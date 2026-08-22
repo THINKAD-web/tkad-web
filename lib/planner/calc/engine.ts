@@ -287,12 +287,29 @@ function buildMediaItems(
 ): PlanMediaItem[] {
   const rows = input.media.map((entry) => {
     const m = entry.media;
-    const monthlyImpressions = Math.max(
-      0,
-      round(resolveImpressionsForUnits(m, entry.units)),
-    );
-    const dailyImpressions = monthlyImpressions / PLAN_DAYS_PER_MONTH;
-    const campaignImpressions = round(dailyImpressions * period.days);
+
+    /**
+     * 노출 앵커 — 기본은 monthly, 저장 스냅샷 재현 시에는 campaign.
+     *
+     * override 경로에서 monthly 를 반올림하면 `MEDIA_RATIO_LOCK` 이 깨진다
+     * (저장값이 일수로 나누어떨어지지 않을 때). 정확한 파생으로 두고
+     * 반올림은 표시 계층에 맡긴다. daily 는 기본 경로에서도 이미 float 이다.
+     */
+    const override =
+      entry.itemImpressions != null && Number.isFinite(entry.itemImpressions)
+        ? Math.max(0, entry.itemImpressions)
+        : null;
+
+    const monthlyImpressions =
+      override != null
+        ? (override / period.days) * PLAN_DAYS_PER_MONTH
+        : Math.max(0, round(resolveImpressionsForUnits(m, entry.units)));
+    const dailyImpressions =
+      override != null
+        ? override / period.days
+        : monthlyImpressions / PLAN_DAYS_PER_MONTH;
+    const campaignImpressions =
+      override != null ? round(override) : round(dailyImpressions * period.days);
     const itemNet = Math.max(0, round(entry.itemNet));
 
     const visNorm = normalizeVisibilityScore(m.visibilityScore);
@@ -331,7 +348,8 @@ function buildMediaItems(
       }));
     }
 
-    const conflict = detectBasisConflict(m);
+    // override 경로는 유동인구에서 유도하지 않으므로 기준 충돌이 성립하지 않는다.
+    const conflict = override != null ? null : detectBasisConflict(m);
     if (conflict) {
       warnings.push(warn({
         code: "IMPRESSIONS_BASIS_CONFLICT",
@@ -353,7 +371,7 @@ function buildMediaItems(
       region: resolveRegionRef(m, warnings),
       units: entry.units ?? 1,
       monthlyImpressions,
-      impressionsBasis: resolveBasis(m),
+      impressionsBasis: override != null ? "snapshot" : resolveBasis(m),
       dailyImpressions,
       rawDailyFootTraffic: m.dailyFootTraffic ?? null,
       campaignImpressions,

@@ -21,6 +21,7 @@ import {
   isQuoteCampaignPeriodKey,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
+import type { PlanPeriodInput } from "@/lib/planner/calc/types";
 
 const PLANNER_PERIOD_MONTHS_TOL = 0.04;
 
@@ -41,7 +42,46 @@ export type CampaignMediaPriceOptionIndex = Record<string, number>;
 export type PlannerPortfolioPricing = {
   quantities?: CampaignMediaQuantities;
   priceOptionIndex?: CampaignMediaPriceOptionIndex;
+  /**
+   * 매체별 캠페인 기간 노출 (A-1b Wave 3) — 저장 스냅샷을 정본으로 표시할 때.
+   *
+   * 보고서 payload · 매체 기여도 · 상권 세분화가 각각 `calculatePlan` 을
+   * 부르므로, 한 곳에서만 저장값을 쓰면 같은 문서 안에서 숫자가 어긋난다.
+   * 세 경로가 공통으로 받는 `pricing` 에 실어 함께 넘긴다.
+   */
+  impressions?: Record<string, number>;
+  /**
+   * 캠페인 실제 집행일 (A-1b Wave 2) — 브리프 흐름 전용.
+   *
+   * 주어지면 세 계산 지점(payload · 기여도 · 상권)이 각자 `months` 를
+   * 반올림해 일수로 복원하는 대신, `calculatePlan` 의 `PlanPeriodInput`
+   * `flight` 종류로 넘겨 달력 일수를 직접 계산하게 한다. `impressions` 와
+   * 같은 이유로 세 경로가 공통으로 받는 `pricing` 에 실어 함께 넘긴다.
+   */
+  flight?: { startDate: string; endDate: string };
 };
+
+/**
+ * 브리프 흐름 기간 → CalcEngine `PlanPeriodInput` (A-1b Wave 2).
+ *
+ * `pricing.flight` 가 있으면 달력 일수를 직접 넘긴다(`kind: "flight"`) —
+ * `months` 를 반올림해 일수로 복원하지 않는다. 세 계산 지점(payload · 기여도 ·
+ * 상권)이 각자 이 판단을 하면 갈라질 수 있으므로 여기 한 곳에서만 결정하고,
+ * 세 곳 모두 이 함수를 호출한다.
+ */
+export function resolvePlanPeriodInput(
+  months: number,
+  pricing?: PlannerPortfolioPricing,
+): PlanPeriodInput {
+  if (pricing?.flight) {
+    return {
+      kind: "flight",
+      startDate: pricing.flight.startDate,
+      endDate: pricing.flight.endDate,
+    };
+  }
+  return { kind: "months", months: months > 0 ? months : 1 };
+}
 
 export function pruneCampaignMediaPriceOptionIndex(
   mediaIds: readonly string[],

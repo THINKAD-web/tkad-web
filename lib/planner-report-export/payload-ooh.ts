@@ -1,7 +1,10 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PlannerMetrics } from "@/lib/planner-logic";
 import { calculatePlan } from "@/lib/planner/calc/engine";
-import { plannerMediaPeriodLineWon } from "@/lib/planner/planner-media-quantity";
+import {
+  plannerMediaPeriodLineWon,
+  resolvePlanPeriodInput,
+} from "@/lib/planner/planner-media-quantity";
 import { reportPlanValidation } from "@/lib/planner/calc/report-validation";
 import {
   computePortfolioContributions,
@@ -70,16 +73,31 @@ export type BuildOohPayloadArgs = {
   effectSummaryLines: string[];
   generatedAt: string;
   months?: number;
+  /**
+   * 캠페인 실제 집행일 (A-1b Wave 2) — 있으면 CalcEngine 이 월 환산을
+   * 거치지 않고 이 날짜로 직접 일수를 계산한다(`PlanPeriodInput` 의
+   * `flight` 종류). 둘 다 있어야 쓰인다 — 하나만 있으면 `months` 로 폴백.
+   */
+  flightStart?: string | null;
+  flightEnd?: string | null;
   regionBreakdown?: PlannerExportRegionBreakdown[];
   regionBudgetCharts?: PlannerExportChartDatum[];
   regionImpressionCharts?: PlannerExportChartDatum[];
   isAutoPortfolio?: boolean;
   campaignMediaQuantities?: Record<string, number>;
   campaignMediaPriceOptionIndex?: Record<string, number>;
+  /**
+   * 매체별 캠페인 기간 노출 (A-1b Wave 3) — 저장 스냅샷을 정본으로 표시할 때.
+   * 주어지면 엔진이 유동인구에서 유도하지 않고 이 값을 집계만 하므로,
+   * 화면·PDF 에 뜨는 숫자가 저장 시점 값과 정의상 일치한다.
+   */
+  campaignMediaImpressions?: Record<string, number>;
   /** 내 플랜 보고서 — 복수 옵션 라벨·금액 */
   planCartItems?: import("@/lib/plan-cart").PlanCartItem[];
   /** R-3: channelMode=ooh_digital 이지만 digital 스냅샷 없을 때 */
   digitalOmittedNotice?: string;
+  /** A-1b Wave 3 — 저장 스냅샷이 이전 엔진 버전일 때 */
+  staleEngineNotice?: string;
   /** PR-8-2 — KPI별 배지 (미지정 시 impressions/cpm=estimated, reach/roi=pending) */
   kpiBadges?: Partial<Record<ExportKpiBadgeKey, PlannerExportBadgeKind>>;
   mixSource?: "inquiry_match";
@@ -94,6 +112,11 @@ export function buildOohReportPayload(
   const pricing: PlannerPortfolioPricing = {
     quantities: a.campaignMediaQuantities,
     priceOptionIndex: a.campaignMediaPriceOptionIndex,
+    impressions: a.campaignMediaImpressions,
+    flight:
+      a.flightStart && a.flightEnd
+        ? { startDate: a.flightStart, endDate: a.flightEnd }
+        : undefined,
   };
   const campaignMonths = a.months ?? 1;
   const periodCtx =
@@ -113,8 +136,9 @@ export function buildOohReportPayload(
         pricing,
         isKo,
       ),
+      itemImpressions: a.campaignMediaImpressions?.[m.id],
     })),
-    period: { kind: "months", months: campaignMonths > 0 ? campaignMonths : 1 },
+    period: resolvePlanPeriodInput(campaignMonths, pricing),
     budgetWon: Math.max(0, a.budgetMan) * 10_000,
     goal: a.campaignGoal ?? null,
     industryKey: a.industryKey ?? null,
@@ -335,6 +359,12 @@ export function buildOohReportPayload(
       lines: [a.digitalOmittedNotice],
     });
   }
+  if (a.staleEngineNotice) {
+    sections.push({
+      title: isKo ? "계산 기준" : "Calculation basis",
+      lines: [a.staleEngineNotice],
+    });
+  }
   if (a.regionBreakdown && a.regionBreakdown.length > 1) {
     sections.push({
       title: isKo ? "지역별 예산·효과" : "Budget & impact by region",
@@ -453,6 +483,7 @@ export function buildOohReportPayload(
     budgetHonesty: a.budgetHonesty,
     sections,
     digitalOmittedNotice: a.digitalOmittedNotice,
+    staleEngineNotice: a.staleEngineNotice,
     currencyFootnote: portfolioHasJapanMedia(orderedPortfolio)
       ? formatReportJpyExchangeFootnote(isKo)
       : undefined,

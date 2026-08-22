@@ -238,6 +238,7 @@ export function networkInventoryUnitSuffix(
   if (!isKo) return "";
   const venue = resolveNetworkVenueCode(networkType, tags);
   if (venue === "elevator") return "기";
+  if (venue === "convenience_store") return "지점";
   return "대";
 }
 

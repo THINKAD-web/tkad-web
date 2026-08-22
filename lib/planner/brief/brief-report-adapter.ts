@@ -11,7 +11,10 @@ import type {
   CampaignPlanSnapshot,
   CampaignPlanStoredMetrics,
 } from "@/lib/campaign-plan-schema";
-import { resolveStoredOverBudget } from "@/lib/campaign-plan-schema";
+import {
+  isEngineVersionCurrent,
+  resolveStoredOverBudget,
+} from "@/lib/campaign-plan-schema";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import {
   budgetSplitByCategory,
@@ -145,6 +148,26 @@ export function briefMixQuantities(
   return out;
 }
 
+/**
+ * 매체별 저장 노출 (A-1b Wave 3) — 보고서가 저장 스냅샷을 정본으로 쓰게 한다.
+ *
+ * 라인 노출이 하나라도 비어 있으면 **전체를 포기한다.** 일부만 저장값을 쓰면
+ * 집계 합이 저장 총계와도, 유도 총계와도 맞지 않는 제3의 값이 되기 때문이다.
+ */
+export function briefMixImpressions(
+  mediaMix: readonly CampaignPlanMediaLine[],
+): Record<string, number> | undefined {
+  if (mediaMix.length === 0) return undefined;
+  const out: Record<string, number> = {};
+  for (const line of mediaMix) {
+    if (!Number.isFinite(line.impressions) || line.impressions < 0) {
+      return undefined;
+    }
+    out[line.mediaId] = line.impressions;
+  }
+  return out;
+}
+
 export function briefPriceOptionIndex(
   mediaMix: readonly CampaignPlanMediaLine[],
   catalog: readonly MediaItem[],
@@ -160,6 +183,27 @@ export function briefPriceOptionIndex(
     if (idx >= 0) out[line.mediaId] = idx;
   }
   return out;
+}
+
+/**
+ * 저장 스냅샷이 이전 엔진 버전이면 안내 문구를 만든다 (A-1b Wave 3).
+ *
+ * **표시값은 바꾸지 않는다.** 보고서는 저장 시점 값을 그대로 보여주고,
+ * 이 문구만 덧붙는다. 광고주에게 이미 나간 제안서의 숫자가 조용히
+ * 바뀌는 것을 막으면서, 계산 로직이 그 사이 바뀌었다는 사실은 알린다.
+ */
+export function staleEngineNoticeFor(
+  plan: BriefReportPlan,
+  isKo: boolean,
+): string | undefined {
+  // 필드는 타입상 필수지만, 이 값이 생기기 전에 저장된 DB 행은 비어 있을 수 있다.
+  const version = plan.engineVersion;
+  if (typeof version !== "string" || version.length === 0) return undefined;
+  if (isEngineVersionCurrent({ engineVersion: version })) return undefined;
+
+  return isKo
+    ? `이 제안서는 이전 계산 로직(${version}) 기준입니다. 저장 시점 값을 그대로 보여줍니다.`
+    : `This proposal uses an earlier calculation engine (${version}). Figures are shown as saved.`;
 }
 
 /** 스냅샷 metrics → export용 impressions only (demo ROI/reach 금지) */
@@ -218,7 +262,8 @@ function briefGoalTitle(
 }
 
 /**
- * 브리프 flight 일수 → payload `months`.
+ * 브리프 flight 일수 해소 — `months`(레거시 경로)와 `flight` 종류
+ * (A-1b Wave 2, `calculatePlan` 직접 소비) 두 소비처가 공유한다.
  *
  * **반올림하지 않는다.** 예전에는 `Math.round(days / 30)` 이 21일을 1개월로
  * 올려, 보고서 머리말은 flight 날짜에서 "21일" 로 뜨는데 지표는 30일치로
@@ -231,17 +276,30 @@ function briefGoalTitle(
  * 않는다. `Math.round(21/30)` 이 이미 1 을 내기 때문이다. 반올림 자체를
  * 없애야 한다.
  *
- * 소비처인 `calculatePlan` 이 `Math.max(1, Math.round(months × 30))` 으로
- * 일수를 복원하므로, 0.7 을 넘기면 21일로 계산된다.
+ * `days` 는 `mediaMix[0]?.days` 를 우선한다 — 저장 시점 라인값이 정본이라는
+ * A-1b Wave 3 원칙과 같다. `flightMatchesStored` 는 그 값이 실제
+ * `brief.flightStart/flightEnd` 에서 나온 게 맞는지 확인한다: 저장 시점에
+ * flight 날짜가 없었으면 `mediaMix[0].days` 가 1로 저장되므로(#`build-plan-snapshot.ts`),
+ * 이후 화면에 flight 날짜가 어쩌다 채워져 있어도 `flight` 종류를 쓰면 안 된다 —
+ * 저장값(1일)과 달력 계산값이 어긋난다.
  */
+function resolveBriefPeriodDays(plan: BriefReportPlan): {
+  days: number;
+  flightMatchesStored: boolean;
+} {
+  const brief = briefFromPlan(plan);
+  const storedDays = plan.mediaMix[0]?.days;
+  const flightDaysValue = flightDays(brief);
+  const raw = storedDays ?? flightDaysValue ?? MEDIA_DAYS_PER_MONTH;
+  const days = Number.isFinite(raw) && raw > 0 ? raw : MEDIA_DAYS_PER_MONTH;
+  return {
+    days,
+    flightMatchesStored: flightDaysValue != null && flightDaysValue === days,
+  };
+}
+
 function briefPeriodMonths(plan: BriefReportPlan): number {
-  const raw =
-    plan.mediaMix[0]?.days ??
-    flightDays(briefFromPlan(plan)) ??
-    MEDIA_DAYS_PER_MONTH;
-  const days =
-    Number.isFinite(raw) && raw > 0 ? raw : MEDIA_DAYS_PER_MONTH;
-  return days / MEDIA_DAYS_PER_MONTH;
+  return resolveBriefPeriodDays(plan).days / MEDIA_DAYS_PER_MONTH;
 }
 
 function resolveDigitalOmittedNotice(
@@ -306,8 +364,13 @@ export function buildBriefReportPayload(
   const quantities = briefMixQuantities(plan.mediaMix);
   const priceOptionIndex = briefPriceOptionIndex(plan.mediaMix, catalog);
   const pricing = { quantities, priceOptionIndex };
-  const months = briefPeriodMonths(plan);
+  const resolvedPeriod = resolveBriefPeriodDays(plan);
+  const months = resolvedPeriod.days / MEDIA_DAYS_PER_MONTH;
   const periodCtx = months > 0 ? { months } : undefined;
+  const useFlightPeriod =
+    resolvedPeriod.flightMatchesStored &&
+    !!brief.flightStart &&
+    !!brief.flightEnd;
   const budgetMan = Math.max(0, Math.round(plan.brief.budgetWon / 10_000));
   const campaignGoal = briefGoalToPlanner(brief.goal);
   const industryKey = briefIndustryToPlanner(brief.industry);
@@ -386,8 +449,12 @@ export function buildBriefReportPayload(
       args.generatedAt ??
       new Date().toLocaleString(isKo ? "ko-KR" : "en-US"),
     months,
+    flightStart: useFlightPeriod ? brief.flightStart : undefined,
+    flightEnd: useFlightPeriod ? brief.flightEnd : undefined,
     campaignMediaQuantities: quantities,
     campaignMediaPriceOptionIndex: priceOptionIndex,
+    campaignMediaImpressions: briefMixImpressions(plan.mediaMix),
+    staleEngineNotice: staleEngineNoticeFor(plan, isKo),
     digitalOmittedNotice,
     kpiBadges: buildBriefKpiBadges(plan),
     mixSource: args.mixSource,

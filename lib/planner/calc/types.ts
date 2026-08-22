@@ -73,6 +73,11 @@ export type PlanImpressionsBasis =
   | "monthlyFootTraffic"
   /** `dailyFootfall × 30` 환산 */
   | "dailyDerived"
+  /**
+   * 호출자가 `itemImpressions` 로 넘긴 저장 스냅샷 값 (A-1b Wave 3).
+   * 엔진은 유동인구에서 유도하지 않고 이 값을 집계만 한다.
+   */
+  | "snapshot"
   /** 셋 다 없음 — 0 으로 집계 */
   | "none";
 
@@ -89,6 +94,22 @@ export type PlanMediaInput = {
    * 엔진은 이 값을 그대로 합산하고, 기간이 운영 요율 키와 어긋나면 경고만 남긴다.
    */
   itemNet: number;
+  /**
+   * 캠페인 기간 노출. **엔진이 계산하지 않는다** — `itemNet` 과 같은 성격이다.
+   *
+   * 저장 스냅샷을 정본으로 표시할 때(A-1b Wave 3) 호출자가 넘긴다. 주어지면
+   * 엔진은 유동인구에서 유도하지 않고 이 값을 **집계만** 한다. 상권표·지역표는
+   * 라인의 집계이므로, 저장 라인값을 그룹핑하면 저장 총계와 정의상 일치한다.
+   *
+   * 이때 세 값의 앵커가 monthly → campaign 으로 뒤집힌다.
+   *   campaign = itemImpressions
+   *   daily    = campaign / period.days
+   *   monthly  = daily × 30      ← **반올림하지 않는다**
+   *
+   * monthly 를 다시 반올림하면 저장값이 일수로 나누어떨어지지 않을 때
+   * `MEDIA_RATIO_LOCK` 의 `|daily × 30 − monthly| ≤ 1e-6` 이 깨진다.
+   */
+  itemImpressions?: number;
 };
 
 export type CalcPlanInput = {
