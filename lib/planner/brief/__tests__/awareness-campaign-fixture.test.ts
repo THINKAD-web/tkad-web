@@ -224,18 +224,50 @@ test("[현행 불일치] 카드 일일노출 순위와 기여도 순위가 다�
 });
 
 /**
- * 「총 2면」 같은 복수 면수 — 저장 노출·금액에는 반영되지만 카드에는
- * 수량 표기가 아예 붙지 않는다(`isQuantitySelectableMedia` 가 false).
- * Wave 4 에서 다룬 네트워크 수량 문제의 고정형 판이다.
+ * 「총 2면」 같은 복수 면수 — 저장 노출·금액에 이미 반영돼 있는데도 카드에는
+ * 수량 표기가 붙지 않고 일일 노출이 1면 값으로 남던 문제(Wave 4 가 네트워크만
+ * 고치고 놓친 고정형 판). 이제 저장 수량을 그대로 드러낸다.
+ *
+ * `isQuantitySelectableMedia` 자체는 건드리지 않았다 — 그 함수는
+ * `resolveImpressionsForUnits`·`resolveMediaQuantity` 같은 **계산** 경로도
+ * 가르는 스위치라, 판정을 넓히면 표시가 아니라 노출·단가가 움직인다.
  */
-test("[현행 불일치] 고정형 복수 면수가 저장값에만 반영되고 카드엔 안 뜬다", () => {
+function payloadWithUnits(unitsById: Record<string, number>) {
+  const plan = buildCampaignPlanSnapshot({
+    brief,
+    catalog: CATALOG,
+    mixUnits: Object.fromEntries(
+      CATALOG.map((m) => [m.id, unitsById[m.id] ?? 1]),
+    ),
+  });
+  return buildBriefReportPayload({ plan, catalog: CATALOG, isKo: true });
+}
+
+test("고정형 복수 면수가 카드 수량·일일 노출에 반영된다", () => {
   const one = calcLineMetrics({ media: CATALOG[2]!, units: 1 }, FLIGHT_DAYS);
   const two = calcLineMetrics({ media: CATALOG[2]!, units: 2 }, FLIGHT_DAYS);
   assert.equal(two.impressions.value, one.impressions.value * 2, "저장 노출은 2배");
   assert.equal(two.costWon?.value, (one.costWon?.value ?? 0) * 2, "저장 금액도 2배");
 
-  // 그런데 카드에는 수량 라벨이 없다.
-  assert.equal(row(payload(), "홍대 코너래핑").quantityLabel, undefined);
+  const single = row(payloadWithUnits({}), "홍대 코너래핑");
+  assert.equal(single.quantityLabel, undefined, "1면이면 수량 표기를 붙이지 않는다");
+  assert.equal(single.dailyTraffic, 42_000);
+
+  const double = row(payloadWithUnits({ n3: 2 }), "홍대 코너래핑");
+  assert.equal(double.quantityLabel, "2개", "저장 수량이 카드에 드러나야 한다");
+  assert.equal(double.dailyTraffic, 84_000, "일일 노출도 면수 합산이어야 한다");
+});
+
+test("수량 변경이 계산이 아니라 표시만 바꾼다 — 기여도 순위는 그대로", () => {
+  const order = (p: ReturnType<typeof payload>) =>
+    [...p.portfolio]
+      .sort(
+        (a, b) =>
+          (b.exposureContributionPct ?? 0) - (a.exposureContributionPct ?? 0),
+      )
+      .map((r) => r.name);
+  // 같은 저장 스냅샷(units=1)에서 표시 로직만 지난다 — 순위가 흔들리면 안 된다.
+  assert.deepEqual(order(payloadWithUnits({})), order(payload()));
 });
 
 // ── 이미 맞는 것 — 회귀 방지 ───────────────────────────────────────────────

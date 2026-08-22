@@ -882,7 +882,7 @@
         },
         {
           "id": "m3",
-          "dailyTraffic": 25000,
+          "dailyTraffic": 100000,
           "exposureContributionPct": 38
         }
       ],

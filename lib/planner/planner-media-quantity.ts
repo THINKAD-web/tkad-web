@@ -324,7 +324,9 @@ export function formatPlannerQuantityLabel(
   if (m.type?.trim().toLowerCase() === "digital") {
     return isKo ? `${units}기` : `${units} units`;
   }
-  return String(units);
+  // 고정형 등 — 유형별 전용 단위가 없다. 「면」처럼 매체마다 갈리는 용어를
+  // 추측하지 않고 범용 수량 단위만 붙인다 (기존에는 단위 없는 맨 숫자였다).
+  return isKo ? `${units}개` : `${units} units`;
 }
 
 export function shouldShowPlannerQuantityControl(m: MediaItem): boolean {
