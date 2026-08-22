@@ -1,7 +1,10 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PlannerMetrics } from "@/lib/planner-logic";
 import { calculatePlan } from "@/lib/planner/calc/engine";
-import { plannerMediaPeriodLineWon } from "@/lib/planner/planner-media-quantity";
+import {
+  plannerMediaPeriodLineWon,
+  resolvePlanPeriodInput,
+} from "@/lib/planner/planner-media-quantity";
 import { reportPlanValidation } from "@/lib/planner/calc/report-validation";
 import {
   computePortfolioContributions,
@@ -70,6 +73,13 @@ export type BuildOohPayloadArgs = {
   effectSummaryLines: string[];
   generatedAt: string;
   months?: number;
+  /**
+   * 캠페인 실제 집행일 (A-1b Wave 2) — 있으면 CalcEngine 이 월 환산을
+   * 거치지 않고 이 날짜로 직접 일수를 계산한다(`PlanPeriodInput` 의
+   * `flight` 종류). 둘 다 있어야 쓰인다 — 하나만 있으면 `months` 로 폴백.
+   */
+  flightStart?: string | null;
+  flightEnd?: string | null;
   regionBreakdown?: PlannerExportRegionBreakdown[];
   regionBudgetCharts?: PlannerExportChartDatum[];
   regionImpressionCharts?: PlannerExportChartDatum[];
@@ -103,6 +113,10 @@ export function buildOohReportPayload(
     quantities: a.campaignMediaQuantities,
     priceOptionIndex: a.campaignMediaPriceOptionIndex,
     impressions: a.campaignMediaImpressions,
+    flight:
+      a.flightStart && a.flightEnd
+        ? { startDate: a.flightStart, endDate: a.flightEnd }
+        : undefined,
   };
   const campaignMonths = a.months ?? 1;
   const periodCtx =
@@ -124,7 +138,7 @@ export function buildOohReportPayload(
       ),
       itemImpressions: a.campaignMediaImpressions?.[m.id],
     })),
-    period: { kind: "months", months: campaignMonths > 0 ? campaignMonths : 1 },
+    period: resolvePlanPeriodInput(campaignMonths, pricing),
     budgetWon: Math.max(0, a.budgetMan) * 10_000,
     goal: a.campaignGoal ?? null,
     industryKey: a.industryKey ?? null,

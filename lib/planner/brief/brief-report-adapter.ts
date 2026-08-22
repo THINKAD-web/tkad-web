@@ -262,7 +262,8 @@ function briefGoalTitle(
 }
 
 /**
- * 브리프 flight 일수 → payload `months`.
+ * 브리프 flight 일수 해소 — `months`(레거시 경로)와 `flight` 종류
+ * (A-1b Wave 2, `calculatePlan` 직접 소비) 두 소비처가 공유한다.
  *
  * **반올림하지 않는다.** 예전에는 `Math.round(days / 30)` 이 21일을 1개월로
  * 올려, 보고서 머리말은 flight 날짜에서 "21일" 로 뜨는데 지표는 30일치로
@@ -275,17 +276,30 @@ function briefGoalTitle(
  * 않는다. `Math.round(21/30)` 이 이미 1 을 내기 때문이다. 반올림 자체를
  * 없애야 한다.
  *
- * 소비처인 `calculatePlan` 이 `Math.max(1, Math.round(months × 30))` 으로
- * 일수를 복원하므로, 0.7 을 넘기면 21일로 계산된다.
+ * `days` 는 `mediaMix[0]?.days` 를 우선한다 — 저장 시점 라인값이 정본이라는
+ * A-1b Wave 3 원칙과 같다. `flightMatchesStored` 는 그 값이 실제
+ * `brief.flightStart/flightEnd` 에서 나온 게 맞는지 확인한다: 저장 시점에
+ * flight 날짜가 없었으면 `mediaMix[0].days` 가 1로 저장되므로(#`build-plan-snapshot.ts`),
+ * 이후 화면에 flight 날짜가 어쩌다 채워져 있어도 `flight` 종류를 쓰면 안 된다 —
+ * 저장값(1일)과 달력 계산값이 어긋난다.
  */
+function resolveBriefPeriodDays(plan: BriefReportPlan): {
+  days: number;
+  flightMatchesStored: boolean;
+} {
+  const brief = briefFromPlan(plan);
+  const storedDays = plan.mediaMix[0]?.days;
+  const flightDaysValue = flightDays(brief);
+  const raw = storedDays ?? flightDaysValue ?? MEDIA_DAYS_PER_MONTH;
+  const days = Number.isFinite(raw) && raw > 0 ? raw : MEDIA_DAYS_PER_MONTH;
+  return {
+    days,
+    flightMatchesStored: flightDaysValue != null && flightDaysValue === days,
+  };
+}
+
 function briefPeriodMonths(plan: BriefReportPlan): number {
-  const raw =
-    plan.mediaMix[0]?.days ??
-    flightDays(briefFromPlan(plan)) ??
-    MEDIA_DAYS_PER_MONTH;
-  const days =
-    Number.isFinite(raw) && raw > 0 ? raw : MEDIA_DAYS_PER_MONTH;
-  return days / MEDIA_DAYS_PER_MONTH;
+  return resolveBriefPeriodDays(plan).days / MEDIA_DAYS_PER_MONTH;
 }
 
 function resolveDigitalOmittedNotice(
@@ -350,8 +364,13 @@ export function buildBriefReportPayload(
   const quantities = briefMixQuantities(plan.mediaMix);
   const priceOptionIndex = briefPriceOptionIndex(plan.mediaMix, catalog);
   const pricing = { quantities, priceOptionIndex };
-  const months = briefPeriodMonths(plan);
+  const resolvedPeriod = resolveBriefPeriodDays(plan);
+  const months = resolvedPeriod.days / MEDIA_DAYS_PER_MONTH;
   const periodCtx = months > 0 ? { months } : undefined;
+  const useFlightPeriod =
+    resolvedPeriod.flightMatchesStored &&
+    !!brief.flightStart &&
+    !!brief.flightEnd;
   const budgetMan = Math.max(0, Math.round(plan.brief.budgetWon / 10_000));
   const campaignGoal = briefGoalToPlanner(brief.goal);
   const industryKey = briefIndustryToPlanner(brief.industry);
@@ -430,6 +449,8 @@ export function buildBriefReportPayload(
       args.generatedAt ??
       new Date().toLocaleString(isKo ? "ko-KR" : "en-US"),
     months,
+    flightStart: useFlightPeriod ? brief.flightStart : undefined,
+    flightEnd: useFlightPeriod ? brief.flightEnd : undefined,
     campaignMediaQuantities: quantities,
     campaignMediaPriceOptionIndex: priceOptionIndex,
     campaignMediaImpressions: briefMixImpressions(plan.mediaMix),

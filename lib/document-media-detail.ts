@@ -12,6 +12,7 @@ import {
   plannerMediaPeriodLineWon,
   plannerMonthlyPriceWonForMedia,
   plannerUnitsForMedia,
+  resolvePlanPeriodInput,
   shouldShowPlannerQuantityControl,
   type CampaignMediaQuantities,
   type PlannerPeriodPricingContext,
@@ -360,7 +361,7 @@ export function computePortfolioContributions(
           ),
       itemImpressions: pricing?.impressions?.[m.id],
     })),
-    period: { kind: "months", months: effectiveMonths },
+    period: resolvePlanPeriodInput(effectiveMonths, pricing),
     budgetWon: 0,
   });
 

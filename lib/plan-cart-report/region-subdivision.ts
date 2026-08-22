@@ -12,6 +12,7 @@ import { formatPlannerSharePct } from "@/lib/planner-logic";
 import { calculatePlan } from "@/lib/planner/calc/engine";
 import {
   plannerMediaPeriodLineWon,
+  resolvePlanPeriodInput,
   type PlannerPortfolioPricing,
 } from "@/lib/planner/planner-media-quantity";
 import type {
@@ -164,7 +165,7 @@ export function computeRegionSubdivisionReport(
       itemNet: plannerMediaPeriodLineWon(item, periodCtx, pricing, isKo),
       itemImpressions: pricing?.impressions?.[item.id],
     })),
-    period: { kind: "months", months: periodCtx.months },
+    period: resolvePlanPeriodInput(periodCtx.months, pricing),
     budgetWon: 0,
     locale: isKo ? "ko" : "en",
   });
