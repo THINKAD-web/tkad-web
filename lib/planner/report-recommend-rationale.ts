@@ -2,9 +2,9 @@ import type { MediaItem } from "@/lib/media-data";
 import type { PlannerExportMediaRow } from "@/lib/planner-report-export/types";
 import {
   computePlannerPortfolioBudgetStatus,
-  computePortfolioReportMetrics,
   formatPlannerSharePct,
 } from "@/lib/planner-logic";
+import type { PlannerPortfolioPricing } from "@/lib/planner/planner-media-quantity";
 
 export type PlannerRecommendRationale = {
   summaryLines: string[];
@@ -13,6 +13,11 @@ export type PlannerRecommendRationale = {
 
 /**
  * 보고서 "추천 근거" — 기존 포트폴리오·예산·노출 수치만 서술 (새 추천 계산 없음).
+ *
+ * A-1 Wave 3 — CPM 을 직접 계산하지 않는다.
+ * 예전에는 `computePortfolioReportMetrics(portfolio, months)` 를 pricing·periodCtx
+ * **없이** 다시 호출해, 같은 보고서의 KPI CPM 과 다른 값이 본문에 실릴 수 있었다.
+ * 이제 호출자가 이미 계산한 값을 넘겨받는다.
  */
 export function buildPlannerRecommendRationale(args: {
   portfolio: readonly MediaItem[];
@@ -20,6 +25,11 @@ export function buildPlannerRecommendRationale(args: {
   budgetMan: number;
   months: number;
   isKo: boolean;
+  /** 호출자가 계산한 값 — 여기서 재계산하지 않는다 */
+  blendedCpmKrw: number | null;
+  totalImpressions: number;
+  monthlyImpressions: number;
+  pricing?: PlannerPortfolioPricing;
   isAutoPortfolio?: boolean;
   isInquiryMatched?: boolean;
 }): PlannerRecommendRationale | undefined {
@@ -29,6 +39,10 @@ export function buildPlannerRecommendRationale(args: {
     budgetMan,
     months,
     isKo,
+    blendedCpmKrw,
+    totalImpressions,
+    monthlyImpressions,
+    pricing,
     isAutoPortfolio,
     isInquiryMatched,
   } = args;
@@ -38,8 +52,8 @@ export function buildPlannerRecommendRationale(args: {
     portfolio,
     budgetMan,
     months,
+    pricing,
   );
-  const metrics = computePortfolioReportMetrics(portfolio, months);
   const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
 
   const utilPct =
@@ -82,19 +96,19 @@ export function buildPlannerRecommendRationale(args: {
       : `Monthly budget use: ${formatPlannerSharePct(utilPct)} of ${fmt(Math.round(budget.monthlyBudgetMan))}M KRW (${fmt(Math.round(budget.monthlyTotalMan))}M planned)${overNote}.`,
   );
 
-  if (metrics.totalImpressions > 0) {
+  if (totalImpressions > 0) {
     summaryLines.push(
       isKo
-        ? `집행 기간 총 ${fmt(metrics.totalImpressions)}회·월 ${fmt(metrics.monthlyImpressions)}회 노출을 합산한 조합입니다.`
-        : `Combined reach: ${fmt(metrics.totalImpressions)} total / ${fmt(metrics.monthlyImpressions)} monthly impressions over the flight.`,
+        ? `집행 기간 총 ${fmt(totalImpressions)}회·월 ${fmt(monthlyImpressions)}회 노출을 합산한 조합입니다.`
+        : `Combined reach: ${fmt(totalImpressions)} total / ${fmt(monthlyImpressions)} monthly impressions over the flight.`,
     );
   }
 
-  if (metrics.blendedCpmKrw != null && metrics.blendedCpmKrw > 0) {
+  if (blendedCpmKrw != null && blendedCpmKrw > 0) {
     summaryLines.push(
       isKo
-        ? `블렌디드 CPM ₩${fmt(metrics.blendedCpmKrw)} — 예산 대비 노출 효율의 참고 지표입니다.`
-        : `Blended CPM ₩${fmt(metrics.blendedCpmKrw)} — reference cost per 1,000 impressions for this mix.`,
+        ? `블렌디드 CPM ₩${fmt(blendedCpmKrw)} — 예산 대비 노출 효율의 참고 지표입니다.`
+        : `Blended CPM ₩${fmt(blendedCpmKrw)} — reference cost per 1,000 impressions for this mix.`,
     );
   }
 

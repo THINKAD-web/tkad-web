@@ -1,9 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
-import {
-  budgetSplitByCategory,
-  computeAdvancedPlannerMetrics,
-  type PlannerCampaignGoal,
-} from "@/lib/planner-logic";
+import type { PlannerCampaignGoal } from "@/lib/planner-logic";
+import { calculatePlan } from "@/lib/planner/calc/engine";
+import { plannerMonthlyPriceWonForMedia } from "@/lib/planner/planner-media-quantity";
 
 export type GanttRow = {
   mediaId: string;
@@ -75,12 +73,21 @@ export function buildPlannerPremiumInsights(opts: {
   const { portfolio, budgetMan, months, regionsText, goal, industryText } = opts;
   if (portfolio.length === 0) return null;
 
-  const advanced = computeAdvancedPlannerMetrics({
-    portfolio,
-    budgetMan,
-    months,
+  // A-1 Wave 3 — 지표와 예산 도넛을 각각 계산하던 두 경로를 하나로 합쳤다.
+  // 이 함수는 pricing 을 받지 않아 수량이 항상 1 이고, 예산 도넛도
+  // periodCtx 없이 월정가를 쓰고 있었다 (Wave 1 패널과 동일 조건).
+  const plan = calculatePlan({
+    media: portfolio.map((m) => ({
+      media: m,
+      itemNet: plannerMonthlyPriceWonForMedia(m),
+    })),
+    period: { kind: "months", months: months > 0 ? months : 1 },
+    budgetWon: Math.max(0, budgetMan) * 10_000,
   });
-  if (!advanced) return null;
+  const advanced = {
+    cpmKrw: plan.cpm.budgetWon,
+    uniqueReach: plan.reach.value ?? 0,
+  };
 
   const sliceWidth = 100 / portfolio.length;
   const gantt: GanttRow[] = portfolio.map((m, i) => ({
@@ -91,19 +98,18 @@ export function buildPlannerPremiumInsights(opts: {
     color: GANTT_COLORS[i % GANTT_COLORS.length] ?? "#ff6200",
   }));
 
-  const slices = budgetSplitByCategory(portfolio);
-  const budgetRecs: BudgetRecommendation[] = slices.map((s) => {
+  const budgetRecs: BudgetRecommendation[] = plan.breakdown.byCategory.map((s) => {
     const media = portfolio.find((m) => m.type === s.key);
     const region = media?.region ?? regionsText;
     return {
       label: s.labelKo,
-      pct: s.pct,
+      pct: s.budgetShare,
       reasonKo:
-        s.pct >= 35
+        s.budgetShare >= 35
           ? `${region} 핵심 동선 커버 — 타깃 도달 극대화`
           : "보조 채널 — 빈도·리마인드 보강",
       reasonEn:
-        s.pct >= 35
+        s.budgetShare >= 35
           ? `${region} core route coverage — maximize target reach`
           : "Support placement — frequency and reminder",
     };

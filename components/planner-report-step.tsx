@@ -6,13 +6,12 @@ import { FileDown, Loader2, Lock, Mail, RefreshCw } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
 import {
-  budgetSplitByCategory,
-  computePortfolioReportMetrics,
-  portfolioCpmByCategory,
   portfolioDailyByCategory,
   type PlannerCampaignGoal,
   type PlannerMetrics,
 } from "@/lib/planner-logic";
+import { calculatePlan } from "@/lib/planner/calc/engine";
+import { plannerMediaPeriodLineWon } from "@/lib/planner/planner-media-quantity";
 import type {
   PlannerAgeKey,
   PlannerCategory,
@@ -226,64 +225,76 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
     [props.months],
   );
 
-  const budgetAllocation = useMemo(() => {
-    const slices = budgetSplitByCategory(
-      props.portfolio,
-      reportPortfolioPricing(props),
-      reportPeriodCtx,
-    );
-    return slices.map((s) => ({
-      key: s.key,
-      label: props.isKo ? s.labelKo : s.labelEn,
-      pct: s.pct,
-      valueWon: s.value,
-      actualWon: s.actualWon,
-    }));
+  /**
+   * A-1 Wave 4 — 예산 도넛·CPM 막대·총노출을 각각 계산하던 세 경로를
+   * `calculatePlan` 하나로 합쳤다. payload 도 같은 엔진을 쓰므로
+   * 화면과 PDF 가 구조적으로 같은 숫자를 본다.
+   */
+  const quantities = props.campaignMediaQuantities;
+  const priceOptionIndex = props.campaignMediaPriceOptionIndex;
+  const portfolio = props.portfolio;
+  const months = props.months;
+  const budgetNum = props.budgetNum;
+  const isKo = props.isKo;
+
+  const plan = useMemo(() => {
+    const pricing = { quantities, priceOptionIndex };
+    const ctx = reportPeriodCtx ?? { months: 1 };
+    return calculatePlan({
+      media: portfolio.map((m) => ({
+        media: m,
+        units: quantities?.[m.id],
+        itemNet: plannerMediaPeriodLineWon(m, ctx, pricing, isKo),
+      })),
+      period: { kind: "months", months: months > 0 ? months : 1 },
+      budgetWon: Math.max(0, budgetNum) * 10_000,
+      locale: isKo ? "ko" : "en",
+    });
   }, [
-    props.portfolio,
-    props.isKo,
-    props.campaignMediaQuantities,
-    props.campaignMediaPriceOptionIndex,
+    portfolio,
+    months,
+    budgetNum,
+    isKo,
+    quantities,
+    priceOptionIndex,
     reportPeriodCtx,
   ]);
 
-  const cpmBars = useMemo(() => {
-    const pts = portfolioCpmByCategory(
-      props.portfolio,
-      reportPortfolioPricing(props),
-      reportPeriodCtx,
-    );
-    return pts.map((p) => ({
-      key: p.key,
-      label: props.isKo ? p.labelKo : p.labelEn,
-      value: p.cpm,
-    }));
-  }, [
-    props.portfolio,
-    props.isKo,
-    props.campaignMediaQuantities,
-    props.campaignMediaPriceOptionIndex,
-    reportPeriodCtx,
-  ]);
+  const budgetAllocation = useMemo(
+    () =>
+      plan.breakdown.byCategory.map((s) => ({
+        key: s.key,
+        label: isKo ? s.labelKo : s.labelEn,
+        pct: s.budgetShare,
+        valueWon: s.budgetAmount,
+        actualWon: s.budgetAmount,
+      })),
+    [plan, isKo],
+  );
+
+  const cpmBars = useMemo(
+    () =>
+      plan.breakdown.byCategory
+        .filter((s) => (s.cpmWon ?? 0) > 0)
+        .map((s) => ({
+          key: s.key,
+          label: isKo ? s.labelKo : s.labelEn,
+          value: s.cpmWon ?? 0,
+        }))
+        .sort((x, y) => x.value - y.value),
+    [plan, isKo],
+  );
 
   const portfolioReport = useMemo(
-    () =>
-      computePortfolioReportMetrics(
-        props.portfolio,
-        props.months,
-        reportPortfolioPricing(props),
-        reportPeriodCtx,
-      ),
-    [
-      props.portfolio,
-      props.months,
-      props.campaignMediaQuantities,
-      props.campaignMediaPriceOptionIndex,
-      reportPeriodCtx,
-    ],
+    () => ({
+      monthlyImpressions: plan.impressions.monthlyEquivalent,
+      totalImpressions: plan.impressions.campaignTotal,
+      blendedCpmKrw: plan.cpm.campaignWon,
+    }),
+    [plan],
   );
   const usePortfolioReach =
-    props.portfolio.length > 0 && portfolioReport.monthlyImpressions > 0;
+    portfolio.length > 0 && portfolioReport.monthlyImpressions > 0;
 
   const blendedCpmKrw = portfolioReport.blendedCpmKrw;
 

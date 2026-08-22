@@ -12,6 +12,7 @@ import type {
   PlannerExportSection,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
+import { computePortfolioReportMetrics } from "@/lib/planner-logic";
 import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-rationale";
 
 export type BuildIntegratedPayloadArgs = {
@@ -159,12 +160,25 @@ export function buildIntegratedReportPayload(
       pricing,
     }),
   );
+  // A-1 Wave 3 — 근거 본문이 CPM·노출을 스스로 계산하지 않게 바꾸면서
+  // 호출자가 값을 넘기게 됐다. 통합 플래너는 A-1b 이월 대상이라
+  // 여기서는 기존 동작을 유지하도록 같은 함수로 값을 만들어 넘긴다.
+  const oohMetrics = computePortfolioReportMetrics(
+    a.portfolio,
+    months,
+    pricing,
+    periodCtx,
+  );
   const recommendRationale = buildPlannerRecommendRationale({
     portfolio: a.portfolio,
     portfolioRows,
     budgetMan: a.budgetMan,
     months,
     isKo,
+    blendedCpmKrw: oohMetrics.blendedCpmKrw,
+    totalImpressions: oohMetrics.totalImpressions,
+    monthlyImpressions: oohMetrics.monthlyImpressions,
+    pricing,
     isAutoPortfolio: false,
   });
 

@@ -465,7 +465,6 @@ export const PlannerReportDocument = forwardRef<
                     <th className="px-3 py-2.5">{isKo ? "매체" : "Media"}</th>
                     <th className="px-3 py-2.5">{isKo ? "월 예산" : "Monthly"}</th>
                     <th className="px-3 py-2.5">{isKo ? "월 노출" : "Monthly imp."}</th>
-                    <th className="px-3 py-2.5">{isKo ? "추정 도달" : "Reach"}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -485,11 +484,6 @@ export const PlannerReportDocument = forwardRef<
                       </td>
                       <td className="px-3 py-2.5 tabular-nums text-gray-900">
                         {row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
-                      </td>
-                      <td className="px-3 py-2.5 tabular-nums text-gray-700">
-                        {row.uniqueReach > 0
-                          ? row.uniqueReach.toLocaleString(isKo ? "ko-KR" : "en-US")
-                          : "—"}
                       </td>
                     </tr>
                   ))}
@@ -547,7 +541,6 @@ export const PlannerReportDocument = forwardRef<
                     <th className="px-3 py-2.5">{isKo ? "매체" : "Media"}</th>
                     <th className="px-3 py-2.5">{isKo ? "월 예산" : "Monthly"}</th>
                     <th className="px-3 py-2.5">{isKo ? "월 노출" : "Monthly imp."}</th>
-                    <th className="px-3 py-2.5">{isKo ? "추정 도달" : "Reach"}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -567,11 +560,6 @@ export const PlannerReportDocument = forwardRef<
                       </td>
                       <td className="px-3 py-2.5 tabular-nums text-gray-900">
                         {row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
-                      </td>
-                      <td className="px-3 py-2.5 tabular-nums text-gray-700">
-                        {row.uniqueReach > 0
-                          ? row.uniqueReach.toLocaleString(isKo ? "ko-KR" : "en-US")
-                          : "—"}
                       </td>
                     </tr>
                   ))}

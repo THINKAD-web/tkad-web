@@ -3,15 +3,17 @@ import {
   MEDIA_BROWSE_REGIONS,
   browseRegionLabel,
 } from "@/lib/media-browse-regions";
-import { catalogPriceFieldToPriceMan, catalogPriceFieldToWon } from "@/lib/media-price-format";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
   isValidRegionZoneId,
   regionZoneLabel,
 } from "@/lib/media-regions";
+import { formatPlannerSharePct } from "@/lib/planner-logic";
+import { calculatePlan } from "@/lib/planner/calc/engine";
 import {
-  computeAdvancedPlannerMetrics,
-  formatPlannerSharePct,
-} from "@/lib/planner-logic";
+  plannerMediaPeriodLineWon,
+  type PlannerPortfolioPricing,
+} from "@/lib/planner/planner-media-quantity";
 import type {
   PlannerExportChartDatum,
   PlannerExportRegionBreakdown,
@@ -58,10 +60,6 @@ export function resolveBrowseRegionSubId(raw: string): string | null {
     }
   }
   return null;
-}
-
-function monthlyImpressionsOf(m: MediaItem): number {
-  return Math.max(0, Math.round((m.dailyFootTraffic ?? 0) * 30));
 }
 
 function countClassified(
@@ -151,13 +149,26 @@ export function computeRegionSubdivisionReport(
   portfolio: readonly MediaItem[],
   months: number,
   isKo: boolean,
+  pricing?: PlannerPortfolioPricing,
 ): RegionSubdivisionReport | null {
   if (portfolio.length === 0) return null;
 
   const field = pickRegionSubdivisionField(portfolio);
   if (!field) return null;
 
-  const m = Math.max(1, months);
+  const periodCtx = { months: months > 0 ? months : 1 };
+  const plan = calculatePlan({
+    media: portfolio.map((item) => ({
+      media: item,
+      units: pricing?.quantities?.[item.id],
+      itemNet: plannerMediaPeriodLineWon(item, periodCtx, pricing, isKo),
+    })),
+    period: { kind: "months", months: periodCtx.months },
+    budgetWon: 0,
+    locale: isKo ? "ko" : "en",
+  });
+  const planById = new Map(plan.mediaItems.map((r) => [r.id, r]));
+
   const groups = new Map<string, MediaItem[]>();
   let classifiedCount = 0;
 
@@ -179,10 +190,7 @@ export function computeRegionSubdivisionReport(
     (s, item) => s + catalogPriceFieldToWon(item.price),
     0,
   );
-  const totalMonthlyImp = portfolio.reduce(
-    (s, item) => s + monthlyImpressionsOf(item),
-    0,
-  );
+  const totalMonthlyImp = plan.impressions.monthlyEquivalent;
 
   const breakdown: PlannerExportRegionBreakdown[] = [];
 
@@ -191,38 +199,40 @@ export function computeRegionSubdivisionReport(
       (s, item) => s + catalogPriceFieldToWon(item.price),
       0,
     );
-    const monthlyImpressions = media.reduce(
-      (s, item) => s + monthlyImpressionsOf(item),
+    const planRows = media
+      .map((item) => planById.get(item.id))
+      .filter((r): r is NonNullable<typeof r> => r != null);
+
+    const monthlyImpressions = planRows.reduce(
+      (s, r) => s + r.monthlyImpressions,
       0,
     );
-    const budgetMan = Math.max(
-      0.01,
-      media.reduce((s, item) => s + catalogPriceFieldToPriceMan(item.price), 0),
+    const totalImpressions = planRows.reduce(
+      (s, r) => s + r.campaignImpressions,
+      0,
     );
-    const advanced = computeAdvancedPlannerMetrics({
-      portfolio: media,
-      budgetMan,
-      months: m,
-    });
+    const periodBudgetWon = planRows.reduce((s, r) => s + r.itemNet, 0);
 
     breakdown.push({
       regionKey,
       label: regionSubdivisionLabel(regionKey, field, isKo),
       mediaCount: media.length,
       monthlyBudgetWon,
-      periodBudgetWon: monthlyBudgetWon * m,
+      periodBudgetWon,
       budgetPct:
         totalMonthlyWon > 0
           ? Math.round((monthlyBudgetWon / totalMonthlyWon) * 1000) / 10
           : 0,
       monthlyImpressions,
-      totalImpressions: monthlyImpressions * m,
+      totalImpressions,
       impressionPct:
         totalMonthlyImp > 0
           ? Math.round((monthlyImpressions / totalMonthlyImp) * 1000) / 10
           : 0,
-      uniqueReach: advanced?.uniqueReach ?? 0,
-      cpmKrw: advanced?.cpmKrw ?? null,
+      cpmKrw:
+        totalImpressions > 0 && periodBudgetWon > 0
+          ? Math.round(periodBudgetWon / (totalImpressions / 1000))
+          : null,
     });
   }
 

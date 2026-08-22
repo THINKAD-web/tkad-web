@@ -43,7 +43,6 @@ import {
   computePlannerMetrics,
   computeBudgetBlurbParts,
   estimateCpmByCategory,
-  portfolioCpmByCategory,
   reachSplitForGoal,
   comparePlansByDuration,
   resolvePlannerPortfolio,
@@ -74,6 +73,8 @@ import { PlanCartRegionalBreakdown } from "@/components/my/plan-cart-regional-br
 import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
 import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 import { computePlanCartRegionalBreakdown } from "@/lib/plan-cart-report/regional-breakdown";
+import { calculatePlan } from "@/lib/planner/calc/engine";
+import { plannerMonthlyPriceWonForMedia } from "@/lib/planner/planner-media-quantity";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import {
@@ -567,16 +568,40 @@ export default function PlannerPageClient({
     portfolioPricing,
   ]);
 
+  /**
+   * A-1 Wave 4 — 포트폴리오가 있으면 `calculatePlan` 의 유형별 CPM 을 쓴다.
+   * 포트폴리오가 비었을 때만 필터 풀 추정치로 폴백한다 (기존 동작 유지).
+   */
   const cpmBars = useMemo(() => {
-    const pts =
-      portfolio.length > 0
-        ? portfolioCpmByCategory(portfolio, portfolioPricing)
-        : estimateCpmByCategory(filtered);
-    return pts.map((p) => ({
-      key: p.key,
-      label: isKo ? p.labelKo : p.labelEn,
-      value: p.cpm,
-    }));
+    if (portfolio.length === 0) {
+      return estimateCpmByCategory(filtered).map((p) => ({
+        key: p.key,
+        label: isKo ? p.labelKo : p.labelEn,
+        value: p.cpm,
+      }));
+    }
+    const plan = calculatePlan({
+      media: portfolio.map((m) => ({
+        media: m,
+        units: portfolioPricing.quantities?.[m.id],
+        itemNet: plannerMonthlyPriceWonForMedia(
+          m,
+          portfolioPricing.quantities,
+          portfolioPricing.priceOptionIndex,
+        ),
+      })),
+      period: { kind: "months", months: 1 },
+      budgetWon: 0,
+      locale: isKo ? "ko" : "en",
+    });
+    return plan.breakdown.byCategory
+      .filter((s) => (s.cpmWon ?? 0) > 0)
+      .map((s) => ({
+        key: s.key,
+        label: isKo ? s.labelKo : s.labelEn,
+        value: s.cpmWon ?? 0,
+      }))
+      .sort((a, b) => a.value - b.value);
   }, [portfolio, filtered, isKo, portfolioPricing]);
 
   const portfolioBudgetStatus = useMemo(

@@ -9,12 +9,9 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import {
-  budgetSplitByCategory,
-  computeAdvancedPlannerMetrics,
-  formatPlannerSharePct,
-  type BudgetPieSlice,
-} from "@/lib/planner-logic";
+import { formatPlannerSharePct } from "@/lib/planner-logic";
+import { calculatePlan } from "@/lib/planner/calc/engine";
+import { plannerMonthlyPriceWonForMedia } from "@/lib/planner/planner-media-quantity";
 import type { MediaItem } from "@/lib/media-data";
 import {
   formatCpmKrw,
@@ -65,34 +62,56 @@ export function PlannerEffectSimulationPanel({
   const { allowed: simAllowed, loading: simLoading, access: simAccess } =
     useFeatureAccess("simulation_full");
 
-  const advanced = useMemo(
+  /**
+   * A-1 Wave 1 — 지표·도넛을 각각 계산하던 두 경로를 `PlanResult` 하나로 합쳤다.
+   *
+   * 이 패널은 pricing·quantities 를 받지 않으므로 수량은 항상 1 이고,
+   * `itemNet` 은 기존 `budgetSplitByCategory(portfolio)` 와 같은 월정가를 쓴다
+   * (그 함수도 periodCtx 없이 호출되고 있었다). 따라서 표시 값이 바뀌지 않는다.
+   */
+  const plan = useMemo(
     () =>
-      computeAdvancedPlannerMetrics({
-        portfolio,
-        budgetMan,
-        months,
+      calculatePlan({
+        media: portfolio.map((m) => ({
+          media: m,
+          itemNet: plannerMonthlyPriceWonForMedia(m),
+        })),
+        period: { kind: "months", months },
+        budgetWon: Math.max(0, budgetMan) * 10_000,
+        locale: isKo ? "ko" : "en",
       }),
-    [portfolio, budgetMan, months],
-  );
-
-  const budgetSlices: BudgetPieSlice[] = useMemo(
-    () => budgetSplitByCategory(portfolio),
-    [portfolio],
+    [portfolio, budgetMan, months, isKo],
   );
 
   const pieData = useMemo(
     () =>
-      budgetSlices.map((s) => ({
+      plan.breakdown.byCategory.map((s) => ({
         key: s.key,
         label: isKo ? s.labelKo : s.labelEn,
-        value: s.value,
-        actualWon: s.actualWon,
-        pct: s.pct,
+        value: s.budgetAmount,
+        actualWon: s.budgetAmount,
+        pct: s.budgetShare,
       })),
-    [budgetSlices, isKo],
+    [plan, isKo],
   );
 
-  if (!advanced) return null;
+  if (portfolio.length === 0 || months <= 0) return null;
+
+  const advanced = {
+    totalImpressions: plan.impressions.campaignTotal,
+    totalOts: plan.impressions.ots,
+    uniqueReach: plan.reach.value ?? 0,
+    avgFrequency: plan.reach.frequency ?? 1,
+    cpmKrw: plan.cpm.budgetWon,
+    perMedia: plan.mediaItems.map((m) => ({
+      id: m.id,
+      name: m.name,
+      type: m.rawType,
+      totalImpressions: m.campaignImpressions,
+      ots: m.ots,
+      cpmKrw: m.monthlyCpmWon,
+    })),
+  };
 
   const heroImpressions =
     totalImpressionsFromMetrics ?? advanced.totalImpressions;

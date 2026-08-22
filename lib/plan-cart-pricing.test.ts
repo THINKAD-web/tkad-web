@@ -167,3 +167,66 @@ test("planCartPeriodTotalWon — no override keeps monthly × months", () => {
   const cartTotal = planCartPeriodTotalWon(cart, [plain], { months: 3 });
   assert.equal(cartTotal, 30_000_000);
 });
+
+/**
+ * A-1 Wave 2 회귀 — `cart.duration` 이 opts 없이 쓰이는 경로.
+ *
+ * 유일한 호출자 `my-plan-page-client.tsx:109` 가 opts 를 넘기지 않으므로
+ * 이 경로가 실제 「내 플랜」 페이지 총액을 만든다. 기존 테스트 2건은 둘 다
+ * `opts.months` 를 명시해 이 경로를 타지 않았다.
+ *
+ * `planner-page-client.tsx:1186` 이 `duration: months` 로 저장하므로
+ * 21일 플랜은 0.7 이 들어온다. 예전 `Math.max(1, cart.duration ?? 1)` 은
+ * 이를 1 로 올려 총액을 1개월치로 부풀렸고, 같은 화면에서 만든 보고서
+ * 금액(490만)과 어긋났다.
+ */
+test("planCartPeriodTotalWon — opts 없이 21일(0.7개월) 플랜은 월정가의 70%", () => {
+  const plain: MediaItem = {
+    ...monthlyMedia,
+    id: "m-plain-21d",
+    partialPeriodRates: undefined,
+  };
+  const cart: PlanCart = {
+    items: [
+      {
+        mediaId: "m-plain-21d",
+        mediaName: "Plain",
+        mediaType: "digital",
+        region: "seoul",
+        price: 10_000_000,
+        addedFrom: "planner",
+        addedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+    duration: 21 / 30,
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  };
+
+  const cartTotal = planCartPeriodTotalWon(cart, [plain]);
+  assert.equal(cartTotal, 7_000_000);
+  assert.notEqual(cartTotal, 10_000_000);
+});
+
+test("planCartPeriodTotalWon — opts 없이 duration 미지정이면 1개월", () => {
+  const plain: MediaItem = {
+    ...monthlyMedia,
+    id: "m-plain-none",
+    partialPeriodRates: undefined,
+  };
+  const cart: PlanCart = {
+    items: [
+      {
+        mediaId: "m-plain-none",
+        mediaName: "Plain",
+        mediaType: "digital",
+        region: "seoul",
+        price: 10_000_000,
+        addedFrom: "planner",
+        addedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  };
+
+  assert.equal(planCartPeriodTotalWon(cart, [plain]), 10_000_000);
+});
