@@ -183,19 +183,21 @@ test("반달 상품이 없다는 사실이 각주로 붙고 상한이 월정가 
   assert.ok(!notice.includes("MEDIA_NO_PARTIAL_RATE_TIER"));
 });
 
-// ── 현행 불일치 ② — 추천 근거의 정체불명 숫자 ──────────────────────────────
+// ── 증상2 수정 — 추천 근거 예산 문구 ────────────────────────────────────────
 //
-// `computePlannerPortfolioBudgetStatus` 가 `budgetMan / months` 로 요청 예산을
-// 월 환산한다. 14일 총액 3,000만이 월 6,429만으로 부풀고, 비교 대상인
-// `monthlyTotalMan` 은 기간 미반영 월 정가 합(1,250만)이다. 문서 어디에도
-// 없는 두 숫자가 한 문장에 함께 나온다.
+// `budgetMan` 은 캠페인 기간 전체 금액이다. 월 환산(3,000 ÷ 14/30 = 6,429만)을
+// 쓰지 않고, 기간 프로라타 견적 합을 요청 예산과 직접 비교한다.
 
-test("[현행 불일치] 추천 근거에 월 환산 예산(6,429만)이 등장한다", () => {
-  const line = (payload().recommendRationale?.summaryLines ?? []).find((l) =>
-    l.includes("월 예산"),
+test("추천 근거에 월 환산 예산(6,429만)이 나오지 않는다", () => {
+  const lines = payload().recommendRationale?.summaryLines ?? [];
+  const budgetLine = lines.find((l) => l.includes("요청 예산"));
+  assert.ok(budgetLine, "요청 예산 문구가 있어야 한다");
+  assert.ok(!budgetLine.includes("6,429"), `왜곡값 포함: ${budgetLine}`);
+  assert.ok(!budgetLine.includes("월 예산"), `월 예산 문구 잔존: ${budgetLine}`);
+  assert.equal(
+    budgetLine,
+    "요청 예산 3,000만원 대비 19.4%(583만원) 활용.",
   );
-  assert.equal(line, "월 예산 6,429만원 대비 19.4%(1,250만원) 활용.");
-  assert.equal(Math.round(3000 / (FLIGHT_DAYS / 30)), 6429, "3,000만 ÷ (14/30)");
 });
 
 // ── ③ raw · SOV보정 노출 병기 (증상3 구현) ─────────────────────────────────

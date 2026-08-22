@@ -72,7 +72,7 @@ test("portfolio budget status reflects quantity", () => {
   const status = computePlannerPortfolioBudgetStatus(portfolio, 5000, 3, {
     quantities: { [m.id]: 20 },
   });
-  assert.equal(status.monthlyTotalMan, atMore);
+  assert.equal(status.periodTotalMan, atMore * 3);
 });
 
 test("planner 2w period total matches quote wizard partial rate", () => {

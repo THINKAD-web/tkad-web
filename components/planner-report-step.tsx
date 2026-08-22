@@ -104,8 +104,8 @@ export type PlannerReportSharedProps = {
   /** 4단계에서 직접 담은 매체 수 (설계 포함 안내용) */
   selectedMediaCount?: number;
   portfolioOverBudget?: boolean;
-  portfolioMonthlyTotalMan?: number;
-  portfolioMonthlyBudgetMan?: number;
+  portfolioPeriodTotalMan?: number;
+  portfolioBudgetMan?: number;
   isAutoPortfolio?: boolean;
   unresolvedMediaCount?: number;
   /** 내 플랜 보고서 — 지역별 예산·효과 */
@@ -638,8 +638,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         selectedCount={props.selectedMediaCount ?? props.portfolio.length}
         inPlanCount={props.portfolio.length}
         overBudget={props.portfolioOverBudget ?? false}
-        monthlyTotalMan={props.portfolioMonthlyTotalMan ?? 0}
-        monthlyBudgetMan={props.portfolioMonthlyBudgetMan ?? 0}
+        periodTotalMan={props.portfolioPeriodTotalMan ?? 0}
+        budgetMan={props.portfolioBudgetMan ?? 0}
         isAutoMix={props.isAutoPortfolio}
         unresolvedCount={props.unresolvedMediaCount ?? 0}
       />

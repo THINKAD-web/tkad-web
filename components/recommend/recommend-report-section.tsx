@@ -509,8 +509,8 @@ export function RecommendReportSection({
             selectedCount={portfolio.length}
             inPlanCount={portfolio.length}
             overBudget={portfolioBudgetStatus.overBudget}
-            monthlyTotalMan={portfolioBudgetStatus.monthlyTotalMan}
-            monthlyBudgetMan={portfolioBudgetStatus.monthlyBudgetMan}
+            periodTotalMan={portfolioBudgetStatus.periodTotalMan}
+            budgetMan={portfolioBudgetStatus.budgetMan}
             isAutoMix={false}
             unresolvedCount={0}
           />

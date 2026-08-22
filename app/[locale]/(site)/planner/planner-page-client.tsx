@@ -1921,8 +1921,8 @@ export default function PlannerPageClient({
                 mediaPlacements={mediaPlacements}
                 selectedMediaCount={campaignMediaIds.length}
                 portfolioOverBudget={portfolioBudgetStatus.overBudget}
-                portfolioMonthlyTotalMan={portfolioBudgetStatus.monthlyTotalMan}
-                portfolioMonthlyBudgetMan={portfolioBudgetStatus.monthlyBudgetMan}
+                portfolioPeriodTotalMan={portfolioBudgetStatus.periodTotalMan}
+                portfolioBudgetMan={portfolioBudgetStatus.budgetMan}
                 isAutoPortfolio={isAutoPortfolio}
                 unresolvedMediaCount={unresolvedMediaCount}
                 activitySource="planner"

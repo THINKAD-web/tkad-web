@@ -57,9 +57,8 @@ export function buildPlannerRecommendRationale(args: {
   const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
 
   const utilPct =
-    budget.monthlyBudgetMan > 0
-      ? Math.round((budget.monthlyTotalMan / budget.monthlyBudgetMan) * 1000) /
-        10
+    budget.budgetMan > 0
+      ? Math.round((budget.periodTotalMan / budget.budgetMan) * 1000) / 10
       : 0;
 
   const summaryLines: string[] = [];
@@ -73,8 +72,8 @@ export function buildPlannerRecommendRationale(args: {
   } else if (isAutoPortfolio) {
     summaryLines.push(
       isKo
-        ? `캠페인 조건(목표·지역·타깃)에 맞춰 매칭 점수 상위 후보 중 월 예산 상한(92%) 내에서 ${portfolio.length}개 매체를 자동 선별했습니다.`
-        : `From top-scored matches for your campaign context, ${portfolio.length} media were auto-selected within the monthly budget cap (92%).`,
+        ? `캠페인 조건(목표·지역·타깃)에 맞춰 매칭 점수 상위 후보 중 요청 예산 상한(92%) 내에서 ${portfolio.length}개 매체를 자동 선별했습니다.`
+        : `From top-scored matches for your campaign context, ${portfolio.length} media were auto-selected within the campaign budget cap (92%).`,
     );
   } else {
     summaryLines.push(
@@ -86,14 +85,14 @@ export function buildPlannerRecommendRationale(args: {
 
   const overNote = budget.overBudget
     ? isKo
-      ? " — 월 단가 합이 예산을 초과합니다"
-      : " — monthly rates exceed budget"
+      ? " — 기간 견적 합이 요청 예산을 초과합니다"
+      : " — prorated total exceeds campaign budget"
     : "";
 
   summaryLines.push(
     isKo
-      ? `월 예산 ${fmt(Math.round(budget.monthlyBudgetMan))}만원 대비 ${formatPlannerSharePct(utilPct)}(${fmt(Math.round(budget.monthlyTotalMan))}만원) 활용${overNote}.`
-      : `Monthly budget use: ${formatPlannerSharePct(utilPct)} of ${fmt(Math.round(budget.monthlyBudgetMan))}M KRW (${fmt(Math.round(budget.monthlyTotalMan))}M planned)${overNote}.`,
+      ? `요청 예산 ${fmt(Math.round(budget.budgetMan))}만원 대비 ${formatPlannerSharePct(utilPct)}(${fmt(Math.round(budget.periodTotalMan))}만원) 활용${overNote}.`
+      : `Campaign budget use: ${formatPlannerSharePct(utilPct)} of ${fmt(Math.round(budget.budgetMan))}M KRW (${fmt(Math.round(budget.periodTotalMan))}M prorated)${overNote}.`,
   );
 
   if (totalImpressions > 0) {
