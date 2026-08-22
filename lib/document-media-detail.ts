@@ -358,6 +358,7 @@ export function computePortfolioContributions(
             pricing?.quantities,
             pricing?.priceOptionIndex,
           ),
+      itemImpressions: pricing?.impressions?.[m.id],
     })),
     period: { kind: "months", months: effectiveMonths },
     budgetWon: 0,

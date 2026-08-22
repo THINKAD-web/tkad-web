@@ -162,6 +162,7 @@ export function computeRegionSubdivisionReport(
       media: item,
       units: pricing?.quantities?.[item.id],
       itemNet: plannerMediaPeriodLineWon(item, periodCtx, pricing, isKo),
+      itemImpressions: pricing?.impressions?.[item.id],
     })),
     period: { kind: "months", months: periodCtx.months },
     budgetWon: 0,

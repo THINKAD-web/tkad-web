@@ -76,10 +76,18 @@ export type BuildOohPayloadArgs = {
   isAutoPortfolio?: boolean;
   campaignMediaQuantities?: Record<string, number>;
   campaignMediaPriceOptionIndex?: Record<string, number>;
+  /**
+   * 매체별 캠페인 기간 노출 (A-1b Wave 3) — 저장 스냅샷을 정본으로 표시할 때.
+   * 주어지면 엔진이 유동인구에서 유도하지 않고 이 값을 집계만 하므로,
+   * 화면·PDF 에 뜨는 숫자가 저장 시점 값과 정의상 일치한다.
+   */
+  campaignMediaImpressions?: Record<string, number>;
   /** 내 플랜 보고서 — 복수 옵션 라벨·금액 */
   planCartItems?: import("@/lib/plan-cart").PlanCartItem[];
   /** R-3: channelMode=ooh_digital 이지만 digital 스냅샷 없을 때 */
   digitalOmittedNotice?: string;
+  /** A-1b Wave 3 — 저장 스냅샷이 이전 엔진 버전일 때 */
+  staleEngineNotice?: string;
   /** PR-8-2 — KPI별 배지 (미지정 시 impressions/cpm=estimated, reach/roi=pending) */
   kpiBadges?: Partial<Record<ExportKpiBadgeKey, PlannerExportBadgeKind>>;
   mixSource?: "inquiry_match";
@@ -94,6 +102,7 @@ export function buildOohReportPayload(
   const pricing: PlannerPortfolioPricing = {
     quantities: a.campaignMediaQuantities,
     priceOptionIndex: a.campaignMediaPriceOptionIndex,
+    impressions: a.campaignMediaImpressions,
   };
   const campaignMonths = a.months ?? 1;
   const periodCtx =
@@ -113,6 +122,7 @@ export function buildOohReportPayload(
         pricing,
         isKo,
       ),
+      itemImpressions: a.campaignMediaImpressions?.[m.id],
     })),
     period: { kind: "months", months: campaignMonths > 0 ? campaignMonths : 1 },
     budgetWon: Math.max(0, a.budgetMan) * 10_000,
@@ -335,6 +345,12 @@ export function buildOohReportPayload(
       lines: [a.digitalOmittedNotice],
     });
   }
+  if (a.staleEngineNotice) {
+    sections.push({
+      title: isKo ? "계산 기준" : "Calculation basis",
+      lines: [a.staleEngineNotice],
+    });
+  }
   if (a.regionBreakdown && a.regionBreakdown.length > 1) {
     sections.push({
       title: isKo ? "지역별 예산·효과" : "Budget & impact by region",
@@ -453,6 +469,7 @@ export function buildOohReportPayload(
     budgetHonesty: a.budgetHonesty,
     sections,
     digitalOmittedNotice: a.digitalOmittedNotice,
+    staleEngineNotice: a.staleEngineNotice,
     currencyFootnote: portfolioHasJapanMedia(orderedPortfolio)
       ? formatReportJpyExchangeFootnote(isKo)
       : undefined,

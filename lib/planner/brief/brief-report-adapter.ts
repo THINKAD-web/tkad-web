@@ -11,7 +11,10 @@ import type {
   CampaignPlanSnapshot,
   CampaignPlanStoredMetrics,
 } from "@/lib/campaign-plan-schema";
-import { resolveStoredOverBudget } from "@/lib/campaign-plan-schema";
+import {
+  isEngineVersionCurrent,
+  resolveStoredOverBudget,
+} from "@/lib/campaign-plan-schema";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import {
   budgetSplitByCategory,
@@ -145,6 +148,26 @@ export function briefMixQuantities(
   return out;
 }
 
+/**
+ * 매체별 저장 노출 (A-1b Wave 3) — 보고서가 저장 스냅샷을 정본으로 쓰게 한다.
+ *
+ * 라인 노출이 하나라도 비어 있으면 **전체를 포기한다.** 일부만 저장값을 쓰면
+ * 집계 합이 저장 총계와도, 유도 총계와도 맞지 않는 제3의 값이 되기 때문이다.
+ */
+export function briefMixImpressions(
+  mediaMix: readonly CampaignPlanMediaLine[],
+): Record<string, number> | undefined {
+  if (mediaMix.length === 0) return undefined;
+  const out: Record<string, number> = {};
+  for (const line of mediaMix) {
+    if (!Number.isFinite(line.impressions) || line.impressions < 0) {
+      return undefined;
+    }
+    out[line.mediaId] = line.impressions;
+  }
+  return out;
+}
+
 export function briefPriceOptionIndex(
   mediaMix: readonly CampaignPlanMediaLine[],
   catalog: readonly MediaItem[],
@@ -160,6 +183,27 @@ export function briefPriceOptionIndex(
     if (idx >= 0) out[line.mediaId] = idx;
   }
   return out;
+}
+
+/**
+ * 저장 스냅샷이 이전 엔진 버전이면 안내 문구를 만든다 (A-1b Wave 3).
+ *
+ * **표시값은 바꾸지 않는다.** 보고서는 저장 시점 값을 그대로 보여주고,
+ * 이 문구만 덧붙는다. 광고주에게 이미 나간 제안서의 숫자가 조용히
+ * 바뀌는 것을 막으면서, 계산 로직이 그 사이 바뀌었다는 사실은 알린다.
+ */
+export function staleEngineNoticeFor(
+  plan: BriefReportPlan,
+  isKo: boolean,
+): string | undefined {
+  // 필드는 타입상 필수지만, 이 값이 생기기 전에 저장된 DB 행은 비어 있을 수 있다.
+  const version = plan.engineVersion;
+  if (typeof version !== "string" || version.length === 0) return undefined;
+  if (isEngineVersionCurrent({ engineVersion: version })) return undefined;
+
+  return isKo
+    ? `이 제안서는 이전 계산 로직(v${version}) 기준입니다. 저장 시점 값을 그대로 보여줍니다.`
+    : `This proposal uses an earlier calculation engine (v${version}). Figures are shown as saved.`;
 }
 
 /** 스냅샷 metrics → export용 impressions only (demo ROI/reach 금지) */
@@ -388,6 +432,8 @@ export function buildBriefReportPayload(
     months,
     campaignMediaQuantities: quantities,
     campaignMediaPriceOptionIndex: priceOptionIndex,
+    campaignMediaImpressions: briefMixImpressions(plan.mediaMix),
+    staleEngineNotice: staleEngineNoticeFor(plan, isKo),
     digitalOmittedNotice,
     kpiBadges: buildBriefKpiBadges(plan),
     mixSource: args.mixSource,

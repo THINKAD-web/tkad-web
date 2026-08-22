@@ -41,6 +41,14 @@ export type CampaignMediaPriceOptionIndex = Record<string, number>;
 export type PlannerPortfolioPricing = {
   quantities?: CampaignMediaQuantities;
   priceOptionIndex?: CampaignMediaPriceOptionIndex;
+  /**
+   * 매체별 캠페인 기간 노출 (A-1b Wave 3) — 저장 스냅샷을 정본으로 표시할 때.
+   *
+   * 보고서 payload · 매체 기여도 · 상권 세분화가 각각 `calculatePlan` 을
+   * 부르므로, 한 곳에서만 저장값을 쓰면 같은 문서 안에서 숫자가 어긋난다.
+   * 세 경로가 공통으로 받는 `pricing` 에 실어 함께 넘긴다.
+   */
+  impressions?: Record<string, number>;
 };
 
 export function pruneCampaignMediaPriceOptionIndex(
