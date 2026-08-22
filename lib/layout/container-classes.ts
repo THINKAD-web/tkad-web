@@ -5,9 +5,9 @@
 
 export const PAGE_CONTAINER_PADDING = "px-4 md:px-6 lg:px-8";
 
-/** Bottom inset when mobile tab bar / quick actions are visible */
+/** Bottom inset when mobile tab bar (incl. FAB) is visible — md+ unchanged */
 export const MOBILE_CHROME_BOTTOM_PAD =
-  "pb-[calc(4rem+env(safe-area-inset-bottom))]";
+  "max-md:pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]";
 
 export type PageContainerVariant = "wide" | "prose" | "fluid";
 
