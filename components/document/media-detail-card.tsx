@@ -3,6 +3,7 @@
 import {
   Clock,
   ExternalLink,
+  Eye,
   MapPin,
   Ruler,
   Tag,
@@ -176,8 +177,15 @@ export function MediaDetailCard({
           {detail.dailyTraffic != null && detail.dailyTraffic > 0 ? (
             <SpecRow
               icon={Users}
-              label={isKo ? "일일 노출" : "Daily reach"}
+              label={isKo ? "일 유동인구" : "Daily footfall"}
               value={`${detail.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "회" : ""}`}
+            />
+          ) : null}
+          {detail.adjustedDailyReach != null && detail.adjustedDailyReach > 0 ? (
+            <SpecRow
+              icon={Eye}
+              label={isKo ? "일 실노출(추정)" : "Daily reach (est.)"}
+              value={`${detail.adjustedDailyReach.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "회" : ""}`}
             />
           ) : null}
           {detail.broadcastLabel ? (

@@ -10,8 +10,8 @@ type Props = {
   /** 설계·보고서에 포함된 매체 수 */
   inPlanCount: number;
   overBudget: boolean;
-  monthlyTotalMan: number;
-  monthlyBudgetMan: number;
+  periodTotalMan: number;
+  budgetMan: number;
   /** AI 자동 조합 여부 */
   isAutoMix?: boolean;
   autoMixMax?: number;
@@ -25,8 +25,8 @@ export function PlannerPortfolioNotice({
   selectedCount,
   inPlanCount,
   overBudget,
-  monthlyTotalMan,
-  monthlyBudgetMan,
+  periodTotalMan,
+  budgetMan,
   isAutoMix = false,
   autoMixMax = 12,
   unresolvedCount = 0,
@@ -65,8 +65,8 @@ export function PlannerPortfolioNotice({
   if (overBudget) {
     lines.push(
       isKo
-        ? `선택 매체 월 단가 합 약 ${Math.round(monthlyTotalMan).toLocaleString("ko-KR")}만원이 월 예산 ${Math.round(monthlyBudgetMan).toLocaleString("ko-KR")}만원을 초과합니다. 견적·집행 전 조정이 필요할 수 있습니다.`
-        : `Selected media total ~${Math.round(monthlyTotalMan).toLocaleString("en-US")}M KRW/month exceeds the ${Math.round(monthlyBudgetMan).toLocaleString("en-US")}M/month budget. Adjust before quoting.`,
+        ? `선택 매체 기간 견적 합 약 ${Math.round(periodTotalMan).toLocaleString("ko-KR")}만원이 요청 예산 ${Math.round(budgetMan).toLocaleString("ko-KR")}만원을 초과합니다. 견적·집행 전 조정이 필요할 수 있습니다.`
+        : `Selected media prorated total ~${Math.round(periodTotalMan).toLocaleString("en-US")}M KRW exceeds the ${Math.round(budgetMan).toLocaleString("en-US")}M campaign budget. Adjust before quoting.`,
     );
   }
 

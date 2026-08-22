@@ -186,7 +186,17 @@ export function plannerMediaPeriodTotalWon(
   return Math.round(line.lineTotalMan * 10_000);
 }
 
-/** 단일 매체 — 캠페인 기간 반영 line total(원). partial rate 우선, 없으면 월×기간 선형 */
+/**
+ * 단일 매체 — 캠페인 기간 반영 line total(원). partial rate 우선, 없으면 월×기간 선형.
+ *
+ * **역할 — 「제안 견적」.** 보고서·PDF·화면에 뜨는 라인 금액이 전부 이 함수에서
+ * 나온다. 지역표·매체 라인·예산 배분·브리프가 모두 같은 기준을 쓰도록 통일한
+ * 결과이므로, 여기만 다른 기준으로 바꾸면 문서 안에서 숫자가 또 갈린다.
+ *
+ * 저장 스냅샷의 `costWon`(`calcLineMetrics`)은 이 값과 **다를 수 있다** — 그쪽은
+ * 실제 등록 상품가라 반달 상품이 없으면 월정가 전액이다. 역할 구분과 안내
+ * 문구는 `lib/planner/partial-rate-notice.ts` 상단 주석 참고.
+ */
 export function plannerMediaPeriodLineWon(
   media: MediaItem,
   ctx: PlannerPeriodPricingContext,
@@ -324,7 +334,9 @@ export function formatPlannerQuantityLabel(
   if (m.type?.trim().toLowerCase() === "digital") {
     return isKo ? `${units}기` : `${units} units`;
   }
-  return String(units);
+  // 고정형 등 — 유형별 전용 단위가 없다. 「면」처럼 매체마다 갈리는 용어를
+  // 추측하지 않고 범용 수량 단위만 붙인다 (기존에는 단위 없는 맨 숫자였다).
+  return isKo ? `${units}개` : `${units} units`;
 }
 
 export function shouldShowPlannerQuantityControl(m: MediaItem): boolean {

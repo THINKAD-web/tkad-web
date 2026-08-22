@@ -22,6 +22,7 @@ import type {
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
 import { buildPerformanceChartGuide } from "@/lib/planner-report-performance-guide";
+import { buildPartialRateNotice } from "@/lib/planner/partial-rate-notice";
 import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-rationale";
 import { regionalBreakdownSectionLines } from "@/lib/plan-cart-report/regional-breakdown";
 import { computeRegionSubdivisionReport } from "@/lib/plan-cart-report/region-subdivision";
@@ -147,6 +148,23 @@ export function buildOohReportPayload(
 
   // 엔진이 스스로의 약속을 지켰는지 확인한다. 실패해도 던지지 않는다.
   reportPlanValidation(plan, "report_payload_ooh");
+
+  /**
+   * 표시 금액(선형 환산)과 실제 청구 기준이 갈릴 수 있는 매체 안내.
+   * 표시값 자체는 바꾸지 않는다 — 문서 전체가 선형 환산 기준으로 통일돼 있다.
+   */
+  const partialRateNotice = buildPartialRateNotice({
+    portfolio: a.portfolio,
+    days: plan.period.days,
+    displayedLineWonById: Object.fromEntries(
+      a.portfolio.map((m) => [
+        m.id,
+        plannerMediaPeriodLineWon(m, periodCtx ?? { months: 1 }, pricing, isKo),
+      ]),
+    ),
+    unitsById: pricing.quantities,
+    isKo,
+  });
 
   const portfolioMetrics = {
     monthlyImpressions: plan.impressions.monthlyEquivalent,
@@ -385,6 +403,14 @@ export function buildOohReportPayload(
     pricing,
     periodCtx,
   );
+  /**
+   * 증상3 — 카드 병기용 SOV 보정 일 실노출. 새 계산이 아니라 이미 위에서
+   * `calculatePlan` 이 낸 `plan.mediaItems[].dailyImpressions` 를 id 로만
+   * 옮긴다. 별도로 다시 계산하면 Wave 3 가 겪은 다중 배선 문제가 재발한다.
+   */
+  const adjustedDailyReachById = Object.fromEntries(
+    plan.mediaItems.map((mi) => [mi.id, Math.round(mi.dailyImpressions)]),
+  );
   const portfolioRows = orderedPortfolio.map((m) =>
     mediaItemToExportRow(m, isKo, {
       months,
@@ -392,6 +418,7 @@ export function buildOohReportPayload(
       contributions,
       pricing,
       planCartItem: a.planCartItems?.find((item) => item.mediaId === m.id),
+      adjustedDailyReachById,
     }),
   );
 
@@ -484,6 +511,7 @@ export function buildOohReportPayload(
     sections,
     digitalOmittedNotice: a.digitalOmittedNotice,
     staleEngineNotice: a.staleEngineNotice,
+    partialRateNotice: partialRateNotice?.text,
     currencyFootnote: portfolioHasJapanMedia(orderedPortfolio)
       ? formatReportJpyExchangeFootnote(isKo)
       : undefined,

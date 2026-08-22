@@ -37,7 +37,10 @@ export type PlannerExportMediaRow = {
   categoryLabel?: string;
   size?: string;
   operatingHours?: string;
+  /** 일 유동인구(raw) — "일 유동인구" 로 표기할 것, "일일 노출" 아님 */
   dailyTraffic?: number;
+  /** 일 실노출(추정) — 접촉률·SOV 보정. 기여도·CPM·정렬의 기준값과 동일 */
+  adjustedDailyReach?: number;
   broadcastLabel?: string;
   monthlyPriceLabel?: string;
   lineTotalLabel?: string;
@@ -175,6 +178,11 @@ export type PlannerReportExportPayload = {
    * 표시값은 저장 시점 값 그대로이고, 이 문구만 추가로 붙는다.
    */
   staleEngineNotice?: string;
+  /**
+   * 반달 상품이 없는 매체가 포함될 때의 청구 기준 안내.
+   * 표시 금액은 선형 환산이고, 실제 청구액은 협의로 갈릴 수 있다.
+   */
+  partialRateNotice?: string;
   /** JP 매체 포함 시 ¥ 환산 각주 (합계·차트는 KRW 유지) */
   currencyFootnote?: string;
   disclaimer: string;

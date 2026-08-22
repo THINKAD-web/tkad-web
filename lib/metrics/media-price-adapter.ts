@@ -11,7 +11,7 @@
  */
 import type { MediaItem, MediaPriceOption } from "@/lib/media-data";
 import { isAddonSurchargePriceOption } from "@/lib/media-price-addon-option";
-import { periodToDays, resolvePrice } from "./price";
+import { minSellableDaysAbove, periodToDays, resolvePrice } from "./price";
 import type { PriceOption, PriceResult } from "./types";
 
 /** 어댑터가 필요한 최소 필드 */
@@ -93,6 +93,17 @@ export function resolveMediaProductPrice(
   days = 30,
 ): PriceResult | null {
   return resolvePrice(mediaPriceOptions(media), days);
+}
+
+/**
+ * 이 매체가 요청 기간보다 짧게는 팔지 않는가 — 최소 판매 단위(일) 또는 null.
+ * 청구 기준이 협상으로 갈릴 수 있는 매체를 보고서가 식별하는 데 쓴다.
+ */
+export function mediaMinSellableDaysAbove(
+  media: MediaPriceSource,
+  days: number,
+): number | null {
+  return minSellableDaysAbove(mediaPriceOptions(media), days);
 }
 
 export type ResolvedMediaPrice = {

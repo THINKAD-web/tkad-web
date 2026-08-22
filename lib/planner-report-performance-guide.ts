@@ -74,12 +74,14 @@ export function buildPerformanceChartGuide(
 
   const bullets = isKo
     ? [
+        "유동인구와 실노출은 다릅니다. 유동인구는 매체 앞을 지나간 전체 인원이고, 실노출은 그중 광고가 실제로 노출되는 비율(디지털 사이니지의 경우 전체 광고 루프 중 내 소재가 차지하는 몫)을 반영한 추정치입니다. 보고서의 노출·CPM·비중은 모두 실노출 기준이며, 디지털 매체는 여러 광고가 시간을 나눠 쓰므로 유동인구 대비 실노출 비율이 고정형 매체보다 낮게 나타납니다.",
         "예산 배분 도넛은 선택 매체 월 단가 합 기준입니다. 고가·저가 매체를 함께 담으면 돈 기준 비중이 비슷해 보일 수 있습니다.",
         `노출 비중은 유형별 추정 노출(일일×30) 합입니다. CPM이 낮은 ${lowCpm.label}(₩${lowCpm.value.toLocaleString("ko-KR")})은 같은 예산으로 ${cpmRatio > 1 ? `약 ${cpmRatio}배` : "더"} 많은 노출을 만듭니다.`,
         `이 포트폴리오 기준 — 예산: ${budgetPhrase} / 노출: ${impPhrase}. 두 비중이 다르게 보이는 것이 정상입니다.`,
         `고 CPM(${highCpm.label})은 브랜드·임팩트, 저 CPM(${lowCpm.label})은 노출 볼륨 역할로 함께 설계된 구성으로 이해하시면 됩니다.`,
       ]
     : [
+        "Daily footfall and daily reach are different figures. Footfall is everyone who passes the medium; reach is the estimated share who actually see the ad — for digital signage, the portion of the shared ad loop your creative occupies. Every impression, CPM and share figure in this report uses reach, and because digital media split screen time across multiple ads, their reach-to-footfall ratio runs lower than static media.",
         "The budget donut reflects monthly unit prices of selected media. Mixing premium and efficient inventory can make spend shares look similar.",
         `Impression share uses estimated monthly impressions (daily×30) by type. Lower CPM ${lowCpm.label} (₩${lowCpm.value.toLocaleString("en-US")}) delivers ${cpmRatio > 1 ? `about ${cpmRatio}×` : "more"} impressions per won.`,
         `This portfolio — budget: ${budgetPhrase} / impressions: ${impPhrase}. Different shares are expected.`,

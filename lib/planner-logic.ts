@@ -520,25 +520,35 @@ export function computePlannerPortfolioMonthlyMan(
   );
 }
 
+/**
+ * 요청 예산(`budgetMan`) 대비 포트폴리오 기간 견적 합.
+ *
+ * `budgetMan` 은 **캠페인 기간 전체** 금액(만원)이다. 월 단위로 역산하지 않는다.
+ * 실사용액은 매체 라인의 기간 프로라타 합(`portfolioPeriodPriceWon`)과 동일 기준.
+ */
 export function computePlannerPortfolioBudgetStatus(
   portfolio: readonly MediaItem[],
   budgetMan: number,
   months: number,
   pricing?: PlannerPortfolioPricing,
+  periodCtx?: PlannerPeriodPricingContext,
 ): {
-  monthlyTotalMan: number;
-  monthlyBudgetMan: number;
+  /** 기간 프로라타 견적 합(만원) */
+  periodTotalMan: number;
+  /** 요청 예산 — 캠페인 기간 전체(만원) */
+  budgetMan: number;
   overBudget: boolean;
 } {
-  const monthlyBudgetMan = months > 0 ? budgetMan / months : budgetMan;
-  const monthlyTotalMan = computePlannerPortfolioMonthlyMan(
-    portfolio,
-    pricing,
+  const ctx = periodCtx ?? (months > 0 ? { months } : { months: 1 });
+  const periodTotalWon = portfolio.reduce(
+    (s, m) => s + portfolioPeriodPriceWon(m, pricing, ctx),
+    0,
   );
+  const periodTotalMan = periodTotalWon / 10_000;
   return {
-    monthlyTotalMan,
-    monthlyBudgetMan,
-    overBudget: monthlyTotalMan > monthlyBudgetMan + 0.01,
+    periodTotalMan,
+    budgetMan,
+    overBudget: periodTotalMan > budgetMan + 0.01,
   };
 }
 

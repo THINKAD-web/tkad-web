@@ -7,7 +7,6 @@ import {
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 import { formatKrwPrimaryWithJpyFootnote } from "@/lib/media-display-currency";
-import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import {
   formatPlannerQuantityLabel,
   plannerMediaPeriodLineWon,
@@ -40,8 +39,23 @@ export type DocumentMediaDetail = {
   categoryLabel?: string;
   size?: string;
   operatingHours?: string;
-  /** 일일 유동·노출 */
+  /**
+   * 일 유동인구 — 매체 앞을 지나간 사람 수(raw). 수량 반영 후 값이다.
+   * "일일 노출" 로 라벨링하지 말 것 — 실제 노출과는 유형별로 최대 20배
+   * 차이난다 (증상3 스코핑 문서 참고).
+   */
   dailyTraffic?: number;
+  /**
+   * 일 실노출(추정) — 접촉률·SOV 보정을 반영한, 실제로 광고를 보는 사람 수.
+   * `PlanMediaItem.dailyImpressions` 에서 그대로 가져온다(재계산 없음).
+   * 보고서의 기여도·CPM·정렬은 전부 이 기준이다 — 표시 병기에만 쓰고
+   * 계산에 다시 넣지 말 것.
+   *
+   * 엔진 결과(`plan.mediaItems`)에 접근할 수 있는 호출자(브리프·플랜카트
+   * 보고서)만 채운다. 견적서 등 엔진을 거치지 않는 경로는 undefined —
+   * 그 경로는 raw 만 있던 기존 동작 그대로다.
+   */
+  adjustedDailyReach?: number;
   /** DOOH 송출 (예: 15초 / 시간당 240회) */
   broadcastLabel?: string;
   monthlyPriceLabel?: string;
@@ -391,6 +405,11 @@ export function mediaItemToExportRow(
     pricing?: PlannerPortfolioPricing;
     quantities?: CampaignMediaQuantities;
     planCartItem?: PlanCartItem;
+    /**
+     * `PlanMediaItem.dailyImpressions` (엔진 이미 계산한 값) — id 로 조회.
+     * 증상3 병기용. 없으면 `adjustedDailyReach` 는 undefined.
+     */
+    adjustedDailyReachById?: Readonly<Record<string, number>>;
   },
 ): import("@/lib/planner-report-export/types").PlannerExportMediaRow {
   const c = opts?.contributions?.get(m.id);
@@ -400,6 +419,23 @@ export function mediaItemToExportRow(
     opts?.periodCtx ??
     (opts?.months != null && opts.months > 0 ? { months: opts.months } : undefined);
   const units = plannerUnitsForMedia(m, pricing.quantities);
+  /**
+   * 카드에 표시할 수량 — 저장 라인 수량을 그대로 존중한다.
+   *
+   * `resolveMediaQuantity` 는 「수량 선택형」이 아닌 매체(고정형 등)에 대해
+   * 무조건 1을 돌려준다. 단가 해소 관점에서는 옳지만, 저장 스냅샷의 라인
+   * 수량은 그와 무관하게 2 이상일 수 있다 — 고정형 「총 2면」이 그 경우다
+   * (`brief/store.ts` 의 `setMixUnits` 는 유형을 가리지 않는다).
+   *
+   * 저장 시점 계산(`calcMixMetrics.calcLineMetrics`)은 유형과 무관하게 수량에
+   * 비례해 노출·금액을 올려 두므로, 카드에서만 수량을 1로 뭉개면 카드가
+   * 자기 라인 금액과도 어긋난다. 그래서 표시 수량은 저장값을 따른다.
+   */
+  const storedUnits = pricing.quantities?.[m.id];
+  const displayUnits =
+    storedUnits != null && Number.isFinite(storedUnits) && storedUnits > 1
+      ? Math.round(storedUnits)
+      : units;
   const monthlyWonFromCart =
     opts?.planCartItem != null
       ? planCartLineMonthlyWon(opts.planCartItem, m)
@@ -446,22 +482,29 @@ export function mediaItemToExportRow(
       );
       if (multi) return multi;
     }
-    if (!shouldShowPlannerQuantityControl(m)) return undefined;
+    // 수량 조절 UI 가 없는 매체라도, 저장 수량이 2 이상이면 카드에 드러낸다.
+    if (!shouldShowPlannerQuantityControl(m) && displayUnits <= 1) {
+      return undefined;
+    }
     return formatPlannerQuantityLabel(
       m,
-      units,
+      displayUnits,
       isKo,
       pricing.priceOptionIndex,
     );
   })();
   /**
-   * A-1b Wave 4 — 네트워크 매체는 `dailyFootTraffic` 이 지점당 값이다.
-   * 카드는 "일일 노출" 이라는 이름으로 전체량인 것처럼 보여줬으므로,
-   * 선택 지점 수(`units`)를 곱해 실제 합산 노출을 표시한다.
+   * `dailyFootTraffic` 은 **1단위당** 값이다 — 네트워크는 지점당(A-1b Wave 4),
+   * 고정형 「총 2면」은 면당. 카드는 "일일 노출" 이라는 이름으로 전체량인 것처럼
+   * 보여주므로 저장 수량을 곱해 합산값으로 맞춘다.
+   *
+   * Wave 4 는 네트워크만 처리했다. 저장 시점 계산은 유형을 가리지 않고 수량에
+   * 비례하므로(`calcLineMetrics`), 표시도 유형이 아니라 **수량 자체**를 기준으로
+   * 삼는다. 네트워크의 기존 동작은 그대로다 (수량이 곧 지점 수).
    */
   const dailyTraffic =
-    isNetworkCatalogItem(m) && detail.dailyTraffic != null
-      ? detail.dailyTraffic * units
+    detail.dailyTraffic != null && displayUnits > 1
+      ? detail.dailyTraffic * displayUnits
       : detail.dailyTraffic;
   return {
     ...detail,
@@ -480,5 +523,6 @@ export function mediaItemToExportRow(
         : detail.lineTotalLabel,
     quantityLabel,
     dailyTraffic,
+    adjustedDailyReach: opts?.adjustedDailyReachById?.[m.id],
   };
 }

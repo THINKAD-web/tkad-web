@@ -144,7 +144,7 @@ function comparePortfolio(
     `Hybrid overlaps Step4: ${hybrid.some((m) => step4.includes(m.id)) ? "YES" : "NO"}`,
   );
   console.log(
-    `Budget OK (≤ monthly): ${budget.overBudget ? "OVER" : "OK"} (${budget.monthlyTotalMan.toFixed(0)} / ${budget.monthlyBudgetMan.toFixed(0)} 만/월)`,
+    `Budget OK (≤ campaign): ${budget.overBudget ? "OVER" : "OK"} (${budget.periodTotalMan.toFixed(0)} / ${budget.budgetMan.toFixed(0)} 만)`,
   );
 
   return { legacy, hybrid, step4 };

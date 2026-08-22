@@ -12,6 +12,7 @@
  */
 
 import type { MediaItem } from "@/lib/media-data";
+import { mediaMinSellableDaysAbove } from "@/lib/metrics/media-price-adapter";
 import {
   normalizeVisibilityScore,
   plannerBrowseCategoryKey,
@@ -345,6 +346,18 @@ function buildMediaItems(
         messageKo: `${m.name} — 단가가 0 이라 예산 비중·CPM 이 왜곡될 수 있습니다.`,
         messageEn: `${m.name} — zero net price; budget share and CPM may be distorted.`,
         mediaId: m.id,
+      }));
+    }
+
+    const minSellableDays = mediaMinSellableDaysAbove(m, period.days);
+    if (minSellableDays != null) {
+      warnings.push(warn({
+        code: "MEDIA_NO_PARTIAL_RATE_TIER",
+        severity: "warn",
+        messageKo: `${m.name} — 최소 판매 단위가 ${minSellableDays}일이라 ${period.days}일 상품이 없습니다. 표시 금액은 선형 환산이며 실제 청구액은 협의에 따라 달라질 수 있습니다.`,
+        messageEn: `${m.name} — sold in minimum units of ${minSellableDays} days, so no ${period.days}-day product exists. The shown amount is prorated linearly; actual billing may differ after negotiation.`,
+        mediaId: m.id,
+        context: { minSellableDays, days: period.days },
       }));
     }
 

@@ -54,6 +54,7 @@ function exportRowToDetail(
     size: row.size,
     operatingHours: row.operatingHours,
     dailyTraffic: row.dailyTraffic,
+    adjustedDailyReach: row.adjustedDailyReach,
     broadcastLabel: row.broadcastLabel,
     monthlyPriceLabel: row.monthlyPriceLabel ?? row.priceLabel,
     lineTotalLabel: row.lineTotalLabel,
@@ -74,8 +75,47 @@ function exportRowToCatalogItem(row: PlannerExportMediaRow, index: number): Home
     location: row.location ?? row.region,
     size: row.size,
     dailyFootTraffic: row.dailyTraffic,
+    /**
+     * 증상3 — 피드·카드·컴팩트 보기가 공용으로 쓰는 `resolveMonthlyImpressions`
+     * 는 `impressions` 를 `dailyFootTraffic × 30` 보다 우선한다(media-metrics.ts).
+     * 여기서만(플래너 보고서 로컬 매핑) 채워서, 이 화면의 「노출」 표기와
+     * CPM 이 문서 나머지와 같은 SOV 보정 기준을 쓰게 한다. 공용 리졸버 자체는
+     * 건드리지 않으므로 지도·탐색 등 다른 화면은 영향받지 않는다.
+     */
+    impressions:
+      row.adjustedDailyReach != null ? row.adjustedDailyReach * 30 : undefined,
     thumbnailUrl: row.thumbUrl ?? undefined,
   };
+}
+
+/** 컴팩트·카드·피드 — raw 유동인구를 보정값 옆 작은 아이콘+툴팁으로 노출 */
+function RawFootfallHint({
+  row,
+  isKo,
+  className,
+}: {
+  row: PlannerExportMediaRow;
+  isKo: boolean;
+  className?: string;
+}) {
+  if (row.dailyTraffic == null || row.dailyTraffic <= 0) return null;
+  if (row.adjustedDailyReach == null) return null;
+  const label = isKo
+    ? `일 유동인구(참고): ${row.dailyTraffic.toLocaleString("ko-KR")}회 — 위 노출은 접촉률·SOV 보정 실노출 추정치입니다.`
+    : `Daily footfall (reference): ${row.dailyTraffic.toLocaleString("en-US")} — the figure above is an SOV-adjusted reach estimate.`;
+  return (
+    <span
+      role="img"
+      aria-label={label}
+      title={label}
+      className={cn(
+        "pointer-events-auto inline-flex h-4 w-4 items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold leading-none text-white",
+        className,
+      )}
+    >
+      i
+    </span>
+  );
 }
 
 function mediaHref(row: PlannerExportMediaRow): string | null {
@@ -137,7 +177,7 @@ function DiscoveryLineupCard({
   if (viewMode === "compact") {
     const metaLine = exportMediaLineMetaParts(row, { includePrice: true }).join(" · ");
     return (
-      <div className={DOCUMENT_LINEUP_CARD}>
+      <div className={cn(DOCUMENT_LINEUP_CARD, "relative")}>
         <DiscoveryMediaCard
           variant="compact"
           compactLayout="row"
@@ -147,13 +187,18 @@ function DiscoveryLineupCard({
           isKo={isKo}
           showPlanButton={false}
         />
+        <RawFootfallHint
+          row={row}
+          isKo={isKo}
+          className="pointer-events-auto absolute right-1.5 top-1.5 z-10"
+        />
       </div>
     );
   }
 
   if (viewMode === "card") {
     return (
-      <div className={cn(DOCUMENT_LINEUP_CARD, "h-full")}>
+      <div className={cn(DOCUMENT_LINEUP_CARD, "relative h-full")}>
         <DiscoveryMediaCard
           variant="compact"
           compactLayout="grid"
@@ -164,12 +209,17 @@ function DiscoveryLineupCard({
           className="h-full"
           showPlanButton={false}
         />
+        <RawFootfallHint
+          row={row}
+          isKo={isKo}
+          className="pointer-events-auto absolute right-1.5 top-1.5 z-10"
+        />
       </div>
     );
   }
 
   return (
-    <div className={DOCUMENT_LINEUP_CARD}>
+    <div className={cn(DOCUMENT_LINEUP_CARD, "relative")}>
       <DiscoveryMediaCard
         variant="feed"
         item={item}
@@ -179,6 +229,11 @@ function DiscoveryLineupCard({
         priceLabel={priceLabel}
         isKo={isKo}
         showPlanButton={false}
+      />
+      <RawFootfallHint
+        row={row}
+        isKo={isKo}
+        className="pointer-events-auto absolute right-1.5 top-1.5 z-10"
       />
     </div>
   );
@@ -225,7 +280,11 @@ function lineupListClass(viewMode: PlannerReportViewMode): string {
 type Props = {
   payload: Pick<
     PlannerReportExportPayload,
-    "portfolio" | "portfolioGroups" | "isKo"
+    | "portfolio"
+    | "portfolioGroups"
+    | "isKo"
+    | "budgetHonesty"
+    | "partialRateNotice"
   >;
 };
 
@@ -346,6 +405,15 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
           data-testid="report-mix-vs-budget"
         >
           {p.budgetHonesty.mixVsBudgetFootnote}
+        </p>
+      ) : null}
+
+      {p.portfolio.length > 0 && p.partialRateNotice ? (
+        <p
+          className="text-[11px] leading-snug text-amber-700"
+          data-testid="report-partial-rate-notice"
+        >
+          {p.partialRateNotice}
         </p>
       ) : null}
 
