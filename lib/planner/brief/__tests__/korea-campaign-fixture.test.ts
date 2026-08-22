@@ -169,6 +169,56 @@ function summaryTotalImpressions(p: ReturnType<typeof payload>): number {
   return row.value;
 }
 
+// ── 고정 0 — 픽스처 자체가 온전한가 ────────────────────────────────────────
+
+/**
+ * 아래 두 검사는 **리터럴** 로 적는다.
+ *
+ * `DAILY_SUM` 은 `CATALOG` 에서 reduce 로 계산되므로, 매체 하나가 포트폴리오에서
+ * 빠지면 기대값과 실제값이 **같이 줄어들어** 나머지 단언이 전부 통과해 버린다.
+ * 과거 픽스처 사고(CPM bars 빈 배열 · 지역표 0행 · 네트워크 단가 0원)가 모두
+ * 이 형태였다. 리터럴 앵커가 있어야 매체 누락이 드러난다.
+ */
+test("픽스처 3개 매체가 모두 살아 있다", () => {
+  assert.equal(CATALOG.length, 3);
+  assert.equal(DAILY_SUM, 2_005_000, "165,000 + 1,750,000 + 90,000");
+  assert.equal(CAMPAIGN_TOTAL, 42_105_000, "2,005,000 × 21일");
+
+  // 매체별 일 노출 — 수량 반영 후
+  assert.equal(dailyImpressionsOf(CATALOG[0]!), 165_000);
+  assert.equal(dailyImpressionsOf(CATALOG[1]!), 1_750_000); // 35,000 × 50지점
+  assert.equal(dailyImpressionsOf(CATALOG[2]!), 90_000);
+});
+
+test("보고서 포트폴리오에 3개 매체가 모두 실린다", () => {
+  const p = payload();
+  assert.equal(p.portfolio.length, 3, "매체가 누락되면 나머지 단언이 무력해진다");
+  assert.deepEqual(
+    p.portfolio.map((r) => r.id).sort(),
+    ["m1", "m2", "m3"],
+  );
+});
+
+test("상권 세분화 표에 3개 권역이 모두 나온다", () => {
+  const p = payload();
+  const rows = p.regionSubdivision?.breakdown ?? [];
+  assert.equal(rows.length, 3, "권역 행이 줄면 합계가 작아진 채로 닫혀 버린다");
+  for (const r of rows) {
+    assert.equal(r.mediaCount, 1);
+    assert.ok(r.totalImpressions > 0, `${r.label} 기간노출이 0`);
+  }
+});
+
+test("차트가 빈 배열로 떨어지지 않는다", () => {
+  const p = payload();
+  // 유형 2종(디지털·고정형) — 과거 회귀에서 빈 배열이 된 지점이다.
+  assert.equal(p.charts?.cpmBars?.length, 2);
+  assert.equal(p.charts?.budgetSplit?.length, 2);
+  for (const bar of p.charts?.cpmBars ?? []) {
+    assert.ok(bar.value > 0, `${bar.label} CPM 이 0`);
+  }
+});
+
 // ── 고정 1 — 기간 표기 ──────────────────────────────────────────────────────
 
 test("기간 표기가 21일이다", () => {
