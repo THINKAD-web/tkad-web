@@ -217,10 +217,31 @@ test("엔진 버전이 다르면 안내가 붙는다 — 표시값은 그대로"
 
   const p = payloadOf(old);
   assert.ok(p.staleEngineNotice, "버전이 다르면 안내가 있어야 한다");
-  assert.match(p.staleEngineNotice, /v0-old/);
+  // 부분 매치가 아니라 정확한 문구를 검사한다 — 버전 문자열이 이미 "v" 로
+  // 시작하므로(`METRICS_ENGINE_VERSION = "v2.0.0"`), 템플릿이 "v" 를 또
+  // 붙이면 "vv0-old" 가 되어도 /v0-old/ 부분매치는 통과해 버린다.
+  assert.equal(
+    p.staleEngineNotice,
+    "이 제안서는 이전 계산 로직(v0-old) 기준입니다. 저장 시점 값을 그대로 보여줍니다.",
+  );
 
   // 배지는 표시값에 관여하지 않는다 — 저장값 그대로다.
   assert.equal(kpiTotal(p), STORED_TOTAL);
+});
+
+test("버전 문구가 접두사를 중복시키지 않는다 — 실제 버전 상수로 검증", () => {
+  // METRICS_ENGINE_VERSION 자체가 이미 "v" 로 시작한다(예: "v2.0.0").
+  // 문구가 `v${version}` 형태면 "vv2.0.0" 처럼 접두사가 겹친다.
+  const old = snapshot();
+  old.engineVersion = "v1.0.0";
+
+  const p = payloadOf(old);
+  assert.ok(p.staleEngineNotice);
+  assert.ok(
+    !p.staleEngineNotice.includes("vv1.0.0"),
+    `접두사 중복: ${p.staleEngineNotice}`,
+  );
+  assert.match(p.staleEngineNotice, /\(v1\.0\.0\)/);
 });
 
 test("엔진 버전이 현재와 같으면 안내가 없다", () => {

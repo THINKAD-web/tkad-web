@@ -202,8 +202,8 @@ export function staleEngineNoticeFor(
   if (isEngineVersionCurrent({ engineVersion: version })) return undefined;
 
   return isKo
-    ? `이 제안서는 이전 계산 로직(v${version}) 기준입니다. 저장 시점 값을 그대로 보여줍니다.`
-    : `This proposal uses an earlier calculation engine (v${version}). Figures are shown as saved.`;
+    ? `이 제안서는 이전 계산 로직(${version}) 기준입니다. 저장 시점 값을 그대로 보여줍니다.`
+    : `This proposal uses an earlier calculation engine (${version}). Figures are shown as saved.`;
 }
 
 /** 스냅샷 metrics → export용 impressions only (demo ROI/reach 금지) */
