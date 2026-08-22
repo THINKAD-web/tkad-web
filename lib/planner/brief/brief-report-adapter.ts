@@ -34,6 +34,7 @@ import {
   type CampaignBriefInput,
 } from "@/lib/planner/brief/types";
 import { getMediaPackageOptions } from "@/lib/media-quantity";
+import { MEDIA_DAYS_PER_MONTH } from "@/lib/media-metrics";
 import { plannerIndustryLabel } from "@/lib/planner/types";
 import {
   EXPORT_DIGITAL_OMITTED_EN,
@@ -216,12 +217,31 @@ function briefGoalTitle(
   return isKo ? GOAL_TITLES_KO[plannerGoal] : GOAL_TITLES_EN[plannerGoal];
 }
 
+/**
+ * 브리프 flight 일수 → payload `months`.
+ *
+ * **반올림하지 않는다.** 예전에는 `Math.round(days / 30)` 이 21일을 1개월로
+ * 올려, 보고서 머리말은 flight 날짜에서 "21일" 로 뜨는데 지표는 30일치로
+ * 계산되는 상태를 만들었다 (21일 기준 총노출 43% 과대).
+ *
+ * 1개월의 정수배가 아닌 모든 기간이 영향을 받았다 — 7·14·21·45·365일 등.
+ * 30·60·90일만 우연히 맞았다.
+ *
+ * 경계값(`Math.max(1, ...)` / `Math.min(12, ...)`) 제거만으로는 고쳐지지
+ * 않는다. `Math.round(21/30)` 이 이미 1 을 내기 때문이다. 반올림 자체를
+ * 없애야 한다.
+ *
+ * 소비처인 `calculatePlan` 이 `Math.max(1, Math.round(months × 30))` 으로
+ * 일수를 복원하므로, 0.7 을 넘기면 21일로 계산된다.
+ */
 function briefPeriodMonths(plan: BriefReportPlan): number {
-  const days =
+  const raw =
     plan.mediaMix[0]?.days ??
     flightDays(briefFromPlan(plan)) ??
-    30;
-  return Math.max(1, Math.min(12, Math.round(days / 30)));
+    MEDIA_DAYS_PER_MONTH;
+  const days =
+    Number.isFinite(raw) && raw > 0 ? raw : MEDIA_DAYS_PER_MONTH;
+  return days / MEDIA_DAYS_PER_MONTH;
 }
 
 function resolveDigitalOmittedNotice(
