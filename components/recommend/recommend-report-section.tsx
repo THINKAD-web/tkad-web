@@ -8,11 +8,9 @@ import type { MediaItem } from "@/lib/media-data";
 import type { ScoredMedia, AiRecommendInput } from "@/lib/ai-media-recommend";
 import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
 import {
-  budgetSplitByCategory,
-  computePortfolioReportMetrics,
-  portfolioCpmByCategory,
-} from "@/lib/planner-logic";
-import { PLANNER_CAMPAIGN_GOAL_DEFS } from "@/lib/planner/campaign-goal-defs";
+  PLANNER_CAMPAIGN_GOAL_DEFS,
+} from "@/lib/planner/campaign-goal-defs";
+import { calculatePlan } from "@/lib/planner/calc/engine";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
@@ -27,6 +25,7 @@ import type {
   CampaignMediaPriceOptionIndex,
   CampaignMediaQuantities,
 } from "@/lib/planner/planner-media-quantity";
+import { plannerMediaPeriodLineWon } from "@/lib/planner/planner-media-quantity";
 import { PLANNER_INDUSTRY_LABELS } from "@/lib/planner/types";
 import { useToast } from "@/components/toast-provider";
 import { DocumentPreviewFrame } from "@/components/document/document-layout";
@@ -225,43 +224,66 @@ export function RecommendReportSection({
     [reportContext.months],
   );
 
-  const budgetAllocation = useMemo(() => {
-    const slices = budgetSplitByCategory(
-      portfolio,
-      portfolioPricing,
-      reportPeriodCtx,
-    );
-    return slices.map((s) => ({
-      key: s.key,
-      label: isKo ? s.labelKo : s.labelEn,
-      pct: s.pct,
-      valueWon: s.value,
-      actualWon: s.actualWon,
-    }));
-  }, [portfolio, portfolioPricing, isKo, reportPeriodCtx]);
+  /** Wave 5-1 — 예산 도넛·CPM 막대·총노출을 calculatePlan 단일 경로로 (planner Wave 4 패턴) */
+  const plan = useMemo(() => {
+    const pricing = portfolioPricing;
+    const ctx = reportPeriodCtx ?? { months: 1 };
+    return calculatePlan({
+      media: portfolio.map((m) => ({
+        media: m,
+        units: quantities?.[m.id],
+        itemNet: plannerMediaPeriodLineWon(m, ctx, pricing, isKo),
+      })),
+      period: {
+        kind: "months",
+        months: reportContext.months > 0 ? reportContext.months : 1,
+      },
+      budgetWon: Math.max(0, reportContext.budgetNum) * 10_000,
+      locale: isKo ? "ko" : "en",
+    });
+  }, [
+    portfolio,
+    reportContext.months,
+    reportContext.budgetNum,
+    isKo,
+    quantities,
+    priceOptionIndex,
+    portfolioPricing,
+    reportPeriodCtx,
+  ]);
 
-  const cpmBars = useMemo(() => {
-    const pts = portfolioCpmByCategory(
-      portfolio,
-      portfolioPricing,
-      reportPeriodCtx,
-    );
-    return pts.map((p) => ({
-      key: p.key,
-      label: isKo ? p.labelKo : p.labelEn,
-      value: p.cpm,
-    }));
-  }, [portfolio, portfolioPricing, isKo, reportPeriodCtx]);
+  const budgetAllocation = useMemo(
+    () =>
+      plan.breakdown.byCategory.map((s) => ({
+        key: s.key,
+        label: isKo ? s.labelKo : s.labelEn,
+        pct: s.budgetShare,
+        valueWon: s.budgetAmount,
+        actualWon: s.budgetAmount,
+      })),
+    [plan, isKo],
+  );
+
+  const cpmBars = useMemo(
+    () =>
+      plan.breakdown.byCategory
+        .filter((s) => (s.cpmWon ?? 0) > 0)
+        .map((s) => ({
+          key: s.key,
+          label: isKo ? s.labelKo : s.labelEn,
+          value: s.cpmWon ?? 0,
+        }))
+        .sort((x, y) => x.value - y.value),
+    [plan, isKo],
+  );
 
   const portfolioReport = useMemo(
-    () =>
-      computePortfolioReportMetrics(
-        portfolio,
-        reportContext.months,
-        portfolioPricing,
-        reportPeriodCtx,
-      ),
-    [portfolio, reportContext.months, portfolioPricing, reportPeriodCtx],
+    () => ({
+      monthlyImpressions: plan.impressions.monthlyEquivalent,
+      totalImpressions: plan.impressions.campaignTotal,
+      blendedCpmKrw: plan.cpm.campaignWon,
+    }),
+    [plan],
   );
 
   const blendedCpmKrw = portfolioReport.blendedCpmKrw;
