@@ -19,10 +19,15 @@ import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import {
   budgetSplitByCategory,
   plannerReportCategoryKey,
-  portfolioCpmByCategory,
   type PlannerCampaignGoal,
   type PlannerMetrics,
 } from "@/lib/planner-logic";
+import { calculatePlan } from "@/lib/planner/calc/engine";
+import {
+  plannerMediaPeriodLineWon,
+  resolvePlanPeriodInput,
+  type PlannerPortfolioPricing,
+} from "@/lib/planner/planner-media-quantity";
 import {
   briefAgeBandsToPlannerKeys,
   briefGoalToPlanner,
@@ -355,6 +360,51 @@ function buildEffectSummaryLines(args: {
   return lines;
 }
 
+/**
+ * 브리프 보고서 표시용 CalcEngine — `buildOohReportPayload` 와 동일 입력.
+ * 1p KPI·4p 효과요약·CPM 비교가 같은 `money.mediaNet`·`campaignImpressions` 를 쓰게 한다.
+ */
+function buildBriefExportCalcPlan(args: {
+  portfolio: readonly MediaItem[];
+  pricing: PlannerPortfolioPricing;
+  months: number;
+  campaignMediaImpressions?: Record<string, number>;
+  budgetWon: number;
+  campaignGoal: PlannerCampaignGoal | null;
+  industryKey: ReturnType<typeof briefIndustryToPlanner>;
+  isKo: boolean;
+  flightStart?: string | null;
+  flightEnd?: string | null;
+}) {
+  const pricing: PlannerPortfolioPricing = {
+    ...args.pricing,
+    impressions: args.campaignMediaImpressions,
+    flight:
+      args.flightStart && args.flightEnd
+        ? { startDate: args.flightStart, endDate: args.flightEnd }
+        : undefined,
+  };
+  const periodCtx = args.months > 0 ? { months: args.months } : undefined;
+  return calculatePlan({
+    media: args.portfolio.map((m) => ({
+      media: m,
+      units: pricing.quantities?.[m.id],
+      itemNet: plannerMediaPeriodLineWon(
+        m,
+        periodCtx ?? { months: 1 },
+        pricing,
+        args.isKo,
+      ),
+      itemImpressions: args.campaignMediaImpressions?.[m.id],
+    })),
+    period: resolvePlanPeriodInput(args.months, pricing),
+    budgetWon: args.budgetWon,
+    goal: args.campaignGoal,
+    industryKey: args.industryKey,
+    locale: args.isKo ? "ko" : "en",
+  });
+}
+
 export function buildBriefReportPayload(
   args: BuildBriefReportPayloadArgs,
 ): PlannerReportExportPayload {
@@ -376,6 +426,20 @@ export function buildBriefReportPayload(
   const industryKey = briefIndustryToPlanner(brief.industry);
   const exportMetrics = snapshotMetricsToExportMetrics(plan.metrics, months);
 
+  const campaignMediaImpressions = briefMixImpressions(plan.mediaMix);
+  const exportCalcPlan = buildBriefExportCalcPlan({
+    portfolio,
+    pricing,
+    months,
+    campaignMediaImpressions,
+    budgetWon: plan.brief.budgetWon,
+    campaignGoal,
+    industryKey,
+    isKo,
+    flightStart: useFlightPeriod ? brief.flightStart : undefined,
+    flightEnd: useFlightPeriod ? brief.flightEnd : undefined,
+  });
+
   const budgetAllocation = budgetSplitByCategory(
     portfolio,
     pricing,
@@ -388,15 +452,16 @@ export function buildBriefReportPayload(
     actualWon: s.actualWon,
   }));
 
-  const cpmBars = portfolioCpmByCategory(portfolio, pricing, periodCtx).map(
-    (p) => ({
-      key: p.key,
-      label: isKo ? p.labelKo : p.labelEn,
-      value: p.cpm,
-    }),
-  );
+  const cpmBars = exportCalcPlan.breakdown.byCategory
+    .filter((s) => (s.cpmWon ?? 0) > 0)
+    .map((s) => ({
+      key: s.key,
+      label: isKo ? s.labelKo : s.labelEn,
+      value: s.cpmWon ?? 0,
+    }))
+    .sort((a, b) => a.value - b.value);
 
-  const blendedCpmKrw = plan.metrics.mixCpmWon;
+  const blendedCpmKrw = exportCalcPlan.cpm.campaignWon;
 
   /**
    * 1p 헤더 「이 구성」 — **표시 금액 기준**(선형 환산)을 쓴다.
@@ -479,7 +544,7 @@ export function buildBriefReportPayload(
     flightEnd: useFlightPeriod ? brief.flightEnd : undefined,
     campaignMediaQuantities: quantities,
     campaignMediaPriceOptionIndex: priceOptionIndex,
-    campaignMediaImpressions: briefMixImpressions(plan.mediaMix),
+    campaignMediaImpressions,
     staleEngineNotice: staleEngineNoticeFor(plan, isKo),
     digitalOmittedNotice,
     kpiBadges: buildBriefKpiBadges(plan),

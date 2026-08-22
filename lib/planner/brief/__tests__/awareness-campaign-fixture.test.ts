@@ -200,6 +200,45 @@ test("추천 근거에 월 환산 예산(6,429만)이 나오지 않는다", () =
   );
 });
 
+function parseCpmWon(labelValue: string): number {
+  const m = labelValue.match(/₩([\d,]+)/);
+  assert.ok(m, `CPM 파싱 실패: ${labelValue}`);
+  return Number(m[1]!.replace(/,/g, ""));
+}
+
+function kpiBlendedCpmWon(p: ReturnType<typeof payload>): number {
+  const kpi = p.kpis.find((k) => k.label === "블렌디드 CPM");
+  assert.ok(kpi, "1p 블렌디드 CPM KPI 가 있어야 한다");
+  return parseCpmWon(kpi.value);
+}
+
+function effectSummaryBlendedCpmWon(p: ReturnType<typeof payload>): number {
+  const section = p.sections.find((s) => s.title === "효과 요약");
+  const line = section?.lines.find((l) => l.includes("블렌디드 CPM"));
+  assert.ok(line, "4p 효과 요약에 블렌디드 CPM 이 있어야 한다");
+  return parseCpmWon(line);
+}
+
+test("1p와 4p 블렌디드 CPM이 같다 (14일·프로라타 기준)", () => {
+  const p = payload();
+  assert.equal(kpiBlendedCpmWon(p), effectSummaryBlendedCpmWon(p));
+  assert.equal(kpiBlendedCpmWon(p), 18_005);
+});
+
+test("CPM 비교 막대가 CalcEngine byCategory 와 일치한다 (레거시 portfolioCpmByCategory 아님)", () => {
+  const p = payload();
+  const bars = p.charts?.cpmBars ?? [];
+  assert.equal(bars.length, 2);
+  const digital = bars.find((b) => b.label === "디지털");
+  const staticBar = bars.find((b) => b.label === "고정형");
+  assert.ok(digital && staticBar);
+  assert.equal(digital.value, 68_067);
+  assert.equal(staticBar.value, 3_704);
+  // 과거 잘못된 표시값(1,522 / 3,937)과 다르다 — 프로라타·SOV 보정 경로
+  assert.notEqual(digital.value, 1_522);
+  assert.notEqual(staticBar.value, 3_937);
+});
+
 // ── ③ raw · SOV보정 노출 병기 (증상3 구현) ─────────────────────────────────
 //
 // A-1b Wave 3 이후 기여도는 **저장 스냅샷**(접촉률×SOV 보정)에서 나오고,

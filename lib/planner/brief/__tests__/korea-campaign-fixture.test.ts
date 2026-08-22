@@ -173,6 +173,25 @@ function summaryTotalImpressions(p: ReturnType<typeof payload>): number {
   return row.value;
 }
 
+function parseCpmWon(labelValue: string): number {
+  const m = labelValue.match(/₩([\d,]+)/);
+  assert.ok(m, `CPM 파싱 실패: ${labelValue}`);
+  return Number(m[1]!.replace(/,/g, ""));
+}
+
+function kpiBlendedCpmWon(p: ReturnType<typeof payload>): number {
+  const kpi = p.kpis.find((k) => k.label === "블렌디드 CPM");
+  assert.ok(kpi, "1p 블렌디드 CPM KPI 가 있어야 한다");
+  return parseCpmWon(kpi.value);
+}
+
+function effectSummaryBlendedCpmWon(p: ReturnType<typeof payload>): number {
+  const section = p.sections.find((s) => s.title === "효과 요약");
+  const line = section?.lines.find((l) => l.includes("블렌디드 CPM"));
+  assert.ok(line, "4p 효과 요약에 블렌디드 CPM 이 있어야 한다");
+  return parseCpmWon(line);
+}
+
 // ── 고정 0 — 픽스처 자체가 온전한가 ────────────────────────────────────────
 
 /**
@@ -221,6 +240,30 @@ test("차트가 빈 배열로 떨어지지 않는다", () => {
   for (const bar of p.charts?.cpmBars ?? []) {
     assert.ok(bar.value > 0, `${bar.label} CPM 이 0`);
   }
+});
+
+test("1p와 4p 블렌디드 CPM이 같다 (21일·프로라타 기준)", () => {
+  const p = payload();
+  const kpi = kpiBlendedCpmWon(p);
+  const effect = effectSummaryBlendedCpmWon(p);
+  assert.equal(
+    kpi,
+    effect,
+    `1p=${kpi} vs 4p=${effect} — money.mediaNet 분자가 어긋났다`,
+  );
+});
+
+test("CPM 비교 막대가 CalcEngine byCategory 와 일치한다", () => {
+  const p = payload();
+  const bars = p.charts?.cpmBars ?? [];
+  assert.equal(bars.length, 2);
+  const digital = bars.find((b) => b.label === "디지털");
+  const staticBar = bars.find((b) => b.label === "고정형");
+  assert.ok(digital && staticBar);
+  // 21일 고려 캠페인 — 프로라타 금액 ÷ SOV 보정 캠페인 노출 (Wave 4 엔진 경로)
+  assert.equal(digital.value, 104);
+  assert.equal(staticBar.value, 370);
+  assert.equal(kpiBlendedCpmWon(p), 116);
 });
 
 // ── 고정 1 — 기간 표기 ──────────────────────────────────────────────────────
