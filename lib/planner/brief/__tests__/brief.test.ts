@@ -239,22 +239,35 @@ test("빈 입력은 빈 브리프", () => {
 
 // ── 업종 프리셋 ────────────────────────────────────────────
 
-test("프리셋 3개, 무작위 아님, 완결 브리프로 환산", async () => {
-  const { BRIEF_PRESETS, presetToBrief } = await import("../presets.ts");
-  assert.equal(BRIEF_PRESETS.length, 3);
+test("프리셋 풀 ≥3, 무작위 값 아님, 완결 브리프로 환산", async () => {
+  const {
+    BRIEF_PRESETS,
+    BRIEF_PRESET_DISPLAY_COUNT,
+    pickBriefPresets,
+    presetToBrief,
+  } = await import("../presets.ts");
+  assert.ok(BRIEF_PRESETS.length >= BRIEF_PRESET_DISPLAY_COUNT);
   const today = new Date(Date.UTC(2026, 8, 1));
   for (const p of BRIEF_PRESETS) {
     const b = presetToBrief(p, today);
-    // 필수(예산·기간) 항상 충족
     assert.ok(b.budgetInputWon > 0, `${p.id} 예산`);
     assert.ok(b.flightStart && b.flightEnd, `${p.id} 기간`);
     assert.deepEqual(briefRequiredStatus(b).ok, true, `${p.id} 필수 통과`);
   }
+  const shuffled = pickBriefPresets(BRIEF_PRESET_DISPLAY_COUNT, 42);
+  assert.equal(shuffled.length, BRIEF_PRESET_DISPLAY_COUNT);
+  const shuffledAgain = pickBriefPresets(BRIEF_PRESET_DISPLAY_COUNT, 42);
+  assert.deepEqual(
+    shuffled.map((p) => p.id),
+    shuffledAgain.map((p) => p.id),
+  );
   // 뷰티 런칭 검산
-  const beauty = presetToBrief(BRIEF_PRESETS[0], today);
-  assert.equal(beauty.flightStart, "2026-09-01");
-  assert.equal(beauty.flightEnd, "2026-09-14");
-  assert.deepEqual(beauty.regionCodes, ["11", "41"]);
+  const beauty = BRIEF_PRESETS.find((p) => p.id === "beauty-launch");
+  assert.ok(beauty);
+  const beautyBrief = presetToBrief(beauty!, today);
+  assert.equal(beautyBrief.flightStart, "2026-09-01");
+  assert.equal(beautyBrief.flightEnd, "2026-09-14");
+  assert.deepEqual(beautyBrief.regionCodes, ["11", "41"]);
 });
 
 test("O-2 빠른 추천 — 예산만 필수", () => {

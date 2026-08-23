@@ -15,6 +15,7 @@ import {
   type ScoredMedia,
 } from "@/lib/planner/brief/scoring";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
+import { PlannerMediaThumb } from "@/components/planner/planner-media-thumb";
 
 const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
   target: { ko: "타깃 적합", en: "Target fit" },
@@ -27,6 +28,7 @@ const QUICK_DAYS = 30;
 
 function RankRow({ scored, rank, isKo }: { scored: ScoredMedia; rank: number; isKo: boolean }) {
   const { media, axes, total } = scored;
+  const mediaName = isKo ? media.name : media.nameEn || media.name;
 
   return (
     <li
@@ -37,12 +39,16 @@ function RankRow({ scored, rank, isKo }: { scored: ScoredMedia; rank: number; is
         <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-bold tabular-nums">
           {rank}
         </span>
+        <PlannerMediaThumb
+          media={media}
+          alt={mediaName}
+          size="rank"
+          isKo={isKo}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">
-                {isKo ? media.name : media.nameEn || media.name}
-              </p>
+              <p className="truncate text-sm font-semibold">{mediaName}</p>
               <p className="truncate text-xs text-muted-foreground">
                 {isKo ? media.location : media.locationEn || media.location}
               </p>

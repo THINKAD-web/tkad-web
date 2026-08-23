@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
+import { getPrimaryMediaImageUrl, type MediaItem, typeLabels } from "@/lib/media-data";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
+import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 import { cn } from "@/lib/utils";
 
 type ThumbSize = "rank" | "card";
@@ -17,6 +18,7 @@ type Props = {
   alt: string;
   size?: ThumbSize;
   className?: string;
+  isKo?: boolean;
 };
 
 export function PlannerMediaThumb({
@@ -24,13 +26,16 @@ export function PlannerMediaThumb({
   alt,
   size = "card",
   className,
+  isKo = true,
 }: Props) {
   const thumb = catalogThumbnailImageProps(getPrimaryMediaImageUrl(media));
+  const typeLabel =
+    typeLabels[media.type]?.[isKo ? "ko" : "en"] ?? media.type;
 
   return (
     <div
       className={cn(
-        "relative overflow-hidden bg-gray-100 dark:bg-white/10",
+        "relative shrink-0 overflow-hidden bg-gray-100 dark:bg-white/10",
         SIZE[size],
         className,
       )}
@@ -45,9 +50,11 @@ export function PlannerMediaThumb({
           unoptimized={thumb.unoptimized}
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center text-[9px] font-medium text-muted-foreground">
-          —
-        </div>
+        <MediaImagePlaceholder
+          label={typeLabel}
+          size="xs"
+          className="absolute inset-0 h-full w-full"
+        />
       )}
     </div>
   );

@@ -34,6 +34,7 @@ import { rebuildBriefRecommendedMix } from "@/lib/planner/brief/rebuild-mix";
 import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import { BriefDigitalPanel } from "@/components/planner/brief/brief-digital-panel";
+import { PlannerMediaThumb } from "@/components/planner/planner-media-thumb";
 
 const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
   target: { ko: "타깃 적합", en: "Target fit" },
@@ -61,6 +62,7 @@ function MediaCard({
 }) {
   const { media, axes, total } = scored;
   const selected = units > 0;
+  const mediaName = isKo ? media.name : media.nameEn || media.name;
 
   return (
     <li
@@ -68,18 +70,24 @@ function MediaCard({
         selected ? "border-primary bg-primary/5" : "border-border bg-card"
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">
-            {isKo ? media.name : media.nameEn || media.name}
-          </p>
-          <p className="truncate text-xs text-muted-foreground">
-            {isKo ? media.location : media.locationEn || media.location}
-          </p>
+      <div className="flex items-start gap-3">
+        <PlannerMediaThumb
+          media={media}
+          alt={mediaName}
+          size="card"
+          isKo={isKo}
+        />
+        <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold">{mediaName}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {isKo ? media.location : media.locationEn || media.location}
+            </p>
+          </div>
+          <span className="shrink-0 rounded-lg bg-muted px-2 py-1 text-xs font-bold tabular-nums">
+            {total}
+          </span>
         </div>
-        <span className="shrink-0 rounded-lg bg-muted px-2 py-1 text-xs font-bold tabular-nums">
-          {total}
-        </span>
       </div>
 
       {/* 추천 근거 — 근거를 못 쓰는 축은 애초에 없다 */}

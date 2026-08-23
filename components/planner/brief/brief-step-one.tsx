@@ -10,8 +10,9 @@
  * 브리프를 수집하고 Step 2 로 넘길 준비만 한다.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
+import { RefreshCw } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,7 +40,13 @@ import {
   type BriefGoal,
   type BriefIndustry,
 } from "@/lib/planner/brief/types";
-import { BRIEF_PRESETS, presetToBrief } from "@/lib/planner/brief/presets";
+import {
+  BRIEF_PRESET_DISPLAY_COUNT,
+  BRIEF_PRESETS,
+  nextBriefPresetSeed,
+  pickBriefPresetsExcluding,
+  presetToBrief,
+} from "@/lib/planner/brief/presets";
 import type { CampaignPlanGender } from "@/lib/campaign-plan-schema";
 import {
   BRIEF_CHANNEL_MODES,
@@ -163,6 +170,10 @@ function SectionLabel({
   );
 }
 
+function randomPresetSeed(): number {
+  return (Math.floor(Math.random() * 0xffffffff) >>> 0) || 1;
+}
+
 export function BriefStepOne({
   catalog = [],
   onRequestNext,
@@ -178,7 +189,37 @@ export function BriefStepOne({
 
   const store = useBriefStore();
   const [freeTextDraft, setFreeTextDraft] = useState(store.freeText);
+  const [presetSeed, setPresetSeed] = useState(0);
+  const [excludePresetIds, setExcludePresetIds] = useState<readonly string[]>(
+    [],
+  );
+  const [isRefreshingPresets, setIsRefreshingPresets] = useState(false);
   const isQuick = store.entryMode === "quick";
+
+  useEffect(() => {
+    setExcludePresetIds([]);
+    setPresetSeed(randomPresetSeed());
+  }, []);
+
+  const visiblePresets = useMemo(() => {
+    if (presetSeed === 0) {
+      return BRIEF_PRESETS.slice(0, BRIEF_PRESET_DISPLAY_COUNT);
+    }
+    return pickBriefPresetsExcluding(
+      BRIEF_PRESET_DISPLAY_COUNT,
+      presetSeed,
+      excludePresetIds,
+    );
+  }, [presetSeed, excludePresetIds]);
+
+  const handleShufflePresets = () => {
+    setIsRefreshingPresets(true);
+    window.setTimeout(() => {
+      setExcludePresetIds(visiblePresets.map((p) => p.id));
+      setPresetSeed((seed) => nextBriefPresetSeed(seed || randomPresetSeed()));
+      setIsRefreshingPresets(false);
+    }, 160);
+  };
 
   const required = briefRequiredStatus(store);
   const quickRequired = briefQuickRequiredStatus(store);
@@ -327,12 +368,12 @@ export function BriefStepOne({
           </Button>
         </div>
 
-        {/* 업종 프리셋 (무작위 채우기 대체) */}
-        <div className="mt-3 flex flex-wrap gap-2">
+        {/* 업종 프리셋 — 풀에서 3개 shuffle 노출 (G-4: 무작위 값 채우기 아님) */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="self-center text-xs text-muted-foreground">
             {isKo ? "또는 프리셋:" : "or preset:"}
           </span>
-          {BRIEF_PRESETS.map((p) => (
+          {visiblePresets.map((p) => (
             <button
               key={p.id}
               type="button"
@@ -350,6 +391,17 @@ export function BriefStepOne({
               </span>
             </button>
           ))}
+          <button
+            type="button"
+            onClick={handleShufflePresets}
+            disabled={isRefreshingPresets}
+            className="inline-flex items-center gap-1 rounded-lg border border-dashed border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground disabled:opacity-60"
+          >
+            <RefreshCw
+              className={isRefreshingPresets ? "size-3.5 animate-spin" : "size-3.5"}
+            />
+            {isKo ? "다른 예시 보기" : "More examples"}
+          </button>
         </div>
       </section>
 
