@@ -346,6 +346,15 @@ export const PlannerReportDocument = forwardRef<
           </p>
         ) : null}
 
+        {p.portfolio.length > 0 && p.unpricedMediaNotice ? (
+          <p
+            className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-2.5 text-[12px] leading-snug text-amber-900 dark:text-amber-200"
+            data-testid="report-unpriced-media-notice"
+          >
+            {p.unpricedMediaNotice}
+          </p>
+        ) : null}
+
         {/* 성과 요약 차트 */}
         {sectionVisible(vis, "performance") &&
         p.charts &&

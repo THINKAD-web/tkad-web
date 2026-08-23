@@ -1283,6 +1283,22 @@ export async function buildPlannerReportPptx(
     });
   }
 
+  if (p.unpricedMediaNotice && lineupSlideIdx > 0) {
+    const slides = (
+      pptx as unknown as { slides?: { addText: (t: string, o: object) => void }[] }
+    ).slides;
+    const lastLineup = slides?.[slides.length - 1];
+    lastLineup?.addText(p.unpricedMediaNotice, {
+      x: 0.6,
+      y: p.partialRateNotice ? 7.74 : 7.46,
+      w: 12.1,
+      h: 0.28,
+      fontFace: face,
+      fontSize: 9,
+      color: "92400E",
+    });
+  }
+
   // ── 4. 디지털 배분 (통합) ──
   if (p.digital && p.digital.length) {
     const s4 = pptx.addSlide();

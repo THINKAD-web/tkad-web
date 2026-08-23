@@ -32,7 +32,7 @@ export default async function PlannerPage({ params }: Props) {
   const digitalBridge = await loadDigitalChannelsForIntegratedPlanner();
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10">
+    <main className="mx-auto w-full min-w-0 max-w-5xl overflow-x-clip px-4 py-10">
       <header className="mx-auto mb-8 max-w-3xl text-center">
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
           {isKo ? "미디어 플래너 · 3단계" : "Media Planner · 3 steps"}

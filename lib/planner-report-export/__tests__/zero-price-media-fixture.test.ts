@@ -16,6 +16,7 @@ import {
 } from "@/lib/planner/planner-media-quantity";
 import { computeRegionSubdivisionReport } from "@/lib/plan-cart-report/region-subdivision";
 import { mediaItemToExportRow } from "@/lib/document-media-detail";
+import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import {
   assertNoZeroWonPriceDisplay,
   formatExportBudgetWonLabel,
@@ -132,4 +133,32 @@ test("formatExportBudgetWonLabel — 양수는 ₩, 0 이하는 가격 문의", 
   assert.equal(formatExportBudgetWonLabel(0, true), "가격 문의");
   assert.equal(formatExportBudgetWonLabel(-1, true), "가격 문의");
   assert.ok(assertNoZeroWonPriceDisplay(formatExportBudgetWonLabel(0, true)));
+});
+
+test("보고서 payload — 0원 매체 포함 시 협의 단가 안내 각주", () => {
+  const portfolio = [HANSEO, HANSUNG];
+  const payload = buildOohReportPayload({
+    isKo: true,
+    goalTitle: "전환",
+    budgetMan: 3000,
+    periodDisplay: "2026-09-01 ~ 2026-09-30",
+    regionsText: "서울",
+    categoriesText: "고정형",
+    ageText: "20–30대",
+    industryText: "F&B",
+    portfolio,
+    metrics: null,
+    blendedCpmKrw: null,
+    budgetAllocation: [],
+    cpmBars: [],
+    effectSummaryLines: [],
+    generatedAt: "2026-08-23",
+    months: 1,
+    campaignMediaQuantities: Object.fromEntries(portfolio.map((m) => [m.id, 1])),
+    campaignMediaPriceOptionIndex: { [HANSUNG.id]: 0 },
+  });
+
+  assert.ok(payload.unpricedMediaNotice, "0원 매체가 있으면 안내 문구");
+  assert.match(payload.unpricedMediaNotice!, /단가 협의/);
+  assert.match(payload.unpricedMediaNotice!, /포함되지 않을 수 있습니다/);
 });

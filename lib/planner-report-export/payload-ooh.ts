@@ -23,6 +23,7 @@ import type {
 } from "@/lib/planner-report-export/types";
 import { buildPerformanceChartGuide } from "@/lib/planner-report-performance-guide";
 import { buildPartialRateNotice } from "@/lib/planner/partial-rate-notice";
+import { buildUnpricedMediaNotice } from "@/lib/planner/unpriced-media-notice";
 import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-rationale";
 import { regionalBreakdownSectionLines } from "@/lib/plan-cart-report/regional-breakdown";
 import { computeRegionSubdivisionReport } from "@/lib/plan-cart-report/region-subdivision";
@@ -163,6 +164,11 @@ export function buildOohReportPayload(
       ]),
     ),
     unitsById: pricing.quantities,
+    isKo,
+  });
+
+  const unpricedMediaNotice = buildUnpricedMediaNotice({
+    portfolio: a.portfolio,
     isKo,
   });
 
@@ -512,6 +518,7 @@ export function buildOohReportPayload(
     digitalOmittedNotice: a.digitalOmittedNotice,
     staleEngineNotice: a.staleEngineNotice,
     partialRateNotice: partialRateNotice?.text,
+    unpricedMediaNotice: unpricedMediaNotice?.text,
     currencyFootnote: portfolioHasJapanMedia(orderedPortfolio)
       ? formatReportJpyExchangeFootnote(isKo)
       : undefined,

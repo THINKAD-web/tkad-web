@@ -49,7 +49,7 @@ function Stepper({
   onJump: (s: BriefWizardStep) => void;
 }) {
   return (
-    <ol className="mx-auto mb-8 flex max-w-3xl items-center gap-2 text-sm">
+    <ol className="mx-auto mb-8 flex min-w-0 max-w-3xl items-center gap-1 text-xs sm:gap-2 sm:text-sm">
       {([1, 2, 3] as const).map((s, i) => {
         const active = s === step;
         const done = s < step;
@@ -59,7 +59,7 @@ function Stepper({
               type="button"
               onClick={() => (s <= step ? onJump(s) : undefined)}
               disabled={s > step}
-              className={`flex items-center gap-2 ${s > step ? "opacity-50" : ""}`}
+              className={`flex min-w-0 items-center gap-1.5 sm:gap-2 ${s > step ? "opacity-50" : ""}`}
             >
               <span
                 className={`flex size-6 items-center justify-center rounded-full text-xs font-semibold ${
@@ -72,7 +72,9 @@ function Stepper({
               >
                 {s}
               </span>
-              <span className={active ? "font-semibold" : "text-muted-foreground"}>
+              <span
+                className={`hidden truncate sm:inline ${active ? "font-semibold" : "text-muted-foreground"}`}
+              >
                 {STEP_LABELS[s][isKo ? "ko" : "en"]}
               </span>
             </button>
@@ -197,7 +199,7 @@ export function BriefFlowClient({
   };
 
   return (
-    <div>
+    <div className="min-w-0 max-w-full overflow-x-clip">
       <BriefResumeDialog
         open={resumeOpen}
         mixCount={mixCount}

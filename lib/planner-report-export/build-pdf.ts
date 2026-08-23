@@ -1200,6 +1200,15 @@ export async function buildPlannerReportPdf(
       doc.text(lines, M, y + 3);
       y += lines.length * 4.5 + 4;
     }
+    if (p.portfolio.length > 0 && p.unpricedMediaNotice) {
+      const lines = doc.splitTextToSize(p.unpricedMediaNotice, contentW) as string[];
+      ensure(lines.length * 4.5 + 4);
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(8.5);
+      setText([146, 64, 14]);
+      doc.text(lines, M, y + 3);
+      y += lines.length * 4.5 + 4;
+    }
   }
 
   function drawMediaCardGrid(
