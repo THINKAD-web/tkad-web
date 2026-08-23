@@ -1,0 +1,110 @@
+{
+  "generatedAt": "2026-08-23T07:30:13.247Z",
+  "snapshot": {
+    "source": "database:production",
+    "hasPricingModeColumn": true,
+    "pendingMigrations": [],
+    "activeMediaTotal": 865,
+    "activeMediaWithPricingMode": 865,
+    "wallMuralByMode": [
+      {
+        "pricing_mode": "fixed",
+        "n": 36
+      },
+      {
+        "pricing_mode": "quote_only",
+        "n": 9
+      }
+    ],
+    "currentWallQuoteOnly": 9,
+    "currentWallFixed": 36,
+    "pricedWallMarkedQuoteOnly": [],
+    "unpricedWallStillFixed": [],
+    "expectedQuoteOnlyIds": [
+      "cmnz9wm17000004kyd4r72mug",
+      "cmq3vyc6o000004jm5h9a4yki",
+      "cmq3w55p4000304lg3tqbvgtw",
+      "cmq3wd9aw000504l5lfq1lha8",
+      "cmq3whqri000h04lgafc3x5zu",
+      "cmq3wpngl000804l55es4eret",
+      "cmq3wwc63000j04lgcmp77yeg",
+      "cmq3x2965000m04l5hq30xrp5",
+      "cmq3x5pvz000504jpapuvuztt"
+    ],
+    "expectedAfterRepair": {
+      "quote_only": 9,
+      "fixed": 36
+    },
+    "delta": {
+      "quoteOnlyChange": 0,
+      "fixedChange": 0,
+      "wronglyQuoteOnly": 0,
+      "missingQuoteOnly": 0
+    },
+    "alreadyCorrect": true,
+    "corruptionDetected": false
+  },
+  "checks": {
+    "ok": true,
+    "expectedTargetsOk": true,
+    "corruptionDetected": false,
+    "alreadyCorrect": true,
+    "needsRepair": false,
+    "needsInitialMigration": false,
+    "idMatch": true,
+    "expectedIds": [
+      "cmnz9wm17000004kyd4r72mug",
+      "cmq3vyc6o000004jm5h9a4yki",
+      "cmq3w55p4000304lg3tqbvgtw",
+      "cmq3wd9aw000504l5lfq1lha8",
+      "cmq3whqri000h04lgafc3x5zu",
+      "cmq3wpngl000804l55es4eret",
+      "cmq3wwc63000j04lgcmp77yeg",
+      "cmq3x2965000m04l5hq30xrp5",
+      "cmq3x5pvz000504jpapuvuztt"
+    ],
+    "actualExpectedIds": [
+      "cmnz9wm17000004kyd4r72mug",
+      "cmq3vyc6o000004jm5h9a4yki",
+      "cmq3w55p4000304lg3tqbvgtw",
+      "cmq3wd9aw000504l5lfq1lha8",
+      "cmq3whqri000h04lgafc3x5zu",
+      "cmq3wpngl000804l55es4eret",
+      "cmq3wwc63000j04lgcmp77yeg",
+      "cmq3x2965000m04l5hq30xrp5",
+      "cmq3x5pvz000504jpapuvuztt"
+    ]
+  },
+  "summary": {
+    "before": {
+      "wallMural": {
+        "quote_only": 9,
+        "fixed": 36,
+        "byMode": [
+          {
+            "pricing_mode": "fixed",
+            "n": 36
+          },
+          {
+            "pricing_mode": "quote_only",
+            "n": 9
+          }
+        ]
+      },
+      "corruption": {
+        "pricedRowsMarkedQuoteOnly": 0,
+        "samples": []
+      }
+    },
+    "afterRepairExpected": {
+      "quote_only": 9,
+      "fixed": 36
+    },
+    "delta": {
+      "quoteOnlyChange": 0,
+      "fixedChange": 0,
+      "wronglyQuoteOnly": 0,
+      "missingQuoteOnly": 0
+    }
+  }
+}

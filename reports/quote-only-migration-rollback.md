@@ -66,22 +66,35 @@ DROP TYPE "MediaPricingMode";
 
 ---
 
-## 4. 배포 전 dry-run (필수)
+## 4. 배포 전 dry-run (필수 — **DB URL 필수**)
+
+카탈로그만으로는 DB 오염(이미 45건 `quote_only`)을 감지할 수 없음.
 
 ```bash
-# Preview/스테이징 DB
-DATABASE_URL="postgresql://..." npx tsx scripts/dry-run-pricing-mode-migration.mts
+# migrate 전 스냅샷 저장 (reports/ 에 JSON 기록)
+MIGRATION_DRY_RUN_ENV=production npx tsx scripts/check-pricing-mode-db-state.mts
 
-# DB 없을 때 카탈로그 시뮬레이션 (읽기 전용)
-AUDIT_BASE=https://tkad.co.kr npx tsx scripts/dry-run-pricing-mode-migration.mts
+# Preview 점검
+source .env.preview.local  # 또는 MIGRATION_DRY_RUN_DATABASE_URL
+npx tsx scripts/dry-run-pricing-mode-migration.mts
 ```
 
-기대 결과:
+출력 확인:
 
-- `wallMuralActive`: 45
-- `wouldQuoteOnly`: 9 (성수 8 + 강남 한승 1)
-- `wouldStayFixed`: 36 (정상 단가 외벽 — quote_only 로 바뀌면 안 됨)
-- `checks.ok`: true
+- **현재 DB (변경 전):** `wallMuralByMode`, `pricedWallWronglyQuoteOnly`
+- **repair 후 예상:** `quote_only: 9`, `fixed: 36`
+- **차이:** `delta`
+- `corruptionDetected: true` → **migrate/UI 검증 금지**, repair 먼저
+
+게이트:
+
+| DB 상태 | `checks.ok` |
+|---------|-------------|
+| 컬럼 없음 | `needsInitialMigration` |
+| 9/36 정상 | `alreadyCorrect` |
+| 45/0 오염 | **FAIL** (`corruptionDetected`) |
+
+repair idempotent 검증: `node --import tsx --test lib/__tests__/pricing-mode-repair-idempotent.test.ts`
 
 스테이징에서 마이그레이션 적용 후:
 

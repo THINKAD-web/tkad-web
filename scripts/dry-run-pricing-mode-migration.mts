@@ -1,13 +1,16 @@
 #!/usr/bin/env npx tsx
 /**
- * pricing_mode 마이그레이션 dry-run — 프로덕션 적용 전 필수.
+ * pricing_mode 마이그레이션 dry-run — **DB 필수** (프로덕션 게이트).
+ *
+ * 카탈로그만으로는 "현재 DB 오염"을 감지할 수 없음.
+ * 반드시 Preview/스테이징/프로덕션 DB URL로 실행할 것.
  *
  * Usage:
- *   # DB 직접 (Preview/스테이징 권장)
- *   DATABASE_URL="postgresql://..." npx tsx scripts/dry-run-pricing-mode-migration.mts
+ *   MIGRATION_DRY_RUN_DATABASE_URL="<db-url>" npx tsx scripts/dry-run-pricing-mode-migration.mts
  *
- *   # DB 없으면 공개 카탈로그로 시뮬레이션 (읽기 전용)
- *   AUDIT_BASE=https://tkad.co.kr npx tsx scripts/dry-run-pricing-mode-migration.mts
+ *   # Vercel env pull 후
+ *   # Preview:  source .env.preview.local
+ *   # Production (조회 전용): MIGRATION_DRY_RUN_ENV=production npx tsx ...
  *
  * Writes: scripts/.dry-run-pricing-mode/report.json
  */
@@ -19,20 +22,20 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "../lib/normalize-pg-database-url.ts";
-import { isQuoteOnlyMedia } from "../lib/media-pricing-mode.ts";
-import type { MediaItem } from "../lib/media-data.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 config({ path: resolve(root, ".env") });
 config({ path: resolve(root, ".env.local"), override: true });
 config({ path: resolve(root, ".env.preview.local"), override: true });
+if (process.env.MIGRATION_DRY_RUN_ENV === "production") {
+  config({ path: resolve(root, ".env.production.local"), override: true });
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, ".dry-run-pricing-mode");
-const BASE = process.env.AUDIT_BASE ?? "https://tkad.co.kr";
 
-/** migration.sql UPDATE 와 동일한 SQL 필터 (Prisma raw) */
-const MIGRATION_WHERE_SQL = `
+/** repair + initial narrow UPDATE 와 동일 */
+const QUOTE_ONLY_WHERE_SQL = `
   "is_active" = true
   AND "media_sub_category" = 'wall_mural'
   AND COALESCE("price", 0) <= 0
@@ -47,7 +50,9 @@ const MIGRATION_WHERE_SQL = `
   )
 `;
 
-const EXPECTED_IDS = [
+const EXPECTED_WALL = { quoteOnly: 9, fixed: 36, activeWallMural: 45 } as const;
+
+const EXPECTED_QUOTE_ONLY_IDS = [
   "cmnz9wm17000004kyd4r72mug",
   "cmq3vyc6o000004jm5h9a4yki",
   "cmq3w55p4000304lg3tqbvgtw",
@@ -59,57 +64,177 @@ const EXPECTED_IDS = [
   "cmq3x5pvz000504jpapuvuztt",
 ].sort();
 
-type Row = {
+type ModeCount = { pricing_mode: string; n: number };
+
+type WallRow = {
   id: string;
   name: string;
   price: number;
-  mediaSubCategory: string | null;
-  isActive: boolean;
-  pricingMode?: string | null;
+  pricing_mode: string | null;
 };
 
-async function fromDatabase(): Promise<{
+type DbSnapshot = {
   source: string;
-  before: Row[];
-  wouldQuoteOnly: Row[];
-  wouldStayFixed: Row[];
-  wallMuralActive: Row[];
-} | null> {
+  hasPricingModeColumn: boolean;
+  pendingMigrations: string[];
+  activeMediaTotal: number;
+  activeMediaWithPricingMode: number;
+  wallMuralByMode: ModeCount[];
+  currentWallQuoteOnly: number;
+  currentWallFixed: number;
+  /** 정상 단가인데 quote_only — 오염 지표 */
+  pricedWallMarkedQuoteOnly: WallRow[];
+  /** 무단가인데 fixed — 미적용 지표 */
+  unpricedWallStillFixed: WallRow[];
+  expectedQuoteOnlyIds: string[];
+  expectedAfterRepair: { quote_only: number; fixed: number };
+  delta: {
+    quoteOnlyChange: number;
+    fixedChange: number;
+    wronglyQuoteOnly: number;
+    missingQuoteOnly: number;
+  };
+  alreadyCorrect: boolean;
+  corruptionDetected: boolean;
+};
+
+async function createDb() {
   const url = normalizePgDatabaseUrl(
     process.env.MIGRATION_DRY_RUN_DATABASE_URL ??
       process.env.DATABASE_URL ??
       "",
   );
-  if (!url || process.env.MIGRATION_DRY_RUN_SOURCE === "catalog") return null;
-
+  if (!url) return null;
   const pool = new Pool({ connectionString: url });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });
+  return { db, pool, url };
+}
+
+async function inspectDatabase(): Promise<DbSnapshot | null> {
+  const conn = await createDb();
+  if (!conn) return null;
+  const { db, pool } = conn;
+
   try {
-    const wallMuralActive = await db.$queryRaw<Row[]>`
-      SELECT id, name, price, media_sub_category AS "mediaSubCategory",
-             is_active AS "isActive", pricing_mode AS "pricingMode"
-      FROM media
-      WHERE is_active = true AND media_sub_category = 'wall_mural'
-      ORDER BY name
+    const colRows = await db.$queryRaw<{ exists: boolean }[]>`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'media'
+          AND column_name = 'pricing_mode'
+      ) AS exists
     `;
+    const hasPricingModeColumn = colRows[0]?.exists === true;
 
-    const wouldQuoteOnly = await db.$queryRawUnsafe<Row[]>(`
-      SELECT id, name, price, media_sub_category AS "mediaSubCategory",
-             is_active AS "isActive", pricing_mode AS "pricingMode"
-      FROM media
-      WHERE ${MIGRATION_WHERE_SQL}
-      ORDER BY name
-    `);
+    const pendingMigrations = hasPricingModeColumn
+      ? []
+      : ["20260823140000_media_pricing_mode", "20260823153000_media_pricing_mode_repair"];
 
-    const wouldIds = new Set(wouldQuoteOnly.map((r) => r.id));
-    const wouldStayFixed = wallMuralActive.filter((r) => !wouldIds.has(r.id));
+    const activeStats = hasPricingModeColumn
+      ? await db.$queryRaw<{ total: number; with_mode: number }[]>`
+          SELECT
+            COUNT(*)::int AS total,
+            COUNT(*) FILTER (WHERE pricing_mode IS NOT NULL)::int AS with_mode
+          FROM media
+          WHERE is_active = true
+        `
+      : [{ total: 0, with_mode: 0 }];
+
+    const wallMuralByMode: ModeCount[] = hasPricingModeColumn
+      ? await db.$queryRaw<ModeCount[]>`
+          SELECT pricing_mode::text, COUNT(*)::int AS n
+          FROM media
+          WHERE is_active = true AND media_sub_category = 'wall_mural'
+          GROUP BY pricing_mode
+          ORDER BY pricing_mode
+        `
+      : [];
+
+    const currentWallQuoteOnly =
+      wallMuralByMode.find((r) => r.pricing_mode === "quote_only")?.n ?? 0;
+    const currentWallFixed =
+      wallMuralByMode.find((r) => r.pricing_mode === "fixed")?.n ?? 0;
+
+    const pricedWallMarkedQuoteOnly: WallRow[] = hasPricingModeColumn
+      ? await db.$queryRaw<WallRow[]>`
+          SELECT id, name, price, pricing_mode::text AS pricing_mode
+          FROM media
+          WHERE is_active = true
+            AND media_sub_category = 'wall_mural'
+            AND pricing_mode = 'quote_only'
+            AND COALESCE(price, 0) > 0
+          ORDER BY name
+          LIMIT 20
+        `
+      : [];
+
+    const unpricedWallStillFixed: WallRow[] = hasPricingModeColumn
+      ? await db.$queryRawUnsafe<WallRow[]>(`
+          SELECT id, name, price, pricing_mode::text AS pricing_mode
+          FROM media
+          WHERE ${QUOTE_ONLY_WHERE_SQL}
+            AND pricing_mode = 'fixed'
+          ORDER BY name
+        `)
+      : [];
+
+    const expectedQuoteOnlyRows = hasPricingModeColumn
+      ? await db.$queryRawUnsafe<{ id: string }[]>(`
+          SELECT id FROM media WHERE ${QUOTE_ONLY_WHERE_SQL}
+        `)
+      : [];
+    const expectedQuoteOnlyIds = (
+      expectedQuoteOnlyRows.length > 0
+        ? expectedQuoteOnlyRows.map((r) => r.id)
+        : [...EXPECTED_QUOTE_ONLY_IDS]
+    ).sort();
+
+    const expectedAfterRepair = {
+      quote_only: EXPECTED_WALL.quoteOnly,
+      fixed: EXPECTED_WALL.fixed,
+    };
+
+    const wronglyQuoteOnly = pricedWallMarkedQuoteOnly.length;
+    const missingQuoteOnly = unpricedWallStillFixed.length;
+
+    const alreadyCorrect =
+      hasPricingModeColumn &&
+      currentWallQuoteOnly === EXPECTED_WALL.quoteOnly &&
+      currentWallFixed === EXPECTED_WALL.fixed &&
+      wronglyQuoteOnly === 0 &&
+      missingQuoteOnly === 0;
+
+    const corruptionDetected =
+      hasPricingModeColumn &&
+      (wronglyQuoteOnly > 0 ||
+        currentWallQuoteOnly > EXPECTED_WALL.quoteOnly ||
+        (currentWallQuoteOnly > 0 &&
+          currentWallQuoteOnly !== EXPECTED_WALL.quoteOnly));
 
     return {
-      source: "database",
-      before: wallMuralActive,
-      wouldQuoteOnly,
-      wouldStayFixed,
-      wallMuralActive,
+      source: process.env.MIGRATION_DRY_RUN_ENV === "production"
+        ? "database:production"
+        : "database",
+      hasPricingModeColumn,
+      pendingMigrations,
+      activeMediaTotal: activeStats[0]?.total ?? 0,
+      activeMediaWithPricingMode: activeStats[0]?.with_mode ?? 0,
+      wallMuralByMode,
+      currentWallQuoteOnly,
+      currentWallFixed,
+      pricedWallMarkedQuoteOnly,
+      unpricedWallStillFixed,
+      expectedQuoteOnlyIds,
+      expectedAfterRepair,
+      delta: {
+        quoteOnlyChange:
+          expectedAfterRepair.quote_only - currentWallQuoteOnly,
+        fixedChange: expectedAfterRepair.fixed - currentWallFixed,
+        wronglyQuoteOnly,
+        missingQuoteOnly,
+      },
+      alreadyCorrect,
+      corruptionDetected,
     };
   } finally {
     await db.$disconnect();
@@ -117,82 +242,70 @@ async function fromDatabase(): Promise<{
   }
 }
 
-async function fromCatalog(): Promise<{
-  source: string;
-  before: Row[];
-  wouldQuoteOnly: Row[];
-  wouldStayFixed: Row[];
-  wallMuralActive: Row[];
-}> {
-  const res = await fetch(`${BASE}/api/public/media-catalog`);
-  const data = (await res.json()) as { medias?: MediaItem[] } | MediaItem[];
-  const items = Array.isArray(data) ? data : (data.medias ?? []);
-  const wallMuralActive = items
-    .filter((m) => m.mediaSubCategory === "wall_mural")
-    .map((m) => ({
-      id: m.id,
-      name: m.name,
-      price: m.price ?? 0,
-      mediaSubCategory: m.mediaSubCategory ?? null,
-      isActive: true,
-      pricingMode: m.pricingMode ?? null,
-    }));
-
-  const wouldQuoteOnly = wallMuralActive.filter((m) =>
-    isQuoteOnlyMedia(items.find((x) => x.id === m.id)!),
-  );
-  const wouldIds = new Set(wouldQuoteOnly.map((r) => r.id));
-  const wouldStayFixed = wallMuralActive.filter((r) => !wouldIds.has(r.id));
-
-  return {
-    source: `catalog:${BASE}`,
-    before: wallMuralActive,
-    wouldQuoteOnly,
-    wouldStayFixed,
-    wallMuralActive,
-  };
-}
-
-function validate(report: Awaited<ReturnType<typeof fromCatalog>>) {
-  const gotIds = report.wouldQuoteOnly.map((r) => r.id).sort();
+function validate(snapshot: DbSnapshot) {
   const idMatch =
-    gotIds.length === EXPECTED_IDS.length &&
-    gotIds.every((id, i) => id === EXPECTED_IDS[i]);
+    snapshot.expectedQuoteOnlyIds.length === EXPECTED_QUOTE_ONLY_IDS.length &&
+    snapshot.expectedQuoteOnlyIds.every(
+      (id, i) => id === EXPECTED_QUOTE_ONLY_IDS[i],
+    );
 
-  const positiveLeak = report.wouldQuoteOnly.filter((r) => r.price > 0);
-  const pricedWallLost = report.wouldStayFixed.filter((r) => r.price > 0);
+  const expectedTargetsOk =
+    idMatch &&
+    snapshot.expectedQuoteOnlyIds.length === EXPECTED_WALL.quoteOnly;
+
+  const needsRepair =
+    snapshot.hasPricingModeColumn &&
+    !snapshot.alreadyCorrect &&
+    (snapshot.corruptionDetected || snapshot.delta.missingQuoteOnly > 0);
+  const needsInitialMigration = !snapshot.hasPricingModeColumn;
+
+  const gateOk =
+    expectedTargetsOk &&
+    !snapshot.corruptionDetected &&
+    (snapshot.alreadyCorrect || needsInitialMigration || needsRepair);
 
   return {
-    ok:
-      idMatch &&
-      positiveLeak.length === 0 &&
-      report.wouldQuoteOnly.length === 9 &&
-      report.wallMuralActive.length === 45,
+    ok: gateOk && expectedTargetsOk,
+    expectedTargetsOk,
+    corruptionDetected: snapshot.corruptionDetected,
+    alreadyCorrect: snapshot.alreadyCorrect,
+    needsRepair,
+    needsInitialMigration,
     idMatch,
-    expectedCount: 9,
-    actualQuoteOnlyCount: report.wouldQuoteOnly.length,
-    wallMuralActiveCount: report.wallMuralActive.length,
-    pricedWallStayingFixed: pricedWallLost.length,
-    positivePriceInQuoteOnly: positiveLeak,
-    expectedIds: EXPECTED_IDS,
-    actualIds: gotIds,
+    expectedIds: EXPECTED_QUOTE_ONLY_IDS,
+    actualExpectedIds: snapshot.expectedQuoteOnlyIds,
   };
 }
 
-const result = (await fromDatabase()) ?? (await fromCatalog());
-const checks = validate(result);
+const snapshot = await inspectDatabase();
+if (!snapshot) {
+  console.error(
+    "FAIL: DATABASE_URL required. Catalog-only dry-run cannot gate production migrate.",
+  );
+  process.exit(1);
+}
+
+const checks = validate(snapshot);
 
 const report = {
   generatedAt: new Date().toISOString(),
-  source: result.source,
-  counts: {
-    wallMuralActive: result.wallMuralActive.length,
-    wouldQuoteOnly: result.wouldQuoteOnly.length,
-    wouldStayFixed: result.wouldStayFixed.length,
-  },
+  snapshot,
   checks,
-  wouldQuoteOnly: result.wouldQuoteOnly,
-  wouldStayFixedSample: result.wouldStayFixed.slice(0, 5),
+  summary: {
+    before: {
+      wallMural: {
+        quote_only: snapshot.currentWallQuoteOnly,
+        fixed: snapshot.currentWallFixed,
+        byMode: snapshot.wallMuralByMode,
+      },
+      corruption: {
+        pricedRowsMarkedQuoteOnly: snapshot.pricedWallMarkedQuoteOnly.length,
+        samples: snapshot.pricedWallMarkedQuoteOnly.slice(0, 5),
+      },
+    },
+    afterRepairExpected: snapshot.expectedAfterRepair,
+    delta: snapshot.delta,
+  },
 };
 
 mkdirSync(OUT_DIR, { recursive: true });
@@ -202,6 +315,29 @@ writeFileSync(
   "utf8",
 );
 
-console.log(JSON.stringify(report.counts, null, 2));
+console.log("── 현재 DB (변경 전) ──");
+console.log(
+  JSON.stringify(
+    {
+      hasColumn: snapshot.hasPricingModeColumn,
+      wallMuralByMode: snapshot.wallMuralByMode,
+      pricedWallWronglyQuoteOnly: snapshot.pricedWallMarkedQuoteOnly.length,
+    },
+    null,
+    2,
+  ),
+);
+console.log("── repair 후 예상 ──");
+console.log(JSON.stringify(snapshot.expectedAfterRepair, null, 2));
+console.log("── 차이 ──");
+console.log(JSON.stringify(snapshot.delta, null, 2));
 console.log("checks:", checks.ok ? "PASS" : "FAIL", checks);
+
+if (snapshot.corruptionDetected) {
+  console.error(
+    "\nBLOCKER: DB already corrupted (priced wall_mural marked quote_only).",
+  );
+  console.error("Run repair migration before trusting Preview/production UI.");
+}
+
 if (!checks.ok) process.exit(1);
