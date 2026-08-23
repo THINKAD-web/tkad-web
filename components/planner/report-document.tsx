@@ -13,6 +13,7 @@ import type {
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import { plannerChartColor } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
+import { formatExportBudgetWonLabel } from "@/lib/planner-report-export/format-export-money";
 import {
   documentCardClass,
   DocumentGradientHero,
@@ -345,6 +346,15 @@ export const PlannerReportDocument = forwardRef<
           </p>
         ) : null}
 
+        {p.portfolio.length > 0 && p.unpricedMediaNotice ? (
+          <p
+            className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-2.5 text-[12px] leading-snug text-amber-900 dark:text-amber-200"
+            data-testid="report-unpriced-media-notice"
+          >
+            {p.unpricedMediaNotice}
+          </p>
+        ) : null}
+
         {/* 성과 요약 차트 */}
         {sectionVisible(vis, "performance") &&
         p.charts &&
@@ -477,10 +487,12 @@ export const PlannerReportDocument = forwardRef<
                         {row.mediaCount}
                       </td>
                       <td className="px-3 py-2.5 tabular-nums text-gray-900">
-                        ₩{row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
-                        <span className="ml-1 text-xs text-gray-500">
-                          ({formatPlannerSharePct(row.budgetPct)})
-                        </span>
+                        {formatExportBudgetWonLabel(row.monthlyBudgetWon, isKo)}
+                        {row.monthlyBudgetWon > 0 ? (
+                          <span className="ml-1 text-xs text-gray-500">
+                            ({formatPlannerSharePct(row.budgetPct)})
+                          </span>
+                        ) : null}
                       </td>
                       <td className="px-3 py-2.5 tabular-nums text-gray-900">
                         {row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
@@ -553,10 +565,12 @@ export const PlannerReportDocument = forwardRef<
                         {row.mediaCount}
                       </td>
                       <td className="px-3 py-2.5 tabular-nums text-gray-900">
-                        ₩{row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
-                        <span className="ml-1 text-xs text-gray-500">
-                          ({formatPlannerSharePct(row.budgetPct)})
-                        </span>
+                        {formatExportBudgetWonLabel(row.monthlyBudgetWon, isKo)}
+                        {row.monthlyBudgetWon > 0 ? (
+                          <span className="ml-1 text-xs text-gray-500">
+                            ({formatPlannerSharePct(row.budgetPct)})
+                          </span>
+                        ) : null}
                       </td>
                       <td className="px-3 py-2.5 tabular-nums text-gray-900">
                         {row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")}

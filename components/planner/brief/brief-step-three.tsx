@@ -344,8 +344,8 @@ export function BriefStepThree({
   }
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="space-y-4">
+    <div className="mx-auto grid w-full min-w-0 max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="min-w-0 max-w-full space-y-4">
         <BriefSummary brief={store} isKo={isKo} />
 
         <div className="rounded-xl border border-border bg-card p-4">
@@ -425,7 +425,7 @@ export function BriefStepThree({
         ) : null}
       </div>
 
-      <div className="lg:sticky lg:top-4 lg:self-start">
+      <div className="min-w-0 max-w-full lg:sticky lg:top-4 lg:self-start">
         <MetricsPanel metrics={displayMetrics} isKo={isKo} />
 
         <div className="mt-3 space-y-2">

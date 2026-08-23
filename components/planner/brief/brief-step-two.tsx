@@ -102,7 +102,7 @@ function MediaCard({
         </p>
       )}
 
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
         {selected ? (
           <>
             <div className="flex items-center gap-1">
@@ -135,7 +135,7 @@ function MediaCard({
             {isKo ? "믹스에 추가" : "Add to mix"}
           </Button>
         )}
-        <span className="ml-auto text-[11px] text-muted-foreground">
+        <span className="text-[11px] text-muted-foreground sm:ml-auto">
           {scored.unitCpmWon != null
             ? `CPM ₩${scored.unitCpmWon.toLocaleString()} / ${days}${isKo ? "일" : "d"}`
             : isKo
@@ -240,9 +240,9 @@ export function BriefStepTwo({
   } = useIntegratedMix(mixRequest, mixEnabled);
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1fr_320px]">
+    <div className="mx-auto grid w-full min-w-0 max-w-6xl gap-6 lg:grid-cols-[1fr_320px]">
       {/* ── 좌: 추천 리스트 ── */}
-      <div>
+      <div className="min-w-0 max-w-full">
         {/* 과대포함 경고 — 무엇이 섞이는지 이름을 댄다 */}
         {overIncl.length > 0 ? (
           <div className="mb-3 rounded-lg border border-amber-400/40 bg-amber-400/10 p-2.5">
@@ -330,7 +330,7 @@ export function BriefStepTwo({
       </div>
 
       {/* ── 우: 지표 패널 ── */}
-      <div className="lg:sticky lg:top-4 lg:self-start">
+      <div className="min-w-0 max-w-full lg:sticky lg:top-4 lg:self-start">
         <MetricsPanel metrics={metrics} isKo={isKo} />
 
         <div className="mt-3 rounded-xl border border-border bg-card p-3">

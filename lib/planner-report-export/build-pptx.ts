@@ -6,6 +6,7 @@ import type {
 } from "@/lib/planner-report-export/types";
 import { plannerChartColorPptx } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
+import { formatExportBudgetWonLabel } from "@/lib/planner-report-export/format-export-money";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import {
   plannerMediaPageButtonLabel,
@@ -671,7 +672,7 @@ export async function buildPlannerReportPptx(
           options: { color: INK, fontSize: 10, fontFace: face },
         },
         {
-          text: `₩${row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")} (${row.budgetPct}%)`,
+          text: `${formatExportBudgetWonLabel(row.monthlyBudgetWon, isKo)}${row.monthlyBudgetWon > 0 ? ` (${row.budgetPct}%)` : ""}`,
           options: { color: INK, fontSize: 10, fontFace: face },
         },
         {
@@ -1274,6 +1275,22 @@ export async function buildPlannerReportPptx(
     lastLineup?.addText(p.partialRateNotice, {
       x: 0.6,
       y: 7.46,
+      w: 12.1,
+      h: 0.28,
+      fontFace: face,
+      fontSize: 9,
+      color: "92400E",
+    });
+  }
+
+  if (p.unpricedMediaNotice && lineupSlideIdx > 0) {
+    const slides = (
+      pptx as unknown as { slides?: { addText: (t: string, o: object) => void }[] }
+    ).slides;
+    const lastLineup = slides?.[slides.length - 1];
+    lastLineup?.addText(p.unpricedMediaNotice, {
+      x: 0.6,
+      y: p.partialRateNotice ? 7.74 : 7.46,
       w: 12.1,
       h: 0.28,
       fontFace: face,

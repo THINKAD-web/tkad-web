@@ -345,6 +345,7 @@ type Props = {
     | "isKo"
     | "budgetHonesty"
     | "partialRateNotice"
+    | "unpricedMediaNotice"
   >;
 };
 
@@ -474,6 +475,15 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
           data-testid="report-partial-rate-notice"
         >
           {p.partialRateNotice}
+        </p>
+      ) : null}
+
+      {p.portfolio.length > 0 && p.unpricedMediaNotice ? (
+        <p
+          className="text-[11px] leading-snug text-amber-800 dark:text-amber-300"
+          data-testid="report-unpriced-media-notice-lineup"
+        >
+          {p.unpricedMediaNotice}
         </p>
       ) : null}
 

@@ -183,6 +183,8 @@ export type PlannerReportExportPayload = {
    * 표시 금액은 선형 환산이고, 실제 청구액은 협의로 갈릴 수 있다.
    */
   partialRateNotice?: string;
+  /** 단가 미등록(₩0) 매체 — 총액·배분에서 제외될 수 있음 */
+  unpricedMediaNotice?: string;
   /** JP 매체 포함 시 ¥ 환산 각주 (합계·차트는 KRW 유지) */
   currencyFootnote?: string;
   disclaimer: string;
