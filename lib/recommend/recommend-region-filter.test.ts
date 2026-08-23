@@ -240,6 +240,82 @@ test("runRecommendMatchFromCatalog: supplements nationwide when regional pool is
   assert.ok(recommendations.some((r) => r.media.regionMain !== "busan"));
 });
 
+test("integration: 버스 래핑 브랜딩 1000만 — no region hard filter, no banner", async () => {
+  const { parsePlannerFreetextBrief } = await import(
+    "@/lib/planner/parse-freetext-brief"
+  );
+  const { buildAiRecommendInputFromFreetextRaw } = await import(
+    "@/lib/recommend/build-freetext-recommend-input"
+  );
+  const raw = "버스 래핑 브랜딩 1000만";
+  const parseResult = parsePlannerFreetextBrief(raw);
+  assert.deepEqual(parseResult.fields.categories.value, ["mobile"]);
+  assert.equal(parseResult.fields.regions.value?.length ?? 0, 0);
+
+  const input = buildAiRecommendInputFromFreetextRaw(raw, true);
+  assert.ok(input);
+  assert.equal(resolveAiRecommendPlannerRegionIds(input!), undefined);
+
+  const bus = {
+    ...mockMedia("bus1", "seoul", "서울 버스 래핑"),
+    type: "network",
+    catalogSource: "network",
+    name: "서울 시내버스 래핑",
+  } as MediaItem;
+  const led = mockMedia("led1", "seoul", "강남 LED");
+  const matching = aiInputToMatching(input!, 0);
+  const { meta, recommendations } = runRecommendMatchFromCatalog(
+    [bus, led],
+    matching,
+    5,
+    input!,
+  );
+  assert.equal(meta.regionSupplemented, false);
+  assert.ok(
+    recommendations.some((r) => /버스|bus/i.test(r.media.name ?? "")),
+  );
+});
+
+test("integration: 강남 택시 브랜딩 — mobile + gangnam region", async () => {
+  const { parsePlannerFreetextBrief } = await import(
+    "@/lib/planner/parse-freetext-brief"
+  );
+  const { buildAiRecommendInputFromFreetextRaw } = await import(
+    "@/lib/recommend/build-freetext-recommend-input"
+  );
+  const raw = "강남 택시 브랜딩";
+  const parseResult = parsePlannerFreetextBrief(raw);
+  assert.deepEqual(parseResult.fields.categories.value, ["mobile"]);
+  assert.ok(parseResult.fields.seoulZones.value?.includes("gangnam"));
+
+  const input = buildAiRecommendInputFromFreetextRaw(raw, true);
+  assert.ok(input?.plannerCategories?.includes("mobile"));
+  assert.deepEqual(resolveAiRecommendPlannerRegionIds(input!), ["seoul"]);
+
+  const taxi = {
+    ...mockMedia("taxi1", "seoul", "강남 택시 광고"),
+    type: "network",
+    catalogSource: "network",
+    name: "서울 택시 래핑",
+  } as MediaItem;
+  const delivery = {
+    ...mockMedia("del1", "seoul", "강남 택배차량 LED"),
+    type: "digital",
+    name: "택배차량 LED",
+  } as MediaItem;
+  const matching = aiInputToMatching(input!, 0);
+  const { recommendations } = runRecommendMatchFromCatalog(
+    [taxi, delivery],
+    matching,
+    5,
+    input!,
+  );
+  assert.ok(
+    recommendations[0]?.media.id === "taxi1",
+    `expected taxi first, got ${recommendations[0]?.media.name}`,
+  );
+});
+
 test("integration: 부산 벡스코 — busan hard filter kept", async () => {
   const { parsePlannerFreetextBrief } = await import(
     "@/lib/planner/parse-freetext-brief"
