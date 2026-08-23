@@ -156,6 +156,11 @@ async function main() {
     domesticWithOptions,
   );
 
+  const zeroPlannerMonthly = active.filter((m) => {
+    const item = { ...m, sampleImages: m.sampleImages ?? [] } as MediaItem;
+    return plannerResolvedMonthlyWon(item) <= 0;
+  });
+
   const topDomestic = domesticMismatchSub
     .map((m) => rows.find((r) => r.id === m.id)!)
     .sort(
@@ -215,6 +220,23 @@ async function main() {
         mismatch: mismatchMonthlyEquiv(overseas).length,
       },
     },
+    zeroPlannerMonthlyPrice: {
+      all: zeroPlannerMonthly.length,
+      domestic: zeroPlannerMonthly.filter((m) =>
+        isKoreaMediaCountry(m.country),
+      ).length,
+      overseas: zeroPlannerMonthly.filter(
+        (m) => !isKoreaMediaCountry(m.country),
+      ).length,
+      items: zeroPlannerMonthly.map((m) => ({
+        id: m.id,
+        name: m.name,
+        price: m.price,
+        pricePeriod: m.pricePeriod,
+        priceOptions: m.priceOptions,
+        type: m.type,
+      })),
+    },
     byPriceKind_domestic_mismatchSubdivision: Object.fromEntries(
       ["single", "package", "grade", "network", "options_other"].map((k) => [
         k,
@@ -261,7 +283,10 @@ async function main() {
     "root monthly-equiv vs resolved (domestic):",
     report.rootMonthlyEquivVsResolved.domestic,
   );
-  console.log("byPriceKind:", report.byPriceKind_domestic_mismatchSubdivision);
+  console.log(
+    "zero plannerMonthly (가격 미등록):",
+    report.zeroPlannerMonthlyPrice,
+  );
   console.log(`\nWrote ${join(OUT_DIR, "report.json")}`);
 }
 

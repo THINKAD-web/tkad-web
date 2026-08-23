@@ -17,6 +17,7 @@ import {
 import { addPdfMediaDetailLink, addPdfRectLink } from "@/lib/planner-report-export/draw-media-link";
 import { plannerChartColorRgb } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
+import { formatExportBudgetWonLabel } from "@/lib/planner-report-export/format-export-money";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import {
@@ -680,7 +681,7 @@ export async function buildPlannerReportPdf(
       const cells = [
         row.label,
         String(row.mediaCount),
-        `₩${row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}`,
+        formatExportBudgetWonLabel(row.monthlyBudgetWon, isKo),
         row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US"),
       ];
       cells.forEach((cell, i) => {
@@ -757,7 +758,7 @@ export async function buildPlannerReportPdf(
       const cells = [
         row.label,
         String(row.mediaCount),
-        `₩${row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}`,
+        formatExportBudgetWonLabel(row.monthlyBudgetWon, isKo),
         row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US"),
       ];
       cells.forEach((cell, i) => {

@@ -6,6 +6,7 @@ import type {
 } from "@/lib/planner-report-export/types";
 import { plannerChartColorPptx } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
+import { formatExportBudgetWonLabel } from "@/lib/planner-report-export/format-export-money";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import {
   plannerMediaPageButtonLabel,
@@ -671,7 +672,7 @@ export async function buildPlannerReportPptx(
           options: { color: INK, fontSize: 10, fontFace: face },
         },
         {
-          text: `₩${row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")} (${row.budgetPct}%)`,
+          text: `${formatExportBudgetWonLabel(row.monthlyBudgetWon, isKo)}${row.monthlyBudgetWon > 0 ? ` (${row.budgetPct}%)` : ""}`,
           options: { color: INK, fontSize: 10, fontFace: face },
         },
         {
