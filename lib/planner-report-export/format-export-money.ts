@@ -1,12 +1,12 @@
-import { mediaPriceOnInquiryLabel } from "@/lib/media-price-format";
+import { mediaQuoteOnlyLabel } from "@/lib/media-pricing-mode";
 
-/** 보고서·PDF·PPTX — 예산 셀. ₩0 은 계약 리스크이므로 「가격 문의」로 통일 */
+/** 보고서·PDF·PPTX — 예산 셀. 협의가·무단가는 「문의」 */
 export function formatExportBudgetWonLabel(
   won: number,
   isKo: boolean,
 ): string {
   if (!Number.isFinite(won) || won <= 0) {
-    return mediaPriceOnInquiryLabel(isKo ? "ko-KR" : "en-US");
+    return mediaQuoteOnlyLabel(isKo);
   }
   return `₩${won.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
 }

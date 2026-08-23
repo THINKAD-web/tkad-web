@@ -44,6 +44,10 @@ import { stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
 import { logLockdownAttempt, logReviewStatusChange } from "@/lib/media/audit-log";
 import { isMediaReviewStatus } from "@/lib/media-review-status";
 import {
+  defaultPricingModeForBrowseSub,
+  isMediaPricingMode,
+} from "@/lib/media-pricing-mode";
+import {
   hasValidManualCoords,
   isKoreaMediaCountry,
   normalizeMediaCountry,
@@ -177,6 +181,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       body.mediaSubCategory === null
         ? null
         : String(body.mediaSubCategory).trim() || null;
+  }
+  if (body.pricingMode !== undefined) {
+    if (body.pricingMode === null) {
+      return json({ error: "pricingMode cannot be null" }, 400);
+    }
+    if (!isMediaPricingMode(body.pricingMode)) {
+      return json({ error: "pricingMode must be fixed or quote_only" }, 400);
+    }
+    data.pricingMode = body.pricingMode;
   }
   if (body.regionMain !== undefined) {
     data.regionMain =

@@ -23,34 +23,36 @@ function media(
     dailyFootTraffic: 10_000,
     sampleImages: [],
     pricePeriod: "month",
+    mediaSubCategory: "wall_mural",
+    pricingMode: "quote_only",
     ...o,
   } as MediaItem;
 }
 
-const PRICED = media({ id: "priced", price: 3_000_000 });
-const UNPRICED = media({ id: "unpriced", price: 0 });
+const PRICED = media({ id: "priced", price: 3_000_000, pricingMode: "fixed" });
+const QUOTE_ONLY = media({ id: "quote", price: 0 });
 
-test("portfolioHasUnpricedMedia — 0원 매체가 있으면 true", () => {
+test("portfolioHasUnpricedMedia — 협의가 매체가 있으면 true", () => {
   assert.equal(portfolioHasUnpricedMedia([PRICED]), false);
-  assert.equal(portfolioHasUnpricedMedia([PRICED, UNPRICED]), true);
+  assert.equal(portfolioHasUnpricedMedia([PRICED, QUOTE_ONLY]), true);
 });
 
-test("buildUnpricedMediaNotice — 협의 단가 안내와 총액 제외 경고", () => {
+test("buildUnpricedMediaNotice — 외벽 협의가 각주", () => {
   const notice = buildUnpricedMediaNotice({
-    portfolio: [PRICED, UNPRICED],
+    portfolio: [PRICED, QUOTE_ONLY],
     isKo: true,
   });
   assert.ok(notice);
-  assert.match(notice!.text, /단가 협의/);
-  assert.match(notice!.text, /포함되지 않을 수 있습니다/);
-  assert.deepEqual(notice!.affectedMediaIds, ["unpriced"]);
+  assert.match(notice!.text, /외벽 1건 별도 문의/);
+  assert.match(notice!.text, /포함되지 않습니다/);
+  assert.deepEqual(notice!.affectedMediaIds, ["quote"]);
 });
 
-test("buildUnpricedMediaNotice — 전부 미등록이면 구성 전체 문구", () => {
+test("buildUnpricedMediaNotice — 전부 협의가", () => {
   const notice = buildUnpricedMediaNotice({
-    portfolio: [UNPRICED],
+    portfolio: [QUOTE_ONLY],
     isKo: true,
   });
   assert.ok(notice);
-  assert.match(notice!.text, /이 구성의 매체는/);
+  assert.match(notice!.text, /외벽 1건 별도 문의/);
 });

@@ -8,6 +8,7 @@ import {
   regionZoneLabel,
 } from "@/lib/media-regions";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
+import { isQuoteOnlyMedia } from "@/lib/media-pricing-mode";
 import { calculatePlan } from "@/lib/planner/calc/engine";
 import {
   plannerMediaPeriodLineWon,
@@ -188,29 +189,23 @@ export function computeRegionSubdivisionReport(
   );
   if (nonUnclassified.length < 2) return null;
 
-  const totalMonthlyWon = portfolio.reduce(
-    (s, item) =>
-      s +
-      plannerMonthlyPriceWonForMedia(
-        item,
-        pricing?.quantities,
-        pricing?.priceOptionIndex,
-      ),
-    0,
-  );
+  const monthlyWonForItem = (item: MediaItem) => {
+    if (isQuoteOnlyMedia(item)) return 0;
+    return plannerMonthlyPriceWonForMedia(
+      item,
+      pricing?.quantities,
+      pricing?.priceOptionIndex,
+    );
+  };
+
+  const totalMonthlyWon = portfolio.reduce((s, item) => s + monthlyWonForItem(item), 0);
   const totalMonthlyImp = plan.impressions.monthlyEquivalent;
 
   const breakdown: PlannerExportRegionBreakdown[] = [];
 
   for (const [regionKey, media] of groups.entries()) {
     const monthlyBudgetWon = media.reduce(
-      (s, item) =>
-        s +
-        plannerMonthlyPriceWonForMedia(
-          item,
-          pricing?.quantities,
-          pricing?.priceOptionIndex,
-        ),
+      (s, item) => s + monthlyWonForItem(item),
       0,
     );
     const planRows = media

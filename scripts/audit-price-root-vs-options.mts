@@ -16,6 +16,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { MediaItem } from "../lib/media-data.ts";
 import { isKoreaMediaCountry } from "../lib/media-country.ts";
+import { isQuoteOnlyMedia } from "../lib/media-pricing-mode.ts";
 import {
   catalogPriceFieldToWon,
   priceToMonthlyEquivalentWon,
@@ -161,6 +162,11 @@ async function main() {
     return plannerResolvedMonthlyWon(item) <= 0;
   });
 
+  const quoteOnlyActive = active.filter((m) => {
+    const item = { ...m, sampleImages: m.sampleImages ?? [] } as MediaItem;
+    return isQuoteOnlyMedia(item);
+  });
+
   const topDomestic = domesticMismatchSub
     .map((m) => rows.find((r) => r.id === m.id)!)
     .sort(
@@ -235,6 +241,18 @@ async function main() {
         pricePeriod: m.pricePeriod,
         priceOptions: m.priceOptions,
         type: m.type,
+      })),
+    },
+    quoteOnlyMedia: {
+      all: quoteOnlyActive.length,
+      domestic: quoteOnlyActive.filter((m) => isKoreaMediaCountry(m.country))
+        .length,
+      items: quoteOnlyActive.map((m) => ({
+        id: m.id,
+        name: m.name,
+        pricingMode: (m as MediaItem).pricingMode ?? null,
+        mediaSubCategory: m.mediaSubCategory ?? null,
+        price: m.price,
       })),
     },
     byPriceKind_domestic_mismatchSubdivision: Object.fromEntries(

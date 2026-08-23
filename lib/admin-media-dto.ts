@@ -1,4 +1,9 @@
 import type { Media } from "@prisma/client";
+import {
+  defaultPricingModeForBrowseSub,
+  isMediaPricingMode,
+  type MediaPricingMode,
+} from "@/lib/media-pricing-mode";
 import { normalizeMediaCountry } from "@/lib/media-country";
 import {
   parsePartialPeriodRatesRaw,
@@ -117,6 +122,8 @@ export type AdminMediaDto = {
   hasProposal: boolean;
   mediaMainCategory: string | null;
   mediaSubCategory: string | null;
+  /** 협의가(quote_only) | 고정단가(fixed) */
+  pricingMode: MediaPricingMode;
   regionMain: string | null;
   regionSub: string | null;
   /** PR4: 3-layer badge data (admin list/modal only) */
@@ -387,6 +394,12 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     hasProposal: pickBool(r, "hasProposal", "has_proposal", false),
     mediaMainCategory: pickStr(r, "mediaMainCategory", "media_main_category"),
     mediaSubCategory: pickStr(r, "mediaSubCategory", "media_sub_category"),
+    pricingMode: (() => {
+      const raw = r.pricingMode ?? r.pricing_mode;
+      if (isMediaPricingMode(raw)) return raw;
+      const sub = pickStr(r, "mediaSubCategory", "media_sub_category");
+      return defaultPricingModeForBrowseSub(sub);
+    })(),
     regionMain: pickStr(r, "regionMain", "region_main"),
     regionSub: pickStr(r, "regionSub", "region_sub"),
     layerBadges: pickLayerBadges(r),
@@ -516,6 +529,11 @@ export function prismaMediaToAdminDto(
     hasProposal: m.hasProposal,
     mediaMainCategory: m.mediaMainCategory,
     mediaSubCategory: m.mediaSubCategory,
+    pricingMode: isMediaPricingMode(
+      (m as Media & { pricingMode?: string }).pricingMode,
+    )
+      ? ((m as Media & { pricingMode: MediaPricingMode }).pricingMode)
+      : defaultPricingModeForBrowseSub(m.mediaSubCategory),
     regionMain: m.regionMain,
     regionSub: m.regionSub,
     layerBadges,

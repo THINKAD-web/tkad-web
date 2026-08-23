@@ -57,7 +57,8 @@ import {
 } from "@/lib/planner-report-export/export-badge";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
-import { buildExportBudgetHonesty } from "@/lib/planner/brief/over-budget-copy";
+import { buildReportBudgetHonesty } from "@/lib/planner/report-budget-honesty";
+import { blendedCpmExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
 
 const GOAL_TITLES_KO: Record<PlannerCampaignGoal, string> = {
   brand: "브랜드 인지도",
@@ -461,8 +462,6 @@ export function buildBriefReportPayload(
     }))
     .sort((a, b) => a.value - b.value);
 
-  const blendedCpmKrw = exportCalcPlan.cpm.campaignWon;
-
   /**
    * 1p 헤더 「이 구성」 — **표시 금액 기준**(선형 환산)을 쓴다.
    *
@@ -481,26 +480,18 @@ export function buildBriefReportPayload(
     (sum, s) => sum + (s.actualWon ?? s.valueWon),
     0,
   );
-  /**
-   * 표시 기준을 산출할 수 없으면(단가 미등록 등으로 0) 저장값으로 되돌린다.
-   * 「₩0 (0%)」 은 어떤 기준으로도 사실이 아니고, 예산 초과 배너까지 사라진다.
-   * Wave 3 의 `briefMixImpressions` 와 같은 all-or-nothing 원칙 — 표시 기준과
-   * 저장 기준을 섞어 제3의 값을 만들지 않는다.
-   */
-  const headerMixWon =
-    displayedMixWon > 0 ? displayedMixWon : plan.metrics.totalCostWon;
-  const { overBudgetWon, budgetUsedRate } = resolveStoredOverBudget(
-    displayedMixWon > 0 ? { totalCostWon: displayedMixWon } : plan.metrics,
-    plan.brief.budgetWon,
-  );
-  const budgetHonesty = buildExportBudgetHonesty({
+  const budgetHonesty = buildReportBudgetHonesty({
     requestWon: plan.brief.budgetWon,
-    mixWon: headerMixWon,
-    overBudgetWon,
-    budgetUsedRate,
+    portfolio,
+    pricing,
+    periodCtx,
     isKo,
+    confirmedMixWon: displayedMixWon > 0 ? displayedMixWon : undefined,
+    planMetrics: exportCalcPlan.metrics,
   });
-
+  const blendedCpmKrw =
+    blendedCpmExcludingQuoteOnly(exportCalcPlan, portfolio) ??
+    exportCalcPlan.cpm.campaignWon;
   const days = flightDays(brief);
   const periodDisplay =
     brief.flightStart && brief.flightEnd

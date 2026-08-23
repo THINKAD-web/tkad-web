@@ -67,6 +67,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
 import type { AdminMediaDto, MediaAvailability } from "@/lib/admin-media-dto";
 import {
+  defaultPricingModeForBrowseSub,
+  type MediaPricingMode,
+} from "@/lib/media-pricing-mode";
+import {
   AdminMediaCategoryFields,
   browseFieldsFromDto,
   mergeMediaCategoryForm,
@@ -345,6 +349,7 @@ type AdminMediaForm = {
   browseSubCategory: string;
   browseRegionMain: string;
   browseRegionSub: string;
+  pricingMode: MediaPricingMode;
 };
 
 function galleryUrlsFromForm(form: AdminMediaForm): string[] {
@@ -419,6 +424,7 @@ const emptyForm: AdminMediaForm = {
   browseSubCategory: "",
   browseRegionMain: "",
   browseRegionSub: "",
+  pricingMode: "fixed",
 };
 
 type PriceOptDraft = {
@@ -626,6 +632,7 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     browseRegionSub: overseasDefaults
       ? browse.regionSub || OVERSEAS_BROWSE_REGION_MAIN
       : browse.regionSub,
+    pricingMode: m.pricingMode ?? defaultPricingModeForBrowseSub(browse.browseSub),
   };
 }
 
@@ -697,6 +704,7 @@ function formToApiBody(
     mediaSubCategory: form.browseSubCategory.trim() || null,
     regionMain: form.browseRegionMain.trim() || null,
     regionSub: form.browseRegionSub.trim() || null,
+    pricingMode: form.pricingMode,
     mediaCategory: mergeMediaCategoryForm(
       form.mediaCategoryParent,
       form.mediaCategorySubs,
@@ -3893,6 +3901,28 @@ export default function AdminMediasClient({
                   </p>
                 ) : null}
               </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  가격 모드
+                </label>
+                <select
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                  value={form.pricingMode}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      pricingMode:
+                        e.target.value === "quote_only" ? "quote_only" : "fixed",
+                    }))
+                  }
+                >
+                  <option value="fixed">고정 단가 (fixed)</option>
+                  <option value="quote_only">협의가 (quote_only)</option>
+                </select>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  외벽광고 신규 등록 시 기본값은 협의가입니다.
+                </p>
+              </div>
               <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 선택 정보
               </p>
@@ -4036,7 +4066,15 @@ export default function AdminMediasClient({
                   }))
                 }
                 onBrowseSubChange={(slug) =>
-                  setForm((f) => ({ ...f, browseSubCategory: slug }))
+                  setForm((f) => ({
+                    ...f,
+                    browseSubCategory: slug,
+                    ...(!editing
+                      ? {
+                          pricingMode: defaultPricingModeForBrowseSub(slug),
+                        }
+                      : {}),
+                  }))
                 }
                 onRegionMainChange={(slug) =>
                   setForm((f) => ({

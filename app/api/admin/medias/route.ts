@@ -33,8 +33,9 @@ import {
   validateMediaMetricsWrite,
 } from "@/lib/media-metrics-write";
 import {
-  ADMIN_MEDIA_LAYER_INCLUDE,
-} from "@/lib/admin-media-dto";
+  defaultPricingModeForBrowseSub,
+  isMediaPricingMode,
+} from "@/lib/media-pricing-mode";
 import { stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
 import {
@@ -237,6 +238,13 @@ export async function POST(request: NextRequest) {
   if (mediaMainCategory !== undefined) data.mediaMainCategory = mediaMainCategory;
   const mediaSubCategory = optStr(body.mediaSubCategory);
   if (mediaSubCategory !== undefined) data.mediaSubCategory = mediaSubCategory;
+  const subForPricing =
+    (data.mediaSubCategory as string | null | undefined) ?? null;
+  if (body.pricingMode !== undefined && isMediaPricingMode(body.pricingMode)) {
+    data.pricingMode = body.pricingMode;
+  } else {
+    data.pricingMode = defaultPricingModeForBrowseSub(subForPricing);
+  }
   const regionMain = optStr(body.regionMain);
   if (regionMain !== undefined) data.regionMain = regionMain;
   const regionSub = optStr(body.regionSub);

@@ -42,6 +42,12 @@ enum MediaPricePeriod {
   day
 }
 
+/// fixed — 공개 단가 / quote_only — 건별 견적(외벽 등, price=0 이 정상)
+enum MediaPricingMode {
+  fixed
+  quote_only
+}
+
 enum NotificationType {
   CAMPAIGN_START
   CAMPAIGN_END
@@ -187,6 +193,8 @@ model Media {
   type               String
   price              Int
   pricePeriod        MediaPricePeriod @default(month) @map("price_period")
+  /// fixed(기본) | quote_only(건별 견적 — 외벽 등)
+  pricingMode        MediaPricingMode @default(fixed) @map("pricing_mode")
   /// 가격 옵션 (JSON 배열). 예: [{"label":"20초 기준","price":30000000,"period":"month"},{"label":"15초 기준","price":25000000,"period":"month"}]
   priceOptions       Json?            @map("price_options")
   /// 부분기간 요율 lookup — 예: {"3days":0.35,"1week":0.45,"2weeks":0.6,"3weeks":0.8}

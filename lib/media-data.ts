@@ -96,6 +96,8 @@ export interface MediaItem {
   country?: string;
   type: string;
   price: number;
+  /** fixed | quote_only — 건별 견적(외벽 등) */
+  pricingMode?: import("@/lib/media-pricing-mode").MediaPricingMode;
   /** 집행 단가 기준: 월·2주·주·일 */
   pricePeriod?: MediaPricePeriodKey;
   lat: number;
