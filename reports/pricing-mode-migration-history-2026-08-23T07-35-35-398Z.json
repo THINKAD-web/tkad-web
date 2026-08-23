@@ -1,0 +1,156 @@
+{
+  "generatedAt": "2026-08-23T07:35:35.398Z",
+  "sameDatabaseHost": false,
+  "production": {
+    "envName": "production",
+    "connection": {
+      "host": "ep-holy-cloud-ah6w4cml-pooler.c-3.us-east-1.aws.neon.tech",
+      "database": "neondb",
+      "user": "neondb_owner"
+    },
+    "hasPricingModeColumn": true,
+    "pricingModeMigrations": [
+      {
+        "migration_name": "20260823140000_media_pricing_mode",
+        "finished_at": "2026-08-23T05:53:27.135Z",
+        "applied_steps_count": 1,
+        "checksum": "5e695c8e08c668dee6477dbe96a0bf50d76db7f5119c3c84e842625d3b48eb0a"
+      },
+      {
+        "migration_name": "20260823153000_media_pricing_mode_repair",
+        "finished_at": "2026-08-23T05:55:13.210Z",
+        "applied_steps_count": 1,
+        "checksum": "6ed75ea0e70b55bef57fc3d2498243290195a8dc336533783544ff835bd62ec6"
+      }
+    ],
+    "recentMigrations": [
+      {
+        "migration_name": "20260515143000_reports",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260601120000_faqs_table",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260522120000_points_system",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260528120000_user_saved_plans",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260519120000_user_recently_viewed_medias",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260520120000_web_vitals_ab_testing",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260515120000_user_region",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260823153000_media_pricing_mode_repair",
+        "finished_at": "2026-08-23T05:55:13.210Z"
+      },
+      {
+        "migration_name": "20260823140000_media_pricing_mode",
+        "finished_at": "2026-08-23T05:53:27.135Z"
+      },
+      {
+        "migration_name": "20260820170000_media_review_status",
+        "finished_at": "2026-08-20T06:51:36.411Z"
+      }
+    ],
+    "wallMuralByMode": [
+      {
+        "mode": "fixed",
+        "n": 36
+      },
+      {
+        "mode": "quote_only",
+        "n": 9
+      }
+    ],
+    "pricedWallMarkedQuoteOnly": 0
+  },
+  "preview": {
+    "envName": "preview",
+    "connection": {
+      "host": "ep-shiny-sun-ahrk7gkk-pooler.c-3.us-east-1.aws.neon.tech",
+      "database": "neondb",
+      "user": "neondb_owner"
+    },
+    "hasPricingModeColumn": true,
+    "pricingModeMigrations": [
+      {
+        "migration_name": "20260823140000_media_pricing_mode",
+        "finished_at": "2026-08-23T05:33:26.133Z",
+        "applied_steps_count": 1,
+        "checksum": "2e179965423da14b5f76684d8a5a507ee5eee227b8fbc5213c8596a0af7c2470"
+      },
+      {
+        "migration_name": "20260823153000_media_pricing_mode_repair",
+        "finished_at": "2026-08-23T07:30:20.208Z",
+        "applied_steps_count": 1,
+        "checksum": "6ed75ea0e70b55bef57fc3d2498243290195a8dc336533783544ff835bd62ec6"
+      }
+    ],
+    "recentMigrations": [
+      {
+        "migration_name": "20260515143000_reports",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260528120000_user_saved_plans",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260601120000_faqs_table",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260522120000_points_system",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260520120000_web_vitals_ab_testing",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260519120000_user_recently_viewed_medias",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260515120000_user_region",
+        "finished_at": null
+      },
+      {
+        "migration_name": "20260823153000_media_pricing_mode_repair",
+        "finished_at": "2026-08-23T07:30:20.208Z"
+      },
+      {
+        "migration_name": "20260823140000_media_pricing_mode",
+        "finished_at": "2026-08-23T05:33:26.133Z"
+      },
+      {
+        "migration_name": "20260820170000_media_review_status",
+        "finished_at": "2026-08-20T06:36:20.422Z"
+      }
+    ],
+    "wallMuralByMode": [
+      {
+        "mode": "fixed",
+        "n": 36
+      },
+      {
+        "mode": "quote_only",
+        "n": 9
+      }
+    ],
+    "pricedWallMarkedQuoteOnly": 0
+  }
+}
