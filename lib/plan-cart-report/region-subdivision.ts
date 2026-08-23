@@ -3,7 +3,6 @@ import {
   MEDIA_BROWSE_REGIONS,
   browseRegionLabel,
 } from "@/lib/media-browse-regions";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
   isValidRegionZoneId,
   regionZoneLabel,
@@ -12,6 +11,7 @@ import { formatPlannerSharePct } from "@/lib/planner-logic";
 import { calculatePlan } from "@/lib/planner/calc/engine";
 import {
   plannerMediaPeriodLineWon,
+  plannerMonthlyPriceWonForMedia,
   resolvePlanPeriodInput,
   type PlannerPortfolioPricing,
 } from "@/lib/planner/planner-media-quantity";
@@ -189,7 +189,13 @@ export function computeRegionSubdivisionReport(
   if (nonUnclassified.length < 2) return null;
 
   const totalMonthlyWon = portfolio.reduce(
-    (s, item) => s + catalogPriceFieldToWon(item.price),
+    (s, item) =>
+      s +
+      plannerMonthlyPriceWonForMedia(
+        item,
+        pricing?.quantities,
+        pricing?.priceOptionIndex,
+      ),
     0,
   );
   const totalMonthlyImp = plan.impressions.monthlyEquivalent;
@@ -198,7 +204,13 @@ export function computeRegionSubdivisionReport(
 
   for (const [regionKey, media] of groups.entries()) {
     const monthlyBudgetWon = media.reduce(
-      (s, item) => s + catalogPriceFieldToWon(item.price),
+      (s, item) =>
+        s +
+        plannerMonthlyPriceWonForMedia(
+          item,
+          pricing?.quantities,
+          pricing?.priceOptionIndex,
+        ),
       0,
     );
     const planRows = media
