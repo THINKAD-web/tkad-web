@@ -229,7 +229,7 @@ const pdf = await buildPlannerReportPdf(payload, {});
 const text = Buffer.from(pdf).toString("latin1");
 const checks = {
   quoteSection: text.includes("견적 요약") || text.includes("Quote summary"),
-  subtotalLabel: text.includes("합계 (협의 매체 제외)") || text.includes("Subtotal"),
+  subtotalLabel: text.includes("부가세 포함") || text.includes("incl. VAT"),
   footnote: text.includes("별도 협의 후 추가"),
   mediaFee: text.includes("20,100,000") || text.includes("20100000"),
 };

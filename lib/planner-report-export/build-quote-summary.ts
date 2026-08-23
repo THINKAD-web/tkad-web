@@ -31,10 +31,10 @@ export function buildPlannerQuoteSummary(args: {
   const hasQuoteOnly = Boolean(args.quoteOnlyNotice);
   const totalLabel = hasQuoteOnly
     ? args.isKo
-      ? "합계 (협의 매체 제외)"
-      : "Subtotal (inquiry media excluded)"
+      ? "합계 (부가세 포함 · 협의 매체 제외)"
+      : "Subtotal (incl. VAT · inquiry media excluded)"
     : args.isKo
-      ? "총액 (VAT 포함)"
+      ? "총액 (부가세 포함)"
       : "Total (incl. VAT)";
 
   const footnotes: string[] = [];
