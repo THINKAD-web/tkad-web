@@ -16,6 +16,9 @@ import {
 } from "@/lib/planner/brief/scoring";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import { PlannerMediaThumb } from "@/components/planner/planner-media-thumb";
+import { partitionScoredByBudget } from "@/lib/planner/brief/budget-ranking";
+import { BudgetFilterBar } from "@/components/planner/brief/budget-filter-bar";
+import { totalBudgetWon } from "@/lib/planner/brief/types";
 
 const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
   target: { ko: "타깃 적합", en: "Target fit" },
@@ -52,6 +55,11 @@ function RankRow({ scored, rank, isKo }: { scored: ScoredMedia; rank: number; is
               <p className="truncate text-xs text-muted-foreground">
                 {isKo ? media.location : media.locationEn || media.location}
               </p>
+              {scored.overBudget ? (
+                <p className="mt-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+                  {isKo ? "예산 초과" : "Over budget"}
+                </p>
+              ) : null}
             </div>
             <span className="shrink-0 rounded-lg bg-muted px-2 py-1 text-xs font-bold tabular-nums">
               {total}
@@ -104,6 +112,17 @@ export function BriefQuickRankPanel({
     [candidates, store, ready.ok, isKo],
   );
 
+  const budgetWon = totalBudgetWon(store);
+  const budgetPartition = useMemo(
+    () =>
+      partitionScoredByBudget({
+        scored,
+        budgetWithinOnly: store.budgetWithinOnly,
+      }),
+    [scored, store.budgetWithinOnly],
+  );
+  const visibleScored = budgetPartition.visible;
+
   if (!ready.ok) {
     return (
       <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
@@ -131,13 +150,23 @@ export function BriefQuickRankPanel({
         {briefRankingBasisLabel(store, QUICK_DAYS, isKo)}
       </p>
 
+      {budgetWon > 0 ? (
+        <BudgetFilterBar
+          isKo={isKo}
+          budgetWithinOnly={store.budgetWithinOnly}
+          onToggle={store.setBudgetWithinOnly}
+          hiddenOverBudgetCount={budgetPartition.hiddenOverBudgetCount}
+          withinBudgetCount={budgetPartition.withinBudgetCount}
+        />
+      ) : null}
+
       <ul className="space-y-2">
-        {scored.slice(0, 20).map((s, i) => (
+        {visibleScored.slice(0, 20).map((s, i) => (
           <RankRow key={s.media.id} scored={s} rank={i + 1} isKo={isKo} />
         ))}
       </ul>
 
-      {scored.length === 0 ? (
+      {visibleScored.length === 0 ? (
         <p className="mt-4 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
           {isKo
             ? "조건에 맞는 매체가 없습니다. 지역을 넓혀 보세요."

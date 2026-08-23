@@ -17,7 +17,7 @@
  * - 지역 적합 : `Media.regionMain` (browse 14그룹) ↔ 브리프 17시도 역매핑
  * - 예산 효율 : 등록 상품가 ÷ 노출 = CPM, 같은 유형 후보군 중앙값 대비
  * - 타깃 적합 : demo gender/age share ↔ 브리프 성별·연령
- * - 업종 적합 : matchMediaCatalog `scoreIndustry` + targetCategory 보조
+ * - 업종 적합 : name/tags 기반 Strong·Medium 보너스 (평균 축과 분리, P1)
  */
 
 import type { MediaItem } from "@/lib/media-data";
@@ -33,14 +33,17 @@ import {
 import type { MediaMetricClass } from "@/lib/metrics/types";
 import { calcLineMetrics } from "@/lib/planner/brief/mix-metrics";
 import {
-  briefIndustryToPlanner,
-} from "@/lib/planner/brief/brief-integrated-adapters";
+  budgetOverPenalty,
+  lineCostWonForMedia,
+} from "@/lib/planner/brief/budget-ranking";
+import {
+  classifyBriefIndustryMatch,
+  industryAxisDisplayScore,
+  industryBonusForTier,
+} from "@/lib/planner/brief/industry-bonus";
 import { sidoCodesToBrowseMainIds, sidoLabel, summarizeSidoCodes } from "@/lib/planner/brief/regions";
 import type { BriefAgeBand, BriefIndustry, CampaignBriefInput } from "@/lib/planner/brief/types";
-import { scoreMediaIndustryMatch } from "@/lib/matching-engine";
-import {
-  PLANNER_INDUSTRY_TO_MATCHING,
-} from "@/lib/planner/industry-match";
+import { totalBudgetWon } from "@/lib/planner/brief/types";
 
 export type ScoreAxisKey = "region" | "budget" | "target" | "industry";
 
@@ -54,8 +57,14 @@ export type ScoreAxis = {
 
 export type ScoredMedia = {
   media: MediaItem;
-  /** 존재하는 축들의 평균 (0~100). 축이 하나도 없으면 0 */
+  /** region·budget·target 평균 + 업종보너스 − 예산페널티 (0~100 근사) */
   total: number;
+  /** region·budget·target 축 평균 (업종·예산페널티 제외) */
+  baseTotal: number;
+  industryBonus: number;
+  budgetPenalty: number;
+  lineCostWon: number | null;
+  overBudget: boolean;
   axes: ScoreAxis[];
   /** 타깃 축이 있을 때 demo basis (배지·UI용) */
   targetBasis?: MetricBasis | null;
@@ -185,44 +194,36 @@ const BRIEF_INDUSTRY_LABEL: Record<BriefIndustry, { ko: string; en: string }> = 
 
 function formatIndustryRationale(
   industry: BriefIndustry,
-  score: number,
+  tier: ReturnType<typeof classifyBriefIndustryMatch>,
   isKo: boolean,
 ): string {
   const label = BRIEF_INDUSTRY_LABEL[industry][isKo ? "ko" : "en"];
-  if (score >= 85) {
+  if (tier === "strong") {
     return isKo
-      ? `${label} 업종 키워드·매체 유형 일치`
-      : `Strong ${label} keyword and media-type fit`;
+      ? `${label} 업종 키워드 일치 (매체명·태그)`
+      : `Strong ${label} keyword match (name/tags)`;
   }
-  if (score >= 55) {
+  if (tier === "medium") {
     return isKo
-      ? `${label} 업종 관련 신호(텍스트·유형)`
-      : `${label}-related signals in media profile`;
+      ? `${label} 관련 매체 유형`
+      : `${label}-related media type`;
   }
   return isKo
     ? `${label} 업종과 직접 연관 신호 약함`
     : `Weak direct ${label} association`;
 }
 
-function industryAxisScore(
-  media: MediaItem,
-  industry: BriefIndustry,
-): number {
-  const plannerKey = briefIndustryToPlanner(industry);
-  const matchingIndustry = PLANNER_INDUSTRY_TO_MATCHING[plannerKey];
-  let pts = scoreMediaIndustryMatch(media, matchingIndustry);
-  const targetCats = media.targetCategory ?? [];
-  const industryLabels = media.industryLabels ?? [];
-  const labelHay = industryLabels.join(" ").toLowerCase();
-  if (
-    targetCats.length > 0 &&
-    (labelHay.includes(industry) ||
-      (industry === "fb" && /f&b|fnb|food|식음/i.test(labelHay)))
-  ) {
-    pts = Math.min(20, pts + 3);
-  }
-  return Math.min(100, Math.max(0, Math.round((pts / 20) * 100)));
+function mixDiversityDistrict(media: MediaItem): string {
+  return (
+    media.district?.trim() ||
+    media.regionSub?.trim() ||
+    media.regionMain?.trim() ||
+    "unknown"
+  );
 }
+
+const MIX_DIVERSITY_DISTRICT_CAP = 2;
+const MIX_DIVERSITY_TYPE_CAP = 2;
 
 /** Quick/Step2 랭킹 기준 문구 — 실제 store 타게팅을 반영 */
 export function briefRankingBasisLabel(
@@ -307,11 +308,13 @@ export function scoreMediaCandidates(params: {
   const wantedBrowseIds = new Set(sidoCodesToBrowseMainIds(brief.regionCodes));
   const hasTargetBrief =
     brief.genders.length > 0 || brief.ageBands.length > 0;
+  const budgetWon = totalBudgetWon(brief);
 
   return candidates
     .map((media): ScoredMedia => {
       const axes: ScoreAxis[] = [];
       let targetBasis: MetricBasis | null = null;
+      let industryBonus = 0;
 
       if (wantedBrowseIds.size > 0 && media.regionMain) {
         const hit = wantedBrowseIds.has(media.regionMain);
@@ -371,24 +374,49 @@ export function scoreMediaCandidates(params: {
       }
 
       if (brief.industry && brief.industry !== "other") {
-        const industryScore = industryAxisScore(media, brief.industry);
+        const tier = classifyBriefIndustryMatch(media, brief.industry);
+        industryBonus = industryBonusForTier(tier);
+        const industryScore = industryAxisDisplayScore(tier);
         axes.push({
           key: "industry",
           score: industryScore,
-          rationale: formatIndustryRationale(
-            brief.industry,
-            industryScore,
-            isKo,
-          ),
+          rationale: formatIndustryRationale(brief.industry, tier, isKo),
         });
       }
 
-      const total =
-        axes.length > 0
-          ? Math.round(axes.reduce((s, a) => s + a.score, 0) / axes.length)
+      const rankingAxes = axes.filter((a) => a.key !== "industry");
+      const baseTotal =
+        rankingAxes.length > 0
+          ? Math.round(
+              rankingAxes.reduce((s, a) => s + a.score, 0) / rankingAxes.length,
+            )
           : 0;
 
-      return { media, total, axes, targetBasis, unitCpmWon: cpm };
+      const lineCostWon = lineCostWonForMedia(media, days);
+      const overBudget =
+        lineCostWon != null && budgetWon > 0 && lineCostWon > budgetWon;
+      const budgetPenalty =
+        lineCostWon != null && budgetWon > 0
+          ? budgetOverPenalty(lineCostWon, budgetWon)
+          : 0;
+
+      const total = Math.max(
+        0,
+        Math.min(100, baseTotal + industryBonus - budgetPenalty),
+      );
+
+      return {
+        media,
+        total,
+        baseTotal,
+        industryBonus,
+        budgetPenalty,
+        lineCostWon,
+        overBudget,
+        axes,
+        targetBasis,
+        unitCpmWon: cpm,
+      };
     })
     .sort((a, b) => b.total - a.total);
 }
@@ -405,6 +433,8 @@ export function buildRecommendedMix(params: {
 }): { mediaId: string; units: number }[] {
   const maxLines = params.maxLines ?? 5;
   const out: { mediaId: string; units: number }[] = [];
+  const districtCounts = new Map<string, number>();
+  const typeCounts = new Map<string, number>();
   let spent = 0;
 
   for (const s of params.scored) {
@@ -414,8 +444,20 @@ export function buildRecommendedMix(params: {
     const cost = line.costWon.value;
     if (cost <= 0) continue;
     if (spent + cost > params.budgetWon) continue;
+
+    const district = mixDiversityDistrict(s.media);
+    const type = s.media.type ?? "unknown";
+    if ((districtCounts.get(district) ?? 0) >= MIX_DIVERSITY_DISTRICT_CAP) {
+      continue;
+    }
+    if ((typeCounts.get(type) ?? 0) >= MIX_DIVERSITY_TYPE_CAP) {
+      continue;
+    }
+
     out.push({ mediaId: s.media.id, units: 1 });
     spent += cost;
+    districtCounts.set(district, (districtCounts.get(district) ?? 0) + 1);
+    typeCounts.set(type, (typeCounts.get(type) ?? 0) + 1);
   }
 
   return out;

@@ -68,6 +68,8 @@ export type BriefStoreState = CampaignBriefInput & {
   mixUnits: Record<string, number>;
   /** mixUnits 가 마지막으로 확정·담긴 시점의 브리프 지문 (L-1) */
   mixBriefFingerprint: string | null;
+  /** P1: 예산 내만 랭킹 필터 (기본 ON) */
+  budgetWithinOnly: boolean;
 };
 
 export type BriefStoreActions = {
@@ -105,6 +107,7 @@ export type BriefStoreActions = {
   clearMix: () => void;
   /** 현재 브리프 기준으로 mix 지문을 갱신 (담은 매체 유지 확인) */
   acknowledgeMixForCurrentBrief: () => void;
+  setBudgetWithinOnly: (value: boolean) => void;
 };
 
 export type BriefStore = BriefStoreState & BriefStoreActions;
@@ -118,6 +121,7 @@ const INITIAL: BriefStoreState = {
   digitalChannelIds: defaultDigitalChannelIds(),
   mixUnits: {},
   mixBriefFingerprint: null,
+  budgetWithinOnly: true,
 };
 
 function normalizeDigitalChannelIds(raw: unknown): DigitalChannelId[] {
@@ -264,6 +268,8 @@ export const useBriefStore = create<BriefStore>()(
 
       acknowledgeMixForCurrentBrief: () =>
         set((s) => stampMixFingerprint(s)),
+
+      setBudgetWithinOnly: (value) => set({ budgetWithinOnly: value }),
     }),
     {
       name: BRIEF_STORAGE_KEY,
@@ -287,6 +293,7 @@ export const useBriefStore = create<BriefStore>()(
         digitalChannelIds: s.digitalChannelIds,
         mixUnits: s.mixUnits,
         mixBriefFingerprint: s.mixBriefFingerprint,
+        budgetWithinOnly: s.budgetWithinOnly,
       }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<BriefStoreState>;
@@ -311,6 +318,10 @@ export const useBriefStore = create<BriefStore>()(
             typeof p.mixBriefFingerprint === "string"
               ? p.mixBriefFingerprint
               : null,
+          budgetWithinOnly:
+            typeof p.budgetWithinOnly === "boolean"
+              ? p.budgetWithinOnly
+              : true,
         };
       },
     },

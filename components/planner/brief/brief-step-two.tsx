@@ -31,6 +31,8 @@ import {
   type ScoredMedia,
 } from "@/lib/planner/brief/scoring";
 import { rebuildBriefRecommendedMix } from "@/lib/planner/brief/rebuild-mix";
+import { partitionScoredByBudget } from "@/lib/planner/brief/budget-ranking";
+import { BudgetFilterBar } from "@/components/planner/brief/budget-filter-bar";
 import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import { BriefDigitalPanel } from "@/components/planner/brief/brief-digital-panel";
@@ -83,6 +85,11 @@ function MediaCard({
             <p className="truncate text-xs text-muted-foreground">
               {isKo ? media.location : media.locationEn || media.location}
             </p>
+            {scored.overBudget ? (
+              <p className="mt-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+                {isKo ? "예산 초과" : "Over budget"}
+              </p>
+            ) : null}
           </div>
           <span className="shrink-0 rounded-lg bg-muted px-2 py-1 text-xs font-bold tabular-nums">
             {total}
@@ -189,6 +196,17 @@ export function BriefStepTwo({
     [candidates, store, days, isKo],
   );
 
+  const budgetPartition = useMemo(
+    () =>
+      partitionScoredByBudget({
+        scored,
+        budgetWithinOnly: store.budgetWithinOnly,
+      }),
+    [scored, store.budgetWithinOnly],
+  );
+
+  const visibleScored = budgetPartition.visible;
+
   const lines: MixLine[] = useMemo(() => {
     const out: MixLine[] = [];
     for (const [mediaId, units] of Object.entries(store.mixUnits)) {
@@ -277,11 +295,21 @@ export function BriefStepTwo({
           </p>
         ) : null}
 
+        {budgetWon > 0 ? (
+          <BudgetFilterBar
+            isKo={isKo}
+            budgetWithinOnly={store.budgetWithinOnly}
+            onToggle={store.setBudgetWithinOnly}
+            hiddenOverBudgetCount={budgetPartition.hiddenOverBudgetCount}
+            withinBudgetCount={budgetPartition.withinBudgetCount}
+          />
+        ) : null}
+
         <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-sm font-semibold">
             {isKo
-              ? `추천 매체 ${scored.length}개`
-              : `${scored.length} recommended media`}
+              ? `추천 매체 ${visibleScored.length}개`
+              : `${visibleScored.length} recommended media`}
           </h3>
           <Button
             type="button"
@@ -302,7 +330,7 @@ export function BriefStepTwo({
         </div>
 
         <ul className="space-y-2">
-          {scored.slice(0, 30).map((s) => (
+          {visibleScored.slice(0, 30).map((s) => (
             <MediaCard
               key={s.media.id}
               scored={s}
@@ -315,7 +343,7 @@ export function BriefStepTwo({
             />
           ))}
         </ul>
-        {scored.length === 0 ? (
+        {visibleScored.length === 0 ? (
           <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
             {isKo
               ? "조건에 맞는 매체가 없습니다. 지역 조건을 넓혀 보세요."
