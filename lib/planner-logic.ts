@@ -1,5 +1,6 @@
 import { getMainCategory } from "@/lib/media-browse-categories";
 import type { MediaItem } from "@/lib/media-data";
+import { isQuoteOnlyMedia } from "@/lib/media-pricing-mode";
 import {
   catalogPriceFieldToPriceMan,
   catalogPriceFieldToWon,
@@ -1103,9 +1104,10 @@ function budgetSplitByGroupedKeys(
   if (portfolio.length === 0) return [];
 
   const lineWonOf = (m: MediaItem) =>
-    portfolioPeriodPriceWon(m, pricing, periodCtx);
+    isQuoteOnlyMedia(m) ? 0 : portfolioPeriodPriceWon(m, pricing, periodCtx);
 
-  const positivePrices = portfolio
+  const pricedPortfolio = portfolio.filter((m) => !isQuoteOnlyMedia(m));
+  const positivePrices = pricedPortfolio
     .map((m) => lineWonOf(m))
     .filter((won) => won > 0);
   const fallbackWon =
@@ -1113,6 +1115,7 @@ function budgetSplitByGroupedKeys(
       ? Math.round(positivePrices.reduce((a, b) => a + b, 0) / positivePrices.length)
       : 1;
   const weightOf = (m: MediaItem): number => {
+    if (isQuoteOnlyMedia(m)) return 0;
     const won = lineWonOf(m);
     return won > 0 ? won : fallbackWon;
   };
@@ -1120,6 +1123,7 @@ function budgetSplitByGroupedKeys(
   const weightSums = new Map<string, number>();
   const wonSums = new Map<string, number>();
   for (const m of portfolio) {
+    if (isQuoteOnlyMedia(m)) continue;
     const key = keyOf(m);
     weightSums.set(key, (weightSums.get(key) ?? 0) + weightOf(m));
     wonSums.set(key, (wonSums.get(key) ?? 0) + lineWonOf(m));

@@ -125,9 +125,21 @@ test("snapshotMetricsToExportMetrics: impressions only", () => {
   assert.ok(!("roiExpected" in m));
 });
 
-test("brief-report-adapter: over-budget honesty uses stored mix metrics + inquiry copy", () => {
+test("brief-report-adapter: over-budget honesty uses displayed mix + inquiry copy", () => {
+  const priceyMedia: MediaItem = {
+    ...catalogMedia,
+    id: "m-brief-over",
+    price: 35_000_000,
+  };
   const over = {
     ...snapshot,
+    mediaMix: [
+      {
+        ...snapshot.mediaMix[0]!,
+        mediaId: priceyMedia.id,
+        units: 2,
+      },
+    ],
     metrics: {
       ...snapshot.metrics,
       totalCostWon: 69_000_000,
@@ -137,21 +149,21 @@ test("brief-report-adapter: over-budget honesty uses stored mix metrics + inquir
   };
   const payload = buildBriefReportPayload({
     plan: over,
-    catalog: [catalogMedia],
+    catalog: [priceyMedia],
     isKo: true,
     mixSource: "inquiry_match",
   });
   assert.equal(
     payload.budgetHonesty?.coverValue,
-    "요청 예산 ₩30,000,000 / 이 구성 ₩69,000,000 (230%)",
+    "요청 예산 ₩30,000,000 / 이 구성 ₩35,000,000 (117%)",
   );
   assert.equal(
     payload.budgetHonesty?.overBudgetBanner,
-    "예산 초과 ₩39,000,000 — 수량을 줄이거나 예산을 조정해 주세요.",
+    "예산 초과 ₩5,000,000 — 수량을 줄이거나 예산을 조정해 주세요.",
   );
   assert.equal(
     payload.budgetHonesty?.mixVsBudgetFootnote,
-    "요청 예산 대비 230% 구성입니다",
+    "요청 예산 대비 117% 구성입니다",
   );
   assert.equal(payload.mixSource, "inquiry_match");
   assert.ok(

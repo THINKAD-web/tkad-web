@@ -11,6 +11,7 @@ import {
   PLANNER_CAMPAIGN_GOAL_DEFS,
 } from "@/lib/planner/campaign-goal-defs";
 import { calculatePlan } from "@/lib/planner/calc/engine";
+import { blendedCpmExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
@@ -254,13 +255,15 @@ export function RecommendReportSection({
 
   const budgetAllocation = useMemo(
     () =>
-      plan.breakdown.byCategory.map((s) => ({
-        key: s.key,
-        label: isKo ? s.labelKo : s.labelEn,
-        pct: s.budgetShare,
-        valueWon: s.budgetAmount,
-        actualWon: s.budgetAmount,
-      })),
+      plan.breakdown.byCategory
+        .filter((s) => s.budgetAmount > 0)
+        .map((s) => ({
+          key: s.key,
+          label: isKo ? s.labelKo : s.labelEn,
+          pct: s.budgetShare,
+          valueWon: s.budgetAmount,
+          actualWon: s.budgetAmount,
+        })),
     [plan, isKo],
   );
 
@@ -281,9 +284,10 @@ export function RecommendReportSection({
     () => ({
       monthlyImpressions: plan.impressions.monthlyEquivalent,
       totalImpressions: plan.impressions.campaignTotal,
-      blendedCpmKrw: plan.cpm.campaignWon,
+      blendedCpmKrw:
+        blendedCpmExcludingQuoteOnly(plan, portfolio) ?? plan.cpm.campaignWon,
     }),
-    [plan],
+    [plan, portfolio],
   );
 
   const blendedCpmKrw = portfolioReport.blendedCpmKrw;

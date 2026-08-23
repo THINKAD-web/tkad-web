@@ -159,9 +159,9 @@ test("총노출·CPM·노출기여 앵커 (해외 주단가)", () => {
 
 // ── 이슈 1: AI 경로는 budgetHonesty 미전달 → 1p 「이 구성」 누락 ───────────
 
-test("이슈1 — AI recommend 경로는 budgetHonesty 가 없다 (1p 총 예산만)", () => {
+test("이슈1 — AI recommend 경로도 budgetHonesty 를 채운다", () => {
   const p = aiRecommendPayload([]);
-  assert.equal(p.budgetHonesty, undefined);
+  assert.ok(p.budgetHonesty?.coverValue?.includes("이 구성"));
 });
 
 test("이슈1 대조 — 브리프 경로는 budgetHonesty 를 채운다", () => {

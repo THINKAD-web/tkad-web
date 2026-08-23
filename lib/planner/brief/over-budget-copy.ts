@@ -1,6 +1,6 @@
 /**
  * 예산 vs 믹스 합계 — Step 3 화면과 PDF/PPTX가 같은 문구를 쓴다.
- * 숫자는 calcMixMetrics 의 overBudgetWon / budgetUsedRate.
+ * 협의가(quote_only) 매체는 확정분만 합산한다.
  */
 
 export function formatWonAmount(n: number, isKo: boolean): string {
@@ -29,18 +29,33 @@ export function budgetCoverValue(args: {
   mixWon: number;
   budgetUsedRate: number;
   isKo: boolean;
+  /** 협의가 매체가 있으면 「확정」 라벨 */
+  confirmedLabel?: boolean;
 }): string {
   const pct = budgetUsedPct(args.budgetUsedRate);
+  const mixLabel = args.confirmedLabel
+    ? args.isKo
+      ? "확정"
+      : "confirmed"
+    : args.isKo
+      ? "이 구성"
+      : "this mix";
   return args.isKo
-    ? `요청 예산 ${formatWonAmount(args.requestWon, true)} / 이 구성 ${formatWonAmount(args.mixWon, true)} (${pct}%)`
-    : `Requested ${formatWonAmount(args.requestWon, false)} / this mix ${formatWonAmount(args.mixWon, false)} (${pct}%)`;
+    ? `요청 예산 ${formatWonAmount(args.requestWon, true)} / ${mixLabel} ${formatWonAmount(args.mixWon, true)} (${pct}%)`
+    : `Requested ${formatWonAmount(args.requestWon, false)} / ${mixLabel} ${formatWonAmount(args.mixWon, false)} (${pct}%)`;
 }
 
 export function mixVsBudgetFootnote(
   budgetUsedRate: number,
   isKo: boolean,
+  opts?: { quoteOnlyExcluded?: boolean },
 ): string {
   const pct = budgetUsedPct(budgetUsedRate);
+  if (opts?.quoteOnlyExcluded) {
+    return isKo
+      ? `요청 예산 대비 ${pct}% (확정분 기준 · 문의 매체 제외)`
+      : `${pct}% of requested budget (confirmed only · inquiry media excluded)`;
+  }
   return isKo
     ? `요청 예산 대비 ${pct}% 구성입니다`
     : `This mix is ${pct}% of the requested budget`;
@@ -48,12 +63,16 @@ export function mixVsBudgetFootnote(
 
 export type PlannerExportBudgetHonesty = {
   requestWon: number;
+  /** 확정(고정 단가) 합계 — 협의가 제외 */
   mixWon: number;
   overBudgetWon: number;
   budgetUsedRate: number;
   coverValue: string;
   overBudgetBanner: string | null;
   mixVsBudgetFootnote: string;
+  /** 협의가 매체 각주 (1p·매체구성) */
+  quoteOnlyFootnote?: string;
+  quoteOnlyCount?: number;
 };
 
 export function buildExportBudgetHonesty(args: {
@@ -62,18 +81,31 @@ export function buildExportBudgetHonesty(args: {
   overBudgetWon: number;
   budgetUsedRate: number;
   isKo: boolean;
+  quoteOnlyCount?: number;
+  quoteOnlyFootnote?: string;
 }): PlannerExportBudgetHonesty | undefined {
   if (args.requestWon <= 0) return undefined;
+  const hasQuoteOnly = (args.quoteOnlyCount ?? 0) > 0;
   return {
     requestWon: args.requestWon,
     mixWon: args.mixWon,
     overBudgetWon: args.overBudgetWon,
     budgetUsedRate: args.budgetUsedRate,
-    coverValue: budgetCoverValue(args),
+    coverValue: budgetCoverValue({
+      requestWon: args.requestWon,
+      mixWon: args.mixWon,
+      budgetUsedRate: args.budgetUsedRate,
+      isKo: args.isKo,
+      confirmedLabel: hasQuoteOnly,
+    }),
     overBudgetBanner:
       args.overBudgetWon > 0
         ? overBudgetBannerLine(args.overBudgetWon, args.isKo)
         : null,
-    mixVsBudgetFootnote: mixVsBudgetFootnote(args.budgetUsedRate, args.isKo),
+    mixVsBudgetFootnote: mixVsBudgetFootnote(args.budgetUsedRate, args.isKo, {
+      quoteOnlyExcluded: hasQuoteOnly,
+    }),
+    quoteOnlyFootnote: args.quoteOnlyFootnote,
+    quoteOnlyCount: args.quoteOnlyCount,
   };
 }

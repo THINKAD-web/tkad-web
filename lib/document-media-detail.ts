@@ -1,4 +1,5 @@
 import type { MediaItem, MediaPriceOption } from "@/lib/media-data";
+import { isQuoteOnlyMedia, mediaQuoteOnlyLabel } from "@/lib/media-pricing-mode";
 import { MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import {
   catalogPriceFieldToWon,
@@ -66,7 +67,7 @@ export type DocumentMediaDetail = {
   executionPeriodLabel?: string;
   recommendReason?: string;
   exposureContributionPct?: number;
-  budgetContributionPct?: number;
+  budgetContributionPct?: number | null;
 };
 
 export type DocumentMediaDetailSource =
@@ -268,7 +269,7 @@ export function mediaToDocumentDetail(
     lineTotalWon?: number;
     months?: number;
     exposureContributionPct?: number;
-    budgetContributionPct?: number;
+    budgetContributionPct?: number | null;
   } & DocumentBroadcastResolveOpts,
 ): DocumentMediaDetail {
   const isKo = opts.isKo;
@@ -384,11 +385,22 @@ export function computePortfolioContributions(
   // 반올림하면 이중 반올림이 되어 21.49% 가 22% 로 올라간다.
   // 분자·분모 모두 PlanResult 값이므로 재계산이 아니라 표시 반올림만 한 번 한다.
   const impTotal = plan.impressions.campaignTotal || 1;
-  const netTotal = plan.money.mediaNet || 1;
+  const netTotal =
+    plan.mediaItems
+      .filter((row) => {
+        const media = items.find((m) => m.id === row.id);
+        return media != null && !isQuoteOnlyMedia(media);
+      })
+      .reduce((s, r) => s + r.itemNet, 0) || 1;
   for (const row of plan.mediaItems) {
+    const media = items.find((m) => m.id === row.id);
+    const budgetPct =
+      media != null && isQuoteOnlyMedia(media)
+        ? null
+        : Math.round((row.itemNet / netTotal) * 100);
     map.set(row.id, {
       exposurePct: Math.round((row.campaignImpressions / impTotal) * 100),
-      budgetPct: Math.round((row.itemNet / netTotal) * 100),
+      budgetPct,
     });
   }
   return map;
@@ -462,17 +474,21 @@ export function mediaItemToExportRow(
     lineTotalWon,
     months: opts?.months,
     exposureContributionPct: c?.exposurePct,
-    budgetContributionPct: c?.budgetPct,
+    budgetContributionPct:
+      c?.budgetPct === null ? null : c?.budgetPct,
   });
+  const quoteOnly = isQuoteOnlyMedia(m);
   const monthlyPriceLabel =
-    monthlyWon > 0
-      ? formatReportMonthlyPriceLabel(
-          monthlyWon,
-          m.pricePeriod ?? "month",
-          m.country,
-          isKo,
-        )
-      : detail.monthlyPriceLabel;
+    quoteOnly
+      ? mediaQuoteOnlyLabel(isKo)
+      : monthlyWon > 0
+        ? formatReportMonthlyPriceLabel(
+            monthlyWon,
+            m.pricePeriod ?? "month",
+            m.country,
+            isKo,
+          )
+        : detail.monthlyPriceLabel;
   const quantityLabel = (() => {
     if (opts?.planCartItem) {
       const multi = formatPlanCartMultiOptionQuantityLabel(
@@ -512,15 +528,20 @@ export function mediaItemToExportRow(
     type: m.type ?? undefined,
     priceLabel: monthlyPriceLabel ?? detail.monthlyPriceLabel,
     monthlyPriceLabel,
+    budgetContributionPct: quoteOnly
+      ? null
+      : detail.budgetContributionPct,
     lineTotalLabel:
-      lineTotalWon != null && lineTotalWon > 0
-        ? formatReportLineTotalLabel(
-            lineTotalWon,
-            m.country,
-            isKo,
-            opts?.months,
-          )
-        : detail.lineTotalLabel,
+      quoteOnly
+        ? mediaQuoteOnlyLabel(isKo)
+        : lineTotalWon != null && lineTotalWon > 0
+          ? formatReportLineTotalLabel(
+              lineTotalWon,
+              m.country,
+              isKo,
+              opts?.months,
+            )
+          : detail.lineTotalLabel,
     quantityLabel,
     dailyTraffic,
     adjustedDailyReach: opts?.adjustedDailyReachById?.[m.id],

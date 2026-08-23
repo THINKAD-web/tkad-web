@@ -97,7 +97,8 @@ export function MediaDetailCard({
   const showContributionBars =
     showContribution &&
     (portfolioSize == null || portfolioSize > 1) &&
-    (detail.exposureContributionPct != null || detail.budgetContributionPct != null);
+    (detail.exposureContributionPct != null ||
+      detail.budgetContributionPct !== undefined);
 
   const cardClassName = cn(
     "flex gap-3 overflow-hidden rounded-xl border bg-white p-4 shadow-sm sm:gap-4 sm:p-5",
@@ -239,12 +240,21 @@ export function MediaDetailCard({
                 color="#06B6D4"
               />
             ) : null}
-            {detail.budgetContributionPct != null ? (
-              <ContributionBar
-                label={isKo ? "예산 비중" : "Budget share"}
-                pct={detail.budgetContributionPct}
-                color="#7C3AED"
-              />
+            {detail.budgetContributionPct !== undefined ? (
+              detail.budgetContributionPct != null ? (
+                <ContributionBar
+                  label={isKo ? "예산 비중" : "Budget share"}
+                  pct={detail.budgetContributionPct}
+                  color="#7C3AED"
+                />
+              ) : (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-[#6B7280]">
+                    {isKo ? "예산 비중" : "Budget share"}
+                  </p>
+                  <p className="text-sm font-semibold text-[#374151]">—</p>
+                </div>
+              )
             ) : null}
           </div>
         ) : null}

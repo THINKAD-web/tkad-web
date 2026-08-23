@@ -35,6 +35,8 @@ const HANSEO = {
   country: "KR",
   price: 0,
   pricePeriod: "month",
+  mediaSubCategory: "wall_mural",
+  pricingMode: "quote_only",
   lat: 37.54,
   lng: 127.05,
   dailyFootTraffic: 48_000,
@@ -53,6 +55,8 @@ const HANSUNG = {
   country: "KR",
   price: 0,
   pricePeriod: "biweekly",
+  mediaSubCategory: "wall_mural",
+  pricingMode: "quote_only",
   priceOptions: [
     {
       label: "2주",
@@ -80,14 +84,15 @@ test("카탈로그 데이터 — 구·신 가격 경로 모두 0 (PR #453 회귀
   }
 });
 
-test("매체 카드 — 월단가·집행소계 행 없음 (0원 라벨 미생성)", () => {
+test("매체 카드 — 협의가는 문의 라벨", () => {
   const row = mediaItemToExportRow(HANSEO, true, {
     months: 1,
     periodCtx: { months: 1 },
     pricing: { quantities: { [HANSEO.id]: 1 } },
   });
-  assert.equal(row.monthlyPriceLabel, undefined);
-  assert.equal(row.lineTotalLabel, undefined);
+  assert.equal(row.monthlyPriceLabel, "문의");
+  assert.equal(row.lineTotalLabel, "문의");
+  assert.equal(row.budgetContributionPct, null);
 });
 
 test("한승빌딩 — priceOptions 0원·수량 2주만 표시", () => {
@@ -99,12 +104,12 @@ test("한승빌딩 — priceOptions 0원·수량 2주만 표시", () => {
       priceOptionIndex: { [HANSUNG.id]: 0 },
     },
   });
-  assert.equal(row.monthlyPriceLabel, undefined);
-  assert.equal(row.lineTotalLabel, undefined);
+  assert.equal(row.monthlyPriceLabel, "문의");
+  assert.equal(row.lineTotalLabel, "문의");
   assert.match(row.quantityLabel ?? "", /2주/);
 });
 
-test("상권표 — 내부 monthlyBudgetWon 은 0 이지만 표시는 가격 문의", () => {
+test("상권표 — 협의가 매체는 문의 표기", () => {
   const portfolio = [HANSEO, HANSUNG];
   const pricing = {
     quantities: Object.fromEntries(portfolio.map((m) => [m.id, 1])),
@@ -128,14 +133,14 @@ test("상권표 — 내부 monthlyBudgetWon 은 0 이지만 표시는 가격 문
   }
 });
 
-test("formatExportBudgetWonLabel — 양수는 ₩, 0 이하는 가격 문의", () => {
+test("formatExportBudgetWonLabel — 양수는 ₩, 0 이하는 문의", () => {
   assert.equal(formatExportBudgetWonLabel(1_000_000, true), "₩1,000,000");
-  assert.equal(formatExportBudgetWonLabel(0, true), "가격 문의");
-  assert.equal(formatExportBudgetWonLabel(-1, true), "가격 문의");
+  assert.equal(formatExportBudgetWonLabel(0, true), "문의");
+  assert.equal(formatExportBudgetWonLabel(-1, true), "문의");
   assert.ok(assertNoZeroWonPriceDisplay(formatExportBudgetWonLabel(0, true)));
 });
 
-test("보고서 payload — 0원 매체 포함 시 협의 단가 안내 각주", () => {
+test("보고서 payload — 협의가 매체 포함 시 각주", () => {
   const portfolio = [HANSEO, HANSUNG];
   const payload = buildOohReportPayload({
     isKo: true,
@@ -158,7 +163,8 @@ test("보고서 payload — 0원 매체 포함 시 협의 단가 안내 각주",
     campaignMediaPriceOptionIndex: { [HANSUNG.id]: 0 },
   });
 
-  assert.ok(payload.unpricedMediaNotice, "0원 매체가 있으면 안내 문구");
-  assert.match(payload.unpricedMediaNotice!, /단가 협의/);
-  assert.match(payload.unpricedMediaNotice!, /포함되지 않을 수 있습니다/);
+  assert.ok(payload.quoteOnlyNotice, "협의가 매체가 있으면 안내 문구");
+  assert.match(payload.quoteOnlyNotice!, /외벽 2건 별도 문의/);
+  assert.match(payload.quoteOnlyNotice!, /포함되지 않습니다/);
+  assert.ok(payload.budgetHonesty?.coverValue?.includes("확정"));
 });

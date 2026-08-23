@@ -294,6 +294,12 @@ export function prismaMediaToMediaItem(
     nearbyLandmarks: m.nearbyLandmarks?.trim() || undefined,
     type: m.type,
     price: m.price,
+    pricingMode:
+      (m as Media & { pricingMode?: string }).pricingMode === "quote_only"
+        ? "quote_only"
+        : (m as Media & { pricingMode?: string }).pricingMode === "fixed"
+          ? "fixed"
+          : undefined,
     lat,
     lng,
     coordinatesAreFallback,

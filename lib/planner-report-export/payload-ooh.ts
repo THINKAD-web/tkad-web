@@ -23,7 +23,9 @@ import type {
 } from "@/lib/planner-report-export/types";
 import { buildPerformanceChartGuide } from "@/lib/planner-report-performance-guide";
 import { buildPartialRateNotice } from "@/lib/planner/partial-rate-notice";
-import { buildUnpricedMediaNotice } from "@/lib/planner/unpriced-media-notice";
+import { buildQuoteOnlyNotice } from "@/lib/planner/quote-only-portfolio";
+import { buildReportBudgetHonesty } from "@/lib/planner/report-budget-honesty";
+import { portfolioQuoteOnlyMedia } from "@/lib/media-pricing-mode";
 import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-rationale";
 import { regionalBreakdownSectionLines } from "@/lib/plan-cart-report/regional-breakdown";
 import { computeRegionSubdivisionReport } from "@/lib/plan-cart-report/region-subdivision";
@@ -167,15 +169,17 @@ export function buildOohReportPayload(
     isKo,
   });
 
-  const unpricedMediaNotice = buildUnpricedMediaNotice({
+  const quoteOnlyNotice = buildQuoteOnlyNotice({
     portfolio: a.portfolio,
     isKo,
   });
+  const hasQuoteOnly = portfolioQuoteOnlyMedia(a.portfolio).length > 0;
+  const cpmExcludesQuoteOnly = hasQuoteOnly;
 
   const portfolioMetrics = {
     monthlyImpressions: plan.impressions.monthlyEquivalent,
     totalImpressions: plan.impressions.campaignTotal,
-    blendedCpmKrw: plan.cpm.campaignWon,
+    blendedCpmKrw: a.blendedCpmKrw ?? plan.cpm.campaignWon,
   };
   const usePortfolioReach =
     a.portfolio.length > 0 && portfolioMetrics.monthlyImpressions > 0;
@@ -208,7 +212,13 @@ export function buildOohReportPayload(
   if (blendedForKpi && blendedForKpi > 0) {
     kpis.push(
       exportKpiValue(
-        isKo ? "블렌디드 CPM" : "Blended CPM",
+        cpmExcludesQuoteOnly
+          ? isKo
+            ? "블렌디드 CPM (문의 매체 제외)"
+            : "Blended CPM (excl. inquiry)"
+          : isKo
+            ? "블렌디드 CPM"
+            : "Blended CPM",
         `₩${blendedForKpi.toLocaleString()}`,
         badge("cpm"),
       ),
@@ -476,6 +486,23 @@ export function buildOohReportPayload(
     }));
   })();
 
+  const confirmedFromAllocation = a.budgetAllocation.reduce(
+    (sum, s) => sum + (s.actualWon ?? s.valueWon),
+    0,
+  );
+  const budgetHonesty =
+    a.budgetHonesty ??
+    buildReportBudgetHonesty({
+      requestWon: Math.max(0, a.budgetMan) * 10_000,
+      portfolio: a.portfolio,
+      pricing,
+      periodCtx: periodCtx ?? { months: 1 },
+      isKo,
+      confirmedMixWon:
+        confirmedFromAllocation > 0 ? confirmedFromAllocation : undefined,
+      planMetrics: plan.metrics,
+    });
+
   return {
     kind: "ooh",
     isKo,
@@ -513,12 +540,14 @@ export function buildOohReportPayload(
     portfolioGroups,
     recommendRationale,
     mixSource: a.mixSource,
-    budgetHonesty: a.budgetHonesty,
+    budgetHonesty,
     sections,
     digitalOmittedNotice: a.digitalOmittedNotice,
     staleEngineNotice: a.staleEngineNotice,
     partialRateNotice: partialRateNotice?.text,
-    unpricedMediaNotice: unpricedMediaNotice?.text,
+    quoteOnlyNotice: quoteOnlyNotice?.text,
+    unpricedMediaNotice: quoteOnlyNotice?.text,
+    cpmExcludesQuoteOnly: cpmExcludesQuoteOnly || undefined,
     currencyFootnote: portfolioHasJapanMedia(orderedPortfolio)
       ? formatReportJpyExchangeFootnote(isKo)
       : undefined,

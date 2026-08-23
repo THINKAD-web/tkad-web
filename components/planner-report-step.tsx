@@ -11,6 +11,7 @@ import {
   type PlannerMetrics,
 } from "@/lib/planner-logic";
 import { calculatePlan } from "@/lib/planner/calc/engine";
+import { blendedCpmExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
 import { plannerMediaPeriodLineWon } from "@/lib/planner/planner-media-quantity";
 import type {
   PlannerAgeKey,
@@ -262,13 +263,15 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
 
   const budgetAllocation = useMemo(
     () =>
-      plan.breakdown.byCategory.map((s) => ({
-        key: s.key,
-        label: isKo ? s.labelKo : s.labelEn,
-        pct: s.budgetShare,
-        valueWon: s.budgetAmount,
-        actualWon: s.budgetAmount,
-      })),
+      plan.breakdown.byCategory
+        .filter((s) => s.budgetAmount > 0)
+        .map((s) => ({
+          key: s.key,
+          label: isKo ? s.labelKo : s.labelEn,
+          pct: s.budgetShare,
+          valueWon: s.budgetAmount,
+          actualWon: s.budgetAmount,
+        })),
     [plan, isKo],
   );
 
@@ -289,9 +292,10 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
     () => ({
       monthlyImpressions: plan.impressions.monthlyEquivalent,
       totalImpressions: plan.impressions.campaignTotal,
-      blendedCpmKrw: plan.cpm.campaignWon,
+      blendedCpmKrw:
+        blendedCpmExcludingQuoteOnly(plan, portfolio) ?? plan.cpm.campaignWon,
     }),
-    [plan],
+    [plan, portfolio],
   );
   const usePortfolioReach =
     portfolio.length > 0 && portfolioReport.monthlyImpressions > 0;

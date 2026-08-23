@@ -14,6 +14,7 @@
  */
 
 import type { MediaItem } from "@/lib/media-data";
+import { isQuoteOnlyMedia } from "@/lib/media-pricing-mode";
 import { calcImpressions } from "@/lib/metrics/impressions";
 import { calcNetReach } from "@/lib/metrics/reach";
 import { resolveMediaProductPrice } from "@/lib/metrics/media-price-adapter";
@@ -195,11 +196,13 @@ export function calcMixMetrics(params: {
   const costBases: MetricBasis[] = [];
   const impBases: MetricBasis[] = [];
 
-  for (const l of lines) {
-    if (l.costWon) {
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i]!;
+    const quoteOnly = isQuoteOnlyMedia(params.lines[i]!.media);
+    if (l.costWon && !quoteOnly) {
       totalCostWon += l.costWon.value;
       costBases.push(l.costWon.basis);
-    } else {
+    } else if (!quoteOnly) {
       // 금액을 해석하지 못한 매체가 하나라도 있으면 합계는 추정이다
       costBases.push("default");
     }
