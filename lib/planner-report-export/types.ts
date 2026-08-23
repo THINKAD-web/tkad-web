@@ -199,7 +199,7 @@ export type PlannerReportExportPayload = {
   cpmFootnote?: string;
   /** JP 매체 포함 시 ¥ 환산 각주 (합계·차트는 KRW 유지) */
   currencyFootnote?: string;
-  /** 제작비·부가세 별도 — RFP 견적과 동일 SSOT */
+  /** 제작·설치 협의 고지 — VAT는 quoteSummary 표에서만 */
   pricingFootnote?: string;
   /** C-full-3a — 매체비·제작비·VAT·총액 견적 표 */
   quoteSummary?: PlannerExportQuoteSummary;
@@ -212,7 +212,7 @@ export type PlannerExportQuoteSummary = {
   productionWon: number;
   vatWon: number;
   totalWon: number;
-  /** 협의가 포함 시 「합계 (협의 매체 제외)」 등 — web/PDF/PPTX 공용 */
+  /** 협의가 포함 시 「합계 (부가세 포함 · 협의 매체 제외)」 등 — web/PDF/PPTX 공용 */
   totalLabel: string;
   quoteOnlyLine?: {
     label: string;

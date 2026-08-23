@@ -7,10 +7,11 @@ import {
   buildScenarioArgs,
 } from "@/lib/planner-report-export/__tests__/payload-snapshot-scenarios";
 
-test("plannerReportPricingFootnote — Korean VAT and production notice", () => {
+test("plannerReportPricingFootnote — Korean production notice without VAT duplicate", () => {
   const text = plannerReportPricingFootnote(true);
-  assert.match(text, /제작비·부가세 별도/);
+  assert.doesNotMatch(text, /부가세/);
   assert.match(text, /송출료/);
+  assert.match(text, /제작·설치/);
 });
 
 test("buildOohReportPayload — attaches pricingFootnote", () => {

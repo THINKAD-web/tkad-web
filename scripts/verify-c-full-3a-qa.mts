@@ -113,7 +113,7 @@ log(
 );
 log(
   "협의가 총액 라벨",
-  payload.quoteSummary?.totalLabel === "합계 (협의 매체 제외)",
+  payload.quoteSummary?.totalLabel === "합계 (부가세 포함 · 협의 매체 제외)",
   payload.quoteSummary?.totalLabel,
 );
 log(

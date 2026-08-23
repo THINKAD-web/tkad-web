@@ -13,7 +13,7 @@ test("buildPlannerQuoteSummary — VAT on media + production, SSOT mixWon", () =
   assert.equal(summary!.productionWon, 2_000_000);
   assert.equal(summary!.vatWon, 1_200_000);
   assert.equal(summary!.totalWon, 13_200_000);
-  assert.equal(summary!.totalLabel, "총액 (VAT 포함)");
+  assert.equal(summary!.totalLabel, "총액 (부가세 포함)");
   assert.equal(summary!.quoteOnlyLine, undefined);
   assert.equal(summary!.footnotes.length, 0);
 });
@@ -29,7 +29,7 @@ test("buildPlannerQuoteSummary — quote-only line excluded from totals", () => 
   assert.equal(summary!.supplyWon, 5_000_000);
   assert.equal(summary!.vatWon, 500_000);
   assert.equal(summary!.totalWon, 5_500_000);
-  assert.equal(summary!.totalLabel, "합계 (협의 매체 제외)");
+  assert.equal(summary!.totalLabel, "합계 (부가세 포함 · 협의 매체 제외)");
   assert.match(summary!.quoteOnlyLine!.label, /외벽 2건 — 별도 협의/);
   assert.equal(summary!.quoteOnlyLine!.amountLabel, "문의");
   assert.equal(summary!.footnotes.length, 1);
