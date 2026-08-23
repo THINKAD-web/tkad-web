@@ -12,11 +12,20 @@
  * Writes: scripts/.dry-run-pricing-mode/report.json
  */
 import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+import { normalizePgDatabaseUrl } from "../lib/normalize-pg-database-url.ts";
 import { isQuoteOnlyMedia } from "../lib/media-pricing-mode.ts";
 import type { MediaItem } from "../lib/media-data.ts";
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+config({ path: resolve(root, ".env") });
+config({ path: resolve(root, ".env.local"), override: true });
+config({ path: resolve(root, ".env.preview.local"), override: true });
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, ".dry-run-pricing-mode");
@@ -66,10 +75,15 @@ async function fromDatabase(): Promise<{
   wouldStayFixed: Row[];
   wallMuralActive: Row[];
 } | null> {
-  const url = process.env.MIGRATION_DRY_RUN_DATABASE_URL ?? process.env.DATABASE_URL;
+  const url = normalizePgDatabaseUrl(
+    process.env.MIGRATION_DRY_RUN_DATABASE_URL ??
+      process.env.DATABASE_URL ??
+      "",
+  );
   if (!url || process.env.MIGRATION_DRY_RUN_SOURCE === "catalog") return null;
 
-  const db = new PrismaClient();
+  const pool = new Pool({ connectionString: url });
+  const db = new PrismaClient({ adapter: new PrismaPg(pool) });
   try {
     const wallMuralActive = await db.$queryRaw<Row[]>`
       SELECT id, name, price, media_sub_category AS "mediaSubCategory",
@@ -99,6 +113,7 @@ async function fromDatabase(): Promise<{
     };
   } finally {
     await db.$disconnect();
+    await pool.end();
   }
 }
 
