@@ -2305,8 +2305,9 @@ model PlanReportActivity {
   mediaCount  Int      @default(0) @map("media_count")
   goalTitle   String?  @map("goal_title") @db.VarChar(120)
   regionsText String?  @map("regions_text") @db.VarChar(500)
-  reportTitle String?  @map("report_title") @db.VarChar(200)
-  createdAt   DateTime @default(now()) @map("created_at")
+  reportTitle    String?  @map("report_title") @db.VarChar(200)
+  recipientEmail String?  @map("recipient_email") @db.VarChar(320)
+  createdAt      DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

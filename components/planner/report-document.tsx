@@ -21,6 +21,7 @@ import {
 } from "@/components/document/document-layout";
 import { ReportScanLine } from "@/components/planner/report-scan-text";
 import { ReportMediaLineupSection } from "@/components/planner/report-media-lineup-section";
+import { ReportQuoteSummarySection } from "@/components/planner/report-quote-summary-section";
 import { ReportPortfolioMapSection } from "@/components/planner/report-portfolio-map-section";
 import { sectionVisible, filterExportSections } from "@/lib/planner-report-export/section-visibility";
 import type { PlannerReportSectionVisibility } from "@/lib/planner-report-export/section-visibility";
@@ -229,14 +230,39 @@ export const PlannerReportDocument = forwardRef<
     className?: string;
     editableTitle?: boolean;
     onDocumentTitleChange?: (title: string) => void;
+    editableClientName?: boolean;
+    onClientNameChange?: (name: string) => void;
+    editableGreeting?: boolean;
+    onGreetingChange?: (text: string) => void;
+    editableExecutiveSummary?: boolean;
+    onExecutiveSummaryChange?: (text: string) => void;
   }
 >(function PlannerReportDocument(
-  { payload: p, mapPortfolio, sectionVisibility, className, editableTitle, onDocumentTitleChange },
+  {
+    payload: p,
+    mapPortfolio,
+    sectionVisibility,
+    className,
+    editableTitle,
+    onDocumentTitleChange,
+    editableClientName,
+    onClientNameChange,
+    editableGreeting,
+    onGreetingChange,
+    editableExecutiveSummary,
+    onExecutiveSummaryChange,
+  },
   ref,
 ) {
   const isKo = p.isKo;
   const vis = sectionVisibility;
-  const visibleSections = filterExportSections(p.sections, vis);
+  const visibleSections = filterExportSections(p.sections, vis)?.filter(
+    (sec) =>
+      !(
+        p.executiveSummaryLines?.length &&
+        (sec.title === "전략 요약" || sec.title === "Strategy summary")
+      ),
+  );
   const summary: Array<[string, string]> = [
     [isKo ? "캠페인 목표" : "Goal", p.goalTitle || "—"],
     [isKo ? "총 예산" : "Total budget", p.budgetHonesty?.coverValue ?? fmtBudget(p.budgetMan, isKo)],
@@ -264,6 +290,15 @@ export const PlannerReportDocument = forwardRef<
               ? "OOH 미디어 플랜"
               : "OOH media plan"
         } · ${p.generatedAt}`}
+        coverLogoUrl={p.coverLogoUrl}
+        clientName={p.clientName}
+        clientNameEditable={editableClientName}
+        onClientNameChange={onClientNameChange}
+        clientNamePlaceholder={
+          isKo ? "광고주명 (선택, 예: OO브랜드)" : "Client name (optional)"
+        }
+        clientNameAriaLabel={isKo ? "광고주명" : "Client name"}
+        clientNameSuffix={!editableClientName && isKo ? "귀중" : undefined}
         titleEditable={editableTitle}
         onTitleChange={onDocumentTitleChange}
         titlePlaceholder={
@@ -273,6 +308,66 @@ export const PlannerReportDocument = forwardRef<
       />
 
       <div className="space-y-9 px-6 py-8 sm:px-9">
+        {editableGreeting && onGreetingChange ? (
+          <section className="space-y-2" data-testid="report-greeting-edit">
+            <DocumentSectionHeading>
+              {isKo ? "인사말" : "Greeting"}
+            </DocumentSectionHeading>
+            <textarea
+              value={p.greetingText ?? ""}
+              onChange={(e) => onGreetingChange(e.target.value)}
+              rows={4}
+              placeholder={
+                isKo
+                  ? "광고주에게 전달할 인사말 (비우면 PDF에서 생략)"
+                  : "Greeting to the client (leave empty to omit)"
+              }
+              className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-[color:var(--qp-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/30"
+            />
+          </section>
+        ) : p.greetingText?.trim() ? (
+          <section className="space-y-2">
+            <DocumentSectionHeading>
+              {isKo ? "인사말" : "Greeting"}
+            </DocumentSectionHeading>
+            <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50/60 p-4 text-sm leading-relaxed text-gray-800">
+              {p.greetingText.split(/\n+/).map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {editableExecutiveSummary && onExecutiveSummaryChange ? (
+          <section className="space-y-2" data-testid="report-executive-edit">
+            <DocumentSectionHeading>
+              {isKo ? "전략 요약" : "Strategy summary"}
+            </DocumentSectionHeading>
+            <textarea
+              value={(p.executiveSummaryLines ?? []).join("\n\n")}
+              onChange={(e) => onExecutiveSummaryChange(e.target.value)}
+              rows={8}
+              placeholder={
+                isKo
+                  ? "제안 배경·전략·다음 액션 (비우면 PDF에서 생략)"
+                  : "Proposal context and strategy (leave empty to omit)"
+              }
+              className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-[color:var(--qp-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/30"
+            />
+          </section>
+        ) : p.executiveSummaryLines && p.executiveSummaryLines.length > 0 ? (
+          <section className="space-y-3">
+            <DocumentSectionHeading>
+              {isKo ? "전략 요약" : "Strategy summary"}
+            </DocumentSectionHeading>
+            <ul className="space-y-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
+              {p.executiveSummaryLines.map((line, i) => (
+                <ReportScanLine key={i} text={line} />
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         {/* 캠페인 개요 */}
         <section className="space-y-4">
           <DocumentSectionHeading>{isKo ? "캠페인 개요" : "Campaign overview"}</DocumentSectionHeading>
@@ -335,6 +430,19 @@ export const PlannerReportDocument = forwardRef<
               </div>
             ))}
           </div>
+        ) : null}
+
+        {p.quoteSummary ? (
+          <ReportQuoteSummarySection summary={p.quoteSummary} isKo={isKo} />
+        ) : null}
+
+        {p.cpmFootnote ? (
+          <p
+            className="text-[11px] leading-snug text-gray-500"
+            data-testid="report-cpm-footnote"
+          >
+            {p.cpmFootnote}
+          </p>
         ) : null}
 
         {p.budgetHonesty?.overBudgetBanner ? (
@@ -425,6 +533,11 @@ export const PlannerReportDocument = forwardRef<
               <div className="rounded-xl border border-gray-200 p-4">
                 <p className="mb-1 text-xs font-semibold text-gray-500">
                   {isKo ? "CPM 비교 (원)" : "CPM comparison (KRW)"}
+                  {p.cpmExcludesQuoteOnly
+                    ? isKo
+                      ? " (문의 매체 제외)"
+                      : " (excl. inquiry)"
+                    : ""}
                 </p>
                 <p className="mb-3 text-[10px] leading-snug text-gray-400">
                   {isKo
@@ -677,8 +790,15 @@ export const PlannerReportDocument = forwardRef<
             {p.currencyFootnote}
           </p>
         ) : null}
+        {p.pricingFootnote ? (
+          <p
+            className={`text-[11px] leading-relaxed text-gray-500 ${p.currencyFootnote ? "pt-2" : "border-t border-gray-100 pt-5"}`}
+          >
+            {p.pricingFootnote}
+          </p>
+        ) : null}
         <p
-          className={`text-[11px] leading-relaxed text-gray-400 ${p.currencyFootnote ? "pt-2" : "border-t border-gray-100 pt-5"}`}
+          className={`text-[11px] leading-relaxed text-gray-400 ${p.currencyFootnote || p.pricingFootnote ? "pt-2" : "border-t border-gray-100 pt-5"}`}
         >
           {p.disclaimer}
         </p>

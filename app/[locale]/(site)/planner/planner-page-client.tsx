@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * DEAD CODE — `/ko/planner` 는 3단계 브리프(`BriefFlowClient`)를 사용한다.
+ * 이 파일(6단계 위저드)은 어떤 page.tsx 에도 import 되지 않으며 삭제 예정.
+ * C-full UI 변경은 `brief-step-three.tsx` 에만 반영할 것.
+ */
+
 import {
   useCallback,
   useEffect,
@@ -74,6 +80,7 @@ import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-se
 import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 import { computePlanCartRegionalBreakdown } from "@/lib/plan-cart-report/regional-breakdown";
 import { calculatePlan } from "@/lib/planner/calc/engine";
+import { categoryCpmBarsExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
 import { plannerMonthlyPriceWonForMedia } from "@/lib/planner/planner-media-quantity";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
@@ -594,14 +601,7 @@ export default function PlannerPageClient({
       budgetWon: 0,
       locale: isKo ? "ko" : "en",
     });
-    return plan.breakdown.byCategory
-      .filter((s) => (s.cpmWon ?? 0) > 0)
-      .map((s) => ({
-        key: s.key,
-        label: isKo ? s.labelKo : s.labelEn,
-        value: s.cpmWon ?? 0,
-      }))
-      .sort((a, b) => a.value - b.value);
+    return categoryCpmBarsExcludingQuoteOnly(plan, portfolio, isKo);
   }, [portfolio, filtered, isKo, portfolioPricing]);
 
   const portfolioBudgetStatus = useMemo(
@@ -1062,6 +1062,13 @@ export default function PlannerPageClient({
         campaignMediaPriceOptionIndex: state.campaignMediaPriceOptionIndex,
         creativeUploadedUrl: state.creativeUploadedUrl,
         mediaPlacements: state.mediaPlacements,
+        reportClientName: state.reportClientName,
+        reportDocumentTitle: state.reportDocumentTitle,
+        reportGreeting: state.reportGreeting,
+        reportExecutiveSummary: state.reportExecutiveSummary,
+        reportGreetingTouched: state.reportGreetingTouched,
+        reportExecutiveSummaryTouched: state.reportExecutiveSummaryTouched,
+        reportCopyFingerprint: state.reportCopyFingerprint,
       };
 
       const userEmail = sessionUser?.email ?? undefined;

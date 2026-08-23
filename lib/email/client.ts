@@ -201,28 +201,58 @@ export async function sendEmailWithPdfAttachment({
   pdfFilename,
   pdfBase64,
 }: SendEmailWithPdfParams): Promise<void> {
+  const result = await sendEmailWithPdfResult({
+    to,
+    subject,
+    text,
+    html,
+    pdfFilename,
+    pdfBase64,
+  });
+  if (!result.sent) {
+    throw new Error(result.error ?? "Failed to send email with PDF");
+  }
+}
+
+export async function sendEmailWithPdfResult({
+  to,
+  subject,
+  text,
+  html,
+  pdfFilename,
+  pdfBase64,
+}: SendEmailWithPdfParams): Promise<SendEmailResult> {
   const pdfBuffer = Buffer.from(pdfBase64, "base64");
 
   if (isResendConfigured()) {
     const resend = resendClient();
-    if (!resend) throw new Error("Email not configured");
-    const body = resendBody(text, html);
-    const { error } = await resend.emails.send({
-      from: resendFromAddress()!,
-      to,
-      subject,
-      ...body,
-      attachments: [{ filename: pdfFilename, content: pdfBuffer }],
-    });
-    if (error) throw new Error(error.message);
-    return;
+    if (!resend) return { sent: false, error: "Resend client unavailable" };
+    try {
+      const body = resendBody(text, html);
+      const { error } = await resend.emails.send({
+        from: resendFromAddress()!,
+        to,
+        subject,
+        ...body,
+        attachments: [{ filename: pdfFilename, content: pdfBuffer }],
+      });
+      if (error) {
+        console.error("[email] Resend:", error);
+        return { sent: false, error: error.message };
+      }
+      return { sent: true };
+    } catch (err) {
+      console.error("[email] Resend failed:", err);
+      return {
+        sent: false,
+        error: err instanceof Error ? err.message : "Resend send failed",
+      };
+    }
   }
 
-  if (!transporter) {
-    throw new Error("Email not configured");
-  }
+  if (!transporter) return { sent: false, error: "SMTP not configured" };
 
-  const from = process.env.SMTP_FROM!;
+  const from = envTrim("SMTP_FROM");
 
   try {
     await transporter.sendMail({
@@ -239,8 +269,12 @@ export async function sendEmailWithPdfAttachment({
         },
       ],
     });
+    return { sent: true };
   } catch (err) {
     console.error("[email] Failed to send email with PDF:", err);
-    throw err;
+    return {
+      sent: false,
+      error: err instanceof Error ? err.message : "SMTP send failed",
+    };
   }
 }

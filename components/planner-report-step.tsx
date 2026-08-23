@@ -11,7 +11,8 @@ import {
   type PlannerMetrics,
 } from "@/lib/planner-logic";
 import { calculatePlan } from "@/lib/planner/calc/engine";
-import { blendedCpmExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
+import { blendedCpmExcludingQuoteOnly, categoryCpmBarsExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
+import { usePlannerStore } from "@/lib/planner/store";
 import { plannerMediaPeriodLineWon } from "@/lib/planner/planner-media-quantity";
 import type {
   PlannerAgeKey,
@@ -21,6 +22,16 @@ import type {
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
+import {
+  buildDefaultExecutiveSummaryLines,
+  buildDefaultReportGreeting,
+  computeReportCopyFingerprint,
+  isReportCopyStale,
+  joinReportCopyLines,
+  splitReportCopyParagraphs,
+} from "@/lib/planner-report-export/report-copy";
+import { ReportCopyStaleBanner } from "@/components/planner/report-copy-stale-banner";
+import { ReportEmailSendDialog } from "@/components/planner/report-email-send-dialog";
 import {
   exportReachPendingLine,
   exportRoiPendingLine,
@@ -276,16 +287,8 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
   );
 
   const cpmBars = useMemo(
-    () =>
-      plan.breakdown.byCategory
-        .filter((s) => (s.cpmWon ?? 0) > 0)
-        .map((s) => ({
-          key: s.key,
-          label: isKo ? s.labelKo : s.labelEn,
-          value: s.cpmWon ?? 0,
-        }))
-        .sort((x, y) => x.value - y.value),
-    [plan, isKo],
+    () => categoryCpmBarsExcludingQuoteOnly(plan, portfolio, isKo),
+    [plan, portfolio, isKo],
   );
 
   const portfolioReport = useMemo(
@@ -400,9 +403,9 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
-  const [userEmail, setUserEmail] = useState("");
-  const [emailSending, setEmailSending] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [emailSentTo, setEmailSentTo] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
 
   const portfolioForExport = useMemo(
@@ -423,6 +426,118 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     props.portfolio,
     props.recommendationContext,
     props.isKo,
+  ]);
+
+  const reportClientName = usePlannerStore((s) => s.reportClientName);
+  const setReportClientName = usePlannerStore((s) => s.setReportClientName);
+  const reportDocumentTitle = usePlannerStore((s) => s.reportDocumentTitle);
+  const setReportDocumentTitle = usePlannerStore((s) => s.setReportDocumentTitle);
+  const reportGreeting = usePlannerStore((s) => s.reportGreeting);
+  const setReportGreeting = usePlannerStore((s) => s.setReportGreeting);
+  const reportExecutiveSummary = usePlannerStore((s) => s.reportExecutiveSummary);
+  const setReportExecutiveSummary = usePlannerStore(
+    (s) => s.setReportExecutiveSummary,
+  );
+  const reportGreetingTouched = usePlannerStore((s) => s.reportGreetingTouched);
+  const reportExecutiveSummaryTouched = usePlannerStore(
+    (s) => s.reportExecutiveSummaryTouched,
+  );
+  const reportCopyFingerprint = usePlannerStore((s) => s.reportCopyFingerprint);
+  const applyReportCopyDraft = usePlannerStore((s) => s.applyReportCopyDraft);
+  const acknowledgeReportCopyFingerprint = usePlannerStore(
+    (s) => s.acknowledgeReportCopyFingerprint,
+  );
+  const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
+
+  const copyFingerprintCurrent = useMemo(
+    () =>
+      computeReportCopyFingerprint({
+        mediaIds: portfolioForExport.map((m) => m.id),
+        quantities: props.campaignMediaQuantities,
+        priceOptionIndex: props.campaignMediaPriceOptionIndex,
+      }),
+    [
+      portfolioForExport,
+      props.campaignMediaQuantities,
+      props.campaignMediaPriceOptionIndex,
+    ],
+  );
+
+  const executiveSummaryLines = useMemo(
+    () => splitReportCopyParagraphs(reportExecutiveSummary),
+    [reportExecutiveSummary],
+  );
+
+  const copyStrategyInput = useMemo(
+    () => ({
+      isKo: props.isKo,
+      campaignGoal: props.campaignGoal ?? null,
+      goalTitle: props.goalTitle,
+      industryKey: props.industryKey ?? props.narrativeContext?.industryKey ?? null,
+      industryText: props.industryText,
+      regionsText: props.regionsText,
+      seoulZones: props.seoulZones ?? [],
+      followUp: props.goalFollowUp ?? {},
+      portfolioCount: portfolioForExport.length,
+      topMediaName:
+        portfolioForExport[0]?.name ??
+        (props.isKo ? "핵심 매체" : "key media"),
+    }),
+    [props, portfolioForExport],
+  );
+
+  useEffect(() => {
+    if (reportGreetingTouched || reportExecutiveSummaryTouched) return;
+    if (portfolioForExport.length === 0) return;
+    const greeting = buildDefaultReportGreeting(
+      props.isKo,
+      reportClientName.trim() || undefined,
+    );
+    const executive = joinReportCopyLines(
+      buildDefaultExecutiveSummaryLines(copyStrategyInput),
+    );
+    applyReportCopyDraft({
+      greeting,
+      executiveSummary: executive,
+      fingerprint: copyFingerprintCurrent,
+    });
+  }, [
+    reportGreetingTouched,
+    reportExecutiveSummaryTouched,
+    portfolioForExport.length,
+    copyFingerprintCurrent,
+    copyStrategyInput,
+    reportClientName,
+    props.isKo,
+    applyReportCopyDraft,
+  ]);
+
+  const copyStale = isReportCopyStale({
+    copyFingerprint: reportCopyFingerprint,
+    greetingTouched: reportGreetingTouched,
+    executiveSummaryTouched: reportExecutiveSummaryTouched,
+    currentFingerprint: copyFingerprintCurrent,
+  });
+
+  const regenerateReportCopy = useCallback(() => {
+    const greeting = buildDefaultReportGreeting(
+      props.isKo,
+      reportClientName.trim() || undefined,
+    );
+    const executive = joinReportCopyLines(
+      buildDefaultExecutiveSummaryLines(copyStrategyInput),
+    );
+    applyReportCopyDraft({
+      greeting,
+      executiveSummary: executive,
+      fingerprint: copyFingerprintCurrent,
+    });
+  }, [
+    props.isKo,
+    reportClientName,
+    copyStrategyInput,
+    copyFingerprintCurrent,
+    applyReportCopyDraft,
   ]);
 
   const payload = useMemo(
@@ -455,22 +570,35 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         campaignMediaQuantities: props.campaignMediaQuantities,
         campaignMediaPriceOptionIndex: props.campaignMediaPriceOptionIndex,
         planCartItems: props.planCartItems,
+        reportGreeting,
+        reportExecutiveSummaryLines: executiveSummaryLines,
       }),
-    [props, derived, snapshotAt, portfolioForExport],
+    [
+      props,
+      derived,
+      snapshotAt,
+      portfolioForExport,
+      reportGreeting,
+      executiveSummaryLines,
+    ],
   );
-
-  const [documentTitle, setDocumentTitle] = useState(payload.documentTitle);
-
-  useEffect(() => {
-    setDocumentTitle(payload.documentTitle);
-  }, [payload.documentTitle]);
 
   const exportPayload = useMemo(
     () => ({
       ...payload,
-      documentTitle: documentTitle.trim() || payload.documentTitle,
+      documentTitle: reportDocumentTitle.trim() || payload.documentTitle,
+      clientName: reportClientName.trim() || undefined,
+      // C-lite: creativeUploadedUrl(소재) → 표지 로고 임시 재사용. 전용 coverLogo 분리 예정.
+      coverLogoUrl:
+        (creativeUploadedUrl ?? props.logoUrl)?.trim() || undefined,
     }),
-    [payload, documentTitle],
+    [
+      payload,
+      reportDocumentTitle,
+      reportClientName,
+      creativeUploadedUrl,
+      props.logoUrl,
+    ],
   );
 
   const [internalSectionVisibility, setInternalSectionVisibility] =
@@ -506,90 +634,24 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     [downloading, exportPayload, sectionVisibility, props.activitySource, t, tCommon, toast],
   );
 
-  const sendEmailReport = useCallback(async () => {
-    const email = userEmail.trim();
-    if (
-      !email ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    ) {
-      toast("error", props.isKo ? "올바른 이메일을 입력하세요" : "Please enter a valid email");
-      return;
-    }
-    setEmailSending(true);
+  const openEmailDialog = useCallback(() => {
     setEmailSent(false);
     setEmailError(null);
-    try {
-      const res = await fetch("/api/planner/email-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail: email,
-          goalTitle: props.goalTitle,
-          budgetNum: props.budgetNum,
-          periodDisplay: derived.periodDisplay,
-          regionsText: props.regionsText,
-          categoriesText: props.categoriesText,
-          ageText: props.ageText,
-          industryText: props.industryText,
-          mediaList: props.portfolio.map((m) => ({
-            name: props.isKo ? m.name : (m.nameEn || m.name),
-            price: m.price,
-            location: m.location,
-          })),
-          metrics: props.metrics
-            ? {
-                ...props.metrics,
-                impressions: props.metrics.estimatedTotalImpressions,
-                reach: Math.round(props.metrics.blendDailyReach * 30),
-              }
-            : undefined,
-          screenshot: "",
-        }),
-      });
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        success?: boolean;
-      };
-      if (!res.ok) {
-        const message =
-          res.status === 503
-            ? t("reportEmailNotConfigured")
-            : res.status === 401
-              ? t("reportEmailLoginRequired")
-              : res.status === 403
-                ? t("reportEmailProRequired")
-                : data.error || t("reportEmailFailed");
-        setEmailError(message);
-        toast("error", message);
-        return;
-      }
+    setEmailDialogOpen(true);
+  }, []);
+
+  const handleEmailSent = useCallback(
+    ({ email }: { email: string; pdfFilename: string }) => {
       setEmailSent(true);
+      setEmailSentTo(email);
+      setEmailError(null);
       toast(
         "success",
         t("reportEmailSentDetail", { email }),
       );
-    } catch {
-      const message = t("reportEmailFailed");
-      setEmailError(message);
-      toast("error", message);
-    } finally {
-      setEmailSending(false);
-    }
-  }, [
-    userEmail,
-    props.isKo,
-    props.goalTitle,
-    props.budgetNum,
-    props.regionsText,
-    props.categoriesText,
-    props.ageText,
-    props.industryText,
-    props.portfolio,
-    props.metrics,
-    derived.periodDisplay,
-    toast,
-    t,
-  ]);
+    },
+    [toast, t],
+  );
 
   return (
     <div
@@ -696,13 +758,28 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         >
           {plannerResultAllowed ? (
             <div className="space-y-6">
+              {copyStale ? (
+                <ReportCopyStaleBanner
+                  isKo={props.isKo}
+                  onRegenerate={regenerateReportCopy}
+                  onKeep={() =>
+                    acknowledgeReportCopyFingerprint(copyFingerprintCurrent)
+                  }
+                />
+              ) : null}
               <DocumentPreviewFrame>
                 <PlannerReportDocument
                   payload={exportPayload}
                   mapPortfolio={props.portfolio}
                   sectionVisibility={sectionVisibility}
                   editableTitle
-                  onDocumentTitleChange={setDocumentTitle}
+                  onDocumentTitleChange={setReportDocumentTitle}
+                  editableClientName
+                  onClientNameChange={setReportClientName}
+                  editableGreeting
+                  onGreetingChange={setReportGreeting}
+                  editableExecutiveSummary
+                  onExecutiveSummaryChange={setReportExecutiveSummary}
                 />
               </DocumentPreviewFrame>
 
@@ -793,62 +870,44 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                         </BtnBlock>
                       )}
                     </PlannerPdfDownloadGate>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <input
-                        type="email"
-                        placeholder={props.isKo ? "이메일 주소" : "Email address"}
-                        value={userEmail}
-                        onChange={(e) => {
-                          setUserEmail(e.target.value);
-                          setEmailSent(false);
-                          setEmailError(null);
-                        }}
-                        className={cn(
-                          "h-10 w-full min-w-[14rem] rounded-xl border px-3 text-sm",
-                          "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
-                          "dark:text-white text-gray-900 placeholder:dark:text-white/40 placeholder:text-gray-400",
-                          "focus:border-[color:var(--qp-accent)]/60 focus:outline-none sm:w-56",
-                        )}
-                      />
-                      <PlannerPdfDownloadGate
-                        isKo={props.isKo}
-                        onAllowedDownload={() => void sendEmailReport()}
-                      >
-                        {({ onDownloadClick, pdfAllowed, checking }) => (
-                          <BtnBlock
-                            variant="accent"
-                            size="md"
-                            onClick={onDownloadClick}
-                            disabled={emailSending || checking}
-                          >
-                            {emailSending ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : !pdfAllowed ? (
-                              <Lock className="h-4 w-4" />
-                            ) : (
-                              <Mail className="h-4 w-4" />
-                            )}
-                            {emailSent
-                              ? t("reportEmailSent")
-                              : !pdfAllowed
-                                ? props.isKo
-                                  ? "🔒 이메일로 받기"
-                                  : "🔒 Email report"
+                    <PlannerPdfDownloadGate
+                      isKo={props.isKo}
+                      onAllowedDownload={openEmailDialog}
+                    >
+                      {({ onDownloadClick, pdfAllowed, checking }) => (
+                        <BtnBlock
+                          variant="accent"
+                          size="md"
+                          onClick={onDownloadClick}
+                          disabled={checking}
+                        >
+                          {!pdfAllowed ? (
+                            <Lock className="h-4 w-4" />
+                          ) : (
+                            <Mail className="h-4 w-4" />
+                          )}
+                          {emailSent
+                            ? t("reportEmailSent")
+                            : !pdfAllowed
+                              ? props.isKo
+                                ? "🔒 이메일로 보내기"
+                                : "🔒 Email proposal"
+                              : props.isKo
+                                ? "이메일로 보내기"
                                 : t("reportEmailMe")}
-                          </BtnBlock>
-                        )}
-                      </PlannerPdfDownloadGate>
-                    </div>
+                        </BtnBlock>
+                      )}
+                    </PlannerPdfDownloadGate>
                     {emailError ? (
-                      <p className="text-sm font-medium text-rose-500" role="alert">
+                      <p className="w-full text-sm font-medium text-rose-500" role="alert">
                         {emailError}
                       </p>
                     ) : emailSent ? (
-                      <p className="text-sm text-emerald-600 dark:text-emerald-400" role="status">
-                        {t("reportEmailSentDetail", { email: userEmail.trim() })}
+                      <p className="w-full text-sm text-emerald-600 dark:text-emerald-400" role="status">
+                        {t("reportEmailSentDetail", { email: emailSentTo })}
                       </p>
                     ) : (
-                      <p className={cn("text-xs", plannerNeon.subtext)}>
+                      <p className={cn("w-full text-xs", plannerNeon.subtext)}>
                         {t("reportEmailHint")}
                       </p>
                     )}
@@ -878,6 +937,17 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           ) : null}
         </PlannerProGate>
       </section>
+
+      <ReportEmailSendDialog
+        open={emailDialogOpen}
+        onClose={() => setEmailDialogOpen(false)}
+        isKo={props.isKo}
+        exportPayload={exportPayload}
+        activitySource={props.activitySource}
+        sectionVisibility={sectionVisibility}
+        lineupViewMode={lineupViewModeForExport(readPlannerReportViewMode())}
+        onSent={handleEmailSent}
+      />
     </div>
   );
 }

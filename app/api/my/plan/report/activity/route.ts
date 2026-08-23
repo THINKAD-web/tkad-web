@@ -18,6 +18,7 @@ const BodySchema = z.object({
   goalTitle: z.string().max(120).optional(),
   regionsText: z.string().max(500).optional(),
   reportTitle: z.string().max(200).optional(),
+  recipientEmail: z.string().max(320).optional(),
 });
 
 export async function POST(request: NextRequest) {

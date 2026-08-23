@@ -11,7 +11,8 @@ import {
   PLANNER_CAMPAIGN_GOAL_DEFS,
 } from "@/lib/planner/campaign-goal-defs";
 import { calculatePlan } from "@/lib/planner/calc/engine";
-import { blendedCpmExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
+import { blendedCpmExcludingQuoteOnly, categoryCpmBarsExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
+import { usePlannerStore } from "@/lib/planner/store";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
@@ -268,16 +269,8 @@ export function RecommendReportSection({
   );
 
   const cpmBars = useMemo(
-    () =>
-      plan.breakdown.byCategory
-        .filter((s) => (s.cpmWon ?? 0) > 0)
-        .map((s) => ({
-          key: s.key,
-          label: isKo ? s.labelKo : s.labelEn,
-          value: s.cpmWon ?? 0,
-        }))
-        .sort((x, y) => x.value - y.value),
-    [plan, isKo],
+    () => categoryCpmBarsExcludingQuoteOnly(plan, portfolio, isKo),
+    [plan, portfolio, isKo],
   );
 
   const portfolioReport = useMemo(
@@ -401,17 +394,20 @@ export function RecommendReportSection({
     ],
   );
 
-  const [documentTitle, setDocumentTitle] = useState(payload.documentTitle);
-  useEffect(() => {
-    setDocumentTitle(payload.documentTitle);
-  }, [payload.documentTitle]);
+  const reportClientName = usePlannerStore((s) => s.reportClientName);
+  const setReportClientName = usePlannerStore((s) => s.setReportClientName);
+  const reportDocumentTitle = usePlannerStore((s) => s.reportDocumentTitle);
+  const setReportDocumentTitle = usePlannerStore((s) => s.setReportDocumentTitle);
+  const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
 
   const exportPayload = useMemo(
     () => ({
       ...payload,
-      documentTitle: documentTitle.trim() || payload.documentTitle,
+      documentTitle: reportDocumentTitle.trim() || payload.documentTitle,
+      clientName: reportClientName.trim() || undefined,
+      coverLogoUrl: creativeUploadedUrl?.trim() || undefined,
     }),
-    [payload, documentTitle],
+    [payload, reportDocumentTitle, reportClientName, creativeUploadedUrl],
   );
 
   const handleExport = useCallback(
@@ -576,7 +572,9 @@ export function RecommendReportSection({
                       mapPortfolio={portfolio}
                       sectionVisibility={sectionVisibility}
                       editableTitle
-                      onDocumentTitleChange={setDocumentTitle}
+                      onDocumentTitleChange={setReportDocumentTitle}
+                      editableClientName
+                      onClientNameChange={setReportClientName}
                     />
                   </DocumentPreviewFrame>
 

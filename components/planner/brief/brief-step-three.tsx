@@ -7,10 +7,10 @@
  * 제안서 생성(8단계)·공유 링크는 UI만 — 비활성.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { FileDown, Loader2, Lock } from "lucide-react";
+import { FileDown, Loader2, Lock, Mail } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import {
@@ -26,9 +26,26 @@ import {
   buildCampaignPlanSnapshot,
   buildMixLines,
 } from "@/lib/planner/brief/build-plan-snapshot";
-import { buildBriefReportPayload } from "@/lib/planner/brief/brief-report-adapter";
+import {
+  briefMixQuantities,
+  briefPriceOptionIndex,
+  buildBriefReportCopyStrategyInput,
+  buildBriefReportPayload,
+  resolveBriefPortfolio,
+} from "@/lib/planner/brief/brief-report-adapter";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
+import { useShallow } from "zustand/react/shallow";
+import { useReportCopyStore } from "@/lib/planner-report-export/report-copy-store";
+import { serializePlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
+import { useReportCopyAutoDraft } from "@/lib/planner-report-export/use-report-copy-auto-draft";
+import { DocumentPreviewFrame } from "@/components/document/document-layout";
+import { PlannerReportDocument } from "@/components/planner/report-document";
+import { ReportCopyStaleBanner } from "@/components/planner/report-copy-stale-banner";
+import { ReportEmailSendDialog } from "@/components/planner/report-email-send-dialog";
+import { Input } from "@/components/ui/input";
+import { uploadPlannerCreative } from "@/lib/planner/creative-upload";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { useToast } from "@/components/toast-provider";
 import {
   calcMixMetrics,
@@ -201,7 +218,22 @@ export function BriefStepThree({
   const [exporting, setExporting] =
     useState<PlannerReportExportFormat | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const {
+    allowed: reportPreviewAllowed,
+    loading: reportPreviewLoading,
+  } = useFeatureAccess("planner_result");
+
+  const setReportClientName = useReportCopyStore((s) => s.setClientName);
+  const setReportDocumentTitle = useReportCopyStore((s) => s.setDocumentTitle);
+  const coverLogoUrl = useReportCopyStore((s) => s.coverLogoUrl);
+  const setCoverLogoUrl = useReportCopyStore((s) => s.setCoverLogoUrl);
+  const productionCostWon = useReportCopyStore((s) => s.productionCostWon);
+  const setProductionCostWon = useReportCopyStore((s) => s.setProductionCostWon);
+  const hydrateReportCopy = useReportCopyStore((s) => s.hydrateFromSnapshot);
 
   useEffect(() => {
     if (!planFromUrl) return;
@@ -214,7 +246,12 @@ export function BriefStepThree({
         );
         if (!res.ok) throw new Error("load failed");
         const data = (await res.json()) as SavedCampaignPlan;
-        if (!cancelled) setSavedPlan(data);
+        if (!cancelled) {
+          setSavedPlan(data);
+          if (data.reportCopy) {
+            hydrateReportCopy(data.reportCopy);
+          }
+        }
       } catch {
         if (!cancelled) {
           setSaveError(
@@ -230,7 +267,7 @@ export function BriefStepThree({
     return () => {
       cancelled = true;
     };
-  }, [planFromUrl, isKo]);
+  }, [planFromUrl, isKo, hydrateReportCopy]);
 
   const displayMetrics: MixMetrics = savedPlan
     ? storedMetricsToMixMetrics(savedPlan.metrics, savedPlan.brief.budgetWon)
@@ -241,6 +278,18 @@ export function BriefStepThree({
   const handleSave = useCallback(async () => {
     setSaving(true);
     setSaveError(null);
+    const copyState = useReportCopyStore.getState();
+    const reportCopy = serializePlannerReportCopyState({
+      clientName: copyState.clientName,
+      documentTitle: copyState.documentTitle,
+      coverLogoUrl: copyState.coverLogoUrl,
+      greeting: copyState.greeting,
+      executiveSummary: copyState.executiveSummary,
+      greetingTouched: copyState.greetingTouched,
+      executiveSummaryTouched: copyState.executiveSummaryTouched,
+      copyFingerprint: copyState.copyFingerprint,
+      productionCostWon: copyState.productionCostWon,
+    });
     try {
       const res = await fetch("/api/campaign-plan", {
         method: "POST",
@@ -259,6 +308,7 @@ export function BriefStepThree({
             freeText: store.freeText,
           },
           mixUnits: store.mixUnits,
+          reportCopy,
         }),
       });
       if (!res.ok) {
@@ -293,22 +343,128 @@ export function BriefStepThree({
       catalog,
       mixUnits: store.mixUnits,
     });
-  }, [savedPlan, lines.length, store, catalog]);
+  }, [savedPlan, lines.length, store.mixUnits, catalog, store]);
+
+  const exportPortfolio = useMemo(
+    () => (exportPlan ? resolveBriefPortfolio(exportPlan, catalog) : []),
+    [exportPlan, catalog],
+  );
+
+  const exportQuantities = useMemo(
+    () => (exportPlan ? briefMixQuantities(exportPlan.mediaMix) : {}),
+    [exportPlan],
+  );
+
+  const exportPriceOptionIndex = useMemo(
+    () =>
+      exportPlan ? briefPriceOptionIndex(exportPlan.mediaMix, catalog) : {},
+    [exportPlan, catalog],
+  );
+
+  const reportCopySnapshot = useReportCopyStore(
+    useShallow((s) => ({
+      clientName: s.clientName,
+      documentTitle: s.documentTitle,
+      coverLogoUrl: s.coverLogoUrl,
+      greeting: s.greeting,
+      executiveSummary: s.executiveSummary,
+      greetingTouched: s.greetingTouched,
+      executiveSummaryTouched: s.executiveSummaryTouched,
+      copyFingerprint: s.copyFingerprint,
+      productionCostWon: s.productionCostWon,
+    })),
+  );
+
+  const copyStrategyInput = useMemo(
+    () =>
+      exportPlan
+        ? buildBriefReportCopyStrategyInput(exportPlan, catalog, isKo)
+        : null,
+    [exportPlan, catalog, isKo],
+  );
+
+  const {
+    setGreeting,
+    setExecutiveSummary,
+    copyStale,
+    regenerate: regenerateReportCopy,
+    keepEdits: keepReportCopyEdits,
+  } = useReportCopyAutoDraft({
+    isKo,
+    enabled: exportPortfolio.length > 0 && copyStrategyInput != null,
+    fingerprint: {
+      mediaIds: exportPortfolio.map((m) => m.id),
+      quantities: exportQuantities,
+      priceOptionIndex: exportPriceOptionIndex,
+    },
+    strategyInput: copyStrategyInput ?? {
+      isKo,
+      campaignGoal: "brand",
+      goalTitle: isKo ? "브랜드 인지도" : "Brand awareness",
+      industryKey: "indOther",
+      industryText: isKo ? "기타" : "Other",
+      regionsText: isKo ? "전국" : "Nationwide",
+      seoulZones: [],
+      followUp: {},
+      portfolioCount: 0,
+      topMediaName: isKo ? "핵심 매체" : "key media",
+    },
+  });
+
+  const [snapshotAt] = useState(() =>
+    new Date().toLocaleString(isKo ? "ko-KR" : "en-US"),
+  );
+
+  const exportPayload = useMemo(() => {
+    if (!exportPlan) return null;
+    return buildBriefReportPayload({
+      plan: exportPlan,
+      catalog,
+      isKo,
+      channelMode: store.channelMode,
+      hasDigitalSnapshot: false,
+      reportCopy: reportCopySnapshot,
+      generatedAt: snapshotAt,
+    });
+  }, [
+    exportPlan,
+    catalog,
+    isKo,
+    store.channelMode,
+    reportCopySnapshot,
+    snapshotAt,
+  ]);
+
+  const handleLogoUpload = useCallback(
+    async (file: File) => {
+      setLogoUploading(true);
+      try {
+        const result = await uploadPlannerCreative(file);
+        setCoverLogoUrl(result.secureUrl);
+        toast(
+          "success",
+          isKo ? "표지 로고를 업로드했습니다." : "Cover logo uploaded.",
+        );
+      } catch (e) {
+        console.error("[brief-step-three logo]", e);
+        toast(
+          "error",
+          isKo ? "로고 업로드에 실패했습니다." : "Logo upload failed.",
+        );
+      } finally {
+        setLogoUploading(false);
+      }
+    },
+    [isKo, setCoverLogoUrl, toast],
+  );
 
   const handleExport = useCallback(
     async (format: PlannerReportExportFormat) => {
-      if (exporting || !exportPlan) return;
+      if (exporting || !exportPayload) return;
       setExporting(format);
       setExportError(null);
       try {
-        const payload = buildBriefReportPayload({
-          plan: exportPlan,
-          catalog,
-          isKo,
-          channelMode: store.channelMode,
-          hasDigitalSnapshot: false,
-        });
-        await downloadPlannerReport(format, payload, {
+        await downloadPlannerReport(format, exportPayload, {
           activitySource: "planner",
         });
         toast(
@@ -329,7 +485,7 @@ export function BriefStepThree({
         setExporting(null);
       }
     },
-    [exporting, exportPlan, catalog, isKo, store.channelMode, toast],
+    [exporting, exportPayload, toast, isKo],
   );
 
   const won = (n: number) =>
@@ -344,7 +500,8 @@ export function BriefStepThree({
   }
 
   return (
-    <div className="mx-auto grid w-full min-w-0 max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
+    <div className="mx-auto w-full min-w-0 max-w-5xl space-y-6">
+    <div className="grid w-full gap-6 lg:grid-cols-[1fr_320px]">
       <div className="min-w-0 max-w-full space-y-4">
         <BriefSummary brief={store} isKo={isKo} />
 
@@ -428,6 +585,37 @@ export function BriefStepThree({
       <div className="min-w-0 max-w-full lg:sticky lg:top-4 lg:self-start">
         <MetricsPanel metrics={displayMetrics} isKo={isKo} />
 
+        <div className="mt-3 rounded-xl border border-border bg-card p-4">
+          <label htmlFor="brief-production-cost" className="text-sm font-semibold">
+            {isKo ? "제작비 (캠페인 총액)" : "Production cost (campaign total)"}
+          </label>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {isKo
+              ? "견적 요약 표에 반영됩니다. 부가세는 매체비+제작비 기준 10%입니다."
+              : "Shown in the quote summary. VAT is 10% of media + production."}
+          </p>
+          <Input
+            id="brief-production-cost"
+            type="text"
+            inputMode="numeric"
+            className="mt-2 tabular-nums"
+            placeholder={isKo ? "예: 3000000" : "e.g. 3000000"}
+            value={
+              productionCostWon != null && productionCostWon > 0
+                ? String(productionCostWon)
+                : ""
+            }
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^\d]/g, "");
+              if (!raw) {
+                setProductionCostWon(null);
+                return;
+              }
+              setProductionCostWon(Number(raw));
+            }}
+          />
+        </div>
+
         <div className="mt-3 space-y-2">
           <Button
             type="button"
@@ -457,42 +645,11 @@ export function BriefStepThree({
               : "Sharing unlocks after dong population data is connected."}
           </p>
 
-          <PlannerPdfDownloadGate
-            isKo={isKo}
-            onAllowedDownload={() => void handleExport("pdf")}
-          >
-            {({ onDownloadClick, pdfAllowed, checking }) => (
-              <Button
-                type="button"
-                variant="secondary"
-                className="w-full"
-                disabled={
-                  exporting !== null ||
-                  checking ||
-                  lines.length === 0
-                }
-                onClick={onDownloadClick}
-              >
-                {exporting === "pdf" ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : !pdfAllowed ? (
-                  <Lock className="mr-2 h-4 w-4" />
-                ) : (
-                  <FileDown className="mr-2 h-4 w-4" />
-                )}
-                {!pdfAllowed
-                  ? isKo
-                    ? "제안서 PDF (PRO)"
-                    : "Proposal PDF (PRO)"
-                  : isKo
-                    ? "제안서 PDF 생성"
-                    : "Generate proposal PDF"}
-              </Button>
-            )}
-          </PlannerPdfDownloadGate>
-          {exportError ? (
-            <p className="text-xs text-destructive">{exportError}</p>
-          ) : null}
+          <p className="text-[11px] text-muted-foreground">
+            {isKo
+              ? "제안서 PDF·이메일은 아래 미리보기에서 이용할 수 있습니다."
+              : "Export and email the proposal from the preview below."}
+          </p>
           {store.channelMode === "ooh_digital" ? (
             <p className="text-[11px] text-muted-foreground">
               {isKo
@@ -513,6 +670,162 @@ export function BriefStepThree({
           </Button>
         </div>
       </div>
+    </div>
+
+    {exportPayload && exportPortfolio.length > 0 ? (
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold">
+              {isKo ? "제안서 미리보기" : "Proposal preview"}
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              {isKo
+                ? "표지·인사말·요약을 편집한 뒤 PDF·이메일로 보낼 수 있습니다."
+                : "Edit cover copy, then export or email the proposal."}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) void handleLogoUpload(file);
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={logoUploading || !reportPreviewAllowed}
+              onClick={() => logoInputRef.current?.click()}
+            >
+              {logoUploading
+                ? isKo
+                  ? "업로드 중…"
+                  : "Uploading…"
+                : coverLogoUrl
+                  ? isKo
+                    ? "표지 로고 변경"
+                    : "Change cover logo"
+                  : isKo
+                    ? "표지 로고 업로드"
+                    : "Upload cover logo"}
+            </Button>
+          </div>
+        </div>
+
+        {reportPreviewLoading ? (
+          <p className="text-sm text-muted-foreground">
+            {isKo ? "권한 확인 중…" : "Checking access…"}
+          </p>
+        ) : !reportPreviewAllowed ? (
+          <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+            {isKo
+              ? "로그인·PRO 구독 후 제안서 미리보기·편집·이메일 발송을 사용할 수 있습니다."
+              : "Sign in with PRO to preview, edit, and email the proposal."}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {copyStale ? (
+              <ReportCopyStaleBanner
+                isKo={isKo}
+                onRegenerate={regenerateReportCopy}
+                onKeep={keepReportCopyEdits}
+              />
+            ) : null}
+            <DocumentPreviewFrame>
+              <PlannerReportDocument
+                payload={exportPayload}
+                mapPortfolio={exportPortfolio}
+                editableTitle
+                onDocumentTitleChange={setReportDocumentTitle}
+                editableClientName
+                onClientNameChange={setReportClientName}
+                editableGreeting
+                onGreetingChange={setGreeting}
+                editableExecutiveSummary
+                onExecutiveSummaryChange={setExecutiveSummary}
+              />
+            </DocumentPreviewFrame>
+
+            <div className="flex flex-wrap gap-2">
+              <PlannerPdfDownloadGate
+                isKo={isKo}
+                onAllowedDownload={() => void handleExport("pdf")}
+              >
+                {({ onDownloadClick, pdfAllowed, checking }) => (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={exporting !== null || checking}
+                    onClick={onDownloadClick}
+                  >
+                    {exporting === "pdf" ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : !pdfAllowed ? (
+                      <Lock className="mr-2 h-4 w-4" />
+                    ) : (
+                      <FileDown className="mr-2 h-4 w-4" />
+                    )}
+                    {!pdfAllowed
+                      ? isKo
+                        ? "제안서 PDF (PRO)"
+                        : "Proposal PDF (PRO)"
+                      : isKo
+                        ? "제안서 PDF 생성"
+                        : "Generate proposal PDF"}
+                  </Button>
+                )}
+              </PlannerPdfDownloadGate>
+
+              <PlannerPdfDownloadGate
+                isKo={isKo}
+                onAllowedDownload={() => setEmailDialogOpen(true)}
+              >
+                {({ onDownloadClick, pdfAllowed, checking }) => (
+                  <Button
+                    type="button"
+                    variant="default"
+                    disabled={checking}
+                    onClick={onDownloadClick}
+                  >
+                    {!pdfAllowed ? (
+                      <Lock className="mr-2 h-4 w-4" />
+                    ) : (
+                      <Mail className="mr-2 h-4 w-4" />
+                    )}
+                    {isKo ? "이메일로 보내기" : "Email proposal"}
+                  </Button>
+                )}
+              </PlannerPdfDownloadGate>
+            </div>
+
+            {exportError ? (
+              <p className="text-xs text-destructive">{exportError}</p>
+            ) : null}
+          </div>
+        )}
+
+        <ReportEmailSendDialog
+          open={emailDialogOpen}
+          onClose={() => setEmailDialogOpen(false)}
+          isKo={isKo}
+          exportPayload={exportPayload}
+          activitySource="planner"
+          onSent={() => {
+            toast(
+              "success",
+              isKo ? "제안서를 이메일로 보냈습니다." : "Proposal emailed.",
+            );
+          }}
+        />
+      </section>
+    ) : null}
     </div>
   );
 }

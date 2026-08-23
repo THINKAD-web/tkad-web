@@ -167,4 +167,7 @@ test("보고서 payload — 협의가 매체 포함 시 각주", () => {
   assert.match(payload.quoteOnlyNotice!, /외벽 2건 별도 문의/);
   assert.match(payload.quoteOnlyNotice!, /포함되지 않습니다/);
   assert.ok(payload.budgetHonesty?.coverValue?.includes("확정"));
+  assert.ok(payload.cpmFootnote, "CPM 각주");
+  assert.match(payload.cpmFootnote!, /문의 매체 제외/);
+  assert.ok(payload.cpmExcludesQuoteOnly);
 });

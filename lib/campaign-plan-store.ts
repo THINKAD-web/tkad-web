@@ -9,6 +9,11 @@ import {
   type CampaignPlanSnapshot,
   type CampaignPlanStoredMetrics,
 } from "@/lib/campaign-plan-schema";
+import {
+  packCampaignPlanBriefJson,
+  unpackCampaignPlanBriefJson,
+} from "@/lib/campaign-plan-report-copy";
+import type { PlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
 
 export type SavedCampaignPlan = {
   id: string;
@@ -17,6 +22,7 @@ export type SavedCampaignPlan = {
   mediaMix: CampaignPlanSnapshot["mediaMix"];
   metrics: CampaignPlanStoredMetrics;
   engineVersion: string;
+  reportCopy?: PlannerReportCopyState | null;
   createdAt: string;
   expiresAt: string | null;
 };
@@ -34,7 +40,10 @@ export async function createCampaignPlan(params: {
     data: {
       shareToken: newShareToken(),
       ownerId: params.ownerId ?? null,
-      brief: params.snapshot.brief as never,
+      brief: packCampaignPlanBriefJson(
+        params.snapshot.brief,
+        params.snapshot.reportCopy,
+      ) as never,
       mediaMix: params.snapshot.mediaMix as never,
       metrics: params.snapshot.metrics as never,
       engineVersion: params.snapshot.engineVersion,
@@ -52,13 +61,15 @@ export async function createCampaignPlan(params: {
     },
   });
 
+  const unpacked = unpackCampaignPlanBriefJson(row.brief);
   return {
     id: row.id,
     shareToken: row.shareToken,
-    brief: row.brief as SavedCampaignPlan["brief"],
+    brief: unpacked.brief,
     mediaMix: row.mediaMix as SavedCampaignPlan["mediaMix"],
     metrics: row.metrics as SavedCampaignPlan["metrics"],
     engineVersion: row.engineVersion,
+    reportCopy: unpacked.reportCopy,
     createdAt: row.createdAt.toISOString(),
     expiresAt: row.expiresAt?.toISOString() ?? null,
   };
@@ -83,13 +94,15 @@ export async function getCampaignPlanById(
   if (!row) return null;
   if (row.expiresAt && row.expiresAt.getTime() < Date.now()) return null;
 
+  const unpacked = unpackCampaignPlanBriefJson(row.brief);
   return {
     id: row.id,
     shareToken: row.shareToken,
-    brief: row.brief as SavedCampaignPlan["brief"],
+    brief: unpacked.brief,
     mediaMix: row.mediaMix as SavedCampaignPlan["mediaMix"],
     metrics: row.metrics as SavedCampaignPlan["metrics"],
     engineVersion: row.engineVersion,
+    reportCopy: unpacked.reportCopy,
     createdAt: row.createdAt.toISOString(),
     expiresAt: row.expiresAt?.toISOString() ?? null,
   };

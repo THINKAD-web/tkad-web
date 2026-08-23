@@ -5,12 +5,14 @@ import { createCampaignPlan } from "@/lib/campaign-plan-store";
 import { buildCampaignPlanSnapshot } from "@/lib/planner/brief/build-plan-snapshot";
 import { normalizeBriefInput } from "@/lib/planner/brief/types";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
+import { parsePlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
 
 export const dynamic = "force-dynamic";
 
 const SaveBodySchema = z.object({
   brief: z.record(z.string(), z.unknown()),
   mixUnits: z.record(z.string(), z.number()),
+  reportCopy: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**
@@ -45,11 +47,17 @@ export async function POST(request: NextRequest) {
 
   const { catalog } = await fetchPlannerMediaCatalog();
   const snapshot = buildCampaignPlanSnapshot({ brief, catalog, mixUnits });
+  const reportCopy = parsed.data.reportCopy
+    ? parsePlannerReportCopyState(parsed.data.reportCopy)
+    : null;
 
   try {
     const sessionUser = await getCurrentUser();
     const saved = await createCampaignPlan({
-      snapshot,
+      snapshot: {
+        ...snapshot,
+        reportCopy,
+      },
       ownerId: sessionUser?.id ?? null,
     });
     return NextResponse.json(saved);

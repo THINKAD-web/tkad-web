@@ -78,6 +78,13 @@ export function DocumentGradientHero({
   onTitleChange,
   titlePlaceholder,
   titleAriaLabel = "Report title",
+  coverLogoUrl,
+  clientName,
+  clientNameEditable = false,
+  onClientNameChange,
+  clientNamePlaceholder,
+  clientNameAriaLabel = "Client name",
+  clientNameSuffix,
 }: {
   badge: string;
   title: string;
@@ -90,6 +97,15 @@ export function DocumentGradientHero({
   onTitleChange?: (value: string) => void;
   titlePlaceholder?: string;
   titleAriaLabel?: string;
+  /** 표지 우측 로고 (광고주 브랜드) */
+  coverLogoUrl?: string | null;
+  clientName?: string;
+  clientNameEditable?: boolean;
+  onClientNameChange?: (value: string) => void;
+  clientNamePlaceholder?: string;
+  clientNameAriaLabel?: string;
+  /** 비편집 표시 시 접미사 (예: 한국어 「귀중」) */
+  clientNameSuffix?: string;
 }) {
   const titleClassName =
     "mt-5 w-full text-2xl font-black leading-tight text-white sm:text-3xl";
@@ -109,9 +125,19 @@ export function DocumentGradientHero({
       ) : null}
       <div className="flex items-center justify-between gap-3">
         <ThinkadWordmark className="text-lg sm:text-xl" onDark />
-        <span className="font-display text-[10px] font-semibold uppercase tracking-[0.2em] text-white/70">
-          {badge}
-        </span>
+        <div className="flex items-center gap-3">
+          {coverLogoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={coverLogoUrl}
+              alt=""
+              className="h-10 w-10 rounded-md border border-white/20 bg-white/10 object-contain p-1 sm:h-12 sm:w-12"
+            />
+          ) : null}
+          <span className="font-display text-[10px] font-semibold uppercase tracking-[0.2em] text-white/70">
+            {badge}
+          </span>
+        </div>
       </div>
       {titleEditable && onTitleChange ? (
         <input
@@ -131,6 +157,22 @@ export function DocumentGradientHero({
       )}
       {subtitle ? (
         <p className="mt-2 text-sm font-medium text-white/85">{subtitle}</p>
+      ) : null}
+      {clientNameEditable && onClientNameChange ? (
+        <input
+          type="text"
+          value={clientName ?? ""}
+          onChange={(e) => onClientNameChange(e.target.value)}
+          maxLength={80}
+          placeholder={clientNamePlaceholder}
+          aria-label={clientNameAriaLabel}
+          className="mt-4 w-full max-w-md border-0 border-b border-white/25 bg-transparent p-0 pb-1 text-sm font-medium text-white placeholder:text-white/45 focus:border-[color:var(--qp-accent)] focus:outline-none"
+        />
+      ) : clientName?.trim() ? (
+        <p className="mt-4 text-sm font-semibold text-white">
+          {clientName.trim()}
+          {clientNameSuffix ? ` ${clientNameSuffix}` : ""}
+        </p>
       ) : null}
       <div
         className="mt-5 h-1 w-16 bg-[color:var(--qp-accent)]"

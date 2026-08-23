@@ -58,7 +58,16 @@ import {
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
 import { buildReportBudgetHonesty } from "@/lib/planner/report-budget-honesty";
-import { blendedCpmExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
+import {
+  blendedCpmExcludingQuoteOnly,
+  categoryCpmBarsExcludingQuoteOnly,
+} from "@/lib/planner/quote-only-portfolio";
+import {
+  resolveCoverLogoUrl,
+  type PlannerReportCopyState,
+} from "@/lib/planner-report-export/report-copy-state";
+import { splitReportCopyParagraphs } from "@/lib/planner-report-export/report-copy";
+import type { DefaultExecutiveSummaryInput } from "@/lib/planner-report-export/report-copy";
 
 const GOAL_TITLES_KO: Record<PlannerCampaignGoal, string> = {
   brand: "브랜드 인지도",
@@ -101,6 +110,8 @@ export type BuildBriefReportPayloadArgs = {
   generatedAt?: string;
   /** 문의 자동 매칭 → 「문의 내용으로 자동 매칭된」 */
   mixSource?: "inquiry_match";
+  /** C-lite/C-full — 표지·인사말·요약 (useReportCopyStore) */
+  reportCopy?: PlannerReportCopyState | null;
 };
 
 function isBriefGoal(v: string | undefined): v is BriefGoal {
@@ -265,6 +276,31 @@ function briefGoalTitle(
     }
   }
   return isKo ? GOAL_TITLES_KO[plannerGoal] : GOAL_TITLES_EN[plannerGoal];
+}
+
+/** C-full-1 — 인사말·요약 초안용 strategy input */
+export function buildBriefReportCopyStrategyInput(
+  plan: BriefReportPlan,
+  catalog: readonly MediaItem[],
+  isKo: boolean,
+): DefaultExecutiveSummaryInput {
+  const brief = briefFromPlan(plan);
+  const portfolio = resolveBriefPortfolio(plan, catalog);
+  const campaignGoal = briefGoalToPlanner(brief.goal);
+  const industryKey = briefIndustryToPlanner(brief.industry);
+  return {
+    isKo,
+    campaignGoal,
+    goalTitle: briefGoalTitle(brief, isKo),
+    industryKey,
+    industryText: plannerIndustryLabel(industryKey, isKo),
+    regionsText: summarizeSidoCodes(brief.regionCodes, isKo),
+    seoulZones: [],
+    followUp: {},
+    portfolioCount: portfolio.length,
+    topMediaName:
+      portfolio[0]?.name ?? (isKo ? "핵심 매체" : "key media"),
+  };
 }
 
 /**
@@ -453,14 +489,11 @@ export function buildBriefReportPayload(
     actualWon: s.actualWon,
   }));
 
-  const cpmBars = exportCalcPlan.breakdown.byCategory
-    .filter((s) => (s.cpmWon ?? 0) > 0)
-    .map((s) => ({
-      key: s.key,
-      label: isKo ? s.labelKo : s.labelEn,
-      value: s.cpmWon ?? 0,
-    }))
-    .sort((a, b) => a.value - b.value);
+  const cpmBars = categoryCpmBarsExcludingQuoteOnly(
+    exportCalcPlan,
+    portfolio,
+    isKo,
+  );
 
   /**
    * 1p 헤더 「이 구성」 — **표시 금액 기준**(선형 환산)을 쓴다.
@@ -506,7 +539,12 @@ export function buildBriefReportPayload(
 
   const digitalOmittedNotice = resolveDigitalOmittedNotice(args);
 
-  return buildOohReportPayload({
+  const copy = args.reportCopy;
+  const executiveSummaryLines = copy
+    ? splitReportCopyParagraphs(copy.executiveSummary)
+    : undefined;
+
+  const payload = buildOohReportPayload({
     isKo,
     goalTitle: briefGoalTitle(brief, isKo),
     budgetMan,
@@ -541,7 +579,23 @@ export function buildBriefReportPayload(
     kpiBadges: buildBriefKpiBadges(plan),
     mixSource: args.mixSource,
     budgetHonesty,
+    clientName: copy?.clientName?.trim() || undefined,
+    coverLogoUrl: copy ? resolveCoverLogoUrl(copy) : undefined,
+    reportGreeting: copy?.greeting?.trim() || undefined,
+    reportExecutiveSummaryLines:
+      executiveSummaryLines && executiveSummaryLines.length > 0
+        ? executiveSummaryLines
+        : undefined,
+    productionCostWon: copy?.productionCostWon,
   });
+
+  if (!copy?.documentTitle?.trim()) {
+    return payload;
+  }
+  return {
+    ...payload,
+    documentTitle: copy.documentTitle.trim(),
+  };
 }
 
 /** CampaignPlan dataQuality → export badge (화면 DataQualityBadge 와 1:1) */

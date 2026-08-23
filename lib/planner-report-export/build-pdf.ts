@@ -4,6 +4,8 @@ import {
   addPdfThumbImage,
   PLANNER_EXPORT_THUMB_BOX_MM,
   loadExportThumbMap,
+  loadExportImageForPdf,
+  dataUrlImageFormat,
 } from "@/lib/export-media-images";
 import type {
   PlannerExportMediaRow,
@@ -24,6 +26,7 @@ import {
   filterExportSections,
   sectionVisible,
 } from "@/lib/planner-report-export/section-visibility";
+import { splitReportCopyParagraphs } from "@/lib/planner-report-export/report-copy";
 import {
   collectMediaCardSpecs,
   exportMediaLineMetaParts,
@@ -368,6 +371,14 @@ export async function buildPlannerReportPdf(
         ? "OOH 미디어 캠페인 플랜"
         : "OOH media campaign plan";
 
+  const coverLogoData = p.coverLogoUrl?.trim()
+    ? await loadExportImageForPdf(p.coverLogoUrl.trim(), {
+        width: 256,
+        height: 256,
+        quality: 88,
+      })
+    : null;
+
   // ── 표지 페이지 ──
   setFill(QP_ACCENT);
   doc.rect(0, 0, pageW, pageH, "F");
@@ -375,6 +386,21 @@ export async function buildPlannerReportPdf(
   doc.rect(0, 0, pageW, 3, "F");
 
   drawWordmark(M, 50, 26);
+  if (coverLogoData) {
+    const logoSize = 28;
+    try {
+      doc.addImage(
+        coverLogoData,
+        dataUrlImageFormat(coverLogoData),
+        pageW - M - logoSize,
+        22,
+        logoSize,
+        logoSize,
+      );
+    } catch {
+      /* broken logo */
+    }
+  }
   doc.setFont(FONT, "normal");
   setText(QP_ON_ACCENT_MUTED);
   doc.setFontSize(10);
@@ -474,6 +500,28 @@ export async function buildPlannerReportPdf(
   doc.line(M, y, pageW - M, y);
   y += 8;
 
+  const drawCopyParagraphs = (paragraphs: readonly string[]) => {
+    for (const para of paragraphs) {
+      const lines = doc.splitTextToSize(para, contentW) as string[];
+      ensure(lines.length * 4.6 + 2);
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(9);
+      setText(INK);
+      doc.text(lines, M, y);
+      y += lines.length * 4.6 + 2;
+    }
+    y += 2;
+  };
+
+  if (p.greetingText?.trim()) {
+    sectionTitle(isKo ? "인사말" : "Greeting");
+    drawCopyParagraphs(splitReportCopyParagraphs(p.greetingText));
+  }
+  if (p.executiveSummaryLines && p.executiveSummaryLines.length > 0) {
+    sectionTitle(isKo ? "전략 요약" : "Strategy summary");
+    drawCopyParagraphs(p.executiveSummaryLines);
+  }
+
   // ── KPI 카드 행 ──
   if (p.kpis.length) {
     ensure(20);
@@ -508,6 +556,16 @@ export async function buildPlannerReportPdf(
     });
     y += 26;
 
+    if (p.cpmFootnote) {
+      const cpmLines = doc.splitTextToSize(p.cpmFootnote, contentW) as string[];
+      ensure(cpmLines.length * 4 + 4);
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(7.5);
+      setText(GRAY_500);
+      doc.text(cpmLines, M, y + 2);
+      y += cpmLines.length * 4 + 4;
+    }
+
     if (p.budgetHonesty?.overBudgetBanner) {
       const banner = p.budgetHonesty.overBudgetBanner;
       const bannerLines = doc.splitTextToSize(banner, contentW - 8) as string[];
@@ -523,6 +581,64 @@ export async function buildPlannerReportPdf(
       doc.text(bannerLines, M + 3, y + 5);
       y += bannerH + 6;
     }
+  }
+
+  if (p.quoteSummary) {
+    const qs = p.quoteSummary;
+    const fmtAmt = (won: number) => formatExportBudgetWonLabel(won, isKo);
+    const quoteRows: [string, string, boolean][] = [
+      [
+        isKo ? "매체비 (확정)" : "Media fee (confirmed)",
+        fmtAmt(qs.supplyWon),
+        false,
+      ],
+      [
+        isKo ? "제작비" : "Production",
+        qs.productionWon > 0 ? fmtAmt(qs.productionWon) : "—",
+        false,
+      ],
+      [isKo ? "부가세 (10%)" : "VAT (10%)", fmtAmt(qs.vatWon), false],
+    ];
+    if (qs.quoteOnlyLine) {
+      quoteRows.push([
+        qs.quoteOnlyLine.label,
+        qs.quoteOnlyLine.amountLabel,
+        false,
+      ]);
+    }
+    quoteRows.push([qs.totalLabel, fmtAmt(qs.totalWon), true]);
+
+    sectionTitle(isKo ? "견적 요약" : "Quote summary");
+    const rowH = 7;
+    ensure(quoteRows.length * rowH + 8);
+    quoteRows.forEach(([label, value, emphasis], i) => {
+      const ry = y + i * rowH;
+      if (emphasis) {
+        setFill(GRAY_50);
+        doc.rect(M, ry, contentW, rowH, "F");
+      } else if (i > 0) {
+        setDraw([229, 231, 235]);
+        doc.setLineWidth(0.1);
+        doc.line(M, ry, M + contentW, ry);
+      }
+      doc.setFont(FONT, emphasis ? "bold" : "normal");
+      doc.setFontSize(9);
+      setText(emphasis ? INK : GRAY_500);
+      doc.text(label, M + 3, ry + 4.8);
+      setText(emphasis ? QP_ACCENT : INK);
+      doc.text(value, M + contentW - 3, ry + 4.8, { align: "right" });
+    });
+    y += quoteRows.length * rowH + 4;
+    for (const note of qs.footnotes) {
+      const noteLines = doc.splitTextToSize(`※ ${note}`, contentW) as string[];
+      ensure(noteLines.length * 3.8 + 2);
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(7);
+      setText(GRAY_500);
+      doc.text(noteLines, M, y);
+      y += noteLines.length * 3.8 + 2;
+    }
+    y += 4;
   }
 
   // ── 성과 요약 차트 ──
@@ -625,7 +741,14 @@ export async function buildPlannerReportPdf(
       ensure(6 + ch.cpmBars.length * 7);
       doc.setFontSize(8);
       setText(GRAY_500);
-      doc.text(isKo ? "CPM 비교 (원)" : "CPM comparison (KRW)", M, y + 2);
+      const cpmTitle = p.cpmExcludesQuoteOnly
+        ? isKo
+          ? "CPM 비교 (원) (문의 매체 제외)"
+          : "CPM comparison (KRW, excl. inquiry)"
+        : isKo
+          ? "CPM 비교 (원)"
+          : "CPM comparison (KRW)";
+      doc.text(cpmTitle, M, y + 2);
       y += 5;
       drawBars(M, contentW, ch.cpmBars, QP_ACCENT, true);
       y += 3;
@@ -1474,6 +1597,7 @@ export async function buildPlannerReportPdf(
   setText(GRAY_500);
   const footnotes: string[] = [];
   if (p.currencyFootnote) footnotes.push(p.currencyFootnote);
+  if (p.pricingFootnote) footnotes.push(p.pricingFootnote);
   footnotes.push(p.disclaimer);
   const disc = doc.splitTextToSize(footnotes.join("\n\n"), contentW) as string[];
   doc.text(disc, M, y + 2);

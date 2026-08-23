@@ -58,6 +58,7 @@ export async function listAdminPlanReportActivities(args: {
       goalTitle: row.goalTitle,
       regionsText: row.regionsText,
       reportTitle: row.reportTitle,
+      recipientEmail: row.recipientEmail,
       createdAt: row.createdAt.toISOString(),
       user: row.user,
     })),

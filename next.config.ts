@@ -151,6 +151,10 @@ const nextConfig: NextConfig = {
       "./public/fonts/NotoSansKR-Regular.ttf",
       "./public/fonts/Pretendard-Regular.ttf",
     ],
+    "/api/planner/email-report": [
+      "./public/fonts/NotoSansKR-Regular.ttf",
+      "./public/fonts/Pretendard-Regular.ttf",
+    ],
   },
   webpack(config, { dev, isServer }) {
     config.resolve ??= {};

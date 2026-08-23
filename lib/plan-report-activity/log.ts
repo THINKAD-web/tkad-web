@@ -18,6 +18,7 @@ export async function logPlanReportActivity(
       goalTitle: input.goalTitle?.slice(0, 120) ?? null,
       regionsText: input.regionsText?.slice(0, 500) ?? null,
       reportTitle: input.reportTitle?.slice(0, 200) ?? null,
+      recipientEmail: input.recipientEmail?.slice(0, 320) ?? null,
     },
   });
 }

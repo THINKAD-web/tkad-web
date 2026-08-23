@@ -24,8 +24,14 @@ import type {
 import { buildPerformanceChartGuide } from "@/lib/planner-report-performance-guide";
 import { buildPartialRateNotice } from "@/lib/planner/partial-rate-notice";
 import { buildQuoteOnlyNotice } from "@/lib/planner/quote-only-portfolio";
+import {
+  buildCpmExclusionFootnote,
+  categoryCpmBarsExcludingQuoteOnly,
+} from "@/lib/planner/quote-only-portfolio";
 import { buildReportBudgetHonesty } from "@/lib/planner/report-budget-honesty";
 import { portfolioQuoteOnlyMedia } from "@/lib/media-pricing-mode";
+import { plannerReportPricingFootnote } from "@/lib/planner-report-export/pricing-footnote";
+import { buildPlannerQuoteSummary } from "@/lib/planner-report-export/build-quote-summary";
 import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-rationale";
 import { regionalBreakdownSectionLines } from "@/lib/plan-cart-report/regional-breakdown";
 import { computeRegionSubdivisionReport } from "@/lib/plan-cart-report/region-subdivision";
@@ -106,6 +112,15 @@ export type BuildOohPayloadArgs = {
   kpiBadges?: Partial<Record<ExportKpiBadgeKey, PlannerExportBadgeKind>>;
   mixSource?: "inquiry_match";
   budgetHonesty?: import("@/lib/planner/brief/over-budget-copy").PlannerExportBudgetHonesty;
+  /** 표지·헤더용 광고주명 (선택) */
+  clientName?: string;
+  /** 표지 로고 — planner creative upload URL */
+  coverLogoUrl?: string | null;
+  /** C-full-1 — 인사말·요약 (undefined = 레거시 자동 sections) */
+  reportGreeting?: string;
+  reportExecutiveSummaryLines?: string[];
+  /** C-full-3a — 캠페인 총 제작비 (직접 입력) */
+  productionCostWon?: number | null;
 };
 
 export function buildOohReportPayload(
@@ -175,6 +190,16 @@ export function buildOohReportPayload(
   });
   const hasQuoteOnly = portfolioQuoteOnlyMedia(a.portfolio).length > 0;
   const cpmExcludesQuoteOnly = hasQuoteOnly;
+  const cpmFootnote = buildCpmExclusionFootnote({
+    plan,
+    portfolio: a.portfolio,
+    isKo,
+  });
+  const cpmBarRows = categoryCpmBarsExcludingQuoteOnly(
+    plan,
+    a.portfolio,
+    isKo,
+  );
 
   const portfolioMetrics = {
     monthlyImpressions: plan.impressions.monthlyEquivalent,
@@ -244,9 +269,7 @@ export function buildOohReportPayload(
         colorKey: s.key,
         pct: s.budgetShare,
       })),
-    cpmBars: a.cpmBars
-      .filter((c) => c.value > 0)
-      .map((c) => ({
+    cpmBars: cpmBarRows.map((c) => ({
         label: c.label,
         value: c.value,
         colorKey: c.key,
@@ -339,33 +362,36 @@ export function buildOohReportPayload(
       followUp: a.goalFollowUp ?? {},
       portfolioCount: a.portfolio.length,
     };
-    const extraLines = buildReportStrategyLines(strategyCtx);
-    const impressionTotal =
-      a.metrics || usePortfolioReach
-        ? fmt(
-            usePortfolioReach
-              ? portfolioMetrics.totalImpressions
-              : (a.metrics?.estimatedTotalImpressions ?? 0),
-          )
-        : null;
-    const strategyLines = [
-      buildReportWhyLine(strategyCtx),
-      ...extraLines,
-      impressionTotal
-        ? isKo
-          ? `예상 효과 · 총 ${impressionTotal}회 노출(추정). 핵심 타깃 도달률·ROI는 행정동 인구 데이터 연동 후 제공됩니다.`
-          : `Impact · ${impressionTotal} estimated impressions. Core reach and ROI will be available after dong-level population data is connected.`
-        : isKo
-          ? "예상 효과 · 핵심 타깃 도달률·ROI는 행정동 인구 데이터 연동 후 제공됩니다."
-          : "Impact · Core reach and ROI will be available after dong-level population data is connected.",
-      isKo
-        ? `다음 액션 · ${topMedia} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
-        : `Next · Lock ${topMedia} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
-    ];
-    sections.push({
-      title: isKo ? "전략 요약" : "Strategy summary",
-      lines: strategyLines,
-    });
+    const hasExecutiveOverride = a.reportExecutiveSummaryLines !== undefined;
+    if (!hasExecutiveOverride) {
+      const extraLines = buildReportStrategyLines(strategyCtx);
+      const impressionTotal =
+        a.metrics || usePortfolioReach
+          ? fmt(
+              usePortfolioReach
+                ? portfolioMetrics.totalImpressions
+                : (a.metrics?.estimatedTotalImpressions ?? 0),
+            )
+          : null;
+      const strategyLines = [
+        buildReportWhyLine(strategyCtx),
+        ...extraLines,
+        impressionTotal
+          ? isKo
+            ? `예상 효과 · 총 ${impressionTotal}회 노출(추정). 핵심 타깃 도달률·ROI는 행정동 인구 데이터 연동 후 제공됩니다.`
+            : `Impact · ${impressionTotal} estimated impressions. Core reach and ROI will be available after dong-level population data is connected.`
+          : isKo
+            ? "예상 효과 · 핵심 타깃 도달률·ROI는 행정동 인구 데이터 연동 후 제공됩니다."
+            : "Impact · Core reach and ROI will be available after dong-level population data is connected.",
+        isKo
+          ? `다음 액션 · ${topMedia} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
+          : `Next · Lock ${topMedia} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
+      ];
+      sections.push({
+        title: isKo ? "전략 요약" : "Strategy summary",
+        lines: strategyLines,
+      });
+    }
   }
   if (a.budgetAllocation.length) {
     sections.push({
@@ -503,6 +529,18 @@ export function buildOohReportPayload(
       planMetrics: plan.metrics,
     });
 
+  const quoteSummary = buildPlannerQuoteSummary({
+    mixWon: budgetHonesty.mixWon,
+    productionCostWon: a.productionCostWon,
+    quoteOnlyNotice: quoteOnlyNotice
+      ? {
+          count: quoteOnlyNotice.count,
+          groupLabel: quoteOnlyNotice.groupLabel,
+        }
+      : undefined,
+    isKo,
+  });
+
   return {
     kind: "ooh",
     isKo,
@@ -515,6 +553,13 @@ export function buildOohReportPayload(
           ? "OOH 옥외광고 플래너 보고서"
           : "OOH Media Plan Report",
     campaignName: a.goalTitle,
+    clientName: a.clientName?.trim() || undefined,
+    coverLogoUrl: a.coverLogoUrl?.trim() || undefined,
+    greetingText: a.reportGreeting?.trim() || undefined,
+    executiveSummaryLines:
+      a.reportExecutiveSummaryLines && a.reportExecutiveSummaryLines.length > 0
+        ? a.reportExecutiveSummaryLines
+        : undefined,
     generatedAt: a.generatedAt,
     goalTitle: a.goalTitle,
     budgetMan: a.budgetMan,
@@ -548,9 +593,12 @@ export function buildOohReportPayload(
     quoteOnlyNotice: quoteOnlyNotice?.text,
     unpricedMediaNotice: quoteOnlyNotice?.text,
     cpmExcludesQuoteOnly: cpmExcludesQuoteOnly || undefined,
+    cpmFootnote,
     currencyFootnote: portfolioHasJapanMedia(orderedPortfolio)
       ? formatReportJpyExchangeFootnote(isKo)
       : undefined,
+    pricingFootnote: plannerReportPricingFootnote(isKo),
+    quoteSummary,
     disclaimer: isKo
       ? "본 보고서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
       : "This report uses THINKAD internal estimates; actual delivery may vary by inventory and terms.",

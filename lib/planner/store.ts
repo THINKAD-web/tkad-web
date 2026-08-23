@@ -66,7 +66,7 @@ import {
  * `migrate()` 훅에서 흡수한다. persist 자체 version은 별도 관리.
  */
 export const PLANNER_STORAGE_KEY = "tkad-planner-plan-v2";
-const PLANNER_PERSIST_VERSION = 7;
+const PLANNER_PERSIST_VERSION = 9;
 
 export type PlannerStoreState = {
   wizardStep: PlannerWizardStep;
@@ -86,7 +86,9 @@ export type PlannerStoreState = {
   campaignMediaPriceOptionIndex: CampaignMediaPriceOptionIndex;
   /** 로컬 Object URL. 메모리 전용이라 persist 대상에서 제외. */
   creativeObjectUrl: string | null;
-  /** Cloudinary 업로드된 크리에이티브 secure_url. persist 포함. */
+  /** Cloudinary 업로드된 크리에이티브 secure_url. persist 포함.
+   *  C-lite: 표지 `coverLogoUrl` 로도 임시 재사용 중 — 소재 미리보기(합성)와
+   *  광고주 회사 로고는 개념이 다름. 전용 `coverLogoUrl` 필드 분리 예정. */
   creativeUploadedUrl: string | null;
   /** 매체별 로고 배치 좌표 (Canvas 편집 결과). key = media id. persist 포함. */
   mediaPlacements: Record<string, CompositeLogoPlacement>;
@@ -113,6 +115,18 @@ export type PlannerStoreState = {
   mediaSelectionExplicit: boolean;
   /** 시나리오 카드 적용 시 보고서 맥락. 수동 진행 시 null */
   appliedScenario: AppliedPlannerScenario | null;
+  /** Step 7 보고서 — 광고주명 (표지·헤더) */
+  reportClientName: string;
+  /** Step 7 보고서 — 문서 제목 오버라이드 (비어 있으면 기본 제목) */
+  reportDocumentTitle: string;
+  /** Step 7 — 광고주 대상 인사말 (비어 있으면 export 에서 섹션 생략) */
+  reportGreeting: string;
+  /** Step 7 — Executive summary (문단은 빈 줄로 구분) */
+  reportExecutiveSummary: string;
+  reportGreetingTouched: boolean;
+  reportExecutiveSummaryTouched: boolean;
+  /** 인사말·요약이 마지막으로 맞춰진 매체 구성 지문 */
+  reportCopyFingerprint: string | null;
 };
 
 export type PlannerStoreActions = {
@@ -154,6 +168,16 @@ export type PlannerStoreActions = {
   /** React `Dispatch<SetStateAction<string | null>>` 호환 */
   setCreativeObjectUrl: (action: SetStateAction<string | null>) => void;
   setCreativeUploadedUrl: (url: string | null) => void;
+  setReportClientName: (name: string) => void;
+  setReportDocumentTitle: (title: string) => void;
+  setReportGreeting: (text: string) => void;
+  setReportExecutiveSummary: (text: string) => void;
+  applyReportCopyDraft: (draft: {
+    greeting: string;
+    executiveSummary: string;
+    fingerprint: string;
+  }) => void;
+  acknowledgeReportCopyFingerprint: (fingerprint: string) => void;
   setMediaPlacement: (
     mediaId: string,
     placement: CompositeLogoPlacement,
@@ -198,6 +222,13 @@ const INITIAL_STATE: PlannerStoreState = {
   mediaPlacements: {},
   mediaSelectionExplicit: false,
   appliedScenario: null,
+  reportClientName: "",
+  reportDocumentTitle: "",
+  reportGreeting: "",
+  reportExecutiveSummary: "",
+  reportGreetingTouched: false,
+  reportExecutiveSummaryTouched: false,
+  reportCopyFingerprint: null,
 };
 
 function clampWizardStep(n: number): PlannerWizardStep {
@@ -565,6 +596,33 @@ export const usePlannerStore = create<PlannerStore>()(
 
       setCreativeUploadedUrl: (url) => set({ creativeUploadedUrl: url }),
 
+      setReportClientName: (name) => set({ reportClientName: name }),
+
+      setReportDocumentTitle: (title) =>
+        set({ reportDocumentTitle: title.slice(0, 120) }),
+
+      setReportGreeting: (text) =>
+        set({
+          reportGreeting: text.slice(0, 2000),
+          reportGreetingTouched: true,
+        }),
+
+      setReportExecutiveSummary: (text) =>
+        set({
+          reportExecutiveSummary: text.slice(0, 4000),
+          reportExecutiveSummaryTouched: true,
+        }),
+
+      applyReportCopyDraft: (draft) =>
+        set({
+          reportGreeting: draft.greeting.slice(0, 2000),
+          reportExecutiveSummary: draft.executiveSummary.slice(0, 4000),
+          reportCopyFingerprint: draft.fingerprint,
+        }),
+
+      acknowledgeReportCopyFingerprint: (fingerprint) =>
+        set({ reportCopyFingerprint: fingerprint }),
+
       setMediaPlacement: (mediaId, placement) =>
         set((s) => ({
           mediaPlacements: { ...s.mediaPlacements, [mediaId]: placement },
@@ -732,6 +790,13 @@ export const usePlannerStore = create<PlannerStore>()(
         mediaPlacements: state.mediaPlacements,
         mediaSelectionExplicit: state.mediaSelectionExplicit,
         appliedScenario: state.appliedScenario,
+        reportClientName: state.reportClientName,
+        reportDocumentTitle: state.reportDocumentTitle,
+        reportGreeting: state.reportGreeting,
+        reportExecutiveSummary: state.reportExecutiveSummary,
+        reportGreetingTouched: state.reportGreetingTouched,
+        reportExecutiveSummaryTouched: state.reportExecutiveSummaryTouched,
+        reportCopyFingerprint: state.reportCopyFingerprint,
       }),
       /**
        * 레거시 포맷:
@@ -914,6 +979,28 @@ export const usePlannerStore = create<PlannerStore>()(
                 typeof s.descriptionEn === "string" ? s.descriptionEn : "",
             };
           }
+        }
+
+        if (typeof raw.reportClientName === "string") {
+          merged.reportClientName = raw.reportClientName.slice(0, 80);
+        }
+        if (typeof raw.reportDocumentTitle === "string") {
+          merged.reportDocumentTitle = raw.reportDocumentTitle.slice(0, 120);
+        }
+        if (typeof raw.reportGreeting === "string") {
+          merged.reportGreeting = raw.reportGreeting.slice(0, 2000);
+        }
+        if (typeof raw.reportExecutiveSummary === "string") {
+          merged.reportExecutiveSummary = raw.reportExecutiveSummary.slice(0, 4000);
+        }
+        if (typeof raw.reportGreetingTouched === "boolean") {
+          merged.reportGreetingTouched = raw.reportGreetingTouched;
+        }
+        if (typeof raw.reportExecutiveSummaryTouched === "boolean") {
+          merged.reportExecutiveSummaryTouched = raw.reportExecutiveSummaryTouched;
+        }
+        if (typeof raw.reportCopyFingerprint === "string") {
+          merged.reportCopyFingerprint = raw.reportCopyFingerprint;
         }
 
         return merged as unknown as PlannerStore;

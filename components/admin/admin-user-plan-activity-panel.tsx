@@ -170,6 +170,7 @@ export function AdminUserPlanActivityPanel({
                       {sourceLabelKo(row.source)}
                       {row.mediaCount > 0 ? ` · 매체 ${row.mediaCount}개` : ""}
                       {row.goalTitle ? ` · ${row.goalTitle}` : ""}
+                      {row.recipientEmail ? ` · ${row.recipientEmail}` : ""}
                     </div>
                   </div>
                   <time className="shrink-0 text-xs text-muted-foreground">

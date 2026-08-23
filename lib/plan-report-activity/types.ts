@@ -2,6 +2,7 @@ export const PLAN_REPORT_ACTIVITY_EVENTS = [
   "view",
   "pdf_export",
   "pptx_export",
+  "email_send",
 ] as const;
 export type PlanReportActivityEvent =
   (typeof PLAN_REPORT_ACTIVITY_EVENTS)[number];
@@ -23,6 +24,7 @@ export type PlanReportActivityInput = {
   goalTitle?: string | null;
   regionsText?: string | null;
   reportTitle?: string | null;
+  recipientEmail?: string | null;
 };
 
 export type AdminPlanReportActivityRow = {
@@ -34,6 +36,7 @@ export type AdminPlanReportActivityRow = {
   goalTitle: string | null;
   regionsText: string | null;
   reportTitle: string | null;
+  recipientEmail: string | null;
   createdAt: string;
   user: {
     id: string;
@@ -53,6 +56,8 @@ export function eventTypeLabelKo(
       return "PDF 다운로드";
     case "pptx_export":
       return "PPT 다운로드";
+    case "email_send":
+      return "이메일 발송";
   }
 }
 

@@ -13,6 +13,7 @@
 
 import { METRICS_ENGINE_VERSION } from "@/lib/metrics/constants";
 import type { MetricBasis } from "@/lib/metrics/defaults";
+import type { PlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
 
 /** 계산 엔진 버전 — `CampaignPlan.engineVersion` 스냅샷에 기록 */
 export const CAMPAIGN_PLAN_ENGINE_VERSION = METRICS_ENGINE_VERSION;
@@ -118,6 +119,8 @@ export type CampaignPlanSnapshot = {
   mediaMix: CampaignPlanMediaLine[];
   metrics: CampaignPlanStoredMetrics;
   engineVersion: string;
+  /** 저장 시 `brief` Json 안에 함께 persist (별도 DB 컬럼 없음) */
+  reportCopy?: PlannerReportCopyState | null;
 };
 
 export function defaultExpiresAt(now: Date = new Date()): Date {

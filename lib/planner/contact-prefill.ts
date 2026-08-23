@@ -21,6 +21,14 @@ export type SavedPlannerPlanJson = {
   campaignMediaPriceOptionIndex?: Record<string, number>;
   creativeUploadedUrl?: string | null;
   mediaPlacements?: Record<string, unknown>;
+  /** Step 7 보고서 메타 — SavedPlan 복원 시 함께 로드 */
+  reportClientName?: string;
+  reportDocumentTitle?: string;
+  reportGreeting?: string;
+  reportExecutiveSummary?: string;
+  reportGreetingTouched?: boolean;
+  reportExecutiveSummaryTouched?: boolean;
+  reportCopyFingerprint?: string | null;
 };
 
 const PLAN_ID_RE = /^c[a-z0-9]{24,}$/i;

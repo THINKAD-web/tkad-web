@@ -68,3 +68,43 @@ export async function downloadPlannerReport(
   a.remove();
   URL.revokeObjectURL(url);
 }
+
+/** 서버에서 PDF 생성 후 이메일 발송 (발송 시점 최신 payload 반영) */
+export async function sendPlannerReportEmail(
+  recipientEmail: string,
+  payload: PlannerReportExportPayload,
+  options?: {
+    activitySource?: PlanReportActivitySource;
+    sectionVisibility?: PlannerReportSectionVisibility;
+    lineupViewMode?: PlannerExportLineupViewMode;
+    emailBody?: string;
+  },
+): Promise<{ pdfFilename: string; pdfSizeBytes: number }> {
+  const res = await fetch("/api/planner/email-report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify({
+      recipientEmail,
+      payload,
+      activitySource: options?.activitySource,
+      sectionVisibility: options?.sectionVisibility,
+      lineupViewMode: options?.lineupViewMode,
+      emailBody: options?.emailBody,
+    }),
+  });
+  const data = (await res.json().catch(() => ({}))) as {
+    error?: string;
+    detail?: string;
+    pdfFilename?: string;
+    pdfSizeBytes?: number;
+  };
+  if (!res.ok) {
+    const message = data.detail?.trim() || data.error?.trim() || "";
+    throw new Error(message || `email send failed (${res.status})`);
+  }
+  return {
+    pdfFilename: data.pdfFilename ?? `${plannerReportFileBase(payload)}.pdf`,
+    pdfSizeBytes: data.pdfSizeBytes ?? 0,
+  };
+}

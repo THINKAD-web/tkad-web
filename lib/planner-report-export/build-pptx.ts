@@ -1,4 +1,4 @@
-import { EXPORT_THUMB_BOX_MM, PLANNER_EXPORT_THUMB_BOX_MM, loadExportThumbMap } from "@/lib/export-media-images";
+import { EXPORT_THUMB_BOX_MM, PLANNER_EXPORT_THUMB_BOX_MM, loadExportThumbMap, loadExportImageForPdf } from "@/lib/export-media-images";
 import type {
   PlannerExportMediaRow,
   PlannerReportExportAssets,
@@ -262,7 +262,13 @@ export async function buildPlannerReportPptx(
   const face = isKo ? "Malgun Gothic" : "Arial";
   const W = 13.33;
   const vis = assets?.sectionVisibility;
-  const exportSections = filterExportSections(p.sections, vis);
+  const exportSections = filterExportSections(p.sections, vis)?.filter(
+    (sec) =>
+      !(
+        p.executiveSummaryLines?.length &&
+        (sec.title === "전략 요약" || sec.title === "Strategy summary")
+      ),
+  );
   const lineupViewMode = assets?.lineupViewMode ?? "detail";
 
   const ACCENT_LT = "FFB990";
@@ -271,9 +277,30 @@ export async function buildPlannerReportPptx(
     { text: "AD", options: { color: ACCENT_LT, bold: true } },
   ].map((r) => ({ ...r, options: { ...r.options, fontFace: face, fontSize: size } }));
 
+  const coverLogoData = p.coverLogoUrl?.trim()
+    ? await loadExportImageForPdf(p.coverLogoUrl.trim(), {
+        width: 256,
+        height: 256,
+        quality: 88,
+      })
+    : null;
+
   // ── 1. 표지 ──
   const cover = pptx.addSlide();
   cover.background = { color: VIOLET };
+  if (coverLogoData) {
+    try {
+      cover.addImage({
+        data: coverLogoData,
+        x: W - 2.2,
+        y: 0.45,
+        w: 1.5,
+        h: 1.5,
+      });
+    } catch {
+      /* broken logo */
+    }
+  }
   cover.addText(wordmark(30), { x: 0.7, y: 1.35, w: 6, h: 0.7 });
   cover.addText("CAMPAIGN PLANNER", {
     x: 0.72, y: 2.05, w: 9, h: 0.4, fontFace: face,
@@ -354,6 +381,43 @@ export async function buildPlannerReportPptx(
     return topY + 0.28;
   }
 
+  // ── 1b. 인사말 / 전략 요약 (C-full-1) ──
+  if (p.greetingText?.trim()) {
+    const gSlide = pptx.addSlide();
+    header(gSlide, isKo ? "인사말" : "Greeting");
+    gSlide.addText(
+      p.greetingText
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .join("\n\n"),
+      {
+        x: 0.7,
+        y: 1.3,
+        w: 12,
+        h: 5.2,
+        fontFace: face,
+        fontSize: 14,
+        color: INK,
+        valign: "top",
+      },
+    );
+  }
+  if (p.executiveSummaryLines && p.executiveSummaryLines.length > 0) {
+    const eSlide = pptx.addSlide();
+    header(eSlide, isKo ? "전략 요약" : "Strategy summary");
+    eSlide.addText(p.executiveSummaryLines.join("\n\n"), {
+      x: 0.7,
+      y: 1.3,
+      w: 12,
+      h: 5.2,
+      fontFace: face,
+      fontSize: 13,
+      color: INK,
+      valign: "top",
+    });
+  }
+
   // ── 2. 캠페인 요약 + KPI ──
   const s2 = pptx.addSlide();
   header(s2, isKo ? "캠페인 개요" : "Campaign overview");
@@ -406,6 +470,18 @@ export async function buildPlannerReportPptx(
     });
   });
 
+  if (p.cpmFootnote) {
+    s2.addText(p.cpmFootnote, {
+      x: 0.6,
+      y: 6.15,
+      w: 12.1,
+      h: 0.35,
+      fontFace: face,
+      fontSize: 9,
+      color: GRAY,
+    });
+  }
+
   if (p.budgetHonesty?.overBudgetBanner) {
     s2.addShape(pptx.ShapeType.roundRect, {
       x: 0.6,
@@ -426,6 +502,82 @@ export async function buildPlannerReportPptx(
       bold: true,
       color: "B91C1C",
     });
+  }
+
+  if (p.quoteSummary) {
+    const qs = p.quoteSummary;
+    const fmtAmt = (won: number) => formatExportBudgetWonLabel(won, isKo);
+    const sq = pptx.addSlide();
+    header(sq, isKo ? "견적 요약" : "Quote summary");
+    const quoteRows: Array<[string, string, boolean]> = [
+      [
+        isKo ? "매체비 (확정)" : "Media fee (confirmed)",
+        fmtAmt(qs.supplyWon),
+        false,
+      ],
+      [
+        isKo ? "제작비" : "Production",
+        qs.productionWon > 0 ? fmtAmt(qs.productionWon) : "—",
+        false,
+      ],
+      [isKo ? "부가세 (10%)" : "VAT (10%)", fmtAmt(qs.vatWon), false],
+    ];
+    if (qs.quoteOnlyLine) {
+      quoteRows.push([
+        qs.quoteOnlyLine.label,
+        qs.quoteOnlyLine.amountLabel,
+        false,
+      ]);
+    }
+    quoteRows.push([qs.totalLabel, fmtAmt(qs.totalWon), true]);
+    sq.addTable(
+      quoteRows.map(([k, v, emphasis]) => [
+        {
+          text: k,
+          options: {
+            fill: { color: emphasis ? LIGHT : "FFFFFF" },
+            color: emphasis ? INK : GRAY,
+            bold: emphasis,
+            fontSize: 11,
+            fontFace: face,
+          },
+        },
+        {
+          text: v,
+          options: {
+            fill: { color: emphasis ? LIGHT : "FFFFFF" },
+            color: emphasis ? VIOLET.replace("#", "") : INK,
+            bold: emphasis,
+            align: "right",
+            fontSize: 11,
+            fontFace: face,
+          },
+        },
+      ]),
+      {
+        x: 0.6,
+        y: 1.25,
+        w: 7.2,
+        colW: [4.2, 3],
+        border: { type: "solid", color: "E4E6EC", pt: 0.5 },
+        rowH: 0.45,
+        valign: "middle",
+      },
+    );
+    if (qs.footnotes.length > 0) {
+      sq.addText(
+        qs.footnotes.map((n) => `※ ${n}`).join("\n"),
+        {
+          x: 0.6,
+          y: 1.25 + quoteRows.length * 0.45 + 0.2,
+          w: 12.1,
+          h: 0.6,
+          fontFace: face,
+          fontSize: 9,
+          color: GRAY,
+        },
+      );
+    }
   }
 
   // ── 2.5 성과 요약 (도형 차트 — Keynote·Google Slides 호환) ──
@@ -504,7 +656,13 @@ export async function buildPlannerReportPptx(
     }
     if (ch.cpmBars?.length) {
       addShapeBarChart(sc, pptx, {
-        title: isKo ? "CPM 비교 (원)" : "CPM (KRW)",
+        title: p.cpmExcludesQuoteOnly
+          ? isKo
+            ? "CPM 비교 (원) (문의 매체 제외)"
+            : "CPM (KRW, excl. inquiry)"
+          : isKo
+            ? "CPM 비교 (원)"
+            : "CPM (KRW)",
         x: barX,
         y: ch.reachSummary?.length ? rightY + 0.15 : rightY,
         w: barW,
@@ -1337,7 +1495,9 @@ export async function buildPlannerReportPptx(
   // ── 면책 ──
   const last = pptx.addSlide();
   last.background = { color: WHITE };
-  const footerText = [p.currencyFootnote, p.disclaimer].filter(Boolean).join("\n\n");
+  const footerText = [p.currencyFootnote, p.pricingFootnote, p.disclaimer]
+    .filter(Boolean)
+    .join("\n\n");
   last.addText(footerText, {
     x: 0.8, y: 3.2, w: 11.7, h: 1.2, fontFace: face, fontSize: 11, color: GRAY, align: "center", valign: "middle",
   });

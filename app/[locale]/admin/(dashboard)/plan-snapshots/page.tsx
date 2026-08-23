@@ -321,6 +321,7 @@ export default function AdminPlanSnapshotsPage() {
                       {sourceLabelKo(row.source)}
                       {row.mediaCount > 0 ? ` · 매체 ${row.mediaCount}개` : ""}
                       {row.goalTitle ? ` · ${row.goalTitle}` : ""}
+                      {row.recipientEmail ? ` · ${row.recipientEmail}` : ""}
                     </div>
                     {row.regionsText ? (
                       <div className="text-xs text-muted-foreground">{row.regionsText}</div>

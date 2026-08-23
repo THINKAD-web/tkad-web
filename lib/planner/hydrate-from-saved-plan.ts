@@ -75,5 +75,24 @@ export function hydratePlannerFromSavedPlan(
       !Array.isArray(plan.mediaPlacements)
         ? (plan.mediaPlacements as Record<string, CompositeLogoPlacement>)
         : {},
+    reportClientName:
+      typeof plan.reportClientName === "string" ? plan.reportClientName : "",
+    reportDocumentTitle:
+      typeof plan.reportDocumentTitle === "string"
+        ? plan.reportDocumentTitle
+        : "",
+    reportGreeting:
+      typeof plan.reportGreeting === "string" ? plan.reportGreeting : "",
+    reportExecutiveSummary:
+      typeof plan.reportExecutiveSummary === "string"
+        ? plan.reportExecutiveSummary
+        : "",
+    reportGreetingTouched: plan.reportGreetingTouched === true,
+    reportExecutiveSummaryTouched:
+      plan.reportExecutiveSummaryTouched === true,
+    reportCopyFingerprint:
+      typeof plan.reportCopyFingerprint === "string"
+        ? plan.reportCopyFingerprint
+        : null,
   };
 }

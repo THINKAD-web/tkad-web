@@ -140,8 +140,15 @@ export type PlannerReportExportPayload = {
   documentTitle: string;
   /** slim 헤더·표지용 캠페인명 (없으면 목표명 사용) */
   campaignName?: string;
-  /** slim 헤더용 클라이언트명 (선택) */
+  /** slim 헤더·표지용 클라이언트명 (선택) */
   clientName?: string;
+  /** 표지 우측 — Step 5 업로드 로고 등
+   *  현재는 `creativeUploadedUrl`(광고 소재)을 임시 재사용. 전용 필드 분리 예정. */
+  coverLogoUrl?: string;
+  /** 광고주 대상 인사말 — 비어 있으면 섹션 생략 */
+  greetingText?: string;
+  /** Executive summary — 비어 있으면 섹션 생략 (노출·CPM 수치 없음) */
+  executiveSummaryLines?: string[];
   generatedAt: string;
   goalTitle: string;
   /** 총 캠페인 예산 (만원 단위) */
@@ -188,9 +195,30 @@ export type PlannerReportExportPayload = {
   /** @deprecated use quoteOnlyNotice */
   unpricedMediaNotice?: string;
   cpmExcludesQuoteOnly?: boolean;
+  /** 협의가 제외 CPM 분모 노출 명시 (검산용) */
+  cpmFootnote?: string;
   /** JP 매체 포함 시 ¥ 환산 각주 (합계·차트는 KRW 유지) */
   currencyFootnote?: string;
+  /** 제작비·부가세 별도 — RFP 견적과 동일 SSOT */
+  pricingFootnote?: string;
+  /** C-full-3a — 매체비·제작비·VAT·총액 견적 표 */
+  quoteSummary?: PlannerExportQuoteSummary;
   disclaimer: string;
+};
+
+/** C-full-3a 견적 요약 — 매체비는 budgetHonesty.mixWon 과 동일 SSOT */
+export type PlannerExportQuoteSummary = {
+  supplyWon: number;
+  productionWon: number;
+  vatWon: number;
+  totalWon: number;
+  /** 협의가 포함 시 「합계 (협의 매체 제외)」 등 — web/PDF/PPTX 공용 */
+  totalLabel: string;
+  quoteOnlyLine?: {
+    label: string;
+    amountLabel: string;
+  };
+  footnotes: string[];
 };
 
 export type PlannerReportExportFormat = "pdf" | "pptx";
