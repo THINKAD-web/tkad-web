@@ -14,7 +14,11 @@ import {
   type MediaPackageOption,
   type MediaQuantityUnitMode,
 } from "@/lib/media-quantity";
-import { quotePeriodLookupKeyFromDays } from "@/lib/compare-quote";
+import {
+  interpolatePartialRate,
+  quotePeriodLookupKeyFromDays,
+} from "@/lib/compare-quote";
+import { quoteLineTotalWonFromPartialRate } from "@/lib/media-partial-period-rates";
 import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import {
   buildQuoteWizardLineContext,
@@ -218,13 +222,17 @@ export function plannerMediaPeriodLineWon(
       : ctx.weeks != null && ctx.weeks > 0
         ? (ctx.weeks * 7) / 30
         : 1;
-  return Math.round(
-    plannerMonthlyPriceWonForMedia(
-      media,
-      pricing?.quantities,
-      pricing?.priceOptionIndex,
-    ) * months,
+  const unitWon = plannerMonthlyPriceWonForMedia(
+    media,
+    pricing?.quantities,
+    pricing?.priceOptionIndex,
   );
+  const days = Math.max(1, Math.round(months * 30));
+  const interpRate = interpolatePartialRate(media, days);
+  if (interpRate != null) {
+    return quoteLineTotalWonFromPartialRate(unitWon, interpRate);
+  }
+  return Math.round(unitWon * months);
 }
 
 /** 포트폴리오 기간 총액(원) — partial rate 우선, 없으면 월×개월 선형 */
