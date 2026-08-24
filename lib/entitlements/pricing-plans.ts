@@ -1,4 +1,5 @@
 import { featureLabel } from "@/lib/report-access-shared";
+import { freeAfterProTrialNote } from "@/lib/pro-trial-marketing";
 import { litePlanProAddonNote } from "@/lib/entitlements/tier-copy";
 import {
   AI_DAILY_LIMITS,
@@ -151,6 +152,10 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
       id: "free",
       features: [
         { id: "media_spec", text: mediaSpec },
+        {
+          id: "free_after_pro_trial",
+          text: freeAfterProTrialNote(isKo),
+        },
         { id: "planner_input", text: plannerInput },
         {
           id: "planner_gate_note",

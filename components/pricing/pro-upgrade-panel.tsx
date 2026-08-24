@@ -124,16 +124,16 @@ export function ProUpgradePanel({
     return (
       <div
         id="pro-upgrade"
-        className="scroll-mt-24 rounded-[28px] border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] p-6 text-center sm:p-8"
+        className="scroll-mt-24 tkad-qp-pricing-card tkad-qp-accent-soft-surface border border-[color:var(--qp-accent)]/35 p-6 text-center sm:p-8"
       >
-        <p className="text-sm font-semibold dark:text-white text-gray-800">
+        <p className="text-sm font-semibold">
           {isKo
             ? "포인트 또는 카드로 PRO를 시작하려면 로그인해 주세요."
             : "Sign in to upgrade to PRO with points or card."}
         </p>
         <Link
           href="/login?redirect=/pricing#pro-upgrade"
-          className="tkad-qp-cta mt-4 inline-flex h-11 items-center justify-center rounded-xl px-8 text-sm font-black text-white"
+          className="tkad-qp-cta mt-4 inline-flex h-11 items-center justify-center rounded-[var(--qp-radius-md)] px-8 text-sm font-black text-white"
         >
           {isKo ? "로그인하고 PRO 시작" : "Sign in to start PRO"}
         </Link>
@@ -154,7 +154,7 @@ export function ProUpgradePanel({
     <SubscriptionConfirmOnReturn isKo={isKo} onConfirmed={onPlanChange} />
     <div
       id="pro-upgrade"
-      className="scroll-mt-24 rounded-[28px] border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] p-6 sm:p-8"
+      className="scroll-mt-24 tkad-qp-pricing-card tkad-qp-accent-soft-surface border border-[color:var(--qp-accent)]/35 p-6 sm:p-8"
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -162,7 +162,7 @@ export function ProUpgradePanel({
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {isKo ? "PRO 업그레이드" : "Upgrade to PRO"}
           </p>
-          <h3 className="mt-2 text-xl font-black dark:text-white text-gray-900 sm:text-2xl">
+          <h3 className="mt-2 text-xl font-black sm:text-2xl">
             {isPro
               ? isKo
                 ? "PRO 이용 중 · 기간 연장"
@@ -171,7 +171,7 @@ export function ProUpgradePanel({
                 ? "지금 PRO로 업그레이드"
                 : "Upgrade to PRO now"}
           </h3>
-          <p className="mt-2 max-w-xl text-sm text-gray-600 dark:text-white/70">
+          <p className="tkad-qp-text-muted-on-accent mt-2 max-w-xl text-sm">
             {isKo
               ? "보유 포인트로 바로 PRO를 받거나, 카드로 월 구독할 수 있습니다."
               : "Use your points instantly or subscribe monthly by card."}
@@ -307,7 +307,7 @@ export function ProUpgradePanel({
 
       <div
         id="lite-upgrade"
-        className="scroll-mt-24 mt-6 rounded-[28px] border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
+        className="scroll-mt-24 mt-6 tkad-qp-pricing-card border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
       >
         <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-white/50">
           LITE
@@ -335,7 +335,7 @@ export function ProUpgradePanel({
 
       <div
         id="agency-upgrade"
-        className="scroll-mt-24 mt-6 rounded-[28px] border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
+        className="scroll-mt-24 mt-6 tkad-qp-pricing-card border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
       >
         <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-white/50">
           AGENCY

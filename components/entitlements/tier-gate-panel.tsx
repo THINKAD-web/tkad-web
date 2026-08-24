@@ -17,7 +17,7 @@ export function TierGatePanel({ message, className, compact = false }: Props) {
   return (
     <div
       className={cn(
-        "mx-auto max-w-sm rounded-2xl border border-[color:var(--qp-accent)]/25 bg-gradient-to-b from-[color:var(--qp-accent)]/8 to-white px-6 py-7 text-center shadow-lg dark:border-[color:var(--qp-accent)]/25 dark:from-[color:var(--qp-accent)]/15 dark:to-gray-950/70",
+        "tkad-qp-tier-gate tkad-qp-accent-soft-surface mx-auto max-w-sm border border-[color:var(--qp-accent)]/25 px-6 py-7 text-center dark:border-[color:var(--qp-accent)]/25",
         compact && "px-5 py-5",
         className,
       )}
@@ -33,13 +33,13 @@ export function TierGatePanel({ message, className, compact = false }: Props) {
       </p>
       <h3
         className={cn(
-          "mt-2 font-black text-gray-900 dark:text-white",
+          "mt-2 font-black",
           compact ? "text-sm" : "text-base",
         )}
       >
         {message.title}
       </h3>
-      <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-white/75">
+      <p className="tkad-qp-text-muted-on-accent mt-2 text-sm leading-relaxed">
         {message.description}
       </p>
       {message.hint ? (
@@ -68,7 +68,7 @@ function TierGateCtaLink({
     return (
       <Link
         href={cta.href}
-        className="tkad-neon-cta-clean inline-flex h-10 items-center justify-center gap-1.5 rounded-xl px-5 text-sm font-bold text-gray-900 dark:text-white"
+        className="tkad-neon-cta-clean inline-flex h-10 items-center justify-center gap-1.5 rounded-[var(--qp-radius-md)] px-5 text-sm font-bold text-gray-900 dark:text-white"
       >
         <Sparkles className="h-4 w-4" aria-hidden />
         {cta.label}

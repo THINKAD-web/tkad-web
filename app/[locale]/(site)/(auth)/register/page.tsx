@@ -15,7 +15,21 @@ import type { SignupStartRole } from "@/lib/signup-start-roles";
 import {
   proTrialSignupHeadlineEn,
   proTrialSignupHeadlineKo,
+  freeAfterProTrialNoteEn,
+  freeAfterProTrialNoteKo,
 } from "@/lib/pro-trial-marketing";
+import {
+  authAlertClass,
+  authCardClass,
+  authEyebrowClass,
+  authFooterClass,
+  authInputClass,
+  authLabelClass,
+  authLinkClass,
+  authSubmitClass,
+  authSubtitleClass,
+  authTitleClass,
+} from "@/lib/auth/auth-ui-classes";
 
 export default function RegisterPage() {
   return (
@@ -104,21 +118,12 @@ function RegisterPageInner() {
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10">
         <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
-          <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
-            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:28px_28px]" />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--qp-accent)_18%,transparent),transparent_58%),radial-gradient(circle_at_bottom,color-mix(in_srgb,var(--qp-accent)_10%,transparent),transparent_58%)]"
-            />
-            <div className="relative">
+          <div className={authCardClass}>
+            <div>
               <div className="mb-6 text-center">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
-                  [ REGISTER ]
-                </p>
-                <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
-                  회원가입
-                </h1>
-                <p className="mt-2 text-[12px] tracking-tight dark:text-white text-gray-500">
+                <p className={authEyebrowClass}>[ REGISTER ]</p>
+                <h1 className={`mt-2 ${authTitleClass}`}>회원가입</h1>
+                <p className={`mt-2 ${authSubtitleClass}`}>
                   {`// `}
                   {isKo
                     ? "Google·카카오·네이버로 간편 가입하거나 이메일로 가입하세요"
@@ -126,6 +131,9 @@ function RegisterPageInner() {
                 </p>
                 <p className="mt-2 text-center text-xs font-semibold text-[color:var(--qp-accent)]">
                   {isKo ? proTrialSignupHeadlineKo() : proTrialSignupHeadlineEn()}
+                </p>
+                <p className={`mt-1 ${authSubtitleClass}`}>
+                  {isKo ? freeAfterProTrialNoteKo() : freeAfterProTrialNoteEn()}
                 </p>
               </div>
 
@@ -202,7 +210,7 @@ function RegisterPageInner() {
                 </Field>
 
                 {error && (
-                  <div className="rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 text-[12px] tracking-tight dark:text-white text-gray-800">
+                  <div className={authAlertClass}>
                     {`// `}{error}
                   </div>
                 )}
@@ -212,7 +220,7 @@ function RegisterPageInner() {
                   variant="accent"
                   size="lg"
                   disabled={loading}
-                  className="w-full rounded-[22px] border dark:border-white/14 border-gray-200 tkad-qp-cta text-white shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
+                  className={authSubmitClass}
                 >
                   {loading && <Spinner size="sm" />}
                   {loading ? "가입 중…" : "가입하기"}
@@ -221,12 +229,9 @@ function RegisterPageInner() {
             </div>
           </div>
 
-          <p className="mt-6 text-center text-[12px] tracking-tight dark:text-white text-gray-500">
+          <p className={`mt-6 ${authFooterClass}`}>
             {`// `}이미 계정이 있으신가요?{" "}
-            <Link
-              href="/login"
-              className="border-b dark:border-white/20 border-gray-300 pb-0.5 font-bold dark:text-white text-gray-900 transition-colors hover:border-white/35 hover:dark:text-white"
-            >
+            <Link href="/login" className={authLinkClass}>
               로그인
             </Link>
           </p>
@@ -236,8 +241,7 @@ function RegisterPageInner() {
   );
 }
 
-const inputCls =
-  "tkad-auth-input h-11 w-full rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/28 px-4  text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-all focus:dark:border-white/18 border-gray-300 focus:ring-2 focus:ring-white/12";
+const inputCls = authInputClass;
 
 function Field({
   label,
@@ -252,11 +256,8 @@ function Field({
 }) {
   return (
     <div>
-      <label
-        htmlFor={htmlFor}
-        className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600"
-      >
-        [ {label}{hint && <span className="ml-1 dark:text-white">{hint}</span>} ]
+      <label htmlFor={htmlFor} className={authLabelClass}>
+        [ {label}{hint && <span className="ml-1">{hint}</span>} ]
       </label>
       {children}
     </div>

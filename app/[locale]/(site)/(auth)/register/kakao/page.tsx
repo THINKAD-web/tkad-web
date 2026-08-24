@@ -110,7 +110,7 @@ function KakaoRegisterForm() {
 function AuthCardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
-      <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
+      <div className="tkad-auth-card tkad-qp-auth-card relative w-full overflow-hidden border dark:border-white/12 border-gray-200 p-6 dark:text-white text-gray-900 sm:p-8">
         <AuthCardDecor />
         <div className="relative">{children}</div>
       </div>

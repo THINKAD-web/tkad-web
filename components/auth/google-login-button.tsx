@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
+import { authOAuthButtonClass } from "@/lib/auth/auth-ui-classes";
 
 type Props = {
   className?: string;
@@ -33,7 +34,7 @@ function GoogleLoginButtonInner({ className }: Props) {
       disabled={loading}
       className={
         className ??
-        "flex h-12 w-full items-center justify-center gap-2.5 rounded-[18px] border dark:border-white/14 border-gray-200 bg-white px-4 text-sm font-bold text-gray-800 shadow-[0_12px_40px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-70 dark:bg-white/95 dark:text-gray-900"
+        `${authOAuthButtonClass} bg-white text-gray-800 dark:bg-white dark:text-gray-900`
       }
     >
       <span aria-hidden className="inline-flex h-5 w-5 items-center justify-center">

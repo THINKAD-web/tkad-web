@@ -24,16 +24,22 @@ export function SignupStartRolePicker({ value, onChange, ariaLabel }: Props) {
           type="button"
           role="radio"
           aria-checked={value === opt.value}
+          data-selected={value === opt.value ? "true" : "false"}
           onClick={() => onChange(opt.value)}
           className={cn(
-            "w-full rounded-[18px] border px-4 py-3 text-left transition-all",
+            "tkad-qp-auth-role w-full border px-4 py-3 text-left transition-colors",
             value === opt.value
-              ? "border-white/28 bg-white/14 dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
-              : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 dark:text-white text-gray-600 hover:border-white/16 hover:dark:text-white text-gray-800",
+              ? "border-[color:var(--qp-accent)]/45"
+              : "dark:border-white/10 border-gray-200 bg-white dark:bg-black/20 hover:border-[color:var(--qp-accent)]/25",
           )}
         >
           <p className="text-sm font-bold tracking-tight">{t(opt.labelKey)}</p>
-          <p className="mt-1 text-[11px] dark:text-white text-gray-500">
+          <p
+            className={cn(
+              "mt-1 text-[11px]",
+              value === opt.value ? "tkad-qp-text-muted-on-accent" : "tkad-qp-text-muted",
+            )}
+          >
             {t(opt.descKey)}
           </p>
         </button>

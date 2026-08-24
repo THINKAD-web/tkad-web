@@ -27,10 +27,10 @@ type Props = {
 
 /** appearance day/night — `tkad-pricing-outline-btn` (globals.css) */
 const planOutlineBtnClass =
-  "tkad-pricing-outline-btn mt-8 flex h-11 items-center justify-center rounded-xl border text-sm font-bold transition-colors";
+  "tkad-pricing-outline-btn mt-8 flex h-11 items-center justify-center rounded-[var(--qp-radius-md)] border text-sm font-bold transition-colors";
 
 const planCtaPrimaryClass =
-  "tkad-qp-cta mt-8 flex h-11 w-full items-center justify-center rounded-xl text-sm font-black text-white";
+  "tkad-qp-cta mt-8 flex h-11 w-full items-center justify-center rounded-[var(--qp-radius-md)] text-sm font-black text-white";
 
 function scrollToCheckout(plan: "lite" | "pro" | "agency") {
   const id =
@@ -75,7 +75,7 @@ export function PricingPageClient({
           return (
             <article
               key={key}
-              className={`rounded-[28px] border p-6 backdrop-blur sm:p-8 ${highlighted ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] dark:bg-white/10" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50"}`}
+              className={`rounded-[var(--qp-radius-md)] border p-6 backdrop-blur sm:p-8 ${highlighted ? "tkad-qp-pricing-card tkad-qp-accent-soft-surface border-[color:var(--qp-accent)]/45" : "tkad-qp-pricing-card dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50"}`}
             >
               {highlighted ? (
                 <p className="mb-3 inline-flex items-center gap-1 rounded-full border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-wider text-[color:var(--qp-accent)]">
@@ -83,7 +83,7 @@ export function PricingPageClient({
                   {isKo ? "인기" : "Popular"}
                 </p>
               ) : null}
-              <h2 className="text-xl font-black uppercase dark:text-white text-gray-900">
+              <h2 className="text-xl font-black uppercase">
                 {planTitle(key)}
               </h2>
               {key === "pro" ? (
@@ -125,7 +125,7 @@ export function PricingPageClient({
                   .map((f) => (
                     <li
                       key={f.id}
-                      className="flex gap-2 text-sm dark:text-white text-gray-800"
+                      className="flex gap-2 text-sm tkad-qp-text-primary"
                     >
                       <Check
                         className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)]"
