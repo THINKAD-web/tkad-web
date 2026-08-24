@@ -14,7 +14,7 @@
 | **A∩B** | 두 기준 모두 | **4** | 겹침 |
 | **A only** | guro+관악, zone≠gwanak | **2** | 맥스비전 2건 (`region_zone=downtown`) |
 | **B only** | gwanak zone, A 아님 | **7** | 동작·금천 등 (**별도 정책 필요**) |
-| **Tier 1 (백필 대상)** | `district` 관악 + `sub≠seoul_gwanak` | **6** | **승인된 백필 범위** |
+| **Tier 1 (백필 대상)** | `district` 관악 + `sub≠seoul_gwanak` | **6** | **최종 확정 (사당역 주소 확인 완료)** |
 
 **6건 vs 11건:** 겹치는 4건. 11건은 planner `gwanak` zone(관악·동작·금천) 전체이고, 6건은 그중 **관악구 행정구**만. 백필은 **Tier 1 = 6건 unique** 로 진행.
 
@@ -30,6 +30,27 @@
 | `cmp02109u000604jxnuzp4ypp` | 신림역 정도빌딩 | seoul_guro | gwanak | OK |
 | `cmofq46f8000204leputaopdy` | 신림역사거리 | seoul_guro | gwanak | OK |
 | `cms7cmnak000h04jlwlgu1viw` | 지하철 2호선 신림역 맥스비전 | seoul_guro | downtown | OK |
+
+### 사당역 삼진빌딩 — 주소 확인 (2026-08-24) ✅ Tier 1 포함
+
+| 항목 | 값 |
+|------|-----|
+| id | `cmpbcufq0000004l4kl2vh2no` |
+| location | 서울 **관악구** 남부순환로 2082-25 삼진빌딩 |
+| 좌표 | 37.476057, 126.981013 |
+| nearby_stations | 사당역 2호선 (약 74m) |
+| DB district | 관악구 |
+
+**결론: district=관악구는 맞음 — 6건째 백필 포함.**
+
+근거:
+- 도로명주소 `관악구 남부순환로 2082-25` → 공공데이터상 **관악구 남현동** (관악구청 등록)
+- 사당역은 **관악·동작 경계** 역이라 “사당=동작구”로 알려진 경우가 많지만, 이 빌딩 주소·좌표는 **관악구 쪽** 남부순환로변
+- `region_sub=seoul_guro`만 틀렸고, district 필드 자체는 신뢰 가능
+
+**참고:** 역명이 ‘사당’이라 동작구로 오해하기 쉬움 — district 백필 기준으로는 문제 없음.
+
+---
 
 ### 서울대입구 증상 매체 포함 확인 ✅
 
