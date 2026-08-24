@@ -15,6 +15,8 @@ import type { SignupStartRole } from "@/lib/signup-start-roles";
 import {
   proTrialSignupHeadlineEn,
   proTrialSignupHeadlineKo,
+  freeAfterProTrialNoteEn,
+  freeAfterProTrialNoteKo,
 } from "@/lib/pro-trial-marketing";
 import {
   authAlertClass,
@@ -129,6 +131,9 @@ function RegisterPageInner() {
                 </p>
                 <p className="mt-2 text-center text-xs font-semibold text-[color:var(--qp-accent)]">
                   {isKo ? proTrialSignupHeadlineKo() : proTrialSignupHeadlineEn()}
+                </p>
+                <p className={`mt-1 ${authSubtitleClass}`}>
+                  {isKo ? freeAfterProTrialNoteKo() : freeAfterProTrialNoteEn()}
                 </p>
               </div>
 
