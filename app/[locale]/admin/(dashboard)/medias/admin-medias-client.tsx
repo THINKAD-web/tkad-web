@@ -85,6 +85,7 @@ import {
 import { adminFetchJson, readAdminResponseJson } from "@/lib/admin-client-fetch";
 import { MetricsWriteWarningsModal } from "@/components/admin/metrics-write-warnings-modal";
 import { AdminMediaReviewFlagBadge } from "@/components/admin/admin-media-review-flag-badge";
+import { MEDIA_REVIEW_STATUS } from "@/lib/media-review-status";
 import {
   isMetricsWarningsPayload,
   type MediaMetricsFieldWarning,
@@ -776,9 +777,14 @@ function clampPageSize(n: number): PageSizeOption {
     : 8;
 }
 
-type PublicListFilter = "all" | "public" | "hidden";
+type PublicListFilter = "all" | "public" | "hidden" | "public_flagged";
 type AvailabilityListFilter = "all" | MediaAvailability;
 type QualityListFilter = "all" | "low";
+
+/** isActive but reviewStatus=flagged → hidden from customer catalog */
+function isActiveFlaggedHiddenFromCustomer(m: AdminMediaDto): boolean {
+  return m.isActive && m.reviewStatus === MEDIA_REVIEW_STATUS.flagged;
+}
 
 function mediaQualityScore(m: AdminMediaDto): number {
   const images = [
@@ -870,6 +876,11 @@ export default function AdminMediasClient({
 
   const lowQualityCount = useMemo(
     () => medias.filter((m) => mediaQualityScore(m) < 60).length,
+    [medias],
+  );
+
+  const publicFlaggedCount = useMemo(
+    () => medias.filter(isActiveFlaggedHiddenFromCustomer).length,
     [medias],
   );
 
@@ -1296,6 +1307,9 @@ export default function AdminMediasClient({
       if (!matchesCategoryFilter(m.type, typeFilter)) return false;
       if (publicFilter === "public" && !m.isActive) return false;
       if (publicFilter === "hidden" && m.isActive) return false;
+      if (publicFilter === "public_flagged" && !isActiveFlaggedHiddenFromCustomer(m)) {
+        return false;
+      }
       if (
         availabilityFilter !== "all" &&
         m.availability !== availabilityFilter
@@ -2277,7 +2291,7 @@ export default function AdminMediasClient({
   const renderMediaListActionBar = (media: AdminMediaDto) => (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
       <span className="text-[10px] font-semibold text-muted-foreground">노출</span>
-      <div className="flex items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5">
         <span className="text-[10px] text-muted-foreground">공개</span>
         <button
           type="button"
@@ -2298,6 +2312,14 @@ export default function AdminMediasClient({
             }`}
           />
         </button>
+        {isActiveFlaggedHiddenFromCustomer(media) ? (
+          <span
+            className="max-w-[14rem] text-[10px] font-medium leading-snug text-amber-900 dark:text-amber-200"
+            title="isActive는 켜져 있지만 reviewStatus=flagged라 고객 카탈로그·검색·상세에서 제외됩니다."
+          >
+            공개 ON · 검토 필요로 고객 미노출
+          </span>
+        ) : null}
       </div>
       <div className="flex items-center gap-1.5">
         <span className="text-[10px] text-muted-foreground">즉시예약</span>
@@ -2578,6 +2600,13 @@ export default function AdminMediasClient({
                   { value: "all" as const, label: "전체" },
                   { value: "public" as const, label: "공개만" },
                   { value: "hidden" as const, label: "숨김만" },
+                  {
+                    value: "public_flagged" as const,
+                    label:
+                      publicFlaggedCount > 0
+                        ? `공개 ON·미노출 (${publicFlaggedCount})`
+                        : "공개 ON·미노출",
+                  },
                 ] as const
               ).map((opt) => (
                 <button
@@ -2835,9 +2864,11 @@ export default function AdminMediasClient({
                     <li
                       key={media.id}
                       className={`border-l-[3px] px-3 py-3 ${
-                        isRowActive(media)
-                          ? "border-l-transparent"
-                          : "border-l-amber-500/75 bg-muted/35 dark:border-l-amber-400/60"
+                        !isRowActive(media)
+                          ? "border-l-amber-500/75 bg-muted/35 dark:border-l-amber-400/60"
+                          : isActiveFlaggedHiddenFromCustomer(media)
+                            ? "border-l-amber-500/60 bg-amber-50/40 dark:border-l-amber-400/50 dark:bg-amber-950/20"
+                            : "border-l-transparent"
                       }`}
                     >
                       <div className="flex gap-3">
@@ -2947,9 +2978,11 @@ export default function AdminMediasClient({
                       const metaLine = mediaListMetaLine(media);
                       const nameLine = mediaListNameLine(media);
                       const rowClass = `border-l-[3px] transition-colors ${
-                        isRowActive(media)
-                          ? "border-l-transparent hover:bg-muted/40"
-                          : "border-l-amber-500/75 bg-muted/25 hover:bg-muted/40 dark:border-l-amber-400/60"
+                        !isRowActive(media)
+                          ? "border-l-amber-500/75 bg-muted/25 hover:bg-muted/40 dark:border-l-amber-400/60"
+                          : isActiveFlaggedHiddenFromCustomer(media)
+                            ? "border-l-amber-500/60 bg-amber-50/30 hover:bg-amber-50/50 dark:border-l-amber-400/50 dark:bg-amber-950/15"
+                            : "border-l-transparent hover:bg-muted/40"
                       }`;
 
                       return (
