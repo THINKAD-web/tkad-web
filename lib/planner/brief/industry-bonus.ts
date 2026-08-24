@@ -5,6 +5,12 @@
 
 import type { MediaItem } from "@/lib/media-data";
 import { briefIndustryToPlanner } from "@/lib/planner/brief/brief-integrated-adapters";
+import {
+  matchKeywordTierInMedia,
+  RETAIL_KEYWORDS,
+  TECH_KEYWORDS,
+  type IndustryKeywordConfig,
+} from "@/lib/planner/brief/industry-keyword-match";
 import { PLANNER_INDUSTRY_TO_MATCHING } from "@/lib/planner/industry-match";
 import type { BriefIndustry } from "@/lib/planner/brief/types";
 
@@ -14,15 +20,19 @@ export const INDUSTRY_STRONG_BONUS = 15;
 export const INDUSTRY_MEDIUM_BONUS = 6;
 
 const STRONG_KEYWORDS: Record<
-  Exclude<BriefIndustry, "other">,
+  Exclude<BriefIndustry, "other" | "retail" | "tech">,
   RegExp
 > = {
   fb: /푸드코트|먹자골목|요식|식음료|레스토랑|베이커리|카페|주점|디저트|맛집|bakery|restaurant|food hall|dining|이마트24|편의점|\bcu\b|gs25|서브웨이|스타벅스|치킨|피자|버거/i,
-  retail:
-    /백화점|쇼핑몰|아울렛|매장|retail|mall|department|boutique|뷰티|beauty|cosmetic|패션|fashion|팝업|popup/i,
-  tech: /테크|saas|앱|software|ict|스타트업|startup|판교/i,
   finance: /금융|은행|증권|보험|fintech|finance|여의도|테헤란/i,
   ent: /k-pop|kpop|콘서트|공연|엔터|영화|게임|fan|fandom/i,
+};
+
+const STRUCTURED_KEYWORDS: Partial<
+  Record<BriefIndustry, IndustryKeywordConfig>
+> = {
+  retail: RETAIL_KEYWORDS,
+  tech: TECH_KEYWORDS,
 };
 
 const MEDIUM_MEDIA_TYPES: Record<string, readonly string[]> = {
@@ -42,14 +52,29 @@ export function industryContentHaystack(media: MediaItem): string {
     .toLowerCase();
 }
 
+function keywordTierForIndustry(
+  media: MediaItem,
+  industry: BriefIndustry,
+): "strong" | "medium" | "none" {
+  const structured = STRUCTURED_KEYWORDS[industry];
+  if (structured) {
+    return matchKeywordTierInMedia(media, structured);
+  }
+  if (industry === "other") return "none";
+  const re = STRONG_KEYWORDS[industry];
+  if (re.test(industryContentHaystack(media))) return "strong";
+  return "none";
+}
+
 export function classifyBriefIndustryMatch(
   media: MediaItem,
   industry: BriefIndustry,
 ): IndustryMatchTier {
   if (industry === "other") return "weak";
 
-  const hay = industryContentHaystack(media);
-  if (STRONG_KEYWORDS[industry].test(hay)) return "strong";
+  const keywordTier = keywordTierForIndustry(media, industry);
+  if (keywordTier === "strong") return "strong";
+  if (keywordTier === "medium") return "medium";
 
   const plannerKey = briefIndustryToPlanner(industry);
   const matchingKey = PLANNER_INDUSTRY_TO_MATCHING[plannerKey];

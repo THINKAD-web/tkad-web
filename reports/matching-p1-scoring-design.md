@@ -79,8 +79,8 @@ displayTotal = round(avg(region, budget, target)) + industryBonus
 | matching key | Strong 키워드 (정규식 요약) | mediaTypes (Medium) |
 |---|---|---|
 | **fnb** | 푸드코트, 먹자골목, 요식, 식음료, 레스토랑, 베이커리, 카페, 주점, 디저트, 맛집, bakery, restaurant, food hall, dining, 이마트24, 편의점, cu, gs25, 서브웨이, 스타벅스, 치킨, 피자, 버거 | mobile, static, subway, digital |
-| **retail** | 백화점, 쇼핑몰, 아울렛, 매장, retail, mall, department, boutique, 뷰티, beauty, cosmetic, 패션, fashion, 팝업, popup | digital, static, mobile |
-| **tech** | 테크, saas, 앱, software, ict, 스타트업, startup, 판교 | digital, mobile, subway |
+| **retail** | **Strong:** 백화점, 쇼핑몰, 아울렛, 매장, retail, department, boutique, 팝업, popup + tag exact `shopping_mall`/`mall` · **Medium:** 뷰티, beauty, cosmetic, 패션, fashion | digital, static, mobile |
+| **tech** | 테크, saas, software, ict, 스타트업, startup, 판교, 판교테크노밸리, 테헤란로, 정보기술, 인공지능, 빅데이터, 클라우드, 플랫폼, 개발자, 스타트업밸리, 유니콘, 실리콘밸리, 성수, 앱(토큰 경계) — **제외:** 디지털, IT, AI, 핀테크, 강남역·역삼 | digital, mobile, subway |
 | **finance** | 금융, 은행, 증권, 보험, fintech, finance, 여의도, 테헤란 | digital, static |
 | **entertainment** | k-pop, kpop, 콘서트, 공연, 엔터, 영화, 게임, fan, fandom | digital, mobile |
 | **other** | (보너스 없음) | — |
