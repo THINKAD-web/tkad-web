@@ -34,6 +34,12 @@ export const MEDIA_BROWSE_REGIONS: BrowseRegionMain[] = [
       { id: "seoul_gangbuk", label: "강북/노원", aliases: ["강북", "노원", "도봉", "성북", "미아"] },
       { id: "seoul_yeongdeungpo", label: "영등포/여의도", aliases: ["영등포", "여의도", "당산"] },
       { id: "seoul_guro", label: "구로/신도림", aliases: ["구로", "신도림", "가산", "금천"] },
+      {
+        id: "seoul_gwanak",
+        label: "관악/서울대입구",
+        labelEn: "Gwanak / Seoul Nat'l Univ.",
+        aliases: ["관악", "관악구", "서울대입구", "봉천", "신림", "남현"],
+      },
       { id: "seoul_jamsil", label: "잠실/송파", aliases: ["잠실", "송파", "강동", "롯데월드"] },
       { id: "seoul_coex", label: "코엑스/삼성", aliases: ["코엑스", "삼성", "선릉", "삼성역"] },
       { id: "seoul_dongdaemun", label: "동대문/청량리", aliases: ["동대문", "청량리", "회기"] },
