@@ -22,6 +22,10 @@ import {
   computeRecommendReportMetrics,
   inferRecommendCategoriesText,
 } from "@/lib/recommend/recommend-report-adapter";
+import {
+  exportReachPendingLine,
+  exportRoiPendingLine,
+} from "@/lib/planner-report-export/export-kpi";
 import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
 import type {
   CampaignMediaPriceOptionIndex,
@@ -287,6 +291,8 @@ export function RecommendReportSection({
   const usePortfolioReach =
     portfolio.length > 0 && portfolioReport.monthlyImpressions > 0;
 
+  const reachRoiPending = plan.reach.status === "estimating";
+
   const effectSummaryLines = useMemo(() => {
     const metrics = metricsBundle.metrics;
     if (!metrics && portfolioReport.monthlyImpressions <= 0) return [];
@@ -303,17 +309,25 @@ export function RecommendReportSection({
       tPlanner("reportSummaryImpTotal", {
         n: totalImp.toLocaleString(),
       }),
-      tPlanner("reportSummaryReach", {
-        core: metricsBundle.reachCorePct,
-        ext: metricsBundle.reachExtendedPct,
-      }),
     ];
+    if (reachRoiPending) {
+      lines.push(exportReachPendingLine(isKo));
+    } else {
+      lines.push(
+        tPlanner("reportSummaryReach", {
+          core: metricsBundle.reachCorePct,
+          ext: metricsBundle.reachExtendedPct,
+        }),
+      );
+    }
     if (blendedCpmKrw != null) {
       lines.push(
         tPlanner("reportSummaryCpm", { n: blendedCpmKrw.toLocaleString() }),
       );
     }
-    if (metrics) {
+    if (reachRoiPending) {
+      lines.push(exportRoiPendingLine(isKo));
+    } else if (metrics) {
       lines.push(tPlanner("reportSummaryRoi", { n: metrics.roiExpected }));
     }
     lines.push(tPlanner("reportSummaryDisclaimerShort"));
@@ -325,6 +339,8 @@ export function RecommendReportSection({
     blendedCpmKrw,
     portfolioReport,
     usePortfolioReach,
+    reachRoiPending,
+    isKo,
     tPlanner,
   ]);
 
@@ -485,11 +501,15 @@ export function RecommendReportSection({
                 },
                 {
                   label: isKo ? "핵심 도달" : "Core reach",
-                  value: `${metricsBundle.reachCorePct}%`,
+                  value: reachRoiPending
+                    ? "—"
+                    : `${metricsBundle.reachCorePct}%`,
                 },
                 {
                   label: isKo ? "기대 ROI" : "Expected ROI",
-                  value: `${metrics.roiExpected}${isKo ? "배" : "×"}`,
+                  value: reachRoiPending
+                    ? "—"
+                    : `${metrics.roiExpected}${isKo ? "배" : "×"}`,
                 },
               ].map((kpi) => (
                 <div
@@ -551,8 +571,12 @@ export function RecommendReportSection({
                     <PlannerProTeaserStats
                       isKo={isKo}
                       totalImpressions={metrics.estimatedTotalImpressions}
-                      reachCorePct={metricsBundle.reachCorePct}
-                      roiExpected={metrics.roiExpected}
+                      reachCorePct={
+                        reachRoiPending ? null : metricsBundle.reachCorePct
+                      }
+                      roiExpected={
+                        reachRoiPending ? null : metrics.roiExpected
+                      }
                       blurred={false}
                     />
                     <p className="text-center text-sm text-muted-foreground">

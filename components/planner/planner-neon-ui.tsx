@@ -146,8 +146,8 @@ export function PlannerProTeaserStats({
 }: {
   isKo: boolean;
   totalImpressions: number;
-  reachCorePct: number;
-  roiExpected?: number;
+  reachCorePct?: number | null;
+  roiExpected?: number | null;
   /** 잠금 placeholder용 — 블러 없이 요약만 표시 */
   blurred?: boolean;
 }) {
@@ -172,7 +172,7 @@ export function PlannerProTeaserStats({
           {isKo ? "도달률" : "Reach"}
         </p>
         <p className="mt-1 text-lg font-bold tabular-nums text-[color:var(--qp-fg)] sm:text-xl">
-          {reachCorePct}%
+          {reachCorePct != null ? `${reachCorePct}%` : "—"}
         </p>
       </div>
       <div className="rounded-xl border border-gray-200 bg-white p-3 text-center dark:border-white/10 dark:bg-white/5 sm:p-4">
