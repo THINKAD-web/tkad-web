@@ -12,8 +12,14 @@ import { resolveOAuthLoginErrorMessage } from "@/lib/oauth-login-errors";
 import {
   authAlertClass,
   authCardClass,
+  authEyebrowClass,
+  authFooterClass,
   authInputClass,
+  authLabelClass,
+  authLinkClass,
   authSubmitClass,
+  authSubtitleClass,
+  authTitleClass,
 } from "@/lib/auth/auth-ui-classes";
 
 function LoginForm() {
@@ -74,13 +80,9 @@ function LoginForm() {
           <div className={authCardClass}>
             <div>
               <div className="mb-6 text-center">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
-                  [ LOGIN ]
-                </p>
-                <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
-                  로그인
-                </h1>
-                <p className="mt-2 text-[12px] tracking-tight dark:text-white text-gray-500">
+                <p className={authEyebrowClass}>[ LOGIN ]</p>
+                <h1 className={`mt-2 ${authTitleClass}`}>로그인</h1>
+                <p className={`mt-2 ${authSubtitleClass}`}>
                   {`// `}
                   {isKo
                     ? "Google·카카오·네이버 간편 로그인 또는 이메일 로그인"
@@ -94,17 +96,14 @@ function LoginForm() {
                 <div className="absolute inset-0 flex items-center" aria-hidden>
                   <div className="w-full border-t dark:border-white/12 border-gray-200" />
                 </div>
-                <p className="relative text-center font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white">
+                <p className={`relative text-center ${authEyebrowClass}`}>
                   {t("orEmail")}
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label
-                    htmlFor="email"
-                    className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600"
-                  >
+                  <label htmlFor="email" className={authLabelClass}>
                     [ 이메일 ]
                   </label>
                   <input
@@ -121,15 +120,12 @@ function LoginForm() {
 
                 <div>
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <label
-                      htmlFor="password"
-                      className="block font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600"
-                    >
+                    <label htmlFor="password" className={authLabelClass}>
                       [ 비밀번호 ]
                     </label>
                     <Link
                       href="/forgot-password"
-                      className="text-[10px] dark:text-white text-gray-400 transition-colors hover:dark:text-white text-gray-900"
+                      className="text-[10px] tkad-qp-text-muted transition-colors hover:opacity-90"
                     >
                       비밀번호 찾기
                     </Link>
@@ -166,12 +162,9 @@ function LoginForm() {
             </div>
           </div>
 
-          <p className="mt-6 text-center text-[12px] tracking-tight dark:text-white text-gray-500">
+          <p className={`mt-6 ${authFooterClass}`}>
             {`// `}계정이 없으신가요?{" "}
-            <Link
-              href="/signup"
-              className="border-b dark:border-white/20 border-gray-300 pb-0.5 font-bold dark:text-white text-gray-900 transition-colors hover:border-white/35 hover:dark:text-white"
-            >
+            <Link href="/signup" className={authLinkClass}>
               {t("signup")}
             </Link>
           </p>

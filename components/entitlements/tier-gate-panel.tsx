@@ -17,7 +17,7 @@ export function TierGatePanel({ message, className, compact = false }: Props) {
   return (
     <div
       className={cn(
-        "tkad-qp-tier-gate mx-auto max-w-sm border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent-soft)] px-6 py-7 text-center dark:border-[color:var(--qp-accent)]/25 dark:bg-[color:var(--qp-accent)]/10",
+        "tkad-qp-tier-gate tkad-qp-accent-soft-surface mx-auto max-w-sm border border-[color:var(--qp-accent)]/25 px-6 py-7 text-center dark:border-[color:var(--qp-accent)]/25",
         compact && "px-5 py-5",
         className,
       )}
@@ -33,13 +33,13 @@ export function TierGatePanel({ message, className, compact = false }: Props) {
       </p>
       <h3
         className={cn(
-          "mt-2 font-black text-gray-900 dark:text-white",
+          "mt-2 font-black",
           compact ? "text-sm" : "text-base",
         )}
       >
         {message.title}
       </h3>
-      <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-white/75">
+      <p className="tkad-qp-text-muted-on-accent mt-2 text-sm leading-relaxed">
         {message.description}
       </p>
       {message.hint ? (

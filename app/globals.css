@@ -276,6 +276,10 @@
   --qp-text-body: 1rem;      /* 16px (기존 14px 본문 대비 확대) */
   --qp-text-meta: 0.875rem;  /* 14px */
 
+  /* Accent-soft surface foreground (light peach bg → dark ink) */
+  --qp-on-accent-soft: var(--qp-ink);
+  --qp-on-accent-soft-muted: var(--qp-fg-muted);
+
   /* Space scale — 매체 상세 등 정보 밀도 완화 */
   --qp-space-stack: 1rem;      /* 16px — 그룹 내부 */
   --qp-space-group: 1.75rem;   /* 28px — 히어로 정보 그룹 간 */
@@ -2703,6 +2707,81 @@ html.dark .tkad-qp-auth-card {
 .tkad-qp-auth-role[data-selected="true"] {
   border-color: color-mix(in srgb, var(--qp-accent) 45%, var(--qp-line)) !important;
   background: var(--qp-accent-soft) !important;
+  color: var(--qp-on-accent-soft);
+  -webkit-text-fill-color: currentColor;
+}
+
+.tkad-qp-auth-role[data-selected="true"] p {
+  color: inherit;
+  -webkit-text-fill-color: currentColor;
+}
+
+.tkad-qp-auth-role[data-selected="true"] p:last-child {
+  color: var(--qp-on-accent-soft-muted);
+}
+
+/* Accent-soft panel (PRO upgrade, tier gate, pricing highlight) */
+.tkad-qp-accent-soft-surface {
+  background: var(--qp-accent-soft) !important;
+  color: var(--qp-on-accent-soft);
+  -webkit-text-fill-color: currentColor;
+}
+
+.tkad-qp-accent-soft-surface :where(h1, h2, h3, p, span, li):not(.tkad-qp-cta):not(.tkad-qp-cta *):not([class*="text-[color:var(--qp-accent)]"]):not([class*="text-emerald"]):not([class*="text-amber"]) {
+  color: inherit;
+  -webkit-text-fill-color: currentColor;
+}
+
+.tkad-qp-text-muted-on-accent {
+  color: var(--qp-on-accent-soft-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* QP semantic text — avoids dark: + text-gray-* fighting planner-neon webkit inheritance */
+.tkad-qp-text-primary {
+  color: var(--qp-ink);
+  -webkit-text-fill-color: currentColor;
+}
+
+.tkad-qp-text-muted {
+  color: var(--qp-fg-muted);
+  -webkit-text-fill-color: currentColor;
+}
+
+html.dark {
+  --qp-accent-soft: color-mix(in srgb, var(--hermes) 18%, rgb(8 8 12));
+  --qp-surface: rgb(10 10 12);
+  --qp-surface-2: rgb(16 16 20);
+  --qp-line: rgb(255 255 255 / 0.12);
+  --qp-fg: rgb(248 250 252 / 0.96);
+  --qp-fg-muted: rgb(163 163 172 / 0.88);
+  --qp-ink: rgb(248 250 252 / 0.96);
+  --qp-on-accent-soft: rgb(248 250 252 / 0.96);
+  --qp-on-accent-soft-muted: rgb(203 213 225 / 0.78);
+}
+
+html.dark .tkad-qp-text-primary {
+  color: var(--qp-ink);
+}
+
+html.dark .tkad-qp-text-muted {
+  color: var(--qp-fg-muted);
+}
+
+/*
+ * Auth/pricing QP: tkad-planner-neon sets -webkit-text-fill-color on ancestors;
+ * reset on QP cards so color / tkad-qp-text-* utilities render in dark mode.
+ */
+html.dark .tkad-home-appearance .tkad-auth-page .tkad-qp-auth-card :where(
+  label, p, h1, h2, h3, span, a, li, div
+):not(.tkad-qp-cta):not(.tkad-qp-cta *) {
+  -webkit-text-fill-color: currentColor;
+}
+
+html.dark .tkad-home-appearance .tkad-qp-pricing-surface :where(
+  h2, h3, p, span, li, button, a
+):not(.tkad-qp-cta):not(.tkad-qp-cta *):not([class*="text-[color:var(--qp-accent)]"]):not([class*="text-emerald"]):not([class*="text-amber"]) {
+  -webkit-text-fill-color: currentColor;
 }
 
 .tkad-qp-pricing-card {

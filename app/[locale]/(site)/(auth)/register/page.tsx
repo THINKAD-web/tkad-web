@@ -19,8 +19,14 @@ import {
 import {
   authAlertClass,
   authCardClass,
+  authEyebrowClass,
+  authFooterClass,
   authInputClass,
+  authLabelClass,
+  authLinkClass,
   authSubmitClass,
+  authSubtitleClass,
+  authTitleClass,
 } from "@/lib/auth/auth-ui-classes";
 
 export default function RegisterPage() {
@@ -113,13 +119,9 @@ function RegisterPageInner() {
           <div className={authCardClass}>
             <div>
               <div className="mb-6 text-center">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
-                  [ REGISTER ]
-                </p>
-                <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
-                  회원가입
-                </h1>
-                <p className="mt-2 text-[12px] tracking-tight dark:text-white text-gray-500">
+                <p className={authEyebrowClass}>[ REGISTER ]</p>
+                <h1 className={`mt-2 ${authTitleClass}`}>회원가입</h1>
+                <p className={`mt-2 ${authSubtitleClass}`}>
                   {`// `}
                   {isKo
                     ? "Google·카카오·네이버로 간편 가입하거나 이메일로 가입하세요"
@@ -222,12 +224,9 @@ function RegisterPageInner() {
             </div>
           </div>
 
-          <p className="mt-6 text-center text-[12px] tracking-tight dark:text-white text-gray-500">
+          <p className={`mt-6 ${authFooterClass}`}>
             {`// `}이미 계정이 있으신가요?{" "}
-            <Link
-              href="/login"
-              className="border-b dark:border-white/20 border-gray-300 pb-0.5 font-bold dark:text-white text-gray-900 transition-colors hover:border-white/35 hover:dark:text-white"
-            >
+            <Link href="/login" className={authLinkClass}>
               로그인
             </Link>
           </p>
@@ -252,11 +251,8 @@ function Field({
 }) {
   return (
     <div>
-      <label
-        htmlFor={htmlFor}
-        className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600"
-      >
-        [ {label}{hint && <span className="ml-1 dark:text-white">{hint}</span>} ]
+      <label htmlFor={htmlFor} className={authLabelClass}>
+        [ {label}{hint && <span className="ml-1">{hint}</span>} ]
       </label>
       {children}
     </div>

@@ -75,7 +75,7 @@ export default async function PricingPage({ params, searchParams }: Props) {
         />
 
         <section className="relative overflow-hidden border-t border-gray-100 bg-white pb-20 pt-8 text-gray-900 dark:border-white/5 dark:bg-[#0a0a0a] dark:text-white">
-          <PageContainer className="relative">
+          <PageContainer className="relative tkad-qp-pricing-surface">
             {sp.success === "1" ? (
               <p className="mb-6 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-center text-sm font-semibold text-emerald-800 dark:text-emerald-200">
                 {isKo ? "PRO 구독이 활성화되었습니다!" : "PRO subscription activated!"}
