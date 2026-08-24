@@ -1,0 +1,335 @@
+{
+  "generatedAt": "2026-08-24T06:56:51.406Z",
+  "summary": {
+    "setA_guro_and_gwanak_district": 6,
+    "setB_gwanak_zone_misaligned_sub": 11,
+    "overlap_A_and_B": 4,
+    "A_only_not_in_B": 2,
+    "B_only_not_in_A": 7,
+    "tier1_recommended_backfill": 6,
+    "setC_seoul_univ_name_or_slug": 3,
+    "setC_in_tier1": 2,
+    "setC_excluded_from_tier1": 1
+  },
+  "tier1BackfillTarget": [
+    {
+      "id": "cmpbcufq0000004l4kl2vh2no",
+      "name": "사당역 삼진빌딩 전광판 광고",
+      "slug": "sadangyeok-samjinbilding-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 관악구 남부순환로 2082-25 삼진빌딩"
+    },
+    {
+      "id": "cmp02a32h000804jx74rsirpz",
+      "name": "서울대입구역 우남빌딩 전광판 광고",
+      "slug": "seouldaeipguyeok-unambilding-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 관악구 관악로 185 우남빌딩"
+    },
+    {
+      "id": "cmp02109u000604jxnuzp4ypp",
+      "name": "신림역 정도빌딩 전광판 광고",
+      "slug": "sinrimyeok-jeongdobilding-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울특별시 관악구 남부순환로 1633 정도빌딩"
+    },
+    {
+      "id": "cmofq46f8000204leputaopdy",
+      "name": "신림역사거리 전광판 광고",
+      "slug": "sinrimyeoksageori-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 관악구 남부순환로 1607"
+    },
+    {
+      "id": "cms7cpp85000e04jm72xswkrv",
+      "name": "지하철 2호선 서울대입구역 맥스비전 광고",
+      "slug": "jihacheol-2hoseon-sinrimyeok-maekseubijeon-gwanggo-bokje",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "downtown",
+      "region_main": "seoul",
+      "location": "서울특별시 관악구 서울대입구역 (2호선)"
+    },
+    {
+      "id": "cms7cmnak000h04jlwlgu1viw",
+      "name": "지하철 2호선 신림역 맥스비전 광고",
+      "slug": "jihacheol-2hoseon-gurodijiteoldanjiyeok-maekseubijeon-gwanggo-bokje",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "downtown",
+      "region_main": "seoul",
+      "location": "서울특별시 관악구 신림역 (2호선)"
+    }
+  ],
+  "setA": [
+    {
+      "id": "cmpbcufq0000004l4kl2vh2no",
+      "name": "사당역 삼진빌딩 전광판 광고",
+      "slug": "sadangyeok-samjinbilding-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 관악구 남부순환로 2082-25 삼진빌딩"
+    },
+    {
+      "id": "cmp02a32h000804jx74rsirpz",
+      "name": "서울대입구역 우남빌딩 전광판 광고",
+      "slug": "seouldaeipguyeok-unambilding-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 관악구 관악로 185 우남빌딩"
+    },
+    {
+      "id": "cmp02109u000604jxnuzp4ypp",
+      "name": "신림역 정도빌딩 전광판 광고",
+      "slug": "sinrimyeok-jeongdobilding-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울특별시 관악구 남부순환로 1633 정도빌딩"
+    },
+    {
+      "id": "cmofq46f8000204leputaopdy",
+      "name": "신림역사거리 전광판 광고",
+      "slug": "sinrimyeoksageori-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 관악구 남부순환로 1607"
+    },
+    {
+      "id": "cms7cpp85000e04jm72xswkrv",
+      "name": "지하철 2호선 서울대입구역 맥스비전 광고",
+      "slug": "jihacheol-2hoseon-sinrimyeok-maekseubijeon-gwanggo-bokje",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "downtown",
+      "region_main": "seoul",
+      "location": "서울특별시 관악구 서울대입구역 (2호선)"
+    },
+    {
+      "id": "cms7cmnak000h04jlwlgu1viw",
+      "name": "지하철 2호선 신림역 맥스비전 광고",
+      "slug": "jihacheol-2hoseon-gurodijiteoldanjiyeok-maekseubijeon-gwanggo-bokje",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "downtown",
+      "region_main": "seoul",
+      "location": "서울특별시 관악구 신림역 (2호선)"
+    }
+  ],
+  "setB": [
+    {
+      "id": "cmofpfkgk000004l5b0uvgv6t",
+      "name": "2호선 사당역 디지털포스터 지하철 광고",
+      "slug": "sadangyeok-dijiteolposeuteo-gwanggo",
+      "district": "동작구",
+      "region_sub": "seoul_gangnam",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 동작구 남부순환로 지하 2089"
+    },
+    {
+      "id": "cmqxwgvs3000104l8e0pj7vxj",
+      "name": "노량진 백이빌딩 전광판 광고",
+      "slug": null,
+      "district": "동작구",
+      "region_sub": "seoul_yeongdeungpo",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 동작구 노량진로 116 백이빌딩"
+    },
+    {
+      "id": "cmpb97bzq000404l179dvpjp6",
+      "name": "노량진 순만빌딩 전광판 광고",
+      "slug": "noryangjin-sunmanbilding-jeongwangpan-gwanggo",
+      "district": "동작구",
+      "region_sub": "seoul_yeongdeungpo",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 동작구 노량진로 169 순만빌딩"
+    },
+    {
+      "id": "cmqg7yhvi000q04l852a7gya4",
+      "name": "디지털단지오거리 마인드호텔 전광판 광고",
+      "slug": null,
+      "district": "금천구",
+      "region_sub": null,
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울특별시 금천구 남부순환로 1262 마인드호텔"
+    },
+    {
+      "id": "cmp02989a000804l5lk08ra0v",
+      "name": "사당역 산광빌딩 전광판 광고",
+      "slug": "sadangyeok-sangwangbilding-jeongwangpan-gwanggo",
+      "district": "동작구",
+      "region_sub": null,
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 동작구 동작대로 7 산광빌딩"
+    },
+    {
+      "id": "cmpbcufq0000004l4kl2vh2no",
+      "name": "사당역 삼진빌딩 전광판 광고",
+      "slug": "sadangyeok-samjinbilding-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 관악구 남부순환로 2082-25 삼진빌딩"
+    },
+    {
+      "id": "cmp02a32h000804jx74rsirpz",
+      "name": "서울대입구역 우남빌딩 전광판 광고",
+      "slug": "seouldaeipguyeok-unambilding-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 관악구 관악로 185 우남빌딩"
+    },
+    {
+      "id": "cmp02109u000604jxnuzp4ypp",
+      "name": "신림역 정도빌딩 전광판 광고",
+      "slug": "sinrimyeok-jeongdobilding-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울특별시 관악구 남부순환로 1633 정도빌딩"
+    },
+    {
+      "id": "cmofq46f8000204leputaopdy",
+      "name": "신림역사거리 전광판 광고",
+      "slug": "sinrimyeoksageori-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 관악구 남부순환로 1607"
+    },
+    {
+      "id": "cmoegluf8000204ldbj44j2uq",
+      "name": "여의도 여의12 올림픽대로 디지털 광고",
+      "slug": "yeouido-yeoui12-olrimpikdaero-dijiteol-gwanggo",
+      "district": "동작구",
+      "region_sub": "seoul_yeongdeungpo",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 동작구 노량진동 13-14"
+    },
+    {
+      "id": "cmp0ezyna000004ient8k3ogh",
+      "name": "지하철 9호선 노량진역 캔버스9 광고",
+      "slug": "kaenbeoseu9-gwanggo-noryangjinyeok",
+      "district": "동작구",
+      "region_sub": "seoul_yeongdeungpo",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 동작구 노량진동 노량진역 (9호선)"
+    }
+  ],
+  "setC": [
+    {
+      "id": "cmp02a32h000804jx74rsirpz",
+      "name": "서울대입구역 우남빌딩 전광판 광고",
+      "slug": "seouldaeipguyeok-unambilding-jeongwangpan-gwanggo",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "gwanak",
+      "region_main": "seoul",
+      "location": "서울 관악구 관악로 185 우남빌딩"
+    },
+    {
+      "id": "cms7cxwdg000604kyi4epi3tu",
+      "name": "지하철 2호선 사당역 맥스비전 광고",
+      "slug": "jihacheol-2hoseon-seouldaeipguyeok-maekseubijeon-gwanggo-bokje",
+      "district": "동작구",
+      "region_sub": "seoul_guro",
+      "region_zone": "downtown",
+      "region_main": "seoul",
+      "location": "서울특별시 동작구 사당역 (2·4호선)"
+    },
+    {
+      "id": "cms7cpp85000e04jm72xswkrv",
+      "name": "지하철 2호선 서울대입구역 맥스비전 광고",
+      "slug": "jihacheol-2hoseon-sinrimyeok-maekseubijeon-gwanggo-bokje",
+      "district": "관악구",
+      "region_sub": "seoul_guro",
+      "region_zone": "downtown",
+      "region_main": "seoul",
+      "location": "서울특별시 관악구 서울대입구역 (2호선)"
+    }
+  ],
+  "overlap": {
+    "A_intersect_B": [
+      "cmpbcufq0000004l4kl2vh2no",
+      "cmp02a32h000804jx74rsirpz",
+      "cmp02109u000604jxnuzp4ypp",
+      "cmofq46f8000204leputaopdy"
+    ],
+    "A_only": [
+      "cms7cpp85000e04jm72xswkrv",
+      "cms7cmnak000h04jlwlgu1viw"
+    ],
+    "B_only": [
+      "cmofpfkgk000004l5b0uvgv6t",
+      "cmqxwgvs3000104l8e0pj7vxj",
+      "cmpb97bzq000404l179dvpjp6",
+      "cmqg7yhvi000q04l852a7gya4",
+      "cmp02989a000804l5lk08ra0v",
+      "cmoegluf8000204ldbj44j2uq",
+      "cmp0ezyna000004ient8k3ogh"
+    ]
+  },
+  "setC_tier1_ids": [
+    "cmp02a32h000804jx74rsirpz",
+    "cms7cpp85000e04jm72xswkrv"
+  ],
+  "setC_excluded": [
+    {
+      "id": "cms7cxwdg000604kyi4epi3tu",
+      "name": "지하철 2호선 사당역 맥스비전 광고",
+      "slug": "jihacheol-2hoseon-seouldaeipguyeok-maekseubijeon-gwanggo-bokje",
+      "district": "동작구",
+      "region_sub": "seoul_guro",
+      "region_zone": "downtown",
+      "region_main": "seoul",
+      "location": "서울특별시 동작구 사당역 (2·4호선)"
+    }
+  ],
+  "slugManualReview": [
+    {
+      "id": "cms7cxwdg000604kyi4epi3tu",
+      "name": "지하철 2호선 사당역 맥스비전 광고",
+      "slug": "jihacheol-2hoseon-seouldaeipguyeok-maekseubijeon-gwanggo-bokje",
+      "note": "slug/name mismatch — manual review (not blocked on tier1 backfill)"
+    },
+    {
+      "id": "cms7cpp85000e04jm72xswkrv",
+      "name": "지하철 2호선 서울대입구역 맥스비전 광고",
+      "slug": "jihacheol-2hoseon-sinrimyeok-maekseubijeon-gwanggo-bokje",
+      "note": "slug/name mismatch — manual review (not blocked on tier1 backfill)"
+    }
+  ],
+  "rollbackSql": "-- Rollback tier1 seoul_gwanak backfill (restore region_sub + region_zone)\n-- Generated: 2026-08-24T06:56:51.408Z\nUPDATE media AS m\nSET\n  region_sub = v.region_sub,\n  region_zone = v.region_zone\nFROM (VALUES\n  ('cmpbcufq0000004l4kl2vh2no', 'seoul_guro', 'gwanak'),\n  ('cmp02a32h000804jx74rsirpz', 'seoul_guro', 'gwanak'),\n  ('cmp02109u000604jxnuzp4ypp', 'seoul_guro', 'gwanak'),\n  ('cmofq46f8000204leputaopdy', 'seoul_guro', 'gwanak'),\n  ('cms7cpp85000e04jm72xswkrv', 'seoul_guro', 'downtown'),\n  ('cms7cmnak000h04jlwlgu1viw', 'seoul_guro', 'downtown')\n) AS v(id, region_sub, region_zone)\nWHERE m.id = v.id;",
+  "applySqlPreview": "-- Preview apply (tier1 only — run on Preview DB first)\nUPDATE media\nSET region_sub = 'seoul_gwanak'\nWHERE is_active = true\n  AND region_main = 'seoul'\n  AND district ILIKE '%관악%'\n  AND (region_sub IS NULL OR region_sub != 'seoul_gwanak');"
+}
