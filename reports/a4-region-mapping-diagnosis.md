@@ -9,8 +9,8 @@
 
 | 이슈 | 증상 | 근본 원인 (코드) | 구현 전 확인 |
 |------|------|------------------|-------------|
-| **3-1** 서울대입구/관악 → 구로/신도림 | 상권·browse 칩 오분류 | browse taxonomy에 `seoul_gwanak` 없음 + `신도림` alias 오매칭 + `region_zone=gwanak` 무시 | DB 실제 건수 SQL |
-| **3-2** 부산 시내버스 → 부산 시내 과집중 | 전환 캠페인 상권표 66.9% 한 bucket | `busan_downtown` default + mobile이 `regionSub`로 pin | **Jaehan님 정책 결정** |
+| **3-1** 서울대입구/관악 → 구로/신도림 | 상권·browse 칩 오분류 | **DB `region_sub=seoul_guro` 오저장**(주원인) + taxonomy `seoul_gwanak` 부재 + inference tie-break | DB 확인 ✅ (아래) |
+| **3-2** 부산 시내버스 → 부산 시내 과집중 | 전환 캠페인 상권표 66.9% 한 bucket | `busan_downtown` default + mobile이 `regionSub`로 pin | **coverageDistrictCodes 확인 ✅** |
 | **3-3** 해외(시부야) 상권 공란 | 일본 매체 district 있어도 표 omitted | `regionSub=overseas`가 `district`보다 우선 | 로컬 시뮬레이션 ✅ |
 
 로컬 진단 스크립트: `npx tsx scripts/a4-diagnose-region-mapping.mts`
@@ -19,48 +19,56 @@
 
 ## 3-1. 서울대입구역(관악) → 구로/신도림
 
+### ⚠️ 경로 명확화 (2026-08-24 재확인)
+
+로컬 진단 스크립트의 `seoul_gangnam`과 프로덕션 PDF의 `구로/신도림`은 **같은 결손에서 나온 서로 다른 경로의 서로 다른 오답**이다. 별개 버그가 아니다.
+
+| 경로 | 함수 | 입력 조건 | 출력 | 프로덕션 PDF와 일치 |
+|------|------|-----------|------|---------------------|
+| **A. 상권표·PDF 세분화** | `computeRegionSubdivisionReport` → `resolveRegionSubdivisionKey(field=regionSub)` → `regionSubdivisionLabel` | DB **`region_sub=seoul_guro`** (stored) | **구로/신도림** | ✅ **이게 프로덕션 증상** |
+| **B. CalcEngine 매체 라벨** | `resolveRegionRef` → stored sub 유효 시 browse 라벨 | DB **`region_sub=seoul_guro`** | **구로/신도림** | ✅ (포트폴리오 행) |
+| **C. CalcEngine fallback** | `resolveRegionRef` → `inferBrowseRegionFromMedia` | `region_sub` **null** | **강남/서초** (`seoul_gangnam`) | ❌ (로컬 스크립트만 테스트) |
+| **D. 상권표 (sub null 혼합)** | `pickRegionSubdivisionField` → `regionZone` wins | m1 sub null + m2/m3 sub 있음, zone 3/3 | **관악권·강서권·마포권** | ❌ (고려 캠페인 픽스처) |
+
+**로컬 스크립트가 `inferBrowseRegionFromMedia`만 호출**해서 C 경로(`seoul_gangnam`)만 보여준 것. 프로덕션 PDF 상권표는 A/B 경로(**stored `seoul_guro`**)를 탄다.
+
+`seoul_gangnam` 원인: `region_sub` null + `region=seoul`일 때 alias 매칭 점수 동률 → taxonomy **첫 sub** (`seoul_gangnam`) tie-break. `region_zone=gwanak`은 inference zone-map에 **없음**.
+
+### DB 확인 (운영, 2026-08-24)
+
+서울대입구/관악 active 매체 **전원** `region_sub=seoul_guro` + `district=관악구`:
+
+| id | name | slug | district | region_sub | region_zone |
+|----|------|------|----------|------------|-------------|
+| `cms7cpp85000e04jm72xswkrv` | 지하철 2호선 서울대입구역 맥스비전 | `…sinrimyeok…` ⚠️ | 관악구 | seoul_guro | downtown |
+| `cmp02a32h000804jx74rsirpz` | 서울대입구역 우남빌딩 | `seouldaeipguyeok…` | 관악구 | seoul_guro | gwanak |
+
+집계:
+- `region_zone=gwanak` 이면서 `region_sub≠관악 계열`: **11건** (guro 4, yeongdeungpo 4, null 2, gangnam 1)
+- `region_sub=seoul_guro` + `district ILIKE '%관악%'`: **6건** (전부 mismatch)
+
+**결론:** `seoul_gwanak` taxonomy + backfill이 **프로덕션 증상(구로/신도림)을 직접 고친다.** slug `sinrimyeok` 오염이 guro sub 저장의 유력 원인.
+
 ### 아키텍처
 
 - **Planner zone** (`regionZone`): `gwanak` = 관악·동작·금천 — `lib/media-regions.ts`
 - **Browse chip** (`regionSub`): Seoul 14 subs — **`seoul_gwanak` 없음**, `seoul_guro`(구로/신도림) 있음
-- **상권표**: `pickRegionSubdivisionField()` — `regionSub` > `regionZone` > `district`
-
-### 추정 메커니즘
-
-1. DB에 `region_sub=seoul_guro` 저장됐거나  
-2. `inferBrowseRegionFromMedia()` — alias `"신도림"` in `seoul_guro`가 location/name에 partial match  
-3. `region_sub` 없을 때 Seoul default tie-break → first sub  
-4. `region_zone=gwanak`은 browse/상권에서 **secondary**
+- **상권표**: `pickRegionSubdivisionField()` — `regionSub` > `regionZone` > `district` (stored sub 3/3이면 regionSub field)
 
 ### 관련 코드
 
-- `lib/media-browse-regions.ts` — taxonomy + inference
-- `lib/planner/calc/engine.ts` — `REGION_SUB_UNMAPPED` warning (A-4 comment)
-- `lib/plan-cart-report/region-subdivision.ts`
+- `lib/plan-cart-report/region-subdivision.ts` — **PDF 상권표 라벨** (`regionSubdivisionLabel` → `browseRegionLabel`)
+- `lib/planner/calc/engine.ts` — `resolveRegionRef` — **매체 행 지역 라벨**
+- `lib/media-browse-regions.ts` — `inferBrowseRegionFromMedia` — **sub null fallback only**
 - `lib/media/region-main-corrections.ts` — manual list (관악 미포함)
-
-### STEP1 DB 쿼리 (운영 확인용)
-
-```sql
--- A) 서울대입구/관악 매체
-SELECT id, name, slug, district, region_sub, region_zone, location
-FROM media
-WHERE is_active = true
-  AND (name ILIKE '%서울대입구%' OR district ILIKE '%관악%' OR slug ILIKE '%seouldaeipgu%');
-
--- B) gwanak zone but non-gwanak browse sub
-SELECT region_sub, COUNT(*)
-FROM media
-WHERE is_active = true AND region_main = 'seoul' AND region_zone = 'gwanak'
-GROUP BY 1;
-```
 
 ### 구현 방향 (승인 후)
 
 1. `MEDIA_BROWSE_REGIONS`에 **`seoul_gwanak`** 추가 (aliases: 관악, 서울대입구, 봉천 등)
-2. 서울대입구역 매체 **backfill** `region_sub=seoul_gwanak`
-3. `신도림` alias — word-boundary 또는 district 교차검증
-4. slug 오류(`sinrimyeok` on 서울대입구) 수동 correction
+2. `inferBrowseRegionFromMedia` — `regionZone=gwanak` → `seoul_gwanak` zone-map 추가 (C 경로도 수정)
+3. 서울대입구/관악 매체 **backfill** `region_sub=seoul_gwanak` (A/B 경로 수정 — **핵심**)
+4. slug `sinrimyeok` on 서울대입구 수동 correction
+5. `신도림` alias — word-boundary 또는 district 교차검증 (재오염 방지)
 
 ---
 
@@ -76,23 +84,26 @@ GROUP BY 1;
 - Alias `"부산"` → downtown bucket
 - 상권표는 `regionSub` 우선 → network bus가 단일 상권에 pin
 
-### Jaehan님 결정 필요 (구현 보류)
+### coverageDistrictCodes 확인 (2026-08-24)
 
-1. 해당 캠페인 portfolio **매체 ID/이름** 확인  
-2. mobile bus 정책: **미분류** / **광역(부산 전체)** / **coverageDistrictCodes 분할** / **노선명**  
-3. `pickRegionSubdivisionField`에서 bus exterior/interior **deprioritize regionSub** 여부  
-4. `coverageDistrictCodes` admin 입력 여부
+테스트 매체 `cmqjdj9yr000104i6kcdcxdt1` (부산 시내버스 외부광고):
 
-### STEP1 DB 쿼리
+| 필드 | 값 |
+|------|-----|
+| `coverage_district_codes` | **16개** (부산 전 구·군 MOIS 코드) |
+| `district` | `부산 전역` |
+| `region_sub` | `busan_downtown` |
 
-```sql
-SELECT id, name, type, sub_category, region_sub, region_zone, district
-FROM media
-WHERE is_active = true AND region_main = 'busan'
-  AND (type = 'mobile' OR name ILIKE '%버스%');
-```
+부산 `type=mobile` 버스 5건 **전부 code_count=16**.  
+전국 mobile+버스: **33/34건** coverage codes 보유.
 
-**이번 진단: 코드·백로그 분석만 — 구현은 Jaehan님 정책 후**
+**→ 데이터는 채워져 있고 신뢰 가능.** Jaehan님 조건부 의견대로 `coverageDistrictCodes` 우선 검토 대상.  
+다만 상권표(`region-subdivision.ts`)는 현재 **coverage codes 미사용** — 구현 시 field 추가 또는 `district`/광역 라벨 정책 선택 필요.
+
+### Jaehan님 최종 결정 (구현 보류)
+
+1. **coverageDistrictCodes 분할** (데이터 있음 — 16구 bucket) vs **광역 단일 bucket** (`부산 전역`)  
+2. `pickRegionSubdivisionField`에서 mobile bus **`regionSub` deprioritize** 여부
 
 ---
 
