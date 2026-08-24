@@ -1,4 +1,5 @@
 import { featureLabel } from "@/lib/report-access-shared";
+import { litePlanProAddonNote } from "@/lib/entitlements/tier-copy";
 import {
   AI_DAILY_LIMITS,
   API_KEY_MONTHLY_LIMITS,
@@ -62,6 +63,27 @@ function featuresAtMin(
       id: f,
       text: featureLabel(f, isKo),
     }));
+}
+
+function liteExclusiveFeatures(isKo: boolean): PricingPlanFeature[] {
+  return [
+    {
+      id: "proposal_email",
+      text: isKo ? "제안서 이메일 발송" : "Proposal email delivery",
+    },
+    {
+      id: "quote_summary",
+      text: isKo ? "견적 요약표 (VAT 포함)" : "Quote summary table (VAT incl.)",
+    },
+    {
+      id: "cover_edit",
+      text: isKo ? "표지·클라이언트명 편집" : "Cover & client name editing",
+    },
+    {
+      id: "quote_only_display",
+      text: isKo ? "협의가(quote_only) 매체 표시" : "Negotiated-rate (quote_only) media",
+    },
+  ];
 }
 
 /** /pricing 카드 혜택 — entitlements 상수·FEATURE_MIN_LEVEL 단일 소스 */
@@ -172,15 +194,14 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
       id: "lite",
       features: [
         ...featuresAtMin("LITE", isKo),
+        ...liteExclusiveFeatures(isKo),
         {
           id: "price",
           text: isKo ? `월 ₩${litePrice}` : `₩${litePrice}/mo`,
         },
         {
           id: "pro_note",
-          text: isKo
-            ? "AI 시뮬레이션·경쟁 분석·마켓은 PRO"
-            : "Simulation, competitor & market — PRO",
+          text: litePlanProAddonNote(isKo),
         },
       ],
     },
@@ -188,6 +209,7 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
       id: "pro",
       features: [
         ...featuresAtMin("LITE", isKo),
+        ...liteExclusiveFeatures(isKo),
         ...featuresAtMin("PRO", isKo),
         {
           id: "plan_cart",

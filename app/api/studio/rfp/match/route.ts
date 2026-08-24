@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
+import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 import { matchRfpProposalBrief } from "@/lib/rfp-proposal/match-rfp-brief";
 import { rfpMatchRequestSchema } from "@/lib/rfp-proposal/match-request";
 
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   const access = await requirePlannerPdfAccess();
   if (!access.allowed) {
     return NextResponse.json(
-      { error: access.status === 401 ? "Login required" : "PRO required" },
+      { error: plannerPdfAccessDeniedMessage(access.status) },
       { status: access.status },
     );
   }

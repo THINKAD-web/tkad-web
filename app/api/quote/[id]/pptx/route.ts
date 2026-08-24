@@ -5,7 +5,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { buildQuoteExportPayload } from "@/lib/quote-export/build-payload";
 import { buildQuotePptx } from "@/lib/quote-export/build-pptx";
 import { quoteExportFileBase } from "@/lib/quote-export/types";
-import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
+import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,7 +36,7 @@ export async function GET(
 
   const pdfAccess = await requirePlannerPdfAccess();
   if (!pdfAccess.allowed) {
-    return new NextResponse(pdfAccess.status === 401 ? "Login required" : "PRO required", {
+    return new NextResponse(plannerPdfAccessDeniedMessage(pdfAccess.status), {
       status: pdfAccess.status,
     });
   }

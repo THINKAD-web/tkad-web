@@ -6,6 +6,8 @@
 import type { MediaItem } from "@/lib/media-data";
 import { briefIndustryToPlanner } from "@/lib/planner/brief/brief-integrated-adapters";
 import {
+  ENT_KEYWORDS,
+  FB_KEYWORDS,
   matchKeywordTierInMedia,
   RETAIL_KEYWORDS,
   TECH_KEYWORDS,
@@ -20,17 +22,17 @@ export const INDUSTRY_STRONG_BONUS = 15;
 export const INDUSTRY_MEDIUM_BONUS = 6;
 
 const STRONG_KEYWORDS: Record<
-  Exclude<BriefIndustry, "other" | "retail" | "tech">,
+  Exclude<BriefIndustry, "other" | "retail" | "tech" | "fb" | "ent">,
   RegExp
 > = {
-  fb: /푸드코트|먹자골목|요식|식음료|레스토랑|베이커리|카페|주점|디저트|맛집|bakery|restaurant|food hall|dining|이마트24|편의점|\bcu\b|gs25|서브웨이|스타벅스|치킨|피자|버거/i,
   finance: /금융|은행|증권|보험|fintech|finance|여의도|테헤란/i,
-  ent: /k-pop|kpop|콘서트|공연|엔터|영화|게임|fan|fandom/i,
 };
 
 const STRUCTURED_KEYWORDS: Partial<
   Record<BriefIndustry, IndustryKeywordConfig>
 > = {
+  fb: FB_KEYWORDS,
+  ent: ENT_KEYWORDS,
   retail: RETAIL_KEYWORDS,
   tech: TECH_KEYWORDS,
 };

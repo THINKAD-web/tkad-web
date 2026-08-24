@@ -12,7 +12,7 @@ import {
   type QuoteExportTemplate,
 } from "@/lib/quote-export/types";
 import { OOH_PERIOD_MONTHS } from "@/lib/ooh-quote";
-import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
+import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
   const pdfAccess = await requirePlannerPdfAccess();
   if (!pdfAccess.allowed) {
-    return new NextResponse(pdfAccess.status === 401 ? "Login required" : "PRO required", {
+    return new NextResponse(plannerPdfAccessDeniedMessage(pdfAccess.status), {
       status: pdfAccess.status,
     });
   }

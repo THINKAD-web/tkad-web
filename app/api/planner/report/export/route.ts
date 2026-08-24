@@ -6,7 +6,7 @@ import {
 } from "@/lib/planner-report-export/types";
 import { parseSectionVisibility } from "@/lib/planner-report-export/section-visibility";
 import { parseExportLineupViewMode } from "@/lib/planner-report-view-mode";
-import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
+import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 import { logPlanReportActivityFireAndForget } from "@/lib/plan-report-activity/log";
 import {
   PLAN_REPORT_ACTIVITY_SOURCES,
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   if (!pdfAccess.allowed) {
     return NextResponse.json(
       {
-        error: pdfAccess.status === 401 ? "Login required" : "PRO required",
+        error: plannerPdfAccessDeniedMessage(pdfAccess.status),
       },
       { status: pdfAccess.status },
     );

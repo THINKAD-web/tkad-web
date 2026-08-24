@@ -6,6 +6,7 @@ import { generateMediaProposalPdf } from "@/lib/generate-media-proposal";
 import { mediaProposalDownloadFilename } from "@/lib/media-proposal-filename";
 import { getCurrentUser } from "@/lib/user-session";
 import { checkReportAccess } from "@/lib/report-access";
+import { accessDeniedErrorMessage } from "@/lib/entitlements/tier-copy";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -42,7 +43,12 @@ export async function GET(request: NextRequest, { params }: Params) {
   const pdfAccess = await checkReportAccess(user?.id ?? null, "planner_pdf");
   if (!pdfAccess.allowed) {
     return NextResponse.json(
-      { error: pdfAccess.reason === "login" ? "Login required" : "PRO required" },
+      {
+        error: accessDeniedErrorMessage(
+          "planner_pdf",
+          pdfAccess.reason === "login" ? 401 : 403,
+        ),
+      },
       { status: pdfAccess.reason === "login" ? 401 : 403 },
     );
   }
