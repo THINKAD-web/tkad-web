@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { comparePdfBuffer, type ComparePdfMediaRow } from "@/lib/build-compare-pdf";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
-import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
+import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 import type { MediaItem } from "@/lib/media-data";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
   if (!pdfAccess.allowed) {
     return NextResponse.json(
       {
-        error: pdfAccess.status === 401 ? "Login required" : "PRO required",
+        error: plannerPdfAccessDeniedMessage(pdfAccess.status),
       },
       { status: pdfAccess.status },
     );

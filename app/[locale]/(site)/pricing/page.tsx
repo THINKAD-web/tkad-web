@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isKo = locale === "ko";
   const title = isKo ? "요금제 | THINKAD 싱커드" : "Pricing | THINKAD";
   const description = isKo
-    ? "FREE·PRO·ENTERPRISE 플랜. OOH 데이터 보고서, 플래너 PDF, 유동인구 분석을 PRO에서 이용하세요."
-    : "FREE, PRO, and Enterprise plans for OOH data reports and planner PDFs.";
+    ? "FREE·LITE·PRO·AGENCY·ENTERPRISE. 제안서·견적표·이메일 발송(LITE), 시뮬레이션·마켓 인사이트(PRO)."
+    : "FREE, LITE, PRO, Agency & Enterprise — proposals & quote tables on LITE; simulation & market on PRO.";
 
   return {
     title,
@@ -59,8 +59,8 @@ export default async function PricingPage({ params, searchParams }: Props) {
           title={isKo ? "OOH 데이터, PRO에서" : "OOH data on PRO"}
           description={
             isKo
-              ? "매체 분석·플래너 시뮬레이션·PDF 보고서를 데이터로 차별화하세요."
-              : "Media analytics, planner simulation, and PDF reports — powered by data."
+              ? "제안서·견적표·이메일 발송은 LITE부터, AI 시뮬레이션·마켓 인사이트는 PRO에서 이용하세요."
+              : "Proposals, quote tables & email from LITE; AI simulation & market insights on PRO."
           }
           icon={<CreditCard className="size-7 dark:text-white text-gray-800" aria-hidden />}
           primaryCta={{

@@ -3,7 +3,7 @@ import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { fetchPublishedCases } from "@/lib/case-queries";
 import { generateProposal } from "@/lib/proposal/generate-proposal";
 import { studioProposalInputSchema, sectionsForType } from "@/lib/proposal/types";
-import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
+import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 import type { MediaItem } from "@/lib/media-data";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   const access = await requirePlannerPdfAccess();
   if (!access.allowed) {
     return NextResponse.json(
-      { error: access.status === 401 ? "Login required" : "PRO required" },
+      { error: plannerPdfAccessDeniedMessage(access.status) },
       { status: access.status },
     );
   }

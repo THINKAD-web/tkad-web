@@ -15,6 +15,7 @@ import { buildIntegratedReportPayload } from "@/lib/planner-report-export/payloa
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { useToast } from "@/components/toast-provider";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
+import { plannerResultGateHint } from "@/lib/entitlements/tier-copy";
 import { PlannerReportDocument } from "@/components/planner/report-document";
 import { IntegratedReportInfoCard } from "@/components/planner/integrated/integrated-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
@@ -231,9 +232,7 @@ export function IntegratedReportStep(props: Props) {
                 blurred={false}
               />
               <p className="text-center text-sm text-muted-foreground">
-                {props.isKo
-                  ? "로그인·PRO 구독 후 통합 보고서 전체를 확인할 수 있습니다."
-                  : "Sign in with PRO to unlock the full integrated report."}
+                {plannerResultGateHint(props.isKo)}
               </p>
             </PlannerProLockedPlaceholder>
           }

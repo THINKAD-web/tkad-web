@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  ENT_KEYWORDS,
+  FB_KEYWORDS,
   matchKeywordTierInMedia,
   RETAIL_KEYWORDS,
   TECH_KEYWORDS,
@@ -103,4 +105,33 @@ test("tech — 테헤란로·판교 hub Strong", () => {
     district: "강남구",
   });
   assert.equal(classifyBriefIndustryMatch(m, "tech"), "strong");
+});
+
+test("fb — 주점 does not match 광주점", () => {
+  assert.equal(textFieldIncludesTerm("교보문고 광주점", "주점"), false);
+  assert.equal(textFieldIncludesTerm("강남 주점 거리", "주점"), true);
+  const m = fixture({
+    id: "gwangju",
+    name: "교보문고 광주점",
+    type: "network",
+  });
+  assert.equal(classifyBriefIndustryMatch(m, "fb"), "weak");
+});
+
+test("ent — fan does not match target:fandom tag", () => {
+  assert.equal(textFieldIncludesTerm("target:fandom", "fan"), false);
+  const m = fixture({
+    id: "fandom-tag",
+    name: "City display",
+    type: "network",
+    tags: ["target:fandom"],
+  });
+  assert.equal(classifyBriefIndustryMatch(m, "ent"), "weak");
+  assert.equal(
+    classifyBriefIndustryMatch(
+      fixture({ id: "fan-tag", tags: ["fan"] }),
+      "ent",
+    ),
+    "strong",
+  );
 });

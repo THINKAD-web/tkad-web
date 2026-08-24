@@ -6,7 +6,7 @@ import { ooHQuotePdfToBase64 } from "@/lib/server-ooh-quote-pdf";
 import { buildKoreanQuotePdf } from "@/lib/build-korean-quote-pdf";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
-import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
+import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +37,7 @@ export async function GET(
 
   const pdfAccess = await requirePlannerPdfAccess();
   if (!pdfAccess.allowed) {
-    return new NextResponse(pdfAccess.status === 401 ? "Login required" : "PRO required", {
+    return new NextResponse(plannerPdfAccessDeniedMessage(pdfAccess.status), {
       status: pdfAccess.status,
     });
   }

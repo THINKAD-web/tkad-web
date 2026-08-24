@@ -46,6 +46,7 @@ import { ReportEmailSendDialog } from "@/components/planner/report-email-send-di
 import { Input } from "@/components/ui/input";
 import { uploadPlannerCreative } from "@/lib/planner/creative-upload";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
+import { plannerProposalGateHint } from "@/lib/entitlements/tier-copy";
 import { useToast } from "@/components/toast-provider";
 import {
   calcMixMetrics,
@@ -725,9 +726,7 @@ export function BriefStepThree({
           </p>
         ) : !reportPreviewAllowed ? (
           <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-            {isKo
-              ? "로그인·PRO 구독 후 제안서 미리보기·편집·이메일 발송을 사용할 수 있습니다."
-              : "Sign in with PRO to preview, edit, and email the proposal."}
+            {plannerProposalGateHint(isKo)}
           </div>
         ) : (
           <div className="space-y-4">

@@ -14,7 +14,7 @@ import {
   isPlannerReportExportPayload,
   type PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
-import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
+import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   if (!pdfAccess.allowed) {
     return NextResponse.json(
       {
-        error: pdfAccess.status === 401 ? "Login required" : "PRO required",
+        error: plannerPdfAccessDeniedMessage(pdfAccess.status),
       },
       { status: pdfAccess.status },
     );
