@@ -15,6 +15,20 @@ import {
   type OnboardingIndustry,
   type OnboardingRole,
 } from "@/lib/onboarding-types";
+import {
+  resolveOnboardingWizardInitialState,
+  wizardDisplayStep,
+  wizardProgressPct,
+  type OnboardingInitialPreference,
+  type WizardPhase,
+} from "@/lib/onboarding-wizard-state";
+import {
+  authAlertClass,
+  authCardClass,
+  authEyebrowClass,
+  authSubmitClass,
+  authTitleClass,
+} from "@/lib/auth/auth-ui-classes";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { markOnboardingCompletedForPush } from "@/lib/pwa-push-client";
 
@@ -40,84 +54,52 @@ function previewToCatalog(m: PreviewItem): HomeCatalogMediaItem {
   };
 }
 
-type WizardStep = 1 | 2 | 3 | 4;
-
-const glassShell =
-  "relative overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black/40 bg-white/50 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur";
-
-const optionIdle =
-  "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50/90 dark:text-white/85 text-gray-700 hover:border-violet-500/30 hover:dark:bg-white/8 hover:shadow-[0_8px_28px_rgba(139,92,246,0.12)]";
-
-const optionSelected =
-  "border-violet-500/45 bg-gradient-to-r from-violet-500/20 via-cyan-400/12 to-fuchsia-500/10 shadow-[0_12px_40px_rgba(139,92,246,0.22)] dark:text-white text-gray-900";
+const roleOptionIdle =
+  "tkad-qp-auth-role dark:border-white/10 border-gray-200 bg-white dark:bg-black/20 hover:border-[color:var(--qp-accent)]/25";
 
 const chipIdle =
-  "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white/75 text-gray-600 hover:border-cyan-400/35 hover:dark:bg-white/8";
+  "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 tkad-qp-text-muted hover:border-[color:var(--qp-accent)]/35";
 
 const chipSelected =
-  "border-violet-500/50 bg-gradient-to-r from-violet-500/25 to-cyan-400/20 dark:text-white text-gray-900 shadow-[0_4px_20px_rgba(139,92,246,0.2)]";
-
-const btnPrimary =
-  "inline-flex h-12 w-full items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.9))] px-6 text-sm font-bold dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] transition-transform hover:-translate-y-0.5 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50";
+  "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent-soft)] tkad-qp-text-primary";
 
 const btnSecondary =
-  "inline-flex h-12 w-full items-center justify-center rounded-[22px] border dark:border-white/15 border-gray-300 dark:bg-white/8 bg-white/70 px-6 text-sm font-semibold dark:text-white text-gray-800 transition-colors hover:dark:bg-white/12 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50";
+  "tkad-qp-auth-btn inline-flex h-12 w-full items-center justify-center border dark:border-white/15 border-gray-300 dark:bg-white/5 bg-white/70 px-6 text-sm font-semibold tkad-qp-text-primary transition-colors hover:dark:bg-white/10 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50";
 
-function NeonBackdrop() {
-  return (
-    <>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.1] tkad-neon-grid"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_right,rgba(236,72,153,0.12),transparent_62%)]"
-      />
-    </>
-  );
-}
-
-export function OnboardingWizard({
-  initialCompleted,
-}: {
+type Props = {
   initialCompleted: boolean;
-}) {
+  initialPreference?: OnboardingInitialPreference | null;
+};
+
+export function OnboardingWizard({ initialCompleted, initialPreference }: Props) {
   const t = useTranslations("onboarding");
   const locale = useLocale();
   const isKo = locale.startsWith("ko");
   const router = useRouter();
 
-  const [step, setStep] = useState<WizardStep>(1);
-  const [role, setRole] = useState<OnboardingRole | null>(null);
-  const [industries, setIndustries] = useState<OnboardingIndustry[]>([]);
+  const boot = useMemo(
+    () => resolveOnboardingWizardInitialState(initialPreference),
+    [initialPreference],
+  );
+
+  const [phase, setPhase] = useState<WizardPhase>(boot.phase);
+  const [role, setRole] = useState<OnboardingRole | null>(boot.role);
+  const [showRolePicker, setShowRolePicker] = useState(!boot.roleLocked);
+  const [industries, setIndustries] = useState<OnboardingIndustry[]>(
+    boot.industries,
+  );
   const [budgetRange, setBudgetRange] = useState<OnboardingBudgetRange | null>(
-    null,
+    boot.budgetRange,
   );
   const [preview, setPreview] = useState<PreviewItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const totalSteps = useMemo(() => {
-    if (role && !needsIndustrySteps(role)) return 2;
-    return 4;
-  }, [role]);
-
-  const displayStep = useMemo(() => {
-    if (role && !needsIndustrySteps(role)) {
-      if (step === 1) return 1;
-      return 2;
-    }
-    return step;
-  }, [role, step]);
-
-  const progressPct = useMemo(() => {
-    if (role && !needsIndustrySteps(role)) {
-      return step >= 4 ? 100 : step === 1 ? 50 : 75;
-    }
-    return Math.round((Math.min(step, 4) / 4) * 100);
-  }, [role, step]);
+  const totalSteps = boot.totalSteps;
+  const displayStep = wizardDisplayStep(phase, totalSteps);
+  const progressPct = wizardProgressPct(phase, totalSteps);
+  const industryRequired = role ? needsIndustrySteps(role) : false;
 
   const loadPreview = useCallback(async () => {
     setLoading(true);
@@ -134,8 +116,8 @@ export function OnboardingWizard({
   }, [locale]);
 
   useEffect(() => {
-    if (step === 4) void loadPreview();
-  }, [step, loadPreview]);
+    if (phase === "preview") void loadPreview();
+  }, [phase, loadPreview]);
 
   useEffect(() => {
     if (initialCompleted) {
@@ -174,30 +156,21 @@ export function OnboardingWizard({
     }
   }
 
-  async function handleRoleNext() {
+  async function handlePrefsNext() {
     if (!role) return;
-    const ok = await savePartial({ onboardingRole: role });
-    if (!ok) return;
-    if (needsIndustrySteps(role)) {
-      setStep(2);
-    } else {
-      setStep(4);
-    }
-  }
-
-  async function handleIndustryNext() {
-    if (industries.length === 0) {
+    if (industryRequired && industries.length === 0) {
       setError(t("industryRequired"));
       return;
     }
-    const ok = await savePartial({ industries });
-    if (ok) setStep(3);
-  }
+    if (industryRequired && !budgetRange) return;
 
-  async function handleBudgetNext() {
-    if (!budgetRange) return;
-    const ok = await savePartial({ budgetRange });
-    if (ok) setStep(4);
+    const body: Record<string, unknown> = { onboardingRole: role };
+    if (industryRequired) {
+      body.industries = industries;
+      body.budgetRange = budgetRange;
+    }
+    const ok = await savePartial(body);
+    if (ok) setPhase("preview");
   }
 
   async function handleComplete() {
@@ -223,6 +196,9 @@ export function OnboardingWizard({
     { value: "BROWSER", label: t("roleBrowser"), desc: t("roleBrowserDesc") },
   ];
 
+  const roleLabel =
+    roleOptions.find((o) => o.value === role)?.label ?? role ?? "";
+
   const industryOptions: { value: OnboardingIndustry; label: string }[] = [
     { value: "beauty_fashion", label: t("industryBeauty") },
     { value: "fnb", label: t("industryFnb") },
@@ -241,20 +217,13 @@ export function OnboardingWizard({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page relative min-h-[calc(100vh-72px)] overflow-hidden px-4 py-10 sm:py-14">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(168,85,247,0.08),transparent_45%),radial-gradient(circle_at_80%_100%,rgba(34,211,238,0.08),transparent_40%)]"
-        />
-
+      <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10 sm:py-14">
         <div className="relative mx-auto w-full max-w-2xl">
           <header className="mb-8 flex items-start justify-between gap-4">
             <div>
-              <p className="font-display text-[10px] font-medium uppercase tracking-[0.24em] text-cyan-600/90 dark:text-cyan-400/90">
-                [ {t("kicker")} ]
-              </p>
-              <h1 className="mt-2 flex items-center gap-2.5 text-2xl font-black tracking-tight dark:text-white text-gray-900 sm:text-3xl">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-violet-500/25 bg-gradient-to-br from-violet-500/20 to-cyan-400/15 text-violet-600 shadow-[0_0_24px_rgba(168,85,247,0.18)] dark:text-cyan-300">
+              <p className={authEyebrowClass}>[ {t("kicker")} ]</p>
+              <h1 className={`mt-2 flex items-center gap-2.5 ${authTitleClass}`}>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--qp-radius-md)] border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]">
                   <Sparkles className="h-4 w-4" aria-hidden />
                 </span>
                 {t("title")}
@@ -264,281 +233,246 @@ export function OnboardingWizard({
               type="button"
               onClick={() => void handleSkip()}
               disabled={saving}
-              className="shrink-0 rounded-full border dark:border-white/12 border-gray-200 px-3 py-1.5 font-display text-[10px] font-semibold uppercase tracking-[0.16em] dark:text-white/55 text-gray-500 transition-colors hover:border-cyan-400/35 hover:dark:text-white text-gray-800 disabled:opacity-50"
+              className="shrink-0 rounded-[var(--qp-radius-md)] border dark:border-white/12 border-gray-200 px-3 py-1.5 font-display text-[10px] font-semibold uppercase tracking-[0.16em] tkad-qp-text-muted transition-colors hover:border-[color:var(--qp-accent)]/35 disabled:opacity-50"
             >
               {t("skip")}
             </button>
           </header>
 
           <div className="mb-8">
-            <div className="mb-2 flex justify-between font-display text-[10px] font-medium uppercase tracking-[0.18em] dark:text-white/45 text-gray-500">
+            <div className="mb-2 flex justify-between font-display text-[10px] font-medium uppercase tracking-[0.18em] tkad-qp-text-muted">
               <span>
                 {t("stepLabel", { current: displayStep, total: totalSteps })}
               </span>
-              <span className="tabular-nums text-cyan-600 dark:text-cyan-400">
+              <span className="tabular-nums text-[color:var(--qp-accent)]">
                 {progressPct}%
               </span>
             </div>
             <div
-              className="h-2 overflow-hidden rounded-full border border-white/10 bg-gray-200/80 dark:bg-white/10"
+              className="h-2 overflow-hidden rounded-[var(--qp-radius-md)] border dark:border-white/10 border-gray-200 bg-gray-200/80 dark:bg-white/10"
               role="progressbar"
               aria-valuenow={progressPct}
               aria-valuemin={0}
               aria-valuemax={100}
             >
               <div
-                className="h-full rounded-full bg-gradient-to-r from-violet-500 via-cyan-400 to-pink-400 shadow-[0_0_14px_rgba(34,211,238,0.45)] transition-all duration-500"
+                className="h-full rounded-[var(--qp-radius-md)] bg-[color:var(--qp-accent)] transition-all duration-500"
                 style={{ width: `${Math.max(progressPct, 4)}%` }}
               />
             </div>
           </div>
 
-          <div className={cn(glassShell, "p-6 sm:p-8")}>
-            <NeonBackdrop />
+          <div className={cn(authCardClass, "p-6 sm:p-8")}>
+            {phase === "prefs" && (
+              <>
+                <h2 className="text-lg font-black tkad-qp-text-primary">
+                  {t("step1Title")}
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed tkad-qp-text-muted">
+                  {industryRequired ? t("step2Desc") : t("step1Desc")}
+                </p>
 
-            <div className="relative">
-              {step === 1 && (
-                <>
-                  <h2 className="text-lg font-black dark:text-white text-gray-900">
-                    {t("step1Title")}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed dark:text-white/65 text-gray-600">
-                    {t("step1Desc")}
-                  </p>
-                  <ul className="mt-6 space-y-2.5">
+                {showRolePicker ? (
+                  <ul className="mt-6 space-y-2.5" role="radiogroup">
                     {roleOptions.map((opt) => (
                       <li key={opt.value}>
                         <button
                           type="button"
+                          role="radio"
+                          aria-checked={role === opt.value}
+                          data-selected={role === opt.value ? "true" : "false"}
                           onClick={() => setRole(opt.value)}
                           className={cn(
-                            "w-full rounded-[18px] border px-4 py-3.5 text-left transition-all",
-                            role === opt.value ? optionSelected : optionIdle,
+                            "w-full border px-4 py-3.5 text-left transition-colors",
+                            role === opt.value
+                              ? "tkad-qp-auth-role border-[color:var(--qp-accent)]/45"
+                              : roleOptionIdle,
                           )}
                         >
                           <span className="block text-sm font-bold tracking-tight">
                             {opt.label}
                           </span>
-                          <span className="mt-1 block text-[11px] dark:text-white/55 text-gray-500">
+                          <span className="tkad-qp-text-muted mt-1 block text-[11px]">
                             {opt.desc}
                           </span>
                         </button>
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-8">
-                    <button
-                      type="button"
-                      disabled={!role || saving}
-                      onClick={() => void handleRoleNext()}
-                      className={btnPrimary}
-                    >
-                      {saving ? (
-                        <Spinner className="h-5 w-5" />
-                      ) : (
-                        <>
-                          {t("next")}
-                          <ArrowRight className="h-4 w-4" aria-hidden />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {step === 2 && (
-                <>
-                  <h2 className="text-lg font-black dark:text-white text-gray-900">
-                    {t("step2Title")}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed dark:text-white/65 text-gray-600">
-                    {t("step2Desc")}
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {industryOptions.map((opt) => {
-                      const selected = industries.includes(opt.value);
-                      return (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => toggleIndustry(opt.value)}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-all",
-                            selected ? chipSelected : chipIdle,
-                          )}
-                        >
-                          {selected ? (
-                            <Check className="h-3.5 w-3.5 text-cyan-500" />
-                          ) : null}
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {error ? (
-                    <p className="mt-4 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-200">
-                      {`// `}
-                      {error}
+                ) : role ? (
+                  <div className="mt-6 flex items-center justify-between gap-3 rounded-[var(--qp-radius-md)] border dark:border-white/12 border-gray-200 px-4 py-3">
+                    <p className="text-sm font-semibold tkad-qp-text-primary">
+                      {isKo ? "시작 역할" : "Your role"}: {roleLabel}
                     </p>
-                  ) : null}
-                  <div className="mt-8 flex gap-3">
                     <button
                       type="button"
-                      onClick={() => setStep(1)}
-                      className={cn(btnSecondary, "flex-1")}
+                      onClick={() => setShowRolePicker(true)}
+                      className="text-xs font-semibold text-[color:var(--qp-accent)] underline"
                     >
-                      {t("back")}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={saving}
-                      onClick={() => void handleIndustryNext()}
-                      className={cn(btnPrimary, "flex-[2]")}
-                    >
-                      {saving ? (
-                        <Spinner className="h-5 w-5" />
-                      ) : (
-                        <>
-                          {t("next")}
-                          <ArrowRight className="h-4 w-4" aria-hidden />
-                        </>
-                      )}
+                      {isKo ? "변경" : "Change"}
                     </button>
                   </div>
-                </>
-              )}
+                ) : null}
 
-              {step === 3 && (
-                <>
-                  <h2 className="text-lg font-black dark:text-white text-gray-900">
-                    {t("step3Title")}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed dark:text-white/65 text-gray-600">
-                    {t("step3Desc")}
-                  </p>
-                  <ul className="mt-6 space-y-2.5">
-                    {budgetOptions.map((opt) => (
-                      <li key={opt.value}>
-                        <button
-                          type="button"
-                          onClick={() => setBudgetRange(opt.value)}
-                          className={cn(
-                            "w-full rounded-[18px] border px-4 py-3.5 text-left text-sm font-semibold transition-all",
-                            budgetRange === opt.value ? optionSelected : optionIdle,
-                          )}
-                        >
-                          {opt.label}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-8 flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setStep(2)}
-                      className={cn(btnSecondary, "flex-1")}
-                    >
-                      {t("back")}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!budgetRange || saving}
-                      onClick={() => void handleBudgetNext()}
-                      className={cn(btnPrimary, "flex-[2]")}
-                    >
-                      {saving ? (
-                        <Spinner className="h-5 w-5" />
-                      ) : (
-                        <>
-                          {t("next")}
-                          <ArrowRight className="h-4 w-4" aria-hidden />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {step === 4 && (
-                <>
-                  <h2 className="text-lg font-black dark:text-white text-gray-900">
-                    {t("step4Title")}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed dark:text-white/65 text-gray-600">
-                    {t("step4Desc")}
-                  </p>
-                  {loading ? (
-                    <div className="mt-10 flex justify-center py-8">
-                      <Spinner className="h-8 w-8" />
+                {role && industryRequired ? (
+                  <>
+                    <h3 className="mt-8 text-sm font-bold tkad-qp-text-primary">
+                      {t("step2Title")}
+                    </h3>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {industryOptions.map((opt) => {
+                        const selected = industries.includes(opt.value);
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => toggleIndustry(opt.value)}
+                            className={cn(
+                              "inline-flex items-center gap-1.5 rounded-[var(--qp-radius-md)] border px-4 py-2 text-sm font-semibold transition-all",
+                              selected ? chipSelected : chipIdle,
+                            )}
+                          >
+                            {selected ? (
+                              <Check className="h-3.5 w-3.5 text-[color:var(--qp-accent)]" />
+                            ) : null}
+                            {opt.label}
+                          </button>
+                        );
+                      })}
                     </div>
-                  ) : (
-                    <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                      {preview.map((m, i) => (
-                        <li key={m.id} className="list-none">
-                          <MediaCard
-                            mode="card"
-                            item={previewToCatalog(m)}
-                            href={m.href}
-                            priceLabel={m.price}
-                            isKo={isKo}
-                            rank={i + 1}
-                            showPlanButton
-                            {...mediaCardStaticHandlers}
-                          />
+
+                    <h3 className="mt-8 text-sm font-bold tkad-qp-text-primary">
+                      {t("step3Title")}
+                    </h3>
+                    <ul className="mt-4 space-y-2">
+                      {budgetOptions.map((opt) => (
+                        <li key={opt.value}>
+                          <button
+                            type="button"
+                            onClick={() => setBudgetRange(opt.value)}
+                            data-selected={
+                              budgetRange === opt.value ? "true" : "false"
+                            }
+                            className={cn(
+                              "tkad-qp-auth-role w-full border px-4 py-3 text-left text-sm font-semibold transition-colors",
+                              budgetRange === opt.value
+                                ? "border-[color:var(--qp-accent)]/45"
+                                : roleOptionIdle,
+                            )}
+                          >
+                            {opt.label}
+                          </button>
                         </li>
                       ))}
                     </ul>
-                  )}
-                  <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                    <button
-                      type="button"
-                      disabled={saving}
-                      onClick={() => void handleComplete()}
-                      className={cn(btnPrimary, "flex-1")}
-                    >
-                      {saving ? (
-                        <Spinner className="h-5 w-5" />
-                      ) : (
-                        <>
-                          {t("ctaExplore")}
-                          <ArrowRight className="h-4 w-4" aria-hidden />
-                        </>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={saving}
-                      className={cn(btnSecondary, "flex-1")}
-                      onClick={async () => {
-                        const ok = await savePartial({ complete: true });
-                        if (ok) {
-                          router.push("/planner");
-                          router.refresh();
-                        }
-                      }}
-                    >
-                      {t("ctaPlanner")}
-                    </button>
-                  </div>
+                  </>
+                ) : null}
+
+                {error ? (
+                  <p className={cn(authAlertClass, "mt-4")}>{`// `}{error}</p>
+                ) : null}
+
+                <div className="mt-8">
                   <button
                     type="button"
-                    onClick={() =>
-                      setStep(role && needsIndustrySteps(role) ? 3 : 1)
+                    disabled={
+                      !role ||
+                      saving ||
+                      (industryRequired &&
+                        (industries.length === 0 || !budgetRange))
                     }
-                    className="mt-4 w-full text-center font-display text-[10px] font-medium uppercase tracking-[0.18em] dark:text-white/45 text-gray-500 transition-colors hover:dark:text-white/70 hover:text-gray-700"
+                    onClick={() => void handlePrefsNext()}
+                    className={cn(authSubmitClass, "inline-flex h-12 gap-2")}
+                  >
+                    {saving ? (
+                      <Spinner className="h-5 w-5" />
+                    ) : (
+                      <>
+                        {t("next")}
+                        <ArrowRight className="h-4 w-4" aria-hidden />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {phase === "preview" && (
+              <>
+                <h2 className="text-lg font-black tkad-qp-text-primary">
+                  {t("step4Title")}
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed tkad-qp-text-muted">
+                  {t("step4Desc")}
+                </p>
+                {loading ? (
+                  <div className="mt-10 flex justify-center py-8">
+                    <Spinner className="h-8 w-8" />
+                  </div>
+                ) : (
+                  <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    {preview.map((m, i) => (
+                      <li key={m.id} className="list-none">
+                        <MediaCard
+                          mode="card"
+                          item={previewToCatalog(m)}
+                          href={m.href}
+                          priceLabel={m.price}
+                          isKo={isKo}
+                          rank={i + 1}
+                          showPlanButton
+                          {...mediaCardStaticHandlers}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={() => void handleComplete()}
+                    className={cn(authSubmitClass, "inline-flex h-12 flex-1 gap-2")}
+                  >
+                    {saving ? (
+                      <Spinner className="h-5 w-5" />
+                    ) : (
+                      <>
+                        {t("ctaExplore")}
+                        <ArrowRight className="h-4 w-4" aria-hidden />
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={saving}
+                    className={cn(btnSecondary, "flex-1")}
+                    onClick={async () => {
+                      const ok = await savePartial({ complete: true });
+                      if (ok) {
+                        router.push("/planner");
+                        router.refresh();
+                      }
+                    }}
+                  >
+                    {t("ctaPlanner")}
+                  </button>
+                </div>
+                {totalSteps > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => setPhase("prefs")}
+                    className="mt-4 w-full text-center font-display text-[10px] font-medium uppercase tracking-[0.18em] tkad-qp-text-muted transition-colors hover:opacity-80"
                   >
                     {t("back")}
                   </button>
-                </>
-              )}
+                ) : null}
+              </>
+            )}
 
-              {error && step !== 2 ? (
-                <p className="mt-4 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-200">
-                  {`// `}
-                  {error}
-                </p>
-              ) : null}
-            </div>
+            {error && phase === "preview" ? (
+              <p className={cn(authAlertClass, "mt-4")}>{`// `}{error}</p>
+            ) : null}
           </div>
         </div>
       </div>
