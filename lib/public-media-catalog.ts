@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { mediaPopularityFallbackScore } from "@/lib/media-popularity";
 import type { Media, MediaAdvertiserExecution } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
@@ -427,6 +428,36 @@ async function appendNetworksIfAny(base: MediaItem[]): Promise<MediaItem[]> {
   }
 }
 
+/** `/ko/media`·browse API — cross-request catalog cache (admin save 시 tag 무효화). */
+export const PUBLIC_MEDIA_CATALOG_CACHE_TAG = "public-media-catalog";
+export const PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS = 3600;
+
+async function loadPublicMediaCatalogFromDb(): Promise<MediaItem[]> {
+  const db = getPrisma();
+  const rows = await db.media.findMany({
+    where: publicActiveMediaWhere(),
+    orderBy: { updatedAt: "desc" },
+    include: catalogInclude,
+  });
+  const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
+  const dbItems = rowsWithCoverage.map((row) => prismaMediaToMediaItem(row));
+  const { attachReviewStatsToMediaItems } = await import("@/lib/media-reviews");
+  const withReviews = await attachReviewStatsToMediaItems(dbItems);
+  const { attachMediaTrustToMediaItems } = await import(
+    "@/lib/media-trust-catalog"
+  );
+  return appendNetworksIfAny(await attachMediaTrustToMediaItems(withReviews));
+}
+
+const getCrossRequestPublicMediaCatalog = unstable_cache(
+  loadPublicMediaCatalogFromDb,
+  ["public-media-catalog-v2"],
+  {
+    revalidate: PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS,
+    tags: [PUBLIC_MEDIA_CATALOG_CACHE_TAG],
+  },
+);
+
 /** 비브라우즈 페이지·API용. `/media` 목록은 `fetchMediaBrowseCatalog()`(`lib/media-browse-catalog`) 사용. */
 export const fetchPublicMediaCatalog = cache(async function fetchPublicMediaCatalog(): Promise<
   MediaItem[]
@@ -440,20 +471,7 @@ export const fetchPublicMediaCatalog = cache(async function fetchPublicMediaCata
   }
 
   try {
-    const db = getPrisma();
-    const rows = await db.media.findMany({
-      where: publicActiveMediaWhere(),
-      orderBy: { updatedAt: "desc" },
-      include: catalogInclude,
-    });
-    const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
-    const dbItems = rowsWithCoverage.map((row) => prismaMediaToMediaItem(row));
-    const { attachReviewStatsToMediaItems } = await import("@/lib/media-reviews");
-    const withReviews = await attachReviewStatsToMediaItems(dbItems);
-    const { attachMediaTrustToMediaItems } = await import(
-      "@/lib/media-trust-catalog"
-    );
-    return appendNetworksIfAny(await attachMediaTrustToMediaItems(withReviews));
+    return await getCrossRequestPublicMediaCatalog();
   } catch (e) {
     // CLAUDE.md: 공개 카탈로그는 DB 가 진실. 컬럼 drift·일시 장애시
     // 목업으로 조용히 떨어지면 운영자가 알아채지 못함. 명시적으로 로깅.
