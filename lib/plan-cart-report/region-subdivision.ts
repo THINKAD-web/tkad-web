@@ -7,6 +7,7 @@ import {
   isValidRegionZoneId,
   regionZoneLabel,
 } from "@/lib/media-regions";
+import { OVERSEAS_BROWSE_REGION_MAIN } from "@/lib/media-country";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 import { isQuoteOnlyMedia } from "@/lib/media-pricing-mode";
 import { calculatePlan } from "@/lib/planner/calc/engine";
@@ -64,6 +65,25 @@ export function resolveBrowseRegionSubId(raw: string): string | null {
   return null;
 }
 
+/** 해외 save 시 붙는 generic `overseas` sub — district/city 세분화를 막지 않게 */
+function isGenericOverseasBrowseSub(
+  m: MediaItem,
+  resolvedSubId: string | null,
+): boolean {
+  if (resolvedSubId !== OVERSEAS_BROWSE_REGION_MAIN) return false;
+  const main = m.regionMain?.trim();
+  if (main === OVERSEAS_BROWSE_REGION_MAIN) return true;
+  const region = m.region?.trim().toLowerCase();
+  return (
+    region === "overseas" ||
+    region === "international" ||
+    region === "jp" ||
+    region === "us" ||
+    region === "cn" ||
+    region === "sg"
+  );
+}
+
 function countClassified(
   portfolio: readonly MediaItem[],
   field: RegionSubdivisionSourceField,
@@ -103,7 +123,14 @@ export function resolveRegionSubdivisionKey(
   if (field === "regionSub") {
     const raw = m.regionSub?.trim();
     if (!raw) return null;
-    return resolveBrowseRegionSubId(raw);
+    const resolved = resolveBrowseRegionSubId(raw);
+    if (
+      isGenericOverseasBrowseSub(m, resolved) &&
+      m.district?.trim()
+    ) {
+      return null;
+    }
+    return resolved;
   }
   if (field === "regionZone") {
     const raw = m.regionZone?.trim();

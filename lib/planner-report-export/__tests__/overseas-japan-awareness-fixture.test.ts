@@ -238,6 +238,29 @@ test("이슈4 — 해외 자유텍스트 district 는 KR browse 칩이 아닌 �
   );
 });
 
+test("이슈4 — admin save regionSub=overseas 여도 district 로 상권표 생성", () => {
+  const withOverseasSub = CATALOG.map((m) => ({
+    ...m,
+    regionSub: "overseas" as const,
+  }));
+  const coverage = analyzeRegionDetailCoverage(withOverseasSub);
+  assert.equal(coverage.regionSub, 0, "generic overseas sub 는 세분화에 쓰지 않는다");
+  assert.equal(coverage.district, 2);
+  assert.equal(coverage.picked, "district");
+
+  const sub = computeRegionSubdivisionReport(
+    withOverseasSub,
+    MONTHS,
+    true,
+    pricing,
+  );
+  assert.ok(sub);
+  assert.deepEqual(
+    sub.breakdown.map((r) => r.label).sort(),
+    ["Shibuya Crossing", "Shibuya Station"],
+  );
+});
+
 // ── 이슈 5: C안 — 1p KPI pending vs 효과요약 reach/ROI 숫자 ───────────────
 
 test("이슈5 — 1p KPI 는 도달·ROI 산정 중인데 효과요약은 숫자를 낸다", () => {
