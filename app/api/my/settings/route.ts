@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { trialDaysLeft } from "@/lib/plan-check-shared";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/user-session";
 import { userNeedsEmailVerification, isOAuthPlaceholderEmail } from "@/lib/user-email";
@@ -26,10 +27,22 @@ export async function GET() {
         company: true,
         phone: true,
         locale: true,
+        plan: true,
+        trialEndsAt: true,
+        proTrialEndsAt: true,
         emailVerifiedAt: true,
         passwordHash: true,
         accounts: {
           select: { provider: true, providerAccountId: true },
+        },
+        subscriptions: {
+          where: {
+            status: { in: ["ACTIVE", "TRIALING"] },
+            OR: [{ endDate: null }, { endDate: { gt: new Date() } }],
+          },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          select: { plan: true, endDate: true, status: true },
         },
       },
     });
@@ -44,6 +57,8 @@ export async function GET() {
       passwordHash: user.passwordHash,
     });
 
+    const activeSub = user.subscriptions[0] ?? null;
+
     return apiOk({
       id: user.id,
       email: user.email,
@@ -56,6 +71,16 @@ export async function GET() {
       hasPassword,
       isOAuthPlaceholderEmail: isOAuthPlaceholderEmail(user.email),
       linkedProviders,
+      plan: user.plan,
+      trialEndsAt: user.trialEndsAt?.toISOString() ?? null,
+      proTrialEndsAt: user.proTrialEndsAt?.toISOString() ?? null,
+      trialDaysLeft: trialDaysLeft({
+        plan: user.plan,
+        trialEndsAt: user.trialEndsAt,
+        proTrialEndsAt: user.proTrialEndsAt,
+      }),
+      subscriptionPlan: activeSub?.plan ?? null,
+      subscriptionEndDate: activeSub?.endDate?.toISOString() ?? null,
     });
   } catch (e) {
     return apiServerError(e, "my/settings GET");
