@@ -52,7 +52,7 @@ export function AdminMediaReviewFlagBadge({
           className="h-6 px-2 text-[10px]"
           onClick={onMarkReviewed}
         >
-          검토 완료
+          검토 통과 처리
         </Button>
       ) : null}
     </span>
