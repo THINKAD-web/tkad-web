@@ -124,7 +124,7 @@ export function ProUpgradePanel({
     return (
       <div
         id="pro-upgrade"
-        className="scroll-mt-24 rounded-[28px] border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] p-6 text-center sm:p-8"
+        className="scroll-mt-24 tkad-qp-pricing-card border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] p-6 text-center sm:p-8"
       >
         <p className="text-sm font-semibold dark:text-white text-gray-800">
           {isKo
@@ -133,7 +133,7 @@ export function ProUpgradePanel({
         </p>
         <Link
           href="/login?redirect=/pricing#pro-upgrade"
-          className="tkad-qp-cta mt-4 inline-flex h-11 items-center justify-center rounded-xl px-8 text-sm font-black text-white"
+          className="tkad-qp-cta mt-4 inline-flex h-11 items-center justify-center rounded-[var(--qp-radius-md)] px-8 text-sm font-black text-white"
         >
           {isKo ? "로그인하고 PRO 시작" : "Sign in to start PRO"}
         </Link>
@@ -154,7 +154,7 @@ export function ProUpgradePanel({
     <SubscriptionConfirmOnReturn isKo={isKo} onConfirmed={onPlanChange} />
     <div
       id="pro-upgrade"
-      className="scroll-mt-24 rounded-[28px] border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] p-6 sm:p-8"
+      className="scroll-mt-24 tkad-qp-pricing-card border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] p-6 sm:p-8"
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -307,7 +307,7 @@ export function ProUpgradePanel({
 
       <div
         id="lite-upgrade"
-        className="scroll-mt-24 mt-6 rounded-[28px] border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
+        className="scroll-mt-24 mt-6 tkad-qp-pricing-card border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
       >
         <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-white/50">
           LITE
@@ -335,7 +335,7 @@ export function ProUpgradePanel({
 
       <div
         id="agency-upgrade"
-        className="scroll-mt-24 mt-6 rounded-[28px] border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
+        className="scroll-mt-24 mt-6 tkad-qp-pricing-card border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
       >
         <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-white/50">
           AGENCY

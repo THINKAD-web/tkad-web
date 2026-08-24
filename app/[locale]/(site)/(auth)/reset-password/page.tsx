@@ -5,6 +5,12 @@ import { useSearchParams } from "next/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import {
+  authAlertClass,
+  authCardClass,
+  authInputClass,
+  authSubmitClass,
+} from "@/lib/auth/auth-ui-classes";
 
 function ResetPasswordForm() {
   const search = useSearchParams();
@@ -15,8 +21,7 @@ function ResetPasswordForm() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const inputCls =
-    "tkad-auth-input h-11 w-full rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/28 px-4  text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-all focus:dark:border-white/18 border-gray-300 focus:ring-2 focus:ring-white/12";
+  const inputCls = authInputClass;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -57,7 +62,7 @@ function ResetPasswordForm() {
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10">
         <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
-          <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
+          <div className={authCardClass}>
             <div className="mb-6 text-center">
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
                 [ RESET PASSWORD ]
@@ -115,7 +120,7 @@ function ResetPasswordForm() {
                   />
                 </div>
                 {error && (
-                  <div className="rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 text-[12px] dark:text-white text-gray-800">
+                  <div className={authAlertClass}>
                     {`// `}{error}
                   </div>
                 )}

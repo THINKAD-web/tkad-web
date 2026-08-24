@@ -2662,6 +2662,61 @@ html:not(.dark) .tkad-home-appearance .tkad-auth-input::placeholder {
   opacity: 1;
 }
 
+/* QP auth — register/login/forgot/verify (4–6px, border-first) */
+.tkad-qp-auth-card {
+  border-radius: var(--qp-radius-lg) !important;
+  border: 1px solid var(--qp-line) !important;
+  background: var(--qp-surface) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html.dark .tkad-qp-auth-card {
+  border-color: color-mix(in srgb, white 12%, transparent) !important;
+  background: color-mix(in srgb, var(--qp-surface) 8%, #0a0a0a) !important;
+}
+
+.tkad-qp-auth-input {
+  border-radius: var(--qp-radius-md) !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.tkad-qp-auth-btn {
+  border-radius: var(--qp-radius-md) !important;
+  box-shadow: none !important;
+}
+
+.tkad-qp-auth-btn:hover {
+  transform: none !important;
+}
+
+.tkad-qp-auth-alert {
+  border-radius: var(--qp-radius-md) !important;
+}
+
+.tkad-qp-auth-role {
+  border-radius: var(--qp-radius-md) !important;
+  box-shadow: none !important;
+}
+
+.tkad-qp-auth-role[data-selected="true"] {
+  border-color: color-mix(in srgb, var(--qp-accent) 45%, var(--qp-line)) !important;
+  background: var(--qp-accent-soft) !important;
+}
+
+.tkad-qp-pricing-card {
+  border-radius: var(--qp-radius-lg) !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.tkad-qp-tier-gate {
+  border-radius: var(--qp-radius-lg) !important;
+  box-shadow: none !important;
+  background: var(--qp-surface) !important;
+}
+
 html:not(.dark) .tkad-home-appearance .tkad-media-hero__eyebrow {
   color: var(--home-muted) !important;
 }

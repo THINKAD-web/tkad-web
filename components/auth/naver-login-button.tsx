@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
+import { authOAuthButtonClass } from "@/lib/auth/auth-ui-classes";
 
 type Props = {
   className?: string;
@@ -33,7 +34,7 @@ function NaverLoginButtonInner({ className }: Props) {
       disabled={loading}
       className={
         className ??
-        "flex h-12 w-full items-center justify-center gap-2 rounded-[18px] border border-[#03C75A]/40 bg-[#03C75A] px-4 text-sm font-bold text-white shadow-[0_12px_40px_rgba(3,199,90,0.22)] transition-transform hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-70"
+        `${authOAuthButtonClass} border-[#03C75A]/40 bg-[#03C75A] text-white`
       }
     >
       <span
