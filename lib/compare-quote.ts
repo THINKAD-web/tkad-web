@@ -151,7 +151,7 @@ function quoteLineFromUnitPrice(
  * 스케줄이 하나도 없거나 요청 일수가 스케줄 범위 밖이면 null.
  * 스케줄 안이면 두 인접 rate 를 이어 그 지점의 rate 를 돌려준다.
  */
-function interpolatePartialRate(
+export function interpolatePartialRate(
   media: MediaItem,
   days: number,
 ): number | null {
