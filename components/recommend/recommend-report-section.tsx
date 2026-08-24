@@ -47,6 +47,7 @@ import {
   PlannerProTeaserStats,
 } from "@/components/planner/planner-neon-ui";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
+import { plannerResultGateHint } from "@/lib/entitlements/tier-copy";
 import { cn } from "@/lib/utils";
 import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
 import {
@@ -580,9 +581,7 @@ export function RecommendReportSection({
                       blurred={false}
                     />
                     <p className="text-center text-sm text-muted-foreground">
-                      {isKo
-                        ? "로그인·PRO 구독 후 전체 효과 보고서와 PDF를 확인할 수 있습니다."
-                        : "Sign in with PRO to unlock the full effect report and PDF export."}
+                      {plannerResultGateHint(isKo)}
                     </p>
                   </PlannerProLockedPlaceholder>
                 ) : null

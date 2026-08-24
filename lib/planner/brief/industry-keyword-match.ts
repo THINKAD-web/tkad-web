@@ -118,6 +118,49 @@ export const RETAIL_KEYWORDS: IndustryKeywordConfig = {
   mediumTextTerms: ["뷰티", "beauty", "cosmetic", "패션", "fashion"],
 };
 
+/** fb — 주점은 2음절 경계 매칭(광주점 오매칭 방지) */
+export const FB_KEYWORDS: IndustryKeywordConfig = {
+  strongTextTerms: [
+    "푸드코트",
+    "먹자골목",
+    "요식",
+    "식음료",
+    "레스토랑",
+    "베이커리",
+    "카페",
+    "주점",
+    "디저트",
+    "맛집",
+    "bakery",
+    "restaurant",
+    "food hall",
+    "dining",
+    "이마트24",
+    "편의점",
+    "cu",
+    "gs25",
+    "서브웨이",
+    "스타벅스",
+    "치킨",
+    "피자",
+    "버거",
+  ],
+};
+
+/** ent — fan 은 ASCII 경계 매칭(target:fandom 오매칭 방지); fandom 태그는 exact만 */
+export const ENT_KEYWORDS: IndustryKeywordConfig = {
+  strongTextTerms: [
+    "k-pop",
+    "kpop",
+    "콘서트",
+    "공연",
+    "엔터",
+    "영화",
+    "게임",
+  ],
+  strongExactTags: ["fan", "fandom"],
+};
+
 /** tech — 제안 A (디지털·IT·AI·핀테크·강남역 geo 제외) */
 export const TECH_KEYWORDS: IndustryKeywordConfig = {
   strongTextTerms: [

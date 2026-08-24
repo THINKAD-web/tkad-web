@@ -56,6 +56,7 @@ import { PlannerReportFreeSummary } from "@/components/planner/planner-report-fr
 import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
 import { PlannerProposalNarrative } from "@/components/planner/planner-proposal-narrative";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
+import { plannerResultGateHint } from "@/lib/entitlements/tier-copy";
 import { cn } from "@/lib/utils";
 import { countMediaMatchingPlannerAgeKeys } from "@/lib/planner/parse-target-age";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
@@ -748,9 +749,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                   blurred={false}
                 />
                 <p className="text-center text-sm text-muted-foreground">
-                  {props.isKo
-                    ? "로그인·PRO 구독 후 전체 보고서, PDF·시뮬레이션을 확인할 수 있습니다."
-                    : "Sign in with PRO to unlock the full report, PDF export, and simulation."}
+                  {plannerResultGateHint(props.isKo)}
                 </p>
               </PlannerProLockedPlaceholder>
             ) : null
