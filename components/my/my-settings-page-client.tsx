@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { ArrowLeft, CheckCircle2, Loader2, Mail, RefreshCw, Trash2 } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
+import { MySubscriptionCard } from "@/components/my/my-subscription-card";
 import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,12 @@ type SettingsData = {
   hasPassword: boolean;
   isOAuthPlaceholderEmail: boolean;
   linkedProviders: string[];
+  plan: string;
+  trialEndsAt: string | null;
+  proTrialEndsAt: string | null;
+  trialDaysLeft: number | null;
+  subscriptionPlan: string | null;
+  subscriptionEndDate: string | null;
 };
 
 const glassCard =
@@ -235,6 +242,19 @@ export function MySettingsPageClient() {
             </h1>
             <p className="mt-1 text-[11px] dark:text-white">{data.email}</p>
           </header>
+
+          <MySubscriptionCard
+            className="mb-6"
+            isKo={isKo}
+            user={{
+              plan: data.plan,
+              trialEndsAt: data.trialEndsAt,
+              proTrialEndsAt: data.proTrialEndsAt,
+              trialDaysLeft: data.trialDaysLeft ?? undefined,
+            }}
+            subscriptionEndDate={data.subscriptionEndDate}
+            subscriptionPlan={data.subscriptionPlan}
+          />
 
           <section className={cn(glassCard, "mb-6")}>
             <h2 className="flex items-center gap-2 text-sm font-bold dark:text-white text-gray-900">
