@@ -13,6 +13,7 @@ import {
 } from "@/lib/media-quick-add";
 import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
 import { stripLockedFields } from "@/lib/media/locked-fields";
+import { maybeAutoRecomputeMediaMetrics } from "@/lib/media/engine/auto-recompute";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
 import {
   gateMediaMetricsWrite,
@@ -179,6 +180,7 @@ export async function POST(request: NextRequest) {
             installLocations,
           );
         }
+        await maybeAutoRecomputeMediaMetrics(db, updated.id);
         if (updated.price !== existing.price) {
           await db.mediaPriceSnapshot.create({
             data: {
@@ -219,6 +221,7 @@ export async function POST(request: NextRequest) {
             installLocations,
           );
         }
+        await maybeAutoRecomputeMediaMetrics(db, created.id);
         await db.mediaPriceSnapshot.create({
           data: {
             mediaId: created.id,

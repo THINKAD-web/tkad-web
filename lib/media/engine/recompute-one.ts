@@ -1,22 +1,34 @@
 import type { PrismaClient } from "@prisma/client";
+import { logReviewStatusChange } from "@/lib/media/audit-log";
 import { buildEngineInput } from "./build-input";
 import { computeMetric } from "./compute";
-import { upsertComputedMetricFromEngine } from "./persist";
+import {
+  syncMediaImpressionsFromEngine,
+  upsertComputedMetricFromEngine,
+} from "./persist";
 import type { RecomputeResult } from "./types";
 
 type Db = PrismaClient;
 
+export type RecomputeOptions = {
+  /** flagged → reviewed 전환 (Batch backfill용) */
+  markReviewed?: boolean;
+};
+
+const MEDIA_INCLUDE = {
+  factSheet: true,
+  externalSignals: true,
+  computedMetric: true,
+} as const;
+
 export async function recomputeOneMedia(
   db: Db,
   mediaId: string,
+  options?: RecomputeOptions,
 ): Promise<RecomputeResult> {
   const media = await db.media.findUnique({
     where: { id: mediaId },
-    include: {
-      factSheet: true,
-      externalSignals: true,
-      computedMetric: true,
-    },
+    include: MEDIA_INCLUDE,
   });
 
   if (!media) {
@@ -27,27 +39,57 @@ export async function recomputeOneMedia(
   const input = buildEngineInput(media);
   const { output, engineVersion } = computeMetric(input);
 
-  const updated = await upsertComputedMetricFromEngine(
-    db,
-    mediaId,
-    output,
-    engineVersion,
-    before
-      ? {
-          legacyDailyImpressions: before.legacyDailyImpressions,
-          legacyCpm: before.legacyCpm,
-        }
-      : null,
-  );
+  await db.$transaction(async (tx) => {
+    await upsertComputedMetricFromEngine(
+      tx,
+      mediaId,
+      output,
+      engineVersion,
+      before
+        ? {
+            legacyDailyImpressions: before.legacyDailyImpressions,
+            legacyCpm: before.legacyCpm,
+          }
+        : null,
+    );
+    await syncMediaImpressionsFromEngine(tx, mediaId, output);
+
+    if (
+      options?.markReviewed &&
+      media.reviewStatus === "flagged" &&
+      (media.reviewReason == null ||
+        media.reviewReason === "null_or_negative")
+    ) {
+      await tx.media.update({
+        where: { id: mediaId },
+        data: {
+          reviewStatus: "reviewed",
+          reviewReason: null,
+          flaggedAt: null,
+        },
+      });
+      logReviewStatusChange({
+        mediaId,
+        from: media.reviewStatus,
+        to: "reviewed",
+        reviewReason: null,
+        source: "recompute_batch",
+      });
+    }
+  });
+
+  const updated = await db.mediaComputedMetric.findUnique({
+    where: { mediaId },
+  });
 
   return {
     mediaId,
     engineVersion,
-    computedAt: updated.computedAt,
+    computedAt: updated!.computedAt,
     changed: {
       dailyImpressions:
-        before?.dailyImpressions !== updated.dailyImpressions,
-      cpm: before?.cpm !== updated.cpm,
+        before?.dailyImpressions !== updated!.dailyImpressions,
+      cpm: before?.cpm !== updated!.cpm,
     },
     before: {
       dailyImpressions: before?.dailyImpressions ?? null,
@@ -55,9 +97,9 @@ export async function recomputeOneMedia(
       modelVersion: before?.modelVersion ?? null,
     },
     after: {
-      dailyImpressions: updated.dailyImpressions,
-      cpm: updated.cpm,
-      modelVersion: updated.modelVersion,
+      dailyImpressions: updated!.dailyImpressions,
+      cpm: updated!.cpm,
+      modelVersion: updated!.modelVersion,
     },
   };
 }

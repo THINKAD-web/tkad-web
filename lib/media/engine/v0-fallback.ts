@@ -12,19 +12,32 @@ export const v0FallbackEngine: MetricEngine = {
     return (
       input.legacy.dailyImpressions !== null ||
       input.legacy.cpm !== null ||
-      input.current != null
+      input.current != null ||
+      (input.media.impressions != null && input.media.impressions > 0)
     );
   },
 
   compute(input: EngineInput): EngineOutput {
+    const storedMonthly = input.media.impressions;
     const dailyImpressions =
       input.legacy.dailyImpressions ??
       input.current?.dailyImpressions ??
-      0;
-    const cpm = input.legacy.cpm ?? input.current?.cpm ?? 0;
+      (storedMonthly != null && storedMonthly > 0
+        ? Math.round(storedMonthly / 30)
+        : 0);
+    const cpm =
+      input.legacy.cpm ??
+      input.current?.cpm ??
+      (typeof input.media.cpm === "number" && input.media.cpm > 0
+        ? Math.round(input.media.cpm)
+        : 0);
 
     return {
       dailyImpressions,
+      monthlyImpressions:
+        storedMonthly != null && storedMonthly > 0
+          ? storedMonthly
+          : dailyImpressions * 30,
       hourlyImpressions: null,
       cpm,
       visibilityScore: null,

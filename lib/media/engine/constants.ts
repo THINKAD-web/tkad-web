@@ -4,6 +4,7 @@
 export const MODEL_VERSIONS = {
   LEGACY_MIGRATION_V1: "legacy-migration-v1",
   V0_FALLBACK: "v0-fallback",
+  V1_IMPRESSIONS: "v1-impressions",
 } as const;
 
 export type ModelVersion =

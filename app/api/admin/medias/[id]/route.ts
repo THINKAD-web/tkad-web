@@ -42,6 +42,7 @@ import {
 } from "@/lib/media-metrics-write";
 import { stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
 import { logLockdownAttempt, logReviewStatusChange } from "@/lib/media/audit-log";
+import { maybeAutoRecomputeMediaMetrics } from "@/lib/media/engine/auto-recompute";
 import { isMediaReviewStatus } from "@/lib/media-review-status";
 import {
   defaultPricingModeForBrowseSub,
@@ -860,6 +861,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       }).catch((err) => console.error("[admin/media] price alert", err));
     }
     revalidateMediaCaches({ id, slug: media.slug });
+    void maybeAutoRecomputeMediaMetrics(db, id);
     if (bunnyUrlsToPurge.length > 0) {
       void deleteBunnyPublicUrls(bunnyUrlsToPurge);
     }
