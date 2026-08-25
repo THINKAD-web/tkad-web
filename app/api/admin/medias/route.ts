@@ -38,6 +38,7 @@ import {
 } from "@/lib/media-pricing-mode";
 import { stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
+import { maybeAutoRecomputeMediaMetrics } from "@/lib/media/engine/auto-recompute";
 import {
   hasValidManualCoords,
   isKoreaMediaCountry,
@@ -499,6 +500,7 @@ export async function POST(request: NextRequest) {
     }
 
     revalidateMediaCaches({ id: media.id, slug: media.slug });
+    void maybeAutoRecomputeMediaMetrics(db, media.id);
 
     return jsonWithHeaders(
       {

@@ -20,6 +20,8 @@ import {
   validateMappedMediaMetrics,
 } from "@/lib/media-metrics-write";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
+import { stripLockedFields } from "@/lib/media/locked-fields";
+import { maybeAutoRecomputeMediaMetrics } from "@/lib/media/engine/auto-recompute";
 
 export const dynamic = "force-dynamic";
 
@@ -175,6 +177,10 @@ export async function POST(request: NextRequest) {
         count: created.length,
         ids: created.map((c) => c.id),
       });
+    }
+
+    for (const row of created) {
+      void maybeAutoRecomputeMediaMetrics(db, row.id);
     }
 
     const strippedHeader =

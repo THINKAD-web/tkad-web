@@ -9,8 +9,22 @@ import type {
  * v0: signals 미사용, legacy/current pass-through
  * v1: signals 필수, legacy는 fallback
  */
+export interface EngineMediaFields {
+  name: string;
+  type: string;
+  subCategory: string | null;
+  mediaMainCategory: string | null;
+  mediaSubCategory: string | null;
+  dailyFootfall: number | null;
+  price: number;
+  visibilityScore: number;
+  impressions: number | null;
+  cpm: number | null;
+}
+
 export interface EngineInput {
   mediaId: string;
+  media: EngineMediaFields;
   fact: MediaFactSheet | null;
   signals: MediaExternalSignal[];
   legacy: {
@@ -21,6 +35,7 @@ export interface EngineInput {
   current?: {
     dailyImpressions: number;
     cpm: number;
+    contactRate?: number;
   };
 }
 
@@ -31,12 +46,20 @@ export type HourlyImpressionPoint = { hour: number; impressions: number };
  */
 export interface EngineOutput {
   dailyImpressions: number;
+  /** v1 — 30일 월간 노출 (Media.impressions SSOT) */
+  monthlyImpressions?: number;
   hourlyImpressions: HourlyImpressionPoint[] | null;
   cpm: number;
   visibilityScore: number | null;
   reliabilityGrade: ReliabilityGrade;
   sourceSignalIds: string[];
   computedAt: Date;
+  contactRate?: number;
+  contactRateBasis?: string;
+  contactRateInputVisibility?: number | null;
+  contactRateInputClass?: string;
+  sovShare?: number;
+  sovShareBasis?: string;
 }
 
 export interface MetricEngine {
