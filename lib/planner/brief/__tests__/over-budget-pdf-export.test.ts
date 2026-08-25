@@ -189,11 +189,23 @@ test("PDF export checklist: admin inquiry dry-run — banner + 문의 자동 매
       "문의 내용으로 자동 매칭된",
     ),
   );
-  if ((payload.budgetHonesty?.overBudgetWon ?? 0) > 0) {
-    assert.ok(payload.budgetHonesty?.overBudgetBanner?.includes("예산 초과"));
-  }
+  assert.equal(payload.budgetHonesty?.overBudgetWon ?? 0, 0);
+  assert.equal(payload.budgetHonesty?.overBudgetBanner, null);
   assert.ok(payload.budgetHonesty?.coverValue?.includes("이 구성"));
+  assert.equal(payload.appendixMediaSpecs?.length, 5);
+  assert.equal(payload.appendixMediaSpecs?.filter((s) => s.inBody).length, 2);
 
+  const pdf = await buildPlannerReportPdf(payload);
+  assert.ok(pdf.byteLength > 10_000);
+});
+
+test("PDF export checklist: regular brief payload — no appendix section", async () => {
+  const payload = buildBriefReportPayload({
+    plan: withinBudgetPlan,
+    catalog: [catalogMedia],
+    isKo: true,
+  });
+  assert.equal(payload.appendixMediaSpecs, undefined);
   const pdf = await buildPlannerReportPdf(payload);
   assert.ok(pdf.byteLength > 10_000);
 });

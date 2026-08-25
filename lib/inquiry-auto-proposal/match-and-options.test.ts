@@ -7,8 +7,8 @@ import {
   type ProposalCatalogRow,
 } from "./match-and-options";
 import { PILOT_DEFAULT_INQUIRY_TEXT } from "./pilot-skus";
-import { inquiryMixUnits } from "./to-brief";
 import { runInquiryAutoProposalDryRun } from "./run-dry-run";
+import { isDesignatedInquiryMatch } from "./select-inquiry-mix";
 
 function row(partial: {
   id: string;
@@ -111,7 +111,7 @@ test("parses budget 3000만 and airport + rest-stop intent", () => {
   assert.equal(p.namedNeedles.length, 5);
 });
 
-test("filters flagged and out-of-bounds CPM from mixUnits", async () => {
+test("filters flagged and out-of-bounds CPM; body greedy within budget", async () => {
   const parsed = parseInquiryProposalText(PILOT_DEFAULT_INQUIRY_TEXT);
   const matched = matchInquiryMedia(catalog, parsed);
   const flagged = matched.find((m) => m.id === "flagged-air");
@@ -125,16 +125,24 @@ test("filters flagged and out-of-bounds CPM from mixUnits", async () => {
   const rest = matched.find((m) => m.id === "rest");
   assert.ok(rest);
   assert.equal(rest!.eligible, false);
+  assert.equal(rest!.matchKind, "category");
   assert.ok(rest!.reasons.includes("cpm_class_bounds"));
 
   const dry = await runInquiryAutoProposalDryRun(PILOT_DEFAULT_INQUIRY_TEXT, {
     proposalCatalog: catalog,
     flightStart: "2026-09-01",
   });
+  const designated = dry.designated;
+  assert.equal(designated.length, 5);
+  assert.equal(designated.every(isDesignatedInquiryMatch), true);
   assert.equal(dry.mixUnits.pkg, undefined);
   assert.equal(dry.mixUnits.rest, undefined);
   assert.equal(dry.mixUnits["flagged-air"], undefined);
   assert.equal(dry.mixUnits.t1, 1);
   assert.equal(dry.mixUnits.t2, 1);
-  assert.deepEqual(inquiryMixUnits(dry.eligible.map((m) => m.id)), dry.mixUnits);
+  assert.equal(dry.mixUnits.checkin, undefined);
+  assert.equal(dry.mixUnits.welcome, undefined);
+  assert.equal(dry.bodyTotalWon, 24_000_000);
+  assert.equal(dry.appendixMediaSpecs.length, 5);
+  assert.equal(dry.appendixMediaSpecs.filter((s) => s.inBody).length, 2);
 });

@@ -1516,6 +1516,104 @@ export async function buildPlannerReportPdf(
 
   renderPortfolioLineup();
 
+  function renderAppendixMediaSpecs() {
+    const specs = p.appendixMediaSpecs;
+    if (!specs?.length) return;
+
+    const colWeights = [24, 11, 10, 22, 8, 25] as const;
+    const weightSum = colWeights.reduce((s, w) => s + w, 0);
+    const cols = (
+      isKo
+        ? [
+            { label: "매체명", weight: colWeights[0] },
+            { label: "월 가격", weight: colWeights[1] },
+            { label: "CPM", weight: colWeights[2] },
+            { label: "위치", weight: colWeights[3] },
+            { label: "본문", weight: colWeights[4] },
+            { label: "비고", weight: colWeights[5] },
+          ]
+        : [
+            { label: "Media", weight: colWeights[0] },
+            { label: "Monthly", weight: colWeights[1] },
+            { label: "CPM", weight: colWeights[2] },
+            { label: "Location", weight: colWeights[3] },
+            { label: "In mix", weight: colWeights[4] },
+            { label: "Note", weight: colWeights[5] },
+          ]
+    ).map((col) => ({ ...col, w: (contentW * col.weight) / weightSum }));
+
+    const headerH = 7;
+    const rowGap = 1;
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(7.5);
+
+    const rowLayouts = specs.map((spec) => {
+      const cellTexts = [
+        spec.name,
+        spec.priceLabel,
+        spec.cpmLabel,
+        spec.location,
+        spec.inBody ? (isKo ? "포함" : "Yes") : "—",
+        spec.statusNote?.trim() && spec.statusNote !== "—"
+          ? spec.statusNote
+          : spec.reviewStatusLabel && spec.reviewStatusLabel !== "—"
+            ? isKo
+              ? `검토: ${spec.reviewStatusLabel}`
+              : `Review: ${spec.reviewStatusLabel}`
+            : "—",
+      ];
+      const lineCounts = cellTexts.map((text, ci) => {
+        const col = cols[ci]!;
+        return (doc.splitTextToSize(text, col.w - 4) as string[]).length;
+      });
+      const rowH = Math.max(8, Math.max(...lineCounts) * 3.8 + 3);
+      return { spec, cellTexts, rowH };
+    });
+
+    const tableH =
+      headerH + rowLayouts.reduce((sum, row) => sum + row.rowH + rowGap, 0) + 4;
+    sectionTitle(
+      isKo ? "부록 · 지정 매체 스펙" : "Appendix · specified media specs",
+      tableH,
+    );
+
+    setFill(QP_INK);
+    doc.rect(M, y, contentW, headerH, "F");
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(7.5);
+    setText(WHITE);
+    let hx = M;
+    for (const col of cols) {
+      doc.text(col.label, hx + 2, y + 4.8);
+      hx += col.w;
+    }
+    y += headerH;
+
+    rowLayouts.forEach(({ spec, cellTexts, rowH }, i) => {
+      if (i > 0) {
+        setDraw([229, 231, 235]);
+        doc.setLineWidth(0.1);
+        doc.line(M, y, M + contentW, y);
+      }
+      let cx = M;
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(7.5);
+      for (let ci = 0; ci < cols.length; ci++) {
+        const col = cols[ci]!;
+        const lines = doc.splitTextToSize(cellTexts[ci]!, col.w - 4) as string[];
+        if (ci === 0) setText(INK);
+        else if (ci === 4 && spec.inBody) setText(QP_ACCENT);
+        else setText(GRAY_600);
+        doc.text(lines, cx + 2, y + 4.2);
+        cx += col.w;
+      }
+      y += rowH + rowGap;
+    });
+    y += 4;
+  }
+
+  renderAppendixMediaSpecs();
+
   // ── 디지털 배분 (통합) ──
   if (p.digital && p.digital.length) {
     sectionTitle(isKo ? "디지털 예산 배분" : "Digital budget allocation");
