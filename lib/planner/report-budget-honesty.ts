@@ -49,6 +49,7 @@ export function buildReportBudgetHonesty(args: {
       ? confirmedMixWon
       : (args.planMetrics?.totalCostWon ?? 0);
 
+  /** 표시 금액(확정분·budgetAllocation) 기준 — 저장 metrics.overBudgetWon 과 다를 수 있음 */
   const { overBudgetWon, budgetUsedRate } = resolveStoredOverBudget(
     { totalCostWon: mixWon },
     args.requestWon,
