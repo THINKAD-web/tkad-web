@@ -36,8 +36,9 @@ import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-r
 import { regionalBreakdownSectionLines } from "@/lib/plan-cart-report/regional-breakdown";
 import { computeRegionSubdivisionReport } from "@/lib/plan-cart-report/region-subdivision";
 import {
-  flattenPlanCartReportGroups,
   groupPlanCartReportPortfolio,
+  reportPortfolioOrderOpts,
+  resolveReportPortfolioOrder,
 } from "@/lib/plan-cart-report/sort-portfolio";
 import {
   buildReportStrategyLines,
@@ -104,6 +105,8 @@ export type BuildOohPayloadArgs = {
   campaignMediaImpressions?: Record<string, number>;
   /** 내 플랜 보고서 — 복수 옵션 라벨·금액 */
   planCartItems?: import("@/lib/plan-cart").PlanCartItem[];
+  /** 4번 확장 — 명시적 portfolio mediaId 순서 (cartItems보다 우선) */
+  manualPortfolioOrder?: readonly string[];
   /** R-3: channelMode=ooh_digital 이지만 digital 스냅샷 없을 때 */
   digitalOmittedNotice?: string;
   /** A-1b Wave 3 — 저장 스냅샷이 이전 엔진 버전일 때 */
@@ -433,12 +436,11 @@ export function buildOohReportPayload(
   }
 
   const months = campaignMonths;
-  const groups = a.regionBreakdown?.length
-    ? groupPlanCartReportPortfolio(a.portfolio, isKo)
-    : null;
-  const orderedPortfolio = groups
-    ? flattenPlanCartReportGroups(groups)
-    : a.portfolio;
+  const orderOpts = reportPortfolioOrderOpts({
+    planCartItems: a.planCartItems,
+    manualPortfolioOrder: a.manualPortfolioOrder,
+  });
+  const orderedPortfolio = resolveReportPortfolioOrder(a.portfolio, orderOpts);
   const contributions = computePortfolioContributions(
     orderedPortfolio,
     months,
@@ -502,7 +504,7 @@ export function buildOohReportPayload(
     orderedPortfolio.forEach((m, i) => {
       rowByKey.set(m.id, portfolioRows[i]!);
     });
-    const grouped = groupPlanCartReportPortfolio(a.portfolio, isKo);
+    const grouped = groupPlanCartReportPortfolio(a.portfolio, isKo, orderOpts);
     return grouped.map((group) => ({
       regionLabel: group.regionLabel,
       categories: group.categories.map((cat) => ({
