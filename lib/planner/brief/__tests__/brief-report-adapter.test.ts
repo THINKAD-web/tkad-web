@@ -125,13 +125,8 @@ test("snapshotMetricsToExportMetrics: impressions only", () => {
   assert.ok(!("roiExpected" in m));
 });
 
-test("brief-report-adapter: over-budget honesty uses displayed mix + inquiry copy", () => {
-  const priceyMedia: MediaItem = {
-    ...catalogMedia,
-    id: "m-brief-over",
-    price: 35_000_000,
-  };
-  const over = {
+function overBudgetHandPickPlan(priceyMedia: MediaItem) {
+  return {
     ...snapshot,
     mediaMix: [
       {
@@ -147,6 +142,55 @@ test("brief-report-adapter: over-budget honesty uses displayed mix + inquiry cop
       budgetUsedRate: 69_000_000 / 30_000_000,
     },
   };
+}
+
+test("brief-report-adapter: hand-pick within budget has no over-budget banner", () => {
+  const payload = buildBriefReportPayload({
+    plan: snapshot,
+    catalog: [catalogMedia],
+    isKo: true,
+  });
+  assert.equal(payload.budgetHonesty?.overBudgetBanner, null);
+  assert.equal(payload.mixSource, undefined);
+  assert.ok(
+    payload.recommendRationale?.summaryLines[0]?.includes("직접 선택한"),
+  );
+});
+
+test("brief-report-adapter: hand-pick over budget shows banner and 직접 선택한", () => {
+  const priceyMedia: MediaItem = {
+    ...catalogMedia,
+    id: "m-brief-over-hand",
+    price: 35_000_000,
+  };
+  const payload = buildBriefReportPayload({
+    plan: overBudgetHandPickPlan(priceyMedia),
+    catalog: [priceyMedia],
+    isKo: true,
+  });
+  assert.equal(payload.mixSource, undefined);
+  assert.equal(
+    payload.budgetHonesty?.overBudgetBanner,
+    "예산 초과 ₩5,000,000 — 수량을 줄이거나 예산을 조정해 주세요.",
+  );
+  assert.ok(
+    payload.recommendRationale?.summaryLines[0]?.includes("직접 선택한"),
+  );
+  assert.equal(
+    payload.recommendRationale?.summaryLines.some((l) =>
+      l.includes("문의 내용으로 자동 매칭된"),
+    ),
+    false,
+  );
+});
+
+test("brief-report-adapter: over-budget honesty uses displayed mix + inquiry copy", () => {
+  const priceyMedia: MediaItem = {
+    ...catalogMedia,
+    id: "m-brief-over",
+    price: 35_000_000,
+  };
+  const over = overBudgetHandPickPlan(priceyMedia);
   const payload = buildBriefReportPayload({
     plan: over,
     catalog: [priceyMedia],
