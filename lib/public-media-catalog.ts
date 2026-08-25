@@ -20,7 +20,10 @@ import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
 import { keywordFilterItemToMediaItem } from "@/lib/keyword-filter-media-detail";
 import { getMediaBrowseMockCatalog } from "@/lib/media-browse-catalog";
 import { isKoreaMediaCountry } from "@/lib/media-country";
-import { attachPublicMediaCatalogExtras } from "@/lib/attach-public-media-catalog-extras";
+import {
+  attachPublicMediaCatalogExtras,
+  PUBLIC_BROWSE_CATALOG_EXTRAS,
+} from "@/lib/attach-public-media-catalog-extras";
 import { parseMediaInstallLocations } from "@/lib/media-install-locations";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { formatSizeFromMeters } from "@/lib/format-media-size";
@@ -439,7 +442,11 @@ async function loadPublicMediaCatalogFromDb(): Promise<MediaItem[]> {
     orderBy: { updatedAt: "desc" },
     include: catalogInclude,
   });
-  const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
+  const rowsWithCoverage = await attachPublicMediaCatalogExtras(
+    db,
+    rows,
+    PUBLIC_BROWSE_CATALOG_EXTRAS,
+  );
   const dbItems = rowsWithCoverage.map((row) => prismaMediaToMediaItem(row));
   const { attachReviewStatsToMediaItems } = await import("@/lib/media-reviews");
   const withReviews = await attachReviewStatsToMediaItems(dbItems);
@@ -451,7 +458,7 @@ async function loadPublicMediaCatalogFromDb(): Promise<MediaItem[]> {
 
 const getCrossRequestPublicMediaCatalog = unstable_cache(
   loadPublicMediaCatalogFromDb,
-  ["public-media-catalog-v2"],
+  ["public-media-catalog-v3"],
   {
     revalidate: PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS,
     tags: [PUBLIC_MEDIA_CATALOG_CACHE_TAG],
@@ -503,6 +510,7 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
       const featuredWithCoverage = await attachPublicMediaCatalogExtras(
         db,
         featured,
+        PUBLIC_BROWSE_CATALOG_EXTRAS,
       );
       const sorted = [...featuredWithCoverage].sort((a, b) => {
         const ao = a.featuredOrder ?? 9999;
@@ -522,6 +530,7 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
       const fallbackWithCoverage = await attachPublicMediaCatalogExtras(
         db,
         fallback,
+        PUBLIC_BROWSE_CATALOG_EXTRAS,
       );
       return fallbackWithCoverage.map((row) => prismaMediaToMediaItem(row));
     }
@@ -557,7 +566,11 @@ export async function fetchHomeWeeklyPopularMedia(
       (a, b) => mediaPopularityFallbackScore(b) - mediaPopularityFallbackScore(a),
     );
     const top = ranked.slice(0, max);
-    const withCoverage = await attachPublicMediaCatalogExtras(db, top);
+    const withCoverage = await attachPublicMediaCatalogExtras(
+      db,
+      top,
+      PUBLIC_BROWSE_CATALOG_EXTRAS,
+    );
     return withCoverage.map((row) => prismaMediaToMediaItem(row));
   } catch (e) {
     console.warn(
@@ -585,7 +598,11 @@ export async function fetchHomeNewMedia(
       take: max,
       include: catalogInclude,
     });
-    const withCoverage = await attachPublicMediaCatalogExtras(db, rows);
+    const withCoverage = await attachPublicMediaCatalogExtras(
+      db,
+      rows,
+      PUBLIC_BROWSE_CATALOG_EXTRAS,
+    );
     return withCoverage.map((row) => prismaMediaToMediaItem(row));
   } catch {
     return [];
@@ -608,7 +625,11 @@ export async function fetchHomeInstantBookingMedia(
       take: 48,
       include: catalogInclude,
     });
-    const withCoverage = await attachPublicMediaCatalogExtras(db, rows);
+    const withCoverage = await attachPublicMediaCatalogExtras(
+      db,
+      rows,
+      PUBLIC_BROWSE_CATALOG_EXTRAS,
+    );
     const items = withCoverage
       .map((row) => prismaMediaToMediaItem(row))
       .filter((m) => isInstantBookingEligible(m).eligible);
@@ -633,6 +654,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
       const popularWithCoverage = await attachPublicMediaCatalogExtras(
         db,
         popular,
+        PUBLIC_BROWSE_CATALOG_EXTRAS,
       );
       const sorted = [...popularWithCoverage].sort((a, b) => {
         const ao = a.popularOrder ?? 9999;
@@ -660,6 +682,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
     const fallbackWithCoverage = await attachPublicMediaCatalogExtras(
       db,
       fallback,
+      PUBLIC_BROWSE_CATALOG_EXTRAS,
     );
     return fallbackWithCoverage.map((row) => prismaMediaToMediaItem(row));
   } catch {

@@ -1,5 +1,6 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PUBLIC_MEDIA_CATALOG_CACHE_TAG } from "@/lib/public-media-catalog";
+import { MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG } from "@/lib/media-trust-catalog";
 
 const MEDIA_CACHE_LOCALES = ["ko", "en"] as const;
 
@@ -22,6 +23,7 @@ export function revalidateMediaCaches(ref: {
   if (slug) detailRefs.add(slug);
   try {
     revalidateTag(PUBLIC_MEDIA_CATALOG_CACHE_TAG, "max");
+    revalidateTag(MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG, "max");
     for (const locale of MEDIA_CACHE_LOCALES) {
       revalidatePath(`/${locale}/media`);
       for (const detailRef of detailRefs) {
@@ -42,6 +44,7 @@ export function revalidateMediaCachesBulk(
 ): void {
   try {
     revalidateTag(PUBLIC_MEDIA_CATALOG_CACHE_TAG, "max");
+    revalidateTag(MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG, "max");
     for (const locale of MEDIA_CACHE_LOCALES) {
       revalidatePath(`/${locale}/media`);
     }

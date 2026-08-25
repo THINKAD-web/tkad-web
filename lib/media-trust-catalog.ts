@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import type { MediaItem } from "@/lib/media-data";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
@@ -156,12 +157,41 @@ async function fetchHotWeekMediaIds(limit = 10): Promise<Set<string>> {
   return new Set(growth.slice(0, limit).map((g) => g.id));
 }
 
-export async function fetchTrustBadgeContext(): Promise<MediaTrustBadgeContext> {
+/** trust badge 집계 — catalog cache miss 시에도 cross-request 1h 캐시 */
+export const MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG = "media-trust-badge-context";
+export const MEDIA_TRUST_BADGE_CONTEXT_REVALIDATE_SECONDS = 3600;
+
+type SerializableTrustBadgeContext = {
+  topInquiryIds: string[];
+  hotWeekIds: string[];
+};
+
+async function loadTrustBadgeContextFromDb(): Promise<SerializableTrustBadgeContext> {
   const [topInquiryIds, hotWeekIds] = await Promise.all([
     fetchTopInquiryMediaIds(10),
     fetchHotWeekMediaIds(10),
   ]);
-  return { topInquiryIds, hotWeekIds };
+  return {
+    topInquiryIds: [...topInquiryIds],
+    hotWeekIds: [...hotWeekIds],
+  };
+}
+
+const getCrossRequestTrustBadgeContext = unstable_cache(
+  loadTrustBadgeContextFromDb,
+  ["media-trust-badge-context-v1"],
+  {
+    revalidate: MEDIA_TRUST_BADGE_CONTEXT_REVALIDATE_SECONDS,
+    tags: [MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG],
+  },
+);
+
+export async function fetchTrustBadgeContext(): Promise<MediaTrustBadgeContext> {
+  const raw = await getCrossRequestTrustBadgeContext();
+  return {
+    topInquiryIds: new Set(raw.topInquiryIds),
+    hotWeekIds: new Set(raw.hotWeekIds),
+  };
 }
 
 export async function fetchExecutionStatsByMediaIds(
