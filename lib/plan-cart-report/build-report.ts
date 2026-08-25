@@ -28,8 +28,9 @@ import {
 } from "@/lib/plan-cart-report/regional-breakdown";
 import { planCartPortfolioPricing } from "@/lib/plan-cart-pricing";
 import {
-  flattenPlanCartReportGroups,
   groupPlanCartReportPortfolio,
+  reportPortfolioOrderOpts,
+  resolveReportPortfolioOrder,
 } from "@/lib/plan-cart-report/sort-portfolio";
 import type {
   PlannerExportChartDatum,
@@ -166,8 +167,13 @@ export function buildPlanCartReportBundle(args: {
   const portfolio = resolvePlanCartPortfolio(cart, catalog);
   if (portfolio.length === 0) return null;
 
-  const portfolioGroups = groupPlanCartReportPortfolio(portfolio, isKo);
-  const portfolioSorted = flattenPlanCartReportGroups(portfolioGroups);
+  const orderOpts = reportPortfolioOrderOpts({ planCartItems: cart.items });
+  const portfolioSorted = resolveReportPortfolioOrder(portfolio, orderOpts);
+  const portfolioGroups = groupPlanCartReportPortfolio(
+    portfolio,
+    isKo,
+    orderOpts,
+  );
   const pricing = planCartPortfolioPricing(cart);
 
   // A-1 Wave 2 — `Math.max(1, ...)` 클램프 제거.
