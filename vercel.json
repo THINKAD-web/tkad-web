@@ -177,6 +177,10 @@
       "schedule": "0 15 * * *"
     },
     {
+      "path": "/api/cron/warm-media-browse-cache",
+      "schedule": "15 * * * *"
+    },
+    {
       "path": "/api/cron/expire-quotes",
       "schedule": "0 15 * * *"
     },
