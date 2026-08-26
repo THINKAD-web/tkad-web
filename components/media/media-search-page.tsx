@@ -353,7 +353,9 @@ function MediaSearchPageInner({
   const [mapHeightPx, setMapHeightPx] = useState(520);
   const [total, setTotal] = useState(initialTotal ?? initialMedia.length);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(
+    () => !plannerMode && initialMedia.length === 0,
+  );
   const [loadingMore, setLoadingMore] = useState(false);
   const catalogFetchGeneration = useRef(0);
   const mediaCountRef = useRef(0);
@@ -786,7 +788,7 @@ function MediaSearchPageInner({
           sort,
           page: 1,
         });
-        if (currentKey === mountSsrFetchKey) return;
+        if (currentKey === mountSsrFetchKey && initialMedia.length > 0) return;
       }
 
       void fetchMedia({ page: 1, append: false }, generation);
