@@ -398,7 +398,7 @@ function normalizePricePeriod(
   return "month";
 }
 
-const catalogInclude = {
+export const PUBLIC_MEDIA_CATALOG_INCLUDE = {
   advertiserExecutions: {
     select: { advertiserName: true } as const,
     orderBy: { createdAt: "desc" as const },
@@ -442,7 +442,7 @@ async function loadPublicMediaCatalogFromDb(): Promise<MediaItem[]> {
   const rows = await db.media.findMany({
     where: publicActiveMediaWhere(),
     orderBy: { updatedAt: "desc" },
-    include: catalogInclude,
+    include: PUBLIC_MEDIA_CATALOG_INCLUDE,
   });
   const rowsWithCoverage = await attachPublicMediaCatalogExtras(
     db,
@@ -506,7 +506,7 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
     const db = getPrisma();
     const featured = await db.media.findMany({
       where: publicActiveMediaWhere({ isFeatured: true }),
-      include: catalogInclude,
+      include: PUBLIC_MEDIA_CATALOG_INCLUDE,
     });
     if (featured.length > 0) {
       const featuredWithCoverage = await attachPublicMediaCatalogExtras(
@@ -526,7 +526,7 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
       where: publicActiveMediaWhere(),
       orderBy: { updatedAt: "desc" },
       take: max,
-      include: catalogInclude,
+      include: PUBLIC_MEDIA_CATALOG_INCLUDE,
     });
     if (fallback.length > 0) {
       const fallbackWithCoverage = await attachPublicMediaCatalogExtras(
@@ -561,7 +561,7 @@ export async function fetchHomeWeeklyPopularMedia(
       ),
       orderBy: [{ popularityScore: "desc" }, { updatedAt: "desc" }],
       take: Math.max(max * 6, 60),
-      include: catalogInclude,
+      include: PUBLIC_MEDIA_CATALOG_INCLUDE,
     });
     if (pool.length === 0) return [];
     const ranked = [...pool].sort(
@@ -598,7 +598,7 @@ export async function fetchHomeNewMedia(
       // createdAt 동률(대량 시드) 대비 id 보조 정렬로 안정적 최신순.
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: max,
-      include: catalogInclude,
+      include: PUBLIC_MEDIA_CATALOG_INCLUDE,
     });
     const withCoverage = await attachPublicMediaCatalogExtras(
       db,
@@ -625,7 +625,7 @@ export async function fetchHomeInstantBookingMedia(
       }),
       orderBy: [{ popularityScore: "desc" }, { price: "asc" }],
       take: 48,
-      include: catalogInclude,
+      include: PUBLIC_MEDIA_CATALOG_INCLUDE,
     });
     const withCoverage = await attachPublicMediaCatalogExtras(
       db,
@@ -650,7 +650,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
   try {
     const popular = await db.media.findMany({
       where: publicActiveMediaWhere({ isPopular: true }),
-      include: catalogInclude,
+      include: PUBLIC_MEDIA_CATALOG_INCLUDE,
     });
     if (popular.length > 0) {
       const popularWithCoverage = await attachPublicMediaCatalogExtras(
@@ -679,7 +679,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
       where: publicActiveMediaWhere(),
       orderBy: [{ updatedAt: "desc" }],
       take: max,
-      include: catalogInclude,
+      include: PUBLIC_MEDIA_CATALOG_INCLUDE,
     });
     const fallbackWithCoverage = await attachPublicMediaCatalogExtras(
       db,
@@ -817,7 +817,7 @@ export async function fetchPlannerMediaCatalog(): Promise<{
     const rows = await db.media.findMany({
       where: publicActiveMediaWhere({ country: "KR" }),
       orderBy: { updatedAt: "desc" },
-      include: catalogInclude,
+      include: PUBLIC_MEDIA_CATALOG_INCLUDE,
     });
     const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
     const moisPopIndex = await fetchMoisPopulationIndex(db);

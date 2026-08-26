@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { sortMergedBrowseCatalog } from "./merged-media-browse.ts";
+import {
+  sortMergedBrowseCatalog,
+} from "./merged-media-browse.ts";
+import {
+  buildMediaBrowseDbWhere,
+  mediaBrowseUsesDbPaginationOnly,
+  sortBrowseCandidates,
+} from "./media-browse-db-query.ts";
 import type { MediaItem } from "./media-data.ts";
 import {
   compareMediaByMonthlyEquivalentPrice,
@@ -135,4 +142,65 @@ test("pagination preserves global monthly order across pages", () => {
   assert.equal(page1[0]!.id, "month-cheap");
   assert.ok(!page1.some((m) => m.id === "day-shinsegae"));
   assert.equal(sorted[sorted.length - 1]!.id, "day-shinsegae");
+});
+
+test("popular sort uses popularityScore without daily engagement reorder", () => {
+  const highScore = {
+    ...stubMedia({ id: "high", name: "High", price: 1 }),
+    popularityScore: 500,
+    dailyFootTraffic: 100,
+  } as MediaItem;
+  const lowScore = {
+    ...stubMedia({ id: "low", name: "Low", price: 1 }),
+    popularityScore: 50,
+    dailyFootTraffic: 999_999,
+  } as MediaItem;
+  const sorted = sortBrowseCandidates([lowScore, highScore], "popular");
+  assert.deepEqual(sorted.map((m) => m.id), ["high", "low"]);
+});
+
+test("mediaBrowseUsesDbPaginationOnly: price sort needs merge path", () => {
+  assert.equal(
+    mediaBrowseUsesDbPaginationOnly({ sort: "price_asc" }),
+    false,
+  );
+  assert.equal(
+    mediaBrowseUsesDbPaginationOnly({ sort: "popular", q: "강남" }),
+    false,
+  );
+  assert.equal(
+    mediaBrowseUsesDbPaginationOnly({ sort: "newest", mainCategory: "digital" }),
+    true,
+  );
+});
+
+test("buildMediaBrowseDbWhere includes active + not-flagged", () => {
+  const where = buildMediaBrowseDbWhere({ sort: "popular", available: true });
+  assert.ok(where.AND);
+  const and = where.AND as Record<string, unknown>[];
+  assert.ok(and.some((c) => "isActive" in c));
+  assert.ok(
+    and.some(
+      (c) =>
+        "reviewStatus" in c &&
+        (c as { reviewStatus: { not: string } }).reviewStatus.not === "flagged",
+    ),
+  );
+  assert.ok(and.some((c) => "availability" in c));
+});
+
+test("filter + sortBrowseCandidates pagination matches global order", () => {
+  const catalog = [
+    shinsegaeDay,
+    cheapMonth,
+    midMonth,
+    stubMedia({ id: "m2", name: "M2", price: 3_000_000 }),
+  ];
+  const sorted = sortBrowseCandidates(catalog, "price_asc");
+  const page1 = sorted.slice(0, 2);
+  const page2 = sorted.slice(2, 4);
+  assert.deepEqual(
+    [...page1, ...page2].map((m) => m.id),
+    sorted.map((m) => m.id),
+  );
 });
