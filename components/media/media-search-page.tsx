@@ -16,6 +16,10 @@ import { MediaBrowseStickyBar } from "@/components/media/media-browse-sticky-bar
 import type { HomeCatalogMediaItem, PublicMediaListResponse } from "@/types/media";
 import type { MediaItem } from "@/lib/media-data";
 import {
+  catalogListItemsToMediaItems,
+  type MediaCatalogListItem,
+} from "@/lib/media-catalog-list-dto";
+import {
   mapMediaItemToHomeCatalog,
 } from "@/lib/media-catalog-map";
 import {
@@ -605,12 +609,12 @@ function MediaSearchPageInner({
         if (res.ok) {
           const json = (await res.json()) as PublicMediaListResponse;
           if (isStale()) return;
-          const rows = Array.isArray(json.data)
+          const rows = (Array.isArray(json.data)
             ? json.data
             : Array.isArray(json.media)
               ? json.media
-              : [];
-          const items = rows as MediaItem[];
+              : []) as MediaCatalogListItem[];
+          const items = catalogListItemsToMediaItems(rows);
           const mapped = items.map((row) => mapMediaItemToHomeCatalog(row));
           setTotal(json.pagination?.total ?? mapped.length);
           setMedia((prev) => (opts.append ? [...prev, ...mapped] : mapped));

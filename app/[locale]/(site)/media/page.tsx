@@ -7,6 +7,10 @@ import {
 } from "@/lib/media-catalog";
 import type { MediaCatalogSort } from "@/lib/media-catalog-types";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
+import {
+  catalogListItemsToMediaItems,
+  mediaItemsToCatalogListItems,
+} from "@/lib/media-catalog-list-dto";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 
 export const revalidate = 3600;
@@ -61,10 +65,13 @@ export default async function MediaPage({ params, searchParams }: Props) {
     priceMax: parseOptionalPrice(sp.priceMax),
   };
 
-  const [initialCatalogItems, initialTotal] = await Promise.all([
+  const [rawCatalogItems, initialTotal] = await Promise.all([
     fetchFilteredMediaCatalogItems(catalogOpts).catch(() => []),
     countPublicMediaCatalog(catalogOpts).catch(() => 0),
   ]);
+  const initialCatalogItems = catalogListItemsToMediaItems(
+    mediaItemsToCatalogListItems(rawCatalogItems),
+  );
   const initialMedia = initialCatalogItems.map(mapMediaItemToHomeCatalog);
 
   return (

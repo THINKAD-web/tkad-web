@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { mediaItemsToCatalogListItems } from "@/lib/media-catalog-list-dto";
 import { isDatabaseConfigured } from "@/lib/prisma";
 import { queryMergedMediaBrowse } from "@/lib/merged-media-browse";
 import { parsePublicMediaQuery } from "@/lib/public-media-query";
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
       await queryMergedMediaBrowse(params);
 
     return Response.json({
-      data,
+      data: mediaItemsToCatalogListItems(data),
       pagination: { page, limit, total, totalPages },
     });
   } catch (e) {

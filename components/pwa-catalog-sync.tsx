@@ -38,8 +38,7 @@ type LeanMediaRow = {
   location?: string;
   type?: string;
   price?: number;
-  image?: string;
-  sampleImages?: string[];
+  thumbnailUrl?: string;
 };
 
 /**
@@ -76,7 +75,7 @@ export function PwaCatalogSync() {
               location: row.location,
               type: row.type,
               price: row.price,
-              image: row.image ?? row.sampleImages?.[0],
+              image: row.thumbnailUrl,
             }),
           ),
         );
