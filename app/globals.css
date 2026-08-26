@@ -254,6 +254,50 @@
   --qp-accent-soft: color-mix(in srgb, var(--hermes) 12%, white);
   --qp-accent-ring: color-mix(in srgb, var(--hermes) 35%, transparent);
 
+  /*
+   * STEP 1 (2026-08-26) — Accent token hierarchy (parallel candidates)
+   *
+   * Runtime --qp-accent 위 값은 STEP 2 승인 전까지 변경하지 않음.
+   * --qp-accent-strong: Hero primary CTA·회원가입 등 브랜드 피크 (#FF6200).
+   * set1–set3: 톤다운 후보 — swatch: reports/design-tone-audit-20260826/token-candidates.html
+   * STEP 2 시 [data-qp-accent-set="N"] 또는 --qp-accent 직접 전환으로 시범 적용.
+   */
+  --qp-accent-strong: var(--hermes);
+  --qp-accent-strong-hover: var(--cta-hover);
+
+  /* Set 1 — 보수적 hex 톤다운 (STEP 2 시범 적용 예정, 최종 확정 아님) */
+  --qp-accent-set1: #e85a00;
+  --qp-accent-set1-hover: #cf5000;
+  --qp-accent-set1-soft: color-mix(in srgb, var(--qp-accent-set1) 12%, white);
+  --qp-accent-set1-soft-surface: color-mix(in srgb, var(--qp-accent-set1) 14%, var(--qp-surface));
+  --qp-accent-set1-ring: color-mix(in srgb, var(--qp-accent-set1) 35%, transparent);
+
+  /* Set 2 — grey mix (채도↓, 명도 중간) */
+  --qp-accent-set2: color-mix(in srgb, var(--hermes) 85%, #888888);
+  --qp-accent-set2-hover: color-mix(in srgb, var(--qp-accent-set2) 88%, black);
+  --qp-accent-set2-soft: color-mix(in srgb, var(--qp-accent-set2) 12%, white);
+  --qp-accent-set2-soft-surface: color-mix(in srgb, var(--qp-accent-set2) 14%, var(--qp-surface));
+  --qp-accent-set2-ring: color-mix(in srgb, var(--qp-accent-set2) 35%, transparent);
+
+  /* Set 3 — black mix (명도↓, 더 차분) */
+  --qp-accent-set3: color-mix(in srgb, var(--hermes) 80%, black);
+  --qp-accent-set3-hover: color-mix(in srgb, var(--qp-accent-set3) 88%, black);
+  --qp-accent-set3-soft: color-mix(in srgb, var(--qp-accent-set3) 12%, white);
+  --qp-accent-set3-soft-surface: color-mix(in srgb, var(--qp-accent-set3) 14%, var(--qp-surface));
+  --qp-accent-set3-ring: color-mix(in srgb, var(--qp-accent-set3) 35%, transparent);
+
+  /*
+   * Surface-oriented soft tokens (STEP 3 필터 토글·선택 칩용)
+   * --qp-accent-soft: 기존 12% tint — 배지·소형 칩 유지
+   * --qp-accent-soft-surface: 필터 active·카드 hover 등 "기본 surface" 패턴
+   */
+  --qp-accent-soft-surface: color-mix(in srgb, var(--qp-accent) 14%, var(--qp-surface));
+  --qp-accent-soft-surface-hover: color-mix(in srgb, var(--qp-accent) 18%, var(--qp-surface));
+  --qp-accent-soft-border: color-mix(in srgb, var(--qp-accent) 30%, var(--qp-line));
+
+  /* --hermes-muted 별칭 (QP 네이밍) — STEP 3+ eyebrow·보조 라벨 후보 */
+  --qp-accent-muted: var(--hermes-muted);
+
   /* Neutral scale — 액센트 외에는 흑백/그레이만 사용 */
   --qp-ink: #08080a;
   --qp-fg: #1c1c1f;
@@ -3300,6 +3344,16 @@ html:not(.dark) .group:hover .tkad-catalog-card-shell {
 /* 라이트: 헤더 기본 잉크 (반투명 상속 방지) */
 html:not(.dark) .tkad-nav-chrome {
   color: var(--foreground);
+}
+
+/*
+ * STEP 2 trial (design/orange-accent-b-c-step2) — GNB only: toned accent Set 1.
+ * Global :root --qp-accent remains var(--hermes). Sidebar/planner/content unchanged.
+ */
+.tkad-nav-chrome {
+  --qp-accent: var(--qp-accent-set1);
+  --qp-accent-hover: var(--qp-accent-set1-hover);
+  --qp-accent-ring: var(--qp-accent-set1-ring);
 }
 
 /* 로고 "AD" — P1: 네온 그라데이션 → qp 액센트 단색 (라이트/다크 공통) */

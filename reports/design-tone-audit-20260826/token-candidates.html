@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TKAD Orange Accent — Token Candidates (STEP 1)</title>
+  <style>
+    :root {
+      --hermes: #ff6200;
+      --qp-surface: #ffffff;
+      --qp-surface-2: #f4f3f0;
+      --qp-line: #d8d6d0;
+      --qp-ink: #08080a;
+      --qp-fg-muted: #5a5a5e;
+      --hermes-muted: color-mix(in srgb, var(--hermes) 55%, white);
+
+      --qp-accent-strong: var(--hermes);
+      --qp-accent-strong-hover: #e65800;
+
+      --qp-accent-set1: #e85a00;
+      --qp-accent-set1-hover: #cf5000;
+      --qp-accent-set1-soft: color-mix(in srgb, var(--qp-accent-set1) 12%, white);
+      --qp-accent-set1-soft-surface: color-mix(in srgb, var(--qp-accent-set1) 14%, var(--qp-surface));
+      --qp-accent-set1-ring: color-mix(in srgb, var(--qp-accent-set1) 35%, transparent);
+
+      --qp-accent-set2: color-mix(in srgb, var(--hermes) 85%, #888888);
+      --qp-accent-set2-hover: color-mix(in srgb, var(--qp-accent-set2) 88%, black);
+      --qp-accent-set2-soft: color-mix(in srgb, var(--qp-accent-set2) 12%, white);
+      --qp-accent-set2-soft-surface: color-mix(in srgb, var(--qp-accent-set2) 14%, var(--qp-surface));
+      --qp-accent-set2-ring: color-mix(in srgb, var(--qp-accent-set2) 35%, transparent);
+
+      --qp-accent-set3: color-mix(in srgb, var(--hermes) 80%, black);
+      --qp-accent-set3-hover: color-mix(in srgb, var(--qp-accent-set3) 88%, black);
+      --qp-accent-set3-soft: color-mix(in srgb, var(--qp-accent-set3) 12%, white);
+      --qp-accent-set3-soft-surface: color-mix(in srgb, var(--qp-accent-set3) 14%, var(--qp-surface));
+      --qp-accent-set3-ring: color-mix(in srgb, var(--qp-accent-set3) 35%, transparent);
+
+      --current-accent: var(--hermes);
+      --current-soft-surface: color-mix(in srgb, var(--current-accent) 14%, var(--qp-surface));
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--qp-surface-2);
+      color: var(--qp-ink);
+      line-height: 1.5;
+    }
+    header {
+      padding: 1.5rem 2rem;
+      background: var(--qp-surface);
+      border-bottom: 1px solid var(--qp-line);
+    }
+    header h1 { margin: 0 0 0.25rem; font-size: 1.25rem; }
+    header p { margin: 0; color: var(--qp-fg-muted); font-size: 0.875rem; max-width: 52rem; }
+    main { padding: 1.5rem 2rem 3rem; max-width: 1200px; }
+    section { margin-bottom: 2.5rem; }
+    section > h2 {
+      font-size: 1rem;
+      margin: 0 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--qp-line);
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .set-card {
+      background: var(--qp-surface);
+      border: 1px solid var(--qp-line);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .set-card h3 {
+      margin: 0;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--qp-line);
+      background: var(--qp-surface-2);
+    }
+    .set-card .meta {
+      padding: 0.5rem 1rem 0;
+      font-size: 0.6875rem;
+      font-family: ui-monospace, monospace;
+      color: var(--qp-fg-muted);
+      word-break: break-all;
+    }
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      padding: 1rem;
+    }
+    .swatch {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      border: 1px solid rgb(0 0 0 / 0.08);
+      position: relative;
+    }
+    .swatch span {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      right: 4px;
+      font-size: 0.5625rem;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+    }
+    .swatch.light-label span { color: var(--qp-ink); text-shadow: none; }
+    .demo-row {
+      padding: 0 1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .demo-surface {
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--qp-line);
+    }
+    .demo-surface.white { background: #fff; }
+    .demo-surface.grey { background: var(--qp-surface-2); }
+    .demo-surface.dark {
+      background: #0a1420;
+      border-color: rgb(255 255 255 / 0.12);
+      color: #f5f3f0;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      text-decoration: none;
+      cursor: default;
+    }
+    .btn-strong {
+      background: var(--qp-accent-strong);
+      color: #fff;
+      border-color: color-mix(in srgb, var(--qp-accent-strong) 85%, black);
+    }
+    .btn-accent {
+      background: var(--accent, var(--current-accent));
+      color: #fff;
+      border-color: color-mix(in srgb, var(--accent, var(--current-accent)) 85%, black);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--accent, var(--current-accent));
+      border-color: color-mix(in srgb, var(--accent, var(--current-accent)) 40%, var(--qp-line));
+    }
+    .toggle-active {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 0.375rem 0.875rem;
+      border-radius: 4px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      background: var(--soft-surface, var(--current-soft-surface));
+      color: var(--accent, var(--current-accent));
+      border: 1px solid var(--accent, var(--current-accent));
+    }
+    .price {
+      font-size: 1.75rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent, var(--current-accent));
+    }
+    .eyebrow {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted, var(--hermes-muted));
+    }
+    .compare-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .compare-bar div {
+      height: 48px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .note {
+      font-size: 0.8125rem;
+      color: var(--qp-fg-muted);
+      background: var(--qp-surface);
+      border: 1px dashed var(--qp-line);
+      border-radius: 6px;
+      padding: 1rem;
+    }
+    .note code { font-size: 0.75rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Orange Accent Token Candidates — STEP 1</h1>
+    <p>
+      런타임 <code>--qp-accent</code>는 아직 <strong>#FF6200</strong> 그대로입니다.
+      아래 3세트는 병행 정의된 후보이며, STEP 2에서 Set 1로 시범 적용 예정(최종 확정 아님).
+      브라우저에서 이 HTML 파일을 직접 열어 비교하세요.
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>0. 현재(Active) vs Strong</h2>
+      <div class="compare-bar">
+        <div style="background:#ff6200">--hermes / active --qp-accent<br>#FF6200</div>
+        <div style="background:var(--qp-accent-strong)">--qp-accent-strong<br>#FF6200</div>
+        <div style="background:var(--hermes-muted); color:#08080a">--hermes-muted<br>55% white mix</div>
+        <div style="background:color-mix(in srgb, #ff6200 12%, white); color:#08080a">--qp-accent-soft<br>12% white mix</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>1. 후보 세트 — 색상 블록</h2>
+      <div class="grid-3">
+        <article class="set-card">
+          <h3>Set 1 — 보수적 hex (STEP 2 시범)</h3>
+          <p class="meta">--qp-accent-set1: #E85A00<br>--qp-accent-strong: #FF6200 (별도 유지)</p>
+          <div class="swatches">
+            <div class="swatch" style="background:var(--qp-accent-strong)"><span>strong</span></div>
+            <div class="swatch" style="background:var(--qp-accent-set1)"><span>accent</span></div>
+            <div class="swatch light-label" style="background:var(--qp-accent-set1-soft)"><span>soft</span></div>
+            <div class="swatch light-label" style="background:var(--qp-accent-set1-soft-surface)"><span>surface</span></div>
+          </div>
+        </article>
+
+        <article class="set-card">
+          <h3>Set 2 — grey mix</h3>
+          <p class="meta">--qp-accent-set2: color-mix(hermes 85%, #888)</p>
+          <div class="swatches">
+            <div class="swatch" style="background:var(--qp-accent-strong)"><span>strong</span></div>
+            <div class="swatch" style="background:var(--qp-accent-set2)"><span>accent</span></div>
+            <div class="swatch light-label" style="background:var(--qp-accent-set2-soft)"><span>soft</span></div>
+            <div class="swatch light-label" style="background:var(--qp-accent-set2-soft-surface)"><span>surface</span></div>
+          </div>
+        </article>
+
+        <article class="set-card">
+          <h3>Set 3 — black mix</h3>
+          <p class="meta">--qp-accent-set3: color-mix(hermes 80%, black)</p>
+          <div class="swatches">
+            <div class="swatch" style="background:var(--qp-accent-strong)"><span>strong</span></div>
+            <div class="swatch" style="background:var(--qp-accent-set3)"><span>accent</span></div>
+            <div class="swatch light-label" style="background:var(--qp-accent-set3-soft)"><span>soft</span></div>
+            <div class="swatch light-label" style="background:var(--qp-accent-set3-soft-surface)"><span>surface</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. UI 맥락 시뮬레이션 (흰 배경)</h2>
+      <div class="grid-3">
+        <article class="set-card" style="--accent: var(--qp-accent-set1); --soft-surface: var(--qp-accent-set1-soft-surface); --muted: var(--hermes-muted);">
+          <h3>Set 1 on white</h3>
+          <div class="demo-row">
+            <div class="demo-surface white">
+              <p class="eyebrow">THINKAD · eyebrow</p>
+              <p class="price">₩6,000만</p>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.75rem;">
+                <span class="btn btn-strong">매체 둘러보기 (strong)</span>
+                <span class="btn btn-accent">회원가입 (accent)</span>
+                <span class="btn btn-outline">새 플랜 (outline)</span>
+              </div>
+              <div style="margin-top:0.75rem;"><span class="toggle-active">매체 · active toggle</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="set-card" style="--accent: var(--qp-accent-set2); --soft-surface: var(--qp-accent-set2-soft-surface); --muted: color-mix(in srgb, var(--qp-accent-set2) 55%, white);">
+          <h3>Set 2 on white</h3>
+          <div class="demo-row">
+            <div class="demo-surface white">
+              <p class="eyebrow">THINKAD · eyebrow</p>
+              <p class="price">₩6,000만</p>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.75rem;">
+                <span class="btn btn-strong">매체 둘러보기 (strong)</span>
+                <span class="btn btn-accent">회원가입 (accent)</span>
+                <span class="btn btn-outline">새 플랜 (outline)</span>
+              </div>
+              <div style="margin-top:0.75rem;"><span class="toggle-active">매체 · active toggle</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="set-card" style="--accent: var(--qp-accent-set3); --soft-surface: var(--qp-accent-set3-soft-surface); --muted: color-mix(in srgb, var(--qp-accent-set3) 55%, white);">
+          <h3>Set 3 on white</h3>
+          <div class="demo-row">
+            <div class="demo-surface white">
+              <p class="eyebrow">THINKAD · eyebrow</p>
+              <p class="price">₩6,000만</p>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.75rem;">
+                <span class="btn btn-strong">매체 둘러보기 (strong)</span>
+                <span class="btn btn-accent">회원가입 (accent)</span>
+                <span class="btn btn-outline">새 플랜 (outline)</span>
+              </div>
+              <div style="margin-top:0.75rem;"><span class="toggle-active">매체 · active toggle</span></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. Hero dark 배경 + glow 느낌</h2>
+      <div class="grid-3">
+        <article class="set-card">
+          <h3>Set 1 · glow 34% (현재)</h3>
+          <div class="demo-surface dark" style="position:relative; overflow:hidden; min-height:140px;">
+            <div style="position:absolute; inset:0; background:radial-gradient(ellipse 80% 70% at 85% 15%, color-mix(in srgb, #ff6200 34%, transparent), transparent 55%);"></div>
+            <div style="position:relative; z-index:1;">
+              <span class="btn btn-strong">매체 둘러보기</span>
+            </div>
+          </div>
+        </article>
+        <article class="set-card">
+          <h3>Set 1 · glow 20% (STEP 2 C안)</h3>
+          <div class="demo-surface dark" style="position:relative; overflow:hidden; min-height:140px;">
+            <div style="position:absolute; inset:0; background:radial-gradient(ellipse 80% 70% at 85% 15%, color-mix(in srgb, #ff6200 20%, transparent), transparent 55%);"></div>
+            <div style="position:relative; z-index:1;">
+              <span class="btn btn-strong">매체 둘러보기</span>
+            </div>
+          </div>
+        </article>
+        <article class="set-card">
+          <h3>Set 1 · glow 20% + accent CTA</h3>
+          <div class="demo-surface dark" style="position:relative; overflow:hidden; min-height:140px;">
+            <div style="position:absolute; inset:0; background:radial-gradient(ellipse 80% 70% at 85% 15%, color-mix(in srgb, var(--qp-accent-set1) 20%, transparent), transparent 55%);"></div>
+            <div style="position:relative; z-index:1; display:flex; gap:0.5rem;">
+              <span class="btn btn-strong">strong CTA</span>
+              <span class="btn btn-accent" style="--accent:var(--qp-accent-set1)">toned nav</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>4. --qp-accent-soft vs --qp-accent-soft-surface</h2>
+      <div class="note">
+        <p><strong>--qp-accent-soft</strong> (기존): 12% white mix — 배지·소형 칩·링크 배경 유지.</p>
+        <p><strong>--qp-accent-soft-surface</strong> (신규): 14% surface mix — 필터 active·선택 칩·카드 hover 등 "기본 surface" 패턴.</p>
+        <p><strong>--qp-accent-soft-border</strong> (신규): accent 30% + line — surface와 함께 테두리용.</p>
+      </div>
+      <div class="grid-3" style="margin-top:1rem;">
+        <div class="demo-surface white">
+          <p style="font-size:0.75rem; margin:0 0 0.5rem;">soft (12%)</p>
+          <span style="display:inline-block;padding:0.25rem 0.5rem;border-radius:4px;background:color-mix(in srgb,#e85a00 12%,white);color:#e85a00;font-size:0.6875rem;font-weight:700;">무료</span>
+        </div>
+        <div class="demo-surface white">
+          <p style="font-size:0.75rem; margin:0 0 0.5rem;">soft-surface (14%)</p>
+          <span class="toggle-active" style="--accent:#e85a00;--soft-surface:color-mix(in srgb,#e85a00 14%,white);">매체 selected</span>
+        </div>
+        <div class="demo-surface white">
+          <p style="font-size:0.75rem; margin:0 0 0.5rem;">hermes-muted eyebrow</p>
+          <p class="eyebrow" style="color:var(--hermes-muted);">THINKAD · SECTION</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

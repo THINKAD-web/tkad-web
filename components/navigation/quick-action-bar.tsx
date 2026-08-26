@@ -119,11 +119,7 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
         onClick={openAi}
         title={aiLabel}
         aria-label={aiLabel}
-        className={cn(
-          onHome
-            ? mutedSidebarBtn(compact)
-            : cn(actionRowClass(compact), qpSidebarCta),
-        )}
+        className={mutedSidebarBtn(compact)}
       >
         <Bot className="h-4 w-4 shrink-0" strokeWidth={2.25} aria-hidden />
         {!compact ? <span className="min-w-0 flex-1 truncate text-left">{aiLabel}</span> : null}

@@ -8,7 +8,8 @@
   --ooh-hero-navy-0: #0a1420;
   --ooh-hero-navy-1: #132033;
   --ooh-hero-navy-warm: #1a120e;
-  --ooh-hero-orange: #ff6200;
+  /* STEP 2 trial: hero primary CTA stays brand peak (#FF6200) */
+  --ooh-hero-orange: var(--qp-accent-strong, #ff6200);
   position: relative;
   isolation: isolate;
   background: var(--ooh-hero-navy-0);
@@ -52,7 +53,7 @@
   pointer-events: none;
   background: radial-gradient(
     ellipse 80% 70% at 85% 15%,
-    color-mix(in srgb, var(--ooh-hero-orange) 34%, transparent),
+    color-mix(in srgb, var(--ooh-hero-orange) 20%, transparent),
     transparent 55%
   );
 }
