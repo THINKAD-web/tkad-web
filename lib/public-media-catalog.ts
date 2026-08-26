@@ -436,6 +436,8 @@ export const PUBLIC_MEDIA_CATALOG_CACHE_TAG = "public-media-catalog";
 export const PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS = 3600;
 
 async function loadPublicMediaCatalogFromDb(): Promise<MediaItem[]> {
+  const { logMediaCacheMiss } = await import("@/lib/media-cache-diagnostics");
+  logMediaCacheMiss("public-media-catalog");
   const db = getPrisma();
   const rows = await db.media.findMany({
     where: publicActiveMediaWhere(),

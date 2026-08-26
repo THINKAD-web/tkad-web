@@ -81,7 +81,7 @@ export function applyMergedBrowseExtraFilters(
   return out;
 }
 
-/** Discovery browse·지도 인기순 — 최근 24h 참여 점수(10분 캐시), tie-break은 주간 폴백 */
+/** Discovery browse·지도 인기순 — 최근 24h 참여 점수(1h cross-request 캐시), tie-break은 주간 폴백 */
 export async function sortMergedBrowseCatalogAsync(
   items: MediaItem[],
   sort: PublicMediaSort | null | undefined,

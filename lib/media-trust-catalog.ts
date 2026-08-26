@@ -167,6 +167,8 @@ type SerializableTrustBadgeContext = {
 };
 
 async function loadTrustBadgeContextFromDb(): Promise<SerializableTrustBadgeContext> {
+  const { logMediaCacheMiss } = await import("@/lib/media-cache-diagnostics");
+  logMediaCacheMiss("trust-badge-context");
   const [topInquiryIds, hotWeekIds] = await Promise.all([
     fetchTopInquiryMediaIds(10),
     fetchHotWeekMediaIds(10),
