@@ -790,12 +790,12 @@
           {
             "label": "관악권",
             "value": 4000000,
-            "pct": 80
+            "pct": 50
           },
           {
             "label": "마포권",
-            "value": 1000000,
-            "pct": 20
+            "value": 4000000,
+            "pct": 50
           }
         ]
       },
@@ -816,15 +816,15 @@
           "label": "관악권",
           "monthlyBudgetWon": 4000000,
           "periodBudgetWon": 4000000,
-          "budgetPct": 80,
+          "budgetPct": 50,
           "cpmKrw": 808
         },
         {
           "regionKey": "mapo",
           "label": "마포권",
-          "monthlyBudgetWon": 1000000,
+          "monthlyBudgetWon": 4000000,
           "periodBudgetWon": 4000000,
-          "budgetPct": 20,
+          "budgetPct": 50,
           "cpmKrw": 1333
         }
       ]
