@@ -5,7 +5,7 @@ import {
 } from "@/lib/public-media-catalog";
 
 /** CDN cache aligned with unstable_cache catalog TTL (admin save → tag revalidate). */
-export const revalidate = PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS;
+export const revalidate = 3600;
 
 const CDN_MAX_AGE = PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS;
 const CDN_SWR = CDN_MAX_AGE * 2;
