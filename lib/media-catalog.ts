@@ -22,6 +22,13 @@ export {
   catalogThumbnailImageProps,
   catalogToMediaItem,
 } from "@/lib/media-catalog-map";
+export {
+  mediaItemToCatalogListItem,
+  mediaItemsToCatalogListItems,
+  catalogListItemToMediaItem,
+  catalogListItemsToMediaItems,
+  type MediaCatalogListItem,
+} from "@/lib/media-catalog-list-dto";
 
 function usesFilteredQuery(opts: {
   sort: MediaCatalogSort;

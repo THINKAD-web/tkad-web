@@ -10,10 +10,12 @@ export type {
 
 export type MediaCardMode = "feed" | "card" | "compact";
 
+export type { MediaCatalogListItem } from "@/lib/media-catalog-list-dto";
+
 /** API `/api/public/media` 페이지네이션 응답 */
 export type PublicMediaListResponse = {
-  data?: import("@/lib/media-data").MediaItem[];
-  media?: import("@/lib/media-data").MediaItem[];
+  data?: import("@/lib/media-catalog-list-dto").MediaCatalogListItem[];
+  media?: import("@/lib/media-catalog-list-dto").MediaCatalogListItem[];
   pagination?: {
     page?: number;
     limit?: number;

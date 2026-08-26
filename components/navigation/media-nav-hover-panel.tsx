@@ -7,8 +7,8 @@ import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/ga-events";
 import type { TopNavLink } from "@/lib/navigation/desktop-top-nav";
-import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
 import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
+import type { MediaCatalogListItem } from "@/lib/media-catalog-list-dto";
 
 type Props = {
   links: TopNavLink[];
@@ -26,8 +26,8 @@ type PreviewItem = {
 let previewCache: PreviewItem[] | null = null;
 let previewInflight: Promise<PreviewItem[]> | null = null;
 
-function mapPreviewItem(m: MediaItem): PreviewItem | null {
-  const rawUrl = getPrimaryMediaImageUrl(m);
+function mapPreviewItem(m: MediaCatalogListItem): PreviewItem | null {
+  const rawUrl = m.thumbnailUrl?.trim();
   if (!rawUrl || !resolveCatalogImageSrc(rawUrl)?.src) return null;
   return {
     id: m.id,
@@ -44,7 +44,7 @@ function loadFeaturedPreview(): Promise<PreviewItem[]> {
   previewInflight = fetch("/api/public/media?sort=popular&limit=12")
     .then((r) => r.json())
     .then((data) => {
-      const items: MediaItem[] = Array.isArray(data)
+      const items: MediaCatalogListItem[] = Array.isArray(data)
         ? data
         : Array.isArray(data?.data)
           ? data.data
