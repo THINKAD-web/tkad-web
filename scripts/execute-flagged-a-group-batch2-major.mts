@@ -7,7 +7,6 @@
  *   npx tsx scripts/execute-flagged-a-group-batch2-major.mts --execute
  */
 import { config } from "dotenv";
-import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PrismaClient } from "@prisma/client";
@@ -26,6 +25,12 @@ import {
 import { calcImpressions } from "../lib/metrics/impressions.ts";
 import { catalogPriceFieldToWon } from "../lib/media-price-format.ts";
 import { recomputeOneMedia } from "../lib/media/engine/recompute-one.ts";
+import {
+  BATCH_MEDIA_METRIC_SELECT,
+  batchReportMeta,
+  snapshotBatchMediaMetrics,
+  writeBatchExecuteReport,
+} from "./lib/batch-execute-report.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 config({ path: resolve(root, ".env.vercel.production"), override: true });
@@ -163,17 +168,14 @@ async function main() {
         continue;
       }
 
+      const beforeRow = await db.media.findUnique({
+        where: { id: row.id },
+        select: BATCH_MEDIA_METRIC_SELECT,
+      });
       const result = await recomputeOneMedia(db, row.id, { markReviewed: true });
       const after = await db.media.findUnique({
         where: { id: row.id },
-        select: {
-          impressions: true,
-          cpm: true,
-          reviewStatus: true,
-          computedMetric: {
-            select: { modelVersion: true, sovShare: true, dailyImpressions: true },
-          },
-        },
+        select: BATCH_MEDIA_METRIC_SELECT,
       });
       results.push({
         id: row.id,
@@ -181,23 +183,23 @@ async function main() {
         expectedMonthly: row.simMonthlyImpressions,
         expectedCpm: row.simCpm,
         ...result,
-        mediaAfter: after,
+        mediaBefore: beforeRow ? snapshotBatchMediaMetrics(beforeRow) : null,
+        mediaAfter: after ? snapshotBatchMediaMetrics(after) : null,
       });
     }
 
     const report = {
-      generatedAt: new Date().toISOString(),
+      ...batchReportMeta("scripts/execute-flagged-a-group-batch2-major.mts"),
       mode: EXECUTE ? "execute" : "dry-run",
       batch2MajorCount: batch2.length,
       results,
     };
 
-    mkdirSync(resolve(root, "reports"), { recursive: true });
-    const outPath = resolve(
+    const outPath = writeBatchExecuteReport(
       root,
       "reports/flagged-a-group-batch2-major-execute.json",
+      report,
     );
-    writeFileSync(outPath, JSON.stringify(report, null, 2));
     console.log(
       JSON.stringify(
         { outPath, batch2MajorCount: batch2.length, mode: report.mode },
