@@ -8,6 +8,7 @@ import { compareMediaPopularRank } from "@/lib/media-popularity";
 import { getCachedDailyEngagementScoreRecord } from "@/lib/media-popularity-daily-cache";
 import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { isDatabaseConfigured } from "@/lib/prisma";
 import type {
   PublicMediaQueryParams,
   PublicMediaSort,
@@ -160,6 +161,17 @@ export async function queryMergedMediaBrowse(params: MergedBrowseQuery): Promise
   limit: number;
   totalPages: number;
 }> {
+  const forceMockOnly =
+    process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "1" ||
+    process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "true";
+
+  if (isDatabaseConfigured() && !forceMockOnly) {
+    const { queryMediaBrowseFromDb } = await import(
+      "@/lib/media-browse-db-query"
+    );
+    return queryMediaBrowseFromDb(params);
+  }
+
   const page = Math.max(1, params.page ?? 1);
   const limit = Math.min(100, Math.max(1, params.limit ?? 24));
   const catalog = await loadMergedBrowseCatalog();
@@ -180,6 +192,17 @@ export async function queryMergedMediaBrowse(params: MergedBrowseQuery): Promise
 export async function countMergedMediaBrowse(
   params: Omit<MergedBrowseQuery, "page" | "limit" | "sort">,
 ): Promise<number> {
+  const forceMockOnly =
+    process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "1" ||
+    process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "true";
+
+  if (isDatabaseConfigured() && !forceMockOnly) {
+    const { countMediaBrowseFromDb } = await import(
+      "@/lib/media-browse-db-query"
+    );
+    return countMediaBrowseFromDb(params);
+  }
+
   const catalog = await loadMergedBrowseCatalog();
   return filterMergedBrowseCatalog(catalog, params).length;
 }
