@@ -1,0 +1,478 @@
+{
+  "generatedAtUtc": "2026-08-26T04:46:37.971Z",
+  "executor": "jaehanlee",
+  "commitHash": "5fd0fb9d81ac8ce0392df8b696c0d6f45b5544f0",
+  "verificationMethod": "2026-08-26 production read-only audit: engine recompute vs stored impressions — 0 mismatches",
+  "note": "Original batch execute before-values unavailable; this snapshot is the post-verification baseline.",
+  "count": 52,
+  "items": [
+    {
+      "id": "cmrlzusu6000704kw28nuhi0a",
+      "name": "에어부산 기내지 FLY&FUN 광고",
+      "impressions": 525000,
+      "cpm": 10159,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.838Z"
+    },
+    {
+      "id": "cmrm2f88q000204kydtp2vmzj",
+      "name": "전통시장 LED 전광판 광고",
+      "impressions": 48750,
+      "cpm": 10256,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-26T01:42:23.895Z"
+    },
+    {
+      "id": "cmssusm16000l04jrumoa55de",
+      "name": "지하철 1호선 서울역 엔스퀘어 광고",
+      "impressions": 193500,
+      "cpm": 5168,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.278Z"
+    },
+    {
+      "id": "cmssuxcz7000i04i3l8zooazn",
+      "name": "지하철 1호선 시청역 엔스퀘어 광고",
+      "impressions": 193500,
+      "cpm": 5168,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.143Z"
+    },
+    {
+      "id": "cmssve4i6000004l966rzty5a",
+      "name": "지하철 1호선 종각역 엔스퀘어 광고",
+      "impressions": 171000,
+      "cpm": 8772,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:03.197Z"
+    },
+    {
+      "id": "cmssvdycc001c04i3l8orpw1u",
+      "name": "지하철 1호선 종로3가역 엔스퀘어 광고",
+      "impressions": 171000,
+      "cpm": 3801,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:05.120Z"
+    },
+    {
+      "id": "cmssv86ki000w04jrd1qk8p6v",
+      "name": "지하철 1호선 종로3가역 엔스퀘어 광고",
+      "impressions": 171000,
+      "cpm": 3801,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.300Z"
+    },
+    {
+      "id": "cmssvgvt5000304ldgc898el9",
+      "name": "지하철 2호선 강남역 엔스퀘어 광고",
+      "impressions": 259200,
+      "cpm": 38580,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.831Z"
+    },
+    {
+      "id": "cmssviih4000004jrvyhnxl7h",
+      "name": "지하철 2호선 건대입구역 엔스퀘어 광고",
+      "impressions": 148500,
+      "cpm": 17845,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:03.183Z"
+    },
+    {
+      "id": "cmssvstt0000004jr7tp1rbdv",
+      "name": "지하철 2호선 교대역 엔스퀘어 광고",
+      "impressions": 198000,
+      "cpm": 20202,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.734Z"
+    },
+    {
+      "id": "cmssw6hqh000004iftnsedovm",
+      "name": "지하철 2호선 구로디지털단지역 엔스퀘어 광고",
+      "impressions": 139500,
+      "cpm": 7168,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.099Z"
+    },
+    {
+      "id": "cmsswa2kr000004jtk7wkv9q6",
+      "name": "지하철 2호선 동대문역사문화공원역 엔스퀘어 광고",
+      "impressions": 193500,
+      "cpm": 3359,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.286Z"
+    },
+    {
+      "id": "cmssx7mtt000004l7ltwy8jg8",
+      "name": "지하철 2호선 사당역 엔스퀘어 광고",
+      "impressions": 156600,
+      "cpm": 28736,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.747Z"
+    },
+    {
+      "id": "cmsswbsqk000104jts3jleei9",
+      "name": "지하철 2호선 삼성역 엔스퀘어 광고",
+      "impressions": 216000,
+      "cpm": 27778,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:05.329Z"
+    },
+    {
+      "id": "cmsswdyll000104jxek16x3rs",
+      "name": "지하철 2호선 선릉역 엔스퀘어 광고",
+      "impressions": 216000,
+      "cpm": 18519,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.870Z"
+    },
+    {
+      "id": "cmsswgvky000004kyr5t48npu",
+      "name": "지하철 2호선 신도림역 엔스퀘어 광고",
+      "impressions": 139500,
+      "cpm": 7168,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.290Z"
+    },
+    {
+      "id": "cmsswkoqx000604jtqwlq45bp",
+      "name": "지하철 2호선 신림역 엔스퀘어 광고",
+      "impressions": 148500,
+      "cpm": 13468,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.823Z"
+    },
+    {
+      "id": "cmssxciu3000204l7kli6su45",
+      "name": "지하철 2호선 역삼역 엔스퀘어 광고",
+      "impressions": 216000,
+      "cpm": 11574,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.297Z"
+    },
+    {
+      "id": "cmssxiklt000204juf3dw64l5",
+      "name": "지하철 2호선 영등포구청역 엔스퀘어 광고",
+      "impressions": 180000,
+      "cpm": 5556,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.299Z"
+    },
+    {
+      "id": "cmssxo5ap000804juo6dm2le4",
+      "name": "지하철 2호선 을지로3가역 엔스퀘어 광고",
+      "impressions": 193500,
+      "cpm": 12920,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.195Z"
+    },
+    {
+      "id": "cmssy1tys000604jsya9x1d8f",
+      "name": "지하철 2호선 을지로입구역 엔스퀘어 광고",
+      "impressions": 193500,
+      "cpm": 5168,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.302Z"
+    },
+    {
+      "id": "cmssy58mh000s04l8yx4b9wtt",
+      "name": "지하철 2호선 잠실역 엔스퀘어 광고",
+      "impressions": 189000,
+      "cpm": 17460,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.921Z"
+    },
+    {
+      "id": "cmssy7qqu000a04jsuhez6xsu",
+      "name": "지하철 2호선 합정역 엔스퀘어 광고",
+      "impressions": 175500,
+      "cpm": 8547,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:03.822Z"
+    },
+    {
+      "id": "cmssychda000e04js5ao9fhv7",
+      "name": "지하철 2호선 홍대입구역 엔스퀘어 광고",
+      "impressions": 175500,
+      "cpm": 5698,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.125Z"
+    },
+    {
+      "id": "cmssybqd9000c04js0ctwh5rz",
+      "name": "지하철 3호선 고속터미널역 엔스퀘어 광고",
+      "impressions": 198000,
+      "cpm": 20202,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T23:02:06.982Z"
+    },
+    {
+      "id": "cmst0zeiq000i04js3mbyjcds",
+      "name": "지하철 3호선 교대역 엔스퀘어 광고",
+      "impressions": 237600,
+      "cpm": 39983,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:01.560Z"
+    },
+    {
+      "id": "cmssyjcz1000004l5ps9iv6pc",
+      "name": "지하철 3호선 신사역 엔스퀘어 광고",
+      "impressions": 259200,
+      "cpm": 30864,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T20:08:18.640Z"
+    },
+    {
+      "id": "cmssynzfz000w04l8hmz0y5eh",
+      "name": "지하철 3호선 압구정역 엔스퀘어 광고",
+      "impressions": 216000,
+      "cpm": 27778,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:05.231Z"
+    },
+    {
+      "id": "cmssyswse000204l5dh6ooq4v",
+      "name": "지하철 3호선 양재역 엔스퀘어 광고",
+      "impressions": 198000,
+      "cpm": 10101,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.330Z"
+    },
+    {
+      "id": "cmssyqjkr000y04l80ymy3kbo",
+      "name": "지하철 3호선 충무로역 엔스퀘어 광고",
+      "impressions": 193500,
+      "cpm": 10336,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.879Z"
+    },
+    {
+      "id": "cmssz03ue000304l5573qtaxd",
+      "name": "지하철 4호선 동대문역 엔스퀘어 광고",
+      "impressions": 171000,
+      "cpm": 21053,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.970Z"
+    },
+    {
+      "id": "cmssz4rd3000604l51uc1pom7",
+      "name": "지하철 4호선 동대문역사문화공원역 엔스퀘어 광고",
+      "impressions": 193500,
+      "cpm": 10336,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.306Z"
+    },
+    {
+      "id": "cmssz6fns000704l5gu4q2wf7",
+      "name": "지하철 4호선 명동역 엔스퀘어 광고",
+      "impressions": 193500,
+      "cpm": 5168,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.314Z"
+    },
+    {
+      "id": "cmssz94kh000904l5mqlxnsgy",
+      "name": "지하철 4호선 서울역 엔스퀘어 광고",
+      "impressions": 193500,
+      "cpm": 20672,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-26T02:08:53.155Z"
+    },
+    {
+      "id": "cmsszbcn0000h04l5vxhb76si",
+      "name": "지하철 4호선 신용산역 엔스퀘어 광고",
+      "impressions": 166500,
+      "cpm": 3003,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-26T00:33:33.149Z"
+    },
+    {
+      "id": "cmsszdjbl000304jv4vlrs72q",
+      "name": "지하철 4호선 총신대입구역 엔스퀘어 광고",
+      "impressions": 130500,
+      "cpm": 3831,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.324Z"
+    },
+    {
+      "id": "cmsszhm51000o04l580w0vkvw",
+      "name": "지하철 4호선 회현역 엔스퀘어 광고",
+      "impressions": 193500,
+      "cpm": 2584,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.332Z"
+    },
+    {
+      "id": "cmsszpu61001e04l8glfkcpjz",
+      "name": "지하철 5호선 광화문역 엔스퀘어 광고",
+      "impressions": 171000,
+      "cpm": 11696,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-26T02:15:42.545Z"
+    },
+    {
+      "id": "cmsszjx2v000504jvrhk2st9z",
+      "name": "지하철 5호선 마포역 엔스퀘어 광고",
+      "impressions": 175500,
+      "cpm": 5698,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.363Z"
+    },
+    {
+      "id": "cmsszlw41000p04l5hrdlgt8y",
+      "name": "지하철 5호선 서대문역 엔스퀘어 광고",
+      "impressions": 139500,
+      "cpm": 3584,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.366Z"
+    },
+    {
+      "id": "cmssznxmw000r04l5ctyx5oqj",
+      "name": "지하철 5호선 여의도역 엔스퀘어 광고",
+      "impressions": 180000,
+      "cpm": 11111,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.580Z"
+    },
+    {
+      "id": "cmsszuei5000u04l546i1lxl3",
+      "name": "지하철 6호선 연신내역 엔스퀘어 광고",
+      "impressions": 126000,
+      "cpm": 10317,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:01.564Z"
+    },
+    {
+      "id": "cmst05ifo000004jwhner9bql",
+      "name": "지하철 7호선 건대입구역 엔스퀘어 광고",
+      "impressions": 148500,
+      "cpm": 26936,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.982Z"
+    },
+    {
+      "id": "cmst0ah4a000404jwq945exjp",
+      "name": "지하철 7호선 고속터미널역 엔스퀘어 광고",
+      "impressions": 198000,
+      "cpm": 30303,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:03.676Z"
+    },
+    {
+      "id": "cmst03vuh000504ibusispq5i",
+      "name": "지하철 7호선 노원역 엔스퀘어 광고",
+      "impressions": 139500,
+      "cpm": 7168,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.592Z"
+    },
+    {
+      "id": "cmst0dedm000604jwypa3qbp8",
+      "name": "지하철 7호선 대림역 엔스퀘어 광고",
+      "impressions": 180000,
+      "cpm": 11111,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.628Z"
+    },
+    {
+      "id": "cmst0fvzx000804jwszm1d5mw",
+      "name": "지하철 7호선 사가정역 엔스퀘어 광고",
+      "impressions": 130500,
+      "cpm": 4981,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:04.160Z"
+    },
+    {
+      "id": "cmst0idld000004jsqcqos2w8",
+      "name": "지하철 7호선 상봉역 엔스퀘어 광고",
+      "impressions": 130500,
+      "cpm": 4981,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.995Z"
+    },
+    {
+      "id": "cmst0ksay000904l7pjp57jsn",
+      "name": "지하철 7호선 어린이대공원역 엔스퀘어 광고",
+      "impressions": 148500,
+      "cpm": 3367,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:03.694Z"
+    },
+    {
+      "id": "cmst0mhr1000104l8wiysxaao",
+      "name": "지하철 7호선 총신대입구역 엔스퀘어 광고",
+      "impressions": 130500,
+      "cpm": 3831,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.641Z"
+    },
+    {
+      "id": "cmst0oz5z000d04jsw3gz1v49",
+      "name": "지하철 8호선 문정역 엔스퀘어 광고",
+      "impressions": 189000,
+      "cpm": 10582,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:00.669Z"
+    },
+    {
+      "id": "cmst0r1nq000f04jsb53ihoxu",
+      "name": "지하철 8호선 잠실역 엔스퀘어 광고",
+      "impressions": 189000,
+      "cpm": 17460,
+      "reviewStatus": "reviewed",
+      "modelVersion": "v1-impressions",
+      "updatedAt": "2026-08-25T15:03:02.745Z"
+    }
+  ]
+}
