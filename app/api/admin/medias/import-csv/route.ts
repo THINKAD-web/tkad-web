@@ -13,6 +13,7 @@ import {
   metricsWriteErrorBody,
   validateCsvDailyFootfall,
 } from "@/lib/media-metrics-write";
+import { maybeAutoRecomputeMediaMetrics } from "@/lib/media/engine/auto-recompute";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -121,7 +122,7 @@ export async function POST(request: NextRequest) {
   });
 }
 
-async function createMediaFromCsvRow(
+export async function createMediaFromCsvRow(
   db: ReturnType<typeof getPrisma>,
   row: MediaCsvRow,
 ): Promise<string> {
@@ -168,6 +169,8 @@ async function createMediaFromCsvRow(
       isActive: false,
     },
   });
+
+  await maybeAutoRecomputeMediaMetrics(db, created.id);
 
   return created.id;
 }
