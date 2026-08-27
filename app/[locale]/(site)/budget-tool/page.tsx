@@ -8,7 +8,7 @@ import { BudgetToolClient } from "./budget-tool-client";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 /** ISR 1h — force-dynamic removed so revalidate takes effect (B1b). */
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 type Props = { params: Promise<{ locale: string }> };
 

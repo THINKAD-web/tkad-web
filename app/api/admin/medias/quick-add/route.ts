@@ -22,6 +22,7 @@ import {
 import { logLockdownAttempt } from "@/lib/media/audit-log";
 import { stripLockedFields } from "@/lib/media/locked-fields";
 import { maybeAutoRecomputeMediaMetrics } from "@/lib/media/engine/auto-recompute";
+import { revalidateMediaCachesBulk } from "@/lib/media-cache-revalidate";
 
 export const dynamic = "force-dynamic";
 
@@ -181,6 +182,10 @@ export async function POST(request: NextRequest) {
 
     for (const row of created) {
       void maybeAutoRecomputeMediaMetrics(db, row.id);
+    }
+
+    if (created.length > 0) {
+      revalidateMediaCachesBulk(created.map((row) => ({ id: row.id })));
     }
 
     const strippedHeader =

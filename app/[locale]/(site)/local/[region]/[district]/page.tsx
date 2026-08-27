@@ -33,7 +33,7 @@ type Props = {
   params: Promise<{ locale: string; region: string; district: string }>;
 };
 
-export const revalidate = 3600;
+export const revalidate = 21600;
 export const dynamicParams = true;
 
 export function generateStaticParams() {
