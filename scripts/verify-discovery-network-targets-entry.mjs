@@ -24,22 +24,22 @@ async function main() {
   await page.goto(`${BASE}/media`, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(3000);
 
-  const segment = page.locator('[data-screenshot="media-catalog-browse-segment"]');
-  checks.push({ name: "desktop-segment-visible", ok: (await segment.count()) > 0 });
-
-  await segment.getByRole("button", { name: "네트워크" }).click();
-  await page.waitForTimeout(1500);
   checks.push({
-    name: "segment-network-url",
-    ok: page.url().includes("features=network"),
+    name: "desktop-segment-removed",
+    ok:
+      (await page.locator('[data-screenshot="media-catalog-browse-segment"]').count()) ===
+      0,
   });
+
+  await page.goto(`${BASE}/media?features=network`, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
 
   const networkTypeChips = await page
     .locator('[data-screenshot="media-main-category"]')
     .getByRole("button", { name: "디지털" })
     .count();
   checks.push({
-    name: "network-mode-type-chips",
+    name: "network-url-type-chips",
     ok: networkTypeChips > 0,
   });
 
@@ -88,11 +88,12 @@ async function main() {
     name: "network-url-regression",
     ok:
       page.url().includes("features=network") &&
-      (await page.locator('[data-screenshot="media-catalog-browse-segment"]').count()) > 0 &&
+      (await page.locator('[data-screenshot="media-catalog-browse-segment"]').count()) ===
+        0 &&
       (await page
-        .locator('[data-screenshot="media-catalog-browse-segment"]')
-        .getByRole("button", { name: "네트워크" })
-        .getAttribute("aria-pressed")) === "true",
+        .locator('[data-screenshot="media-main-category"]')
+        .getByRole("button", { name: "디지털" })
+        .count()) > 0,
   });
 
   await page.goto(`${BASE}/media`, { waitUntil: "domcontentloaded" });
@@ -105,8 +106,10 @@ async function main() {
   await mobile.goto(`${BASE}/media`, { waitUntil: "domcontentloaded" });
   await mobile.waitForTimeout(2000);
   checks.push({
-    name: "mobile-segment-visible",
-    ok: (await mobile.locator('[data-screenshot="media-catalog-browse-segment"]').count()) > 0,
+    name: "mobile-segment-removed",
+    ok:
+      (await mobile.locator('[data-screenshot="media-catalog-browse-segment"]').count()) ===
+      0,
   });
   checks.push({
     name: "mobile-targets-hub-link",

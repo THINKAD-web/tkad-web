@@ -83,7 +83,6 @@ import {
   browseRegionSubCount,
   browseSubCategoryCount,
 } from "@/lib/media-browse-filter-option-counts";
-import { setFeaturesNetworkEnabled } from "@/lib/media-discovery-client-filter";
 import {
   matchMediaMapPricePreset,
   MEDIA_MAP_PRICE_PRESETS,
@@ -1240,40 +1239,6 @@ export function MediaManualBrowseFilters({
     </div>
   ) : null;
 
-  const catalogBrowseSegment = filterIaListPage ? (
-    <div
-      className={cn(
-        "flex shrink-0 overflow-hidden rounded-xl ring-1 ring-inset ring-gray-200 dark:ring-white/10",
-        /* h-9 + inset ring — 모바일·데스크톱 동일 (외곽 border는 높이 잠식) */
-        TOOLBAR_CTRL_H,
-      )}
-      data-screenshot="media-catalog-browse-segment"
-    >
-      <button
-        type="button"
-        aria-pressed={variant === "media"}
-        onClick={() => onFeaturesChange(setFeaturesNetworkEnabled(features, false))}
-        className={cn(
-          "inline-flex h-full items-center px-3 py-0 font-medium transition-all tkad-type-meta",
-          variant === "media" ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
-        )}
-      >
-        {isKo ? "매체" : "Media"}
-      </button>
-      <button
-        type="button"
-        aria-pressed={variant === "network"}
-        onClick={() => onFeaturesChange(setFeaturesNetworkEnabled(features, true))}
-        className={cn(
-          "inline-flex h-full items-center px-3 py-0 font-medium transition-all tkad-type-meta",
-          variant === "network" ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
-        )}
-      >
-        {isKo ? "네트워크" : "Network"}
-      </button>
-    </div>
-  ) : null;
-
   const targetsHubLink = filterIaListPage ? (
     <Link
       href="/media/targets"
@@ -1424,7 +1389,7 @@ export function MediaManualBrowseFilters({
   ) : null;
 
   /**
-   * /media 목록 모바일 sticky — 1행에 필터·정렬·세그먼트·지도를 두고
+   * /media 목록 모바일 sticky — 1행에 필터·정렬·지도를 두고
    * 뷰모드는 2행 전폭으로 분리(1행 flex-1 붕괴로 5px 찌그러짐 방지).
    * md+ 는 이 블록 자체가 md:hidden.
    */
@@ -1437,7 +1402,6 @@ export function MediaManualBrowseFilters({
         <div className="flex min-w-0 items-center gap-2">
           {mobileFilterButton}
           {mobileSortButton}
-          {catalogBrowseSegment}
           {mapPageViewModes ? mapToolbarSummaryChips : null}
           {mapNavButton}
         </div>
@@ -1596,7 +1560,6 @@ export function MediaManualBrowseFilters({
             {showHotspotRegions && mapPageViewModes
               ? renderHotspotControl({ compact: true })
               : null}
-            {catalogBrowseSegment}
             {viewModeToggle}
             {mapPageViewModes ? mapToolbarSummaryChips : null}
             {mapNavButton}
