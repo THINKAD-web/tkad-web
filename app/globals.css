@@ -3347,13 +3347,20 @@ html:not(.dark) .tkad-nav-chrome {
 }
 
 /*
- * STEP 2 trial (design/orange-accent-b-c-step2) — GNB only: toned accent Set 1.
+ * STEP 2 trial (design/orange-accent-b-c-step2) — GNB only: toned accent Set 1 (default).
+ * Set 3 via Preview ?gnbSet=3 → html[data-qp-accent-set="3"] (gnb-accent-set-trial-sync.tsx).
  * Global :root --qp-accent remains var(--hermes). Sidebar/planner/content unchanged.
  */
 .tkad-nav-chrome {
   --qp-accent: var(--qp-accent-set1);
   --qp-accent-hover: var(--qp-accent-set1-hover);
   --qp-accent-ring: var(--qp-accent-set1-ring);
+}
+
+html[data-qp-accent-set="3"] .tkad-nav-chrome {
+  --qp-accent: var(--qp-accent-set3);
+  --qp-accent-hover: var(--qp-accent-set3-hover);
+  --qp-accent-ring: var(--qp-accent-set3-ring);
 }
 
 /* 로고 "AD" — P1: 네온 그라데이션 → qp 액센트 단색 (라이트/다크 공통) */

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>STEP 2 — Before/After (Set 1 trial)</title>
+  <title>STEP 2 — Before / Set 1 / Set 3 (GNB trial)</title>
   <style>
     :root {
       --bg: #f4f3f0;
@@ -26,7 +26,7 @@
     }
     header h1 { margin: 0 0 0.25rem; font-size: 1.125rem; }
     header p { margin: 0; font-size: 0.8125rem; color: var(--muted); max-width: 60rem; }
-    main { padding: 1.25rem 1.5rem 2.5rem; max-width: 1400px; }
+    main { padding: 1.25rem 1.5rem 2.5rem; max-width: 1600px; }
     section { margin-bottom: 2rem; }
     section h2 {
       font-size: 0.9375rem;
@@ -34,10 +34,18 @@
       padding-bottom: 0.375rem;
       border-bottom: 1px solid var(--line);
     }
+    .triple {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem;
+    }
     .pair {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.75rem;
+    }
+    @media (max-width: 1100px) {
+      .triple { grid-template-columns: 1fr; }
     }
     @media (max-width: 900px) {
       .pair { grid-template-columns: 1fr; }
@@ -83,89 +91,101 @@
 </head>
 <body>
   <header>
-    <h1>STEP 2 Before / After — Set 1 trial (#E85A00 GNB scope)</h1>
+    <h1>STEP 2 Before / Set 1 / Set 3 — GNB scope trial</h1>
     <p>
       Before = production <code>tkad.co.kr</code> (2026-08-26 audit).
-      After = Preview branch <code>design/orange-accent-b-c-step2</code>.
-      Set 1 is a trial, not final. Global <code>--qp-accent</code> on main unchanged.
+      Set 1 = default Preview (GNB <code>--qp-accent-set1</code> #E85A00).
+      Set 3 = same Preview with <code>?gnbSet=3</code> (GNB <code>--qp-accent-set3</code>, hermes 80% black mix).
+      Hero glow · sidebar unchanged from Set 1 trial.
     </p>
   </header>
   <main>
     <section>
-      <h2>홈 Hero — glow 34%→20%, CTA strong 유지, GNB Set 1</h2>
-      <div class="pair">
+      <h2>홈 Hero — GNB Set 1 vs Set 3 (hero glow 20% 동일)</h2>
+      <div class="triple">
         <figure>
           <figcaption>Before<span>02-home-desktop.png · #FF6200</span></figcaption>
           <img src="02-home-desktop.png" alt="Home before" loading="lazy" />
         </figure>
         <figure>
-          <figcaption>After (Set 1)<span>02-home-desktop-step2-set1.png</span></figcaption>
-          <img src="02-home-desktop-step2-set1.png" alt="Home after" loading="lazy" />
+          <figcaption>Set 1<span>02-home-desktop-step2-set1.png · default Preview</span></figcaption>
+          <img src="02-home-desktop-step2-set1.png" alt="Home Set 1" loading="lazy" />
+        </figure>
+        <figure>
+          <figcaption>Set 3<span>02-home-desktop-step2-set3.png · ?gnbSet=3</span></figcaption>
+          <img src="02-home-desktop-step2-set3.png" alt="Home Set 3" loading="lazy" />
         </figure>
       </div>
     </section>
 
     <section>
-      <h2>홈 모바일</h2>
+      <h2>매체 목록 — GNB + 사이드바 (Set 3 = GNB만 차분)</h2>
+      <div class="triple">
+        <figure>
+          <figcaption>Before<span>03-media-browse-desktop.png</span></figcaption>
+          <img src="03-media-browse-desktop.png" alt="Media browse before" loading="lazy" />
+        </figure>
+        <figure>
+          <figcaption>Set 1<span>03-media-browse-desktop-step2-set1.png</span></figcaption>
+          <img src="03-media-browse-desktop-step2-set1.png" alt="Media browse Set 1" loading="lazy" />
+        </figure>
+        <figure>
+          <figcaption>Set 3<span>03-media-browse-desktop-step2-set3.png · ?gnbSet=3</span></figcaption>
+          <img src="03-media-browse-desktop-step2-set3.png" alt="Media browse Set 3" loading="lazy" />
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>홈 모바일 — Set 1 trial (Set 3 캡처는 desktop GNB 행 참고)</h2>
       <div class="pair">
         <figure>
           <figcaption>Before<span>06-home-mobile.png</span></figcaption>
           <img src="06-home-mobile.png" alt="Home mobile before" loading="lazy" />
         </figure>
         <figure>
-          <figcaption>After (Set 1)<span>06-home-mobile-step2-set1.png</span></figcaption>
-          <img src="06-home-mobile-step2-set1.png" alt="Home mobile after" loading="lazy" />
+          <figcaption>Set 1<span>06-home-mobile-step2-set1.png</span></figcaption>
+          <img src="06-home-mobile-step2-set1.png" alt="Home mobile Set 1" loading="lazy" />
         </figure>
       </div>
     </section>
 
     <section>
-      <h2>매체 목록 — GNB + 사이드바 (AI 챗봇 outline) · 카드 로드 완료</h2>
+      <h2>AI 추천 — Set 1 trial</h2>
       <div class="pair">
         <figure>
-          <figcaption>Before<span>03-media-browse-desktop.png · skeleton</span></figcaption>
-          <img src="03-media-browse-desktop.png" alt="Media browse before" loading="lazy" />
-        </figure>
-        <figure>
-          <figcaption>After (Set 1)<span>03-media-browse-desktop-step2-set1.png · cards loaded</span></figcaption>
-          <img src="03-media-browse-desktop-step2-set1.png" alt="Media browse after" loading="lazy" />
-        </figure>
-      </div>
-    </section>
-
-    <section>
-      <h2>AI 추천 — GNB + 사이드바 위계</h2>
-      <div class="pair">
-        <figure>
-          <figcaption>Before<span>05-recommend-desktop.png · AI+새플랜 both solid orange</span></figcaption>
+          <figcaption>Before<span>05-recommend-desktop.png</span></figcaption>
           <img src="05-recommend-desktop.png" alt="Recommend before" loading="lazy" />
         </figure>
         <figure>
-          <figcaption>After (Set 1)<span>05-recommend-desktop-step2-set1.png · AI outline, 새플랜 solid</span></figcaption>
-          <img src="05-recommend-desktop-step2-set1.png" alt="Recommend after" loading="lazy" />
+          <figcaption>Set 1<span>05-recommend-desktop-step2-set1.png</span></figcaption>
+          <img src="05-recommend-desktop-step2-set1.png" alt="Recommend Set 1" loading="lazy" />
         </figure>
       </div>
     </section>
 
     <section>
-      <h2>플래너 대조군 — GNB만 Set 1, 본문 neutral 유지</h2>
+      <h2>플래너 — Set 1 trial (본문 neutral)</h2>
       <div class="pair">
         <figure>
           <figcaption>Before<span>01-planner-desktop.png</span></figcaption>
           <img src="01-planner-desktop.png" alt="Planner before" loading="lazy" />
         </figure>
         <figure>
-          <figcaption>After (Set 1)<span>01-planner-desktop-step2-set1.png</span></figcaption>
-          <img src="01-planner-desktop-step2-set1.png" alt="Planner after" loading="lazy" />
+          <figcaption>Set 1<span>01-planner-desktop-step2-set1.png</span></figcaption>
+          <img src="01-planner-desktop-step2-set1.png" alt="Planner Set 1" loading="lazy" />
         </figure>
       </div>
     </section>
 
     <div class="note">
-      <strong>Preview URL:</strong>
-      <a href="https://tkad-web-git-design-orange-accent-bdeb9f-mannote-6701s-projects.vercel.app/ko">tkad-web-git-design-orange-accent-b-c-step2</a><br />
-      <strong>Changes in this trial:</strong> Hero glow 20% · Hero CTA <code>--qp-accent-strong</code> ·
-      GNB <code>.tkad-nav-chrome { --qp-accent: set1 }</code> · Sidebar AI chatbot → neutral outline.
+      <strong>Preview URL (1개):</strong>
+      <a href="https://tkad-web-git-design-orange-accent-b-c-step2-mannote-6701s-projects.vercel.app/ko">design/orange-accent-b-c-step2</a><br />
+      <strong>Set 1 (default):</strong> <code>/ko</code>, <code>/ko/media</code> — GNB <code>--qp-accent-set1</code><br />
+      <strong>Set 3:</strong> <code>?gnbSet=3</code> appended — e.g.
+      <code>/ko?gnbSet=3</code>, <code>/ko/media?gnbSet=3</code><br />
+      <strong>Changes:</strong> Hero glow 20% · Hero CTA <code>--qp-accent-strong</code> ·
+      GNB scoped via <code>.tkad-nav-chrome</code> · Sidebar AI chatbot → neutral outline.
     </div>
   </main>
 </body>
