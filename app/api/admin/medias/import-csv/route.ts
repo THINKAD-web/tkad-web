@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidateMediaCachesBulk } from "@/lib/media-cache-revalidate";
 import type { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import {
@@ -105,9 +105,11 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (outcomes.some((o) => o.kind === "created")) {
-    revalidatePath("/ko/media");
-    revalidatePath("/en/media");
+  const created = outcomes.filter(
+    (o): o is Extract<ImportOutcome, { kind: "created" }> => o.kind === "created",
+  );
+  if (created.length > 0) {
+    revalidateMediaCachesBulk(created.map((o) => ({ id: o.id })));
   }
 
   return json({

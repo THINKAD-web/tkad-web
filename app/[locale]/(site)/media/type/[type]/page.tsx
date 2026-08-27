@@ -36,7 +36,7 @@ type Props = {
  * 템플릿 (AI 생성 X), 알 수 없는 슬러그 + 0건 → notFound.
  */
 
-export const revalidate = 3600;
+export const revalidate = 21600;
 export const dynamicParams = true;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

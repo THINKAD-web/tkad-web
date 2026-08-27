@@ -77,8 +77,8 @@ import { formatSizeDisplayOptional } from "@/lib/format-media-size";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
-/** 일 1회 ISR. 어드민 저장 시 revalidateMediaCaches로 즉시 반영. */
-export const revalidate = 86400;
+/** 7일 ISR. 어드민 저장 시 revalidateMediaCaches로 즉시 반영. */
+export const revalidate = 604800;
 export const dynamicParams = true;
 export const maxDuration = 60;
 

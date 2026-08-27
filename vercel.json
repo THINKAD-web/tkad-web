@@ -178,7 +178,7 @@
     },
     {
       "path": "/api/cron/warm-media-browse-cache",
-      "schedule": "15 * * * *"
+      "schedule": "0 */3 * * *"
     },
     {
       "path": "/api/cron/expire-quotes",
