@@ -93,6 +93,10 @@ const PLANNER_EMBEDDED_PAGE_SIZE = 12;
 /** 플래너 임베드에서 한 번에 보여줄 최대 매체 수 */
 const PLANNER_EMBEDDED_MAX_ITEMS = 36;
 
+/** ISR shell — default props must be referentially stable (avoid fetch effect loop). */
+const EMPTY_HOME_CATALOG: HomeCatalogMediaItem[] = [];
+const EMPTY_CATALOG_ITEMS: MediaItem[] = [];
+
 function slicePlannerEmbeddedCatalog<T>(items: T[], page: number): T[] {
   const end = Math.min(page * PLANNER_EMBEDDED_PAGE_SIZE, PLANNER_EMBEDDED_MAX_ITEMS);
   return items.slice(0, end);
@@ -256,8 +260,8 @@ interface Props {
 }
 
 function MediaSearchPageInner({
-  initialMedia,
-  initialCatalogItems = [],
+  initialMedia = EMPTY_HOME_CATALOG,
+  initialCatalogItems = EMPTY_CATALOG_ITEMS,
   initialTotal,
   initialCategory,
   initialTarget,

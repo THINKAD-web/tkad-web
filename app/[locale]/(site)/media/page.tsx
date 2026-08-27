@@ -20,7 +20,7 @@ export default async function MediaPage({ params }: Props) {
 
   return (
     <Suspense fallback={<MediaBrowsePageSkeleton />}>
-      <MediaSearchPage appShell initialMedia={[]} />
+      <MediaSearchPage appShell />
     </Suspense>
   );
 }
