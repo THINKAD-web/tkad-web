@@ -1020,7 +1020,7 @@ function MediaSearchPageInner({
       aria-live="polite"
     >
       <div className="h-0.5 w-full max-w-sm overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
-        <div className="h-full w-1/3 animate-pulse rounded-full bg-[color:var(--qp-accent)]" />
+        <div className="h-full w-1/3 animate-pulse rounded-full bg-primary/40" />
       </div>
       <p className="tkad-type-meta text-tkad-muted">
         {isKo ? "불러오는 중…" : "Loading…"}
@@ -1245,7 +1245,7 @@ function MediaSearchPageInner({
     return (
       <>
         {mapNavigating ? <MapNavigationLoading /> : null}
-        <div className="tkad-media-app-shell tkad-media-list-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]">
+        <div className="tkad-media-app-shell tkad-media-list-shell media-accent-option-a relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]" data-media-accent="option-a">
           <div className="min-w-0 px-4 pt-3">{filtersBar}</div>
           <div className="min-w-0 px-4 pt-3 pb-[calc(4.25rem+1.5rem+env(safe-area-inset-bottom,0px))] lg:pb-6">
             {bodyContent}

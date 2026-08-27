@@ -1140,6 +1140,101 @@ body:has(.tkad-media-app-shell) .tkad-site-footer {
   min-height: 0;
 }
 
+/* ── Option A (/ko/media) — planner brief pattern: minimal orange, black primary ──
+ * Scope: `.media-accent-option-a` list shell + body:has() for GNB/sidebar.
+ * KEEP (1): sidebar 「새 플랜」 only — `[data-media-keep-accent]`. */
+body:has(.media-accent-option-a) .tkad-nav-chrome .tkad-qp-cta {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  box-shadow: none !important;
+}
+body:has(.media-accent-option-a) .tkad-nav-chrome a.tkad-qp-cta:hover {
+  background: color-mix(in srgb, var(--primary) 88%, black) !important;
+}
+body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-media-keep-accent]) {
+  background: transparent !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-media-keep-accent]) svg {
+  color: var(--muted-foreground) !important;
+}
+body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] [data-media-keep-accent] {
+  background: var(--qp-accent, var(--hermes)) !important;
+  color: white !important;
+  border: none !important;
+}
+body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] [data-media-keep-accent] svg {
+  color: white !important;
+}
+.media-accent-option-a .tkad-qp-cta,
+.media-accent-option-a .tkad-neon-cta-clean {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  box-shadow: none !important;
+}
+.media-accent-option-a .bg-hermes,
+.media-accent-option-a .bg-pink-500 {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+.media-accent-option-a .text-hermes,
+.media-accent-option-a .tkad-home-accent-text,
+.media-accent-option-a .text-\[color\:var\(--qp-accent\)\] {
+  color: var(--foreground) !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  font-weight: 700;
+}
+.media-accent-option-a .text-\[color\:var\(--qp-accent\)\]\/80 {
+  color: color-mix(in srgb, var(--foreground) 75%, transparent) !important;
+}
+.media-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/35,
+.media-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/40,
+.media-accent-option-a .border-hermes\/30,
+.media-accent-option-a .decoration-\[color\:var\(--qp-accent\)\]\/50 {
+  border-color: color-mix(in srgb, var(--foreground) 22%, transparent) !important;
+  text-decoration-color: color-mix(in srgb, var(--foreground) 35%, transparent) !important;
+}
+.media-accent-option-a .bg-\[color\:var\(--qp-accent-soft\)\],
+.media-accent-option-a .bg-hermes\/10,
+.media-accent-option-a .bg-hermes\/15 {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--background)) !important;
+}
+.media-accent-option-a .bg-\[color\:var\(--qp-accent\)\] {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+.media-accent-option-a [data-media-thumbnail-badge-stack] .bg-\[color\:var\(--qp-accent\)\] {
+  background: rgb(0 0 0 / 0.72) !important;
+  color: white !important;
+}
+.media-accent-option-a .border-hermes\/30.bg-hermes\/15,
+.media-accent-option-a .border-hermes\/30.bg-hermes\/15.text-hermes {
+  border-color: var(--border) !important;
+  background: var(--muted) !important;
+  color: var(--foreground) !important;
+}
+.media-accent-option-a .text-pink-600,
+.media-accent-option-a .dark .text-pink-400 {
+  color: var(--foreground) !important;
+}
+.media-accent-option-a .focus\:ring-\[color\:var\(--qp-accent\)\]\/35:focus {
+  --tw-ring-color: color-mix(in srgb, var(--foreground) 18%, transparent) !important;
+}
+.media-accent-option-a [data-media-thumbnail-badge-stack] span.tabular-nums {
+  background: rgb(0 0 0 / 0.68) !important;
+  color: white !important;
+  border-color: rgb(255 255 255 / 0.2) !important;
+}
+.media-accent-option-a .border-hermes\/90,
+.media-accent-option-a .ring-hermes\/35,
+.media-accent-option-a .shadow-hermes\/15 {
+  border-color: color-mix(in srgb, var(--foreground) 35%, transparent) !important;
+  --tw-ring-color: color-mix(in srgb, var(--foreground) 25%, transparent) !important;
+  box-shadow: none !important;
+}
+
 /* `/media/map` — 앱 셸 내부에 지도 전용 하단 바가 있어 in-flow spacer 를 줄임 */
 body:has(.tkad-media-map-shell) .tkad-media-app-shell.tkad-media-map-shell {
   min-height: 0;
