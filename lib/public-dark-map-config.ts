@@ -9,6 +9,47 @@ import {
 
 export const PUBLIC_MAP_TILE_SUBDOMAINS = "abcd";
 
+/** CARTO raster basemaps — https://carto.com/basemaps/apikey/ (free tier, domain-bound) */
+export function getCartoBasemapsApiKey(): string | null {
+  const key = process.env.NEXT_PUBLIC_CARTO_BASEMAPS_API_KEY?.trim();
+  return key || null;
+}
+
+export function isCartoBasemapsApiKeyConfigured(): boolean {
+  return getCartoBasemapsApiKey() != null;
+}
+
+/** Append `?key=` (or `&key=`) — without a key CARTO shows "API KEY REQUIRED" on tiles. */
+export function withCartoBasemapsApiKey(tileUrl: string): string {
+  const key = getCartoBasemapsApiKey();
+  if (!key) return tileUrl;
+  const sep = tileUrl.includes("?") ? "&" : "?";
+  return `${tileUrl}${sep}key=${encodeURIComponent(key)}`;
+}
+
+/** CARTO key 미설정 시 워터마크 대신 OSM 사용 (Aug 2026 CARTO raster key 정책). */
+export const OPENSTREETMAP_TILE_URL =
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+export const OPENSTREETMAP_TILE_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+export function resolvePublicRasterBasemapUrl(cartoUrl: string): string {
+  if (isCartoBasemapsApiKeyConfigured()) {
+    return withCartoBasemapsApiKey(cartoUrl);
+  }
+  return OPENSTREETMAP_TILE_URL;
+}
+
+export function resolvePublicRasterBasemapAttribution(
+  cartoAttribution: string,
+): string {
+  if (isCartoBasemapsApiKeyConfigured()) {
+    return cartoAttribution;
+  }
+  return OPENSTREETMAP_TILE_ATTRIBUTION;
+}
+
 /** Carto 타일 URL — 한 줄만 바꿔 dark / light / voyager 비교 */
 export const PUBLIC_MAP_TILE_URLS = {
   voyager:
@@ -28,8 +69,9 @@ export type PublicMapTilePreset = keyof typeof PUBLIC_MAP_TILE_URLS;
 export const PUBLIC_MAP_TILE_PRESET: PublicMapTilePreset = "voyager";
 
 /** @deprecated 이름 유지 — 실제 URL은 PRESET 에 따름 */
-export const PUBLIC_DARK_MAP_TILE_URL =
-  PUBLIC_MAP_TILE_URLS[PUBLIC_MAP_TILE_PRESET];
+export const PUBLIC_DARK_MAP_TILE_URL = resolvePublicRasterBasemapUrl(
+  PUBLIC_MAP_TILE_URLS[PUBLIC_MAP_TILE_PRESET],
+);
 
 /**
  * next-themes `resolvedTheme` 기준 — /media/map themeAware 타일.
@@ -40,11 +82,11 @@ export function publicMapTileUrlForTheme(
   resolvedTheme: string | undefined,
 ): string {
   if (resolvedTheme === "dark") {
-    return PUBLIC_MAP_TILE_URLS.dark;
+    return resolvePublicRasterBasemapUrl(PUBLIC_MAP_TILE_URLS.dark);
   }
   const vworld = vworldWmtsTileUrl(VWORLD_WMTS_LAYERS.base);
   if (vworld) return vworld;
-  return PUBLIC_MAP_TILE_URLS.voyager;
+  return resolvePublicRasterBasemapUrl(PUBLIC_MAP_TILE_URLS.voyager);
 }
 
 export function publicMapTileAttributionForTheme(
@@ -53,7 +95,9 @@ export function publicMapTileAttributionForTheme(
   if (resolvedTheme !== "dark" && isVWorldTilesConfigured()) {
     return VWORLD_TILE_ATTRIBUTION;
   }
-  return '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+  return resolvePublicRasterBasemapAttribution(
+    '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  );
 }
 
 export function isPublicMapLightTileFromTheme(

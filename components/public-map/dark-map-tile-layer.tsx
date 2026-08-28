@@ -10,6 +10,8 @@ import {
   isPublicMapLightTileFromTheme,
   publicMapTileAttributionForTheme,
   publicMapTileUrlForTheme,
+  resolvePublicRasterBasemapUrl,
+  resolvePublicRasterBasemapAttribution,
 } from "@/lib/public-dark-map-config";
 import { isVWorldTilesConfigured } from "@/lib/public-vworld-map-config";
 
@@ -27,16 +29,21 @@ export function DarkMapTileLayer({ themeAware = false, preferLight = false }: Pr
     themeAware && !preferLight && resolvedTheme !== "dark" && isVWorldTilesConfigured();
 
   const url = preferLight
-    ? PUBLIC_MAP_TILE_URLS.light
+    ? resolvePublicRasterBasemapUrl(PUBLIC_MAP_TILE_URLS.light)
     : themeAware
       ? publicMapTileUrlForTheme(resolvedTheme)
       : PUBLIC_DARK_MAP_TILE_URL;
 
+  const cartoAttribution =
+    '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
   const attribution = preferLight
-    ? '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    ? resolvePublicRasterBasemapAttribution(cartoAttribution)
     : themeAware
       ? publicMapTileAttributionForTheme(resolvedTheme)
-      : '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+      : resolvePublicRasterBasemapAttribution(cartoAttribution);
+
+  const useOsmFallback = url.includes("openstreetmap.org");
 
   return (
     <TileLayer
@@ -52,10 +59,12 @@ export function DarkMapTileLayer({ themeAware = false, preferLight = false }: Pr
       url={url}
       {...(useVWorldLight
         ? { maxZoom: 19 }
-        : {
-            subdomains: PUBLIC_DARK_MAP_TILE_SUBDOMAINS,
-            maxZoom: 20,
-          })}
+        : useOsmFallback
+          ? { maxZoom: 19 }
+          : {
+              subdomains: PUBLIC_DARK_MAP_TILE_SUBDOMAINS,
+              maxZoom: 20,
+            })}
       attribution={attribution}
     />
   );
