@@ -317,6 +317,7 @@ export function MediaDetailStickyQuotePanel({
         <div className="space-y-3">
           <Link
             href={quoteHref}
+            data-accent-keep="true"
             className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-3 text-center text-sm font-bold text-white"
           >
             {isKo ? "견적 받기" : "Get quote"}

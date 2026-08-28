@@ -1140,99 +1140,294 @@ body:has(.tkad-media-app-shell) .tkad-site-footer {
   min-height: 0;
 }
 
-/* ── Option A (/ko/media) — planner brief pattern: minimal orange, black primary ──
- * Scope: `.media-accent-option-a` list shell + body:has() for GNB/sidebar.
- * KEEP (1): sidebar 「새 플랜」 only — `[data-media-keep-accent]`. */
-body:has(.media-accent-option-a) .tkad-nav-chrome .tkad-qp-cta {
+/* ── Option A — minimal orange, black primary (홈·매체목록·상세·추천) ──
+ * Scopes: `.home-accent-option-a`, `.media-accent-option-a`,
+ * `.media-detail-accent-option-a`, `.recommend-accent-option-a`.
+ * Page KEEP (1 each): `[data-accent-keep]` — /media sidebar 「새 플랜」 uses same attr. */
+body:has(.home-accent-option-a) .tkad-nav-chrome .tkad-qp-cta,
+body:has(.media-accent-option-a) .tkad-nav-chrome .tkad-qp-cta,
+body:has(.media-detail-accent-option-a) .tkad-nav-chrome .tkad-qp-cta,
+body:has(.recommend-accent-option-a) .tkad-nav-chrome .tkad-qp-cta {
   background: var(--primary) !important;
   color: var(--primary-foreground) !important;
   box-shadow: none !important;
 }
-body:has(.media-accent-option-a) .tkad-nav-chrome a.tkad-qp-cta:hover {
+body:has(.home-accent-option-a) .tkad-nav-chrome a.tkad-qp-cta:hover,
+body:has(.media-accent-option-a) .tkad-nav-chrome a.tkad-qp-cta:hover,
+body:has(.media-detail-accent-option-a) .tkad-nav-chrome a.tkad-qp-cta:hover,
+body:has(.recommend-accent-option-a) .tkad-nav-chrome a.tkad-qp-cta:hover {
   background: color-mix(in srgb, var(--primary) 88%, black) !important;
 }
-body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-media-keep-accent]) {
+body:has(.home-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-accent-keep]):not([data-media-keep-accent]),
+body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-accent-keep]):not([data-media-keep-accent]),
+body:has(.media-detail-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-accent-keep]):not([data-media-keep-accent]),
+body:has(.recommend-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-accent-keep]):not([data-media-keep-accent]) {
   background: transparent !important;
   color: var(--foreground) !important;
   border: 1px solid var(--border) !important;
   box-shadow: none !important;
 }
-body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-media-keep-accent]) svg {
+body:has(.home-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-accent-keep]):not([data-media-keep-accent]) svg,
+body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-accent-keep]):not([data-media-keep-accent]) svg,
+body:has(.media-detail-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-accent-keep]):not([data-media-keep-accent]) svg,
+body:has(.recommend-accent-option-a) [data-screenshot="quick-actions-desktop"] .tkad-qp-cta:not([data-accent-keep]):not([data-media-keep-accent]) svg {
   color: var(--muted-foreground) !important;
 }
+body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] [data-accent-keep],
 body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] [data-media-keep-accent] {
   background: var(--qp-accent, var(--hermes)) !important;
   color: white !important;
   border: none !important;
 }
+body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] [data-accent-keep] svg,
 body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] [data-media-keep-accent] svg {
   color: white !important;
 }
-.media-accent-option-a .tkad-qp-cta,
-.media-accent-option-a .tkad-neon-cta-clean {
+.home-accent-option-a .tkad-qp-cta:not([data-accent-keep]),
+.home-accent-option-a .tkad-neon-cta-clean:not([data-accent-keep]),
+.media-accent-option-a .tkad-qp-cta:not([data-accent-keep]),
+.media-accent-option-a .tkad-neon-cta-clean:not([data-accent-keep]),
+.media-detail-accent-option-a .tkad-qp-cta:not([data-accent-keep]),
+.media-detail-accent-option-a .tkad-neon-cta-clean:not([data-accent-keep]),
+.recommend-accent-option-a .tkad-qp-cta:not([data-accent-keep]),
+.recommend-accent-option-a .tkad-neon-cta-clean:not([data-accent-keep]) {
   background: var(--primary) !important;
   color: var(--primary-foreground) !important;
   box-shadow: none !important;
 }
+.home-accent-option-a .bg-hermes,
+.home-accent-option-a .bg-pink-500,
 .media-accent-option-a .bg-hermes,
-.media-accent-option-a .bg-pink-500 {
+.media-accent-option-a .bg-pink-500,
+.media-detail-accent-option-a .bg-hermes,
+.media-detail-accent-option-a .bg-pink-500,
+.recommend-accent-option-a .bg-hermes,
+.recommend-accent-option-a .bg-pink-500 {
   background-color: var(--primary) !important;
   color: var(--primary-foreground) !important;
 }
+.home-accent-option-a .text-hermes,
+.home-accent-option-a .tkad-home-accent-text,
+.home-accent-option-a .text-accent,
+.home-accent-option-a .text-\[color\:var\(--qp-accent\)\],
 .media-accent-option-a .text-hermes,
 .media-accent-option-a .tkad-home-accent-text,
-.media-accent-option-a .text-\[color\:var\(--qp-accent\)\] {
+.media-accent-option-a .text-accent,
+.media-accent-option-a .text-\[color\:var\(--qp-accent\)\],
+.media-detail-accent-option-a .text-hermes,
+.media-detail-accent-option-a .tkad-home-accent-text,
+.media-detail-accent-option-a .text-accent,
+.media-detail-accent-option-a .text-\[color\:var\(--qp-accent\)\],
+.recommend-accent-option-a .text-hermes,
+.recommend-accent-option-a .tkad-home-accent-text,
+.recommend-accent-option-a .text-accent,
+.recommend-accent-option-a .text-\[color\:var\(--qp-accent\)\] {
   color: var(--foreground) !important;
   -webkit-text-fill-color: var(--foreground) !important;
   font-weight: 700;
 }
-.media-accent-option-a .text-\[color\:var\(--qp-accent\)\]\/80 {
+.home-accent-option-a .text-\[color\:var\(--qp-accent\)\]\/80,
+.home-accent-option-a .text-\[color\:var\(--qp-accent\)\]\/90,
+.media-accent-option-a .text-\[color\:var\(--qp-accent\)\]\/80,
+.media-accent-option-a .text-\[color\:var\(--qp-accent\)\]\/90,
+.media-detail-accent-option-a .text-\[color\:var\(--qp-accent\)\]\/80,
+.media-detail-accent-option-a .text-\[color\:var\(--qp-accent\)\]\/90,
+.recommend-accent-option-a .text-\[color\:var\(--qp-accent\)\]\/80,
+.recommend-accent-option-a .text-\[color\:var\(--qp-accent\)\]\/90 {
   color: color-mix(in srgb, var(--foreground) 75%, transparent) !important;
 }
+.home-accent-option-a .border-\[color\:var\(--qp-accent\)\],
+.home-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/20,
+.home-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/25,
+.home-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/30,
+.home-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/35,
+.home-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/40,
+.home-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/45,
+.home-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/50,
+.home-accent-option-a .border-hermes\/30,
+.home-accent-option-a .border-hermes\/40,
+.home-accent-option-a .border-hermes\/50,
+.home-accent-option-a .border-accent,
+.home-accent-option-a .decoration-\[color\:var\(--qp-accent\)\]\/50,
+.media-accent-option-a .border-\[color\:var\(--qp-accent\)\],
+.media-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/20,
+.media-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/25,
+.media-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/30,
 .media-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/35,
 .media-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/40,
+.media-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/45,
+.media-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/50,
 .media-accent-option-a .border-hermes\/30,
-.media-accent-option-a .decoration-\[color\:var\(--qp-accent\)\]\/50 {
+.media-accent-option-a .border-hermes\/40,
+.media-accent-option-a .border-hermes\/50,
+.media-accent-option-a .border-accent,
+.media-accent-option-a .decoration-\[color\:var\(--qp-accent\)\]\/50,
+.media-detail-accent-option-a .border-\[color\:var\(--qp-accent\)\],
+.media-detail-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/20,
+.media-detail-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/25,
+.media-detail-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/30,
+.media-detail-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/35,
+.media-detail-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/40,
+.media-detail-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/45,
+.media-detail-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/50,
+.media-detail-accent-option-a .border-hermes\/30,
+.media-detail-accent-option-a .border-hermes\/40,
+.media-detail-accent-option-a .border-hermes\/50,
+.media-detail-accent-option-a .border-accent,
+.media-detail-accent-option-a .decoration-\[color\:var\(--qp-accent\)\]\/50,
+.recommend-accent-option-a .border-\[color\:var\(--qp-accent\)\],
+.recommend-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/20,
+.recommend-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/25,
+.recommend-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/30,
+.recommend-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/35,
+.recommend-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/40,
+.recommend-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/45,
+.recommend-accent-option-a .border-\[color\:var\(--qp-accent\)\]\/50,
+.recommend-accent-option-a .border-hermes\/30,
+.recommend-accent-option-a .border-hermes\/40,
+.recommend-accent-option-a .border-hermes\/50,
+.recommend-accent-option-a .border-accent,
+.recommend-accent-option-a .decoration-\[color\:var\(--qp-accent\)\]\/50 {
   border-color: color-mix(in srgb, var(--foreground) 22%, transparent) !important;
   text-decoration-color: color-mix(in srgb, var(--foreground) 35%, transparent) !important;
 }
+.home-accent-option-a .bg-\[color\:var\(--qp-accent-soft\)\],
+.home-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/5,
+.home-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/8,
+.home-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/10,
+.home-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/15,
+.home-accent-option-a .bg-hermes\/5,
+.home-accent-option-a .bg-hermes\/10,
+.home-accent-option-a .bg-hermes\/15,
+.home-accent-option-a .bg-accent\/10,
+.home-accent-option-a .bg-accent\/15,
 .media-accent-option-a .bg-\[color\:var\(--qp-accent-soft\)\],
+.media-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/5,
+.media-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/8,
+.media-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/10,
+.media-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/15,
+.media-accent-option-a .bg-hermes\/5,
 .media-accent-option-a .bg-hermes\/10,
-.media-accent-option-a .bg-hermes\/15 {
+.media-accent-option-a .bg-hermes\/15,
+.media-accent-option-a .bg-accent\/10,
+.media-accent-option-a .bg-accent\/15,
+.media-detail-accent-option-a .bg-\[color\:var\(--qp-accent-soft\)\],
+.media-detail-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/5,
+.media-detail-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/8,
+.media-detail-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/10,
+.media-detail-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/15,
+.media-detail-accent-option-a .bg-hermes\/5,
+.media-detail-accent-option-a .bg-hermes\/10,
+.media-detail-accent-option-a .bg-hermes\/15,
+.media-detail-accent-option-a .bg-accent\/10,
+.media-detail-accent-option-a .bg-accent\/15,
+.recommend-accent-option-a .bg-\[color\:var\(--qp-accent-soft\)\],
+.recommend-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/5,
+.recommend-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/8,
+.recommend-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/10,
+.recommend-accent-option-a .bg-\[color\:var\(--qp-accent\)\]\/15,
+.recommend-accent-option-a .bg-hermes\/5,
+.recommend-accent-option-a .bg-hermes\/10,
+.recommend-accent-option-a .bg-hermes\/15,
+.recommend-accent-option-a .bg-accent\/10,
+.recommend-accent-option-a .bg-accent\/15 {
   background: color-mix(in srgb, var(--foreground) 6%, var(--background)) !important;
 }
-.media-accent-option-a .bg-\[color\:var\(--qp-accent\)\] {
+.home-accent-option-a .bg-\[color\:var\(--qp-accent\)\]:not([data-accent-keep]),
+.media-accent-option-a .bg-\[color\:var\(--qp-accent\)\]:not([data-accent-keep]),
+.media-detail-accent-option-a .bg-\[color\:var\(--qp-accent\)\]:not([data-accent-keep]),
+.recommend-accent-option-a .bg-\[color\:var\(--qp-accent\)\]:not([data-accent-keep]),
+.home-accent-option-a .bg-accent:not([data-accent-keep]),
+.media-accent-option-a .bg-accent:not([data-accent-keep]),
+.media-detail-accent-option-a .bg-accent:not([data-accent-keep]),
+.recommend-accent-option-a .bg-accent:not([data-accent-keep]) {
   background: var(--primary) !important;
   color: var(--primary-foreground) !important;
 }
-.media-accent-option-a [data-media-thumbnail-badge-stack] .bg-\[color\:var\(--qp-accent\)\] {
+.media-accent-option-a [data-media-thumbnail-badge-stack] .bg-\[color\:var\(--qp-accent\)\],
+.media-detail-accent-option-a [data-media-thumbnail-badge-stack] .bg-\[color\:var\(--qp-accent\)\] {
   background: rgb(0 0 0 / 0.72) !important;
   color: white !important;
 }
+.home-accent-option-a .border-hermes\/30.bg-hermes\/15,
+.home-accent-option-a .border-hermes\/30.bg-hermes\/15.text-hermes,
 .media-accent-option-a .border-hermes\/30.bg-hermes\/15,
-.media-accent-option-a .border-hermes\/30.bg-hermes\/15.text-hermes {
+.media-accent-option-a .border-hermes\/30.bg-hermes\/15.text-hermes,
+.media-detail-accent-option-a .border-hermes\/30.bg-hermes\/15,
+.media-detail-accent-option-a .border-hermes\/30.bg-hermes\/15.text-hermes,
+.recommend-accent-option-a .border-hermes\/30.bg-hermes\/15,
+.recommend-accent-option-a .border-hermes\/30.bg-hermes\/15.text-hermes {
   border-color: var(--border) !important;
   background: var(--muted) !important;
   color: var(--foreground) !important;
 }
+.home-accent-option-a .text-pink-600,
+.home-accent-option-a .dark .text-pink-400,
 .media-accent-option-a .text-pink-600,
-.media-accent-option-a .dark .text-pink-400 {
+.media-accent-option-a .dark .text-pink-400,
+.media-detail-accent-option-a .text-pink-600,
+.media-detail-accent-option-a .dark .text-pink-400,
+.recommend-accent-option-a .text-pink-600,
+.recommend-accent-option-a .dark .text-pink-400 {
   color: var(--foreground) !important;
 }
-.media-accent-option-a .focus\:ring-\[color\:var\(--qp-accent\)\]\/35:focus {
+.home-accent-option-a .focus\:ring-\[color\:var\(--qp-accent\)\]\/35:focus,
+.media-accent-option-a .focus\:ring-\[color\:var\(--qp-accent\)\]\/35:focus,
+.media-detail-accent-option-a .focus\:ring-\[color\:var\(--qp-accent\)\]\/35:focus,
+.recommend-accent-option-a .focus\:ring-\[color\:var\(--qp-accent\)\]\/35:focus,
+.home-accent-option-a .focus\:ring-\[color\:var\(--qp-accent\)\]\/20:focus,
+.media-detail-accent-option-a .focus\:ring-\[color\:var\(--qp-accent\)\]\/20:focus {
   --tw-ring-color: color-mix(in srgb, var(--foreground) 18%, transparent) !important;
 }
-.media-accent-option-a [data-media-thumbnail-badge-stack] span.tabular-nums {
+.media-accent-option-a [data-media-thumbnail-badge-stack] span.tabular-nums,
+.media-detail-accent-option-a [data-media-thumbnail-badge-stack] span.tabular-nums {
   background: rgb(0 0 0 / 0.68) !important;
   color: white !important;
   border-color: rgb(255 255 255 / 0.2) !important;
 }
+.home-accent-option-a .border-hermes\/90,
+.home-accent-option-a .ring-hermes\/35,
+.home-accent-option-a .shadow-hermes\/15,
 .media-accent-option-a .border-hermes\/90,
 .media-accent-option-a .ring-hermes\/35,
-.media-accent-option-a .shadow-hermes\/15 {
+.media-accent-option-a .shadow-hermes\/15,
+.media-detail-accent-option-a .border-hermes\/90,
+.media-detail-accent-option-a .ring-hermes\/35,
+.media-detail-accent-option-a .shadow-hermes\/15,
+.media-detail-accent-option-a .ring-\[color\:var\(--qp-accent\)\]\/40,
+.media-detail-accent-option-a .ring-2.ring-\[color\:var\(--qp-accent\)\]\/40,
+.recommend-accent-option-a .border-hermes\/90,
+.recommend-accent-option-a .ring-hermes\/35,
+.recommend-accent-option-a .shadow-hermes\/15 {
   border-color: color-mix(in srgb, var(--foreground) 35%, transparent) !important;
   --tw-ring-color: color-mix(in srgb, var(--foreground) 25%, transparent) !important;
   box-shadow: none !important;
+}
+/* 홈 — Hero glow·carousel dot NEUTRAL (KEEP: primary CTA only) */
+.home-accent-option-a .ooh-home-hero__glow {
+  background: radial-gradient(
+    ellipse 80% 70% at 85% 15%,
+    color-mix(in srgb, var(--ooh-hero-orange, #ff6200) 10%, transparent),
+    transparent 55%
+  );
+}
+.home-accent-option-a .ooh-home-hero__dot[data-current="true"] {
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+}
+/* KEEP — page primary conversion CTA (1 per page) */
+.media-detail-accent-option-a [data-accent-keep].bg-\[color\:var\(--qp-accent\)\],
+.media-detail-accent-option-a [data-accent-keep].bg-accent,
+.recommend-accent-option-a [data-accent-keep].bg-\[color\:var\(--qp-accent\)\],
+.recommend-accent-option-a [data-accent-keep].tkad-qp-cta {
+  background: var(--qp-accent, var(--hermes)) !important;
+  color: white !important;
+  border-color: var(--qp-accent, var(--hermes)) !important;
+  -webkit-text-fill-color: white !important;
+}
+.recommend-accent-option-a [data-accent-keep].tkad-qp-cta:hover:not(:disabled) {
+  background: var(--qp-accent-hover, color-mix(in srgb, var(--qp-accent, #ff6200) 88%, black)) !important;
+  border-color: var(--qp-accent-hover, color-mix(in srgb, var(--qp-accent, #ff6200) 88%, black)) !important;
 }
 
 /* `/media/map` — 앱 셸 내부에 지도 전용 하단 바가 있어 in-flow spacer 를 줄임 */

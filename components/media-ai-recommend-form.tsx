@@ -897,6 +897,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
               size="md"
               disabled={!canSubmit}
               onClick={handleSubmit}
+              data-accent-keep="true"
               className="tkad-ai-recommend-submit w-full py-3"
             >
               <Sparkles className="h-4 w-4" aria-hidden />

@@ -428,6 +428,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
           <button
             type="button"
             onClick={runRecommend}
+            data-accent-keep="true"
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[color:var(--qp-accent)] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[color:var(--qp-accent-hover)]"
           >
             <Sparkles className="h-4 w-4" />

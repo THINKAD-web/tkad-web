@@ -109,7 +109,10 @@ export function MediaDetailPageView({
   const displayName = isKo ? media.name : media.nameEn || media.name;
 
   return (
-    <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+    <div
+      className="media-detail-accent-option-a tkad-landing-neon tkad-planner-neon tkad-media-page"
+      data-accent-scope="option-a-media-detail"
+    >
         <MediaDetailHeroSection
           media={media}
           isKo={isKo}
