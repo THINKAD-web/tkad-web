@@ -9,6 +9,7 @@ import type { LucideIcon } from "lucide-react";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { cn } from "@/lib/utils";
 import { useContactChannelSheet } from "@/components/contact/contact-channel-provider";
+import { prefetchSupportAiChatModal } from "@/lib/lazy-chunk-prefetch";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 import { PLAN_NAV_LABELS } from "@/lib/navigation/logged-in-nav-labels";
 
@@ -116,7 +117,12 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
     >
       <button
         type="button"
-        onClick={openAi}
+        onPointerEnter={() => prefetchSupportAiChatModal()}
+        onTouchStart={() => prefetchSupportAiChatModal()}
+        onClick={() => {
+          prefetchSupportAiChatModal();
+          openAi();
+        }}
         title={aiLabel}
         aria-label={aiLabel}
         className={cn(

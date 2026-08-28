@@ -17,6 +17,7 @@ import { hapticLight } from "@/lib/haptic";
 import { useMobileChromeOverlayOptional } from "@/components/mobile/mobile-chrome-overlay-context";
 import { useMobileTabBadges } from "@/hooks/use-mobile-tab-badges";
 import { openContactChannelSheet } from "@/components/contact/contact-channel-provider";
+import { prefetchOnIdle, prefetchSupportAiChatModal } from "@/lib/lazy-chunk-prefetch";
 
 export type MobileBottomTabDef = {
   id: string;
@@ -171,6 +172,7 @@ export function BottomTabBar() {
 
   useEffect(() => {
     setMounted(true);
+    return prefetchOnIdle(() => prefetchSupportAiChatModal());
   }, []);
 
   if (!mounted || isHiddenPath(pathname) || chromeOverlay?.isAnyOpen) return null;
@@ -226,8 +228,11 @@ export function BottomTabBar() {
               <li key={tab.id} className="flex min-w-0 flex-1 basis-0">
                 <button
                   type="button"
+                  onPointerEnter={() => prefetchSupportAiChatModal()}
+                  onTouchStart={() => prefetchSupportAiChatModal()}
                   onClick={() => {
                     hapticLight();
+                    prefetchSupportAiChatModal();
                     openContactChannelSheet();
                   }}
                   className="flex w-full min-w-0 flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"

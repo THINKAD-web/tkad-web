@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { MessageCircle, X } from "lucide-react";
 import dynamic from "next/dynamic";
+import { SupportAiChatModalLoading } from "@/components/support/support-ai-chat-modal-loading";
 import { getSupportHoursStatus } from "@/lib/support-chat-hours";
+import { prefetchOnIdle, prefetchSupportAiChatModal } from "@/lib/lazy-chunk-prefetch";
 import { cn } from "@/lib/utils";
 import { SupportChatMenu } from "@/components/support/support-chat-menu";
 
@@ -13,7 +15,7 @@ const SupportAiChatModal = dynamic(
     import("@/components/support/support-ai-chat-modal").then(
       (m) => m.SupportAiChatModal,
     ),
-  { ssr: false },
+  { ssr: false, loading: SupportAiChatModalLoading },
 );
 
 type Props = {
@@ -29,6 +31,10 @@ export function SupportChatWidget({ menuOpen, onMenuOpenChange }: Props) {
   useEffect(() => {
     const id = window.setInterval(() => setHoursTick((n) => n + 1), 60_000);
     return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    return prefetchOnIdle(() => prefetchSupportAiChatModal());
   }, []);
 
   const hours = useMemo(
@@ -48,22 +54,26 @@ export function SupportChatWidget({ menuOpen, onMenuOpenChange }: Props) {
 
   return (
     <>
-      <SupportAiChatModal
-        open={aiOpen}
-        onClose={() => setAiOpen(false)}
-      />
+      {aiOpen ? (
+        <SupportAiChatModal open={aiOpen} onClose={() => setAiOpen(false)} />
+      ) : null}
 
       {menuOpen ? (
         <SupportChatMenu
           open={menuOpen}
           onClose={() => onMenuOpenChange(false)}
           hours={hours}
-          onOpenAi={() => setAiOpen(true)}
+          onOpenAi={() => {
+            prefetchSupportAiChatModal();
+            setAiOpen(true);
+          }}
         />
       ) : null}
 
       <button
         type="button"
+        onPointerEnter={() => prefetchSupportAiChatModal()}
+        onTouchStart={() => prefetchSupportAiChatModal()}
         onClick={toggleMenu}
         aria-expanded={menuOpen}
         aria-haspopup="dialog"
