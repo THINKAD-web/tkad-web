@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Option A — /ko/media 오렌지 재설계 Before/After (2026-08-27)</title>
+  <style>
+    :root { --bg: #f4f3f0; --ink: #08080a; --muted: #5a5a5e; --line: #d8d6d0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; }
+    header { padding: 1.25rem 1.5rem; background: #fff; border-bottom: 1px solid var(--line); }
+    header h1 { margin: 0 0 0.35rem; font-size: 1.125rem; }
+    header p { margin: 0; font-size: 0.8125rem; color: var(--muted); max-width: 72rem; }
+    main { padding: 1.25rem 1.5rem 2.5rem; max-width: 1400px; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 900px) { .pair { grid-template-columns: 1fr; } }
+    figure { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    figcaption { padding: 0.6rem 0.85rem; font-size: 0.8125rem; font-weight: 600; border-bottom: 1px solid var(--line); background: #faf9f7; }
+    figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 0.6875rem; margin-top: 0.15rem; }
+    figure img { display: block; width: 100%; height: auto; }
+    .note { margin-top: 1.5rem; padding: 1rem; background: #fff; border: 1px dashed var(--line); border-radius: 6px; font-size: 0.8125rem; color: var(--muted); }
+    .open-cmd { margin-top: 0.5rem; padding: 0.5rem 0.75rem; background: #f0efec; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.75rem; word-break: break-all; }
+    ul { margin: 0.5rem 0 0; padding-left: 1.2rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Option A — /ko/media 오렌지 사용 재설계 (2026-08-27)</h1>
+    <p>
+      <strong>Before</strong> = production <code>tkad.co.kr/ko/media</code> (오렌지 다수 반복).
+      <strong>After</strong> = <code>design/orange-accent-option-a-media</code> (플래너 브리프 패턴 — 검정/회색 중심, KEEP 1개: 「새 플랜」).
+    </p>
+  </header>
+  <main>
+    <div class="pair">
+      <figure>
+        <figcaption>Before<span>01-media-before-production.png · #FF6200 다수</span></figcaption>
+        <img src="01-media-before-production.png" alt="Media browse before" />
+      </figure>
+      <figure>
+        <figcaption>After (Option A)<span>02-media-after-option-a.png · 검정 primary + 새 플랜만 오렌지</span></figcaption>
+        <img src="02-media-after-option-a.png" alt="Media browse option A" />
+      </figure>
+    </div>
+    <div class="note">
+      <strong>로컬에서 열기:</strong>
+      <div class="open-cmd">open reports/design-tone-audit-20260826/screenshots/option-a-media/option-a-media-before-after.html</div>
+      <strong>KEEP (1개):</strong> 사이드바 「새 플랜」만 <code>--qp-accent</code> solid 유지.<br />
+      <strong>NEUTRAL:</strong> 배지(검증→검정), 필터 active(검정), GNB/회원가입(검정), 인기 지역 칩, 뷰모드 active, AI 챗봇, 견적서 outline.<br />
+      <strong>OUTLINE/TEXT:</strong> 가격(굵은 검정), 담기/비교(회색 outline), 캠페인 목적 링크(밑줄 검정), 양호 점수 배지(회색).<br />
+      <strong>참조:</strong> 플래너 3단계 브리프 — <code>bg-primary</code> 검정 CTA, 프리셋 칩 neutral gray.
+    </div>
+  </main>
+</body>
+</html>

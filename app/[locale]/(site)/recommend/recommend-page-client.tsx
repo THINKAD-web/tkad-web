@@ -916,7 +916,7 @@ export default function RecommendPageClient({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-w-0 overflow-x-auto">
+      <div className="recommend-accent-option-a tkad-landing-neon tkad-planner-neon min-w-0 overflow-x-auto" data-accent-scope="option-a-recommend">
         <PageHero
           eyebrow={isKo ? "// 빠른 추천" : "// Quick recommend"}
           title={isKo ? "빠른 AI " : "Quick AI "}

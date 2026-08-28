@@ -49,7 +49,8 @@ export function MediaCardSkeletonGrid({
 export function MediaBrowsePageSkeleton() {
   return (
     <div
-      className="tkad-media-app-shell tkad-media-list-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]"
+      className="tkad-media-app-shell tkad-media-list-shell media-accent-option-a relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]"
+      data-media-accent="option-a"
       aria-busy="true"
       aria-label="Loading media browse"
     >

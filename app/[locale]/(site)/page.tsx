@@ -61,7 +61,8 @@ export default async function HomePage({
   return (
     <main
       id="main-content"
-      className="tkad-quiet min-h-screen bg-gray-50 dark:bg-[#020202]"
+      className="home-accent-option-a tkad-quiet min-h-screen bg-gray-50 dark:bg-[#020202]"
+      data-accent-scope="option-a-home"
     >
       <h1 className="sr-only">
         {homePageSrOnlyH1(locale, verifiedMediaLabel)}

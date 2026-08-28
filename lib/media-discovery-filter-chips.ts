@@ -18,8 +18,18 @@ import {
 export const MEDIA_CHIP_ACTIVE =
   "tkad-qp-cta text-white shadow-none";
 
+/** Option A — planner brief pattern: black primary fill, no orange */
+export const MEDIA_CHIP_ACTIVE_OPTION_A =
+  "bg-primary text-primary-foreground shadow-none dark:bg-primary dark:text-primary-foreground";
+
 export const MEDIA_CHIP_INACTIVE =
   "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70";
+
+export type MediaBrowseAccentMode = "default" | "option-a";
+
+export function resolveMediaChipActive(mode: MediaBrowseAccentMode = "default"): string {
+  return mode === "option-a" ? MEDIA_CHIP_ACTIVE_OPTION_A : MEDIA_CHIP_ACTIVE;
+}
 
 type FilterChip = {
   label: string;

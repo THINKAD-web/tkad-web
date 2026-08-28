@@ -44,6 +44,16 @@ function isHomePath(pathname: string): boolean {
   return path === "/" || path === "";
 }
 
+function isMediaDetailPath(pathname: string): boolean {
+  const path = pathname.replace(/^\/(ko|en)/, "") || "/";
+  return /^\/media\/[^/]+$/.test(path);
+}
+
+function isRecommendPath(pathname: string): boolean {
+  const path = pathname.replace(/^\/(ko|en)/, "") || "/";
+  return path === "/recommend" || path.startsWith("/recommend/");
+}
+
 type DesktopQuickAction = {
   id: string;
   href: string;
@@ -87,6 +97,15 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
   if (isHiddenPath(pathname)) return null;
 
   const onHome = isHomePath(pathname);
+  const onRecommend = isRecommendPath(pathname);
+  const onMediaDetail = isMediaDetailPath(pathname);
+  const isMediaListBrowse =
+    pathname.includes("/media") &&
+    !pathname.includes("/media/map") &&
+    !pathname.includes("/media/targets") &&
+    !pathname.includes("/media/packages") &&
+    !onMediaDetail;
+  const sidebarMuted = onHome || isMediaListBrowse || onMediaDetail || onRecommend;
   const aiLabel = isKo ? "AI 챗봇 상담" : "AI chatbot";
 
   const actions: DesktopQuickAction[] = [
@@ -126,7 +145,7 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
         title={aiLabel}
         aria-label={aiLabel}
         className={cn(
-          onHome
+          sidebarMuted
             ? mutedSidebarBtn(compact)
             : cn(actionRowClass(compact), qpSidebarCta),
         )}
@@ -160,7 +179,11 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
         const active = action.match(pathname, tab);
         const label = isKo ? action.labelKo : action.labelEn;
         const Icon = action.icon;
-        const isAccent = !onHome && (action.variant === "accent" || active);
+        const isAccent =
+          !sidebarMuted &&
+          (action.variant === "accent" || active);
+        const isMediaKeepAccent =
+          isMediaListBrowse && action.id === "planner";
 
         return (
           <Link
@@ -168,15 +191,21 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
             href={action.href}
             title={compact ? label : undefined}
             aria-label={compact ? label : undefined}
+            data-accent-keep={isMediaKeepAccent ? "true" : undefined}
+            data-media-keep-accent={isMediaKeepAccent ? "true" : undefined}
             className={cn(
               actionRowClass(compact),
-              isAccent
+              isMediaKeepAccent
                 ? qpSidebarCta
-                : action.variant === "outline"
+                : isAccent
+                  ? qpSidebarCta
+                  : action.variant === "outline"
                   ? cn(
                       "border font-medium",
                       active
-                        ? "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] text-gray-900 dark:text-white [&_svg]:text-[color:var(--qp-accent)]"
+                        ? isMediaListBrowse
+                          ? "border-primary/25 bg-primary/5 text-foreground [&_svg]:text-foreground"
+                          : "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] text-gray-900 dark:text-white [&_svg]:text-[color:var(--qp-accent)]"
                         : "border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-white/15 dark:text-white/80 dark:hover:bg-white/5 [&_svg]:text-gray-500 dark:[&_svg]:text-white/55",
                     )
                   : cn(

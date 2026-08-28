@@ -76,6 +76,8 @@ scripts/print-admin-*.ts
 !docs/screenshots/pr4-after/*.png
 !docs/screenshots/pr461-qp-preview/
 !docs/screenshots/pr461-qp-preview/*.png
+!reports/design-tone-audit-20260826/screenshots/option-a-media/
+!reports/design-tone-audit-20260826/screenshots/option-a-media/*.png
 scripts/fix-*.ts
 
 # 매체 지표 감사 리포트 (scripts/audit-media-metrics.ts 출력물)

@@ -144,7 +144,11 @@ export function HomeHeroBanner({ mediaCountLabel }: HomeHeroBannerProps = {}) {
           <p className="ooh-home-hero__slogan">{slogan}</p>
           <p className="ooh-home-hero__lead">{lead}</p>
           <div className="ooh-home-hero__ctas">
-            <Link href="/media" className="ooh-home-hero__cta ooh-home-hero__cta--primary">
+            <Link
+              href="/media"
+              className="ooh-home-hero__cta ooh-home-hero__cta--primary"
+              data-accent-keep="true"
+            >
               {t("heroBannerCtaBrowse")}
             </Link>
             <Link

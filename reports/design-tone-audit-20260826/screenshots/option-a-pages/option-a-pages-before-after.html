@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Option A — 홈·매체상세·추천 Before/After (2026-08-29)</title>
+  <style>
+    :root { --bg: #f4f3f0; --ink: #08080a; --muted: #5a5a5e; --line: #d8d6d0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; }
+    header { padding: 1.25rem 1.5rem; background: #fff; border-bottom: 1px solid var(--line); }
+    header h1 { margin: 0 0 0.35rem; font-size: 1.125rem; }
+    header p { margin: 0; font-size: 0.8125rem; color: var(--muted); max-width: 72rem; }
+    main { padding: 1.25rem 1.5rem 2.5rem; max-width: 1400px; }
+    .page-block { margin-bottom: 2rem; }
+    .page-block h2 { font-size: 0.9375rem; margin: 0 0 0.75rem; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 900px) { .pair { grid-template-columns: 1fr; } }
+    figure { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    figcaption { padding: 0.6rem 0.85rem; font-size: 0.8125rem; font-weight: 600; border-bottom: 1px solid var(--line); background: #faf9f7; }
+    figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 0.6875rem; margin-top: 0.15rem; }
+    figure img { display: block; width: 100%; height: auto; }
+    .note { margin-top: 1rem; padding: 1rem; background: #fff; border: 1px dashed var(--line); border-radius: 6px; font-size: 0.8125rem; color: var(--muted); }
+    .open-cmd { margin-top: 0.5rem; padding: 0.5rem 0.75rem; background: #f0efec; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.75rem; word-break: break-all; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; margin-top: 0.75rem; }
+    th, td { border: 1px solid var(--line); padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
+    th { background: #faf9f7; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Option A — 홈·매체상세·추천 확대 (2026-08-29)</h1>
+    <p>
+      <strong>Before</strong> = production <code>tkad.co.kr</code>.
+      <strong>After</strong> = <code>design/orange-accent-option-a-media</code> (페이지당 KEEP 1개, 나머지 검정/회색).
+      매체목록 비교는 <code>option-a-media/option-a-media-before-after.html</code> 참조.
+    </p>
+  </header>
+  <main>
+    
+    <section class="page-block">
+      <h2>홈 /ko</h2>
+      <div class="pair">
+        <figure>
+          <figcaption>Before<span>home-before-production.png · production</span></figcaption>
+          <img src="home-before-production.png" alt="홈 /ko before" />
+        </figure>
+        <figure>
+          <figcaption>After (Option A)<span>home-after-option-a.png · design/orange-accent-option-a-media</span></figcaption>
+          <img src="home-after-option-a.png" alt="홈 /ko after" />
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-block">
+      <h2>매체 상세 /ko/media/sadangyeok-samjinbilding-jeongwangpan-gwanggo</h2>
+      <div class="pair">
+        <figure>
+          <figcaption>Before<span>media-detail-before-production.png · production</span></figcaption>
+          <img src="media-detail-before-production.png" alt="매체 상세 /ko/media/sadangyeok-samjinbilding-jeongwangpan-gwanggo before" />
+        </figure>
+        <figure>
+          <figcaption>After (Option A)<span>media-detail-after-option-a.png · design/orange-accent-option-a-media</span></figcaption>
+          <img src="media-detail-after-option-a.png" alt="매체 상세 /ko/media/sadangyeok-samjinbilding-jeongwangpan-gwanggo after" />
+        </figure>
+      </div>
+    </section>
+
+    <section class="page-block">
+      <h2>AI 추천 /ko/recommend</h2>
+      <div class="pair">
+        <figure>
+          <figcaption>Before<span>recommend-before-production.png · production</span></figcaption>
+          <img src="recommend-before-production.png" alt="AI 추천 /ko/recommend before" />
+        </figure>
+        <figure>
+          <figcaption>After (Option A)<span>recommend-after-option-a.png · design/orange-accent-option-a-media</span></figcaption>
+          <img src="recommend-after-option-a.png" alt="AI 추천 /ko/recommend after" />
+        </figure>
+      </div>
+    </section>
+    <div class="note">
+      <strong>로컬에서 열기:</strong>
+      <div class="open-cmd">open reports/design-tone-audit-20260826/screenshots/option-a-pages/option-a-pages-before-after.html</div>
+      <table>
+        <thead><tr><th>페이지</th><th>KEEP (1)</th><th>NEUTRAL / OUTLINE</th></tr></thead>
+        <tbody>
+          <tr><td>홈</td><td>Hero 「매체 둘러보기」</td><td>glow·dots·eyebrow·카드 아이콘/CTA·사이드바</td></tr>
+          <tr><td>매체 상세</td><td>sticky 「견적 받기」</td><td>가격·DOOH·썸네일 ring·탭·관련 카드</td></tr>
+          <tr><td>AI 추천</td><td>「추천 받기」/ 폼 submit</td><td>heading·배지·채널 선택·조건 분석</td></tr>
+          <tr><td>매체 목록</td><td>사이드바 「새 플랜」</td><td>(기존 적용)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

@@ -47,6 +47,7 @@ export function MediaQuoteCtaButton({
     <Button
       type="button"
       onClick={() => setOpen(true)}
+      data-accent-keep={variant === "sticky" ? "true" : undefined}
       className={cn(
         variant === "sticky"
           ? "h-11 w-full min-w-0 justify-center rounded-[15px] border-2 border-border bg-accent px-2.5 text-[10.5px] font-black tracking-[0.01em] text-accent-foreground shadow-md transition-colors hover:bg-foreground hover:text-background"
