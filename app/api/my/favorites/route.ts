@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/user-session";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { apiError, apiOk, apiServerError } from "@/lib/api-response";
 
@@ -23,7 +23,7 @@ export async function GET() {
     });
     const ids = favs.map((f) => f.mediaId);
 
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     const byId = new Map(catalog.map((m) => [m.id, m]));
     const items = favs
       .map((f) => {

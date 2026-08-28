@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { buildReportDashboardData } from "@/lib/report/dashboard-data";
 import {
@@ -139,7 +139,7 @@ export async function buildMarketDashboardData(opts: {
 
   const [catalog, baseDashboard, newThisMonth, newPrevMonth, campaignsCount] =
     await Promise.all([
-      fetchPublicMediaCatalog(),
+      fetchPublicMediaCatalogList(),
       buildReportDashboardData({ isKo }),
       prisma.media.count({ where: { createdAt: { gte: monthStart } } }).catch(() => 0),
       prisma.media
@@ -425,7 +425,7 @@ export async function buildMarketExportCsv(
   if (dataset === "media" || dataset === "all") {
     lines.push("section,media_list");
     lines.push("id,name,region,type,price_won");
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     for (const m of catalog) {
       lines.push(
         `media,${m.id},"${m.name.replace(/"/g, '""')}",${m.region},${m.type},${catalogPriceFieldToWon(m.price)}`,

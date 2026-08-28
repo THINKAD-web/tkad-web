@@ -8,7 +8,7 @@ import {
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { filterDisplayableMediaImageUrls } from "@/lib/optimized-image-url";
 import { dedupeImageUrls } from "@/lib/media-data";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   mediaMatchesCategorySlug,
   mediaMatchesTargetSlug,
@@ -123,7 +123,7 @@ export async function fetchPackageLandingPreviews(
     }
   }
 
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   for (const pkg of packages) {
     out[pkg.slug] = previewFromCatalog(pkg, catalog);
   }
@@ -133,7 +133,7 @@ export async function fetchPackageLandingPreviews(
 export async function fetchTargetLandingPreviews(): Promise<
   Record<string, MediaLandingPreview>
 > {
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   const out: Record<string, MediaLandingPreview> = {};
   for (const card of MEDIA_CAMPAIGN_TARGET_CARDS) {
     const matched = catalog.filter((m) =>

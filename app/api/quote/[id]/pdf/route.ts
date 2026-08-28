@@ -4,7 +4,7 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ooHQuotePdfToBase64 } from "@/lib/server-ooh-quote-pdf";
 import { buildKoreanQuotePdf } from "@/lib/build-korean-quote-pdf";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 
@@ -100,7 +100,7 @@ export async function GET(
     if (localeKo) {
       // 한국어 견적서 (Noto Sans KR + THINKAD 브랜드)
       try {
-        const catalog = await fetchPublicMediaCatalog();
+        const catalog = await fetchPublicMediaCatalogList();
         const rows = catalog
           .filter((m) => row.mediaIds.includes(m.id))
           .map((m) => ({

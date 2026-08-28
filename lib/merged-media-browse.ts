@@ -7,7 +7,7 @@ import { mediaItemMatchesNetworkTypeChip } from "@/lib/media-network-types";
 import { compareMediaPopularRank } from "@/lib/media-popularity";
 import { getCachedDailyEngagementScoreRecord } from "@/lib/media-popularity-daily-cache";
 import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { isDatabaseConfigured } from "@/lib/prisma";
 import type {
   PublicMediaQueryParams,
@@ -140,7 +140,7 @@ export function sortMergedBrowseCatalog(
 }
 
 export async function loadMergedBrowseCatalog(): Promise<MediaItem[]> {
-  return fetchPublicMediaCatalog();
+  return fetchPublicMediaCatalogList();
 }
 
 export function filterMergedBrowseCatalog(

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   previewHomeBudgetMedia,
   type HomeBudgetIndustry,
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   const isKo = (locale ?? "ko").startsWith("ko");
 
   try {
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     const scored = previewHomeBudgetMedia(
       catalog,
       budgetMan,

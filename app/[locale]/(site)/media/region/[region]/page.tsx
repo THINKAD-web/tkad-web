@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   KNOWN_REGION_SLUGS,
   regionLabel,
@@ -29,7 +29,7 @@ type Props = {
  * `/[locale]/media/region/[region]` — 지역별 OOH 매체 키워드 랜딩.
  *
  * 운영 안전:
- *   - DB(`fetchPublicMediaCatalog`) 가 source of truth — mock 데이터 사용 X
+ *   - DB(`fetchPublicMediaCatalogList`) 가 source of truth — mock 데이터 사용 X
  *   - 알 수 없는 region 슬러그 → 카탈로그에 매체 0건이면 notFound() (soft 404 회피)
  *   - SEO 콘텐츠는 텍스트 템플릿 (AI 생성 X)
  */
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   let count = 0;
   try {
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     count = catalog.filter((m) => m.region === decodedRegion).length;
   } catch {
     /* 카탈로그 실패 시 count=0 — metadata 만 반환 */
@@ -92,9 +92,9 @@ export default async function RegionLandingPage({ params }: Props) {
   const decodedRegion = decodeURIComponent(region);
   const isKo = locale === "ko";
 
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalog>> = [];
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
   try {
-    catalog = await fetchPublicMediaCatalog();
+    catalog = await fetchPublicMediaCatalogList();
   } catch {
     /* DB 미설정 등 — 빈 카탈로그로 notFound */
   }

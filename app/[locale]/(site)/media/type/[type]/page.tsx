@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   KNOWN_TYPE_SLUGS,
   typeLabel,
@@ -32,7 +32,7 @@ type Props = {
 /**
  * `/[locale]/media/type/[type]` — 매체 유형별 OOH 매체 키워드 랜딩.
  *
- * 운영 안전: DB(`fetchPublicMediaCatalog`) 가 source of truth, 콘텐츠는 텍스트
+ * 운영 안전: DB(`fetchPublicMediaCatalogList`) 가 source of truth, 콘텐츠는 텍스트
  * 템플릿 (AI 생성 X), 알 수 없는 슬러그 + 0건 → notFound.
  */
 
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   let count = 0;
   try {
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     count = catalog.filter((m) => m.type === decodedType).length;
   } catch {
     /* 카탈로그 실패 시 count=0 */
@@ -99,9 +99,9 @@ export default async function TypeLandingPage({ params }: Props) {
   const decodedType = decodeURIComponent(type);
   const isKo = locale === "ko";
 
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalog>> = [];
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
   try {
-    catalog = await fetchPublicMediaCatalog();
+    catalog = await fetchPublicMediaCatalogList();
   } catch {
     /* 빈 카탈로그 */
   }

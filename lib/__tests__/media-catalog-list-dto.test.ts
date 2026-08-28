@@ -72,6 +72,24 @@ test("mediaItemToCatalogListItem resolves CDN thumbnail", () => {
   assert.equal(thumb.src, dto.thumbnailUrl);
 });
 
+test("mediaItemToCatalogListItem keeps browse filter taxonomy fields", () => {
+  const dto = mediaItemToCatalogListItem(
+    fixtureMediaItem({
+      regionMain: "seoul",
+      regionSub: "seoul_gangnam",
+      mediaMainCategory: "ooh",
+      mediaSubCategory: "billboard",
+      mediaCategory: ["ooh", "billboard"],
+      targetCategory: ["brand"],
+      operatingHours: "24h",
+    }),
+  );
+  assert.equal(dto.regionMain, "seoul");
+  assert.equal(dto.regionSub, "seoul_gangnam");
+  assert.equal(dto.mediaMainCategory, "ooh");
+  assert.deepEqual(dto.mediaCategory, ["ooh", "billboard"]);
+});
+
 test("catalogListItemToMediaItem round-trips list-card fields", () => {
   const dto = mediaItemToCatalogListItem(fixtureMediaItem());
   const media = catalogListItemToMediaItem(dto);

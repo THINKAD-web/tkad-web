@@ -7,7 +7,7 @@ import {
 } from "@/lib/matching-engine";
 import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import { mediaMonthlyPriceWon } from "@/lib/media-price-transparency";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   rfpGroupToMatchingInput,
   type RfpGroupToMatchingOpts,
@@ -56,7 +56,7 @@ export type MatchRfpProposalBriefOpts = {
   strictRegionalPool?: boolean;
   isKo?: boolean;
   seed?: number;
-  /** 테스트용 — 주입 시 fetchPublicMediaCatalog 생략 */
+  /** 테스트용 — 주입 시 fetchPublicMediaCatalogList 생략 */
   catalog?: readonly MediaItem[];
   toMatchingOpts?: RfpGroupToMatchingOpts;
 };
@@ -160,7 +160,7 @@ export async function matchRfpProposalBrief(
   );
 
   const fullCatalog =
-    opts?.catalog ?? (await fetchPublicMediaCatalog());
+    opts?.catalog ?? (await fetchPublicMediaCatalogList());
   let catalog = fullCatalog.filter(
     (m) => m?.id && typeof m.id === "string" && m.id.trim().length > 0,
   );

@@ -5,7 +5,7 @@ import { BLOG_SEO_POSTS } from "@/lib/blog-seo-posts";
 import { LOCAL_SEO_LANDINGS, localSeoPath } from "@/lib/local-seo-landings";
 import { MARKETING_MEDIA_TYPE_SLUGS } from "@/lib/marketing-media-types";
 import { PUBLIC_NAV_GROUPS } from "@/lib/navigation/public-nav-data";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 import { getPublishedInsightReports } from "@/lib/public-content-queries";
 import { sitemapPaths } from "@/lib/seo";
@@ -87,7 +87,7 @@ export async function collectInternalPaths(opts?: {
   }
 
   try {
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     const limit = opts?.mediaLimit ?? 40;
     for (const m of catalog.slice(0, limit)) {
       paths.add(`/media/${m.id}`);

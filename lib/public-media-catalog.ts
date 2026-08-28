@@ -18,6 +18,11 @@ import {
 } from "@/lib/optimized-image-url";
 import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
 import { keywordFilterItemToMediaItem } from "@/lib/keyword-filter-media-detail";
+import {
+  catalogListItemsToMediaItems,
+  mediaItemsToCatalogListItems,
+  type MediaCatalogListItem,
+} from "@/lib/media-catalog-list-dto";
 import { getMediaBrowseMockCatalog } from "@/lib/media-browse-catalog";
 import { isKoreaMediaCountry } from "@/lib/media-country";
 import {
@@ -435,9 +440,8 @@ async function appendNetworksIfAny(base: MediaItem[]): Promise<MediaItem[]> {
 export const PUBLIC_MEDIA_CATALOG_CACHE_TAG = "public-media-catalog";
 export const PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS = 3600;
 
-async function loadPublicMediaCatalogFromDb(): Promise<MediaItem[]> {
-  const { logMediaCacheMiss } = await import("@/lib/media-cache-diagnostics");
-  logMediaCacheMiss("public-media-catalog");
+/** Shared DB pipeline for full catalog rows (uncached). */
+export async function loadPublicMediaCatalogRowsFromDb(): Promise<MediaItem[]> {
   const db = getPrisma();
   const rows = await db.media.findMany({
     where: publicActiveMediaWhere(),
@@ -458,39 +462,96 @@ async function loadPublicMediaCatalogFromDb(): Promise<MediaItem[]> {
   return appendNetworksIfAny(await attachMediaTrustToMediaItems(withReviews));
 }
 
-const getCrossRequestPublicMediaCatalog = unstable_cache(
-  loadPublicMediaCatalogFromDb,
-  ["public-media-catalog-v3"],
+async function loadPublicMediaCatalogFromDb(): Promise<MediaItem[]> {
+  const { logMediaCacheMiss } = await import("@/lib/media-cache-diagnostics");
+  logMediaCacheMiss("public-media-catalog");
+  return loadPublicMediaCatalogRowsFromDb();
+}
+
+/** Full catalog — uncached (6MB+; Data Cache 2MB limit). Low-traffic/admin/scripts only. */
+export const fetchPublicMediaCatalogFull = cache(
+  async function fetchPublicMediaCatalogFull(): Promise<MediaItem[]> {
+    const forceMockOnly =
+      process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "1" ||
+      process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "true";
+
+    if (!isDatabaseConfigured() || forceMockOnly) {
+      return appendNetworksIfAny(getMediaBrowseMockCatalog());
+    }
+
+    try {
+      return await loadPublicMediaCatalogFromDb();
+    } catch (e) {
+      console.error(
+        "[fetchPublicMediaCatalogFull] DB query failed — returning empty catalog (NOT mocks)",
+        e instanceof Error ? `${e.name}: ${e.message}` : e,
+      );
+      return appendNetworksIfAny([]);
+    }
+  },
+);
+
+/**
+ * @deprecated Prefer `fetchPublicMediaCatalogList()` for browse/list paths.
+ * Kept as alias to full uncached loader for scripts and legacy callers.
+ */
+export const fetchPublicMediaCatalog = fetchPublicMediaCatalogFull;
+
+async function appendNetworkListItems(
+  base: MediaCatalogListItem[],
+): Promise<MediaCatalogListItem[]> {
+  try {
+    const networks = await fetchPublicMediaNetworks();
+    if (networks.length === 0) return base;
+    return [...base, ...mediaItemsToCatalogListItems(networks)];
+  } catch {
+    return base;
+  }
+}
+
+async function loadPublicMediaCatalogListFromDb(): Promise<MediaCatalogListItem[]> {
+  const { logMediaCacheMiss } = await import("@/lib/media-cache-diagnostics");
+  logMediaCacheMiss("public-media-catalog-list");
+  const rows = await loadPublicMediaCatalogRowsFromDb();
+  return appendNetworkListItems(mediaItemsToCatalogListItems(rows));
+}
+
+const getCrossRequestPublicMediaCatalogList = unstable_cache(
+  loadPublicMediaCatalogListFromDb,
+  ["public-media-catalog-list-v1"],
   {
     revalidate: PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS,
     tags: [PUBLIC_MEDIA_CATALOG_CACHE_TAG],
   },
 );
 
-/** 비브라우즈 페이지·API용. `/media` 목록은 `fetchMediaBrowseCatalog()`(`lib/media-browse-catalog`) 사용. */
-export const fetchPublicMediaCatalog = cache(async function fetchPublicMediaCatalog(): Promise<
-  MediaItem[]
-> {
-  const forceMockOnly =
-    process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "1" ||
-    process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "true";
+/** Browse/list/filter catalog — slim DTO cached under 2MB Data Cache limit. */
+export const fetchPublicMediaCatalogList = cache(
+  async function fetchPublicMediaCatalogList(): Promise<MediaItem[]> {
+    const forceMockOnly =
+      process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "1" ||
+      process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "true";
 
-  if (!isDatabaseConfigured() || forceMockOnly) {
-    return appendNetworksIfAny(getMediaBrowseMockCatalog());
-  }
+    if (!isDatabaseConfigured() || forceMockOnly) {
+      return catalogListItemsToMediaItems(
+        await appendNetworkListItems(
+          mediaItemsToCatalogListItems(getMediaBrowseMockCatalog()),
+        ),
+      );
+    }
 
-  try {
-    return await getCrossRequestPublicMediaCatalog();
-  } catch (e) {
-    // CLAUDE.md: 공개 카탈로그는 DB 가 진실. 컬럼 drift·일시 장애시
-    // 목업으로 조용히 떨어지면 운영자가 알아채지 못함. 명시적으로 로깅.
-    console.error(
-      "[fetchPublicMediaCatalog] DB query failed — returning empty catalog (NOT mocks)",
-      e instanceof Error ? `${e.name}: ${e.message}` : e,
-    );
-    return appendNetworksIfAny([]);
-  }
-});
+    try {
+      const slim = await getCrossRequestPublicMediaCatalogList();
+      return catalogListItemsToMediaItems(slim);
+    } catch (e) {
+      console.error(
+        "[fetchPublicMediaCatalogList] DB query failed — returning empty catalog (NOT mocks)",
+        e instanceof Error ? `${e.name}: ${e.message}` : e,
+      );
+      return [];
+    }
+  },
+);
 
 /**
  * 홈 추천 매체 (`app/[locale]/page.tsx` TOP 3·Verified 그리드).
@@ -780,7 +841,7 @@ export async function fetchHomeHeroVisualAssets(): Promise<{
     };
   }
   try {
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     if (catalog.length === 0) {
       const mock = getMediaBrowseMockCatalog();
       return {
@@ -857,15 +918,14 @@ export async function resolveMediaForDetail(
       where: publicActiveMediaWhere({
         OR: [{ id: slugOrId }, { slug: slugOrId }],
       }),
-      include: {
-        advertiserExecutions: {
-          select: { advertiserName: true },
-          orderBy: { createdAt: "desc" },
-        },
-      },
+      include: PUBLIC_MEDIA_CATALOG_INCLUDE,
     });
     if (!row) return null;
-    const [rowWithCoverage] = await attachPublicMediaCatalogExtras(db, [row]);
+    const [rowWithCoverage] = await attachPublicMediaCatalogExtras(
+      db,
+      [row],
+      { includeInstallLocations: true },
+    );
     return prismaMediaToMediaItem(rowWithCoverage);
   } catch {
     return null;

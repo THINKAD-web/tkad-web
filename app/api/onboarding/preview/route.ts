@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/user-session";
 import { getUserPreferenceByUserId } from "@/lib/user-preference";
 import { recommendMediaForPreference } from "@/lib/onboarding-recommend";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   getPrimaryMediaImageUrl,
   typeLabels,
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
   const locale = searchParams.get("locale") === "en" ? "en" : "ko";
 
   const pref = await getUserPreferenceByUserId(user.id);
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   const items = recommendMediaForPreference(
     pref ?? {
       onboardingRole: null,

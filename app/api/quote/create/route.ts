@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import {
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
     const mediaSelectionsJson = parseQuoteMediaSelections(mediaSelectionsRaw);
 
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     const picked = catalog.filter((m) => mediaIds.includes(m.id));
     if (picked.length === 0) {
       return apiError("NO_VALID_MEDIA", 400, {

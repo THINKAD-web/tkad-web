@@ -1,5 +1,5 @@
 import type { MediaOwnerReportType } from "@prisma/client";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   buildMediaAnalyticsReportFused,
   type MediaAnalyticsReport,
@@ -155,7 +155,7 @@ export async function loadMediaOwnerReportPayload(opts: {
   });
   if (!row) return null;
 
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   const media = dbMediaToItem(row);
   const catalogItem = catalog.find((c) => c.id === media.id) ?? media;
   const stored = row.trafficPattern as StoredTrafficPattern | null;

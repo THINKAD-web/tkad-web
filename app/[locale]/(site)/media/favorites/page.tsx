@@ -3,7 +3,7 @@ export const revalidate = 0;
 
 import { Suspense } from "react";
 import { redirect } from "@/i18n/navigation";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { MediaFavoritesPageClient } from "@/components/media-favorites-page-client";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
@@ -19,7 +19,7 @@ export default async function MediaFavoritesPage({ params }: Props) {
     redirect({ href: "/my?tab=favorites", locale });
   }
 
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
 
   return (
     <HomeLandingDayNight>

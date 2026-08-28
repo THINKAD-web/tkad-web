@@ -3,7 +3,7 @@ import {
   formatMediaPriceCompactWon,
   mediaPriceExclNoteText,
 } from "@/lib/media-price-format";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import type {
   RfpGroupMatchResult,
   RfpMatchedMediaSummary,
@@ -65,7 +65,7 @@ export async function buildRfpProposalExportPayload(
   );
   const [availability, catalog] = await Promise.all([
     fetchRfpMediaAvailabilityBatch(allIds, args.availabilityMonth),
-    fetchPublicMediaCatalog(),
+    fetchPublicMediaCatalogList(),
   ]);
   const catalogById = new Map(catalog.map((m) => [m.id, m]));
 

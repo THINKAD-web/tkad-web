@@ -21,7 +21,7 @@ import {
 } from "@/lib/structured-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { mediaDetailPricePeriodTranslationKey } from "@/lib/media-price-format";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { getCurrentUser } from "@/lib/user-session";
 import { checkReportAccess } from "@/lib/report-access";
 import {
@@ -92,9 +92,9 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
   const media = networkRowToDetailMediaItem(row);
   const isKo = locale === "ko";
 
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalog>> = [];
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
   try {
-    catalog = await fetchPublicMediaCatalog();
+    catalog = await fetchPublicMediaCatalogList();
   } catch (e) {
     console.error("[network-detail] catalog fetch failed", e);
   }

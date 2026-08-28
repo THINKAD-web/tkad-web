@@ -2,14 +2,14 @@ import { unstable_cache } from "next/cache";
 import { buildBrowseFilterOptionCounts } from "@/lib/media-browse-filter-option-counts";
 import type { BrowseFilterOptionCounts } from "@/lib/media-browse-filter-option-counts";
 import {
-  fetchPublicMediaCatalog,
+  fetchPublicMediaCatalogList,
   PUBLIC_MEDIA_CATALOG_CACHE_TAG,
   PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS,
 } from "@/lib/public-media-catalog";
 
 const getCachedPublicMediaFilterCounts = unstable_cache(
   async (): Promise<BrowseFilterOptionCounts> => {
-    const items = await fetchPublicMediaCatalog();
+    const items = await fetchPublicMediaCatalogList();
     return buildBrowseFilterOptionCounts(items);
   },
   ["public-media-filter-counts-v1"],

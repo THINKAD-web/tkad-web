@@ -1,4 +1,4 @@
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 import { siteUrl } from "@/lib/seo";
 
@@ -69,7 +69,7 @@ async function probeImageUrl(
 }
 
 export async function scanBrokenMediaImages(): Promise<MediaImageHealthResult> {
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   const withThumb = catalog
     .map((m) => {
       const raw = getPrimaryMediaImageUrl(m);

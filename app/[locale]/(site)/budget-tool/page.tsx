@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { buildShareMetadata, pageAlternates } from "@/lib/seo";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { curateAllBudgetTiers } from "@/lib/budget-tool-curations";
 import { BudgetToolClient } from "./budget-tool-client";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BudgetToolPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   const curations = curateAllBudgetTiers(catalog);
 
   return (

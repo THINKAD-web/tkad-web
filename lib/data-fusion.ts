@@ -362,8 +362,8 @@ export async function getFusedMediaData(
 export async function refreshAllMediaFusion(limit = 200): Promise<number> {
   if (!isDatabaseConfigured()) return 0;
   const db = getPrisma();
-  const { fetchPublicMediaCatalog } = await import("@/lib/public-media-catalog");
-  const catalog = await fetchPublicMediaCatalog();
+  const { fetchPublicMediaCatalogList } = await import("@/lib/public-media-catalog");
+  const catalog = await fetchPublicMediaCatalogList();
   let count = 0;
   for (const m of catalog.slice(0, limit)) {
     try {
