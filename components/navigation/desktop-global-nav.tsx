@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback, startTransition } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -20,6 +20,9 @@ import {
   type ResolvedPublicNavItem,
 } from "@/lib/navigation/build-public-nav";
 import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
+
+/** Ignore rapid double-taps that open-then-immediately-close the panel. */
+const MOBILE_NAV_TOGGLE_GUARD_MS = 320;
 
 function isMobileDetailPath(pathname: string): boolean {
   return (
@@ -203,6 +206,7 @@ export function DesktopGlobalNav() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const mobileScrollLockYRef = useRef(0);
+  const mobileNavToggleLockUntilRef = useRef(0);
   const commandPalette = useCommandPaletteOptional();
 
   const navGroups = useMemo(() => buildPublicNavGroups(t), [t]);
@@ -218,6 +222,15 @@ export function DesktopGlobalNav() {
       return resolved;
     });
   }, []);
+
+  const toggleMobileNav = useCallback(() => {
+    const now = Date.now();
+    if (now < mobileNavToggleLockUntilRef.current) return;
+    mobileNavToggleLockUntilRef.current = now + MOBILE_NAV_TOGGLE_GUARD_MS;
+    startTransition(() => {
+      setMobileNavOpenSafe((v) => !v);
+    });
+  }, [setMobileNavOpenSafe]);
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -256,7 +269,10 @@ export function DesktopGlobalNav() {
       html.style.overflow = prevHtmlOverflow;
       body.style.overflow = prevBodyOverflow;
       html.classList.remove("tkad-nav-scroll-lock");
-      window.scrollTo(0, scrollY);
+      const y = scrollY;
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: y, left: 0, behavior: "instant" });
+      });
     };
   }, [mobileNavOpen, setMobileNavOpenSafe]);
 
@@ -338,7 +354,7 @@ export function DesktopGlobalNav() {
           <HeaderDesktopChrome isKo={isKo} />
           <button
             type="button"
-            onClick={() => setMobileNavOpenSafe((v) => !v)}
+            onClick={toggleMobileNav}
             className="tkad-site-header-menu-btn md:hidden"
             aria-label={
               mobileNavOpen
