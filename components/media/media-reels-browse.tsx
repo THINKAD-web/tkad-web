@@ -64,6 +64,26 @@ function ReelsSlide({
   onTogglePlan?: () => void;
   priority?: boolean;
 }) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [imageVisible, setImageVisible] = useState(Boolean(priority));
+
+  useEffect(() => {
+    if (priority || imageVisible) return;
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setImageVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "240px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [imageVisible, priority]);
+
   const model = catalogItemToDisplayModel(item, { href, isKo });
   const thumb = item.thumbnailUrl
     ? catalogThumbnailImageProps(item.thumbnailUrl)
@@ -73,21 +93,23 @@ function ReelsSlide({
 
   return (
     <section
+      ref={sectionRef}
       className="relative h-[calc(100dvh-11rem)] min-h-[28rem] w-full shrink-0 snap-start snap-always overflow-hidden rounded-2xl bg-gray-950 sm:h-[calc(100dvh-12rem)]"
       data-reels-slide={item.id}
     >
-      {thumb ? (
+      {imageVisible && thumb ? (
         <Image
           src={thumb.src}
           alt={item.name}
           fill
           priority={priority}
+          loading={priority ? undefined : "lazy"}
           className="object-cover"
           sizes="100vw"
           unoptimized={thumb.unoptimized}
         />
       ) : (
-        <div className="absolute inset-0 bg-gray-800" />
+        <div className="absolute inset-0 animate-pulse bg-gray-800" aria-hidden />
       )}
       <div
         className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/15"

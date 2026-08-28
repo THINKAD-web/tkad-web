@@ -251,7 +251,7 @@ export function PublicNavSidebar({
                 role="region"
                 aria-labelledby={`nav-group-${group.id}`}
                 className={cn(
-                  "grid transition-[grid-template-rows] duration-200 ease-out",
+                  "grid transition-[grid-template-rows] duration-150 ease-out",
                   expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
                 )}
               >

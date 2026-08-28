@@ -72,6 +72,9 @@ import {
   MEDIA_BROWSE_CARD_GRID_CLASS,
 } from "@/lib/media-browse-grid";
 import { MediaReelsBrowse } from "@/components/media/media-reels-browse";
+import { MapNavigationLoading } from "@/components/media/map-navigation-loading";
+import { MapChunkPrefetch } from "@/components/media-map/map-chunk-prefetch";
+import { prefetchMapChunks, prefetchOnIdle } from "@/lib/lazy-chunk-prefetch";
 import {
   DiscoveryMediaFeedCardSkeleton,
 } from "@/components/discovery/discovery-route-skeletons";
@@ -361,6 +364,8 @@ function MediaSearchPageInner({
     () => !plannerMode && initialMedia.length === 0,
   );
   const [loadingMore, setLoadingMore] = useState(false);
+  const [refetching, setRefetching] = useState(false);
+  const [mapNavigating, setMapNavigating] = useState(false);
   const catalogFetchGeneration = useRef(0);
   const mediaCountRef = useRef(0);
   mediaCountRef.current = media.length;
@@ -550,7 +555,8 @@ function MediaSearchPageInner({
       const isStale = () => catalogFetchGeneration.current !== fetchGeneration;
 
       if (opts.append) setLoadingMore(true);
-      else setLoading(true);
+      else if (mediaCountRef.current === 0) setLoading(true);
+      else setRefetching(true);
       try {
         if (plannerMode) {
           const source = initialCatalogItems;
@@ -634,7 +640,10 @@ function MediaSearchPageInner({
       } finally {
         if (isStale()) return;
         if (opts.append) setLoadingMore(false);
-        else setLoading(false);
+        else {
+          setLoading(false);
+          setRefetching(false);
+        }
       }
     },
     [
@@ -670,6 +679,8 @@ function MediaSearchPageInner({
   );
 
   const navigateToMap = useCallback(() => {
+    prefetchMapChunks();
+    setMapNavigating(true);
     const qs = buildMediaBrowseQueryString({
       query,
       mainCategory,
@@ -772,7 +783,7 @@ function MediaSearchPageInner({
   useEffect(() => {
     catalogFetchGeneration.current += 1;
     const generation = catalogFetchGeneration.current;
-    const debounceMs = generation === 1 ? 0 : 300;
+    const debounceMs = generation === 1 ? 0 : 150;
     const timer = setTimeout(() => {
       if (catalogFetchGeneration.current !== generation) return;
 
@@ -920,6 +931,11 @@ function MediaSearchPageInner({
   /** `/media` 라우트에서 명시적으로 opt-in 했을 때만 고정 앱 셸로 렌더 (임베드/플래너 제외) */
   const appShell = appShellEnabled && !embedded && !plannerMode;
 
+  useEffect(() => {
+    if (!appShell) return;
+    return prefetchOnIdle(() => prefetchMapChunks());
+  }, [appShell]);
+
   const filtersBar = (
     <DiscoveryFilterBar
       isKo={isKo}
@@ -950,7 +966,7 @@ function MediaSearchPageInner({
       onViewModeChange={handleViewModeChange}
       resultCount={media.length}
       totalCount={total}
-      loading={loading && !loadingMore}
+      loading={loading && !loadingMore && media.length === 0}
       unifiedToolbar={appShell}
       mobileBottomBar={false}
       mobileStickyToolbar={appShell}
@@ -1002,7 +1018,7 @@ function MediaSearchPageInner({
   );
 
   const showListSkeleton = loading && !loadingMore && media.length === 0;
-  const listRefetching = loading && !loadingMore && media.length > 0;
+  const listRefetching = refetching && !loadingMore && media.length > 0;
 
   const listRefetchOverlay = (
     <div
@@ -1234,6 +1250,8 @@ function MediaSearchPageInner({
   if (appShell) {
     return (
       <>
+        {appShell ? <MapChunkPrefetch /> : null}
+        {mapNavigating ? <MapNavigationLoading /> : null}
         <div className="tkad-media-app-shell tkad-media-list-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]">
           <div className="min-w-0 px-4 pt-3">{filtersBar}</div>
           <div className="min-w-0 px-4 pt-3 pb-[calc(4.25rem+1.5rem+env(safe-area-inset-bottom,0px))] lg:pb-6">

@@ -5,7 +5,9 @@ import dynamic from "next/dynamic";
 import { useLocale } from "next-intl";
 import { X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { SupportAiChatModalLoading } from "@/components/support/support-ai-chat-modal-loading";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
+import { prefetchOnIdle, prefetchSupportAiChatModal } from "@/lib/lazy-chunk-prefetch";
 import { cn } from "@/lib/utils";
 
 const SupportAiChatModal = dynamic(
@@ -13,7 +15,7 @@ const SupportAiChatModal = dynamic(
     import("@/components/support/support-ai-chat-modal").then(
       (m) => m.SupportAiChatModal,
     ),
-  { ssr: false },
+  { ssr: false, loading: SupportAiChatModalLoading },
 );
 
 const OPEN_EVENT = "tkad-open-contact-sheet";
@@ -143,7 +145,10 @@ function ContactChannelSheetUI({
 
           <button
             type="button"
+            onPointerEnter={() => prefetchSupportAiChatModal()}
+            onTouchStart={() => prefetchSupportAiChatModal()}
             onClick={() => {
+              prefetchSupportAiChatModal();
               onClose();
               onOpenAi();
             }}
@@ -203,20 +208,34 @@ export function ContactChannelProvider({ children }: { children: ReactNode }) {
   }, [open]);
 
   useEffect(() => {
-    const handler = () => openAi();
+    const handler = () => {
+      prefetchSupportAiChatModal();
+      openAi();
+    };
     window.addEventListener(OPEN_AI_EVENT, handler);
     return () => window.removeEventListener(OPEN_AI_EVENT, handler);
   }, [openAi]);
 
+  useEffect(() => {
+    return prefetchOnIdle(() => prefetchSupportAiChatModal());
+  }, []);
+
+  const handleOpenAi = useCallback(() => {
+    prefetchSupportAiChatModal();
+    setAiOpen(true);
+  }, []);
+
   return (
-    <ContactChannelContext.Provider value={{ open, close, openAi }}>
+    <ContactChannelContext.Provider value={{ open, close, openAi: handleOpenAi }}>
       {children}
       <ContactChannelSheetUI
         open={sheetOpen}
         onClose={close}
-        onOpenAi={() => setAiOpen(true)}
+        onOpenAi={handleOpenAi}
       />
-      <SupportAiChatModal open={aiOpen} onClose={() => setAiOpen(false)} />
+      {aiOpen ? (
+        <SupportAiChatModal open={aiOpen} onClose={() => setAiOpen(false)} />
+      ) : null}
     </ContactChannelContext.Provider>
   );
 }

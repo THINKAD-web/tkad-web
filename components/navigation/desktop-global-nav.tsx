@@ -21,6 +21,9 @@ import {
 } from "@/lib/navigation/build-public-nav";
 import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 
+/** Ignore rapid double-taps that open-then-immediately-close the panel. */
+const MOBILE_NAV_TOGGLE_GUARD_MS = 320;
+
 function isMobileDetailPath(pathname: string): boolean {
   return (
     (/^\/media\/[^/]+$/.test(pathname) && !pathname.startsWith("/media/map")) ||
@@ -202,7 +205,9 @@ export function DesktopGlobalNav() {
   const t = useTranslations();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [mobileNavContentReady, setMobileNavContentReady] = useState(false);
   const mobileScrollLockYRef = useRef(0);
+  const mobileNavToggleLockUntilRef = useRef(0);
   const commandPalette = useCommandPaletteOptional();
 
   const navGroups = useMemo(() => buildPublicNavGroups(t), [t]);
@@ -219,8 +224,25 @@ export function DesktopGlobalNav() {
     });
   }, []);
 
+  const toggleMobileNav = useCallback(() => {
+    const now = Date.now();
+    if (now < mobileNavToggleLockUntilRef.current) return;
+    mobileNavToggleLockUntilRef.current = now + MOBILE_NAV_TOGGLE_GUARD_MS;
+    setMobileNavOpenSafe((v) => !v);
+  }, [setMobileNavOpenSafe]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) {
+      setMobileNavContentReady(false);
+      return;
+    }
+    const id = requestAnimationFrame(() => setMobileNavContentReady(true));
+    return () => cancelAnimationFrame(id);
+  }, [mobileNavOpen]);
+
   useEffect(() => {
     setMobileNavOpen(false);
+    setMobileNavContentReady(false);
     setOpenMenu(null);
   }, [pathname]);
 
@@ -256,7 +278,10 @@ export function DesktopGlobalNav() {
       html.style.overflow = prevHtmlOverflow;
       body.style.overflow = prevBodyOverflow;
       html.classList.remove("tkad-nav-scroll-lock");
-      window.scrollTo(0, scrollY);
+      const y = scrollY;
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: y, left: 0, behavior: "instant" });
+      });
     };
   }, [mobileNavOpen, setMobileNavOpenSafe]);
 
@@ -338,7 +363,7 @@ export function DesktopGlobalNav() {
           <HeaderDesktopChrome isKo={isKo} />
           <button
             type="button"
-            onClick={() => setMobileNavOpenSafe((v) => !v)}
+            onClick={toggleMobileNav}
             className="tkad-site-header-menu-btn md:hidden"
             aria-label={
               mobileNavOpen
@@ -393,11 +418,22 @@ export function DesktopGlobalNav() {
               className={cn(headerMobileMenuRowClass, "px-1")}
             />
           </div>
-          <PublicNavSidebar
-            groups={navGroups}
-            onNavigate={() => setMobileNavOpenSafe(false)}
-            density="panel"
-          />
+          {mobileNavContentReady ? (
+            <PublicNavSidebar
+              groups={navGroups}
+              onNavigate={() => setMobileNavOpenSafe(false)}
+              density="panel"
+            />
+          ) : (
+            <div className="space-y-2 px-1 py-2" aria-hidden>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-11 animate-pulse rounded-lg bg-gray-100 dark:bg-white/10"
+                />
+              ))}
+            </div>
+          )}
         </div>
       ) : null}
     </header>
