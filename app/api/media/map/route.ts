@@ -1,5 +1,4 @@
 import {
-  mapItemShowsOnMap,
   resolveMapDisplayMode,
   resolveServiceRegionLabel,
   type MapDisplayMode,
@@ -13,6 +12,7 @@ import {
   sortMapCatalogItems,
   type MapCatalogFilterParams,
 } from "@/lib/public-media-map-filter";
+import { applyMapPinResponseLimit } from "@/lib/media-map/map-pin-response-limit";
 import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
 import type { PublicMediaSort } from "@/lib/public-media-query";
 import { apiOk, apiServerError } from "@/lib/api-response";
@@ -194,16 +194,28 @@ export async function GET(req: Request) {
     );
 
     const sorted = sortMapCatalogItems(filtered, filterParams.sort);
-    let mapPlottableTotal = 0;
+
+    const zoomRaw = parseFloatOrNull(sp.get("zoom"));
+    const zoom =
+      zoomRaw != null && zoomRaw >= 1 && zoomRaw <= 14
+        ? Math.round(zoomRaw)
+        : null;
+
+    const { items: limitedCatalog, mapPlottableTotal, mapPinsReturned, mapPinsTruncated } =
+      applyMapPinResponseLimit(sorted, {
+        bounds,
+        zoom,
+        prioritizeViewport: true,
+      });
+
     let serviceRegionTotal = 0;
     let locationUnknownTotal = 0;
 
-    const items = sorted.map((m) => {
+    const items = limitedCatalog.map((m) => {
       const mapDisplayMode = resolveMapDisplayMode(m);
       const serviceRegionLabel = resolveServiceRegionLabel(m);
-      if (mapItemShowsOnMap(mapDisplayMode)) mapPlottableTotal += 1;
-      else if (mapDisplayMode === "service_region") serviceRegionTotal += 1;
-      else locationUnknownTotal += 1;
+      if (mapDisplayMode === "service_region") serviceRegionTotal += 1;
+      else if (mapDisplayMode === "location_unknown") locationUnknownTotal += 1;
       return toMapItem(m, mapDisplayMode, serviceRegionLabel);
     });
 
@@ -212,6 +224,8 @@ export async function GET(req: Request) {
       total: items.length,
       matchTotal: filterMatched.length,
       mapPlottableTotal,
+      mapPinsReturned,
+      mapPinsTruncated,
       serviceRegionTotal,
       locationUnknownTotal,
       facets,

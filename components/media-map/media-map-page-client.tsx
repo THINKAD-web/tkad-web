@@ -155,6 +155,10 @@ export default function MediaMapPageClient() {
   const [mapPlottableTotal, setMapPlottableTotal] = useState<number | undefined>(
     undefined,
   );
+  const [mapPinsTruncated, setMapPinsTruncated] = useState(false);
+  const [mapPinsReturned, setMapPinsReturned] = useState<number | undefined>(
+    undefined,
+  );
   const [serviceRegionTotal, setServiceRegionTotal] = useState<
     number | undefined
   >(undefined);
@@ -268,6 +272,11 @@ export default function MediaMapPageClient() {
   );
   const viewportDirtyRef = useRef(false);
   const boundsRef = useRef<MapBounds | null>(null);
+  const viewRef = useRef(view);
+
+  useEffect(() => {
+    viewRef.current = view;
+  }, [view]);
 
   useEffect(() => {
     return () => {
@@ -382,6 +391,16 @@ export default function MediaMapPageClient() {
   }, []);
 
   useEffect(() => {
+    if (!initialFetchDoneRef.current) return;
+    const b = searchedBoundsRef.current ?? boundsRef.current;
+    if (!b) return;
+    const timer = window.setTimeout(() => {
+      void fetchItems(b, browseFiltersRef.current);
+    }, MAP_AUTO_SEARCH_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [view?.zoom, fetchItems]);
+
+  useEffect(() => {
     if (!loading && items.length > 0) {
       markMapPageUsable();
     }
@@ -469,7 +488,11 @@ export default function MediaMapPageClient() {
       try {
         const { params, nationalScope, queryRegion } =
           mapBrowseFiltersToMapApiParams(f);
-        if (!nationalScope && b) {
+        const zoomLevel = Math.round(
+          viewRef.current?.zoom ?? programmaticView?.zoom ?? 8,
+        );
+        params.set("zoom", String(zoomLevel));
+        if (b) {
           params.set("swLat", String(b.swLat));
           params.set("swLng", String(b.swLng));
           params.set("neLat", String(b.neLat));
@@ -494,6 +517,8 @@ export default function MediaMapPageClient() {
             facets?: Facets;
             matchTotal?: number;
             mapPlottableTotal?: number;
+            mapPinsReturned?: number;
+            mapPinsTruncated?: boolean;
             serviceRegionTotal?: number;
             locationUnknownTotal?: number;
             locationUnknownIds?: string[];
@@ -520,6 +545,12 @@ export default function MediaMapPageClient() {
               ? data.data.mapPlottableTotal
               : next.filter(itemShowsMapPin).length,
           );
+          setMapPinsReturned(
+            typeof data.data.mapPinsReturned === "number"
+              ? data.data.mapPinsReturned
+              : next.filter(itemShowsMapPin).length,
+          );
+          setMapPinsTruncated(data.data.mapPinsTruncated === true);
           setServiceRegionTotal(
             typeof data.data.serviceRegionTotal === "number"
               ? data.data.serviceRegionTotal
@@ -561,15 +592,13 @@ export default function MediaMapPageClient() {
         }
       }
     },
-    [applyTextSearchMapView, isKo, toast],
+    [applyTextSearchMapView, isKo, programmaticView?.zoom, toast],
   );
 
   const runSearch = useCallback(
     async (b: MapBounds) => {
       const f = browseFiltersRef.current;
-      const ok = isMapTextSearchActive(f)
-        ? await fetchItems(null, f)
-        : await fetchItems(b, f);
+      const ok = await fetchItems(b, f);
       if (!ok) return;
       setSearchedBounds(b);
       searchedBoundsRef.current = b;
@@ -581,17 +610,14 @@ export default function MediaMapPageClient() {
   /** /media/map 진입 즉시 전국 개요 영역 검색 — 빈 지도 방지 */
   useEffect(() => {
     if (initialFetchDoneRef.current) return;
-    initialFetchDoneRef.current = true;
     const f = browseFiltersRef.current;
     void (async () => {
-      if (isMapTextSearchActive(f)) {
-        await fetchItems(null, f);
-        return;
-      }
-      const ok = await fetchItems(KOREA_MAP_OVERVIEW_BOUNDS, f);
+      const seedBounds = KOREA_MAP_OVERVIEW_BOUNDS;
+      const ok = await fetchItems(seedBounds, f);
+      initialFetchDoneRef.current = true;
       if (!ok) return;
-      setSearchedBounds(KOREA_MAP_OVERVIEW_BOUNDS);
-      searchedBoundsRef.current = KOREA_MAP_OVERVIEW_BOUNDS;
+      setSearchedBounds(seedBounds);
+      searchedBoundsRef.current = seedBounds;
     })();
   }, [fetchItems]);
 
@@ -612,10 +638,10 @@ export default function MediaMapPageClient() {
 
   // 필터 변경(지역 제외) — 텍스트 검색은 전국, 그 외는 현재 검색 영역
   useEffect(() => {
-    const b = searchedBoundsRef.current;
+    const b = searchedBoundsRef.current ?? boundsRef.current;
     const f = browseFilters;
     if (!b && !isMapTextSearchActive(f)) return;
-    void fetchItems(isMapTextSearchActive(f) ? null : b, f);
+    void fetchItems(b ?? KOREA_MAP_OVERVIEW_BOUNDS, f);
   }, [
     browseFilters.q,
     browseFilters.mainCategory,
@@ -723,7 +749,6 @@ export default function MediaMapPageClient() {
   useEffect(() => {
     clearAutoSearchDebounce();
 
-    if (isMapTextSearchActive(browseFilters)) return;
     if (!viewportDirty || !bounds || !searchedBounds) return;
     if (!mapBoundsChangeExceedsThreshold(searchedBounds, bounds)) return;
 
@@ -733,7 +758,6 @@ export default function MediaMapPageClient() {
       const b = boundsRef.current;
       const s = searchedBoundsRef.current;
       if (!b || !s) return;
-      if (isMapTextSearchActive(browseFiltersRef.current)) return;
       if (
         !mapBoundsChangeExceedsThreshold(
           s,
@@ -1360,6 +1384,22 @@ export default function MediaMapPageClient() {
 
           {mapChromeVisible ? (
             <div className="pointer-events-none absolute bottom-3 left-3 z-[10] flex max-w-[min(100%-1.5rem,220px)] flex-col items-start gap-2 sm:bottom-4 sm:left-4">
+              {mapPinsTruncated && mapPlottableTotal != null && mapPinsReturned != null ? (
+                <div
+                  className={cn(
+                    mapFloatingPanelClass(
+                      "pointer-events-auto px-3 py-2 text-left",
+                    ),
+                  )}
+                  role="status"
+                >
+                  <p className="tkad-type-note leading-snug text-foreground">
+                    {isKo
+                      ? `지도에 ${mapPinsReturned}건 표시 중(전체 ${mapPlottableTotal}건). 더 확대하거나 이동하면 추가 매체가 표시됩니다.`
+                      : `Showing ${mapPinsReturned} of ${mapPlottableTotal} pins — zoom in or pan to load more.`}
+                  </p>
+                </div>
+              ) : null}
               {showPinLabelCapHint && pinLabelState?.capActive ? (
                 <div
                   className={cn(
