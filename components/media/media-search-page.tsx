@@ -73,8 +73,7 @@ import {
 } from "@/lib/media-browse-grid";
 import { MediaReelsBrowse } from "@/components/media/media-reels-browse";
 import { MapNavigationLoading } from "@/components/media/map-navigation-loading";
-import { MapChunkPrefetch } from "@/components/media-map/map-chunk-prefetch";
-import { prefetchMapChunks, prefetchOnIdle } from "@/lib/lazy-chunk-prefetch";
+import { prefetchMapChunks } from "@/lib/lazy-chunk-prefetch";
 import {
   DiscoveryMediaFeedCardSkeleton,
 } from "@/components/discovery/discovery-route-skeletons";
@@ -931,11 +930,6 @@ function MediaSearchPageInner({
   /** `/media` 라우트에서 명시적으로 opt-in 했을 때만 고정 앱 셸로 렌더 (임베드/플래너 제외) */
   const appShell = appShellEnabled && !embedded && !plannerMode;
 
-  useEffect(() => {
-    if (!appShell) return;
-    return prefetchOnIdle(() => prefetchMapChunks());
-  }, [appShell]);
-
   const filtersBar = (
     <DiscoveryFilterBar
       isKo={isKo}
@@ -1250,7 +1244,6 @@ function MediaSearchPageInner({
   if (appShell) {
     return (
       <>
-        {appShell ? <MapChunkPrefetch /> : null}
         {mapNavigating ? <MapNavigationLoading /> : null}
         <div className="tkad-media-app-shell tkad-media-list-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]">
           <div className="min-w-0 px-4 pt-3">{filtersBar}</div>
