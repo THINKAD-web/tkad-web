@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useCallback, startTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -205,6 +205,7 @@ export function DesktopGlobalNav() {
   const t = useTranslations();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [mobileNavContentReady, setMobileNavContentReady] = useState(false);
   const mobileScrollLockYRef = useRef(0);
   const mobileNavToggleLockUntilRef = useRef(0);
   const commandPalette = useCommandPaletteOptional();
@@ -227,13 +228,21 @@ export function DesktopGlobalNav() {
     const now = Date.now();
     if (now < mobileNavToggleLockUntilRef.current) return;
     mobileNavToggleLockUntilRef.current = now + MOBILE_NAV_TOGGLE_GUARD_MS;
-    startTransition(() => {
-      setMobileNavOpenSafe((v) => !v);
-    });
+    setMobileNavOpenSafe((v) => !v);
   }, [setMobileNavOpenSafe]);
 
   useEffect(() => {
+    if (!mobileNavOpen) {
+      setMobileNavContentReady(false);
+      return;
+    }
+    const id = requestAnimationFrame(() => setMobileNavContentReady(true));
+    return () => cancelAnimationFrame(id);
+  }, [mobileNavOpen]);
+
+  useEffect(() => {
     setMobileNavOpen(false);
+    setMobileNavContentReady(false);
     setOpenMenu(null);
   }, [pathname]);
 
@@ -409,11 +418,22 @@ export function DesktopGlobalNav() {
               className={cn(headerMobileMenuRowClass, "px-1")}
             />
           </div>
-          <PublicNavSidebar
-            groups={navGroups}
-            onNavigate={() => setMobileNavOpenSafe(false)}
-            density="panel"
-          />
+          {mobileNavContentReady ? (
+            <PublicNavSidebar
+              groups={navGroups}
+              onNavigate={() => setMobileNavOpenSafe(false)}
+              density="panel"
+            />
+          ) : (
+            <div className="space-y-2 px-1 py-2" aria-hidden>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-11 animate-pulse rounded-lg bg-gray-100 dark:bg-white/10"
+                />
+              ))}
+            </div>
+          )}
         </div>
       ) : null}
     </header>
