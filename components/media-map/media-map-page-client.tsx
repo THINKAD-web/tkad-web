@@ -391,16 +391,6 @@ export default function MediaMapPageClient() {
   }, []);
 
   useEffect(() => {
-    if (!initialFetchDoneRef.current) return;
-    const b = searchedBoundsRef.current ?? boundsRef.current;
-    if (!b) return;
-    const timer = window.setTimeout(() => {
-      void fetchItems(b, browseFiltersRef.current);
-    }, MAP_AUTO_SEARCH_DEBOUNCE_MS);
-    return () => window.clearTimeout(timer);
-  }, [view?.zoom, fetchItems]);
-
-  useEffect(() => {
     if (!loading && items.length > 0) {
       markMapPageUsable();
     }
@@ -606,6 +596,17 @@ export default function MediaMapPageClient() {
     },
     [fetchItems],
   );
+
+  /** zoom 변경 시 pin limit tier 반영 — fetchItems 정의 이후에만 등록 */
+  useEffect(() => {
+    if (!initialFetchDoneRef.current) return;
+    const b = searchedBoundsRef.current ?? boundsRef.current;
+    if (!b) return;
+    const timer = window.setTimeout(() => {
+      void fetchItems(b, browseFiltersRef.current);
+    }, MAP_AUTO_SEARCH_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [view?.zoom, fetchItems]);
 
   /** /media/map 진입 즉시 전국 개요 영역 검색 — 빈 지도 방지 */
   useEffect(() => {
