@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { withApiKeyAuth } from "@/lib/api-key-auth";
 import {
   filterV1MediaList,
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const sp = request.nextUrl.searchParams;
     const { page, limit } = parseV1Pagination(sp);
 
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     const filtered = filterV1MediaList(catalog, {
       region: sp.get("region"),
       type: sp.get("type"),

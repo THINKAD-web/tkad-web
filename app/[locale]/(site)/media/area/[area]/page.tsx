@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   areaLabel,
   areaLandingDescription,
@@ -28,7 +28,7 @@ type Props = {
  *
  * 매칭: m.district === decoded slug (1순위). 없으면 m.city === decoded.
  * 콘텐츠: 텍스트 템플릿 (AI 자동 생성 X).
- * 운영 안전: DB(fetchPublicMediaCatalog) source of truth. 0건이면 notFound.
+ * 운영 안전: DB(fetchPublicMediaCatalogList) source of truth. 0건이면 notFound.
  */
 
 export const dynamic = "force-dynamic";
@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   let count = 0;
   try {
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     count = catalog.filter((m) => matchArea(m, decodedArea)).length;
   } catch {
     /* fall through */
@@ -96,9 +96,9 @@ export default async function AreaLandingPage({ params }: Props) {
   const decodedArea = decodeURIComponent(area);
   const isKo = locale === "ko";
 
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalog>> = [];
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
   try {
-    catalog = await fetchPublicMediaCatalog();
+    catalog = await fetchPublicMediaCatalogList();
   } catch {
     /* empty */
   }

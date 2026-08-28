@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { json } from "@/lib/admin-guard";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { fetchPublicMediaFilterCounts } from "@/lib/public-media-filter-counts";
 import { getCachedDailyEngagementScoreRecord } from "@/lib/media-popularity-daily-cache";
 import { fetchTrustBadgeContext } from "@/lib/media-trust-catalog";
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const [catalog, engagement, trust, filterCounts] = await Promise.all([
-      fetchPublicMediaCatalog(),
+      fetchPublicMediaCatalogList(),
       getCachedDailyEngagementScoreRecord(),
       fetchTrustBadgeContext(),
       fetchPublicMediaFilterCounts(),

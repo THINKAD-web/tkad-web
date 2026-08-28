@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   filterCatalogByTargetSlug,
   KNOWN_TARGET_SLUGS,
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   let count = 0;
   try {
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     count = catalog.filter((m) => mediaMatchesTargetSlug(m, decoded)).length;
   } catch {
     /* ignore */
@@ -89,9 +89,9 @@ export default async function TargetLandingPage({ params }: Props) {
   if (!node) notFound();
 
   const isKo = locale.startsWith("ko");
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalog>> = [];
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
   try {
-    catalog = await fetchPublicMediaCatalog();
+    catalog = await fetchPublicMediaCatalogList();
   } catch {
     /* empty */
   }

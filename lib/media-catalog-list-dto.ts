@@ -39,6 +39,14 @@ export type MediaCatalogListItem = {
   networkTotalLocations?: number;
   networkPricePerUnit?: number | null;
   subCategory?: string;
+  /** Browse chip filters — required for in-memory discovery filter/counts */
+  regionMain?: string;
+  regionSub?: string;
+  mediaMainCategory?: string;
+  mediaSubCategory?: string;
+  mediaCategory?: string[];
+  targetCategory?: string[];
+  operatingHours?: string;
   tags?: string[];
   isVerified?: boolean;
   averageRating?: number;
@@ -82,6 +90,13 @@ export const MEDIA_CATALOG_LIST_ITEM_KEYS = [
   "networkTotalLocations",
   "networkPricePerUnit",
   "subCategory",
+  "regionMain",
+  "regionSub",
+  "mediaMainCategory",
+  "mediaSubCategory",
+  "mediaCategory",
+  "targetCategory",
+  "operatingHours",
   "tags",
   "isVerified",
   "averageRating",
@@ -148,6 +163,13 @@ export function mediaItemToCatalogListItem(item: MediaItem): MediaCatalogListIte
     networkTotalLocations: item.networkTotalLocations,
     networkPricePerUnit: item.networkPricePerUnit,
     subCategory: item.subCategory,
+    regionMain: item.regionMain,
+    regionSub: item.regionSub,
+    mediaMainCategory: item.mediaMainCategory,
+    mediaSubCategory: item.mediaSubCategory,
+    mediaCategory: item.mediaCategory?.length ? item.mediaCategory : undefined,
+    targetCategory: item.targetCategory?.length ? item.targetCategory : undefined,
+    operatingHours: item.operatingHours,
     tags: item.tags?.length ? item.tags : undefined,
     isVerified: item.isVerified === true ? true : undefined,
     averageRating: positiveOrUndefined(item.averageRating),
@@ -215,6 +237,13 @@ export function catalogListItemToMediaItem(
     networkTotalLocations: item.networkTotalLocations,
     networkPricePerUnit: item.networkPricePerUnit,
     subCategory: item.subCategory,
+    regionMain: item.regionMain,
+    regionSub: item.regionSub,
+    mediaMainCategory: item.mediaMainCategory,
+    mediaSubCategory: item.mediaSubCategory,
+    mediaCategory: item.mediaCategory,
+    targetCategory: item.targetCategory,
+    operatingHours: item.operatingHours,
     tags: item.tags,
     isVerified: item.isVerified,
     averageRating: item.averageRating,

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import {
-  fetchPublicMediaCatalog,
+  fetchPublicMediaCatalogList,
   PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS,
 } from "@/lib/public-media-catalog";
 
@@ -12,7 +12,7 @@ const CDN_SWR = CDN_MAX_AGE * 2;
 
 export async function GET() {
   try {
-    const items = await fetchPublicMediaCatalog();
+    const items = await fetchPublicMediaCatalogList();
     return NextResponse.json(items, {
       headers: {
         "Cache-Control": `public, max-age=${CDN_MAX_AGE}, s-maxage=${CDN_MAX_AGE}, stale-while-revalidate=${CDN_SWR}`,

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getPublishedSuccessCases } from "@/lib/public-content-queries";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { INDUSTRY_SLUGS } from "@/lib/industry-landing";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { publicActiveMediaWhere } from "@/lib/media-review-status";
@@ -325,11 +325,11 @@ export async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
   let catalog: MediaItem[] = [];
   let catalogFetchThrew = false;
   try {
-    catalog = await fetchPublicMediaCatalog();
+    catalog = await fetchPublicMediaCatalogList();
   } catch (e) {
     catalogFetchThrew = true;
     console.error(
-      "[sitemap] fetchPublicMediaCatalog threw",
+      "[sitemap] fetchPublicMediaCatalogList threw",
       e instanceof Error ? `${e.name}: ${e.message}` : e,
     );
   }

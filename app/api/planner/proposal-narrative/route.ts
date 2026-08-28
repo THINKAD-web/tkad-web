@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { plannerContextToMatching } from "@/lib/recommendation-adapters";
 import { generatePlannerProposalNarrative } from "@/lib/recommendation-claude";
 import { isPlannerClaudeEnabled } from "@/lib/planner/planner-claude-config";
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     const byId = new Map(catalog.map((m) => [m.id, m]));
     const portfolio = d.mediaIds
       .map((id) => byId.get(id))

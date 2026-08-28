@@ -10,7 +10,7 @@ import {
   getBlogSeoPost,
   type BlogSection,
 } from "@/lib/blog-seo-posts";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { buildShareMetadata, pageAlternates, serializeJsonLd } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import {
@@ -116,10 +116,10 @@ export default async function BlogSeoPostPage({ params }: Props) {
   const description = isKo ? post.descriptionKo : post.descriptionEn;
   const faqs = isKo ? post.faqsKo : post.faqsEn;
 
-  let relatedMedia: Awaited<ReturnType<typeof fetchPublicMediaCatalog>> = [];
+  let relatedMedia: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
   if (post.relatedMediaIds?.length) {
     try {
-      const catalog = await fetchPublicMediaCatalog();
+      const catalog = await fetchPublicMediaCatalogList();
       const idSet = new Set(post.relatedMediaIds);
       relatedMedia = catalog.filter((m) => idSet.has(m.id));
     } catch {

@@ -1,7 +1,7 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { buildMarketDashboardData } from "@/lib/insights/market-dashboard-data";
 import { siteUrl } from "@/lib/seo";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 
 export type MarketWeeklyEmail = {
   userId: string;
@@ -26,7 +26,7 @@ async function pickRecommendedMedia(
 ): Promise<string[]> {
   const picks = [...hotNames];
   if (picks.length >= 3) return picks.slice(0, 3);
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   for (const m of catalog.sort(
     (a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0),
   )) {

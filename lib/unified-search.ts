@@ -2,7 +2,7 @@ import { MEDIA_PACKAGE_SEED_DATA } from "@/lib/media-package-seed-data";
 import type { AcademyLesson } from "@/lib/academy-content";
 import type { InsightReport } from "@/lib/insights-reports";
 import { matchesMediaTextQuery, type MediaItem } from "@/lib/media-data";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   getPublishedAcademyLessonsForUi,
   getPublishedInsightReports,
@@ -249,7 +249,7 @@ export async function runUnifiedSearch(
   const lower = query.toLowerCase();
 
   const [catalog, cases, reportList, insights, academy] = await Promise.all([
-    fetchPublicMediaCatalog(),
+    fetchPublicMediaCatalogList(),
     getPublishedSuccessCases(opts.locale ?? "ko"),
     listPublishedReports({ page: 1, pageSize: 100 }),
     getPublishedInsightReports(),
@@ -288,7 +288,7 @@ export async function suggestMediaNames(
 ): Promise<UnifiedSearchHit[]> {
   const q = normalizeSearchQuery(query);
   if (!q) return [];
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   const isKo = locale === "ko" || locale.startsWith("ko");
   const lower = q.toLowerCase();
 

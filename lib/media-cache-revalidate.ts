@@ -5,6 +5,22 @@ import { MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG } from "@/lib/media-trust-catalog";
 const MEDIA_CACHE_LOCALES = ["ko", "en"] as const;
 
 /**
+ * `export const revalidate` + CDN Cache-Control 로 edge 캐시되는 공개 API.
+ * tag 무효화만으로는 Vercel CDN 이 stale 응답을 계속 줄 수 있어 path 도 함께 무효화.
+ * `/api/public/media` 는 force-dynamic — tag 만으로 충분.
+ */
+const PUBLIC_MEDIA_CDN_CACHED_API_PATHS = [
+  "/api/public/media-filter-counts",
+  "/api/public/media-catalog",
+] as const;
+
+function revalidatePublicMediaCatalogApiPaths(): void {
+  for (const path of PUBLIC_MEDIA_CDN_CACHED_API_PATHS) {
+    revalidatePath(path);
+  }
+}
+
+/**
  * 단일 매체 등록/수정/삭제 시 영향받는 캐시만 정밀 무효화.
  *
  * - 무효화 대상: 해당 매체 상세(`/media/{slug}`, `/media/{id}`) + 공개 목록(`/media`).
@@ -24,6 +40,7 @@ export function revalidateMediaCaches(ref: {
   try {
     revalidateTag(PUBLIC_MEDIA_CATALOG_CACHE_TAG, "max");
     revalidateTag(MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG, "max");
+    revalidatePublicMediaCatalogApiPaths();
     for (const locale of MEDIA_CACHE_LOCALES) {
       revalidatePath(`/${locale}/media`);
       for (const detailRef of detailRefs) {
@@ -45,6 +62,7 @@ export function revalidateMediaCachesBulk(
   try {
     revalidateTag(PUBLIC_MEDIA_CATALOG_CACHE_TAG, "max");
     revalidateTag(MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG, "max");
+    revalidatePublicMediaCatalogApiPaths();
     for (const locale of MEDIA_CACHE_LOCALES) {
       revalidatePath(`/${locale}/media`);
     }

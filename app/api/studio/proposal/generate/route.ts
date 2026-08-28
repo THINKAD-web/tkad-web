@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { fetchPublishedCases } from "@/lib/case-queries";
 import { generateProposal } from "@/lib/proposal/generate-proposal";
 import { studioProposalInputSchema, sectionsForType } from "@/lib/proposal/types";
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   const isKo = input.locale !== "en";
 
   // 선정 매체 — 입력이 있으면 사용, 없고 media_recommend 섹션이면 지역/카탈로그에서 자동 선별
-  const catalog = await fetchPublicMediaCatalog().catch(() => [] as MediaItem[]);
+  const catalog = await fetchPublicMediaCatalogList().catch(() => [] as MediaItem[]);
   const byId = new Map(catalog.map((m) => [m.id, m]));
   let selectedMedia: MediaItem[] = input.mediaIds
     .map((id) => byId.get(id))

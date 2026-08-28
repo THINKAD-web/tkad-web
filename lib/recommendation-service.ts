@@ -1,4 +1,4 @@
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { matchMediaCatalog } from "@/lib/matching-engine";
 import type { MatchingInput, MatchedMedia } from "@/lib/matching-engine";
 import type { AiRecommendInput } from "@/lib/ai-media-recommend";
@@ -69,7 +69,7 @@ export async function runRecommendation(
     }
   }
 
-  const fullCatalog = await fetchPublicMediaCatalog();
+  const fullCatalog = await fetchPublicMediaCatalogList();
   let catalog = filterRecommendCandidateCatalog(
     fullCatalog,
     opts.aiRecommendInput,

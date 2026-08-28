@@ -1,5 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   asMediaRecommendMetadata,
   normalizeIndustryKey,
@@ -61,7 +61,7 @@ export async function createAiRecommendReply(opts: {
   if (!meta) return;
 
   const isKo = opts.locale.toLowerCase().startsWith("ko");
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   const regionFiltered = catalog.filter((m) =>
     mediaMatchesRegion(m, meta.region),
   );

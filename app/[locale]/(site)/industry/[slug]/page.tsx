@@ -5,7 +5,7 @@ import { Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 import {
   filterCasesForIndustry,
@@ -90,9 +90,9 @@ export default async function IndustryLandingPage({ params }: Props) {
 
   const t = await getTranslations(`industryPage.slugs.${slug}`);
 
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalog>> = [];
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
   try {
-    catalog = await fetchPublicMediaCatalog();
+    catalog = await fetchPublicMediaCatalogList();
   } catch {
     /* empty */
   }

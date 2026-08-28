@@ -24,7 +24,7 @@ export function districtHintsToSeoulZones(
 
 /**
  * 시나리오 적용 패치 기준으로 필터·자동조합(knapsack 92%) 후 매체 ID 목록 반환.
- * catalog는 공개 DB 카탈로그(`fetchPublicMediaCatalog`)를 사용한다.
+ * catalog는 공개 DB 카탈로그(`fetchPublicMediaCatalogList`)를 사용한다.
  */
 export function resolveScenarioPortfolioMediaIds(
   catalog: readonly MediaItem[],

@@ -15,7 +15,6 @@ import {
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { MEDIA_CATALOG_GRID_CLASS } from "@/components/media-catalog-shared";
 import type { UnifiedSearchResults } from "@/lib/unified-search";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import type { MediaItem } from "@/lib/media-data";
 import { POPULAR_SEARCHES_EN, POPULAR_SEARCHES_KO, pushRecentSearch } from "@/lib/search-storage";
 import { cn } from "@/lib/utils";

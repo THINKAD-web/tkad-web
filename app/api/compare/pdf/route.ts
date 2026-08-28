@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { comparePdfBuffer, type ComparePdfMediaRow } from "@/lib/build-compare-pdf";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 import type { MediaItem } from "@/lib/media-data";
 
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     const byId = new Map(catalog.map((m) => [m.id, m]));
     const items: MediaItem[] = [];
     for (const id of ids) {

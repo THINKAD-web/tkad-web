@@ -3,7 +3,7 @@ import { completeClaudeChatbot } from "@/lib/ai-chatbot-claude";
 import { completeRuleChatbot, isChatbotClaudeEnabled } from "@/lib/ai-chatbot-rule";
 import { buildAiChatbotSystemPromptWithTools } from "@/lib/ai-chatbot-system";
 import { recordAiUsage } from "@/lib/ai-usage-log";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { getCurrentUser } from "@/lib/user-session";
 import { getClientIp } from "@/lib/api-response";
 import { logChatbotTurn } from "@/lib/chatbot-log";
@@ -133,9 +133,9 @@ export async function POST(req: Request) {
     );
   }
 
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalog>> = [];
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
   try {
-    catalog = await fetchPublicMediaCatalog();
+    catalog = await fetchPublicMediaCatalogList();
   } catch {
     catalog = [];
   }

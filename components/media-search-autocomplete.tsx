@@ -13,7 +13,7 @@ import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 
 interface Props {
-  /** 서버 `fetchPublicMediaCatalog()` 등에서 내려준 공개 매체 목록(필수). */
+  /** 서버 `fetchPublicMediaCatalogList()` 등에서 내려준 공개 매체 목록(필수). */
   catalog: MediaItem[];
   locale: string;
   onSelect: (media: MediaItem) => void;

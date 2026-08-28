@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { recommendMedia } from "@/lib/ai-media-recommend";
 import { sendEmail, isEmailConfigured } from "@/lib/email/client";
 import { createNotification } from "@/lib/notifications";
@@ -39,7 +39,7 @@ export async function runCampaignRenewalProposals(
     },
   });
 
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   let generated = 0;
   let emailed = 0;
 

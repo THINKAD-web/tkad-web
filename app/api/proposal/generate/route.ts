@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { generateCampaignProposal } from "@/lib/proposal/generate-proposal";
 import { proposalInputSchema } from "@/lib/proposal/types";
 import { getCurrentUser } from "@/lib/user-session";
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   const catalogById = new Map(catalog.map((m) => [m.id, m]));
   const selectedMedia = input.mediaIds
     .map((id) => catalogById.get(id))

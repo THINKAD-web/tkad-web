@@ -1,4 +1,4 @@
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { resolveCrossChannelAllocation } from "@/lib/integrated/allocation-policy";
 import {
   buildDigitalMixPayload,
@@ -48,7 +48,7 @@ export async function runIntegratedMix(
     digitalBudgetPct: request.digitalBudgetPct,
   });
 
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   const recommendCtx = buildOohRecommendationContext({
     goal: request.goal,
     regions: request.regions,

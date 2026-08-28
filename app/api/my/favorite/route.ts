@@ -9,7 +9,7 @@ import {
   readJson,
 } from "@/lib/api-response";
 import { recordConversion } from "@/lib/tracking/record";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { resolveMediaZoneId } from "@/lib/media-price-transparency";
 
 export const runtime = "nodejs";
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       });
       void (async () => {
         try {
-          const catalog = await fetchPublicMediaCatalog();
+          const catalog = await fetchPublicMediaCatalogList();
           const item = catalog.find((m) => m.id === mediaId);
           const zone = item ? resolveMediaZoneId(item) : null;
           if (zone) {

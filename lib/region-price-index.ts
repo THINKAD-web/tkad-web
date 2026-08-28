@@ -1,5 +1,5 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   mediaMonthlyPriceWon,
   resolveMediaZoneId,
@@ -15,7 +15,7 @@ export async function rebuildRegionPriceIndices(): Promise<{
   notified: number;
 }> {
   if (!isDatabaseConfigured()) return { zones: 0, notified: 0 };
-  const catalog = await fetchPublicMediaCatalog();
+  const catalog = await fetchPublicMediaCatalogList();
   const periodMonth = currentPeriodMonth();
 
   const byZone = new Map<string, number[]>();

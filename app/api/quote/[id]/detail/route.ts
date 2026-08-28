@@ -1,6 +1,6 @@
 import { OoHQuoteStatus, OohContractStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
   parseQuoteMediaSelections,
@@ -27,7 +27,7 @@ export async function GET(
       });
     }
 
-    const catalog = await fetchPublicMediaCatalog();
+    const catalog = await fetchPublicMediaCatalogList();
     const selectionMap = selectionsByMediaId(
       parseQuoteMediaSelections(quote.mediaSelections),
     );
