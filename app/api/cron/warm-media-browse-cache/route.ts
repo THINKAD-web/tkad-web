@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { json } from "@/lib/admin-guard";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { fetchPublicMediaFilterCounts } from "@/lib/public-media-filter-counts";
 import { getCachedDailyEngagementScoreRecord } from "@/lib/media-popularity-daily-cache";
 import { fetchTrustBadgeContext } from "@/lib/media-trust-catalog";
 import { isDatabaseConfigured } from "@/lib/prisma";
@@ -27,10 +28,11 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const [catalog, engagement, trust] = await Promise.all([
+    const [catalog, engagement, trust, filterCounts] = await Promise.all([
       fetchPublicMediaCatalog(),
       getCachedDailyEngagementScoreRecord(),
       fetchTrustBadgeContext(),
+      fetchPublicMediaFilterCounts(),
     ]);
     return json({
       ok: true,
@@ -38,6 +40,9 @@ export async function GET(request: NextRequest) {
         catalogItems: catalog.length,
         engagementKeys: Object.keys(engagement).length,
         trustTopInquiry: trust.topInquiryIds.size,
+        filterCountKeys:
+          Object.keys(filterCounts.subCategory).length +
+          Object.keys(filterCounts.regionSub).length,
       },
     });
   } catch (e) {

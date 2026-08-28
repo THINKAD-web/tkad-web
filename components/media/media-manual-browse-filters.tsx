@@ -299,7 +299,36 @@ export function MediaManualBrowseFilters({
   const filterIaListPage =
     listPageLayout && unifiedToolbar && !mapPageViewModes;
 
-  const optionCounts = useBrowseFilterOptionCounts(variant === "media");
+  /** `/media/map` — 칩 카운트 불필요, 전체 catalog fetch/계산 금지 */
+  const optionCountsEnabled = variant === "media" && !mapPageViewModes;
+  const [prefetchOptionCounts, setPrefetchOptionCounts] = useState(false);
+  const subCountsVisibleInToolbar =
+    optionCountsEnabled &&
+    Boolean(mainCategory) &&
+    mainCategory !== "network";
+  const optionCountsLoadRequested =
+    optionCountsEnabled &&
+    (prefetchOptionCounts ||
+      desktopPanelOpen ||
+      sheetOpen ||
+      mapFiltersExpanded ||
+      subCountsVisibleInToolbar);
+  const { counts: optionCounts, loading: optionCountsLoading } =
+    useBrowseFilterOptionCounts({
+      enabled: optionCountsEnabled,
+      loadRequested: optionCountsLoadRequested,
+    });
+
+  const requestOptionCountsPrefetch = useCallback(() => {
+    if (optionCountsEnabled) setPrefetchOptionCounts(true);
+  }, [optionCountsEnabled]);
+
+  const filterTriggerPrefetchProps = optionCountsEnabled
+    ? {
+        onMouseEnter: requestOptionCountsPrefetch,
+        onFocus: requestOptionCountsPrefetch,
+      }
+    : {};
 
   /** `/media` 목록 — 유형 칩은 툴바 밖 노출, 필터 패널·시트에도 전체 축(어떤 매체 포함) */
   const showListTypeChipRow =
@@ -660,6 +689,13 @@ export function MediaManualBrowseFilters({
     "ml-0.5 tabular-nums text-[10px] font-semibold opacity-70";
 
   const renderCountBadge = (count: number | null) => {
+    if (optionCountsLoading && count == null) {
+      return (
+        <span className={countBadgeClass} aria-hidden>
+          …
+        </span>
+      );
+    }
     if (count == null) return null;
     return <span className={countBadgeClass}>{count}</span>;
   };
@@ -1329,6 +1365,7 @@ export function MediaManualBrowseFilters({
       aria-haspopup="dialog"
       aria-expanded={sheetOpen}
       aria-label={isKo ? "필터 열기" : "Open filters"}
+      {...filterTriggerPrefetchProps}
     >
       <SlidersHorizontal className="h-4 w-4" aria-hidden />
       {isKo ? "필터" : "Filter"}
@@ -1356,6 +1393,7 @@ export function MediaManualBrowseFilters({
       aria-haspopup="dialog"
       aria-expanded={sheetOpen}
       aria-label={isKo ? "필터 열기" : "Open filters"}
+      {...filterTriggerPrefetchProps}
     >
       <SlidersHorizontal className="h-4 w-4" aria-hidden />
       {activeFilterCount > 0 ? (
@@ -1533,6 +1571,7 @@ export function MediaManualBrowseFilters({
                 aria-expanded={desktopPanelOpen}
                 aria-haspopup="dialog"
                 aria-label={isKo ? "필터 열기" : "Open filters"}
+                {...filterTriggerPrefetchProps}
               >
                 <SlidersHorizontal className="h-4 w-4" aria-hidden />
                 {isKo ? "필터" : "Filters"}
@@ -1591,6 +1630,7 @@ export function MediaManualBrowseFilters({
               aria-haspopup="dialog"
               aria-expanded={sheetOpen}
               aria-label={isKo ? "필터 열기" : "Open filters"}
+              {...filterTriggerPrefetchProps}
             >
               <SlidersHorizontal className="h-4 w-4" aria-hidden />
               {isKo ? "필터" : "Filters"}
@@ -1629,6 +1669,7 @@ export function MediaManualBrowseFilters({
             aria-expanded={mapCompactFilters ? mapFiltersExpanded : desktopPanelOpen}
             aria-haspopup={mapCompactFilters ? undefined : "dialog"}
             aria-label={isKo ? "필터 열기" : "Open filters"}
+            {...filterTriggerPrefetchProps}
           >
             <SlidersHorizontal className="h-4 w-4" aria-hidden />
             {isKo ? "필터" : "Filters"}
@@ -1737,6 +1778,7 @@ export function MediaManualBrowseFilters({
           onClick={() => setSheetOpen(true)}
           className={toolbarControlClass}
           aria-label={isKo ? "필터 열기" : "Open filters"}
+          {...filterTriggerPrefetchProps}
         >
           <SlidersHorizontal className="h-4 w-4" aria-hidden />
           {isKo ? "필터" : "Filters"}
