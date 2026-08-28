@@ -57,6 +57,7 @@ export const HEALTH_API_CHECKS: ApiCheck[] = [
   { name: "health", path: "/api/health", expectKey: "ok" },
   { name: "public media", path: "/api/public/media?limit=1", expectKey: "data" },
   { name: "public media-catalog", path: "/api/public/media-catalog" },
+  { name: "public media-filter-counts", path: "/api/public/media-filter-counts" },
   { name: "public cases", path: "/api/public/cases" },
   { name: "public reports", path: "/api/public/reports" },
   { name: "public success-cases", path: "/api/public/success-cases" },
