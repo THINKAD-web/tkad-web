@@ -79,6 +79,7 @@ import { PlanCartSheet } from "@/components/plan/plan-cart-sheet";
 import { HotspotRegionChips } from "@/components/media/hotspot-region-chips";
 import { HotspotRegionDropdown } from "@/components/media/hotspot-region-dropdown";
 import { useBrowseFilterOptionCounts } from "@/hooks/use-browse-filter-option-counts";
+import { prefetchMapChunks } from "@/lib/lazy-chunk-prefetch";
 import {
   browseRegionSubCount,
   browseSubCategoryCount,
@@ -1254,7 +1255,12 @@ export function MediaManualBrowseFilters({
     listPageLayout && onNavigateToMap ? (
       <button
         type="button"
-        onClick={onNavigateToMap}
+        onPointerEnter={() => prefetchMapChunks()}
+        onTouchStart={() => prefetchMapChunks()}
+        onClick={() => {
+          prefetchMapChunks();
+          onNavigateToMap();
+        }}
         className={toolbarControlClass}
         aria-label={isKo ? "지도에서 보기" : "Open map"}
       >
@@ -1785,7 +1791,7 @@ export function MediaManualBrowseFilters({
             onReset={clearAllFilters}
             applyLabel={sheetCtaLabel}
           >
-            {renderFilterAxes(true)}
+            {sheetOpen ? renderFilterAxes(true) : null}
           </MediaFilterVaulSheet>
           <MediaSortVaulSheet
             open={sortSheetOpen}
@@ -1865,7 +1871,7 @@ export function MediaManualBrowseFilters({
         dialogAriaLabel={isKo ? "필터" : "Filters"}
         panelClassName={unifiedToolbarDesktopFilterPanelClass}
       >
-        {renderUnifiedToolbarDesktopFilterPanelBody()}
+        {desktopPanelOpen ? renderUnifiedToolbarDesktopFilterPanelBody() : null}
       </AnchoredOverlayPortal>
     </div>
   );
