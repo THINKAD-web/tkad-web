@@ -7,7 +7,7 @@
  * flight 는 상대 일수로 정의하고 적용 시점에 오늘 기준으로 환산한다(결정성·최신성).
  */
 
-import type { CampaignBriefInput } from "@/lib/planner/brief/types";
+import { EMPTY_BRIEF, type CampaignBriefInput } from "@/lib/planner/brief/types";
 import { durationToFlight } from "@/lib/planner/brief/natural-language";
 
 export type BriefPreset = {
@@ -287,6 +287,73 @@ export const BRIEF_PRESETS: readonly BriefPreset[] = [
     },
     durationDays: 21,
   },
+  {
+    id: "local-small-business",
+    ko: {
+      title: "동네 매장 홍보 (소상공인)",
+      summary: "500만 · 서울 · 전 타깃 · 2주",
+    },
+    en: {
+      title: "Local storefront promo (small business)",
+      summary: "₩5M · Seoul · All · 2 weeks",
+    },
+    base: {
+      budgetInputWon: 5_000_000,
+      budgetMode: "total",
+      regionCodes: ["11"],
+      genders: [],
+      ageBands: [],
+      goal: "awareness",
+      industry: "fb",
+      freeText: "",
+    },
+    durationDays: 14,
+  },
+  {
+    id: "university-students",
+    ko: {
+      title: "대학생 타깃 캠페인",
+      summary:
+        "1,200만 · 서울 · 20대 · 2주 (대학가 특화 지정은 자세히 설계에서 조정)",
+    },
+    en: {
+      title: "University student campaign",
+      summary: "₩12M · Seoul · 20s · 2 weeks (fine-tune campus areas in detailed mode)",
+    },
+    base: {
+      budgetInputWon: 12_000_000,
+      budgetMode: "total",
+      regionCodes: ["11"],
+      genders: [],
+      ageBands: ["20s"],
+      goal: "consideration",
+      industry: "other",
+      freeText: "",
+    },
+    durationDays: 14,
+  },
+  {
+    id: "fandom-support",
+    ko: {
+      title: "팬클럽 응원 캠페인",
+      summary: "6,000만 · 서울 · 전 타깃 · 1주",
+    },
+    en: {
+      title: "Fandom support campaign",
+      summary: "₩60M · Seoul · All · 1 week",
+    },
+    base: {
+      budgetInputWon: 60_000_000,
+      budgetMode: "total",
+      regionCodes: ["11"],
+      genders: [],
+      ageBands: [],
+      goal: "awareness",
+      industry: "ent",
+      freeText: "",
+    },
+    durationDays: 7,
+  },
 ] as const;
 
 /** 결정적 shuffle — 동일 seed 에서 동일 3개 */
@@ -343,4 +410,20 @@ export function presetToBrief(
 ): CampaignBriefInput {
   const { flightStart, flightEnd } = durationToFlight(preset.durationDays, today);
   return { ...preset.base, flightStart, flightEnd };
+}
+
+/**
+ * 빠른 추천 전용 (PART I) — 예산·지역만 반영한다.
+ * 기간·타깃·목표·업종은 자세히 설계에만 있는 입력이라, 빠른 추천에서 프리셋을
+ * 고르면 화면에 없는 값이 조용히 채워지는 걸 막기 위해 기본값(EMPTY_BRIEF)으로
+ * 되돌린다. 매체 스코어링에 성별·연령 축이 있긴 하지만, 그 축을 조정할 입력이
+ * 빠른 추천 화면엔 없으므로 프리셋이 몰래 켜두지 않는다.
+ */
+export function presetToQuickBrief(preset: BriefPreset): CampaignBriefInput {
+  return {
+    ...EMPTY_BRIEF,
+    budgetInputWon: preset.base.budgetInputWon,
+    budgetMode: preset.base.budgetMode,
+    regionCodes: preset.base.regionCodes,
+  };
 }
