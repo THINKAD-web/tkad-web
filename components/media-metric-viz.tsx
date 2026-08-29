@@ -159,7 +159,7 @@ export function VerifiedBadge({ className = "" }: { className?: string }) {
   return (
     <span
       className={`group/vb relative inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ${className}`}
-      title="싱커드 4단계 검증 완료: 현장 방문 → 촬영 실측 → 데이터 검증 → 매체 등록"
+      title="운영팀이 매체 정보를 확인해 등록한 매체입니다. 지표는 이상값 검사를 거칩니다."
     >
       <svg
         viewBox="0 0 20 20"

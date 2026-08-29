@@ -160,10 +160,49 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     termEn: "Impressions",
     aliases: ["노출", "노출수"],
     definitionKo:
-      "광고가 노출된 총 횟수. OOH 에서는 매체 앞 통행 인구(유동인구) × 인지율(awareness rate) 로 추정합니다. 동일인 반복 노출도 각각 카운트.",
+      "광고가 노출된 총 횟수. THINKAD 는 매체 앞을 지나간 사람(OTS)에 시선이 닿는 비율(접촉률)을 곱해 LTS 를 구하고, 여기에 내 소재 점유율(SOV)을 곱해 산출합니다. 동일인 반복 노출도 각각 카운트.",
     definitionEn:
-      "Total times an ad is displayed. In OOH, typically estimated as foot/vehicle traffic × awareness rate. Repeat exposures by the same person are counted separately.",
-    related: ["reach", "frequency", "cpm"],
+      "Total times an ad is displayed. THINKAD derives it from passing traffic (OTS) × contact rate to get LTS, then × share of voice (SOV). Repeat exposures by the same person are counted separately.",
+    related: ["ots", "lts", "sov", "reach", "frequency", "cpm"],
+  },
+  {
+    id: "ots",
+    category: "metric",
+    term: "OTS",
+    termEn: "Opportunity To See",
+    abbreviationFull: "Opportunity To See",
+    aliases: ["노출 기회", "통행 접촉"],
+    definitionKo:
+      "매체 앞을 지나간 사람 수. 광고를 볼 *기회*가 있었던 인원이며, 실제로 본 인원과는 다릅니다. 노출 계산의 출발점입니다.",
+    definitionEn:
+      "The number of people who passed the media — those who had an opportunity to see the ad, not those who actually did. The starting point of the impression calculation.",
+    related: ["lts", "impressions", "footfall"],
+  },
+  {
+    id: "lts",
+    category: "metric",
+    term: "LTS",
+    termEn: "Likelihood To See",
+    abbreviationFull: "Likelihood To See",
+    aliases: ["시선 접촉", "가시 접촉"],
+    definitionKo:
+      "매체 앞을 지나간 사람(OTS) 중 실제로 시선이 닿은 인원. OTS 에 매체 유형별 접촉률을 곱해 구합니다. 도달(Reach)은 이 LTS 를 기준으로 계산합니다.",
+    definitionEn:
+      "Of those who passed the media (OTS), the number whose gaze actually landed on it — OTS × contact rate. Reach is calculated on this basis.",
+    related: ["ots", "impressions", "reach"],
+  },
+  {
+    id: "sov",
+    category: "metric",
+    term: "SOV",
+    termEn: "Share of Voice",
+    abbreviationFull: "Share of Voice",
+    aliases: ["소재 점유율", "노출 점유율"],
+    definitionKo:
+      "한 매체에서 내 소재가 차지하는 비율. 전광판은 여러 광고가 순서대로 나오므로, 15초 소재가 5분(300초) 루프에 들어가면 SOV 는 0.05 입니다. 현수막·랩핑 같은 정적 매체는 1.0 입니다.",
+    definitionEn:
+      "The share of a media's airtime taken by your creative. On a digital board where ads rotate, a 15-second spot in a 5-minute (300s) loop gives an SOV of 0.05. Static media such as banners and wraps are 1.0.",
+    related: ["impressions", "dooh", "cpm"],
   },
   {
     id: "reach",
@@ -279,9 +318,9 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     termEn: "Media Verification",
     aliases: ["현장 검증", "매체 실측"],
     definitionKo:
-      "광고 매체의 위치·크기·시인성·유동인구를 현장에서 직접 확인·측정하는 절차. THINKAD 는 등록되는 모든 매체에 대해 4단계 검증을 수행합니다.",
+      "광고 매체의 위치·크기·시인성·유동인구를 현장에서 직접 확인·측정하는 절차. THINKAD 는 검증을 마친 매체에 검증 배지를 표시합니다.",
     definitionEn:
-      "On-site inspection and measurement of media position, size, viewability, and traffic. THINKAD performs a 4-step verification for every listed media.",
+      "On-site inspection and measurement of media position, size, viewability, and traffic. THINKAD marks media that have completed verification with a badge.",
   },
 
   // ── 기술·플랫폼 ──

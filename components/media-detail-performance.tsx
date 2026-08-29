@@ -1,12 +1,13 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import {
   donutConicGradient,
   type MediaPerformanceMetrics,
   type PerformanceBarKey,
   type PerformanceDonutKey,
 } from "@/lib/media-performance";
+import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 
 const DONUT_LABEL_KEYS: Record<PerformanceDonutKey, string> = {
   peak: "performanceDonutPeak",
@@ -27,6 +28,7 @@ export default function MediaDetailPerformance({
 }) {
   const t = useTranslations("media.detail");
   const format = useFormatter();
+  const isKo = useLocale().startsWith("ko");
   const gradient = donutConicGradient(metrics.donut);
   /** 고정 문구(번역) — 숫자 보간 없이 자연스러운 안내 문장 */
   const compareNote = t("performanceAverageCompare");
@@ -77,6 +79,33 @@ export default function MediaDetailPerformance({
           </p>
         </div>
       </div>
+
+      {/*
+        일 유동인구와 일 실노출을 나란히 둔다. 위 타일의 유동인구는 매체 앞을
+        "지나간" 사람(OTS)이라 실제로 광고를 보는 수와 유형별로 최대 20배까지
+        차이 난다 — 하나만 보여주면 광고주가 그 수를 노출로 읽는다.
+      */}
+      {metrics.dailyAdjustedReach ? (
+        <div className="-ml-[2px] rounded-[22px] border border-border/80 bg-card px-6 py-5 shadow-xs">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <p className="font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
+              [ {t("performanceStatDailyReach")} ]
+            </p>
+            <span className="flex items-center gap-1.5">
+              <span className="text-2xl font-bold tabular-nums tracking-tight text-foreground">
+                {format.number(metrics.dailyAdjustedReach.value)}
+              </span>
+              <DataQualityBadge
+                basis={metrics.dailyAdjustedReach.basis}
+                isKo={isKo}
+              />
+            </span>
+          </div>
+          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+            {t("performanceStatDailyReachNote")}
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:items-center">
         <div>

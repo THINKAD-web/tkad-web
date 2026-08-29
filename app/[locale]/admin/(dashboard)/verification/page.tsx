@@ -16,7 +16,7 @@ export default function AdminVerificationPage() {
       <header>
         <h1 className="text-xl font-bold text-foreground">매체 검증 큐</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          4단계 현장 검증 대기·심사 상태. 승인 시 Verified 배지가 광고주 화면에 노출됩니다.
+          현장 검증 대기·심사 상태. 승인 시 Verified 배지가 광고주 화면에 노출됩니다.
         </p>
       </header>
       <Suspense fallback={<div className="text-sm text-muted-foreground">불러오는 중…</div>}>
