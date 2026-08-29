@@ -7,6 +7,7 @@ import {
   filterBriefCatalogByRegion,
 } from "../regions.ts";
 import {
+  BRIEF_DEFAULT_DAYS,
   EMPTY_BRIEF,
   totalBudgetWon,
   type CampaignBriefInput,
@@ -668,4 +669,53 @@ test("briefToTargetSpec — 2030 여성 브리프", () => {
   });
   assert.deepEqual(t.genders, ["female"]);
   assert.deepEqual(t.ageBands, ["20s", "30s"]);
+});
+
+// ── 기간 미입력(빠른 추천) — 화면과 저장 스냅샷이 같은 일수를 쓴다 ──────────
+
+test("[fixture] 기간 미입력 시 Step 2 화면과 저장 스냅샷의 일수 기준이 일치한다", () => {
+  const media = fixtureMedia();
+  const brief: CampaignBriefInput = {
+    ...EMPTY_BRIEF,
+    budgetInputWon: 30_000_000,
+    budgetMode: "total",
+    // 빠른 추천은 기간이 선택 입력 — 비운 채로 Step 3 까지 갈 수 있다
+    flightStart: null,
+    flightEnd: null,
+  };
+
+  // Step 2·3 화면이 쓰는 값: flightDays(brief) ?? BRIEF_DEFAULT_DAYS
+  const onScreen = calcMixMetrics({
+    lines: [{ media, units: 2 }],
+    days: BRIEF_DEFAULT_DAYS,
+    budgetWon: totalBudgetWon(brief),
+    target: briefToTargetSpec(brief),
+  });
+
+  const snap = buildCampaignPlanSnapshot({
+    brief,
+    catalog: [media],
+    mixUnits: { [media.id]: 2 },
+  });
+
+  assert.equal(snap.mediaMix[0]!.days, BRIEF_DEFAULT_DAYS);
+  assert.equal(snap.metrics.totalCostWon, onScreen.totalCostWon.value);
+  assert.equal(snap.metrics.totalImpressions, onScreen.totalImpressions.value);
+  assert.equal(snap.metrics.budgetUsedRate, onScreen.budgetUsedRate);
+});
+
+test("[fixture] 기간을 입력하면 스냅샷은 기본값이 아니라 실제 일수를 쓴다", () => {
+  const media = fixtureMedia();
+  const snap = buildCampaignPlanSnapshot({
+    brief: {
+      ...EMPTY_BRIEF,
+      budgetInputWon: 30_000_000,
+      budgetMode: "total",
+      flightStart: "2026-09-01",
+      flightEnd: "2026-09-07",
+    },
+    catalog: [media],
+    mixUnits: { [media.id]: 1 },
+  });
+  assert.equal(snap.mediaMix[0]!.days, 7);
 });
