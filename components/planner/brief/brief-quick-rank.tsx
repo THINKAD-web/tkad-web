@@ -1,13 +1,20 @@
 "use client";
 
 /**
- * O-2 빠른 추천 — scoreMediaCandidates() 랭킹 목록 (믹스 편집 없음).
+ * O-2 빠른 추천 — scoreMediaCandidates() 랭킹 목록.
+ *
+ * 각 행에서 바로 믹스에 담을 수 있다. 수량 조정은 Step 2(믹스 편집)에서 한다 —
+ * 빠른 추천은 "고르고 넘어가기"까지만 책임진다.
  */
 
 import { useMemo } from "react";
 import type { MediaItem } from "@/lib/media-data";
+import { Button } from "@/components/ui/button";
 import { useBriefStore } from "@/lib/planner/brief/store";
-import { briefQuickRequiredStatus } from "@/lib/planner/brief/types";
+import {
+  BRIEF_DEFAULT_DAYS,
+  briefQuickRequiredStatus,
+} from "@/lib/planner/brief/types";
 import { filterBriefCatalogByRegion } from "@/lib/planner/brief/regions";
 import {
   scoreMediaCandidates,
@@ -27,16 +34,33 @@ const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
   industry: { ko: "업종 적합", en: "Industry fit" },
 };
 
-const QUICK_DAYS = 30;
+const QUICK_DAYS = BRIEF_DEFAULT_DAYS;
 
-function RankRow({ scored, rank, isKo }: { scored: ScoredMedia; rank: number; isKo: boolean }) {
+function RankRow({
+  scored,
+  rank,
+  isKo,
+  selected,
+  onAdd,
+  onRemove,
+}: {
+  scored: ScoredMedia;
+  rank: number;
+  isKo: boolean;
+  selected: boolean;
+  onAdd: () => void;
+  onRemove: () => void;
+}) {
   const { media, axes, total } = scored;
   const mediaName = isKo ? media.name : media.nameEn || media.name;
 
   return (
     <li
-      className="rounded-xl border border-border bg-card p-3"
+      className={`rounded-xl border p-3 transition-colors ${
+        selected ? "border-primary bg-primary/5" : "border-border bg-card"
+      }`}
       data-testid="brief-quick-rank-row"
+      data-selected={selected ? "true" : "false"}
     >
       <div className="flex items-start gap-3">
         <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-bold tabular-nums">
@@ -45,7 +69,7 @@ function RankRow({ scored, rank, isKo }: { scored: ScoredMedia; rank: number; is
         <PlannerMediaThumb
           media={media}
           alt={mediaName}
-          size="rank"
+          size="card"
           isKo={isKo}
         />
         <div className="min-w-0 flex-1">
@@ -78,6 +102,29 @@ function RankRow({ scored, rank, isKo }: { scored: ScoredMedia; rank: number; is
               ))}
             </ul>
           ) : null}
+
+          <div className="mt-2.5">
+            {selected ? (
+              <Button
+                type="button"
+                size="xs"
+                variant="outline"
+                onClick={onRemove}
+                data-testid="brief-quick-rank-remove"
+              >
+                {isKo ? "담김 · 제거" : "Added · Remove"}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="xs"
+                onClick={onAdd}
+                data-testid="brief-quick-rank-add"
+              >
+                {isKo ? "믹스에 추가" : "Add to mix"}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </li>
@@ -162,7 +209,15 @@ export function BriefQuickRankPanel({
 
       <ul className="space-y-2">
         {visibleScored.slice(0, 20).map((s, i) => (
-          <RankRow key={s.media.id} scored={s} rank={i + 1} isKo={isKo} />
+          <RankRow
+            key={s.media.id}
+            scored={s}
+            rank={i + 1}
+            isKo={isKo}
+            selected={(store.mixUnits[s.media.id] ?? 0) > 0}
+            onAdd={() => store.addMediaToMix(s.media.id, 1)}
+            onRemove={() => store.removeMediaFromMix(s.media.id)}
+          />
         ))}
       </ul>
 

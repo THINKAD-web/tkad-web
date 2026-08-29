@@ -54,6 +54,7 @@ import {
 } from "@/lib/planner/brief/mix-metrics";
 import { briefToTargetSpec } from "@/lib/planner/brief/reach-adapter";
 import {
+  BRIEF_DEFAULT_DAYS,
   flightDays,
   totalBudgetWon,
   type CampaignBriefInput,
@@ -194,7 +195,7 @@ export function BriefStepThree({
   const planFromUrl = searchParams.get("plan");
 
   const store = useBriefStore();
-  const days = flightDays(store) ?? 1;
+  const days = flightDays(store) ?? BRIEF_DEFAULT_DAYS;
   const budgetWon = totalBudgetWon(store);
   const lines = useMemo(
     () => buildMixLines(catalog, store.mixUnits),
