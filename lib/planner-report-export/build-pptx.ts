@@ -286,8 +286,10 @@ export async function buildPlannerReportPptx(
     : null;
 
   // ── 1. 표지 ──
+  // 배경은 화면 미리보기(DocumentGradientHero, bg-[#1c1c1f])와 통일한다.
+  // CYAN 상수가 이름과 달리 값은 이미 "1C1C1F" 라 그대로 근흑색 배경으로 쓴다.
   const cover = pptx.addSlide();
-  cover.background = { color: VIOLET };
+  cover.background = { color: CYAN };
   if (coverLogoData) {
     try {
       cover.addImage({
@@ -310,7 +312,9 @@ export async function buildPlannerReportPptx(
     x: 0.7, y: 2.7, w: 12, h: 1.4, fontFace: face,
     fontSize: 38, bold: true, color: WHITE,
   });
-  cover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.0, w: 2.2, h: 0.06, fill: { color: CYAN } });
+  // 화면의 <div className="mt-5 h-1 w-16 bg-[color:var(--qp-accent)]" /> 와 대응.
+  // 배경이 CYAN(근흑색)이 됐으니 이 룰도 VIOLET(오렌지)로 바꿔야 보인다.
+  cover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.0, w: 2.2, h: 0.06, fill: { color: VIOLET } });
   cover.addText(
     p.kind === "integrated"
       ? isKo ? "OOH + 디지털 통합 캠페인 제안" : "OOH + Digital integrated campaign"

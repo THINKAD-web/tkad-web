@@ -270,6 +270,72 @@ test("프리셋 풀 ≥3, 무작위 값 아님, 완결 브리프로 환산", asy
   assert.deepEqual(beautyBrief.regionCodes, ["11", "41"]);
 });
 
+test("신규 프리셋(로컬·대학생·팬덤) — 파라미터 및 빠른 추천 필수값 통과", async () => {
+  const { BRIEF_PRESETS, presetToBrief } = await import(
+    "@/lib/planner/brief/presets"
+  );
+  const today = new Date(Date.UTC(2026, 8, 1));
+
+  const local = BRIEF_PRESETS.find((p) => p.id === "local-small-business");
+  assert.ok(local, "local-small-business 프리셋 존재");
+  const localBrief = presetToBrief(local!, today);
+  assert.ok(
+    localBrief.budgetInputWon < 15_000_000,
+    "로컬 프리셋은 기존 F&B 로컬(1,500만)보다 낮은 예산대",
+  );
+  assert.deepEqual(localBrief.regionCodes, ["11"]);
+  // 빠른 추천은 예산만 필수 — 프리셋이 이를 만족하는지 재확인
+  assert.ok(briefQuickRequiredStatus(localBrief).ok);
+
+  const university = BRIEF_PRESETS.find((p) => p.id === "university-students");
+  assert.ok(university, "university-students 프리셋 존재");
+  const universityBrief = presetToBrief(university!, today);
+  assert.deepEqual(universityBrief.ageBands, ["20s"]);
+  assert.deepEqual(universityBrief.regionCodes, ["11"]);
+  assert.match(
+    university!.ko.summary,
+    /자세히 설계/,
+    "동 단위 세분화 불가 안내가 요약에 포함되어야 한다",
+  );
+  assert.ok(briefQuickRequiredStatus(universityBrief).ok);
+
+  const fandom = BRIEF_PRESETS.find((p) => p.id === "fandom-support");
+  assert.ok(fandom, "fandom-support 프리셋 존재");
+  const fandomBrief = presetToBrief(fandom!, today);
+  assert.equal(fandomBrief.goal, "awareness");
+  assert.equal(fandomBrief.industry, "ent");
+  assert.ok(
+    fandomBrief.budgetInputWon > universityBrief.budgetInputWon,
+    "팬덤은 대학생보다 고예산",
+  );
+  assert.ok(
+    (flightDays(fandomBrief) ?? 0) <= 7,
+    "팬덤은 단기 집중 캠페인",
+  );
+  assert.ok(briefQuickRequiredStatus(fandomBrief).ok);
+});
+
+test("PART I — 빠른 추천 프리셋은 예산·지역만 반영하고 자세히 설계 전용 필드는 초기화한다", async () => {
+  const { BRIEF_PRESETS, presetToQuickBrief } = await import(
+    "@/lib/planner/brief/presets"
+  );
+  const university = BRIEF_PRESETS.find((p) => p.id === "university-students");
+  assert.ok(university);
+
+  const quickBrief = presetToQuickBrief(university!);
+  assert.equal(quickBrief.budgetInputWon, university!.base.budgetInputWon);
+  assert.deepEqual(quickBrief.regionCodes, university!.base.regionCodes);
+  // 대학생 프리셋은 자세히 설계용으로 ageBands=["20s"] 를 갖지만,
+  // 빠른 추천엔 그 값을 편집할 입력이 없으므로 조용히 채우지 않는다.
+  assert.deepEqual(quickBrief.ageBands, []);
+  assert.deepEqual(quickBrief.genders, []);
+  assert.equal(quickBrief.goal, null);
+  assert.equal(quickBrief.industry, null);
+  assert.equal(quickBrief.flightStart, null);
+  assert.equal(quickBrief.flightEnd, null);
+  assert.ok(briefQuickRequiredStatus(quickBrief).ok);
+});
+
 test("O-2 빠른 추천 — 예산만 필수", () => {
   assert.deepEqual(briefQuickRequiredStatus(EMPTY_BRIEF), {
     budget: false,

@@ -380,9 +380,11 @@ export async function buildPlannerReportPdf(
     : null;
 
   // ── 표지 페이지 ──
-  setFill(QP_ACCENT);
-  doc.rect(0, 0, pageW, pageH, "F");
+  // 배경은 화면 미리보기(DocumentGradientHero, bg-[#1c1c1f])와 통일한다.
+  // QP_INK 가 정확히 #1c1c1f 라 두 상수의 역할만 맞바꾼다 — 배경=INK, 액센트 줄=ACCENT.
   setFill(QP_INK);
+  doc.rect(0, 0, pageW, pageH, "F");
+  setFill(QP_ACCENT);
   doc.rect(0, 0, pageW, 3, "F");
 
   drawWordmark(M, 50, 26);
@@ -411,7 +413,9 @@ export async function buildPlannerReportPdf(
   const titleLines = doc.splitTextToSize(p.documentTitle, contentW) as string[];
   doc.text(titleLines, M, 92);
 
-  setFill(QP_INK);
+  // 화면의 <div className="mt-5 h-1 w-16 bg-[color:var(--qp-accent)]" /> 와 대응.
+  // 배경이 QP_INK 가 됐으니 이 룰도 QP_ACCENT 로 바꿔야 보인다(안 바꾸면 검정 위 검정).
+  setFill(QP_ACCENT);
   doc.rect(M, 92 + titleLines.length * 11, 28, 1.6, "F");
 
   doc.setFontSize(13);
