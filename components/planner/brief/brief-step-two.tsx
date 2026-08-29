@@ -16,7 +16,11 @@ import type { DigitalChannel } from "@/lib/planner/digital-channels";
 import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
 import { Button } from "@/components/ui/button";
 import { useBriefStore } from "@/lib/planner/brief/store";
-import { flightDays, totalBudgetWon } from "@/lib/planner/brief/types";
+import {
+  BRIEF_DEFAULT_DAYS,
+  flightDays,
+  totalBudgetWon,
+} from "@/lib/planner/brief/types";
 import { buildBriefIntegratedMixRequest } from "@/lib/planner/brief/brief-integrated-adapters";
 import { useIntegratedMix } from "@/hooks/use-integrated-mix";
 import {
@@ -176,7 +180,7 @@ export function BriefStepTwo({
   const store = useBriefStore();
   const localeKey = isKo ? "ko" : "en";
 
-  const days = flightDays(store) ?? 30;
+  const days = flightDays(store) ?? BRIEF_DEFAULT_DAYS;
   const budgetWon = totalBudgetWon(store);
   const showDigital = store.channelMode === "ooh_digital";
 

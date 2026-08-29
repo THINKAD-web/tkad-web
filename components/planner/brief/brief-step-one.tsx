@@ -53,6 +53,7 @@ import {
   type BriefChannelMode,
 } from "@/lib/planner/brief/brief-integrated-adapters";
 import { BriefQuickRankPanel } from "@/components/planner/brief/brief-quick-rank";
+import { countMixUnits } from "@/lib/planner/brief/brief-fingerprint";
 
 const GOAL_LABELS: Record<BriefGoal, { ko: string; en: string }> = {
   awareness: { ko: "인지", en: "Awareness" },
@@ -223,6 +224,7 @@ export function BriefStepOne({
 
   const required = briefRequiredStatus(store);
   const quickRequired = briefQuickRequiredStatus(store);
+  const mixCount = countMixUnits(store.mixUnits);
   const defaults = briefUsesDefaults(store);
   const days = flightDays(store);
   const totalWon = totalBudgetWon(store);
@@ -332,6 +334,42 @@ export function BriefStepOne({
               onClick={() => store.setEntryMode("detailed")}
             >
               {isKo ? "→ 자세히 설계로 전환" : "→ Switch to detailed planning"}
+            </Button>
+          </div>
+
+          {/* ── 진행 (빠른 추천) ── */}
+          <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t border-border bg-background/95 py-4 backdrop-blur">
+            <div className="text-xs text-muted-foreground">
+              {!quickRequired.ok ? (
+                <span className="text-destructive">
+                  {isKo
+                    ? "예산을 입력해 주세요 (필수)"
+                    : "Budget is required"}
+                </span>
+              ) : mixCount > 0 ? (
+                <span>
+                  {isKo
+                    ? `${mixCount}개 매체 담김 · 다음 단계에서 수량을 조정합니다`
+                    : `${mixCount} media added · adjust quantities next`}
+                </span>
+              ) : (
+                <span>
+                  {isKo
+                    ? "지금 담지 않아도 됩니다 — 믹스 편집에서 추천을 다시 봅니다"
+                    : "You can also add media in the next step"}
+                </span>
+              )}
+            </div>
+            <Button
+              type="button"
+              disabled={!quickRequired.ok}
+              onClick={() => {
+                if (onRequestNext) onRequestNext();
+                else store.setWizardStep(2);
+                onNext?.();
+              }}
+            >
+              {isKo ? "다음 · 믹스 편집" : "Next · Edit mix"}
             </Button>
           </div>
         </>

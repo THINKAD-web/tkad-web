@@ -86,6 +86,13 @@ export const EMPTY_BRIEF: CampaignBriefInput = {
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
+/**
+ * 기간 미입력 시 지표·랭킹 산정에 쓰는 기본 일수.
+ * 빠른 추천은 기간이 선택 입력이라 Step 1~3 이 같은 기준을 써야 한다
+ * (Step 2 는 30일, Step 3 은 1일로 갈리던 것을 통일).
+ */
+export const BRIEF_DEFAULT_DAYS = 30;
+
 /** 집행 일수 (포함 기준, 시작·종료 동일 = 1일). 무효 시 null */
 export function flightDays(brief: CampaignBriefInput): number | null {
   if (!brief.flightStart || !brief.flightEnd) return null;
