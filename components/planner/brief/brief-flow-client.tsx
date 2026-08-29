@@ -8,7 +8,7 @@
  * 반환하면 useSyncExternalStore 무한 루프. boolean selector만 사용한다.
  */
 
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useSyncExternalStore } from "react";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -24,6 +24,15 @@ import {
   shouldPromptResumeSession,
 } from "@/lib/planner/brief/brief-session-logic";
 import { rebuildBriefRecommendedMix } from "@/lib/planner/brief/rebuild-mix";
+import {
+  BRIEF_HANDOFF_QUERY_KEYS,
+  planCartToBriefHandoff,
+  resolveBriefHandoff,
+  resolveHandoffMix,
+  savedPlannerPlanToBriefHandoff,
+} from "@/lib/planner/brief/handoff";
+import { getPlanCart } from "@/lib/plan-cart";
+import { useToast } from "@/components/toast-provider";
 import { BriefStepOne } from "@/components/planner/brief/brief-step-one";
 import { BriefStepTwo } from "@/components/planner/brief/brief-step-two";
 import { BriefStepThree } from "@/components/planner/brief/brief-step-three";
@@ -124,6 +133,25 @@ export function BriefFlowClient({
   const pendingStepRef = useRef<BriefWizardStep | null>(null);
   const resumePromptedRef = useRef(false);
 
+  // ── 딥링크 인계 (매체 상세·비교·찜·내 플랜·챗봇) ──
+  const { toast } = useToast();
+  const handoff = useMemo(
+    () =>
+      resolveBriefHandoff({
+        plan: searchParams.get("plan"),
+        loadPlan: searchParams.get("loadPlan"),
+        from: searchParams.get("from"),
+        brief: searchParams.get("brief"),
+        mediaIds: searchParams.get("mediaIds"),
+        addMedia: searchParams.get("addMedia"),
+        units: searchParams.get("units"),
+      }),
+    [searchParams],
+  );
+  // `savedPlan` 은 Step 3 이 ?plan= 으로 이미 처리한다 — 여기선 인계로 세지 않는다.
+  const pendingHandoff = handoff && handoff.kind !== "savedPlan" ? handoff : null;
+  const handledHandoffRef = useRef<string | null>(null);
+
   // L-2: hydration 직후 1회만 — mixCount를 effect deps에 넣지 않는다.
   useLayoutEffect(() => {
     if (resumePromptedRef.current) return;
@@ -133,11 +161,171 @@ export function BriefFlowClient({
       planFromUrl,
       alreadyPrompted: resumePromptedRef.current,
       mixUnits: state.mixUnits,
+      handoffActive: pendingHandoff != null,
     });
     if (!shouldOpen) return;
     resumePromptedRef.current = true;
     setResumeOpen(true);
-  }, [hydrated, planFromUrl]);
+  }, [hydrated, planFromUrl, pendingHandoff]);
+
+  const stripHandoffQuery = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    for (const k of BRIEF_HANDOFF_QUERY_KEYS) url.searchParams.delete(k);
+    window.history.replaceState({}, "", url.toString());
+  }, []);
+
+  const noticeMissing = useCallback(
+    (missing: readonly string[]) => {
+      if (missing.length === 0) return;
+      toast(
+        "warning",
+        isKo
+          ? `매체 ${missing.length}개는 현재 카탈로그에 없어 제외했습니다.`
+          : `${missing.length} media are no longer in the catalog and were skipped.`,
+      );
+    },
+    [toast, isKo],
+  );
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!pendingHandoff) return;
+    const key = JSON.stringify(pendingHandoff);
+    if (handledHandoffRef.current === key) return;
+    handledHandoffRef.current = key;
+
+    const store = useBriefStore.getState();
+    let cancelled = false;
+
+    const applyStartFrom = (
+      result: ReturnType<typeof planCartToBriefHandoff>,
+      emptyMessage: string,
+      okMessage: (n: number) => string,
+    ) => {
+      store.startFromHandoff({ patch: result.patch, lines: result.mix.lines });
+      noticeMissing(result.mix.missing);
+      if (result.mix.lines.length > 0) {
+        setWizardStep(2);
+        toast("success", okMessage(result.mix.lines.length));
+      } else {
+        setWizardStep(1);
+        toast("success", emptyMessage);
+      }
+      stripHandoffQuery();
+    };
+
+    void (async () => {
+      switch (pendingHandoff.kind) {
+        case "media": {
+          const { lines, missing } = resolveHandoffMix({
+            catalog,
+            mediaIds: pendingHandoff.mediaIds,
+            units: pendingHandoff.units,
+          });
+          noticeMissing(missing);
+          if (lines.length === 0) {
+            toast(
+              "error",
+              isKo
+                ? "선택한 매체를 찾을 수 없습니다."
+                : "Selected media not found.",
+            );
+            stripHandoffQuery();
+            return;
+          }
+          store.addMixLines(lines);
+          setWizardStep(2);
+          toast(
+            "success",
+            isKo
+              ? `매체 ${lines.length}개를 담았습니다. 수량을 확인한 뒤 진행해 주세요.`
+              : `Added ${lines.length} media. Check quantities, then continue.`,
+          );
+          stripHandoffQuery();
+          return;
+        }
+
+        case "brief": {
+          store.applyFreeText(pendingHandoff.raw);
+          store.setFreeText(pendingHandoff.raw);
+          setWizardStep(1);
+          toast(
+            "success",
+            isKo
+              ? "입력한 조건으로 채웠습니다. 확인 후 다음 단계로 진행해 주세요."
+              : "Brief applied — review it, then continue.",
+          );
+          stripHandoffQuery();
+          return;
+        }
+
+        case "planCart": {
+          applyStartFrom(
+            planCartToBriefHandoff(getPlanCart(), catalog),
+            isKo
+              ? "내 플랜 설정으로 플래너를 시작합니다."
+              : "Starting the planner with your saved plan settings.",
+            (n) =>
+              isKo
+                ? `내 플랜 매체 ${n}개로 시작합니다.`
+                : `Starting with ${n} media from your plan.`,
+          );
+          return;
+        }
+
+        case "loadPlan": {
+          try {
+            const res = await fetch(
+              `/api/planner/shared/${encodeURIComponent(pendingHandoff.planId)}`,
+              { cache: "no-store" },
+            );
+            if (!res.ok) throw new Error(String(res.status));
+            const data = (await res.json()) as { planJson?: unknown };
+            if (cancelled) return;
+            applyStartFrom(
+              savedPlannerPlanToBriefHandoff(
+                (data.planJson ?? {}) as Parameters<
+                  typeof savedPlannerPlanToBriefHandoff
+                >[0],
+                catalog,
+              ),
+              isKo
+                ? "저장한 플랜 설정을 불러왔습니다."
+                : "Loaded your saved plan settings.",
+              (n) =>
+                isKo
+                  ? `저장한 플랜의 매체 ${n}개를 불러왔습니다.`
+                  : `Loaded ${n} media from your saved plan.`,
+            );
+          } catch {
+            if (cancelled) return;
+            toast(
+              "error",
+              isKo
+                ? "플랜을 불러오지 못했습니다. 만료되었을 수 있습니다."
+                : "Could not load the plan — it may have expired.",
+            );
+            stripHandoffQuery();
+          }
+          return;
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    hydrated,
+    pendingHandoff,
+    catalog,
+    isKo,
+    setWizardStep,
+    stripHandoffQuery,
+    noticeMissing,
+    toast,
+  ]);
 
   const goToStep = useCallback(
     (target: BriefWizardStep) => {

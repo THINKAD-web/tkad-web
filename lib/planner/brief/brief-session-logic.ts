@@ -15,9 +15,15 @@ export function shouldPromptResumeSession(params: {
   planFromUrl: string | null;
   alreadyPrompted: boolean;
   mixUnits: Record<string, number>;
+  /**
+   * 딥링크 인계가 진행 중이면 묻지 않는다. 사용자는 이미 "이 매체로 시작"을
+   * 눌러 의사를 밝혔고, 여기서 "새로 시작"을 고르면 방금 넘어온 값이 사라진다.
+   */
+  handoffActive?: boolean;
 }): boolean {
   if (!params.hydrated) return false;
   if (params.planFromUrl) return false;
+  if (params.handoffActive) return false;
   if (params.alreadyPrompted) return false;
   return countMixUnits(params.mixUnits) >= 1;
 }
