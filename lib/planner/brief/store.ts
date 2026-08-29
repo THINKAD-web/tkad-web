@@ -104,6 +104,16 @@ export type BriefStoreActions = {
   removeMediaFromMix: (mediaId: string) => void;
   setMixUnits: (mediaId: string, units: number) => void;
   replaceMix: (lines: readonly { mediaId: string; units: number }[]) => void;
+  /** 딥링크 인계 — 기존 믹스에 매체를 더한다 (브리프 입력은 건드리지 않는다) */
+  addMixLines: (lines: readonly { mediaId: string; units: number }[]) => void;
+  /**
+   * 딥링크 인계 — 내 플랜·저장 플랜에서 새로 시작한다.
+   * 옛 세션 입력과 섞이지 않도록 브리프 입력을 비운 뒤 patch 를 얹는다.
+   */
+  startFromHandoff: (params: {
+    patch: Partial<CampaignBriefInput>;
+    lines: readonly { mediaId: string; units: number }[];
+  }) => void;
   clearMix: () => void;
   /** 현재 브리프 기준으로 mix 지문을 갱신 (담은 매체 유지 확인) */
   acknowledgeMixForCurrentBrief: () => void;
@@ -262,6 +272,29 @@ export const useBriefStore = create<BriefStore>()(
           }
           const state = { ...s, mixUnits };
           return { mixUnits, ...stampMixFingerprint(state) };
+        }),
+
+      addMixLines: (lines) =>
+        set((s) => {
+          const mixUnits = { ...s.mixUnits };
+          for (const l of lines) {
+            const n = Math.floor(l.units);
+            if (Number.isFinite(n) && n > 0) mixUnits[l.mediaId] = n;
+          }
+          const state = { ...s, mixUnits };
+          return { mixUnits, ...stampMixFingerprint(state) };
+        }),
+
+      startFromHandoff: ({ patch, lines }) =>
+        set((s) => {
+          const brief = normalizeBriefInput({ ...EMPTY_BRIEF, ...patch });
+          const mixUnits: Record<string, number> = {};
+          for (const l of lines) {
+            const n = Math.floor(l.units);
+            if (Number.isFinite(n) && n > 0) mixUnits[l.mediaId] = n;
+          }
+          const state = { ...s, ...brief, mixUnits };
+          return { ...brief, mixUnits, ...stampMixFingerprint(state) };
         }),
 
       clearMix: () => set({ mixUnits: {}, mixBriefFingerprint: null }),
