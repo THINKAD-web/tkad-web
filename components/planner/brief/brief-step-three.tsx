@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
+import { BriefResultSummary } from "@/components/planner/brief/brief-result-summary";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import { useBriefStore } from "@/lib/planner/brief/store";
 import {
@@ -60,6 +61,7 @@ import {
   type CampaignBriefInput,
 } from "@/lib/planner/brief/types";
 import { summarizeSidoCodes } from "@/lib/planner/brief/regions";
+import { summarizeBriefTargetLine } from "@/lib/planner/brief/plain-language-summary";
 
 const GOAL_LABELS = {
   awareness: { ko: "인지", en: "Awareness" },
@@ -493,6 +495,8 @@ export function BriefStepThree({
   const won = (n: number) =>
     isKo ? `₩${n.toLocaleString("ko-KR")}` : `₩${n.toLocaleString("en-US")}`;
 
+  const summaryMediaCount = mixRows?.length ?? lines.length;
+
   if (loadingPlan) {
     return (
       <p className="py-12 text-center text-sm text-muted-foreground">
@@ -503,6 +507,18 @@ export function BriefStepThree({
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-5xl space-y-6">
+    {summaryMediaCount > 0 ? (
+      <BriefResultSummary
+        isKo={isKo}
+        budgetWon={displayMetrics.budgetWon}
+        totalImpressions={displayMetrics.totalImpressions.value}
+        netReach={displayMetrics.netReach?.value ?? null}
+        mediaCount={summaryMediaCount}
+        days={days}
+        targetLine={summarizeBriefTargetLine(store, isKo)}
+        budgetSplit={exportPayload?.charts?.budgetSplit}
+      />
+    ) : null}
     <div className="grid w-full gap-6 lg:grid-cols-[1fr_320px]">
       <div className="min-w-0 max-w-full space-y-4">
         <BriefSummary brief={store} isKo={isKo} />

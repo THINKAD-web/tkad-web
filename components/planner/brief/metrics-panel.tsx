@@ -59,7 +59,8 @@ function PendingRow({
   );
 }
 
-function formatReach(n: number, isKo: boolean): string {
+/** 큰 수를 만/백만 단위로 압축 표시 — 결과 요약 카드도 같은 표기를 쓴다 */
+export function formatReach(n: number, isKo: boolean): string {
   if (n >= 1_000_000) {
     const m = n / 1_000_000;
     return isKo ? `${m.toFixed(1)}백만` : `${m.toFixed(1)}M`;
