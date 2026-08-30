@@ -40,10 +40,12 @@ export function inquiryToBrief(
   const flightStart = opts?.flightStart ?? utcDateOnly();
   const days = inquiryFlightDays(parsed.months);
   const flightEnd = inclusiveFlightEnd(flightStart, days);
+  /** 문의에 공항이 명시되면 시도 코드로 반영 — 빈 배열(=전국) 기본값 사용 안 함 */
+  const regionCodes = parsed.wantsAirport ? (["28"] as const) : [];
   return {
     budgetInputWon: parsed.budgetWon,
     budgetMode: "total",
-    regionCodes: [],
+    regionCodes: [...regionCodes],
     genders: [],
     ageBands: [],
     goal: null,

@@ -90,14 +90,28 @@ export function buildReportStrategyLines(
   return lines;
 }
 
+/** 표지 「미지정」은 유지하되, 파일명·전략 문장에는 끼워 넣지 않는다 */
+export function isUnspecifiedReportLabel(label: string): boolean {
+  const t = label.trim();
+  return t === "미지정" || t === "Not specified";
+}
+
 export function buildReportWhyLine(input: ReportStrategyInput): string {
   const zoneSuffix =
     input.seoulZones.length > 0
       ? formatSeoulZonesText(input.seoulZones, input.isKo)
       : input.regionsText;
 
+  const goalKnown = !isUnspecifiedReportLabel(input.goalTitle);
+
   if (input.isKo) {
-    return `왜 이 구성인가 · ${zoneSuffix} 핵심 동선의 ${input.portfolioCount}개 매체로 ${input.goalTitle} 목표에 맞춰 노출 효율과 도달을 균형 있게 설계했습니다.`;
+    if (goalKnown) {
+      return `왜 이 구성인가 · ${zoneSuffix} 핵심 동선의 ${input.portfolioCount}개 매체로 ${input.goalTitle} 목표에 맞춰 노출 효율과 도달을 균형 있게 설계했습니다.`;
+    }
+    return `왜 이 구성인가 · ${zoneSuffix} 핵심 동선의 ${input.portfolioCount}개 매체로 노출 효율과 도달을 균형 있게 설계했습니다.`;
   }
-  return `Why · ${input.portfolioCount} media across ${zoneSuffix} balance reach and efficiency for the "${input.goalTitle}" objective.`;
+  if (goalKnown) {
+    return `Why · ${input.portfolioCount} media across ${zoneSuffix} balance reach and efficiency for the "${input.goalTitle}" objective.`;
+  }
+  return `Why · ${input.portfolioCount} media across ${zoneSuffix} balance reach and efficiency.`;
 }

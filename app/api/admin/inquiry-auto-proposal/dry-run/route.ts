@@ -33,13 +33,17 @@ export async function POST(request: NextRequest) {
       wantsRestStopLed: dry.parsed.wantsRestStopLed,
       namedNeedles: dry.parsed.namedNeedles,
     };
-    if (dry.eligible.length === 0) {
+    const bodyMixIds = Object.keys(dry.mixUnits);
+    if (bodyMixIds.length === 0) {
       return json({
         parsed,
         matched: dry.matched,
-        eligibleCount: 0,
+        designatedCount: dry.designated.length,
+        eligibleCount: dry.eligible.length,
         excludedCount: dry.excluded.length,
         mixUnits: dry.mixUnits,
+        bodyTotalWon: dry.bodyTotalWon,
+        appendixMediaSpecs: dry.appendixMediaSpecs,
         brief: {
           budgetInputWon: dry.brief.budgetInputWon,
           budgetMode: dry.brief.budgetMode,
@@ -55,9 +59,12 @@ export async function POST(request: NextRequest) {
     return json({
       parsed,
       matched: built.dryRun.matched,
+      designatedCount: built.dryRun.designated.length,
       eligibleCount: built.dryRun.eligible.length,
       excludedCount: built.dryRun.excluded.length,
       mixUnits: built.dryRun.mixUnits,
+      bodyTotalWon: built.dryRun.bodyTotalWon,
+      appendixMediaSpecs: built.dryRun.appendixMediaSpecs,
       brief: {
         budgetInputWon: built.dryRun.brief.budgetInputWon,
         budgetMode: built.dryRun.brief.budgetMode,

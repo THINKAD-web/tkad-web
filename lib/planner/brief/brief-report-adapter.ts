@@ -262,6 +262,42 @@ function briefAgeText(
   return ageBands.join(", ");
 }
 
+function unspecifiedCoverLabel(isKo: boolean): string {
+  return isKo ? "미지정" : "Not specified";
+}
+
+/** 문의 자동 매칭 PDF — 추출 못 한 타깃·업종은 「전국/전 연령/기타」 대신 미지정 */
+function buildBriefCoverDemographics(args: {
+  brief: CampaignBriefInput;
+  ageBands: readonly string[] | undefined;
+  industryKey: ReturnType<typeof briefIndustryToPlanner>;
+  isKo: boolean;
+  mixSource?: "inquiry_match";
+}): { regionsText: string; ageText: string; industryText: string; goalTitle: string } {
+  const isInquiry = args.mixSource === "inquiry_match";
+  const regionsText =
+    args.brief.regionCodes.length > 0
+      ? summarizeSidoCodes(args.brief.regionCodes, args.isKo)
+      : isInquiry
+        ? unspecifiedCoverLabel(args.isKo)
+        : summarizeSidoCodes([], args.isKo);
+  const ageText = args.ageBands?.length
+    ? args.ageBands.join(", ")
+    : isInquiry
+      ? unspecifiedCoverLabel(args.isKo)
+      : briefAgeText(undefined, args.isKo);
+  const industryText = args.brief.industry
+    ? plannerIndustryLabel(args.industryKey, args.isKo)
+    : isInquiry
+      ? unspecifiedCoverLabel(args.isKo)
+      : plannerIndustryLabel(args.industryKey, args.isKo);
+  const goalTitle =
+    isInquiry && !args.brief.goal
+      ? unspecifiedCoverLabel(args.isKo)
+      : briefGoalTitle(args.brief, args.isKo);
+  return { regionsText, ageText, industryText, goalTitle };
+}
+
 function briefGoalTitle(
   brief: CampaignBriefInput,
   isKo: boolean,
@@ -544,15 +580,23 @@ export function buildBriefReportPayload(
     ? splitReportCopyParagraphs(copy.executiveSummary)
     : undefined;
 
+  const cover = buildBriefCoverDemographics({
+    brief,
+    ageBands: plan.brief.ageBands,
+    industryKey,
+    isKo,
+    mixSource: args.mixSource,
+  });
+
   const payload = buildOohReportPayload({
     isKo,
-    goalTitle: briefGoalTitle(brief, isKo),
+    goalTitle: cover.goalTitle,
     budgetMan,
     periodDisplay,
-    regionsText: summarizeSidoCodes(brief.regionCodes, isKo),
+    regionsText: cover.regionsText,
     categoriesText: inferBriefCategoriesText(portfolio, isKo),
-    ageText: briefAgeText(plan.brief.ageBands, isKo),
-    industryText: plannerIndustryLabel(industryKey, isKo),
+    ageText: cover.ageText,
+    industryText: cover.industryText,
     industryKey,
     campaignGoal,
     portfolio,
