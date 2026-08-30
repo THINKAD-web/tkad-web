@@ -68,7 +68,7 @@ export function PlaylistListClient() {
           <Link
             key={p.id}
             href={`/creatives/playlists/${p.id}`}
-            className="group block rounded-2xl border-2 border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_60px_rgba(15,23,42,0.10)] sm:p-5"
+            className="group block rounded-2xl border-2 border-border bg-card p-4 transition-ui hover:-translate-y-0.5 hover:shadow-[0_18px_60px_rgba(15,23,42,0.10)] sm:p-5"
           >
             <div className="mb-2 inline-flex items-center gap-1 rounded-md border-2 border-accent bg-accent/10 px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
               <ListMusic className="h-3 w-3" /> 플레이리스트

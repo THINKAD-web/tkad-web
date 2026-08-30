@@ -30,7 +30,7 @@ export function CaseStudyCard({ item, className, compact }: Props) {
   return (
     <article
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-[22px] border border-gray-200 bg-white text-left shadow-sm transition-all duration-300 hover:border-[color:var(--qp-accent)]/35 hover:shadow-md dark:border-white/10 dark:bg-gray-900 dark:shadow-none dark:hover:border-[var(--qp-accent)]/35 dark:hover:shadow-[0_12px_48px_rgba(255,98,0,0.12)]",
+        "group relative flex flex-col overflow-hidden rounded-[22px] border border-gray-200 bg-white text-left shadow-sm transition-ui duration-200 hover:border-[color:var(--qp-accent)]/35 hover:shadow-md dark:border-white/10 dark:bg-gray-900 dark:shadow-none dark:hover:border-[var(--qp-accent)]/35 dark:hover:shadow-[0_12px_48px_rgba(255,98,0,0.12)]",
         className,
       )}
     >

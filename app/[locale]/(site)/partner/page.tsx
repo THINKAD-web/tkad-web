@@ -799,7 +799,7 @@ export default function PartnerPortalPage() {
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-muted">
                         <div
-                          className="h-full rounded-full bg-accent transition-all"
+                          className="h-full rounded-full bg-accent transition-bar"
                           style={{ width: `${c.progressPercent}%` }}
                         />
                       </div>

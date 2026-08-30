@@ -301,7 +301,7 @@ export default function PlannerSimulationStep3({
                   >
                     <div className="h-2 w-full overflow-hidden rounded-full dark:bg-white/10 bg-gray-200">
                       <div
-                        className="h-full bg-[color:var(--qp-accent)] transition-all"
+                        className="h-full bg-[color:var(--qp-accent)] transition-bar"
                         style={{ width: `${upload.pct}%` }}
                       />
                     </div>
@@ -501,7 +501,7 @@ export default function PlannerSimulationStep3({
                       setSlideIndex(i);
                     }}
                     className={cn(
-                      "h-2 rounded-full transition-all",
+                      "h-2 rounded-full transition-ui",
                       i === slideIndex
                         ? "w-8 bg-[color:var(--qp-accent)]"
                         : "w-2 dark:bg-white/20 bg-gray-300 hover:bg-[color:var(--qp-accent)]/50",

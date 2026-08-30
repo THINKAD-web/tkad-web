@@ -67,7 +67,7 @@ export function ProTrialBanner({ trial, isKo, className }: Props) {
           aria-label={isKo ? "PRO 체험 진행률" : "PRO trial progress"}
         >
           <div
-            className="h-full rounded-full bg-[color:var(--qp-accent)] transition-all duration-500"
+            className="h-full rounded-full bg-[color:var(--qp-accent)] transition-bar duration-500"
             style={{ width: `${trial.progressPct}%` }}
           />
         </div>

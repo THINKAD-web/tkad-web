@@ -24,6 +24,16 @@ import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 /** Ignore rapid double-taps that open-then-immediately-close the panel. */
 const MOBILE_NAV_TOGGLE_GUARD_MS = 320;
 
+/**
+ * 퇴장 애니메이션 길이 — `--motion-exit` 와 같은 값이어야 한다.
+ * 패널을 이 시간만큼 더 mount 해 둔 뒤 언마운트한다.
+ *
+ * **반드시 MOBILE_NAV_TOGGLE_GUARD_MS 보다 짧게 유지할 것.** 가드보다 길면
+ * 닫히는 도중 다시 열 수 없어 버벅이는 것처럼 느껴진다(PR #487 이 고친 문제와
+ * 같은 증상이 다시 생긴다).
+ */
+const MOBILE_NAV_EXIT_MS = 150;
+
 function isMobileDetailPath(pathname: string): boolean {
   return (
     (/^\/media\/[^/]+$/.test(pathname) && !pathname.startsWith("/media/map")) ||
@@ -206,6 +216,12 @@ export function DesktopGlobalNav() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [mobileNavContentReady, setMobileNavContentReady] = useState(false);
+  /**
+   * 퇴장 애니메이션 동안 패널을 살려 두기 위한 렌더 게이트.
+   * `mobileNavOpen` 이 열림/닫힘의 단일 진실이고, 이 값은 그것을 뒤따를 뿐이다
+   * — #487 의 토글 가드·rAF 로직은 그대로 둔다.
+   */
+  const [mobileNavRendered, setMobileNavRendered] = useState(false);
   const mobileScrollLockYRef = useRef(0);
   const mobileNavToggleLockUntilRef = useRef(0);
   const commandPalette = useCommandPaletteOptional();
@@ -231,11 +247,22 @@ export function DesktopGlobalNav() {
     setMobileNavOpenSafe((v) => !v);
   }, [setMobileNavOpenSafe]);
 
+  /**
+   * 열림/닫힘에 딸린 두 가지를 한 effect 에서 처리한다.
+   *  - 내용 mount: #487 이 넣은 rAF 지연 (패널 껍데기를 먼저 보여준다)
+   *  - 렌더 게이트: 닫힐 때 퇴장 애니메이션(MOBILE_NAV_EXIT_MS)이 끝난 뒤 unmount
+   * 의존성과 목적이 같아 나누면 effect 만 늘어난다.
+   */
   useEffect(() => {
     if (!mobileNavOpen) {
       setMobileNavContentReady(false);
-      return;
+      const exitId = window.setTimeout(
+        () => setMobileNavRendered(false),
+        MOBILE_NAV_EXIT_MS,
+      );
+      return () => window.clearTimeout(exitId);
     }
+    setMobileNavRendered(true);
     const id = requestAnimationFrame(() => setMobileNavContentReady(true));
     return () => cancelAnimationFrame(id);
   }, [mobileNavOpen]);
@@ -376,18 +403,26 @@ export function DesktopGlobalNav() {
             }
             aria-expanded={mobileNavOpen}
           >
-            {mobileNavOpen ? (
-              <X className="h-5 w-5" aria-hidden />
-            ) : (
-              <Menu className="h-5 w-5" aria-hidden />
-            )}
+            {/* 두 아이콘을 겹쳐 두고 회전 페이드로 교차한다 (즉시 교체 대신) */}
+            <Menu
+              className="tkad-menu-icon h-5 w-5"
+              data-hidden={mobileNavOpen ? "true" : "false"}
+              aria-hidden
+            />
+            <X
+              className="tkad-menu-icon h-5 w-5"
+              data-hidden={mobileNavOpen ? "false" : "true"}
+              aria-hidden
+            />
           </button>
         </div>
       </div>
 
-      {mobileNavOpen ? (
+      {mobileNavRendered ? (
         <div
           className="tkad-site-header-panel md:hidden"
+          data-state={mobileNavOpen ? "open" : "closed"}
+          aria-hidden={!mobileNavOpen}
           role="dialog"
           aria-label={isKo ? "모바일 메뉴" : "Mobile menu"}
         >
@@ -419,11 +454,15 @@ export function DesktopGlobalNav() {
             />
           </div>
           {mobileNavContentReady ? (
-            <PublicNavSidebar
-              groups={navGroups}
-              onNavigate={() => setMobileNavOpenSafe(false)}
-              density="panel"
-            />
+            /* #487 이 이 내용을 rAF 한 프레임 뒤에 mount 한다 — 그대로 두되,
+               패널 애니메이션 도중 툭 튀어나오지 않도록 함께 페이드인시킨다. */
+            <div className="tkad-site-header-panel-content">
+              <PublicNavSidebar
+                groups={navGroups}
+                onNavigate={() => setMobileNavOpenSafe(false)}
+                density="panel"
+              />
+            </div>
           ) : (
             <div className="space-y-2 px-1 py-2" aria-hidden>
               {Array.from({ length: 4 }).map((_, i) => (

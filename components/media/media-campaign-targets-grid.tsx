@@ -45,7 +45,7 @@ export function MediaCampaignTargetsGrid({ previews, isKo }: Props) {
                 type="button"
                 onClick={() => goToTarget(chip.value)}
                 className={cn(
-                  "rounded-full border px-3.5 py-2 text-sm font-medium transition-all",
+                  "rounded-full border px-3.5 py-2 text-sm font-medium transition-ui",
                   activeSlug === chip.value
                     ? "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]"
                     : cn(MEDIA_CHIP_INACTIVE, "border-transparent"),

@@ -731,7 +731,7 @@ export function MediaManualBrowseFilters({
                       onNetworkTypeChange?.(selected ? "" : chip.value)
                     }
                     className={cn(
-                      "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                      "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-ui",
                       selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
                     )}
                   >
@@ -757,7 +757,7 @@ export function MediaManualBrowseFilters({
                       }
                     }}
                     className={cn(
-                      "flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-medium transition-all",
+                      "flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-medium transition-ui",
                       wrap
                         ? "px-3 py-1.5 text-sm"
                         : "px-2.5 py-1 text-xs",
@@ -800,7 +800,7 @@ export function MediaManualBrowseFilters({
                     onSubCategoryChange(selected ? "" : sub.id);
                   }}
                   className={cn(
-                    "whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-all",
+                    "whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-ui",
                     selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
                     subDisabled && disabledZeroChipClass,
                   )}
@@ -862,7 +862,7 @@ export function MediaManualBrowseFilters({
                   }
                 }}
                 className={cn(
-                  "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                  "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-ui",
                   selected
                     ? "bg-hermes text-white"
                     : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
@@ -894,7 +894,7 @@ export function MediaManualBrowseFilters({
                     onRegionSubChange(selected ? "" : sub.id);
                   }}
                   className={cn(
-                    "whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-all",
+                    "whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-ui",
                     selected
                       ? "bg-hermes text-white"
                       : "bg-white text-gray-600 dark:bg-white/10 dark:text-white/70",
@@ -991,7 +991,7 @@ export function MediaManualBrowseFilters({
                     );
                   }}
                   className={cn(
-                    "rounded-full px-3 py-1 text-xs font-medium transition-all",
+                    "rounded-full px-3 py-1 text-xs font-medium transition-ui",
                     selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
                   )}
                 >
@@ -1041,7 +1041,7 @@ export function MediaManualBrowseFilters({
                     type="button"
                     onClick={() => toggleFeature(chip.value)}
                     className={cn(
-                      "rounded-full px-3 py-1 text-xs font-medium transition-all",
+                      "rounded-full px-3 py-1 text-xs font-medium transition-ui",
                       selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
                     )}
                   >
@@ -1077,7 +1077,7 @@ export function MediaManualBrowseFilters({
                     onTargetChange(target === chip.value ? "" : chip.value)
                   }
                   className={cn(
-                    "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                    "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-ui",
                     target === chip.value
                       ? "bg-pink-500 text-white"
                       : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
@@ -1253,7 +1253,7 @@ export function MediaManualBrowseFilters({
             aria-label={isKo ? mode.labelKo : mode.labelEn}
             aria-pressed={active}
             className={cn(
-              "flex h-full items-center gap-1 py-0 font-medium transition-all tkad-type-meta",
+              "flex h-full items-center gap-1 py-0 font-medium transition-ui tkad-type-meta",
               listPageLayout
                 ? "min-w-0 flex-1 justify-center px-2 md:flex-none md:px-2"
                 : "px-2.5",

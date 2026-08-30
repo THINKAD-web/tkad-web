@@ -67,7 +67,7 @@ export function HomeMediaCarousel({
       : "min-w-0 shrink-0 grow-0 basis-[70%] sm:basis-[42%] md:basis-[31%] lg:basis-[23.5%]";
 
   const arrowBase =
-    "pointer-events-auto inline-flex h-10 w-10 items-center justify-center border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 disabled:cursor-not-allowed disabled:opacity-30";
+    "pointer-events-auto inline-flex h-10 w-10 items-center justify-center border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 backdrop-blur transition-ui duration-200 hover:-translate-y-0.5 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 disabled:cursor-not-allowed disabled:opacity-30";
 
   if (items.length === 0) return null;
 

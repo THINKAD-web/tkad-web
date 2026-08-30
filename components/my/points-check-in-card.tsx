@@ -83,7 +83,7 @@ export function PointsCheckInCard({ className }: Props) {
         disabled={loading || checkedIn || submitting}
         onClick={() => void handleCheckIn()}
         className={cn(
-          "shrink-0 rounded-2xl px-5 py-3 font-display text-xs font-medium uppercase tracking-wider transition-all",
+          "shrink-0 rounded-2xl px-5 py-3 font-display text-xs font-medium uppercase tracking-wider transition-ui",
           checkedIn
             ? "bg-muted text-muted-foreground"
             : "bg-primary text-primary-foreground hover:opacity-90",

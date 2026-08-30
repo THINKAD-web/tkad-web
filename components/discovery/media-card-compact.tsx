@@ -683,7 +683,7 @@ export const DiscoveryMediaCardMapTile = forwardRef<
       role="button"
       tabIndex={0}
       className={cn(
-        "relative list-none cursor-pointer overflow-hidden rounded-2xl border bg-white transition-all hover:shadow-md active:scale-[0.99] dark:bg-white/5",
+        "relative list-none cursor-pointer overflow-hidden rounded-2xl border bg-white transition-ui hover:shadow-md active:scale-[0.99] dark:bg-white/5",
         selected
           ? "z-0 border-2 border-hermes/90 shadow-md shadow-hermes/15 ring-2 ring-inset ring-hermes/35 dark:border-hermes"
           : hovered

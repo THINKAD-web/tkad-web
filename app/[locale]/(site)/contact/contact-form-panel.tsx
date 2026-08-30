@@ -13,7 +13,7 @@ export function ContactFormPanel() {
   const [mainTab, setMainTab] = useState<MainTab>("inquiry");
 
   const tabBase =
-    "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold backdrop-blur transition-all dark:border-white/10 dark:bg-white/5";
+    "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold backdrop-blur transition-ui dark:border-white/10 dark:bg-white/5";
 
   const tabActive =
     "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] text-gray-900 shadow-sm dark:text-white";

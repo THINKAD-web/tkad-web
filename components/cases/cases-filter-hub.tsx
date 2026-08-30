@@ -47,7 +47,7 @@ function FilterChip({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-all",
+        "rounded-full border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-ui",
         active
           ? "border-[var(--qp-accent)]/50 bg-[var(--qp-accent)]/15 text-[var(--qp-accent)] shadow-[0_0_20px_rgba(34,211,238,0.15)]"
           : "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:border-white/25 hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900",

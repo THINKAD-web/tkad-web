@@ -73,7 +73,7 @@ export function SpecialLandingHero({
           </Link>
           <Link
             href={secondaryCta.href}
-            className="inline-flex h-14 min-h-14 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-8 text-sm font-black dark:text-white text-gray-900 backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 sm:h-16 sm:px-10 sm:text-base"
+            className="inline-flex h-14 min-h-14 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-8 text-sm font-black dark:text-white text-gray-900 backdrop-blur transition-ui hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 sm:h-16 sm:px-10 sm:text-base"
           >
             {secondaryCta.label}
             <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />

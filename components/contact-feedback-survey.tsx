@@ -229,7 +229,7 @@ export function ContactFeedbackSurvey() {
               type="button"
               onClick={() => setServiceSatisfaction(n)}
               className={cn(
-                "rounded-xl border inline-flex h-10 min-w-[40px] items-center justify-center px-3 text-sm font-semibold transition-all",
+                "rounded-xl border inline-flex h-10 min-w-[40px] items-center justify-center px-3 text-sm font-semibold transition-ui",
                 serviceSatisfaction === n
                   ? chipActive
                   : chipIdle,
@@ -255,7 +255,7 @@ export function ContactFeedbackSurvey() {
               type="button"
               onClick={() => setNps(n)}
               className={cn(
-                "rounded-xl border inline-flex h-9 min-w-[36px] items-center justify-center px-2 text-sm font-semibold transition-all",
+                "rounded-xl border inline-flex h-9 min-w-[36px] items-center justify-center px-2 text-sm font-semibold transition-ui",
                 nps === n
                   ? chipActive
                   : chipIdle,
@@ -290,7 +290,7 @@ export function ContactFeedbackSurvey() {
                 if (v !== "yes") setCampaignResult("");
               }}
               className={cn(
-                "rounded-xl border px-4 py-2 text-xs font-semibold transition-all",
+                "rounded-xl border px-4 py-2 text-xs font-semibold transition-ui",
                 campaign === v
                   ? chipActive
                   : chipIdle,
@@ -314,7 +314,7 @@ export function ContactFeedbackSurvey() {
                 type="button"
                 onClick={() => setCampaignResult(n)}
                 className={cn(
-                  "rounded-xl border inline-flex h-10 min-w-[40px] items-center justify-center px-3 text-sm font-semibold transition-all",
+                  "rounded-xl border inline-flex h-10 min-w-[40px] items-center justify-center px-3 text-sm font-semibold transition-ui",
                   campaignResult === n
                     ? chipActive
                     : chipIdle,

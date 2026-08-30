@@ -40,7 +40,7 @@ export function PlannerSeoulZoneChips({
 
   const chipClass = (active: boolean, isSuggested: boolean) =>
     cn(
-      "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all touch-manipulation sm:text-sm",
+      "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-ui touch-manipulation sm:text-sm",
       active
         ? "bg-[color:var(--qp-accent)] text-white shadow-sm shadow-[color:var(--qp-accent)]/25"
         : isSuggested

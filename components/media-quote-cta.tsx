@@ -34,7 +34,7 @@ export function MediaQuoteCtaButton({
       type="button"
       onClick={() => setOpen(true)}
       className={cn(
-        "inline-flex h-9 min-h-0 min-w-[7rem] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-bold text-white tkad-neon-cta-clean shadow-[0_4px_16px_rgba(124,58,237,0.25)] transition-all hover:brightness-110 active:scale-[0.98] sm:flex-none",
+        "inline-flex h-9 min-h-0 min-w-[7rem] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-bold text-white tkad-neon-cta-clean shadow-[0_4px_16px_rgba(124,58,237,0.25)] transition-ui hover:brightness-110 active:scale-[0.98] sm:flex-none",
         className,
       )}
     >

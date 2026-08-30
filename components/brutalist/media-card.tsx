@@ -86,7 +86,7 @@ export function MediaCard({
     <Link
       href={href}
       className={cn(
-        "group relative flex h-full min-w-0 flex-col bg-card transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hermes/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "group relative flex h-full min-w-0 flex-col bg-card transition-ui duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hermes/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         premium
           ? cn(
               "rounded-2xl border border-border/60 bg-card/85 backdrop-blur hover:-translate-y-1 hover:border-border/80 shadow-[0_12px_40px_rgba(0,0,0,0.06)] hover:shadow-[0_18px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_18px_60px_rgba(0,0,0,0.45)]",

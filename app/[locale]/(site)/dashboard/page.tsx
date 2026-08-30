@@ -207,7 +207,7 @@ export default function AdvertiserDashboardPage() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "tkad-glass-surface flex items-center justify-center gap-2 rounded-[22px] border px-4 py-4 font-display text-xs font-medium uppercase tracking-[0.14em] backdrop-blur transition-all sm:py-5 sm:text-[13px]",
+                    "tkad-glass-surface flex items-center justify-center gap-2 rounded-[22px] border px-4 py-4 font-display text-xs font-medium uppercase tracking-[0.14em] backdrop-blur transition-ui sm:py-5 sm:text-[13px]",
                     "text-foreground hover:-translate-y-0.5 hover:border-primary/30",
                     "muted" in item && item.muted && "text-muted-foreground",
                   )}
@@ -225,7 +225,7 @@ export default function AdvertiserDashboardPage() {
                   type="button"
                   onClick={() => setSection(item.key)}
                   className={cn(
-                    "relative flex flex-1 items-center justify-center gap-2 rounded-[18px] py-3.5 text-sm font-bold transition-all sm:text-base",
+                    "relative flex flex-1 items-center justify-center gap-2 rounded-[18px] py-3.5 text-sm font-bold transition-ui sm:text-base",
                     section === item.key
                       ? "bg-primary/20 text-primary shadow-sm"
                       : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
@@ -251,7 +251,7 @@ export default function AdvertiserDashboardPage() {
                       type="button"
                       onClick={() => setTab(t.key)}
                       className={cn(
-                        "shrink-0 rounded-full border px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] transition-all sm:px-5 sm:py-2.5 sm:text-[13px]",
+                        "shrink-0 rounded-full border px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] transition-ui sm:px-5 sm:py-2.5 sm:text-[13px]",
                         tab === t.key
                           ? "border-primary/45 bg-primary/15 text-primary"
                           : "border-border bg-muted/30 text-muted-foreground hover:border-primary/25 hover:text-foreground",

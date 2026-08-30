@@ -20,7 +20,7 @@ export function ContactFormClient() {
   const [mainTab, setMainTab] = useState<MainTab>("inquiry");
 
   const tabBase =
-    "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-3 text-sm font-semibold backdrop-blur transition-all";
+    "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-3 text-sm font-semibold backdrop-blur transition-ui";
 
   const tabActive =
     "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] dark:text-white text-gray-900 shadow-sm";

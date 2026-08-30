@@ -56,7 +56,7 @@ function PrimaryNavCard({
     <Link
       href={navItemHref(item)}
       className={cn(
-        "group flex min-h-[4.25rem] items-start gap-3 rounded-2xl border px-3.5 py-3.5 transition-all",
+        "group flex min-h-[4.25rem] items-start gap-3 rounded-2xl border px-3.5 py-3.5 transition-ui",
         "active:scale-[0.99]",
         active
           ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent)]/10 shadow-[0_0_0_1px_color-mix(in_srgb,var(--qp-accent)_30%,transparent)]"
