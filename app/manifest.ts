@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "THINKAD 싱커드",
     short_name: "싱커드",
-    description: "대한민국 No.1 OOH 광고 플랫폼",
+    description: "전국 OOH 매체를 검색·비교하고 미디어 플랜까지 만드는 옥외광고 플랫폼",
     start_url: "/ko",
     scope: "/",
     display: "standalone",
