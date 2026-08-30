@@ -26,7 +26,7 @@ import {
   EXPORT_BADGE_PDF,
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
-import { BRAND_ACCENT_BARE } from "@/lib/brand-palette";
+import { BRAND_ACCENT_BARE, BRAND_ACCENT_PALE } from "@/lib/brand-palette";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
@@ -274,7 +274,13 @@ export async function buildPlannerReportPptx(
   );
   const lineupViewMode = assets?.lineupViewMode ?? "detail";
 
-  const ACCENT_LT = "FFB990";
+  // 표지(INK_DEEP 근흑 배경) 위 워드마크 "AD" — 딥 틸 그대로는 배경과 거의
+  // 구분이 안 돼(대비 3.03) BRAND_ACCENT_PALE 을 쓴다. 옛 오렌지 라이트(FFB990,
+  // 대비 10.20)와 거의 같은 대비(10.30)라 밝기 인상이 바뀌지 않는다.
+  const ACCENT_LT = BRAND_ACCENT_PALE.slice(1).toUpperCase();
+  // generatedAt(발행일) 은 워드마크보다 한 단계 낮은 위계라 같은 PALE 을 쓰지
+  // 않는다 — 채도를 낮춘 회틸로 분리해 두 텍스트가 서로 잡아먹지 않게 한다.
+  const META_TEAL = "9FC9C4";
   const wordmark = (size: number) => [
     { text: "THINK", options: { color: WHITE, bold: true } },
     { text: "AD", options: { color: ACCENT_LT, bold: true } },
@@ -330,7 +336,7 @@ export async function buildPlannerReportPptx(
     });
   }
   cover.addText(p.generatedAt, {
-    x: 0.7, y: 6.6, w: 12, h: 0.4, fontFace: face, fontSize: 12, color: "CFC8EC",
+    x: 0.7, y: 6.6, w: 12, h: 0.4, fontFace: face, fontSize: 12, color: META_TEAL,
   });
 
   // 공통 헤더 그리기
