@@ -1,5 +1,7 @@
 "use client";
 
+import { BRAND_ACCENT } from "@/lib/brand-palette";
+
 type ImpPoint = { month: number; impressions: number };
 type RoiPoint = {
   month: number;
@@ -114,7 +116,7 @@ export function PlannerImpressionsLineChart({
             y={p.y - 4}
             width={8}
             height={8}
-            fill="#ff6200"
+            fill={BRAND_ACCENT}
             stroke="var(--foreground)"
             strokeWidth={2}
           />
@@ -232,7 +234,7 @@ export function PlannerRoiLineChart({
         <path
           d={line("optimistic")}
           fill="none"
-          stroke="#ff6200"
+          stroke={BRAND_ACCENT}
           strokeWidth={2.5}
         />
         {data.map((d, i) => (
@@ -405,7 +407,7 @@ export function PlannerReachDonutChart({
           <circle
             r={r}
             fill="none"
-            stroke="#ff6200"
+            stroke={BRAND_ACCENT}
             strokeWidth={stroke}
             strokeDasharray={`${extLen} ${c}`}
             strokeDashoffset={-coreLen}
@@ -423,7 +425,7 @@ export function PlannerReachDonutChart({
           <span className="font-bold tabular-nums text-foreground">{corePct}%</span>
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <span className="h-3 w-3 shrink-0 bg-[#ff6200]" />
+          <span className="h-3 w-3 shrink-0 bg-[color:var(--qp-accent)]" />
           <span className="text-muted-foreground">{extendedLabel}</span>
           <span className="font-bold tabular-nums text-foreground">{extendedPct}%</span>
         </div>
@@ -433,7 +435,7 @@ export function PlannerReachDonutChart({
 }
 
 const PIE_COLORS = [
-  "#ff6200",
+  BRAND_ACCENT,
   "#1c1c1f",
   "#5a5a5e",
   "#10B981",
@@ -566,7 +568,7 @@ export function PlannerCpmCompareChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 2)}
-                fill="#ff6200"
+                fill={BRAND_ACCENT}
               />
               <text
                 x={x + barW / 2}
@@ -676,7 +678,7 @@ export function PlannerMonthCompareChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 3)}
-                fill={isCurrent ? "#ff6200" : "var(--foreground)"}
+                fill={isCurrent ? BRAND_ACCENT : "var(--foreground)"}
               />
               <text
                 x={x + barW / 2}

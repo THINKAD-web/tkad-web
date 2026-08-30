@@ -31,8 +31,9 @@ import type {
   NewMediaRow,
   ReportDashboardData,
 } from "@/lib/report/dashboard-data";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
-const PIE_COLORS = ["#ff6200", "#1c1c1f", "#ec4899", "#6B7280", "#0ea5e9", "#f43f5e"];
+const PIE_COLORS = [BRAND_ACCENT, "#1c1c1f", "#ec4899", "#6B7280", "#0ea5e9", "#f43f5e"];
 
 export function ReportDashboardClient({ isKo }: { isKo: boolean }) {
   const t = useTranslations();
@@ -350,9 +351,9 @@ function CpmTrendCard({
               <Line
                 type="monotone"
                 dataKey="cpmKrw"
-                stroke="#ff6200"
+                stroke={BRAND_ACCENT}
                 strokeWidth={3}
-                dot={{ fill: "#ff6200", r: 4 }}
+                dot={{ fill: BRAND_ACCENT, r: 4 }}
                 activeDot={{ r: 6 }}
                 isAnimationActive={false}
               />

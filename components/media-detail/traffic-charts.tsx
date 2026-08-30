@@ -22,10 +22,11 @@ import {
 } from "@/lib/media-traffic-estimate";
 import type { DataSourceAttribution } from "@/lib/data-source-types";
 import { DataAttributionList } from "@/components/data-confidence-badge";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 /** Brutalist 차트 색상 팔레트 — 다색 유지 + bx-* 톤. */
 const CHART_PRIMARY = "#e2e8f0"; // slate-200 (dark-friendly)
-const CHART_ACCENT = "#ff6200"; // hermes / qp accent
+const CHART_ACCENT = BRAND_ACCENT; // hermes / qp accent
 const CHART_NEUTRAL = "#94a3b8"; // slate-400 (neutral)
 const CHART_GRID = "rgba(255,255,255,0.14)";
 

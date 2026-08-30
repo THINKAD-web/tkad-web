@@ -14,6 +14,7 @@ import {
 import type { MediaItem } from "@/lib/media-data";
 import { buildCompareRadarData } from "@/lib/compare-quote";
 import { cn } from "@/lib/utils";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 const AXIS_LABELS_KO: Record<string, string> = {
   impressions: "노출수",
@@ -31,7 +32,7 @@ const AXIS_LABELS_EN: Record<string, string> = {
   availability: "Availability",
 };
 
-const COLORS = ["#ff6200", "#111111", "#64748b", "#10b981", "#f59e0b", "#475569"];
+const COLORS = [BRAND_ACCENT, "#111111", "#64748b", "#10b981", "#f59e0b", "#475569"];
 
 type Props = {
   items: MediaItem[];

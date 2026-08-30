@@ -26,14 +26,17 @@ import {
   EXPORT_BADGE_PDF,
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
+import { BRAND_ACCENT_BARE } from "@/lib/brand-palette";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
  * 텍스트/표/도형 네이티브 요소라 영업팀이 PowerPoint 에서 바로 수정 가능.
  */
 
-const VIOLET = "FF6200";
-const CYAN = "1C1C1F";
+/* 상수명 정정(0단계): 과거 보라/청록 팔레트 잔재로 ACCENT·INK_DEEP 이었으나
+   실제 값은 브랜드 액센트와 근흑색이다. 이름이 값과 다르면 다음 사람이 잘못 쓴다. */
+const ACCENT = BRAND_ACCENT_BARE;
+const INK_DEEP = "1C1C1F";
 const INK = "111827";
 const GRAY = "6B7280";
 const LIGHT = "F1F1F7";
@@ -175,7 +178,7 @@ function addBudgetSplitShapes(
   return barY + barH + 0.22 + rows.length * 0.4 + 0.1;
 }
 
-const CYAN_BAR = "1C1C1F";
+const INK_DEEP_BAR = "1C1C1F";
 const BAR_TRACK = "F3F4F6";
 
 function addPptContributionBar(
@@ -287,9 +290,9 @@ export async function buildPlannerReportPptx(
 
   // ── 1. 표지 ──
   // 배경은 화면 미리보기(DocumentGradientHero, bg-[#1c1c1f])와 통일한다.
-  // CYAN 상수가 이름과 달리 값은 이미 "1C1C1F" 라 그대로 근흑색 배경으로 쓴다.
+  // INK_DEEP 상수가 이름과 달리 값은 이미 "1C1C1F" 라 그대로 근흑색 배경으로 쓴다.
   const cover = pptx.addSlide();
-  cover.background = { color: CYAN };
+  cover.background = { color: INK_DEEP };
   if (coverLogoData) {
     try {
       cover.addImage({
@@ -313,8 +316,8 @@ export async function buildPlannerReportPptx(
     fontSize: 38, bold: true, color: WHITE,
   });
   // 화면의 <div className="mt-5 h-1 w-16 bg-[color:var(--qp-accent)]" /> 와 대응.
-  // 배경이 CYAN(근흑색)이 됐으니 이 룰도 VIOLET(오렌지)로 바꿔야 보인다.
-  cover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.0, w: 2.2, h: 0.06, fill: { color: VIOLET } });
+  // 배경이 INK_DEEP(근흑색)이 됐으니 이 룰도 ACCENT(오렌지)로 바꿔야 보인다.
+  cover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.0, w: 2.2, h: 0.06, fill: { color: ACCENT } });
   cover.addText(
     p.kind === "integrated"
       ? isKo ? "OOH + 디지털 통합 캠페인 제안" : "OOH + Digital integrated campaign"
@@ -333,8 +336,8 @@ export async function buildPlannerReportPptx(
   // 공통 헤더 그리기
   function header(slide: ReturnType<typeof pptx.addSlide>, label: string) {
     slide.background = { color: WHITE };
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.9, fill: { color: VIOLET } });
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0.9, w: W, h: 0.05, fill: { color: CYAN } });
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.9, fill: { color: ACCENT } });
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0.9, w: W, h: 0.05, fill: { color: INK_DEEP } });
     slide.addText(label, {
       x: 0.6, y: 0.12, w: 9, h: 0.66, fontFace: face, fontSize: 20, bold: true, color: WHITE,
     });
@@ -380,7 +383,7 @@ export async function buildPlannerReportPptx(
       fontFace: face,
       fontSize: 10,
       bold: true,
-      color: VIOLET,
+      color: ACCENT,
     });
     return topY + 0.28;
   }
@@ -450,7 +453,7 @@ export async function buildPlannerReportPptx(
     if (k.status === "pending") {
       s2.addText("—", { x: 8.4, y: ky + 0.38, w: 4.1, h: 0.35, fontFace: face, fontSize: 16, bold: true, color: GRAY });
     } else {
-      s2.addText(k.value, { x: 8.4, y: ky + 0.38, w: 4.1, h: 0.45, fontFace: face, fontSize: 18, bold: true, color: VIOLET });
+      s2.addText(k.value, { x: 8.4, y: ky + 0.38, w: 4.1, h: 0.45, fontFace: face, fontSize: 18, bold: true, color: ACCENT });
     }
     const badgeColors = EXPORT_BADGE_PDF[k.badge];
     s2.addShape(pptx.ShapeType.roundRect, {
@@ -550,7 +553,7 @@ export async function buildPlannerReportPptx(
           text: v,
           options: {
             fill: { color: emphasis ? LIGHT : "FFFFFF" },
-            color: emphasis ? VIOLET.replace("#", "") : INK,
+            color: emphasis ? ACCENT.replace("#", "") : INK,
             bold: emphasis,
             align: "right",
             fontSize: 11,
@@ -653,7 +656,7 @@ export async function buildPlannerReportPptx(
         y: rightY,
         w: barW,
         rows: ch.reachSummary,
-        color: CYAN,
+        color: INK_DEEP,
         face,
         fmt: (n) => fmtImp(n, isKo),
       });
@@ -671,7 +674,7 @@ export async function buildPlannerReportPptx(
         y: ch.reachSummary?.length ? rightY + 0.15 : rightY,
         w: barW,
         rows: ch.cpmBars,
-        color: VIOLET,
+        color: ACCENT,
         face,
         fmt: (n) => `₩${fmtImp(n, isKo)}`,
         colorByRow: true,
@@ -692,7 +695,7 @@ export async function buildPlannerReportPptx(
         text: h,
         options: {
           fill: { color: "F5F3FF" },
-          color: VIOLET,
+          color: ACCENT,
           bold: true,
           fontSize: 11,
           fontFace: face,
@@ -1004,7 +1007,7 @@ export async function buildPlannerReportPptx(
           h: 0.2,
           fontFace: face,
           fontSize: 10,
-          color: VIOLET,
+          color: ACCENT,
           bold: true,
         });
       }
@@ -1025,7 +1028,7 @@ export async function buildPlannerReportPptx(
           h: 0.2,
           fontFace: face,
           fontSize: 10,
-          color: VIOLET,
+          color: ACCENT,
           bold: true,
         });
       }
@@ -1035,7 +1038,7 @@ export async function buildPlannerReportPptx(
     if (row.recommendReason?.trim()) {
       slide.addText(
         [
-          { text: isKo ? "추천 " : "Why ", options: { color: VIOLET, bold: true, fontSize: 10 } },
+          { text: isKo ? "추천 " : "Why ", options: { color: ACCENT, bold: true, fontSize: 10 } },
           { text: row.recommendReason.trim(), options: { color: GRAY, fontSize: 10 } },
         ].map((p) => ({ ...p, options: { ...p.options, fontFace: face } })),
         { x: textX, y: ty, w: textW, h: 0.35, valign: "top" },
@@ -1054,7 +1057,7 @@ export async function buildPlannerReportPptx(
           colW,
           isKo ? "노출 기여" : "Exposure share",
           row.exposureContributionPct,
-          CYAN_BAR,
+          INK_DEEP_BAR,
           face,
         );
         addPptContributionBar(
@@ -1065,7 +1068,7 @@ export async function buildPlannerReportPptx(
           colW,
           isKo ? "예산 비중" : "Budget share",
           row.budgetContributionPct,
-          VIOLET,
+          ACCENT,
           face,
         );
       } else if (row.exposureContributionPct != null) {
@@ -1077,7 +1080,7 @@ export async function buildPlannerReportPptx(
           textW,
           isKo ? "노출 기여" : "Exposure share",
           row.exposureContributionPct,
-          CYAN_BAR,
+          INK_DEEP_BAR,
           face,
         );
       } else if (row.budgetContributionPct != null) {
@@ -1089,7 +1092,7 @@ export async function buildPlannerReportPptx(
           textW,
           isKo ? "예산 비중" : "Budget share",
           row.budgetContributionPct,
-          VIOLET,
+          ACCENT,
           face,
         );
       }
@@ -1107,7 +1110,7 @@ export async function buildPlannerReportPptx(
         w: btnW,
         h: btnH,
         fill: { color: WHITE },
-        line: { color: VIOLET, width: 1.25 },
+        line: { color: ACCENT, width: 1.25 },
         rectRadius: 0.06,
       });
       slide.addText(plannerMediaPageButtonLabel(isKo), {
@@ -1117,7 +1120,7 @@ export async function buildPlannerReportPptx(
         h: btnH,
         fontFace: face,
         fontSize: 9,
-        color: VIOLET,
+        color: ACCENT,
         bold: true,
         align: "center",
         valign: "middle",
@@ -1205,7 +1208,7 @@ export async function buildPlannerReportPptx(
         h: 0.22,
         fontFace: face,
         fontSize: 9,
-        color: VIOLET,
+        color: ACCENT,
         bold: true,
       });
     }
@@ -1217,7 +1220,7 @@ export async function buildPlannerReportPptx(
         h: 0.2,
         fontFace: face,
         fontSize: 7.5,
-        color: VIOLET,
+        color: ACCENT,
         align: "right",
         hyperlink: { url: mediaUrl },
       });
@@ -1469,7 +1472,7 @@ export async function buildPlannerReportPptx(
       s4.addText(p.digitalSummary, { x: 0.6, y: 1.2, w: 12.1, h: 0.5, fontFace: face, fontSize: 12, color: GRAY });
     }
     const dHead = [isKo ? "플랫폼" : "Platform", isKo ? "비중" : "Share", isKo ? "예상 노출" : "Est. impressions"].map((t) => ({
-      text: t, options: { fill: { color: CYAN }, color: WHITE, bold: true, fontFace: face, fontSize: 12 },
+      text: t, options: { fill: { color: INK_DEEP }, color: WHITE, bold: true, fontFace: face, fontSize: 12 },
     }));
     const dBody = p.digital.map((r, i) => {
       const fill = i % 2 ? { color: LIGHT } : { color: WHITE };

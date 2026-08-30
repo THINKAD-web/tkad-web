@@ -1,8 +1,9 @@
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
 import { resolveQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
+import { BRAND_ACCENT_BARE } from "@/lib/brand-palette";
 
 /** Quiet Professional — 흑백 + 주황 단일 액센트 */
-const ACCENT = "FF6200";
+const ACCENT = BRAND_ACCENT_BARE;
 const INK = "111827";
 const INK_STRONG = "1C1C1F";
 const GRAY = "6B7280";

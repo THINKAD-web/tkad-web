@@ -40,7 +40,7 @@ const SECTION_BAR_W = 1.6;
 const FOOTER_H = 24;
 const HEADER_RULE_H = 1.2;
 
-/** Quiet Professional — 흑백 + 주황 단일 액센트 (#ff6200) */
+/** Quiet Professional — 흑백 + 브랜드 액센트 1종 (lib/brand-palette.ts) */
 const ACCENT: [number, number, number] = [255, 98, 0];
 const ACCENT_DK: [number, number, number] = [194, 78, 0];
 const ACCENT_SOFT: [number, number, number] = [255, 243, 232];

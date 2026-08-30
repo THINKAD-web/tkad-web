@@ -2362,7 +2362,7 @@ export default function AdminMediasClient({
         >
           <ShieldCheck
             className={`h-[18px] w-[18px] ${
-              media.isVerified ? "text-[#ff6200]" : "text-slate-300"
+              media.isVerified ? "text-[color:var(--qp-accent)]" : "text-slate-300"
             }`}
             aria-hidden
           />

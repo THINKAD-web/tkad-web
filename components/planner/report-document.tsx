@@ -26,6 +26,7 @@ import { ReportPortfolioMapSection } from "@/components/planner/report-portfolio
 import { sectionVisible, filterExportSections } from "@/lib/planner-report-export/section-visibility";
 import type { PlannerReportSectionVisibility } from "@/lib/planner-report-export/section-visibility";
 import type { MediaItem } from "@/lib/media-data";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 /**
  * 플래너 보고서 화면 문서 — 서버 PDF/PPTX 와 동일한 payload·레이아웃으로 렌더한다.
@@ -38,7 +39,7 @@ function fmtBudget(man: number, isKo: boolean) {
   return isKo ? `${man.toLocaleString()}만원` : `${man.toLocaleString()}M KRW`;
 }
 
-const CHART_COLORS = ["#ff6200", "#1c1c1f", "#5a5a5e", "#10B981", "#F59E0B"];
+const CHART_COLORS = [BRAND_ACCENT, "#1c1c1f", "#5a5a5e", "#10B981", "#F59E0B"];
 
 function chartDatumColor(d: PlannerExportChartDatum, index: number): string {
   return plannerChartColor(d.colorKey, index);
