@@ -136,7 +136,7 @@ export function OgLayout({
             THINKAD
           </span>
           <span style={{ fontSize: 14, color: "rgba(232,213,181,0.85)" }}>
-            싱커드 · 대한민국 No.1 OOH 광고
+            싱커드 · OOH 광고 플랫폼
           </span>
         </div>
       </div>

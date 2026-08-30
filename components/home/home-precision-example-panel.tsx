@@ -1,7 +1,4 @@
-"use client";
-
 import { MessageSquareQuote } from "lucide-react";
-import { useMemo } from "react";
 import type { HomePrecisionExample } from "@/lib/home-precision-examples";
 
 type ColumnLabels = {
@@ -12,24 +9,29 @@ type ColumnLabels = {
 };
 
 type Props = {
-  examples: HomePrecisionExample[];
+  /**
+   * 보여줄 예시 — **호출자(서버 컴포넌트)가 고른다.**
+   *
+   * 예전에는 이 컴포넌트가 `useMemo` 안에서 `Math.random()` 으로 직접 골랐는데,
+   * 서버와 클라이언트가 서로 다른 예시를 뽑아 hydration 불일치가 났다
+   * (실제로 화면 텍스트가 달라지는 진짜 불일치였다).
+   *
+   * 홈은 ISR(`revalidate = 3600`)이라 어차피 한 시간 동안 같은 HTML 이 캐시된다.
+   * 그래서 서버가 렌더 시점에 한 번 고르면 불일치 없이 시간 단위로 순환한다 —
+   * 클라이언트에서 다시 뽑으면 로드 직후 텍스트가 바뀌는 깜빡임만 생긴다.
+   */
+  example: HomePrecisionExample;
   exampleLabel: string;
   hint: string;
   columnLabels: ColumnLabels;
 };
 
-function pickRandomExample(examples: HomePrecisionExample[]): HomePrecisionExample {
-  return examples[Math.floor(Math.random() * examples.length)] ?? examples[0]!;
-}
-
 export function HomePrecisionExamplePanel({
-  examples,
+  example,
   exampleLabel,
   hint,
   columnLabels,
 }: Props) {
-  const example = useMemo(() => pickRandomExample(examples), [examples]);
-
   const rows: Array<{ key: keyof ColumnLabels; value: string }> = [
     { key: "region", value: example.region },
     { key: "target", value: example.target },
