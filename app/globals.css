@@ -184,10 +184,14 @@
      0단계(토큰 흡수): 흩어져 있던 #ff6200 / #ff8533 / #e65800 / #ffb38a 리터럴을
      전부 이 네 값에서 파생시킨다. 값은 그대로라 화면 변화는 없다.
      색을 바꿀 때는 **여기 네 줄만** 고치면 된다. 아래로는 리터럴을 두지 말 것. */
-  --hermes: #ff6200;
-  --hermes-tint: #ff8533;   /* 밝은 변형 — 다크 hover, gold-700 */
-  --hermes-shade: #e65800;  /* 어두운 변형 — 라이트 hover, gold-dark */
-  --hermes-pale: #ffb38a;   /* 옅은 변형 — 다크 gold-dark */
+  --hermes: #0f5f5c;        /* 딥 틸 — 흰 텍스트 대비 7.47 (구 #ff6200 은 3.00, AA 미달) */
+  --hermes-tint: #14746c;   /* 밝은 변형 — 다크 hover, gold-700 (흰 텍스트 5.61) */
+  --hermes-shade: #0b4f4a;  /* 어두운 변형 — 라이트 hover, gold-dark (흰 텍스트 9.41) */
+  --hermes-pale: #7fd9ce;   /* 옅은 변형 — 다크 gold-dark */
+  /* 다크 배경(#070707) 위 **텍스트**용 — 딥 틸은 텍스트로 쓰면 2.70 이라 못 읽는다.
+     채움(흰 글씨 얹는 CTA)과 텍스트는 요구 대비가 반대라 한 값으로는 둘 다 만족
+     못 한다(전 색역 탐색 결과 4.5/4.5 를 동시에 넘는 틸 없음). 그래서 분리한다. */
+  --hermes-on-dark: #38c3b4;  /* 다크배경 대비 9.24 */
   --hermes-muted: color-mix(in srgb, var(--hermes) 55%, white);
   /* 히어로 등 “항상 어두운” 표면 — 라이트/다크 테마와 무관하게 고정 */
   --hero-void: #020202;
@@ -727,6 +731,19 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: 
   --bx-fg-base: var(--color-bx-black);
   --bx-fg-muted: var(--color-bx-gray-dim);
   --bx-border: var(--color-bx-gray);
+}
+
+/* ── 다크모드 텍스트 액센트 (2단계) ──
+   딥 틸은 **채움**용이다 — 흰 글씨를 얹으면 7.47 로 잘 읽힌다.
+   그런데 근흑 배경 위에 **글자색**으로 쓰면 2.70 이라 읽히지 않는다.
+   두 용도의 요구가 정반대라 한 값으로 둘 다 만족시킬 수 없어(전 색역 탐색 결과
+   흰텍스트 4.5 / 다크배경 4.5 를 동시에 넘는 틸이 없다) 다크에서만 글자색을
+   밝은 틸로 분리한다. 채움(CTA·배지 배경)은 그대로 딥 틸을 쓴다. */
+.dark {
+  --tkad-fg-accent: var(--hermes-on-dark);
+}
+.dark .tkad-quiet .tkad-home-accent-text {
+  color: var(--hermes-on-dark) !important;
 }
 
 /* Hero 섹션 등 항상 어두운 배경(.bg-navy)에는 흰 글씨가 의도된 색이므로
