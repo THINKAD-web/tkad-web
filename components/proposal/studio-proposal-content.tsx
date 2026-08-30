@@ -7,6 +7,7 @@ import type {
   StudioProposalInput,
 } from "@/lib/proposal/types";
 import { PROPOSAL_TYPE_META, PROPOSAL_SECTION_META } from "@/lib/proposal/types";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 type Props = {
   input: StudioProposalInput;
@@ -16,11 +17,11 @@ type Props = {
   isKo: boolean;
 };
 
-const HERMES = "#ff6200";
+const HERMES = BRAND_ACCENT;
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-sm font-bold uppercase tracking-wide text-[#ff6200]">
+    <h2 className="text-sm font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
       {children}
     </h2>
   );
@@ -64,7 +65,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
             <SectionTitle>{label(s)}</SectionTitle>
             <table className="mt-2 w-full border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#ddd] text-left text-[#ff6200]">
+                <tr className="border-b border-[#ddd] text-left text-[color:var(--qp-accent)]">
                   <th className="py-1 pr-2">{isKo ? "매체" : "Media"}</th>
                   <th className="py-1 pr-2">{isKo ? "역할" : "Role"}</th>
                   <th className="py-1 pr-2">{isKo ? "선정 이유" : "Rationale"}</th>
@@ -90,7 +91,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
             <SectionTitle>{label(s)}</SectionTitle>
             <table className="mt-2 w-full border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#ddd] text-left text-[#ff6200]">
+                <tr className="border-b border-[#ddd] text-left text-[color:var(--qp-accent)]">
                   <th className="py-1 pr-2">{isKo ? "경쟁사" : "Competitor"}</th>
                   <th className="py-1 pr-2">{isKo ? "접근" : "Approach"}</th>
                   <th className="py-1">{isKo ? "차별화 포인트" : "Differentiation"}</th>
@@ -118,7 +119,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
                   <p className="font-semibold">{c.title}</p>
                   <p className="mt-0.5 text-[#444]">{c.summary}</p>
                   {c.result ? (
-                    <p className="mt-1 text-xs font-semibold text-[#ff6200]">
+                    <p className="mt-1 text-xs font-semibold text-[color:var(--qp-accent)]">
                       {isKo ? "성과" : "Result"}: {c.result}
                     </p>
                   ) : null}
@@ -138,7 +139,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
                   className={
                     "rounded-lg border p-3 text-xs " +
                     (r.scenario === "base"
-                      ? "border-[#ff6200]/40 bg-[#ff6200]/5"
+                      ? "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/5"
                       : "border-[#e5e7eb] bg-white")
                   }
                 >
@@ -202,7 +203,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
             </ul>
             {output.expectedOutcomes && output.expectedOutcomes.length ? (
               <div className="mt-3">
-                <p className="text-xs font-bold text-[#ff6200]">{isKo ? "기대 효과" : "Expected outcomes"}</p>
+                <p className="text-xs font-bold text-[color:var(--qp-accent)]">{isKo ? "기대 효과" : "Expected outcomes"}</p>
                 <ul className="mt-1 list-disc pl-5 text-sm text-[#444]">
                   {output.expectedOutcomes.map((o, i) => (
                     <li key={i}>{o}</li>
@@ -224,8 +225,8 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
 
   return (
     <div className="bg-white p-8 text-[#111]">
-      <header className="border-b-2 border-[#ff6200] pb-4">
-        <p className="text-xs font-bold uppercase tracking-widest text-[#ff6200]">
+      <header className="border-b-2 border-[color:var(--qp-accent)] pb-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-[color:var(--qp-accent)]">
           THINKAD · 싱커드 · {isKo ? meta.ko : meta.en}
         </p>
         <h1 className="mt-2 text-2xl font-bold">

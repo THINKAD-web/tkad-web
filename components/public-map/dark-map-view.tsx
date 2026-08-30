@@ -24,6 +24,7 @@ import {
   resolveDarkMapLightTiles,
 } from "@/components/public-map/dark-map-tile-layer";
 import { LazySeoulMetroOverlayLayer } from "@/components/public-map/lazy-seoul-metro-overlay-layer";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 export type { MapBounds, MapMarker };
 
@@ -337,10 +338,10 @@ function CoverageLayer({
     <GeoJSON
       data={geoJson as GeoJSON.GeoJsonObject}
       style={{
-        color: "#ff6200",
+        color: BRAND_ACCENT,
         weight: 2,
         opacity: 0.85,
-        fillColor: "#ff6200",
+        fillColor: BRAND_ACCENT,
         fillOpacity: 0.12,
       }}
     />
@@ -453,8 +454,8 @@ export default function DarkMapView({
             center={[userLocation.lat, userLocation.lng]}
             radius={8}
             pathOptions={{
-              color: "#ff6200",
-              fillColor: "#ff6200",
+              color: BRAND_ACCENT,
+              fillColor: BRAND_ACCENT,
               weight: 2,
               fillOpacity: 0.9,
             }}

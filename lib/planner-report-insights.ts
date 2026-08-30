@@ -2,6 +2,7 @@ import type { MediaItem } from "@/lib/media-data";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import { calculatePlan } from "@/lib/planner/calc/engine";
 import { plannerMonthlyPriceWonForMedia } from "@/lib/planner/planner-media-quantity";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 export type GanttRow = {
   mediaId: string;
@@ -48,7 +49,7 @@ export type PlannerPremiumInsights = {
   competitorExposure: CompetitorExposureRow[];
 };
 
-const GANTT_COLORS = ["#ff6200", "#1c1c1f", "#ec4899", "#6B7280", "#0ea5e9"];
+const GANTT_COLORS = [BRAND_ACCENT, "#1c1c1f", "#ec4899", "#6B7280", "#0ea5e9"];
 
 const BRAND_LIFT_BY_GOAL: Record<
   PlannerCampaignGoal | "default",
@@ -95,7 +96,7 @@ export function buildPlannerPremiumInsights(opts: {
     name: m.name,
     startPct: i * sliceWidth,
     widthPct: sliceWidth - 1,
-    color: GANTT_COLORS[i % GANTT_COLORS.length] ?? "#ff6200",
+    color: GANTT_COLORS[i % GANTT_COLORS.length] ?? BRAND_ACCENT,
   }));
 
   const budgetRecs: BudgetRecommendation[] = plan.breakdown.byCategory.map((s) => {

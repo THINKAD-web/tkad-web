@@ -4,35 +4,36 @@
  */
 
 import { getMainCategory } from "@/lib/media-browse-categories";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 /** 발견하기 메인 카테고리 칩 색 — qp·중립 위주 */
 const BROWSE_CHIP_HEX: Record<string, string> = {
-  violet: "#ff6200",
+  violet: BRAND_ACCENT,
   blue: "#3B82F6",
   cyan: "#1c1c1f",
   pink: "#5a5a5e",
   rose: "#F43F5E",
   amber: "#F59E0B",
   emerald: "#10B981",
-  orange: "#ff6200",
+  orange: BRAND_ACCENT,
   teal: "#14B8A6",
   indigo: "#08080a",
-  purple: "#ff6200",
+  purple: BRAND_ACCENT,
   gray: "#6B7280",
 };
 
 export const PLANNER_CHART_COLOR_BY_KEY: Record<string, string> = {
-  static: "#ff6200",
+  static: BRAND_ACCENT,
   digital: "#1c1c1f",
   mobile: "#5a5a5e",
   network: "#10B981",
   /** 통합 플랜 OOH vs 디지털 */
-  ooh: "#ff6200",
+  ooh: BRAND_ACCENT,
   other: "#6B7280",
 };
 
 export const PLANNER_CHART_PALETTE = [
-  "#ff6200",
+  BRAND_ACCENT,
   "#1c1c1f",
   "#10B981",
   "#6B7280",

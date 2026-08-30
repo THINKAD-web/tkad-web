@@ -33,7 +33,8 @@ const REASON_COLORS: Record<RecommendReasonKey, string> = {
   goalFit: "border-primary/55 bg-primary/12 text-primary",
   industryFit: "border-[color:var(--qp-accent)]/55 bg-[color:var(--qp-accent)]/12 text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]",
   highVisibility: "border-primary bg-card text-primary",
-  landmarkHotspot: "border-[#ff6200] bg-[#ff6200]/10 text-[#ff6200]",
+  landmarkHotspot:
+    "border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)]/10 text-[color:var(--qp-accent)]",
   transitHotspot: "border-accent bg-accent/10 text-accent",
   retailHotspot: "border-emerald-500 bg-emerald-500/10 text-emerald-700",
   neighborhoodHotspot: "border-border bg-muted text-foreground",

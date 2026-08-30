@@ -12,8 +12,9 @@ import {
   YAxis,
 } from "recharts";
 import type { InquiryTypeSlice, WeeklyInquiryPoint } from "@/lib/admin-dashboard-data";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
-const PIE_COLORS = ["#ff6200", "#525252", "#e11d48", "#f59e0b", "#94a3b8"];
+const PIE_COLORS = [BRAND_ACCENT, "#525252", "#e11d48", "#f59e0b", "#94a3b8"];
 
 type Props = {
   weeklyInquiries: WeeklyInquiryPoint[];
@@ -60,9 +61,9 @@ export function AdminDashboardCharts({
                 type="monotone"
                 dataKey="count"
                 name="문의"
-                stroke="#ff6200"
+                stroke={BRAND_ACCENT}
                 strokeWidth={2.5}
-                dot={{ r: 4, fill: "#ff6200" }}
+                dot={{ r: 4, fill: BRAND_ACCENT }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>

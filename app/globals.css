@@ -48,9 +48,9 @@
   --color-gold-200: #f0cd85;
   --color-gold-300: #e5b35a;
   --color-gold-400: #d49e44;
-  --color-gold: #ff6200;
-  --color-gold-light: #ff8533;
-  --color-gold-dark: #e65800;
+  --color-gold: var(--hermes);
+  --color-gold-light: var(--hermes-tint);
+  --color-gold-dark: var(--hermes-shade);
   --color-gold-500: #c8913c;
   --color-gold-600: #a67524;
   --color-gold-700: #7e5818;
@@ -70,8 +70,8 @@
   --color-silver-800: #151922;
   --color-silver-900: #0a0d14;
 
-  --color-cta: #ff6200;
-  --color-cta-hover: #e65800;
+  --color-cta: var(--hermes);
+  --color-cta-hover: var(--hermes-shade);
   --color-page: #ffffff;
   --color-brand-dark: #0a1420;
 
@@ -150,7 +150,14 @@
   /* BrutalNav: mobile h-14 (components/brutalist/nav.tsx) */
   --nav-height: 3.5rem;
   --radius: 0.5rem;
+  /* ── 브랜드 액센트 램프 — 사이트 전체 SSOT ──
+     0단계(토큰 흡수): 흩어져 있던 #ff6200 / #ff8533 / #e65800 / #ffb38a 리터럴을
+     전부 이 네 값에서 파생시킨다. 값은 그대로라 화면 변화는 없다.
+     색을 바꿀 때는 **여기 네 줄만** 고치면 된다. 아래로는 리터럴을 두지 말 것. */
   --hermes: #ff6200;
+  --hermes-tint: #ff8533;   /* 밝은 변형 — 다크 hover, gold-700 */
+  --hermes-shade: #e65800;  /* 어두운 변형 — 라이트 hover, gold-dark */
+  --hermes-pale: #ffb38a;   /* 옅은 변형 — 다크 gold-dark */
   --hermes-muted: color-mix(in srgb, var(--hermes) 55%, white);
   /* 히어로 등 “항상 어두운” 표면 — 라이트/다크 테마와 무관하게 고정 */
   --hero-void: #020202;
@@ -182,16 +189,16 @@
   --primary-foreground: #fafafa;
   --secondary: #e9e8e4;
   --secondary-foreground: #08080a;
-  --accent: #ff6200;
+  --accent: var(--hermes);
   --accent-foreground: #ffffff;
   --muted: #e4e3df;
   --muted-foreground: #5a5a5e;
   --destructive: #dc2626;
   --border: #d8d6d0;
   --input: #cfcac0;
-  --ring: #ff6200;
-  --cta: #ff6200;
-  --cta-hover: #e65800;
+  --ring: var(--hermes);
+  --cta: var(--hermes);
+  --cta-hover: var(--hermes-shade);
 
   /* Brutalist 라이트 — 고급 라이트 톤 */
   --bx-black: #08080a;
@@ -199,7 +206,7 @@
   --bx-off: #f0efeb;
   --bx-gray: #d5d2cb;
   --bx-gray-dim: #5c5c62;
-  --bx-accent: #ff6200;
+  --bx-accent: var(--hermes);
 
   --bx-bg-base: var(--color-bx-white);
   --bx-bg-card: var(--color-bx-off);
@@ -208,7 +215,7 @@
   --bx-border: var(--color-bx-black);
 
   /* Home accent text — quiet-professional solid (카드 가격·포인트 텍스트) */
-  --home-accent-gradient: linear-gradient(135deg, #ff6200 0%, #ff6200 100%);
+  --home-accent-gradient: linear-gradient(135deg, var(--hermes) 0%, var(--hermes) 100%);
 }
 
 /* BrutalNav: sm:h-16 / desktop min-h-16 (64px) */
@@ -289,7 +296,7 @@
 /* Home 파일럿 스코프 — 이 클래스 하위에서만 네온 액센트 토큰을 주황 단색으로 치환.
  * (홈 <main> 에만 부여; 공유 chrome 은 아래 .tkad-nav-chrome / .tkad-qp-cta 로 별도 적용) */
 .tkad-quiet {
-  --home-accent-gradient: linear-gradient(135deg, #ff6200 0%, #ff6200 100%);
+  --home-accent-gradient: linear-gradient(135deg, var(--hermes) 0%, var(--hermes) 100%);
   --tkad-fg-accent: var(--hermes);
 }
 .tkad-quiet .tkad-home-accent-text {
@@ -634,21 +641,21 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: 
   --foreground: #f4f2ef;
   --card: #0a0a0a;
   --card-foreground: #f4f2ef;
-  --primary: #ff6200;
+  --primary: var(--hermes);
   /* Solid orange fills — white label (not near-black) for contrast */
   --primary-foreground: #ffffff;
   --secondary: #0f0f12;
   --secondary-foreground: #f4f2ef;
-  --accent: #ff6200;
+  --accent: var(--hermes);
   --accent-foreground: #ffffff;
   --muted: #0f0f12;
   --muted-foreground: #9b9ba3;
   --destructive: #f87171;
   --border: #1f1f26;
   --input: #1f1f26;
-  --ring: #ff6200;
-  --cta: #ff6200;
-  --cta-hover: #ff8533;
+  --ring: var(--hermes);
+  --cta: var(--hermes);
+  --cta-hover: var(--hermes-tint);
 
   /* 다크에서도 남색 유틸은 “밝은 텍스트”로 (레거시 bg-navy 섹션용) */
   --color-navy: #f4f2ef;
@@ -657,10 +664,10 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: 
   --color-navy-900: #ffffff;
   --color-navy-light: #c4c2bd;
   --color-navy-dark: #f4f2ef;
-  --color-gold: #ff6200;
-  --color-gold-dark: #ffb38a;
-  --color-gold-700: #ff8533;
-  --color-gold-800: #ff6200;
+  --color-gold: var(--hermes);
+  --color-gold-dark: var(--hermes-pale);
+  --color-gold-700: var(--hermes-tint);
+  --color-gold-800: var(--hermes);
 
   /* Brutalist 다크 — 고대비 프리미엄 */
   --bx-black: #f2f1ee;
@@ -668,7 +675,7 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: 
   --bx-off: #101014;
   --bx-gray: #2e2e36;
   --bx-gray-dim: #9c9ca8;
-  --bx-accent: #ff6200;
+  --bx-accent: var(--hermes);
 
   --bx-bg-base: var(--color-bx-white);
   --bx-bg-card: var(--color-bx-off);
@@ -967,7 +974,7 @@ html:not(.dark) .tkad-home-appearance {
   );
 
   /* 포인트 텍스트 — qp 단색 */
-  --home-accent-gradient: linear-gradient(135deg, #ff6200 0%, #ff6200 100%);
+  --home-accent-gradient: linear-gradient(135deg, var(--hermes) 0%, var(--hermes) 100%);
   --home-panel-label: #64748b;
   /* 히어로 우측 ‘aside’: 본문 H1보다 한 단계 부드러운 잉크 */
   --home-panel-value: #334155;
@@ -1407,7 +1414,7 @@ body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] [data
 .home-accent-option-a .ooh-home-hero__glow {
   background: radial-gradient(
     ellipse 80% 70% at 85% 15%,
-    color-mix(in srgb, var(--ooh-hero-orange, #ff6200) 10%, transparent),
+    color-mix(in srgb, var(--ooh-hero-orange, var(--hermes)) 10%, transparent),
     transparent 55%
   );
 }
@@ -1426,8 +1433,8 @@ body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] [data
   -webkit-text-fill-color: white !important;
 }
 .recommend-accent-option-a [data-accent-keep].tkad-qp-cta:hover:not(:disabled) {
-  background: var(--qp-accent-hover, color-mix(in srgb, var(--qp-accent, #ff6200) 88%, black)) !important;
-  border-color: var(--qp-accent-hover, color-mix(in srgb, var(--qp-accent, #ff6200) 88%, black)) !important;
+  background: var(--qp-accent-hover, color-mix(in srgb, var(--qp-accent, var(--hermes)) 88%, black)) !important;
+  border-color: var(--qp-accent-hover, color-mix(in srgb, var(--qp-accent, var(--hermes)) 88%, black)) !important;
 }
 
 /* `/media/map` — 앱 셸 내부에 지도 전용 하단 바가 있어 in-flow spacer 를 줄임 */
@@ -1440,7 +1447,7 @@ body:has(.tkad-media-map-shell) .tkad-media-app-shell.tkad-media-map-shell {
   display: inline-block;
   background-image: none !important;
   -webkit-text-fill-color: currentColor !important;
-  color: var(--qp-accent, var(--hermes, #ff6200)) !important;
+  color: var(--qp-accent, var(--hermes)) !important;
 }
 
 /* ── PR A — 역할 기반 타이포 유틸 (발견하기·기획하기 공통) ──
@@ -2031,11 +2038,11 @@ html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step
   -webkit-text-fill-color: currentColor;
 }
 html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-active {
-  border-color: var(--qp-accent, #ff6200);
-  background: var(--qp-accent, #ff6200);
+  border-color: var(--qp-accent, var(--hermes));
+  background: var(--qp-accent, var(--hermes));
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--qp-accent, #ff6200) 32%, transparent);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--qp-accent, var(--hermes)) 32%, transparent);
 }
 
 /* 내 플랜 — 선택 칩(보라·시안 배경)은 day에서도 흰 글자 유지 */
@@ -2045,13 +2052,13 @@ html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-plan-cart-chip-ac
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
-  border-color: color-mix(in srgb, var(--qp-accent, #ff6200) 45%, transparent);
-  background: var(--qp-accent-soft, color-mix(in srgb, #ff6200 12%, white));
+  border-color: color-mix(in srgb, var(--qp-accent, var(--hermes)) 45%, transparent);
+  background: var(--qp-accent-soft, color-mix(in srgb, var(--hermes) 12%, white));
   color: #c24e00;
   -webkit-text-fill-color: currentColor;
 }
 html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-done:hover {
-  background: color-mix(in srgb, var(--qp-accent, #ff6200) 18%, white);
+  background: color-mix(in srgb, var(--qp-accent, var(--hermes)) 18%, white);
 }
 html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-label {
   color: rgb(100 116 139);
@@ -2069,22 +2076,22 @@ html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn {
   -webkit-text-fill-color: currentColor;
 }
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-active {
-  border-color: var(--qp-accent, #ff6200);
-  background: var(--qp-accent, #ff6200);
+  border-color: var(--qp-accent, var(--hermes));
+  background: var(--qp-accent, var(--hermes));
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--qp-accent, #ff6200) 40%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--qp-accent, var(--hermes)) 40%, transparent),
     0 24px 80px rgb(0 0 0 / 0.45);
 }
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
-  border-color: color-mix(in srgb, var(--qp-accent, #ff6200) 50%, transparent);
-  background: color-mix(in srgb, var(--qp-accent, #ff6200) 14%, transparent);
+  border-color: color-mix(in srgb, var(--qp-accent, var(--hermes)) 50%, transparent);
+  background: color-mix(in srgb, var(--qp-accent, var(--hermes)) 14%, transparent);
   color: rgb(255 255 255 / 0.92);
   -webkit-text-fill-color: currentColor;
 }
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-done:hover {
-  background: color-mix(in srgb, var(--qp-accent, #ff6200) 24%, transparent);
+  background: color-mix(in srgb, var(--qp-accent, var(--hermes)) 24%, transparent);
 }
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-label {
   color: rgb(255 255 255 / 0.55);
@@ -3919,7 +3926,7 @@ html:not(.dark) .tkad-mobile-tab-icon-wrap[data-active="true"] .tkad-mobile-tab-
   bottom: -8px;
   width: 48px;
   height: 2px;
-  background: linear-gradient(90deg, #020202, #ff6200);
+  background: linear-gradient(90deg, #020202, var(--hermes));
   border-radius: 2px;
   transform: translateX(-50%);
 }

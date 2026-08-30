@@ -7,6 +7,7 @@ import {
   getKakaoMapAppKey,
   loadKakaoMapsSdk,
 } from "@/lib/kakao-maps-admin";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 function getAdminMapProvider(): "kakao" | "google" | "fallback" {
   if (getKakaoMapAppKey()) return "kakao";
@@ -417,7 +418,7 @@ export default function AdminMediaDraggableMap({
               strokeWeight: 2,
               strokeColor: "#312e81",
               strokeOpacity: 0.9,
-              fillColor: "#ff6200",
+              fillColor: BRAND_ACCENT,
               fillOpacity: 0.14,
             });
             coveragePolygonsRef.current.push(poly);

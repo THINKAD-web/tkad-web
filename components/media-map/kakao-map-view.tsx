@@ -11,6 +11,7 @@ import {
   loadKakaoMapsSdk,
 } from "@/lib/kakao-maps-admin";
 import { cn } from "@/lib/utils";
+import { BRAND_ACCENT, BRAND_ACCENT_STROKE } from "@/lib/brand-palette";
 
 export type MapMarker = {
   id: string;
@@ -293,7 +294,7 @@ function pinColorForType(type: string): {
   const t = (type || "").toLowerCase();
   if (t.includes("office") || t.includes("thinkad")) {
     return {
-      fill: "#ff6200",
+      fill: BRAND_ACCENT,
       stroke: "#ff8a3d",
       text: "#ffffff",
       glow: "rgba(255,98,0,0.45)",
@@ -303,8 +304,8 @@ function pinColorForType(type: string): {
   // Quiet Professional pin palette (no violet/cyan neon)
   if (t.includes("digital")) {
     return {
-      fill: "#ff6200",
-      stroke: "#ff6200",
+      fill: BRAND_ACCENT,
+      stroke: BRAND_ACCENT,
       text: "#ffffff",
       glow: "rgba(255,98,0,0.45)",
       ink: "#0a0a0c",
@@ -330,8 +331,8 @@ function pinColorForType(type: string): {
   }
   if (t.includes("network")) {
     return {
-      fill: "#c24e00",
-      stroke: "#ff6200",
+      fill: BRAND_ACCENT_STROKE,
+      stroke: BRAND_ACCENT,
       text: "#ffffff",
       glow: "rgba(255,98,0,0.4)",
       ink: "#05050a",
@@ -1490,13 +1491,13 @@ export default function KakaoMapView({
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
   <defs>
     <radialGradient id="ul" cx="17" cy="17" r="15" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ff6200"/>
-      <stop offset="0.8" stop-color="#ff6200" stop-opacity="0.4"/>
-      <stop offset="1" stop-color="#ff6200" stop-opacity="0"/>
+      <stop offset="0" stop-color="${BRAND_ACCENT}"/>
+      <stop offset="0.8" stop-color="${BRAND_ACCENT}" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="${BRAND_ACCENT}" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <circle cx="17" cy="17" r="16" fill="url(#ul)" opacity="0.55"/>
-  <circle cx="17" cy="17" r="8" fill="#ff6200" stroke="#ffffff" stroke-width="3"/>
+  <circle cx="17" cy="17" r="8" fill="${BRAND_ACCENT}" stroke="#ffffff" stroke-width="3"/>
 </svg>`;
       const dataUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
       const image = new kakao.maps.MarkerImage(
@@ -1570,7 +1571,7 @@ export default function KakaoMapView({
               </div>
               <div className="text-sm font-semibold dark:text-white text-gray-800">지도 준비 중…</div>
               <div className="h-2 w-full overflow-hidden rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20">
-                <div className="h-full w-[42%] animate-[tkadShimmer_1.2s_ease-in-out_infinite] bg-[linear-gradient(90deg,#52525b,#ff6200,#a1a1aa)]" />
+                <div className="h-full w-[42%] animate-[tkadShimmer_1.2s_ease-in-out_infinite] bg-[linear-gradient(90deg,#52525b,var(--qp-accent),#a1a1aa)]" />
               </div>
             </div>
           </div>

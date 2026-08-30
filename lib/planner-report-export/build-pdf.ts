@@ -39,14 +39,15 @@ import {
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
 import type { PlannerExportKpi } from "@/lib/planner-report-export/types";
+import { BRAND_ACCENT_RGB } from "@/lib/brand-palette";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
  * 견적서 PDF(`build-korean-quote-pdf.ts`)와 동일한 서버 생성 패턴.
  */
 
-/** Quiet Professional — 흑백 + 주황 단일 액센트 (#ff6200) */
-const QP_ACCENT = [255, 98, 0] as const;
+/** Quiet Professional — 흑백 + 브랜드 액센트 1종 (lib/brand-palette.ts) */
+const QP_ACCENT = BRAND_ACCENT_RGB;
 const QP_ACCENT_SOFT = [255, 243, 232] as const;
 /** 주황 커버·배너 위 보조 텍스트 (구 라벤더 대체) */
 const QP_ON_ACCENT_MUTED = [255, 236, 220] as const;

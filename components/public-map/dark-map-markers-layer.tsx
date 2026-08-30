@@ -19,6 +19,7 @@ import {
   type MapPinLabelOverlayState,
 } from "@/lib/map-pin-labels";
 import type { MapMarker } from "@/components/public-map/map-types";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 export type { MapPinLabelOverlayState };
 
@@ -62,7 +63,7 @@ function buildClusterIcon(count: number, lightTiles: boolean): L.DivIcon {
   const border = lightTiles
     ? "2px solid rgba(15,23,42,0.45)"
     : "2px solid rgba(255,255,255,0.35)";
-  const fill = "#ff6200";
+  const fill = BRAND_ACCENT;
   const textColor = "#ffffff";
   const fontSize = sizeClass === "small" ? "10px" : "11px";
   const icon = L.divIcon({

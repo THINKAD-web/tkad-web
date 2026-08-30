@@ -1,6 +1,6 @@
 /**
  * OOH home hero tone — scoped to HomeHeroBanner only.
- * Accent: orange #ff6200 only. No blue glows / #3b82f6.
+ * Accent: brand accent (var(--hermes)) only. No blue glows / #3b82f6.
  * Do not import dmpilot --hermes (that repo aliases hermes to blue).
  */
 
@@ -8,7 +8,7 @@
   --ooh-hero-navy-0: #0a1420;
   --ooh-hero-navy-1: #132033;
   --ooh-hero-navy-warm: #1a120e;
-  --ooh-hero-orange: #ff6200;
+  --ooh-hero-orange: var(--hermes);
   position: relative;
   isolation: isolate;
   background: var(--ooh-hero-navy-0);
@@ -317,6 +317,6 @@
 
 .ooh-home-hero__dot[data-current="true"] {
   width: 1rem;
-  background: #ff6200;
+  background: var(--ooh-hero-orange);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
 }

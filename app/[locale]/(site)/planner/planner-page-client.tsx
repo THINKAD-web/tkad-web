@@ -207,6 +207,7 @@ function PlannerNeonPageBody({
 }
 
 import { PLANNER_CAMPAIGN_GOAL_DEFS } from "@/lib/planner/campaign-goal-defs";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 const CATEGORIES: {
   key: PlannerCategory;
@@ -1721,7 +1722,7 @@ export default function PlannerPageClient({
                       disabled={budgetFieldFocused}
                       onChange={(e) => setBudget(e.target.value)}
                       className="h-2 w-full cursor-pointer appearance-none rounded-full dark:bg-white/10 bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-                      style={{ accentColor: "#ff6200" }}
+                      style={{ accentColor: BRAND_ACCENT }}
                       aria-label={t("budget")}
                     />
                     <div className="mt-4 flex flex-wrap items-end gap-3">
