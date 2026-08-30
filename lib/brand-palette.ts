@@ -20,27 +20,27 @@
  * 액센트 hex 를 직접 적지 말 것 — 0단계에서 115곳을 여기로 흡수했다.
  */
 
-export const BRAND_ACCENT = "#ff6200";
+export const BRAND_ACCENT = "#0f5f5c";
 /** 밝은 변형 — 다크 hover, gold-700 */
-export const BRAND_ACCENT_TINT = "#ff8533";
+export const BRAND_ACCENT_TINT = "#14746c";
 /** 어두운 변형 — 라이트 hover, gold-dark */
-export const BRAND_ACCENT_SHADE = "#e65800";
+export const BRAND_ACCENT_SHADE = "#0b4f4a";
 /** 옅은 변형 — 다크 gold-dark */
-export const BRAND_ACCENT_PALE = "#ffb38a";
+export const BRAND_ACCENT_PALE = "#7fd9ce";
 
 /**
  * 지도 핀 테두리 — 채움(BRAND_ACCENT) 위에 얹는 진한 윤곽.
  * 파생 계산이 아니라 디자인이 고른 값이라 상수로 둔다.
  */
-export const BRAND_ACCENT_STROKE = "#c24e00";
+export const BRAND_ACCENT_STROKE = "#083b38";
 /** 디지털 매체 핀 테두리 (STROKE 보다 한 단계 밝음) */
-export const BRAND_ACCENT_STROKE_ALT = "#ea580c";
+export const BRAND_ACCENT_STROKE_ALT = "#116a63";
 
 /** `#` 없는 6자리 — pptxgenjs 등 hex 문자열만 받는 곳 */
-export const BRAND_ACCENT_BARE = "FF6200";
+export const BRAND_ACCENT_BARE = "0F5F5C";
 
 /** jsPDF `setFillColor(r,g,b)` 용 */
-export const BRAND_ACCENT_RGB = [255, 98, 0] as const;
+export const BRAND_ACCENT_RGB = [15, 95, 92] as const;
 
 /**
  * 차트 시리즈 팔레트 — 1번이 브랜드 액센트, 나머지는 중립·보조.
