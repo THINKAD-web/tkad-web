@@ -256,7 +256,7 @@ export function OnboardingWizard({ initialCompleted, initialPreference }: Props)
               aria-valuemax={100}
             >
               <div
-                className="h-full rounded-[var(--qp-radius-md)] bg-[color:var(--qp-accent)] transition-all duration-500"
+                className="h-full rounded-[var(--qp-radius-md)] bg-[color:var(--qp-accent)] transition-bar duration-500"
                 style={{ width: `${Math.max(progressPct, 4)}%` }}
               />
             </div>
@@ -328,7 +328,7 @@ export function OnboardingWizard({ initialCompleted, initialPreference }: Props)
                             type="button"
                             onClick={() => toggleIndustry(opt.value)}
                             className={cn(
-                              "inline-flex items-center gap-1.5 rounded-[var(--qp-radius-md)] border px-4 py-2 text-sm font-semibold transition-all",
+                              "inline-flex items-center gap-1.5 rounded-[var(--qp-radius-md)] border px-4 py-2 text-sm font-semibold transition-ui",
                               selected ? chipSelected : chipIdle,
                             )}
                           >

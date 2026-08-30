@@ -129,7 +129,7 @@ export default function HistoryPage() {
                     <div className="relative flex w-full items-center justify-center">
                       <div
                         className={cn(
-                          "flex h-12 w-12 items-center justify-center border-2  text-sm font-bold transition-all",
+                          "flex h-12 w-12 items-center justify-center border-2  text-sm font-bold transition-ui",
                           isActive
                             ? "border-accent bg-accent text-accent-foreground"
                             : "border-border bg-card text-foreground",

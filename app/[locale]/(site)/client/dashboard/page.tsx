@@ -520,7 +520,7 @@ export default function ClientDashboardPage() {
               </p>
               <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-navy to-gold transition-all duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-navy to-gold transition-bar duration-500"
                   style={{ width: `${budgetPct}%` }}
                 />
               </div>
@@ -687,7 +687,7 @@ export default function ClientDashboardPage() {
                         </div>
                         <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-navy to-gold transition-all duration-500"
+                            className="h-full rounded-full bg-gradient-to-r from-navy to-gold transition-bar duration-500"
                             style={{
                               width: `${Math.min(
                                 100,

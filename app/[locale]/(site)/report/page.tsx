@@ -67,14 +67,14 @@ export default async function ReportListPage({ params, searchParams }: ListProps
 
   const filterPill = (active: boolean) =>
     cn(
-      "inline-flex items-center justify-center rounded-full px-4 py-2.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-all",
+      "inline-flex items-center justify-center rounded-full px-4 py-2.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-ui",
       active
         ? "tkad-qp-cta text-white shadow-sm"
         : "border border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted/80 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100",
     );
 
   const cardShell =
-    "group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_28px_100px_rgba(0,0,0,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:shadow-[0_28px_120px_rgba(0,0,0,0.45)] dark:backdrop-blur-md dark:hover:dark:border-white/18 border-gray-300";
+    "group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-card text-card-foreground shadow-sm transition-ui duration-200 hover:-translate-y-1 hover:shadow-[0_28px_100px_rgba(0,0,0,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:shadow-[0_28px_120px_rgba(0,0,0,0.45)] dark:backdrop-blur-md dark:hover:dark:border-white/18 border-gray-300";
 
   return (
     <HomeLandingDayNight>

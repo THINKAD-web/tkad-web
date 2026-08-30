@@ -87,7 +87,7 @@ function MediaDetailQuoteModalBody({
     btnBlockBase,
     "px-6 py-3 text-xs",
     "h-12",
-    "rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12 touch-manipulation",
+    "rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur transition-ui hover:-translate-y-0.5 hover:bg-white/12 touch-manipulation",
   );
 
   return (
@@ -169,7 +169,7 @@ function MediaDetailQuoteModalBody({
                 }));
               }}
                   className={cn(
-                    "relative w-full rounded-[22px] border p-3 text-left transition-all sm:p-3.5",
+                    "relative w-full rounded-[22px] border p-3 text-left transition-ui sm:p-3.5",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/18 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
                     selectedCard
                       ? "border-white/22 dark:bg-white/10 bg-gray-100"

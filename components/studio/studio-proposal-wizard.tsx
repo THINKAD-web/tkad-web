@@ -148,7 +148,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
                 type="button"
                 onClick={() => setType(t)}
                 className={
-                  "rounded-2xl border p-5 text-left transition-all " +
+                  "rounded-2xl border p-5 text-left transition-ui " +
                   (active
                     ? "border-hermes bg-hermes/5 ring-1 ring-hermes/30 dark:bg-hermes/10"
                     : "border-gray-200 bg-white hover:border-hermes/30 dark:border-white/10 dark:bg-white/5")

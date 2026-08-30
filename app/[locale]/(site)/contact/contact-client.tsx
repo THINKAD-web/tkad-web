@@ -20,7 +20,7 @@ const textareaCls =
   "flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
 
 const btnCls =
-  "inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg text-sm font-semibold whitespace-nowrap shadow-sm transition-all duration-200 outline-none hover:-translate-y-px hover:shadow-md active:translate-y-0 active:scale-95 focus-visible:ring-[3px] focus-visible:ring-cta/35 disabled:pointer-events-none disabled:opacity-50 bg-cta dark:text-white text-gray-900 hover:bg-cta-hover h-11 px-6";
+  "inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg text-sm font-semibold whitespace-nowrap shadow-sm transition-ui duration-200 outline-none hover:-translate-y-px hover:shadow-md active:translate-y-0 active:scale-95 focus-visible:ring-[3px] focus-visible:ring-cta/35 disabled:pointer-events-none disabled:opacity-50 bg-cta dark:text-white text-gray-900 hover:bg-cta-hover h-11 px-6";
 
 const labelCls = "block text-sm font-medium text-foreground mb-1.5";
 

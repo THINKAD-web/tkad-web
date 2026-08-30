@@ -38,7 +38,7 @@ export function CreativeCard({
   const preview = item.thumbnailUrl || (item.type === "image" ? item.url : null);
 
   const inner = (
-    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border-2 border-border bg-card transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_60px_rgba(15,23,42,0.10)]">
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border-2 border-border bg-card transition-ui hover:-translate-y-0.5 hover:shadow-[0_18px_60px_rgba(15,23,42,0.10)]">
       <div className="relative aspect-[16/10] w-full overflow-hidden border-b-2 border-border bg-muted">
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element

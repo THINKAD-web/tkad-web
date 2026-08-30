@@ -60,7 +60,7 @@ export default async function ReportDetailPage({ params }: Params) {
   const related = await listRelatedCommunityPostsForReport(row.category);
 
   const relatedCard =
-    "group block rounded-[28px] border border-border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_28px_100px_rgba(0,0,0,0.12)] dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:backdrop-blur-md dark:shadow-[0_24px_80px_rgba(0,0,0,0.4)] dark:hover:dark:border-white/18 border-gray-300";
+    "group block rounded-[28px] border border-border bg-card p-4 shadow-sm transition-ui duration-200 hover:-translate-y-1 hover:shadow-[0_28px_100px_rgba(0,0,0,0.12)] dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:backdrop-blur-md dark:shadow-[0_24px_80px_rgba(0,0,0,0.4)] dark:hover:dark:border-white/18 border-gray-300";
 
   return (
     <HomeLandingDayNight>

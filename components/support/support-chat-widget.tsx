@@ -78,7 +78,7 @@ export function SupportChatWidget({ menuOpen, onMenuOpenChange }: Props) {
         aria-expanded={menuOpen}
         aria-haspopup="dialog"
         className={cn(
-          "relative flex h-11 w-full items-center justify-center rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/45",
+          "relative flex h-11 w-full items-center justify-center rounded-xl transition-ui focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/45",
           menuOpen
             ? "bg-white/15 dark:text-white text-gray-900 ring-2 ring-white/25"
             : "bg-[linear-gradient(135deg,rgba(168,85,247,0.9),rgba(34,211,238,0.9))] dark:text-white text-gray-900 shadow-md shadow-violet-500/25 hover:brightness-110",

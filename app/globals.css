@@ -4,6 +4,36 @@
 @config "../tailwind.config.ts";
 @plugin "@tailwindcss/typography";
 
+/* ── 모션 유틸리티 (1단계) ──
+   `transition-all` 을 대체한다. all 은 width/height 같은 레이아웃 속성까지
+   애니메이트해서 모바일에서 프레임을 떨어뜨린다 — PR #487 이 겨냥한 문제와
+   같은 뿌리다. 실제로 변하는 속성만 지정한다.
+
+   duration/easing 은 기본값이며, 개별 요소에서 Tailwind 의 duration-*·ease-*
+   유틸로 덮어쓸 수 있다. */
+@utility transition-ui {
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, box-shadow, opacity, transform, filter,
+    backdrop-filter;
+  transition-timing-function: var(--ease-out);
+  transition-duration: var(--motion-fast);
+}
+
+/* 진행바처럼 폭이 실제로 변하는 요소 전용 — width 를 의도적으로 포함한다 */
+@utility transition-bar {
+  transition-property: width, background-color, opacity;
+  transition-timing-function: var(--ease-out);
+  transition-duration: var(--motion-enter);
+}
+
+/* 접근성 — 동작 최소화 설정을 켠 사용자에게는 전환을 사실상 없앤다 */
+@media (prefers-reduced-motion: reduce) {
+  .transition-ui,
+  .transition-bar {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* THINKAD — Hermès orange #FF6200 · 프리미엄 다크/라이트 (next-themes) */
 @theme inline {
   --color-hermes: var(--hermes);
@@ -291,6 +321,21 @@
   --qp-space-stack: 1rem;      /* 16px — 그룹 내부 */
   --qp-space-group: 1.75rem;   /* 28px — 히어로 정보 그룹 간 */
   --qp-space-section: 2.75rem; /* 44px — 섹션 간 */
+
+  /* ── 모션 표준값 (1단계) ──
+     이전에는 duration 최빈값이 300ms 였고 easing 선언은 93건 중 20건뿐이라
+     대부분 브라우저 기본 곡선을 썼다. 그래서 전반적으로 느리고 밋밋했다.
+
+     퇴장을 진입보다 짧게 두는 것이 핵심이다 — 사라지는 것을 기다리게 하지 않는다.
+     시트류의 spring 은 이미 잘 잡혀 있어(action-sheet.tsx) 그 값을 표준으로 올렸다. */
+  --motion-fast: 120ms;   /* 색·투명도 등 미세 상태 변화 */
+  --motion-enter: 200ms;  /* 패널·시트·모달 진입 */
+  --motion-exit: 150ms;   /* 퇴장 — 진입보다 짧게 */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);   /* 빠르게 나와 부드럽게 안착 */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);        /* 퇴장 */
+  /* framer-motion 시트 spring — action-sheet.tsx 의 현행 값 */
+  --spring-sheet-damping: 30;
+  --spring-sheet-stiffness: 340;
 }
 
 /* Home 파일럿 스코프 — 이 클래스 하위에서만 네온 액센트 토큰을 주황 단색으로 치환.
@@ -3661,6 +3706,8 @@ html:not(.dark) .tkad-nav-chrome {
   background: transparent;
   color: inherit;
   cursor: pointer;
+  display: grid;
+  place-items: center;
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease;
@@ -3678,6 +3725,61 @@ html:not(.dark) .tkad-nav-chrome {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+
+/* ── 모바일 메뉴 패널 애니메이션 (1단계) ──
+   이전에는 조건부 렌더라 진입·퇴장이 0ms 였다 — 툭 나타나고 툭 사라졌다.
+
+   PR #487 제약을 지킨다:
+   1) 퇴장은 --motion-exit(150ms) 로 MOBILE_NAV_TOGGLE_GUARD_MS(320ms) 안에서 끝난다.
+      가드보다 길면 닫는 도중 재열림이 막혀 버벅이는 것처럼 느껴진다.
+   2) #487 이 패널 내용을 rAF 한 프레임 뒤에 mount 하므로, 내용이 애니메이션
+      도중 튀어나오지 않도록 아래 -content 를 따로 페이드인한다.
+   3) #487 의 rAF defer·toggle guard 자체는 건드리지 않는다. */
+@keyframes tkadNavPanelIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes tkadNavPanelOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-6px); }
+}
+
+.tkad-site-header-panel[data-state="open"] {
+  animation: tkadNavPanelIn var(--motion-enter) var(--ease-out) both;
+}
+.tkad-site-header-panel[data-state="closed"] {
+  animation: tkadNavPanelOut var(--motion-exit) var(--ease-in) both;
+  pointer-events: none;
+}
+
+/* 내용은 패널보다 한 박자 늦게 — rAF mount 시점과 맞춰 팝인을 감춘다 */
+.tkad-site-header-panel-content {
+  animation: tkadNavPanelIn var(--motion-enter) var(--ease-out) 40ms both;
+}
+
+/* 햄버거 ↔ X 아이콘 교차 — 겹쳐 놓고 회전 페이드 */
+.tkad-site-header-menu-btn .tkad-menu-icon {
+  grid-area: 1 / 1;
+  transition: opacity var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
+}
+.tkad-site-header-menu-btn .tkad-menu-icon[data-hidden="true"] {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.8);
+}
+.tkad-site-header-menu-btn .tkad-menu-icon[data-hidden="false"] {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tkad-site-header-panel[data-state="open"],
+  .tkad-site-header-panel[data-state="closed"],
+  .tkad-site-header-panel-content {
+    animation-duration: 0.01ms;
+  }
+  .tkad-site-header-menu-btn .tkad-menu-icon { transition-duration: 0.01ms; }
 }
 
 html.tkad-nav-scroll-lock,

@@ -205,7 +205,7 @@ function KeywordFilterEmptyState({
               onClick={() => onPickPopularKeyword(phrase)}
               className={cn(
                 "rounded-full border border-navy/12 bg-card px-4 py-2 text-xs font-semibold text-navy shadow-sm",
-                "transition-all hover:border-gold/45 hover:bg-gold/10 hover:shadow-md",
+                "transition-ui hover:border-gold/45 hover:bg-gold/10 hover:shadow-md",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2",
               )}
             >

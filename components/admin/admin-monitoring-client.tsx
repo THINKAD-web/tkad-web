@@ -61,7 +61,7 @@ function FunnelBar({
       </div>
       <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-[color:var(--qp-accent)] transition-all"
+          className="h-full rounded-full bg-[color:var(--qp-accent)] transition-bar"
           style={{ width: `${width}%` }}
         />
       </div>

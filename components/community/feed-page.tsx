@@ -161,7 +161,7 @@ export async function CommunityFeedPage({
               </Link>
               <Link
                 href="/community/members"
-                className="group inline-flex h-14 items-center justify-center gap-2 rounded-[20px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-7 text-sm font-black dark:text-white text-gray-900 shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100"
+                className="group inline-flex h-14 items-center justify-center gap-2 rounded-[20px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-7 text-sm font-black dark:text-white text-gray-900 shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-ui hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100"
               >
                 <Users className="h-4 w-4" />
                 {isKo ? "활동 멤버 보기" : "Browse members"}

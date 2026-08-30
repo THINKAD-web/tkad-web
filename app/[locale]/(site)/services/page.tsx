@@ -106,7 +106,7 @@ export default async function ServicesPage({ params }: Props) {
             const Icon = p.icon;
             return (
               <AnimatedCard key={p.title} delay={staggerDelayMs(i)}>
-                <article className="group relative h-full rounded-[28px] dark:bg-white/5 bg-gray-50 p-7 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)] transition-all hover:-translate-y-1 hover:dark:bg-white/6">
+                <article className="group relative h-full rounded-[28px] dark:bg-white/5 bg-gray-50 p-7 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)] transition-ui hover:-translate-y-1 hover:dark:bg-white/6">
                   <div className="flex items-center justify-between">
                     <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                       [{String(i + 1).padStart(2, "0")}]
@@ -142,7 +142,7 @@ export default async function ServicesPage({ params }: Props) {
         <div className="grid gap-5 md:grid-cols-5">
           {steps.map((step, i) => (
             <AnimatedCard key={step.label} delay={staggerDelayMs(i)}>
-              <article className="h-full rounded-[26px] dark:bg-white/5 bg-gray-50 p-6 backdrop-blur tkad-neon-border shadow-[0_28px_110px_rgba(0,0,0,0.78)] transition-all hover:-translate-y-1 hover:dark:bg-white/6">
+              <article className="h-full rounded-[26px] dark:bg-white/5 bg-gray-50 p-6 backdrop-blur tkad-neon-border shadow-[0_28px_110px_rgba(0,0,0,0.78)] transition-ui hover:-translate-y-1 hover:dark:bg-white/6">
                 <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 text-sm font-black dark:text-white text-gray-900">
                   {step.label}
                 </span>
@@ -215,7 +215,7 @@ export default async function ServicesPage({ params }: Props) {
             </Link>
             <Link
               href="/media"
-              className="inline-flex h-16 items-center justify-center rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-10 text-base font-black dark:text-white text-gray-900 shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              className="inline-flex h-16 items-center justify-center rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-10 text-base font-black dark:text-white text-gray-900 shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-ui hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
             >
               {t("ctaSecondary")}
             </Link>

@@ -76,7 +76,7 @@ function ContributionBar({
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-[#F3F4F6]">
         <div
-          className="h-full rounded-full transition-all"
+          className="h-full rounded-full transition-bar"
           style={{ width: `${Math.min(100, Math.max(0, pct))}%`, background: color }}
         />
       </div>

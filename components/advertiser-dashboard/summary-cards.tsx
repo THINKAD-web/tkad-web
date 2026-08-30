@@ -63,7 +63,7 @@ export function AdvertiserSummaryCards({
           key={c.label}
           className={cn(
             "tkad-glass-surface tkad-neon-border min-w-[78%] shrink-0 snap-center rounded-[28px] border p-6 backdrop-blur-md",
-            "transition-all hover:-translate-y-0.5 hover:border-primary/25",
+            "transition-ui hover:-translate-y-0.5 hover:border-primary/25",
             "sm:min-w-0",
           )}
         >

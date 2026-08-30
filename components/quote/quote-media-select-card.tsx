@@ -57,7 +57,7 @@ export function QuoteMediaSelectCard({
       type="button"
       onClick={onToggle}
       className={cn(
-        "w-full overflow-hidden rounded-2xl border text-left shadow-sm transition-all hover:shadow-md active:scale-[0.99]",
+        "w-full overflow-hidden rounded-2xl border text-left shadow-sm transition-ui hover:shadow-md active:scale-[0.99]",
         selected
           ? "border-[color:var(--qp-accent)]/55 bg-[color:var(--qp-accent-soft)] ring-2 ring-[color:var(--qp-accent)]/25"
           : "border-gray-100 bg-white dark:border-white/10 dark:bg-white/5",

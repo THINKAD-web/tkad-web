@@ -205,7 +205,7 @@ export function PointsPageClient() {
                   disabled={!canAfford || redeeming === type}
                   onClick={() => void handleRedeem(type)}
                   className={cn(
-                    "mt-4 rounded-2xl px-4 py-3 font-display text-xs font-medium uppercase tracking-wider transition-all",
+                    "mt-4 rounded-2xl px-4 py-3 font-display text-xs font-medium uppercase tracking-wider transition-ui",
                     canAfford
                       ? "bg-primary text-primary-foreground hover:opacity-90"
                       : "cursor-not-allowed bg-muted text-muted-foreground",
