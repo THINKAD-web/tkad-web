@@ -33,7 +33,7 @@ export function BudgetFilterBar({
       </label>
 
       {budgetWithinOnly && hiddenOverBudgetCount > 0 ? (
-        <p className="text-[11px] text-muted-foreground">
+        <p className="tkad-type-caption text-muted-foreground">
           {isKo
             ? `예산 초과 매체 ${hiddenOverBudgetCount}건 숨김`
             : `${hiddenOverBudgetCount} over-budget media hidden`}
@@ -41,7 +41,7 @@ export function BudgetFilterBar({
       ) : null}
 
       {showLowHint ? (
-        <p className="text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
+        <p className="tkad-type-caption leading-relaxed text-amber-800 dark:text-amber-300">
           {isKo
             ? "예산 내 매체가 적습니다. 토글을 끄면 더 많은 매체를 볼 수 있습니다."
             : "Few media fit your budget. Turn off the filter to see more options."}

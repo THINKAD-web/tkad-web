@@ -47,8 +47,8 @@ function PresetButton({
       }`}
       title={t.summary}
     >
-      <span className="text-xs font-semibold">{t.title}</span>
-      <span className="block text-[11px] text-muted-foreground">
+      <span className="tkad-type-title">{t.title}</span>
+      <span className="block tkad-type-caption text-muted-foreground">
         {t.summary}
       </span>
     </button>

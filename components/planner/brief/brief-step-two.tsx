@@ -185,7 +185,7 @@ export function BriefStepTwo({
             {overIncl.map((row) => (
               <p
                 key={row.browseMainId}
-                className="text-[11px] leading-relaxed text-amber-800 dark:text-amber-300"
+                className="tkad-type-caption leading-relaxed text-amber-800 dark:text-amber-300"
               >
                 {overInclusionMessage(row, isKo)}
               </p>
@@ -194,7 +194,7 @@ export function BriefStepTwo({
         ) : null}
 
         {store.genders.length > 0 || store.ageBands.length > 0 ? (
-          <p className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 p-2.5 text-[11px] text-muted-foreground">
+          <p className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 p-2.5 tkad-type-caption text-muted-foreground">
             <span>
               {isKo
                 ? "성별·연령은 매체 유형·등록 정보 기반 추정치입니다."
@@ -215,7 +215,7 @@ export function BriefStepTwo({
         ) : null}
 
         <div className="mb-2 flex items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold">
+          <h3 className="tkad-type-title">
             {isKo
               ? `추천 매체 ${visibleScored.length}개`
               : `${visibleScored.length} recommended media`}
@@ -301,7 +301,7 @@ export function BriefStepTwo({
           data-testid="brief-mix-list"
         >
           <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-xs font-semibold">
+            <p className="tkad-type-title">
               {isKo
                 ? `믹스 ${mixItemCount}건`
                 : `${mixItemCount} mix item(s)`}
@@ -342,7 +342,7 @@ export function BriefStepTwo({
           ) : null}
 
           {!hasMix ? (
-            <p className="text-[11px] text-muted-foreground">
+            <p className="tkad-type-caption text-muted-foreground">
               {isKo
                 ? "카탈로그 매체를 추가하거나 커스텀 항목을 등록하면 지표가 갱신됩니다."
                 : "Add catalog media or a custom line to update metrics."}
@@ -354,7 +354,7 @@ export function BriefStepTwo({
                 return (
                   <li
                     key={l.mediaId}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/20 px-2 py-1.5 text-[11px]"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/20 px-2 py-1.5 tkad-type-caption"
                     data-testid="brief-mix-catalog-row"
                   >
                     <span className="truncate">

@@ -90,15 +90,15 @@ function PlatformCard({
         {channel.icon}
       </span>
 
-      <span className="mt-2 pr-5 text-sm font-semibold">
+      <span className="mt-2 pr-5 tkad-type-title">
         {isKo ? channel.nameKo : channel.nameEn}
       </span>
-      <span className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">
+      <span className="mt-0.5 line-clamp-2 tkad-type-caption text-muted-foreground">
         {isKo ? channel.descriptionKo : channel.descriptionEn}
       </span>
 
       {active && scored ? (
-        <span className="mt-2 text-[10px] font-medium tabular-nums text-muted-foreground">
+        <span className="mt-2 tkad-type-note font-medium tabular-nums text-muted-foreground">
           {isKo ? "추천 비중" : "Share"} {scored.budgetPct}%
           {" · "}
           {isKo ? "월간 노출" : "Monthly impr."}{" "}
@@ -218,7 +218,7 @@ export function BriefDigitalPanel({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm font-semibold">
+            <h3 className="tkad-type-title">
               {isKo ? "디지털 채널 배분" : "Digital channel allocation"}
             </h3>
             {allocationSource ? (
@@ -255,7 +255,7 @@ export function BriefDigitalPanel({
 
       {showBenchmarkNote ? (
         <p
-          className="rounded-lg border border-sky-400/30 bg-sky-400/5 px-3 py-2 text-[11px] text-sky-900 dark:text-sky-200"
+          className="rounded-lg border border-sky-400/30 bg-sky-400/5 px-3 py-2 tkad-type-caption text-sky-900 dark:text-sky-200"
           data-testid="brief-digital-benchmark-note"
         >
           {isKo
@@ -284,7 +284,7 @@ export function BriefDigitalPanel({
       </div>
 
       <div className="space-y-3">
-        <label className="text-xs font-semibold">
+        <label className="tkad-type-title">
           {isKo ? "디지털 예산 비중" : "Digital budget share"}
         </label>
         <input

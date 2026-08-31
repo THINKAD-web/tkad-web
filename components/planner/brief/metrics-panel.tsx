@@ -35,7 +35,7 @@ function Row({
     <div className="flex items-baseline justify-between gap-3 py-2">
       <span className="text-xs text-muted-foreground">{label}</span>
       <span className="flex items-center gap-1.5">
-        <span className="text-sm font-semibold tabular-nums">{value}</span>
+        <span className="tkad-type-title tabular-nums">{value}</span>
         <DataQualityBadge basis={basis} isKo={isKo} />
       </span>
     </div>
@@ -56,13 +56,13 @@ function PendingRow({
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-xs text-muted-foreground">{label}</span>
         <span className="flex items-center gap-1.5">
-          <span className="text-sm font-semibold tabular-nums text-muted-foreground">
+          <span className="tkad-type-title tabular-nums text-muted-foreground">
             —
           </span>
           <DataQualityBadge basis={null} isKo={isKo} />
         </span>
       </div>
-      <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p>
+      <p className="mt-0.5 tkad-type-caption text-muted-foreground">{hint}</p>
     </div>
   );
 }
@@ -111,13 +111,13 @@ export function MetricsPanel({
         화면은 "쓰지 말라" 하고 PDF 는 "써도 된다" 하던 불일치를 없앤 것이다.
         문구를 고칠 때는 양쪽을 함께 고칠 것.
       */}
-      <p className="mb-3 rounded-lg border border-border bg-muted/50 p-2.5 text-[11px] leading-relaxed text-muted-foreground">
+      <p className="mb-3 rounded-lg border border-border bg-muted/50 p-2.5 tkad-type-caption leading-relaxed text-muted-foreground">
         {isKo
           ? "노출·도달은 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
           : "Impressions and reach use THINKAD internal estimates; actual delivery may vary by inventory and terms."}
       </p>
 
-      <h3 className="mb-1 text-sm font-semibold">
+      <h3 className="mb-1 tkad-type-title">
         {isKo ? "실시간 지표" : "Live metrics"}
       </h3>
 
@@ -138,7 +138,7 @@ export function MetricsPanel({
           basis={metrics.totalImpressions.basis}
           isKo={isKo}
         />
-        <p className="px-0 py-1 text-[10px] leading-relaxed text-muted-foreground">
+        <p className="px-0 py-1 tkad-type-note leading-relaxed text-muted-foreground">
           {footfallVsReachFootnote(isKo)}
         </p>
         <Row
@@ -154,7 +154,7 @@ export function MetricsPanel({
           isKo={isKo}
         />
         {customLineCount > 0 ? (
-          <p className="pb-2 text-[10px] leading-relaxed text-muted-foreground">
+          <p className="pb-2 tkad-type-note leading-relaxed text-muted-foreground">
             {isKo
               ? `커스텀 ${customLineCount}건은 노출·CPM·도달 집계에서 제외됩니다.`
               : `${customLineCount} custom line(s) excluded from impressions, CPM, and reach.`}
@@ -163,13 +163,13 @@ export function MetricsPanel({
       </div>
 
       {metrics.isOverBudget ? (
-        <p className="mt-2 rounded-lg border border-destructive/40 bg-destructive/10 p-2 text-[11px] font-medium text-destructive">
+        <p className="mt-2 rounded-lg border border-destructive/40 bg-destructive/10 p-2 tkad-type-caption font-medium text-destructive">
           {overBudgetBannerLine(metrics.overBudgetWon, isKo)}
         </p>
       ) : null}
 
       <div className="mt-4 border-t border-dashed border-border pt-3">
-        <p className="mb-1 text-[11px] font-semibold text-muted-foreground">
+        <p className="mb-1 tkad-type-caption font-semibold text-muted-foreground">
           {isKo ? "도달 추정 (MOIS 인구 + ρ=0.7)" : "Reach estimate (MOIS pop + ρ=0.7)"}
         </p>
         <div className="divide-y divide-border">
@@ -223,7 +223,7 @@ export function MetricsPanel({
         </div>
 
         {excluded > 0 ? (
-          <p className="mt-2 rounded-lg border border-border bg-muted/50 p-2 text-[11px] text-muted-foreground">
+          <p className="mt-2 rounded-lg border border-border bg-muted/50 p-2 tkad-type-caption text-muted-foreground">
             {dataQualityExcludedNote(excluded, isKo)}
           </p>
         ) : null}

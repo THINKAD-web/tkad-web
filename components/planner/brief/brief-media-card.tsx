@@ -70,12 +70,12 @@ export function BriefMediaCard({
         />
         <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{mediaName}</p>
+            <p className="truncate tkad-type-title">{mediaName}</p>
             <p className="truncate text-xs text-muted-foreground">
               {isKo ? media.location : media.locationEn || media.location}
             </p>
             {scored.overBudget ? (
-              <p className="mt-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+              <p className="mt-0.5 tkad-type-note font-medium text-amber-700 dark:text-amber-300">
                 {isKo ? "예산 초과" : "Over budget"}
               </p>
             ) : null}
@@ -90,7 +90,7 @@ export function BriefMediaCard({
       {axes.length > 0 ? (
         <ul className="mt-2 space-y-1">
           {axes.map((a) => (
-            <li key={a.key} className="text-[11px] leading-snug">
+            <li key={a.key} className="tkad-type-caption leading-snug">
               <span className="font-medium">
                 {AXIS_LABEL[a.key]?.[isKo ? "ko" : "en"] ?? a.key} {a.score}
               </span>
@@ -99,7 +99,7 @@ export function BriefMediaCard({
           ))}
         </ul>
       ) : (
-        <p className="mt-2 text-[11px] text-muted-foreground">
+        <p className="mt-2 tkad-type-caption text-muted-foreground">
           {isKo
             ? "이 매체에 대해 근거를 쓸 수 있는 축이 없습니다."
             : "No axis with a stateable rationale for this media."}
@@ -152,7 +152,7 @@ export function BriefMediaCard({
             {isKo ? "믹스에 추가" : "Add to mix"}
           </Button>
         )}
-        <span className="text-[11px] text-muted-foreground sm:ml-auto">
+        <span className="tkad-type-caption text-muted-foreground sm:ml-auto">
           {scored.unitCpmWon != null
             ? `CPM ₩${scored.unitCpmWon.toLocaleString()} / ${days}${isKo ? "일" : "d"}`
             : isKo

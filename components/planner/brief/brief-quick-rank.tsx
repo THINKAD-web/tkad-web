@@ -81,7 +81,7 @@ export function BriefQuickRankPanel({
   return (
     <div data-testid="brief-quick-rank-panel">
       {store.genders.length > 0 || store.ageBands.length > 0 ? (
-        <p className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 p-2.5 text-[11px] text-muted-foreground">
+        <p className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 p-2.5 tkad-type-caption text-muted-foreground">
           <span>
             {isKo
               ? "성별·연령은 매체 유형·등록 정보 기반 추정치입니다."

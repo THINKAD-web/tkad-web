@@ -63,7 +63,7 @@ export function BriefCustomLineForm({
       className="rounded-xl border border-dashed border-violet-400/50 bg-violet-500/5 p-3"
       data-testid="brief-custom-line-form"
     >
-      <p className="mb-2 text-xs font-semibold text-violet-800 dark:text-violet-300">
+      <p className="mb-2 tkad-type-title text-violet-800 dark:text-violet-300">
         {mode === "add"
           ? isKo
             ? "커스텀 항목 추가"
@@ -107,7 +107,7 @@ export function BriefCustomLineForm({
         />
       </div>
       {error ? (
-        <p className="mt-2 text-[11px] text-destructive">{error}</p>
+        <p className="mt-2 tkad-type-caption text-destructive">{error}</p>
       ) : null}
       <div className="mt-3 flex gap-2">
         <Button
