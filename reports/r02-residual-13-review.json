@@ -1,0 +1,357 @@
+{
+  "generatedAt": "2026-08-31T00:25:45.825Z",
+  "count": 13,
+  "rows": [
+    {
+      "id": "cmrwgei4j000b04lat8caj53b",
+      "slug": "incheonjihacheol-1hoseon-juanyeok-i-screen-yeongsanggwanggo-bokje",
+      "name": "인천지하철 1호선 인천시청역 I-SCREEN 영상광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 20000000,
+      "pricePeriod": "month",
+      "cpmStored": 20000,
+      "cpmRecalc": 83595,
+      "cpmDisplay": 83595,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 239250,
+      "dailyFootfall": 7975,
+      "storedVsRecalcRatio": 0.24,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩83,595 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 717750,
+        "forMidCpm": 3349500,
+        "forMaxCpm": 5981250
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmp0gi5je000g04jile8iqnr5",
+      "slug": "incheon-jihacheol-dijiteol-sainiji-gwanggo-bupyeongyeok",
+      "name": "인천지하철 1호선 부평역 디지털사이니지 (디지털포스터) 광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 36000000,
+      "pricePeriod": "month",
+      "cpmStored": 9730,
+      "cpmRecalc": 175901,
+      "cpmDisplay": 175901,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 204660,
+      "dailyFootfall": 6822,
+      "storedVsRecalcRatio": 0.06,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩175,901 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 613980,
+        "forMidCpm": 2865240,
+        "forMaxCpm": 5116500
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmrx2jg0z001n04jr751ualgm",
+      "slug": null,
+      "name": "KTX 전주역 맞이방 영상광고 (4번) 광고",
+      "mediaClass": "subway_light",
+      "priceCurrent": 12000000,
+      "pricePeriod": "month",
+      "cpmStored": 6667,
+      "cpmRecalc": 39013,
+      "cpmDisplay": 39013,
+      "cpmBounds": [
+        2000,
+        15000
+      ],
+      "monthlyImpressions": 307590,
+      "dailyFootfall": 10253,
+      "storedVsRecalcRatio": 0.17,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩39,013 — subway_light 정상 범위 ₩2,000~₩15,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 615180,
+        "forMidCpm": 2614515,
+        "forMaxCpm": 4613850
+      },
+      "suggestedCpmAtMidPrice": 8500,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmp3csmb2000004l43sen816g",
+      "slug": "sinbundangseon-meteuro-raibeu-gwanggo",
+      "name": "지하철 신분당선 메트로 라이브 광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 150000000,
+      "pricePeriod": "month",
+      "cpmStored": 5263,
+      "cpmRecalc": 28265,
+      "cpmDisplay": 28265,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 5307000,
+      "dailyFootfall": 176900,
+      "storedVsRecalcRatio": 0.19,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩28,265 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 15921000,
+        "forMidCpm": 74298000,
+        "forMaxCpm": 132675000
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmp0gg9e3000e04jicm5nl221",
+      "slug": "incheon-jihacheol-dijiteol-sainiji-gwanggo-jakjeonyeok",
+      "name": "인천지하철 1호선 작전역 디지털사이니지 (디지털포스터) 광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 19000000,
+      "pricePeriod": "month",
+      "cpmStored": 11875,
+      "cpmRecalc": 47391,
+      "cpmDisplay": 47391,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 400920,
+      "dailyFootfall": 13364,
+      "storedVsRecalcRatio": 0.25,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩47,391 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 1202760,
+        "forMidCpm": 5612880,
+        "forMaxCpm": 10023000
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmp0gd45o000c04ji4usu8p0e",
+      "slug": "incheon-jihacheol-dijiteol-sainiji-gwanggo-yesulhoegwanyeok",
+      "name": "인천지하철 1호선 예술회관역 디지털사이니지 (디지털포스터) 광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 11000000,
+      "pricePeriod": "month",
+      "cpmStored": 8800,
+      "cpmRecalc": 34520,
+      "cpmDisplay": 34520,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 318660,
+      "dailyFootfall": 10622,
+      "storedVsRecalcRatio": 0.25,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩34,520 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 955980,
+        "forMidCpm": 4461240,
+        "forMaxCpm": 7966500
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmp3biu21000004l8a8ijkh9c",
+      "slug": "2hoseon-jihacheol-meteuro-raibeu-gwanggo",
+      "name": "지하철 2호선 메트로라이브 광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 450000000,
+      "pricePeriod": "month",
+      "cpmStored": 10000,
+      "cpmRecalc": 115385,
+      "cpmDisplay": 115385,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 3900000,
+      "dailyFootfall": 130000,
+      "storedVsRecalcRatio": 0.09,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩115,385 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 11700000,
+        "forMidCpm": 54600000,
+        "forMaxCpm": 97500000
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmrwg26u0000104l20ofjcxkk",
+      "slug": "incheonjihacheol-1hoseon-geomamyeok-i-screen-yeongsanggwanggo-bokje",
+      "name": "인천지하철 2호선 주안역 I-SCREEN 영상광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 50000000,
+      "pricePeriod": "month",
+      "cpmStored": 15873,
+      "cpmRecalc": 30023,
+      "cpmDisplay": 30023,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 1665390,
+      "dailyFootfall": 55513,
+      "storedVsRecalcRatio": 0.53,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩30,023 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 4996170,
+        "forMidCpm": 23315460,
+        "forMaxCpm": 41634750
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmqp7sr5k000004jpyzaczfao",
+      "slug": null,
+      "name": "분당선 압구정로데오역 헬로 로데오 DS 광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 80000000,
+      "pricePeriod": "month",
+      "cpmStored": 12308,
+      "cpmRecalc": 70175,
+      "cpmDisplay": 70175,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 1140000,
+      "dailyFootfall": 38000,
+      "storedVsRecalcRatio": 0.18,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩70,175 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 3420000,
+        "forMidCpm": 15960000,
+        "forMaxCpm": 28500000
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmp0geb4p000i04ibjncqsfya",
+      "slug": "incheon-jihacheol-dijiteol-sainiji-gwanggo-bupyeonggucheongyeok",
+      "name": "인천지하철 1호선 부평구청역 디지털사이니지 (디지털포스터) 광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 19000000,
+      "pricePeriod": "month",
+      "cpmStored": 10556,
+      "cpmRecalc": 49437,
+      "cpmDisplay": 49437,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 384330,
+      "dailyFootfall": 12811,
+      "storedVsRecalcRatio": 0.21,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩49,437 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 1152990,
+        "forMidCpm": 5380620,
+        "forMaxCpm": 9608250
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmrwib77h000m04l28pi9b6ro",
+      "slug": "incheonjihacheol-1hoseon-bupyeongyeok-dijiteolsainiji-dijiteolposeuteo-gwanggo-b",
+      "name": "인천지하철 1호선 인천터미널역 디지털사이니지 (디지털포스터) 광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 26000000,
+      "pricePeriod": "month",
+      "cpmStored": 10196,
+      "cpmRecalc": 68827,
+      "cpmDisplay": 68827,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 377760,
+      "dailyFootfall": 12592,
+      "storedVsRecalcRatio": 0.15,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩68,827 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 1133280,
+        "forMidCpm": 5288640,
+        "forMaxCpm": 9444000
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmp0gjlox000m04ib37h33kgd",
+      "slug": "incheon-jihacheol-dijiteol-sainiji-gwanggo-woninjaeyeok",
+      "name": "인천지하철 1호선 원인재역 디지털사이니지 (디지털포스터) 광고",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 11000000,
+      "pricePeriod": "month",
+      "cpmStored": 9167,
+      "cpmRecalc": 135052,
+      "cpmDisplay": 135052,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 81450,
+      "dailyFootfall": 2715,
+      "storedVsRecalcRatio": 0.07,
+      "rootCause": "price_too_high_for_impressions_after_x10",
+      "r02Message": "CPM ₩135,052 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 244350,
+        "forMidCpm": 1140300,
+        "forMaxCpm": 2036250
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "×10 보정 역효과 — 노출(impressions) 대비 가격이 과대. 가격 인하 또는 impressions 재산정 필요."
+    },
+    {
+      "id": "cmqsuxgmu00010akq6pgm99bi",
+      "slug": "jihacheol-8hoseon-jamsilyeok-cmbodeu-gwanggo-jomyeong-bokje-8",
+      "name": "천호역 지하철 5호선 CM보드 광고 (인쇄)",
+      "mediaClass": "subway_psd",
+      "priceCurrent": 14000000,
+      "pricePeriod": "month",
+      "cpmStored": 10370,
+      "cpmRecalc": 2917,
+      "cpmDisplay": 2917,
+      "cpmBounds": [
+        3000,
+        25000
+      ],
+      "monthlyImpressions": 4800000,
+      "dailyFootfall": 160000,
+      "storedVsRecalcRatio": 3.56,
+      "rootCause": "price_too_low_recalc",
+      "r02Message": "CPM ₩2,917 — subway_psd 정상 범위 ₩3,000~₩25,000 이탈",
+      "suggestedPrice": {
+        "forMinCpm": 14400000,
+        "forMidCpm": 67200000,
+        "forMaxCpm": 120000000
+      },
+      "suggestedCpmAtMidPrice": 14000,
+      "note": "stored/recalc 불일치 — price·cpm·impressions 3필드 정합 필요."
+    }
+  ]
+}

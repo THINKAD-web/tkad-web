@@ -145,9 +145,10 @@
 
 .ooh-home-hero__slogan {
   text-wrap: balance;
-  font-size: 1.5rem;
-  font-weight: 900;
-  line-height: 1.15;
+  font-family: var(--font-noto-serif-kr), "Noto Serif KR", ui-serif, Georgia, serif;
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.12;
   letter-spacing: -0.02em;
   color: #fff;
   text-shadow:

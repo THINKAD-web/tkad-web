@@ -21,6 +21,7 @@ import { plannerChartColorRgb } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 import { formatExportBudgetWonLabel } from "@/lib/planner-report-export/format-export-money";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
+import { footfallVsReachShortFootnote } from "@/lib/planner-report-performance-guide";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import {
   filterExportSections,
@@ -39,19 +40,14 @@ import {
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
 import type { PlannerExportKpi } from "@/lib/planner-report-export/types";
-import { BRAND_ACCENT_RGB } from "@/lib/brand-palette";
+import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
  * 견적서 PDF(`build-korean-quote-pdf.ts`)와 동일한 서버 생성 패턴.
+ * 색상·표지 레이아웃은 `document-theme.ts` SSOT.
  */
 
-/** Quiet Professional — 흑백 + 브랜드 액센트 1종 (lib/brand-palette.ts) */
-const QP_ACCENT = BRAND_ACCENT_RGB;
-const QP_ACCENT_SOFT = [255, 243, 232] as const;
-/** 주황 커버·배너 위 보조 텍스트 (구 라벤더 대체) */
-const QP_ON_ACCENT_MUTED = [255, 236, 220] as const;
-const QP_INK = [28, 28, 31] as const;
 const INK = [17, 24, 39] as const;
 const GRAY_600 = [75, 85, 99] as const;
 const GRAY_500 = [107, 114, 128] as const;
@@ -143,6 +139,18 @@ export async function buildPlannerReportPdf(
   p: PlannerReportExportPayload,
   assets?: PlannerReportExportAssets,
 ): Promise<Uint8Array> {
+  const theme = getReportDocumentTheme(assets?.style);
+  const {
+    accentRgb: QP_ACCENT,
+    accentSoftRgb: QP_ACCENT_SOFT,
+    onAccentMutedRgb: QP_ON_ACCENT_MUTED,
+    inkRgb: QP_INK,
+    coverBgRgb: COVER_BG,
+    coverTextRgb: COVER_TEXT,
+    coverMutedRgb: COVER_MUTED,
+  } = theme.pdf;
+  const wordmarkOnDark = theme.coverMode === "filled";
+
   const { default: JsPDF } = await import("jspdf");
   const doc = new JsPDF({ unit: "mm", format: "a4" });
   const vis = assets?.sectionVisibility;
@@ -196,15 +204,23 @@ export async function buildPlannerReportPdf(
     y += 9;
   }
 
-  /** THINKAD 워드마크 (THINK·AD 흰색 — 주황 커버/배너 위) */
+  /** THINKAD 워드마크 */
   function drawWordmark(x: number, baseY: number, size: number) {
     doc.setFont(FONT, "normal");
     doc.setFontSize(size);
-    doc.setTextColor(255, 255, 255);
-    doc.text("THINK", x, baseY);
-    const w = doc.getTextWidth("THINK");
-    setText(WHITE);
-    doc.text("AD", x + w, baseY);
+    if (wordmarkOnDark) {
+      doc.setTextColor(255, 255, 255);
+      doc.text("THINK", x, baseY);
+      const w = doc.getTextWidth("THINK");
+      setText(QP_ACCENT);
+      doc.text("AD", x + w, baseY);
+    } else {
+      setText(QP_INK);
+      doc.text("THINK", x, baseY);
+      const w = doc.getTextWidth("THINK");
+      setText(QP_ACCENT);
+      doc.text("AD", x + w, baseY);
+    }
   }
 
   /** 도넛 차트 (삼각형 팬 + 중앙 흰 원) */
@@ -381,12 +397,16 @@ export async function buildPlannerReportPdf(
     : null;
 
   // ── 표지 페이지 ──
-  // 배경은 화면 미리보기(DocumentGradientHero, bg-[#1c1c1f])와 통일한다.
-  // QP_INK 가 정확히 #1c1c1f 라 두 상수의 역할만 맞바꾼다 — 배경=INK, 액센트 줄=ACCENT.
-  setFill(QP_INK);
+  setFill(COVER_BG);
   doc.rect(0, 0, pageW, pageH, "F");
-  setFill(QP_ACCENT);
-  doc.rect(0, 0, pageW, 3, "F");
+  if (theme.topAccentBar) {
+    setFill(QP_ACCENT);
+    doc.rect(0, 0, pageW, theme.coverMode === "minimal" ? 1.2 : 3, "F");
+  }
+  if (theme.coverMode === "filled") {
+    setFill(QP_INK);
+    doc.rect(0, 3, pageW, 1.4, "F");
+  }
 
   drawWordmark(M, 50, 26);
   if (coverLogoData) {
@@ -405,27 +425,26 @@ export async function buildPlannerReportPdf(
     }
   }
   doc.setFont(FONT, "normal");
-  setText(QP_ON_ACCENT_MUTED);
+  setText(COVER_MUTED);
   doc.setFontSize(10);
   doc.text("CAMPAIGN PLANNER", M, 58);
 
-  doc.setTextColor(255, 255, 255);
+  setText(COVER_TEXT);
   doc.setFontSize(28);
   const titleLines = doc.splitTextToSize(p.documentTitle, contentW) as string[];
   doc.text(titleLines, M, 92);
 
-  // 화면의 <div className="mt-5 h-1 w-16 bg-[color:var(--qp-accent)]" /> 와 대응.
-  // 배경이 QP_INK 가 됐으니 이 룰도 QP_ACCENT 로 바꿔야 보인다(안 바꾸면 검정 위 검정).
+  // 화면 미리보기 title rule 과 대응 — 배경 대비에 맞춰 accent 로 그린다.
   setFill(QP_ACCENT);
   doc.rect(M, 92 + titleLines.length * 11, 28, 1.6, "F");
 
   doc.setFontSize(13);
-  setText(QP_ON_ACCENT_MUTED);
+  setText(COVER_MUTED);
   doc.text(subtitle, M, 104 + titleLines.length * 11);
 
   if (p.clientName) {
     doc.setFontSize(13);
-    doc.setTextColor(255, 255, 255);
+    setText(COVER_TEXT);
     doc.text(
       `${p.clientName} ${isKo ? "귀중" : ""}`.trim(),
       M,
@@ -433,7 +452,7 @@ export async function buildPlannerReportPdf(
     );
   }
   doc.setFontSize(10);
-  setText(QP_ON_ACCENT_MUTED);
+  setText(COVER_MUTED);
   doc.text(p.generatedAt, M, pageH - 28);
   doc.text(
     `THINKAD (싱커드)   ·   ${CONTACT_EMAIL}   ·   02-515-2772`,
@@ -938,6 +957,11 @@ export async function buildPlannerReportPdf(
     const colW = (textW - 3) / 2;
     const specs = collectMediaCardSpecs(row, isKo);
     const showContrib = showMediaCardContributions(p.portfolio.length, row);
+    const showFootfallFootnote =
+      showContrib &&
+      row.dailyTraffic != null &&
+      row.dailyTraffic > 0 &&
+      row.exposureContributionPct != null;
     const mediaUrl = plannerMediaPageUrl(row.id, isKo);
     const linkBlockH = mediaUrl ? 11 : 0;
 
@@ -954,6 +978,7 @@ export async function buildPlannerReportPdf(
       contentH += 4 + Math.min(reasonLines.length, 3) * 3.8;
     }
     if (showContrib) contentH += 16;
+    if (showFootfallFootnote) contentH += 7;
     contentH += linkBlockH + pad;
 
     const thumbColH = thumbSlot ? thumbBox.h + pad * 2 : 0;
@@ -1088,7 +1113,7 @@ export async function buildPlannerReportPdf(
           textX,
           barY,
           barW,
-          isKo ? "노출 기여" : "Exposure share",
+          isKo ? "실노출 기여(추정)" : "Reach share (est.)",
           row.exposureContributionPct!,
           QP_INK,
         );
@@ -1106,7 +1131,7 @@ export async function buildPlannerReportPdf(
           textX,
           barY,
           barW,
-          isKo ? "노출 기여" : "Exposure share",
+          isKo ? "실노출 기여(추정)" : "Reach share (est.)",
           row.exposureContributionPct!,
           QP_INK,
         );
@@ -1119,6 +1144,18 @@ export async function buildPlannerReportPdf(
           row.budgetContributionPct!,
           QP_ACCENT,
         );
+      }
+      if (showFootfallFootnote) {
+        ty += 1.5;
+        doc.setFont(FONT, "normal");
+        doc.setFontSize(6);
+        setText(GRAY_500);
+        const noteLines = doc.splitTextToSize(
+          footfallVsReachShortFootnote(isKo),
+          textW,
+        ) as string[];
+        doc.text(noteLines, textX, ty);
+        ty += noteLines.length * 2.8;
       }
     }
 
@@ -1520,6 +1557,104 @@ export async function buildPlannerReportPdf(
   }
 
   renderPortfolioLineup();
+
+  function renderAppendixMediaSpecs() {
+    const specs = p.appendixMediaSpecs;
+    if (!specs?.length) return;
+
+    const colWeights = [24, 11, 10, 22, 8, 25] as const;
+    const weightSum = colWeights.reduce((s, w) => s + w, 0);
+    const cols = (
+      isKo
+        ? [
+            { label: "매체명", weight: colWeights[0] },
+            { label: "월 가격", weight: colWeights[1] },
+            { label: "CPM", weight: colWeights[2] },
+            { label: "위치", weight: colWeights[3] },
+            { label: "본문", weight: colWeights[4] },
+            { label: "비고", weight: colWeights[5] },
+          ]
+        : [
+            { label: "Media", weight: colWeights[0] },
+            { label: "Monthly", weight: colWeights[1] },
+            { label: "CPM", weight: colWeights[2] },
+            { label: "Location", weight: colWeights[3] },
+            { label: "In mix", weight: colWeights[4] },
+            { label: "Note", weight: colWeights[5] },
+          ]
+    ).map((col) => ({ ...col, w: (contentW * col.weight) / weightSum }));
+
+    const headerH = 7;
+    const rowGap = 1;
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(7.5);
+
+    const rowLayouts = specs.map((spec) => {
+      const cellTexts = [
+        spec.name,
+        spec.priceLabel,
+        spec.cpmLabel,
+        spec.location,
+        spec.inBody ? (isKo ? "포함" : "Yes") : "—",
+        spec.statusNote?.trim() && spec.statusNote !== "—"
+          ? spec.statusNote
+          : spec.reviewStatusLabel && spec.reviewStatusLabel !== "—"
+            ? isKo
+              ? `검토: ${spec.reviewStatusLabel}`
+              : `Review: ${spec.reviewStatusLabel}`
+            : "—",
+      ];
+      const lineCounts = cellTexts.map((text, ci) => {
+        const col = cols[ci]!;
+        return (doc.splitTextToSize(text, col.w - 4) as string[]).length;
+      });
+      const rowH = Math.max(8, Math.max(...lineCounts) * 3.8 + 3);
+      return { spec, cellTexts, rowH };
+    });
+
+    const tableH =
+      headerH + rowLayouts.reduce((sum, row) => sum + row.rowH + rowGap, 0) + 4;
+    sectionTitle(
+      isKo ? "부록 · 지정 매체 스펙" : "Appendix · specified media specs",
+      tableH,
+    );
+
+    setFill(QP_INK);
+    doc.rect(M, y, contentW, headerH, "F");
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(7.5);
+    setText(WHITE);
+    let hx = M;
+    for (const col of cols) {
+      doc.text(col.label, hx + 2, y + 4.8);
+      hx += col.w;
+    }
+    y += headerH;
+
+    rowLayouts.forEach(({ spec, cellTexts, rowH }, i) => {
+      if (i > 0) {
+        setDraw([229, 231, 235]);
+        doc.setLineWidth(0.1);
+        doc.line(M, y, M + contentW, y);
+      }
+      let cx = M;
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(7.5);
+      for (let ci = 0; ci < cols.length; ci++) {
+        const col = cols[ci]!;
+        const lines = doc.splitTextToSize(cellTexts[ci]!, col.w - 4) as string[];
+        if (ci === 0) setText(INK);
+        else if (ci === 4 && spec.inBody) setText(QP_ACCENT);
+        else setText(GRAY_600);
+        doc.text(lines, cx + 2, y + 4.2);
+        cx += col.w;
+      }
+      y += rowH + rowGap;
+    });
+    y += 4;
+  }
+
+  renderAppendixMediaSpecs();
 
   // ── 디지털 배분 (통합) ──
   if (p.digital && p.digital.length) {

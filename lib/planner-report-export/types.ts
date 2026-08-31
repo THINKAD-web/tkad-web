@@ -59,6 +59,18 @@ export type PlannerExportDigitalRow = {
 
 export type PlannerExportSection = { title: string; lines: string[] };
 
+/** 문의 자동 제안 부록 — 지정 매체 전체 스펙 (본문 mix 와 분리) */
+export type PlannerExportAppendixMediaSpec = {
+  id: string;
+  name: string;
+  priceLabel: string;
+  cpmLabel: string;
+  location: string;
+  reviewStatusLabel: string;
+  inBody: boolean;
+  statusNote: string;
+};
+
 /** 추천 근거 — 포트폴리오 요약 + 매체별 recommendReason (있을 때만) */
 export type PlannerExportRecommendRationale = {
   summaryLines: string[];
@@ -203,6 +215,8 @@ export type PlannerReportExportPayload = {
   pricingFootnote?: string;
   /** C-full-3a — 매체비·제작비·VAT·총액 견적 표 */
   quoteSummary?: PlannerExportQuoteSummary;
+  /** 문의 자동 제안 부록 — 지정 매체 스펙표 (없으면 PDF 부록 미렌더) */
+  appendixMediaSpecs?: PlannerExportAppendixMediaSpec[];
   disclaimer: string;
 };
 
@@ -226,7 +240,11 @@ export type PlannerReportExportFormat = "pdf" | "pptx";
 export type PlannerReportExportAssets = {
   sectionVisibility?: import("@/lib/planner-report-export/section-visibility").PlannerReportSectionVisibility;
   lineupViewMode?: import("@/lib/planner-report-view-mode").PlannerExportLineupViewMode;
+  /** 제안서 문서 스타일 — preview/PDF/PPTX SSOT (`document-theme.ts`) */
+  style?: import("@/lib/planner-report-export/document-theme").PlannerReportStyle;
 };
+
+export type { PlannerReportStyle } from "@/lib/planner-report-export/document-theme";
 
 export type {
   PlannerExportLineupViewMode,
@@ -237,18 +255,49 @@ export type {
   PlannerReportSectionVisibility,
 } from "@/lib/planner-report-export/section-visibility";
 
+function sanitizeReportFileSegment(value: string): string {
+  return value
+    .replace(/[\\/:*?"<>|]+/g, "")
+    .replace(/\s+/g, "_")
+    .slice(0, 48);
+}
+
+function isUnspecifiedReportFileLabel(label: string): boolean {
+  const t = label.trim();
+  return t === "미지정" || t === "Not specified";
+}
+
+function resolveReportFileCampName(p: PlannerReportExportPayload): string | null {
+  for (const raw of [p.campaignName, p.goalTitle]) {
+    const candidate = raw?.trim();
+    if (candidate && !isUnspecifiedReportFileLabel(candidate)) {
+      return sanitizeReportFileSegment(candidate);
+    }
+  }
+  const region = p.regionsText?.trim();
+  if (
+    region &&
+    !isUnspecifiedReportFileLabel(region) &&
+    region !== (p.isKo ? "전국" : "Nationwide")
+  ) {
+    return sanitizeReportFileSegment(region);
+  }
+  return null;
+}
+
 /**
  * 파일명 규칙: `THINKAD_{캠페인명}_제안서_{YYYY-MM-DD}` (+확장자).
+ * 목표 미지정(inquiry_match 등)이면 지역명 또는 `THINKAD_제안서_{date}`.
  * OS 금지문자·공백 정리. 클라이언트(blob download)·서버(Content-Disposition) 공용.
  */
 export function plannerReportFileBase(p: PlannerReportExportPayload): string {
   const date = new Date().toISOString().slice(0, 10);
-  const camp = (p.campaignName || p.goalTitle || (p.isKo ? "캠페인" : "campaign"))
-    .replace(/[\\/:*?"<>|]+/g, "")
-    .replace(/\s+/g, "_")
-    .slice(0, 48);
   const word = p.isKo ? "제안서" : "proposal";
-  return `THINKAD_${camp}_${word}_${date}`;
+  const camp = resolveReportFileCampName(p);
+  if (camp) {
+    return `THINKAD_${camp}_${word}_${date}`;
+  }
+  return `THINKAD_${word}_${date}`;
 }
 
 /** 페이로드 유효성 — 라우트에서 신뢰 경계로 사용 */

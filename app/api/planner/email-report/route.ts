@@ -10,6 +10,7 @@ import {
 import { buildPlannerReportEmailCover } from "@/lib/planner-report-export/email-cover";
 import { parseSectionVisibility } from "@/lib/planner-report-export/section-visibility";
 import { parseExportLineupViewMode } from "@/lib/planner-report-view-mode";
+import { parsePlannerReportStyle } from "@/lib/planner-report-export/document-theme";
 import {
   isPlannerReportExportPayload,
   type PlannerReportExportPayload,
@@ -29,6 +30,7 @@ type EmailReportBody = {
   activitySource?: PlanReportActivitySource;
   sectionVisibility?: unknown;
   lineupViewMode?: unknown;
+  style?: unknown;
 };
 
 function resolveRecipientEmail(body: EmailReportBody): string | null {
@@ -77,7 +79,8 @@ export async function POST(request: NextRequest) {
   const payload = body.payload as PlannerReportExportPayload;
   const sectionVisibility = parseSectionVisibility(body.sectionVisibility);
   const lineupViewMode = parseExportLineupViewMode(body.lineupViewMode);
-  const exportAssets = { sectionVisibility, lineupViewMode };
+  const style = parsePlannerReportStyle(body.style);
+  const exportAssets = { sectionVisibility, lineupViewMode, style };
 
   const cover = buildPlannerReportEmailCover({
     payload,

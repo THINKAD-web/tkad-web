@@ -26,17 +26,13 @@ import {
   EXPORT_BADGE_PDF,
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
-import { BRAND_ACCENT_BARE, BRAND_ACCENT_PALE } from "@/lib/brand-palette";
+import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
  * 텍스트/표/도형 네이티브 요소라 영업팀이 PowerPoint 에서 바로 수정 가능.
  */
 
-/* 상수명 정정(0단계): 과거 보라/청록 팔레트 잔재로 ACCENT·INK_DEEP 이었으나
-   실제 값은 브랜드 액센트와 근흑색이다. 이름이 값과 다르면 다음 사람이 잘못 쓴다. */
-const ACCENT = BRAND_ACCENT_BARE;
-const INK_DEEP = "1C1C1F";
 const INK = "111827";
 const GRAY = "6B7280";
 const LIGHT = "F1F1F7";
@@ -254,6 +250,14 @@ export async function buildPlannerReportPptx(
   p: PlannerReportExportPayload,
   assets?: PlannerReportExportAssets,
 ): Promise<Uint8Array> {
+  const theme = getReportDocumentTheme(assets?.style);
+  const ACCENT = theme.pptx.accent;
+  const ACCENT_LT = theme.pptx.accentLight;
+  const CYAN = theme.pptx.ink;
+  const COVER_BG = theme.pptx.coverBg;
+  const COVER_TEXT = theme.pptx.coverText;
+  const COVER_MUTED = theme.pptx.coverMuted;
+
   const PptxGenJS = (await import("pptxgenjs")).default;
   const pptx = new PptxGenJS();
   pptx.layout = "LAYOUT_WIDE"; // 13.33 x 7.5 in
@@ -274,15 +278,8 @@ export async function buildPlannerReportPptx(
   );
   const lineupViewMode = assets?.lineupViewMode ?? "detail";
 
-  // 표지(INK_DEEP 근흑 배경) 위 워드마크 "AD" — 딥 틸 그대로는 배경과 거의
-  // 구분이 안 돼(대비 3.03) BRAND_ACCENT_PALE 을 쓴다. 옛 오렌지 라이트(FFB990,
-  // 대비 10.20)와 거의 같은 대비(10.30)라 밝기 인상이 바뀌지 않는다.
-  const ACCENT_LT = BRAND_ACCENT_PALE.slice(1).toUpperCase();
-  // generatedAt(발행일) 은 워드마크보다 한 단계 낮은 위계라 같은 PALE 을 쓰지
-  // 않는다 — 채도를 낮춘 회틸로 분리해 두 텍스트가 서로 잡아먹지 않게 한다.
-  const META_TEAL = "9FC9C4";
   const wordmark = (size: number) => [
-    { text: "THINK", options: { color: WHITE, bold: true } },
+    { text: "THINK", options: { color: theme.coverMode === "filled" ? WHITE : COVER_TEXT, bold: true } },
     { text: "AD", options: { color: ACCENT_LT, bold: true } },
   ].map((r) => ({ ...r, options: { ...r.options, fontFace: face, fontSize: size } }));
 
@@ -298,7 +295,7 @@ export async function buildPlannerReportPptx(
   // 배경은 화면 미리보기(DocumentGradientHero, bg-[#1c1c1f])와 통일한다.
   // INK_DEEP 상수가 이름과 달리 값은 이미 "1C1C1F" 라 그대로 근흑색 배경으로 쓴다.
   const cover = pptx.addSlide();
-  cover.background = { color: INK_DEEP };
+  cover.background = { color: COVER_BG };
   if (coverLogoData) {
     try {
       cover.addImage({
@@ -312,38 +309,39 @@ export async function buildPlannerReportPptx(
       /* broken logo */
     }
   }
+  const coverTitleColor = theme.coverMode === "filled" ? WHITE : COVER_TEXT;
+  const coverMutedColor = theme.coverMode === "filled" ? "D1D5DB" : COVER_MUTED;
+
   cover.addText(wordmark(30), { x: 0.7, y: 1.35, w: 6, h: 0.7 });
   cover.addText("CAMPAIGN PLANNER", {
     x: 0.72, y: 2.05, w: 9, h: 0.4, fontFace: face,
-    fontSize: 12, color: "D1D5DB", charSpacing: 3,
+    fontSize: 12, color: coverMutedColor, charSpacing: 3,
   });
   cover.addText(p.documentTitle, {
     x: 0.7, y: 2.7, w: 12, h: 1.4, fontFace: face,
-    fontSize: 38, bold: true, color: WHITE,
+    fontSize: 38, bold: true, color: coverTitleColor,
   });
-  // 화면의 <div className="mt-5 h-1 w-16 bg-[color:var(--qp-accent)]" /> 와 대응.
-  // 배경이 INK_DEEP(근흑색)이 됐으니 이 룰도 ACCENT(오렌지)로 바꿔야 보인다.
   cover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.0, w: 2.2, h: 0.06, fill: { color: ACCENT } });
   cover.addText(
     p.kind === "integrated"
       ? isKo ? "OOH + 디지털 통합 캠페인 제안" : "OOH + Digital integrated campaign"
       : isKo ? "OOH 미디어 캠페인 플랜" : "OOH media campaign plan",
-    { x: 0.7, y: 4.25, w: 12, h: 0.5, fontFace: face, fontSize: 17, color: "E5E7EB" },
+    { x: 0.7, y: 4.25, w: 12, h: 0.5, fontFace: face, fontSize: 17, color: coverMutedColor },
   );
   if (p.clientName) {
     cover.addText(`${p.clientName} ${isKo ? "귀중" : ""}`.trim(), {
-      x: 0.7, y: 6.0, w: 12, h: 0.4, fontFace: face, fontSize: 14, color: WHITE,
+      x: 0.7, y: 6.0, w: 12, h: 0.4, fontFace: face, fontSize: 14, color: coverTitleColor,
     });
   }
   cover.addText(p.generatedAt, {
-    x: 0.7, y: 6.6, w: 12, h: 0.4, fontFace: face, fontSize: 12, color: META_TEAL,
+    x: 0.7, y: 6.6, w: 12, h: 0.4, fontFace: face, fontSize: 12, color: coverMutedColor,
   });
 
   // 공통 헤더 그리기
   function header(slide: ReturnType<typeof pptx.addSlide>, label: string) {
     slide.background = { color: WHITE };
     slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.9, fill: { color: ACCENT } });
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0.9, w: W, h: 0.05, fill: { color: INK_DEEP } });
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0.9, w: W, h: 0.05, fill: { color: CYAN } });
     slide.addText(label, {
       x: 0.6, y: 0.12, w: 9, h: 0.66, fontFace: face, fontSize: 20, bold: true, color: WHITE,
     });
@@ -1061,7 +1059,7 @@ export async function buildPlannerReportPptx(
           textX,
           barY,
           colW,
-          isKo ? "노출 기여" : "Exposure share",
+          isKo ? "실노출 기여(추정)" : "Reach share (est.)",
           row.exposureContributionPct,
           INK_DEEP_BAR,
           face,
@@ -1084,7 +1082,7 @@ export async function buildPlannerReportPptx(
           textX,
           barY,
           textW,
-          isKo ? "노출 기여" : "Exposure share",
+          isKo ? "실노출 기여(추정)" : "Reach share (est.)",
           row.exposureContributionPct,
           INK_DEEP_BAR,
           face,

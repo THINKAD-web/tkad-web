@@ -1,5 +1,25 @@
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 
+/** PDF·카드 각주 — raw traffic + 기여도 병기 시 */
+export function footfallVsReachShortFootnote(isKo: boolean): string {
+  return isKo
+    ? "※ 일 유동인구와 실노출 기여(%)는 서로 다른 기준입니다."
+    : "※ Daily footfall and reach share (%) use different bases.";
+}
+
+/** SYMPTOM3 — 유동인구 vs 실노출 짧은 각주 (카드·PDF·믹스 패널 공용) */
+export function footfallVsReachFootnote(isKo: boolean): string {
+  return isKo
+    ? "유동인구(지나간 사람)와 실노출(광고를 본 추정)은 다릅니다. 기여도·비중·CPM은 실노출 기준입니다."
+    : "Footfall (passers-by) and reach (estimated ad views) differ. Shares and CPM use reach estimates.";
+}
+
+/** 브리프 믹스·PDF KPI — SOV 보정 총노출 라벨 */
+export const PLANNER_TOTAL_REACH_LABEL = {
+  ko: "총 실노출(추정)",
+  en: "Est. total reach",
+} as const;
+
 export type PlannerPerformanceGuide = {
   title: string;
   bullets: string[];

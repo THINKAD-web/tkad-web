@@ -1,0 +1,323 @@
+{
+  "generatedAt": "2026-08-30T23:49:05.002Z",
+  "totalActive": 804,
+  "measured": 804,
+  "skippedNoTraffic": 0,
+  "skippedNoPlanner": 1,
+  "withComparableRatio": 803,
+  "bucketCounts": {
+    "10x+": 569,
+    "2x-5x": 197,
+    "5x-10x": 37
+  },
+  "thresholdCounts": {
+    "gte1_5x": 803,
+    "gte2x": 803,
+    "gte5x": 606,
+    "gte10x": 569,
+    "gte15x": 569
+  },
+  "byType": {
+    "digital": {
+      "total": 569,
+      "gte2x": 569,
+      "gte5x": 569,
+      "gte10x": 569
+    },
+    "static": {
+      "total": 188,
+      "gte2x": 188,
+      "gte5x": 1,
+      "gte10x": 0
+    },
+    "mobile": {
+      "total": 46,
+      "gte2x": 46,
+      "gte5x": 36,
+      "gte10x": 0
+    }
+  },
+  "byClass": {
+    "subway_light": {
+      "total": 130,
+      "gte2x": 130
+    },
+    "dooh_mid": {
+      "total": 383,
+      "gte2x": 383
+    },
+    "airport": {
+      "total": 108,
+      "gte2x": 108
+    },
+    "bus_shelter": {
+      "total": 26,
+      "gte2x": 26
+    },
+    "static_other": {
+      "total": 99,
+      "gte2x": 99
+    },
+    "subway_psd": {
+      "total": 11,
+      "gte2x": 11
+    },
+    "bus_exterior": {
+      "total": 46,
+      "gte2x": 46
+    }
+  },
+  "topDivergent": [
+    {
+      "slug": "gwangju-eodeungsancc-jeongwangpan-gwanggo",
+      "name": "광주 어등산CC 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 500,
+      "plannerDaily": 6,
+      "ratio": 83.33,
+      "cardMonthly": 15000
+    },
+    {
+      "slug": "gaelreoria-baekhwajeom-east-dual-lcd-gwanggo-bokje",
+      "name": "갤러리아 백화점 WEST 출입구 DS 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 8500,
+      "plannerDaily": 106,
+      "ratio": 80.19,
+      "cardMonthly": 807500
+    },
+    {
+      "slug": "gangwon-welrihilri-pakeu-seukijang-jeongwangpan-gwanggo",
+      "name": "강원 웰리힐리 파크 스키장 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 8500,
+      "plannerDaily": 106,
+      "ratio": 80.19,
+      "cardMonthly": 320000
+    },
+    {
+      "slug": "gaelreoria-baekhwajeom-east-b1-media-wall-gwanggo-bokje",
+      "name": "갤러리아 백화점 EAST DUAL LCD 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 8500,
+      "plannerDaily": 106,
+      "ratio": 80.19,
+      "cardMonthly": 807500
+    },
+    {
+      "slug": null,
+      "name": "블루스퀘어 미디어 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 8500,
+      "plannerDaily": 106,
+      "ratio": 80.19,
+      "cardMonthly": 1200000
+    },
+    {
+      "slug": null,
+      "name": "갤러리아 백화점 EAST B1 MEDIA WALL 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 8500,
+      "plannerDaily": 106,
+      "ratio": 80.19,
+      "cardMonthly": 807500
+    },
+    {
+      "slug": "samgakji-yongsan-haetaejegwabilding-jeongwangpan-gwanggo",
+      "name": "삼각지 용산 해태제과빌딩 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 18357,
+      "plannerDaily": 229,
+      "ratio": 80.16,
+      "cardMonthly": 950000
+    },
+    {
+      "slug": "gangnam-senteureolsiti-eondeowoldeu-dijiteolsainiji-gwanggo",
+      "name": "강남 센트럴시티 언더월드 디지털사이니지 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 33617,
+      "plannerDaily": 420,
+      "ratio": 80.04,
+      "cardMonthly": 1350000
+    },
+    {
+      "slug": "sinchonyeok-kwinjeubilding-jeongwangpan-gwanggo",
+      "name": "신촌역 퀸즈빌딩 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 57143,
+      "plannerDaily": 714,
+      "ratio": 80.03,
+      "cardMonthly": 850000
+    },
+    {
+      "slug": "sinchon-31-jeongwangpan-gwanggo",
+      "name": "신촌 31 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 57143,
+      "plannerDaily": 714,
+      "ratio": 80.03,
+      "cardMonthly": 1600000
+    },
+    {
+      "slug": "itaewon-haemilteonhotel-panorama-jeongwangpan-gwanggo",
+      "name": "이태원 해밀턴호텔 파노라마 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 23286,
+      "plannerDaily": 291,
+      "ratio": 80.02,
+      "cardMonthly": 2800000
+    },
+    {
+      "slug": "itaewon-musinsa-ebinyubilding-jeongwangpan-gwanggo",
+      "name": "이태원 무신사 에비뉴빌딩 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 23286,
+      "plannerDaily": 291,
+      "ratio": 80.02,
+      "cardMonthly": 1200000
+    },
+    {
+      "slug": "itaewon-kbgukmineunhaeng-jeongwangpan-gwanggo",
+      "name": "이태원 KB국민은행 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 23286,
+      "plannerDaily": 291,
+      "ratio": 80.02,
+      "cardMonthly": 950000
+    },
+    {
+      "slug": "itaewon-seukeurinled-jeongwangpan-gwanggo",
+      "name": "이태원 스크린LED 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 23286,
+      "plannerDaily": 291,
+      "ratio": 80.02,
+      "cardMonthly": 2600000
+    },
+    {
+      "slug": "gwanghwamun-rumi-midieo-jeongwangpan-gwanggo",
+      "name": "광화문 루미 미디어 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 35529,
+      "plannerDaily": 444,
+      "ratio": 80.02,
+      "cardMonthly": 1850000
+    },
+    {
+      "slug": "gwanghwamun-ilminmisulgwan-jeongwangpan-gwanggo",
+      "name": "광화문 일민미술관 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 35529,
+      "plannerDaily": 444,
+      "ratio": 80.02,
+      "cardMonthly": 1600000
+    },
+    {
+      "slug": null,
+      "name": "마곡 원그로브 복합문화공간 미디어 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 118429,
+      "plannerDaily": 1480,
+      "ratio": 80.02,
+      "cardMonthly": 3550000
+    },
+    {
+      "slug": "teheranro-daemyeong-ruchentawo-jeongwangpan-gwanggo",
+      "name": "테헤란로 대명 루첸타워 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 111786,
+      "plannerDaily": 1397,
+      "ratio": 80.02,
+      "cardMonthly": 2400000
+    },
+    {
+      "slug": "chaeneolkoekseu-midieo-gwanggo",
+      "name": "채널 코엑스 미디어 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 111786,
+      "plannerDaily": 1397,
+      "ratio": 80.02,
+      "cardMonthly": 1650000
+    },
+    {
+      "slug": "gangnam-sigeunicheoseukweeo-jeongwangpan-gwanggo",
+      "name": "강남 시그니처 스퀘어 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 111786,
+      "plannerDaily": 1397,
+      "ratio": 80.02,
+      "cardMonthly": 3200000
+    },
+    {
+      "slug": "koekseu-naintunain-kyubeu-gwanggo",
+      "name": "코엑스 나인투나인 큐브 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 111786,
+      "plannerDaily": 1397,
+      "ratio": 80.02,
+      "cardMonthly": 1850000
+    },
+    {
+      "slug": "dosandaero-biemdeobeulyubilding-jeongwangpan-gwanggo",
+      "name": "도산대로 BMW빌딩 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 119786,
+      "plannerDaily": 1497,
+      "ratio": 80.02,
+      "cardMonthly": 2000000
+    },
+    {
+      "slug": "dosandaero-eseueneseutawo-jeongwangpan-gwanggo",
+      "name": "도산대로 S&S타워 전광판 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 119786,
+      "plannerDaily": 1497,
+      "ratio": 80.02,
+      "cardMonthly": 2200000
+    },
+    {
+      "slug": "yongsan-aipakeumol-3f-dopaminseuteisyeon-gwanggo",
+      "name": "용산역 아이파크몰 3F 도파민스테이션 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 102500,
+      "plannerDaily": 1281,
+      "ratio": 80.02,
+      "cardMonthly": 1680000
+    },
+    {
+      "slug": "yongsan-aipakeumol-3f-singkeuwol-gwanggo",
+      "name": "용산역 아이파크몰 3F 싱크월 광고",
+      "type": "digital",
+      "mediaClass": "dooh_mid",
+      "rawDaily": 102500,
+      "plannerDaily": 1281,
+      "ratio": 80.02,
+      "cardMonthly": 1680000
+    }
+  ],
+  "medianRatio": 57.142857142857146
+}

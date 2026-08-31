@@ -212,7 +212,7 @@ test("[4] 1p KPI 총노출 == 저장 스냅샷 총노출", () => {
 
 test("[4] 4p 노출 요약 == 1p KPI 총노출", () => {
   const row = (CURRENT.charts?.reachSummary ?? []).find(
-    (d) => d.label === "총 노출",
+    (d) => d.label === "총 실노출(추정)",
   );
   assert.equal(row?.value, kpiTotal(CURRENT));
 });
@@ -226,7 +226,7 @@ test("[4] 상권 세분화 표 합계 == 1p 총노출", () => {
 
 test("[4] 네 값이 모두 같은 하나의 숫자다 (제3의 값 없음)", () => {
   const summaryRow = (CURRENT.charts?.reachSummary ?? []).find(
-    (d) => d.label === "총 노출",
+    (d) => d.label === "총 실노출(추정)",
   );
   const regionSum = (CURRENT.regionSubdivision?.breakdown ?? []).reduce(
     (s, r) => s + r.totalImpressions,

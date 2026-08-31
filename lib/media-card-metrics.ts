@@ -52,13 +52,13 @@ function formatImpressionsLine(
 ): string | null {
   const label = formatMonthlyImpressionsLabel(item, isKo);
   if (!label) return null;
-  return isKo ? `노출 ${label}` : `Reach ${label}`;
+  return isKo ? `유동 ${label}` : `Footfall ${label}`;
 }
 
 /** 목록·지도 카드용 CPM — SSOT `lib/media-metrics.resolveCpmWon` */
 export { resolveCpmWon };
 
-/** 카탈로그·피드 카드 썸네일 하단 1줄 — CPM · 월 노출 */
+/** 카탈로그·피드 카드 썸네일 하단 1줄 — CPM · 월 유동인구(참고) */
 export function buildCatalogItemMetricLine(
   item: MetricInput,
   isKo: boolean,

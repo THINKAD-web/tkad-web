@@ -35,6 +35,8 @@ import {
   resolveBriefPortfolio,
 } from "@/lib/planner/brief/brief-report-adapter";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
+import { ReportStylePicker } from "@/components/planner/report-style-picker";
+import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { useShallow } from "zustand/react/shallow";
 import { useReportCopyStore } from "@/lib/planner-report-export/report-copy-store";
@@ -230,6 +232,7 @@ export function BriefStepThree({
     allowed: reportPreviewAllowed,
     loading: reportPreviewLoading,
   } = useFeatureAccess("planner_result");
+  const [reportStyle, setReportStyle] = usePlannerReportStyle();
 
   const setReportClientName = useReportCopyStore((s) => s.setClientName);
   const setReportDocumentTitle = useReportCopyStore((s) => s.setDocumentTitle);
@@ -470,6 +473,7 @@ export function BriefStepThree({
       try {
         await downloadPlannerReport(format, exportPayload, {
           activitySource: "planner",
+          style: reportStyle,
         });
         toast(
           "success",
@@ -489,7 +493,7 @@ export function BriefStepThree({
         setExporting(null);
       }
     },
-    [exporting, exportPayload, toast, isKo],
+    [exporting, exportPayload, toast, isKo, reportStyle],
   );
 
   const won = (n: number) =>
@@ -754,10 +758,16 @@ export function BriefStepThree({
                 onKeep={keepReportCopyEdits}
               />
             ) : null}
+            <ReportStylePicker
+              isKo={isKo}
+              value={reportStyle}
+              onChange={setReportStyle}
+            />
             <DocumentPreviewFrame>
               <PlannerReportDocument
                 payload={exportPayload}
                 mapPortfolio={exportPortfolio}
+                reportStyle={reportStyle}
                 editableTitle
                 onDocumentTitleChange={setReportDocumentTitle}
                 editableClientName

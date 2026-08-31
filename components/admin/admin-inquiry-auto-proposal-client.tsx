@@ -26,9 +26,21 @@ type DryRun = {
     namedNeedles: string[];
   };
   matched: Matched[];
+  designatedCount?: number;
   eligibleCount: number;
   excludedCount: number;
   mixUnits: Record<string, number>;
+  bodyTotalWon?: number;
+  appendixMediaSpecs?: {
+    id: string;
+    name: string;
+    priceLabel: string;
+    cpmLabel: string;
+    location: string;
+    reviewStatusLabel: string;
+    inBody: boolean;
+    statusNote: string;
+  }[];
   brief: {
     budgetInputWon: number;
     budgetMode: string;
@@ -73,7 +85,7 @@ export function AdminInquiryAutoProposalClient() {
       setResult(data);
       const thumbOk = (data.thumbs ?? []).filter((t) => t.thumbUrl).length;
       setMsg(
-        `매칭 ${data.matched.length} · 통과 ${data.eligibleCount} · 제외 ${data.excludedCount} · 썸네일 ${thumbOk}/${data.thumbs?.length ?? 0}`,
+        `지정 ${data.designatedCount ?? "—"} · 본문 ${Object.keys(data.mixUnits).length} · 부록 ${data.appendixMediaSpecs?.length ?? 0} · 썸네일 ${thumbOk}/${data.thumbs?.length ?? 0}`,
       );
     } catch (e) {
       setErr(e instanceof Error ? e.message : "dry_run_failed");
@@ -83,8 +95,8 @@ export function AdminInquiryAutoProposalClient() {
   }
 
   async function sendTest() {
-    if (!result || result.eligibleCount === 0) {
-      setErr("통과 매체가 없습니다");
+    if (!result || Object.keys(result.mixUnits).length === 0) {
+      setErr("본문에 담길 매체가 없습니다");
       return;
     }
     setBusy("send");
@@ -112,6 +124,7 @@ export function AdminInquiryAutoProposalClient() {
 
   const excluded = result?.matched.filter((m) => !m.eligible) ?? [];
   const eligible = result?.matched.filter((m) => m.eligible) ?? [];
+  const bodyIds = new Set(Object.keys(result?.mixUnits ?? {}));
 
   return (
     <div className="space-y-6 text-foreground">
@@ -163,6 +176,8 @@ export function AdminInquiryAutoProposalClient() {
                     : `${result.parsed.months}개월`,
               },
               { label: "통과", value: `${result.eligibleCount}` },
+              { label: "지정", value: `${result.designatedCount ?? "—"}` },
+              { label: "본문", value: `${Object.keys(result.mixUnits).length}` },
               { label: "제외", value: `${result.excludedCount}` },
             ].map((s) => (
               <div key={s.label} className="border-2 border-border bg-card p-4">
@@ -218,14 +233,85 @@ export function AdminInquiryAutoProposalClient() {
 
           <section className="space-y-2">
             <h2 className="font-display text-xs uppercase tracking-[0.18em] text-emerald-800">
-              [ 통과 후보 · mixUnits=1 ]
+              [ 본문 mix · CPM 오름차순 그리디 ]
             </h2>
             <ul className="space-y-1 text-sm">
-              {eligible.map((m) => (
+              {Object.keys(result.mixUnits).map((id) => {
+                const m = result.matched.find((x) => x.id === id);
+                if (!m) return null;
+                return (
+                  <li key={m.id} className="border border-border px-3 py-2">
+                    <span className="font-medium">{m.name}</span>
+                    <span className="ml-2 tabular-nums text-muted-foreground">
+                      {won(m.monthlyWon)}
+                      {m.cpmWon != null
+                        ? ` · CPM ₩${Math.round(m.cpmWon).toLocaleString("ko-KR")}`
+                        : ""}
+                      {m.sellingUnitUndeclared ? " · 확인 후 회신" : ""}
+                    </span>
+                  </li>
+                );
+              })}
+              {Object.keys(result.mixUnits).length === 0 ? (
+                <li className="text-muted-foreground">없음</li>
+              ) : null}
+            </ul>
+            {result.bodyTotalWon != null ? (
+              <p className="text-[11px] text-muted-foreground">
+                본문 합계 {won(result.bodyTotalWon)} / 예산 {won(result.parsed.budgetWon)}
+              </p>
+            ) : null}
+          </section>
+
+          {result.appendixMediaSpecs && result.appendixMediaSpecs.length > 0 ? (
+            <section className="space-y-2">
+              <h2 className="font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                [ 부록 · 지정 매체 스펙 ({result.appendixMediaSpecs.length}) ]
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px] border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                      <th className="px-2 py-2">매체</th>
+                      <th className="px-2 py-2">월 가격</th>
+                      <th className="px-2 py-2">CPM</th>
+                      <th className="px-2 py-2">위치</th>
+                      <th className="px-2 py-2">검토</th>
+                      <th className="px-2 py-2">본문</th>
+                      <th className="px-2 py-2">비고</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.appendixMediaSpecs.map((row) => (
+                      <tr key={row.id} className="border-b border-border/60">
+                        <td className="px-2 py-2 font-medium">{row.name}</td>
+                        <td className="px-2 py-2 tabular-nums">{row.priceLabel}</td>
+                        <td className="px-2 py-2 tabular-nums">{row.cpmLabel}</td>
+                        <td className="px-2 py-2 text-muted-foreground">{row.location}</td>
+                        <td className="px-2 py-2">{row.reviewStatusLabel}</td>
+                        <td className="px-2 py-2">{row.inBody ? "포함" : "—"}</td>
+                        <td className="px-2 py-2 text-muted-foreground">{row.statusNote}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ) : null}
+
+          <section className="space-y-2">
+            <h2 className="font-display text-xs uppercase tracking-[0.18em] text-emerald-800">
+              [ 필터 통과 후보 (지정 매체) ]
+            </h2>
+            <ul className="space-y-1 text-sm">
+              {eligible
+                .filter((m) => m.matchKind === "named" || m.matchKind === "pilot")
+                .map((m) => (
                 <li key={m.id} className="border border-border px-3 py-2">
                   <span className="font-medium">{m.name}</span>
                   <span className="ml-2 tabular-nums text-muted-foreground">
                     {won(m.monthlyWon)}
+                    {bodyIds.has(m.id) ? " · 본문 포함" : " · 본문 제외"}
                     {m.cpmWon != null
                       ? ` · CPM ₩${Math.round(m.cpmWon).toLocaleString("ko-KR")}`
                       : ""}

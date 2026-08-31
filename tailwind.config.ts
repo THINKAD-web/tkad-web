@@ -32,6 +32,13 @@ export default {
     extend: {
       fontFamily: {
         sans: ["var(--font-pretendard)", "system-ui", "sans-serif"],
+        serif: [
+          "var(--font-noto-serif-kr)",
+          "Noto Serif KR",
+          "ui-serif",
+          "Georgia",
+          "serif",
+        ],
         display: [
           "var(--font-space-grotesk)",
           "var(--font-pretendard)",

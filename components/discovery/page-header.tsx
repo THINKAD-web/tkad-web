@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { PlannerNeonLabel } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
 
 export type DiscoveryPageHeaderProps = {
@@ -40,12 +39,20 @@ export function DiscoveryPageHeader({
         className,
       )}
     >
-      {eyebrow ? <PlannerNeonLabel>{eyebrow}</PlannerNeonLabel> : null}
+      {eyebrow ? (
+        <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+          {eyebrow}
+        </p>
+      ) : null}
       {title ? (
-        <TitleTag className="tkad-type-display text-foreground">{title}</TitleTag>
+        <TitleTag className="font-serif text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl">
+          {title}
+        </TitleTag>
       ) : null}
       {description ? (
-        <p className="tkad-type-body text-tkad-secondary">{description}</p>
+        <p className="tkad-type-body text-base leading-relaxed text-tkad-secondary md:text-lg">
+          {description}
+        </p>
       ) : null}
     </div>
   );

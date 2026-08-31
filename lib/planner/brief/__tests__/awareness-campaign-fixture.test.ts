@@ -398,7 +398,7 @@ test("1p 총노출 == 4p 노출 요약 == 저장 총노출", () => {
   const p = payload();
   const kpi = p.kpis.find((k) => k.label === "총 예상 노출");
   const total = Number(kpi?.value.replace(/[^\d]/g, ""));
-  const summary = (p.charts?.reachSummary ?? []).find((d) => d.label === "총 노출");
+  const summary = (p.charts?.reachSummary ?? []).find((d) => d.label === "총 실노출(추정)");
   assert.equal(total, s.metrics.totalImpressions);
   assert.equal(summary?.value, total);
 });

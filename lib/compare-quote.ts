@@ -17,7 +17,12 @@ import {
   resolvePartialPeriodRate,
   type PartialPeriodRateAdminKey,
 } from "@/lib/media-partial-period-rates";
-import { resolveMediaProductPrice } from "@/lib/metrics/media-price-adapter";
+import {
+  isRiskyBaseOnlyPricePeriod,
+  resolveMediaPriceOptions,
+  resolveMediaProductPrice,
+} from "@/lib/metrics/media-price-adapter";
+import { normalizePriceOptions } from "@/lib/metrics/price";
 
 export type QuoteDurationUnit = "day" | "week" | "month";
 
@@ -296,6 +301,15 @@ export function calculateMediaQuoteByDays(
   // 3. 등록 상품 기반 보간·외삽 (선형 환산보다 항상 낫다).
   if (product) {
     return quoteLineFromCostWon(media, product.amount, durationDays);
+  }
+
+  // Fix 2 — base-only + day/week 는 선형 환산(×N) 금지. 최단 등록 상품가를 하한으로.
+  if (isRiskyBaseOnlyPricePeriod(media)) {
+    const shortest = normalizePriceOptions(resolveMediaPriceOptions(media))[0];
+    if (shortest) {
+      return quoteLineFromCostWon(media, shortest.price, durationDays);
+    }
+    return quoteLineFromCostWon(media, 0, durationDays);
   }
 
   // 4. 가격 옵션을 전혀 해석할 수 없을 때만 기존 선형 환산.

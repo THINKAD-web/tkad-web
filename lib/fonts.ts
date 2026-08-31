@@ -1,15 +1,16 @@
 import localFont from "next/font/local";
-import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Noto_Serif_KR, Space_Grotesk } from "next/font/google";
 
 /**
- * THINKAD font system — 3 families only.
+ * THINKAD font system — 4 families.
  *
- * - sans (Pretendard): body, Korean/English titles, UI, numeric data (`tabular-nums`)
- * - display (Space Grotesk): **English-only** accent labels — `font-display` + uppercase
- *   (e.g. `[ 01 ]`, `// DISCOVERY`). Do not use on Korean headings or prices.
+ * - sans (Pretendard): body, Korean/English UI, numeric data (`tabular-nums`)
+ * - serif (Noto Serif KR): **reading screens** — magazine-style headlines (KO+EN)
+ * - display (Space Grotesk): **Latin-only** accent labels — `font-display` + uppercase
+ *   (e.g. `[ 01 ]`, `// DISCOVERY`). Korean glyphs fall back to Pretendard via CSS.
  * - mono (JetBrains Mono): code blocks, API samples
  *
- * Pretendard: Korean subset static woff2 (~267KB/weight vs ~2MB variable).
+ * PART 4 결정: Space Grotesk 는 EN 라벨 전용으로 유지. 한글 헤드라인은 Noto Serif KR.
  */
 export const pretendard = localFont({
   src: [
@@ -46,6 +47,14 @@ export const spaceGrotesk = Space_Grotesk({
   weight: ["400", "500", "700"],
 });
 
+/** 잡지형 헤드라인 — 홈·인사이트 등 읽는 화면 (한글 지원) */
+export const notoSerifKr = Noto_Serif_KR({
+  subsets: ["latin"],
+  variable: "--font-noto-serif-kr",
+  display: "swap",
+  weight: ["400", "600", "700"],
+});
+
 export const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains",
@@ -54,4 +63,4 @@ export const jetBrainsMono = JetBrains_Mono({
 });
 
 /** Apply to `<body className={...}>` */
-export const fontClassNames = `${pretendard.variable} ${spaceGrotesk.variable} ${jetBrainsMono.variable}`;
+export const fontClassNames = `${pretendard.variable} ${spaceGrotesk.variable} ${notoSerifKr.variable} ${jetBrainsMono.variable}`;

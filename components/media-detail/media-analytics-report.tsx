@@ -25,7 +25,7 @@ type Props = {
   access: AccessCheckResult;
 };
 
-const COMMERCE_COLORS = ["#f59e0b", "#6366f1", "#ec4899", "#22c55e"];
+const COMMERCE_COLORS = ["#0D9488", "#6366F1", "#E11D48", "#64748B"];
 const TARGET_KEYS = ["mz", "office", "family", "tourist"] as const;
 
 export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {

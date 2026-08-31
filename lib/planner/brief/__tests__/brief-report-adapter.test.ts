@@ -12,6 +12,8 @@ import {
   EXPORT_DIGITAL_OMITTED_KO,
   EXPORT_KPI_PENDING_HINT_KO,
 } from "@/lib/planner-report-export/export-kpi";
+import { plannerReportFileBase } from "@/lib/planner-report-export/types";
+import { buildReportWhyLine } from "@/lib/planner/report-strategy";
 
 const catalogMedia: MediaItem = {
   id: "m-brief-1",
@@ -219,6 +221,118 @@ test("brief-report-adapter: over-budget honesty uses displayed mix + inquiry cop
     payload.recommendRationale?.summaryLines.some((l) => l.includes("직접 선택한")),
     false,
   );
+});
+
+test("brief-report-adapter: inquiry_match cover uses 미지정 not nationwide defaults", () => {
+  const inquirySnap: CampaignPlanSnapshot = {
+    ...snapshot,
+    brief: {
+      budgetWon: 30_000_000,
+      regionCodes: ["28"],
+      genders: [],
+      ageBands: [],
+      goal: null,
+      industry: null,
+      flightStart: "2026-09-01",
+      flightEnd: "2026-09-30",
+    },
+  };
+  const payload = buildBriefReportPayload({
+    plan: inquirySnap,
+    catalog: [catalogMedia],
+    isKo: true,
+    mixSource: "inquiry_match",
+  });
+  assert.equal(payload.regionsText, "인천");
+  assert.equal(payload.ageText, "미지정");
+  assert.equal(payload.industryText, "미지정");
+  assert.equal(payload.goalTitle, "미지정");
+});
+
+test("brief-report-adapter: inquiry_match omits 미지정 from filename and strategy why line", () => {
+  const inquirySnap: CampaignPlanSnapshot = {
+    ...snapshot,
+    brief: {
+      budgetWon: 30_000_000,
+      regionCodes: ["28"],
+      genders: [],
+      ageBands: [],
+      goal: null,
+      industry: null,
+      flightStart: "2026-09-01",
+      flightEnd: "2026-09-30",
+    },
+  };
+  const payload = buildBriefReportPayload({
+    plan: inquirySnap,
+    catalog: [catalogMedia],
+    isKo: true,
+    mixSource: "inquiry_match",
+  });
+  const filename = plannerReportFileBase(payload);
+  assert.equal(filename.includes("미지정"), false);
+  assert.match(filename, /^THINKAD_인천_제안서_\d{4}-\d{2}-\d{2}$/);
+
+  const strategy = payload.sections?.find((s) => s.title === "전략 요약");
+  assert.ok(strategy?.lines?.[0]);
+  assert.equal(strategy!.lines![0].includes("미지정"), false);
+  assert.equal(strategy!.lines![0].includes("목표에 맞춰"), false);
+
+  const whyWithGoal = buildReportWhyLine({
+    isKo: true,
+    campaignGoal: "brand",
+    goalTitle: "브랜드 인지도",
+    industryKey: "indOther",
+    industryText: "기타",
+    regionsText: "인천",
+    seoulZones: [],
+    followUp: {},
+    portfolioCount: 2,
+  });
+  assert.match(whyWithGoal, /브랜드 인지도 목표에 맞춰/);
+});
+
+test("plannerReportFileBase: unspecified goal with no region uses generic name", () => {
+  const base = plannerReportFileBase({
+    kind: "ooh",
+    isKo: true,
+    documentTitle: "제안서",
+    generatedAt: "2026-08-25",
+    goalTitle: "미지정",
+    campaignName: "미지정",
+    budgetMan: 3000,
+    periodDisplay: "1개월",
+    regionsText: "미지정",
+    categoriesText: "고정형",
+    ageText: "미지정",
+    industryText: "미지정",
+    kpis: [],
+    portfolio: [],
+    disclaimer: "",
+    mixSource: "inquiry_match",
+  });
+  assert.match(base, /^THINKAD_제안서_\d{4}-\d{2}-\d{2}$/);
+  assert.equal(base.includes("미지정"), false);
+});
+
+test("brief-report-adapter: planner hand-pick keeps 전국·전 연령 defaults", () => {
+  const payload = buildBriefReportPayload({
+    plan: {
+      ...snapshot,
+      brief: {
+        ...snapshot.brief,
+        regionCodes: [],
+        ageBands: [],
+        industry: null,
+        goal: null,
+      },
+    },
+    catalog: [catalogMedia],
+    isKo: true,
+  });
+  assert.equal(payload.regionsText, "전국");
+  assert.equal(payload.ageText, "전 연령");
+  assert.equal(payload.industryText, "기타");
 });
 
 test("brief-report-adapter: planner hand-pick keeps 직접 선택한", () => {

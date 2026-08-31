@@ -75,7 +75,7 @@ test("inquiryToBrief: total 3000만 and inclusive 30-day flight", () => {
   assert.equal(brief.flightEnd, "2026-09-30");
   assert.equal(inclusiveFlightEnd("2026-09-01", 30), "2026-09-30");
   assert.equal(flightDays(brief), 30);
-  assert.deepEqual(brief.regionCodes, []);
+  assert.deepEqual(brief.regionCodes, ["28"]);
   assert.equal(brief.freeText, parsed.raw);
 });
 
@@ -91,7 +91,7 @@ test("auto brief+mixUnits snapshot metrics match hand-built Step 3 snapshot", as
   const manualBrief: CampaignBriefInput = {
     budgetInputWon: 30_000_000,
     budgetMode: "total",
-    regionCodes: [],
+    regionCodes: ["28"],
     genders: [],
     ageBands: [],
     goal: null,
@@ -136,7 +136,10 @@ test("auto brief+mixUnits snapshot metrics match hand-built Step 3 snapshot", as
 
   assert.deepEqual(built.dryRun.mixUnits, mixUnits);
   assert.deepEqual(built.snapshot.metrics, step3.metrics);
-  assert.deepEqual(built.snapshot.mediaMix, step3.mediaMix);
+  assert.deepEqual(
+    [...built.snapshot.mediaMix].sort((a, b) => a.mediaId.localeCompare(b.mediaId)),
+    [...step3.mediaMix].sort((a, b) => a.mediaId.localeCompare(b.mediaId)),
+  );
 
   const thumbs = built.payload.portfolio.map((r) => r.thumbUrl);
   assert.ok(thumbs.includes("https://cdn.example.test/t1.jpg"));

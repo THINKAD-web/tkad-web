@@ -11,7 +11,7 @@ import type {
   PlannerExportChartDatum,
 } from "@/lib/planner-report-export/types";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
-import { plannerChartColor } from "@/lib/planner-chart-colors";
+import { plannerChartColor, CHART_SERIES_HEX } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 import { formatExportBudgetWonLabel } from "@/lib/planner-report-export/format-export-money";
 import {
@@ -25,8 +25,9 @@ import { ReportQuoteSummarySection } from "@/components/planner/report-quote-sum
 import { ReportPortfolioMapSection } from "@/components/planner/report-portfolio-map-section";
 import { sectionVisible, filterExportSections } from "@/lib/planner-report-export/section-visibility";
 import type { PlannerReportSectionVisibility } from "@/lib/planner-report-export/section-visibility";
+import type { PlannerReportStyle } from "@/lib/planner-report-export/document-theme";
+import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
 import type { MediaItem } from "@/lib/media-data";
-import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 /**
  * 플래너 보고서 화면 문서 — 서버 PDF/PPTX 와 동일한 payload·레이아웃으로 렌더한다.
@@ -39,7 +40,13 @@ function fmtBudget(man: number, isKo: boolean) {
   return isKo ? `${man.toLocaleString()}만원` : `${man.toLocaleString()}M KRW`;
 }
 
-const CHART_COLORS = [BRAND_ACCENT, "#1c1c1f", "#5a5a5e", "#10B981", "#F59E0B"];
+const CHART_COLORS = [
+  CHART_SERIES_HEX.primary,
+  CHART_SERIES_HEX.ink,
+  CHART_SERIES_HEX.slate,
+  CHART_SERIES_HEX.indigo,
+  CHART_SERIES_HEX.rose,
+];
 
 function chartDatumColor(d: PlannerExportChartDatum, index: number): string {
   return plannerChartColor(d.colorKey, index);
@@ -237,6 +244,7 @@ export const PlannerReportDocument = forwardRef<
     onGreetingChange?: (text: string) => void;
     editableExecutiveSummary?: boolean;
     onExecutiveSummaryChange?: (text: string) => void;
+    reportStyle?: PlannerReportStyle;
   }
 >(function PlannerReportDocument(
   {
@@ -252,10 +260,12 @@ export const PlannerReportDocument = forwardRef<
     onGreetingChange,
     editableExecutiveSummary,
     onExecutiveSummaryChange,
+    reportStyle = "brand",
   },
   ref,
 ) {
   const isKo = p.isKo;
+  const theme = getReportDocumentTheme(reportStyle);
   const vis = sectionVisibility;
   const visibleSections = filterExportSections(p.sections, vis)?.filter(
     (sec) =>
@@ -280,6 +290,7 @@ export const PlannerReportDocument = forwardRef<
       className={cn(documentCardClass, className)}
     >
       <DocumentGradientHero
+        reportStyle={reportStyle}
         badge="CAMPAIGN PLANNER"
         title={p.documentTitle}
         subtitle={`${

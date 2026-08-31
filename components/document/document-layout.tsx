@@ -2,6 +2,10 @@
 
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import {
+  getReportDocumentTheme,
+  type PlannerReportStyle,
+} from "@/lib/planner-report-export/document-theme";
 
 /** 플래너·견적 미리보기 바깥 프레임 (회색 패딩 영역) */
 export const documentPreviewFrameClass =
@@ -24,9 +28,11 @@ export function DocumentPreviewFrame({
 export function DocumentSectionHeading({
   children,
   className,
+  accentColor,
 }: {
   children: React.ReactNode;
   className?: string;
+  accentColor?: string;
 }) {
   return (
     <h3
@@ -36,7 +42,8 @@ export function DocumentSectionHeading({
       )}
     >
       <span
-        className="inline-block h-4 w-1.5 shrink-0 bg-[color:var(--qp-accent)]"
+        className="inline-block h-4 w-1.5 shrink-0"
+        style={{ background: accentColor ?? "var(--qp-accent)" }}
         aria-hidden
       />
       {children}
@@ -47,9 +54,11 @@ export function DocumentSectionHeading({
 export function ThinkadWordmark({
   className,
   onDark = true,
+  accentColor,
 }: {
   className?: string;
   onDark?: boolean;
+  accentColor?: string;
 }) {
   return (
     <span
@@ -59,7 +68,7 @@ export function ThinkadWordmark({
       )}
     >
       <span className={onDark ? "text-white" : "text-gray-900"}>THINK</span>
-      <span className="text-[color:var(--qp-accent)]">AD</span>
+      <span style={{ color: accentColor ?? "var(--qp-accent)" }}>AD</span>
     </span>
   );
 }
@@ -85,6 +94,7 @@ export function DocumentGradientHero({
   clientNamePlaceholder,
   clientNameAriaLabel = "Client name",
   clientNameSuffix,
+  reportStyle = "brand",
 }: {
   badge: string;
   title: string;
@@ -92,6 +102,8 @@ export function DocumentGradientHero({
   className?: string;
   /** 프리미엄 견적 상단 액센트 띠 */
   topAccent?: "gold" | "none";
+  /** 제안서 문서 스타일 — preview/PDF/PPTX SSOT */
+  reportStyle?: PlannerReportStyle;
   /** 미리보기에서 제목 직접 수정 */
   titleEditable?: boolean;
   onTitleChange?: (value: string) => void;
@@ -107,24 +119,38 @@ export function DocumentGradientHero({
   /** 비편집 표시 시 접미사 (예: 한국어 「귀중」) */
   clientNameSuffix?: string;
 }) {
-  const titleClassName =
-    "mt-5 w-full text-2xl font-black leading-tight text-white sm:text-3xl";
+  const theme = getReportDocumentTheme(reportStyle);
+  const onDark = theme.coverMode === "filled";
+  const titleClassName = cn(
+    "mt-5 w-full text-2xl font-black leading-tight sm:text-3xl",
+    onDark ? "text-white" : "text-gray-900",
+  );
 
   return (
     <div
       className={cn(
-        "tkad-planner-dark-surface relative bg-[#1c1c1f] px-6 py-7 sm:px-9 sm:py-9",
+        "tkad-planner-dark-surface relative px-6 py-7 sm:px-9 sm:py-9",
         className,
       )}
+      style={{
+        background: theme.coverBg,
+        color: theme.coverText,
+        borderRadius: theme.heroRadius,
+      }}
     >
-      {topAccent === "gold" ? (
+      {theme.topAccentBar || topAccent === "gold" ? (
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[color:var(--qp-accent)]"
+          className="pointer-events-none absolute inset-x-0 top-0 h-1"
+          style={{ background: theme.accent }}
           aria-hidden
         />
       ) : null}
       <div className="flex items-center justify-between gap-3">
-        <ThinkadWordmark className="text-lg sm:text-xl" onDark />
+        <ThinkadWordmark
+          className="text-lg sm:text-xl"
+          onDark={onDark}
+          accentColor={theme.accent}
+        />
         <div className="flex items-center gap-3">
           {coverLogoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -134,7 +160,10 @@ export function DocumentGradientHero({
               className="h-10 w-10 rounded-md border border-white/20 bg-white/10 object-contain p-1 sm:h-12 sm:w-12"
             />
           ) : null}
-          <span className="font-display text-[10px] font-semibold uppercase tracking-[0.2em] text-white/70">
+          <span
+            className="font-display text-[10px] font-semibold uppercase tracking-[0.2em]"
+            style={{ color: theme.coverMuted }}
+          >
             {badge}
           </span>
         </div>
@@ -149,14 +178,24 @@ export function DocumentGradientHero({
           aria-label={titleAriaLabel}
           className={cn(
             titleClassName,
-            "border-0 bg-transparent p-0 placeholder:text-white/45 focus:rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/70",
+            "border-0 bg-transparent p-0 placeholder:opacity-45 focus:rounded-md focus:outline-none focus:ring-2",
           )}
+          style={
+            {
+              "--tw-ring-color": `${theme.accent}99`,
+            } as React.CSSProperties
+          }
         />
       ) : (
         <h2 className={titleClassName}>{title}</h2>
       )}
       {subtitle ? (
-        <p className="mt-2 text-sm font-medium text-white/85">{subtitle}</p>
+        <p
+          className="mt-2 text-sm font-medium"
+          style={{ color: theme.coverMuted }}
+        >
+          {subtitle}
+        </p>
       ) : null}
       {clientNameEditable && onClientNameChange ? (
         <input
@@ -166,20 +205,26 @@ export function DocumentGradientHero({
           maxLength={80}
           placeholder={clientNamePlaceholder}
           aria-label={clientNameAriaLabel}
-          className="mt-4 w-full max-w-md border-0 border-b border-white/25 bg-transparent p-0 pb-1 text-sm font-medium text-white placeholder:text-white/45 focus:border-[color:var(--qp-accent)] focus:outline-none"
+          className="mt-4 w-full max-w-md border-0 border-b bg-transparent p-0 pb-1 text-sm font-medium focus:outline-none"
+          style={{
+            color: theme.coverText,
+            borderColor: `${theme.coverMuted}66`,
+          }}
         />
       ) : clientName?.trim() ? (
-        <p className="mt-4 text-sm font-semibold text-white">
+        <p className="mt-4 text-sm font-semibold" style={{ color: theme.coverText }}>
           {clientName.trim()}
           {clientNameSuffix ? ` ${clientNameSuffix}` : ""}
         </p>
       ) : null}
       <div
-        className="mt-5 h-1 w-16 bg-[color:var(--qp-accent)]"
+        className="mt-5 h-1 w-16"
+        style={{ background: theme.accent }}
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-[color:var(--qp-accent)]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px]"
+        style={{ background: theme.accent }}
         aria-hidden
       />
     </div>

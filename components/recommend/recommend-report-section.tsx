@@ -16,6 +16,7 @@ import { usePlannerStore } from "@/lib/planner/store";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
+import { PLANNER_TOTAL_REACH_LABEL } from "@/lib/planner-report-performance-guide";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import {
   buildRecommendReportContext,
@@ -36,6 +37,8 @@ import { PLANNER_INDUSTRY_LABELS } from "@/lib/planner/types";
 import { useToast } from "@/components/toast-provider";
 import { DocumentPreviewFrame } from "@/components/document/document-layout";
 import { PlannerReportDocument } from "@/components/planner/report-document";
+import { ReportStylePicker } from "@/components/planner/report-style-picker";
+import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
@@ -141,6 +144,7 @@ export function RecommendReportSection({
   const [downloading, setDownloading] =
     useState<PlannerReportExportFormat | null>(null);
   const [sectionVisibility] = usePlannerReportSectionVisibility();
+  const [reportStyle, setReportStyle] = usePlannerReportStyle();
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(isKo ? "ko-KR" : "en-US"),
   );
@@ -436,6 +440,7 @@ export function RecommendReportSection({
           activitySource: "ai_recommend",
           sectionVisibility,
           lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
+          style: reportStyle,
         });
         toast("success", tPlanner("reportPdfDownloaded"));
       } catch (e) {
@@ -453,6 +458,7 @@ export function RecommendReportSection({
       toast,
       tPlanner,
       tCommon,
+      reportStyle,
     ],
   );
 
@@ -493,11 +499,11 @@ export function RecommendReportSection({
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 {
-                  label: isKo ? "월간 노출(추정)" : "Est. monthly reach",
+                  label: isKo ? "월 실노출(추정)" : "Est. monthly reach",
                   value: metrics.estimatedMonthlyImpressions.toLocaleString(),
                 },
                 {
-                  label: isKo ? "총 노출(추정)" : "Est. total reach",
+                  label: isKo ? PLANNER_TOTAL_REACH_LABEL.ko : PLANNER_TOTAL_REACH_LABEL.en,
                   value: metrics.estimatedTotalImpressions.toLocaleString(),
                 },
                 {
@@ -589,11 +595,17 @@ export function RecommendReportSection({
             >
               {plannerResultAllowed ? (
                 <div className="space-y-6">
+                  <ReportStylePicker
+                    isKo={isKo}
+                    value={reportStyle}
+                    onChange={setReportStyle}
+                  />
                   <DocumentPreviewFrame>
                     <PlannerReportDocument
                       payload={exportPayload}
                       mapPortfolio={portfolio}
                       sectionVisibility={sectionVisibility}
+                      reportStyle={reportStyle}
                       editableTitle
                       onDocumentTitleChange={setReportDocumentTitle}
                       editableClientName

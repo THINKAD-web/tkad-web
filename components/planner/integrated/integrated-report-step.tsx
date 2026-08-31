@@ -16,6 +16,8 @@ import type { PlannerReportExportFormat } from "@/lib/planner-report-export/type
 import { useToast } from "@/components/toast-provider";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { plannerResultGateHint } from "@/lib/entitlements/tier-copy";
+import { ReportStylePicker } from "@/components/planner/report-style-picker";
+import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
 import { PlannerReportDocument } from "@/components/planner/report-document";
 import { IntegratedReportInfoCard } from "@/components/planner/integrated/integrated-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
@@ -88,6 +90,7 @@ export function IntegratedReportStep(props: Props) {
   const [downloading, setDownloading] = useState<PlannerReportExportFormat | null>(
     null,
   );
+  const [reportStyle, setReportStyle] = usePlannerReportStyle();
 
   const generatedAt = new Intl.DateTimeFormat(props.isKo ? "ko-KR" : "en-US", {
     timeZone: "Asia/Seoul",
@@ -157,6 +160,7 @@ export function IntegratedReportStep(props: Props) {
           activitySource: "integrated_planner",
           sectionVisibility,
           lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
+          style: reportStyle,
         });
         toast("success", t("pdfDownloaded"));
       } catch (e) {
@@ -167,7 +171,7 @@ export function IntegratedReportStep(props: Props) {
         setDownloading(null);
       }
     },
-    [pdfAllowed, pdfAccessLoading, downloading, payload, sectionVisibility, toast, t],
+    [pdfAllowed, pdfAccessLoading, downloading, payload, sectionVisibility, toast, t, reportStyle],
   );
 
   const reachSplit = reachSplitForGoal(props.campaignGoal);
@@ -239,11 +243,17 @@ export function IntegratedReportStep(props: Props) {
         >
           {plannerResultAllowed ? (
             <div className="space-y-6">
+              <ReportStylePicker
+                isKo={props.isKo}
+                value={reportStyle}
+                onChange={setReportStyle}
+              />
               <div className="rounded-2xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7">
                 <PlannerReportDocument
                   payload={payload}
                   mapPortfolio={props.portfolio}
                   sectionVisibility={sectionVisibility}
+                  reportStyle={reportStyle}
                 />
               </div>
 
