@@ -53,7 +53,7 @@ export function PhotoSlotUpload({
 
   return (
     <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-4 backdrop-blur">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
+      <p className="tkad-type-label dark:text-white text-gray-500">
         {label}
       </p>
       <p className="mt-1 text-xs dark:text-white text-gray-500">{hint}</p>
@@ -87,7 +87,7 @@ export function PhotoSlotUpload({
         ) : (
           <>
             <ImagePlus className="h-8 w-8 dark:text-white" />
-            <span className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] dark:text-white text-gray-500">
+            <span className="font-display tkad-type-note font-semibold uppercase tracking-[0.12em] dark:text-white text-gray-500">
               {slot}
             </span>
           </>

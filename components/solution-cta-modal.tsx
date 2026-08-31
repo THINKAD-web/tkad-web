@@ -138,7 +138,7 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
                 <input type="text" name="website" tabIndex={-1} autoComplete="off" />
               </div>
               <fieldset className="space-y-2">
-                <legend className="mb-2 text-sm font-semibold text-navy">
+                <legend className="mb-2 tkad-type-title text-navy">
                   {isKo ? "광고 목표" : "Ad goal"}
                 </legend>
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -168,7 +168,7 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
               <div>
                 <label
                   htmlFor="solution-budget"
-                  className="mb-2 block text-sm font-semibold text-navy"
+                  className="mb-2 block tkad-type-title text-navy"
                 >
                   {isKo ? "예산 범위" : "Budget range"}
                 </label>
@@ -193,7 +193,7 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
               <div>
                 <label
                   htmlFor="solution-region"
-                  className="mb-2 block text-sm font-semibold text-navy"
+                  className="mb-2 block tkad-type-title text-navy"
                 >
                   {isKo ? "타겟 지역" : "Target region"}
                 </label>
@@ -222,7 +222,7 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
               <div>
                 <label
                   htmlFor="solution-company"
-                  className="mb-2 block text-sm font-semibold text-navy"
+                  className="mb-2 block tkad-type-title text-navy"
                 >
                   {isKo ? "회사명" : "Company"}
                 </label>
@@ -239,7 +239,7 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
               <div>
                 <label
                   htmlFor="solution-contact"
-                  className="mb-2 block text-sm font-semibold text-navy"
+                  className="mb-2 block tkad-type-title text-navy"
                 >
                   {isKo ? "담당자명" : "Contact name"}
                 </label>
@@ -256,7 +256,7 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
               <div>
                 <label
                   htmlFor="solution-phone"
-                  className="mb-2 block text-sm font-semibold text-navy"
+                  className="mb-2 block tkad-type-title text-navy"
                 >
                   {isKo ? "연락처" : "Phone"}
                 </label>
@@ -274,7 +274,7 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
               <div>
                 <label
                   htmlFor="solution-email"
-                  className="mb-2 block text-sm font-semibold text-navy"
+                  className="mb-2 block tkad-type-title text-navy"
                 >
                   {isKo ? "이메일" : "Email"}
                 </label>

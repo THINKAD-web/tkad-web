@@ -122,7 +122,7 @@ export default function AdminMediaReviewsPage() {
             onClick={() => setStatusFilter(key as StatusFilter)}
             className={
               statusFilter === key
-                ? "rounded-lg bg-foreground px-3 py-1.5 text-sm font-semibold text-background"
+                ? "rounded-lg bg-foreground px-3 py-1.5 tkad-type-title text-background"
                 : "rounded-lg border px-3 py-1.5 text-sm"
             }
           >
@@ -183,7 +183,7 @@ export default function AdminMediaReviewsPage() {
                         type="button"
                         disabled={actingId === r.id}
                         onClick={() => void setStatus(r.id, "APPROVED")}
-                        className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold dark:text-white text-gray-900"
+                        className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 tkad-type-title dark:text-white text-gray-900"
                       >
                         <Check className="h-3.5 w-3.5" />
                         승인
@@ -192,7 +192,7 @@ export default function AdminMediaReviewsPage() {
                         type="button"
                         disabled={actingId === r.id}
                         onClick={() => void setStatus(r.id, "REJECTED")}
-                        className="inline-flex items-center gap-1 rounded-lg border border-destructive/50 px-3 py-1.5 text-xs font-semibold text-destructive"
+                        className="inline-flex items-center gap-1 rounded-lg border border-destructive/50 px-3 py-1.5 tkad-type-title text-destructive"
                       >
                         <X className="h-3.5 w-3.5" />
                         반려

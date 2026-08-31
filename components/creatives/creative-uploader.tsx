@@ -197,7 +197,7 @@ export function CreativeUploader({
       <div className="space-y-5">
         {/* 매체 유형 선택 */}
         <div>
-          <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="mb-2 tkad-type-label text-muted-foreground">
             [ 매체 유형 선택 ]
           </p>
           <p className="mb-3 text-sm text-muted-foreground">
@@ -206,7 +206,7 @@ export function CreativeUploader({
           <select
             value={mediaTypeKey}
             onChange={(e) => setMediaTypeKey(e.target.value)}
-            className="h-11 w-full rounded-md border-2 border-border bg-card px-3 text-sm font-semibold text-foreground focus:border-accent focus:outline-none"
+            className="h-11 w-full rounded-md border-2 border-border bg-card px-3 tkad-type-title text-foreground focus:border-accent focus:outline-none"
           >
             {KNOWN_TYPES.map((t) => (
               <option key={t.key} value={t.key}>
@@ -222,7 +222,7 @@ export function CreativeUploader({
 
         {/* 파일 선택 */}
         <div>
-          <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="mb-2 tkad-type-label text-muted-foreground">
             [ 파일 ]
           </p>
           <label
@@ -236,7 +236,7 @@ export function CreativeUploader({
             <span className="text-sm font-medium text-foreground">
               {file ? file.name : "이미지 또는 영상 파일을 선택하세요"}
             </span>
-            <span className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            <span className="tkad-type-label text-muted-foreground">
               {spec.stillFormats.join(" / ")}
               {spec.videoFormats?.length ? ` · ${spec.videoFormats.join(" / ")}` : ""}
               {" · "}최대 {spec.maxFileMB}MB
@@ -255,7 +255,7 @@ export function CreativeUploader({
             />
           </label>
           {issues.length > 0 ? (
-            <ul className="mt-3 space-y-1 rounded-lg border-2 border-amber-500 bg-amber-50 p-3 text-[12px] text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+            <ul className="mt-3 space-y-1 rounded-lg border-2 border-amber-500 bg-amber-50 p-3 tkad-type-meta text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
               {issues.map((i) => (
                 <li key={i}>· {i}</li>
               ))}
@@ -266,7 +266,7 @@ export function CreativeUploader({
         {file ? (
           <>
             <div>
-              <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="mb-2 tkad-type-label text-muted-foreground">
                 [ 소재 이름 ]
               </p>
               <input
@@ -274,13 +274,13 @@ export function CreativeUploader({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={100}
-                className="h-11 w-full rounded-md border-2 border-border bg-card px-3 text-sm font-semibold text-foreground focus:border-accent focus:outline-none"
+                className="h-11 w-full rounded-md border-2 border-border bg-card px-3 tkad-type-title text-foreground focus:border-accent focus:outline-none"
                 placeholder="예: 2026 봄 캠페인 메인"
               />
             </div>
 
             <div>
-              <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="mb-2 tkad-type-label text-muted-foreground">
                 [ 태그 ]
               </p>
               <div className="flex flex-wrap gap-2">
@@ -289,7 +289,7 @@ export function CreativeUploader({
                     key={t}
                     type="button"
                     onClick={() => removeTag(t)}
-                    className="inline-flex items-center gap-1 rounded-md border-2 border-border bg-muted px-2 py-1 font-display text-xs font-medium uppercase tracking-[0.14em] text-foreground transition-colors hover:border-destructive hover:text-destructive"
+                    className="inline-flex items-center gap-1 rounded-md border-2 border-border bg-muted px-2 py-1 tkad-type-label text-foreground transition-colors hover:border-destructive hover:text-destructive"
                   >
                     #{t}
                     <Trash2 className="h-3 w-3" />
@@ -308,7 +308,7 @@ export function CreativeUploader({
                     }}
                     placeholder="태그 추가 (Enter)"
                     maxLength={30}
-                    className="h-7 w-40 rounded-md border-2 border-dashed border-border bg-card px-2 text-[11px] focus:border-accent focus:outline-none"
+                    className="h-7 w-40 rounded-md border-2 border-dashed border-border bg-card px-2 tkad-type-caption focus:border-accent focus:outline-none"
                   />
                 </div>
               </div>
@@ -343,7 +343,7 @@ export function CreativeUploader({
 
       <aside className="space-y-4">
         <div className="rounded-2xl border-2 border-border bg-muted/40 p-4 sm:p-5">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ 미리보기 ]
           </p>
           <div className="mt-3 aspect-[16/10] w-full overflow-hidden rounded-2xl border-2 border-border dark:bg-black bg-white dark:bg-white/5 bg-gray-50 bg-white/30">
@@ -365,13 +365,13 @@ export function CreativeUploader({
                 />
               )
             ) : (
-              <div className="flex h-full w-full items-center justify-center font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <div className="flex h-full w-full items-center justify-center tkad-type-label text-muted-foreground">
                 파일을 선택하면 미리보기가 표시됩니다
               </div>
             )}
           </div>
           {meta ? (
-            <dl className="mt-3 grid grid-cols-2 gap-2 font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            <dl className="mt-3 grid grid-cols-2 gap-2 tkad-type-label text-muted-foreground">
               <Row label="유형" value={meta.kind === "video" ? "영상" : "이미지"} />
               <Row label="크기" value={file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "—"} />
               <Row
@@ -387,16 +387,16 @@ export function CreativeUploader({
 
         {preselectedMedia ? (
           <div className="rounded-2xl border-2 border-accent bg-accent/10 p-4 sm:p-5">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+            <p className="tkad-type-label text-accent">
               [ 선택된 매체 ]
             </p>
             <p className="mt-2 text-sm font-bold text-foreground">{preselectedMedia.name}</p>
-            <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mt-1 tkad-type-label text-muted-foreground">
               {preselectedMedia.widthM && preselectedMedia.heightM
                 ? `${(preselectedMedia.widthM * 100).toFixed(0)}×${(preselectedMedia.heightM * 100).toFixed(0)}cm`
                 : preselectedMedia.resolution ?? "—"}
             </p>
-            <div className="mt-3 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
+            <div className="mt-3 inline-flex items-center gap-1 tkad-type-label text-accent">
               <CheckCircle2 className="h-3 w-3" /> 규격 자동 적용 완료
             </div>
           </div>
@@ -418,10 +418,10 @@ function Row({ label, value }: { label: string; value: string }) {
 function SpecPreview({ spec }: { spec: CreativeSpecRow }) {
   return (
     <div className="mt-3 rounded-xl border-2 border-border bg-card p-3 text-sm">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
+      <p className="tkad-type-label text-accent">
         [ {spec.labelKo} 권장 규격 ]
       </p>
-      <ul className="mt-2 space-y-1 text-[12px] text-foreground/85">
+      <ul className="mt-2 space-y-1 tkad-type-meta text-foreground/85">
         <li>· 해상도: {spec.recommendedResolution}</li>
         <li>· 비율: {spec.aspectRatio}</li>
         <li>· 포맷: {spec.stillFormats.join(" / ")}

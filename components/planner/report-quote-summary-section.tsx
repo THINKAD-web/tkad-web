@@ -86,7 +86,7 @@ export function ReportQuoteSummarySection({ summary, isKo }: Props) {
       {summary.footnotes.map((note) => (
         <p
           key={note}
-          className="text-[11px] leading-relaxed text-gray-500"
+          className="tkad-type-caption leading-relaxed text-gray-500"
           data-testid="report-quote-summary-footnote"
         >
           ※ {note}

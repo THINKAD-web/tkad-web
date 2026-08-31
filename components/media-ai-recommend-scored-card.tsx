@@ -93,7 +93,7 @@ export function RecommendScoredMediaCard({
       {precisionText ? (
         <p
           className={cn(
-            "mb-1.5 text-[10px] font-semibold uppercase tracking-wide",
+            "mb-1.5 tkad-type-note font-semibold uppercase tracking-wide",
             precision === "exact"
               ? "text-[color:var(--qp-accent)]"
               : "text-muted-foreground",
@@ -176,14 +176,14 @@ export function RecommendTop3PickRow({
               unoptimized={thumb.unoptimized}
             />
           ) : (
-            <span className="flex h-full items-center justify-center px-1 text-center text-[9px] font-medium text-muted-foreground">
+            <span className="flex h-full items-center justify-center px-1 text-center tkad-type-note font-medium text-muted-foreground">
               {isKo ? "준비중" : "N/A"}
             </span>
           )}
         </Link>
         <span className="inline-flex min-w-0 flex-col gap-0.5">
           <span className="inline-flex min-w-0 items-center gap-2">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] text-[11px] font-black text-gray-900 shadow-sm dark:text-white">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] tkad-type-caption font-black text-gray-900 shadow-sm dark:text-white">
               {index + 1}
             </span>
             <span className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
@@ -193,7 +193,7 @@ export function RecommendTop3PickRow({
           {scored.matchPrecision ? (
             <span
               className={cn(
-                "pl-9 text-[10px] font-semibold uppercase tracking-wide",
+                "pl-9 tkad-type-note font-semibold uppercase tracking-wide",
                 scored.matchPrecision === "exact"
                   ? "text-[color:var(--qp-accent)]"
                   : "text-muted-foreground",
@@ -204,18 +204,18 @@ export function RecommendTop3PickRow({
           ) : null}
           {summary ? (
             <span className="mt-1 line-clamp-2 space-y-0.5 pl-9">
-              <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
+              <span className="flex items-center gap-1 tkad-type-note font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
                 <Lightbulb className="h-3 w-3 shrink-0" aria-hidden />
                 {isKo ? "추천 이유" : "Why"}
               </span>
-              <span className="block text-[12px] font-medium leading-snug text-foreground">
+              <span className="block tkad-type-meta font-medium leading-snug text-foreground">
                 {summary}
               </span>
             </span>
           ) : null}
         </span>
       </span>
-      <span className="shrink-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
+      <span className="shrink-0 tkad-type-label text-accent">
         {isKo ? `${scored.score}점 궁합` : `MATCH ${scored.score}`}
       </span>
     </li>

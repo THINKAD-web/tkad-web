@@ -83,7 +83,7 @@ function PlatformCard({
       </span>
 
       {channel.badge ? (
-        <span className="absolute left-3 top-3 rounded-full bg-orange-500/90 px-2 py-0.5 text-[10px] font-bold text-white">
+        <span className="absolute left-3 top-3 rounded-full bg-orange-500/90 px-2 py-0.5 tkad-type-note font-bold text-white">
           {channel.badge}
         </span>
       ) : null}
@@ -106,7 +106,7 @@ function PlatformCard({
       </span>
 
       {active && scored ? (
-        <span className="mt-2 text-[11px] font-semibold text-[color:var(--qp-fg-muted)] dark:text-[color:var(--qp-fg-muted)]">
+        <span className="mt-2 tkad-type-caption font-semibold text-[color:var(--qp-fg-muted)] dark:text-[color:var(--qp-fg-muted)]">
           {isKo ? "추천 비중" : "Suggested share"} {scored.budgetPct}%
           {" · "}
           {isKo ? "월간 노출 (추정)" : "Monthly impressions (est.)"}{" "}
@@ -250,7 +250,7 @@ export function IntegratedDigitalRecommendationPanel({
             disabled={mixLoading}
             className="w-full accent-[color:var(--qp-accent)] disabled:opacity-50"
           />
-          <div className="flex justify-between text-sm font-semibold">
+          <div className="flex justify-between tkad-type-title">
             <span>
               OOH {result.oohBudgetPct}% (
               {Math.round(budgetMan * (result.oohBudgetPct / 100)).toLocaleString()}

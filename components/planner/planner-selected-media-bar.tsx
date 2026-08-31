@@ -101,7 +101,7 @@ export function PlannerSelectedMediaBar({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 space-y-0.5">
-          <p className="text-sm font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
+          <p className="tkad-type-title text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
             {t("selectedMediaBarLabel")}
             <span className="ml-1.5 tabular-nums text-[color:var(--qp-accent)]/80 dark:text-[color:var(--qp-accent)]/80">
               {t("selectedMediaBarCount", { count: entries.length })}

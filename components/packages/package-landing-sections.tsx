@@ -35,7 +35,7 @@ export function PackageLandingHero({
       />
       <div className="relative mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 sm:py-28 lg:px-8">
         {pkg.badgeText ? (
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-white/80">
+          <p className="tkad-type-label text-white/80">
             [ {pkg.badgeText} ]
           </p>
         ) : null}

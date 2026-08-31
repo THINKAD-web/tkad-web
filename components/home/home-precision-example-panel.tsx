@@ -48,7 +48,7 @@ export function HomePrecisionExamplePanel({
             aria-hidden
           />
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-gray-500 dark:text-white/45">
+            <p className="tkad-type-title uppercase tracking-[0.08em] text-gray-500 dark:text-white/45">
               {exampleLabel}
             </p>
             <p className="mt-1 font-medium leading-snug text-gray-900 dark:text-white">
@@ -70,7 +70,7 @@ export function HomePrecisionExamplePanel({
               >
                 <th
                   scope="row"
-                  className="w-[28%] whitespace-nowrap px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-white/45 sm:w-24 sm:px-4 sm:text-sm"
+                  className="w-[28%] whitespace-nowrap px-3 py-2.5 tkad-type-title text-gray-500 dark:text-white/45 sm:w-24 sm:px-4 sm:text-sm"
                 >
                   {columnLabels[row.key]}
                 </th>

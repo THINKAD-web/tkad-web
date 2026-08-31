@@ -78,7 +78,7 @@ function SidebarLink({
             {label}
           </span>
           {item.badge != null && Number(item.badge) > 0 ? (
-            <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+            <span className="rounded-full bg-red-500 px-1.5 py-0.5 tkad-type-note font-bold text-white">
               {item.badge}
             </span>
           ) : null}
@@ -146,7 +146,7 @@ export function ContextNavSidebar({ collapsed, hoverExpanded }: Props) {
           {section.titleKo && !compact ? (
             <>
               <div className="my-2 border-t border-gray-200 dark:border-white/10" />
-              <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/40">
+              <p className="px-2 pb-1 tkad-type-note font-bold uppercase tracking-wider text-gray-400 dark:text-white/40">
                 {isKo ? section.titleKo : section.titleEn}
               </p>
             </>

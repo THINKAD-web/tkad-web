@@ -213,12 +213,12 @@ export default function AdminMediaQuickAddPage() {
         <div>
           <Link
             href="/admin/medias"
-            className="mb-2 inline-flex items-center gap-1 border-b-2 border-border pb-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
+            className="mb-2 inline-flex items-center gap-1 border-b-2 border-border pb-0.5 tkad-type-label text-foreground transition-colors hover:text-primary hover:border-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             매체 목록
           </Link>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="tkad-type-label text-muted-foreground">
             [ MEDIA QUICK ADD ]
           </p>
           <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground">
@@ -265,7 +265,7 @@ export default function AdminMediaQuickAddPage() {
             <code className="rounded bg-slate-100 px-1">nw_*</code>)는 대상이 아닙니다.
           </p>
           {reclassifyMsg ? (
-            <p className="border-2 border-border bg-muted/60 px-3 py-2 text-[11px] tracking-tight text-foreground">
+            <p className="border-2 border-border bg-muted/60 px-3 py-2 tkad-type-caption tracking-tight text-foreground">
               {reclassifyMsg}
             </p>
           ) : null}
@@ -362,7 +362,7 @@ export default function AdminMediaQuickAddPage() {
 
       {parseState.kind === "ok" && (
         <div>
-          <h3 className="mb-1 text-sm font-semibold text-foreground">
+          <h3 className="mb-1 tkad-type-title text-foreground">
             등록 미리보기 (자동 유형·태그)
           </h3>
           <p className="mb-3 text-xs text-muted-foreground">
@@ -441,7 +441,7 @@ function PreviewCard({
         )}
       </div>
       <CardContent className="space-y-3 p-4">
-        <p className="text-[10px] font-semibold uppercase text-muted-foreground">
+        <p className="tkad-type-note font-semibold uppercase text-muted-foreground">
           #{index + 1}
         </p>
         <p className="font-bold text-foreground">{item.media_name}</p>
@@ -457,7 +457,7 @@ function PreviewCard({
               ({typeLabelKo(preview.type)})
             </span>
           </p>
-          <label className="mt-2 block text-[10px] font-medium text-muted-foreground">
+          <label className="mt-2 block tkad-type-note font-medium text-muted-foreground">
             유형 덮어쓰기 (선택)
           </label>
           <select
@@ -474,7 +474,7 @@ function PreviewCard({
           </select>
         </div>
         <div>
-          <label className="text-[10px] font-medium text-muted-foreground">
+          <label className="tkad-type-note font-medium text-muted-foreground">
             태그 (쉼표 구분 → 자동 태그와 합쳐짐)
           </label>
           <Input
@@ -488,20 +488,20 @@ function PreviewCard({
               {preview.tags.slice(0, 16).map((t) => (
                 <span
                   key={t}
-                  className="rounded-full border-2 border-border bg-card px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.12em] text-foreground"
+                  className="rounded-full border-2 border-border bg-card px-2 py-0.5 tkad-type-label text-foreground"
                 >
                   {t}
                 </span>
               ))}
               {preview.tags.length > 16 ? (
-                <span className="text-[10px] text-muted-foreground">
+                <span className="tkad-type-note text-muted-foreground">
                   +{preview.tags.length - 16}
                 </span>
               ) : null}
             </div>
           )}
         </div>
-        <p className="text-sm font-semibold text-foreground">
+        <p className="tkad-type-title text-foreground">
           ₩{Math.round(item.price_per_month).toLocaleString()}
           <span className="text-xs font-normal text-muted-foreground"> /월</span>
         </p>

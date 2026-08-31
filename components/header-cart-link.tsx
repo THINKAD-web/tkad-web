@@ -40,7 +40,7 @@ export function HeaderCartLink({
         <ShoppingCart className="h-4 w-4 shrink-0" strokeWidth={2} />
         <span className="flex-1">{label}</span>
         {count > 0 ? (
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-cyan-500/20 px-1.5 text-[10px] font-bold text-cyan-700 dark:text-cyan-300">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-cyan-500/20 px-1.5 tkad-type-note font-bold text-cyan-700 dark:text-cyan-300">
             {badge}
           </span>
         ) : null}
@@ -62,7 +62,7 @@ export function HeaderCartLink({
     >
       <ShoppingCart className="h-4 w-4" strokeWidth={2} />
       {count > 0 ? (
-        <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan-500 px-1 text-[10px] font-bold text-white ring-1 ring-white/80 dark:ring-[#05050a]">
+        <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan-500 px-1 tkad-type-note font-bold text-white ring-1 ring-white/80 dark:ring-[#05050a]">
           {badge}
         </span>
       ) : null}

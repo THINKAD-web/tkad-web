@@ -76,7 +76,7 @@ export function AdminMediaQualityToolbar({
 
   return (
     <div className="rounded-2xl border border-border bg-muted/15 px-2 py-2 sm:px-2.5">
-      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+      <p className="mb-1.5 tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
         데이터 품질
       </p>
       <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
@@ -95,7 +95,7 @@ export function AdminMediaQualityToolbar({
               key={opt.value}
               type="button"
               onClick={() => onQualityFilterChange(opt.value)}
-              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors sm:px-2.5 sm:text-xs ${
+              className={`rounded-full px-2 py-1 tkad-type-caption font-semibold transition-colors sm:px-2.5 sm:text-xs ${
                 qualityFilter === opt.value
                   ? "border-2 border-border bg-foreground text-background"
                   : "border-2 border-border bg-card text-foreground hover:bg-muted/50"
@@ -139,7 +139,7 @@ export function AdminMediaQualityToolbar({
         </div>
       </div>
       {message ? (
-        <p className="mt-2 text-[11px] text-muted-foreground">{message}</p>
+        <p className="mt-2 tkad-type-caption text-muted-foreground">{message}</p>
       ) : null}
     </div>
   );
@@ -154,7 +154,7 @@ export function MediaQualityScoreBadge({ score }: { score: number }) {
         : "bg-red-500/15 text-red-700 dark:text-red-300";
   return (
     <span
-      className={`inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${tone}`}
+      className={`inline-flex rounded-md px-1.5 py-0.5 tkad-type-note font-bold tabular-nums ${tone}`}
       title="데이터 완성도"
     >
       {score}%

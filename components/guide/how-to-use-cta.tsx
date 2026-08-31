@@ -39,7 +39,7 @@ export function HowToUseCta({ isKo, phone }: Props) {
           {isKo ? "이메일 문의" : "Email inquiry"}
         </Link>
       </div>
-      <p className="mt-4 text-[11px] text-muted-foreground">
+      <p className="mt-4 tkad-type-caption text-muted-foreground">
         {phone} · {CONTACT_EMAIL}
       </p>
     </div>

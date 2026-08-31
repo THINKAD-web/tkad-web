@@ -62,7 +62,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
               key={ind}
               type="button"
               onClick={() => setIndustry(ind)}
-              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${ industry === ind ? "border-hermes bg-hermes/15 text-hermes" : "border-border bg-card hover:border-hermes/30" }`}
+              className={`rounded-full border px-3 py-1.5 tkad-type-title transition-colors ${ industry === ind ? "border-hermes bg-hermes/15 text-hermes" : "border-border bg-card hover:border-hermes/30" }`}
             >
               {industryLabel(ind, isKo)}
             </button>
@@ -124,7 +124,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
 
           <div className="flex flex-col justify-center rounded-xl border border-hermes/20 bg-hermes/5 p-5">
             <Timer className="h-6 w-6 text-hermes" />
-            <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <p className="mt-3 tkad-type-title uppercase tracking-wider text-muted-foreground">
               {isKo ? "평균 집행 기간" : "Avg flight duration"}
             </p>
             <p className="mt-1 text-3xl font-black tabular-nums">
@@ -172,7 +172,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+        <p className="tkad-type-label text-primary">
           [ PRO · COMPETITIVE INTEL ]
         </p>
         <h1 className="text-3xl font-black tracking-tight">
@@ -186,7 +186,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
         {!access.allowed ? (
           <Link
             href="/pricing?trial=1"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+            className="inline-flex items-center gap-1.5 tkad-type-title text-primary hover:underline"
           >
             <Sparkles className="h-4 w-4" />
             {isKo ? "PRO 14일 무료 체험" : "Start 14-day PRO trial"}
@@ -252,14 +252,14 @@ function HeatmapGrid({
         {months.map((ml) => (
           <div
             key={ml}
-            className="text-center text-[10px] font-semibold text-muted-foreground"
+            className="text-center tkad-type-note font-semibold text-muted-foreground"
           >
             {ml}
           </div>
         ))}
         {data.heatmapIndustries.map((ind) => (
           <div key={ind} className="contents">
-            <div className="flex items-center text-xs font-semibold">
+            <div className="flex items-center tkad-type-title">
               {industryLabel(ind, isKo)}
             </div>
             {months.map((ml) => {

@@ -116,7 +116,7 @@ export default function MediaGallery({
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full border border-white/30 bg-navy/75 px-2.5 py-1 text-[11px] font-semibold dark:text-white text-gray-900 shadow-md backdrop-blur-sm transition duration-300 group-hover:bg-navy/90"
+            className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full border border-white/30 bg-navy/75 px-2.5 py-1 tkad-type-caption font-semibold dark:text-white text-gray-900 shadow-md backdrop-blur-sm transition duration-300 group-hover:bg-navy/90"
             aria-hidden
           >
             <ZoomIn className="h-3.5 w-3.5" strokeWidth={2.5} />

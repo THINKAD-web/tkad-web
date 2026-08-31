@@ -65,7 +65,7 @@ function VerifyEmailContent() {
                 <>
                   <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-emerald-400" />
                   <h1 className="text-xl font-black">인증 완료</h1>
-                  <p className="mt-2 text-[12px] dark:text-white text-gray-600">{message}</p>
+                  <p className="mt-2 tkad-type-meta dark:text-white text-gray-600">{message}</p>
                   <BtnBlock href="/my" variant="accent" size="lg" className={`mt-6 ${authSubmitClass}`}>
                     마이페이지로 이동
                   </BtnBlock>
@@ -75,7 +75,7 @@ function VerifyEmailContent() {
                 <>
                   <XCircle className="mx-auto mb-4 h-12 w-12 text-red-400" />
                   <h1 className="text-xl font-black">인증 실패</h1>
-                  <p className="mt-2 text-[12px] dark:text-white text-gray-600">{message}</p>
+                  <p className="mt-2 tkad-type-meta dark:text-white text-gray-600">{message}</p>
                   <BtnBlock href="/my/settings" variant="accent" size="lg" className={`mt-6 ${authSubmitClass}`}>
                     설정에서 재발송
                   </BtnBlock>

@@ -29,7 +29,7 @@ export function PlannerStepper({
       role="group"
       aria-label={stepOfLabel}
     >
-      <p className="max-w-full px-1 text-center font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+      <p className="max-w-full px-1 text-center tkad-type-label text-primary">
         [ {stepOfLabel} ]
       </p>
       <ol className="scrollbar-hide flex max-w-full items-center justify-start gap-1 overflow-x-auto px-1 py-0.5 sm:flex-wrap sm:justify-center sm:gap-3 sm:overflow-visible">

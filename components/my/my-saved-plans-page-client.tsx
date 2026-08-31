@@ -136,12 +136,12 @@ export function MySavedPlansPageClient() {
         <PageContainer>
           <Link
             href="/my/plan"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 dark:text-white/55 dark:hover:text-white"
+            className="inline-flex items-center gap-1 tkad-type-title text-gray-500 hover:text-gray-800 dark:text-white/55 dark:hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
             {tPlan("cart")}
           </Link>
-          <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-fg-muted)]">
+          <p className="mt-3 tkad-type-label text-[color:var(--qp-fg-muted)]">
             [ SAVED PLANS ]
           </p>
           <h1 className="mt-2 text-2xl font-black text-gray-900 dark:text-white md:text-3xl">
@@ -159,7 +159,7 @@ export function MySavedPlansPageClient() {
             </div>
           ) : items.length === 0 ? (
             <div className="mt-10 rounded-[28px] border border-gray-200 bg-gray-50 p-10 text-center dark:border-white/12 dark:bg-white/5">
-              <p className="text-sm font-semibold text-gray-700 dark:text-white/80">
+              <p className="tkad-type-title text-gray-700 dark:text-white/80">
                 {isKo ? "저장된 스냅샷이 없습니다" : "No plan snapshots yet"}
               </p>
               <BtnBlock href="/my/plan" variant="accent" className="mt-6">
@@ -192,7 +192,7 @@ export function MySavedPlansPageClient() {
                           {item.description ? ` — ${item.description}` : ""}
                         </p>
                         {item.publishIntent ? (
-                          <span className="mt-2 inline-flex rounded-full bg-[color:var(--qp-accent)]/12 px-2.5 py-0.5 text-[10px] font-bold text-[color:var(--qp-accent)]">
+                          <span className="mt-2 inline-flex rounded-full bg-[color:var(--qp-accent)]/12 px-2.5 py-0.5 tkad-type-note font-bold text-[color:var(--qp-accent)]">
                             {isKo
                               ? INTENT_LABELS[item.publishIntent].ko
                               : INTENT_LABELS[item.publishIntent].en}
@@ -204,7 +204,7 @@ export function MySavedPlansPageClient() {
                           type="button"
                           disabled={busy}
                           onClick={() => void handleRestore(item.id)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-800 dark:border-white/12 dark:text-white"
+                          className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 tkad-type-title text-gray-800 dark:border-white/12 dark:text-white"
                         >
                           {busy ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -224,7 +224,7 @@ export function MySavedPlansPageClient() {
                           type="button"
                           disabled={busy}
                           onClick={() => void handleDelete(item.id)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-700 dark:border-rose-500/30 dark:text-rose-200"
+                          className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-2 tkad-type-title text-rose-700 dark:border-rose-500/30 dark:text-rose-200"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                           {isKo ? "삭제" : "Delete"}
@@ -233,7 +233,7 @@ export function MySavedPlansPageClient() {
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-2 border-t border-gray-100 pt-4 dark:border-white/10">
-                      <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-white/40">
+                      <span className="tkad-type-caption font-semibold uppercase tracking-wide text-gray-400 dark:text-white/40">
                         {isKo ? "활용 표시" : "Publish intent"}
                       </span>
                       <button
@@ -246,7 +246,7 @@ export function MySavedPlansPageClient() {
                           )
                         }
                         className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition",
+                          "inline-flex items-center gap-1 rounded-full px-3 py-1.5 tkad-type-title transition",
                           item.publishIntent === "case"
                             ? "tkad-qp-cta text-white"
                             : "border border-gray-200 text-gray-700 dark:border-white/12 dark:text-white/80",
@@ -265,7 +265,7 @@ export function MySavedPlansPageClient() {
                           )
                         }
                         className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition",
+                          "inline-flex items-center gap-1 rounded-full px-3 py-1.5 tkad-type-title transition",
                           item.publishIntent === "community"
                             ? "bg-zinc-700 text-white dark:bg-zinc-600"
                             : "border border-gray-200 text-gray-700 dark:border-white/12 dark:text-white/80",

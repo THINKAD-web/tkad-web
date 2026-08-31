@@ -189,7 +189,7 @@ export function AdminNewsletterClient() {
         <button
           type="button"
           onClick={() => setTab("subscribers")}
-          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors ${
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 tkad-type-label transition-colors ${
             tab === "subscribers"
               ? "bg-primary text-primary-foreground"
               : "bg-muted/50 text-muted-foreground hover:text-foreground"
@@ -201,7 +201,7 @@ export function AdminNewsletterClient() {
         <button
           type="button"
           onClick={() => setTab("dispatches")}
-          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors ${
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 tkad-type-label transition-colors ${
             tab === "dispatches"
               ? "bg-primary text-primary-foreground"
               : "bg-muted/50 text-muted-foreground hover:text-foreground"
@@ -226,7 +226,7 @@ export function AdminNewsletterClient() {
                 key={k}
                 type="button"
                 onClick={() => setStatusFilter(k)}
-                className={`rounded-full border px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.16em] transition-colors ${
+                className={`rounded-full border px-3 py-1 tkad-type-label transition-colors ${
                   statusFilter === k
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border bg-card text-muted-foreground hover:text-foreground"
@@ -235,7 +235,7 @@ export function AdminNewsletterClient() {
                 {label}
               </button>
             ))}
-            <span className="ml-auto font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            <span className="ml-auto tkad-type-label text-muted-foreground">
               활성 {activeCount} · 합계 {subscribers.length}
             </span>
           </div>
@@ -254,25 +254,25 @@ export function AdminNewsletterClient() {
                 <table className="w-full min-w-[44rem] border-collapse text-left text-sm">
                   <thead>
                     <tr className="bg-muted text-muted-foreground">
-                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 tkad-type-label">
                         Email
                       </th>
-                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 tkad-type-label">
                         Locale
                       </th>
-                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 tkad-type-label">
                         Source
                       </th>
-                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 tkad-type-label">
                         Status
                       </th>
-                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 tkad-type-label">
                         Last sent
                       </th>
-                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 tkad-type-label">
                         Joined
                       </th>
-                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]" />
+                      <th className="px-3 py-2 tkad-type-label" />
                     </tr>
                   </thead>
                   <tbody>
@@ -284,15 +284,15 @@ export function AdminNewsletterClient() {
                         <td className="px-3 py-2 font-bold text-foreground">
                           {s.email}
                         </td>
-                        <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                        <td className="px-3 py-2 tkad-type-caption text-muted-foreground">
                           {s.locale}
                         </td>
-                        <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                        <td className="px-3 py-2 tkad-type-caption text-muted-foreground">
                           {s.source ?? "—"}
                         </td>
                         <td className="px-3 py-2">
                           <span
-                            className={`inline-flex items-center rounded-full border px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] ${
+                            className={`inline-flex items-center rounded-full border px-2 py-0.5 tkad-type-label ${
                               s.isActive
                                 ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
                                 : "border-border bg-muted text-muted-foreground"
@@ -301,12 +301,12 @@ export function AdminNewsletterClient() {
                             {s.isActive ? "active" : "unsubscribed"}
                           </span>
                         </td>
-                        <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                        <td className="px-3 py-2 tkad-type-caption text-muted-foreground">
                           {s.lastSentAt
                             ? new Date(s.lastSentAt).toLocaleDateString("ko-KR")
                             : "—"}
                         </td>
-                        <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                        <td className="px-3 py-2 tkad-type-caption text-muted-foreground">
                           {new Date(s.createdAt).toLocaleDateString("ko-KR")}
                         </td>
                         <td className="px-3 py-2 text-right">
@@ -314,7 +314,7 @@ export function AdminNewsletterClient() {
                             <button
                               type="button"
                               onClick={() => removeSubscriber(s.id)}
-                              className="inline-flex items-center gap-1 rounded border border-border bg-card px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground hover:border-destructive hover:text-destructive"
+                              className="inline-flex items-center gap-1 rounded border border-border bg-card px-2 py-0.5 tkad-type-label text-muted-foreground hover:border-destructive hover:text-destructive"
                             >
                               <X className="h-3 w-3" />
                               해지
@@ -342,7 +342,7 @@ export function AdminNewsletterClient() {
             </p>
             <div className="mt-4 grid grid-cols-1 gap-3">
               <label className="block">
-                <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="tkad-type-label text-muted-foreground">
                   제목
                 </span>
                 <input
@@ -355,7 +355,7 @@ export function AdminNewsletterClient() {
                 />
               </label>
               <label className="block">
-                <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="tkad-type-label text-muted-foreground">
                   본문 (마크다운: # ## ### · - 단락)
                 </span>
                 <textarea
@@ -368,7 +368,7 @@ export function AdminNewsletterClient() {
                 />
               </label>
               <div className="flex flex-wrap items-center gap-3">
-                <label className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <label className="inline-flex items-center gap-2 tkad-type-label text-muted-foreground">
                   Locale
                   <select
                     value={localeFilter}
@@ -382,7 +382,7 @@ export function AdminNewsletterClient() {
                     <option value="en">en</option>
                   </select>
                 </label>
-                <label className="inline-flex flex-1 items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <label className="inline-flex flex-1 items-center gap-2 tkad-type-label text-muted-foreground">
                   Notes
                   <input
                     type="text"
@@ -398,7 +398,7 @@ export function AdminNewsletterClient() {
                   type="button"
                   onClick={dryRun}
                   disabled={sendBusy}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground hover:bg-muted disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 tkad-type-label text-foreground hover:bg-muted disabled:opacity-50"
                 >
                   대상 미리보기
                 </button>
@@ -406,7 +406,7 @@ export function AdminNewsletterClient() {
                   type="button"
                   onClick={send}
                   disabled={sendBusy}
-                  className="inline-flex items-center gap-1.5 rounded-md border-2 border-primary bg-primary px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] text-primary-foreground hover:opacity-95 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-md border-2 border-primary bg-primary px-4 py-2 tkad-type-label text-primary-foreground hover:opacity-95 disabled:opacity-50"
                 >
                   {sendBusy ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -430,7 +430,7 @@ export function AdminNewsletterClient() {
               <h2 className="text-base font-bold tracking-tight text-foreground">
                 발송 이력
               </h2>
-              <span className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              <span className="tkad-type-label text-muted-foreground">
                 최근 {dispatches.length}건
               </span>
             </header>
@@ -448,15 +448,15 @@ export function AdminNewsletterClient() {
                   <li key={d.id} className="space-y-1 p-4">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-bold text-foreground">{d.subject}</span>
-                      <span className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                      <span className="tkad-type-label text-muted-foreground">
                         {new Date(d.createdAt).toLocaleString("ko-KR")}
                       </span>
-                      <span className="ml-auto text-[11px] tabular-nums">
+                      <span className="ml-auto tkad-type-caption tabular-nums">
                         성공 {d.successCount}/{d.recipientCount}
                         {d.failedCount > 0 ? ` · 실패 ${d.failedCount}` : ""}
                       </span>
                     </div>
-                    <p className="line-clamp-2 text-[11px] text-muted-foreground">
+                    <p className="line-clamp-2 tkad-type-caption text-muted-foreground">
                       {d.bodyMd.slice(0, 240)}
                     </p>
                   </li>

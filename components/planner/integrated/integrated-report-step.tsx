@@ -329,7 +329,7 @@ export function IntegratedReportStep(props: Props) {
                     </BtnBlock>
                     <Link
                       href="/pricing"
-                      className="inline-flex items-center justify-center gap-2 rounded-[var(--qp-radius-md)] bg-[color:var(--qp-accent)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[color:var(--qp-accent-hover)]"
+                      className="inline-flex items-center justify-center gap-2 rounded-[var(--qp-radius-md)] bg-[color:var(--qp-accent)] px-5 py-2.5 tkad-type-title text-white hover:bg-[color:var(--qp-accent-hover)]"
                     >
                       {props.isKo ? "PRO 14일 무료 체험 →" : "Start PRO trial →"}
                     </Link>

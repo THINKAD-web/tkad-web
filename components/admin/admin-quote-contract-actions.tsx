@@ -47,7 +47,7 @@ export function AdminQuoteContractActions({
         {label}
       </button>
       {blockReason ? (
-        <p className="text-sm font-semibold leading-snug text-amber-900 dark:text-amber-200">
+        <p className="tkad-type-title leading-snug text-amber-900 dark:text-amber-200">
           {blockReason}
         </p>
       ) : null}

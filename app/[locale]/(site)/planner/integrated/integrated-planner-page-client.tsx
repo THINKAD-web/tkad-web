@@ -1267,7 +1267,7 @@ export default function IntegratedPlannerPageClient({
           >
             <div className={cn(STICKY_ACTION_BAR_ROW, "mx-auto w-full max-w-3xl")}>
               <span
-                className="min-w-0 flex-1 truncate text-[10px] font-medium tabular-nums text-gray-600 dark:text-white/55"
+                className="min-w-0 flex-1 truncate tkad-type-note font-medium tabular-nums text-gray-600 dark:text-white/55"
                 aria-live="polite"
               >
                 {ti("stepOf", {

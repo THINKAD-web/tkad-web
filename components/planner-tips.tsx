@@ -92,7 +92,7 @@ export default function PlannerTips({
         aria-hidden
       />
       <div className="min-w-0">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+        <p className="tkad-type-label text-primary">
           [ TIP ]
         </p>
         <p className="mt-1 leading-relaxed text-foreground">{tipText}</p>

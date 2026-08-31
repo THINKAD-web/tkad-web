@@ -98,7 +98,7 @@ export default function AdminManualClient() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <header>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ OPS / MANUAL ]
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">
@@ -181,7 +181,7 @@ export default function AdminManualClient() {
               <ul className="mt-2 space-y-3">
                 {chapter.subsections.map((sub) => (
                   <li key={sub.id}>
-                    <p className="text-sm font-semibold">{sub.title}</p>
+                    <p className="tkad-type-title">{sub.title}</p>
                     <ul className="mt-1 list-inside list-disc space-y-0.5 text-sm text-muted-foreground">
                       {sub.bullets.map((b, i) => (
                         <li key={`${sub.id}-${i}`}>{b.text}</li>

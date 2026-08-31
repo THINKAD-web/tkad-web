@@ -48,7 +48,7 @@ export function AdminMediaEnTranslateFields({
   return (
     <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-foreground">영문 카탈로그 (선택)</p>
+        <p className="tkad-type-title text-foreground">영문 카탈로그 (선택)</p>
         <Button
           type="button"
           variant="outline"
@@ -66,9 +66,9 @@ export function AdminMediaEnTranslateFields({
         </Button>
       </div>
       {aiTranslateError ? (
-        <p className="text-[11px] text-red-600">{aiTranslateError}</p>
+        <p className="tkad-type-caption text-red-600">{aiTranslateError}</p>
       ) : (
-        <p className="text-[10px] text-muted-foreground">
+        <p className="tkad-type-note text-muted-foreground">
           한국어 매체명·위치·설명을 바탕으로 영문 초안을 생성합니다. 저장 전까지 DB에
           반영되지 않습니다.
         </p>
@@ -77,7 +77,7 @@ export function AdminMediaEnTranslateFields({
         <label className="mb-1 flex items-center gap-2 text-xs font-medium text-muted-foreground">
           매체명 (영어)
           {aiDraftFields.nameEn ? (
-            <Badge variant="outline" className="h-4 px-1.5 text-[9px] font-normal">
+            <Badge variant="outline" className="h-4 px-1.5 tkad-type-note font-normal">
               AI 초안
             </Badge>
           ) : null}
@@ -95,7 +95,7 @@ export function AdminMediaEnTranslateFields({
         <label className="mb-1 flex items-center gap-2 text-xs font-medium text-muted-foreground">
           위치 (영어)
           {aiDraftFields.locationEn ? (
-            <Badge variant="outline" className="h-4 px-1.5 text-[9px] font-normal">
+            <Badge variant="outline" className="h-4 px-1.5 tkad-type-note font-normal">
               AI 초안
             </Badge>
           ) : null}
@@ -113,7 +113,7 @@ export function AdminMediaEnTranslateFields({
         <label className="mb-1 flex items-center gap-2 text-xs font-medium text-muted-foreground">
           설명 (영어)
           {aiDraftFields.descriptionEn ? (
-            <Badge variant="outline" className="h-4 px-1.5 text-[9px] font-normal">
+            <Badge variant="outline" className="h-4 px-1.5 tkad-type-note font-normal">
               AI 초안
             </Badge>
           ) : null}

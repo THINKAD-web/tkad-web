@@ -55,7 +55,7 @@ export function PwaSplashScreen({ className }: Props) {
               THINK
               <span className="tkad-home-accent-text">AD</span>
             </p>
-            <p className="mt-2 font-display text-xs font-medium uppercase tracking-[0.14em] text-white/50">
+            <p className="mt-2 tkad-type-label text-white/50">
               OOH MKT
             </p>
           </motion.div>{" "}

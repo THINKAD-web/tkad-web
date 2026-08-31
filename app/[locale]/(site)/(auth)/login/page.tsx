@@ -125,7 +125,7 @@ function LoginForm() {
                     </label>
                     <Link
                       href="/forgot-password"
-                      className="text-[10px] tkad-qp-text-muted transition-colors hover:opacity-90"
+                      className="tkad-type-note tkad-qp-text-muted transition-colors hover:opacity-90"
                     >
                       비밀번호 찾기
                     </Link>

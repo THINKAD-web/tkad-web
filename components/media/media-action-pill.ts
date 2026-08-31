@@ -9,7 +9,7 @@ export function mediaActionPillClass(
   className?: string,
 ) {
   return cn(
-    "inline-flex h-5 shrink-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full border px-2 text-[9px] font-semibold leading-none backdrop-blur transition-colors",
+    "inline-flex h-5 shrink-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full border px-2 tkad-type-note font-semibold leading-none backdrop-blur transition-colors",
     active
       ? variant === "cart"
         ? "border-rose-400/55 bg-rose-500/15 text-rose-800 shadow-sm dark:border-rose-400/40 dark:bg-rose-500/20 dark:text-rose-100"

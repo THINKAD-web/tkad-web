@@ -349,7 +349,7 @@ export default function AdminAiContentEditClient() {
         <Button variant="outline" size="sm" asChild>
           <Link href={`/${locale}/admin/ai-content`}>← 목록</Link>
         </Button>
-        <span className="rounded border-2 border-border bg-muted/60 px-2 py-1 font-display text-xs font-medium uppercase tracking-[0.12em] text-foreground">
+        <span className="rounded border-2 border-border bg-muted/60 px-2 py-1 tkad-type-label text-foreground">
           {status || "…"}
         </span>
       </div>
@@ -434,7 +434,7 @@ export default function AdminAiContentEditClient() {
                         key={idx}
                         className="rounded border border-black/10 dark:bg-white/6 bg-gray-500 p-2 text-xs"
                       >
-                        <div className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        <div className="tkad-type-label text-muted-foreground">
                           {iss.category} · {iss.severity}
                         </div>
                         <div className="mt-1 font-medium">
@@ -453,7 +453,7 @@ export default function AdminAiContentEditClient() {
                     감지된 이슈 없음.
                   </p>
                 )}
-                <p className="text-[10px] text-muted-foreground">
+                <p className="tkad-type-note text-muted-foreground">
                   검증 시각:{" "}
                   {new Date(validation.validatedAt).toLocaleString("ko-KR")}
                 </p>
@@ -527,7 +527,7 @@ export default function AdminAiContentEditClient() {
                 <CardContent className="space-y-3">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <label className="text-xs font-semibold">클라이언트</label>
+                      <label className="tkad-type-title">클라이언트</label>
                       <Input
                         className="mt-1"
                         value={scClientName}
@@ -535,7 +535,7 @@ export default function AdminAiContentEditClient() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold">업종</label>
+                      <label className="tkad-type-title">업종</label>
                       <Input
                         className="mt-1"
                         value={scIndustry}
@@ -544,7 +544,7 @@ export default function AdminAiContentEditClient() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">제목 (KO)</label>
+                    <label className="tkad-type-title">제목 (KO)</label>
                     <Input
                       className="mt-1"
                       value={titleKo}
@@ -552,7 +552,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">제목 (EN)</label>
+                    <label className="tkad-type-title">제목 (EN)</label>
                     <Input
                       className="mt-1"
                       value={scTitleEn}
@@ -560,7 +560,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">요약 (KO)</label>
+                    <label className="tkad-type-title">요약 (KO)</label>
                     <Textarea
                       className="mt-1 min-h-[80px]"
                       value={scSummaryKo}
@@ -568,7 +568,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">과제 (KO)</label>
+                    <label className="tkad-type-title">과제 (KO)</label>
                     <Textarea
                       className="mt-1 min-h-[120px]"
                       value={scChallengeKo}
@@ -576,7 +576,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">솔루션 (KO)</label>
+                    <label className="tkad-type-title">솔루션 (KO)</label>
                     <Textarea
                       className="mt-1 min-h-[120px]"
                       value={scSolutionKo}
@@ -584,7 +584,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">
+                    <label className="tkad-type-title">
                       성과 bullet (줄마다 한 줄)
                     </label>
                     <Textarea
@@ -594,7 +594,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">
+                    <label className="tkad-type-title">
                       매체 (쉼표 구분)
                     </label>
                     <Input
@@ -604,7 +604,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">metrics JSON</label>
+                    <label className="tkad-type-title">metrics JSON</label>
                     <Textarea
                       className="mt-1 min-h-[120px] text-xs"
                       value={scMetricsJson}
@@ -612,7 +612,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">썸네일 URL</label>
+                    <label className="tkad-type-title">썸네일 URL</label>
                     <Input
                       className="mt-1"
                       value={scThumbnail}
@@ -620,7 +620,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">
+                    <label className="tkad-type-title">
                       갤러리 URL (줄마다)
                     </label>
                     <Textarea
@@ -630,7 +630,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">고객 후기 (KO)</label>
+                    <label className="tkad-type-title">고객 후기 (KO)</label>
                     <Textarea
                       className="mt-1 min-h-[80px]"
                       value={scTestimonial}
@@ -665,7 +665,7 @@ export default function AdminAiContentEditClient() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <label className="text-xs font-semibold">제목 (KO)</label>
+                    <label className="tkad-type-title">제목 (KO)</label>
                     <Input
                       className="mt-1"
                       value={titleKo}
@@ -673,7 +673,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">
+                    <label className="tkad-type-title">
                       본문 Markdown
                     </label>
                     <Textarea
@@ -701,7 +701,7 @@ export default function AdminAiContentEditClient() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <label className="text-xs font-semibold">제목 (KO)</label>
+                    <label className="tkad-type-title">제목 (KO)</label>
                     <Input
                       className="mt-1"
                       value={titleKo}
@@ -709,7 +709,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">설명 (KO)</label>
+                    <label className="tkad-type-title">설명 (KO)</label>
                     <Textarea
                       className="mt-1 min-h-[100px]"
                       value={descriptionKo}
@@ -717,7 +717,7 @@ export default function AdminAiContentEditClient() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold">
+                    <label className="tkad-type-title">
                       chapters JSON (배열: title, content)
                     </label>
                     <Textarea

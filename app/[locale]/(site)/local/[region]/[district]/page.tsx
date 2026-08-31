@@ -225,7 +225,7 @@ export default async function LocalSeoLandingPage({ params }: Props) {
                 <p className="mt-4 text-center">
                   <Link
                     href="/media"
-                    className="font-display text-xs font-medium uppercase tracking-wider text-cyan-300 hover:underline"
+                    className="tkad-type-label text-cyan-300 hover:underline"
                   >
                     {isKo ? "전체 매체·지도에서 보기 →" : "Browse all media & map →"}
                   </Link>
@@ -274,7 +274,7 @@ export default async function LocalSeoLandingPage({ params }: Props) {
 
             {relatedLinks.length > 0 ? (
               <section className="tkad-media-links-footer border-t border-border/80 py-12">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                <p className="tkad-type-label text-muted-foreground">
                   {isKo ? "인근·관련 지역" : "Nearby areas"}
                 </p>
                 <ul className="mt-4 flex flex-wrap gap-2">

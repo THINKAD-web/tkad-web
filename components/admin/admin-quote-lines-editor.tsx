@@ -100,7 +100,7 @@ export function AdminQuoteLinesEditor({
                           placeholder="예) 제작비, 디자인 시안비"
                           className="h-9 text-sm"
                         />
-                        <span className="mt-1 inline-block text-[10px] text-muted-foreground">
+                        <span className="mt-1 inline-block tkad-type-note text-muted-foreground">
                           커스텀 비용
                         </span>
                       </td>
@@ -217,12 +217,12 @@ export function AdminQuoteLinesEditor({
                         {displayName}
                       </div>
                       {billed.usesMediaPartialRate ? (
-                        <span className="mt-1 inline-block rounded-md border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                        <span className="mt-1 inline-block rounded-md border border-accent/40 bg-accent/10 px-1.5 py-0.5 tkad-type-note font-semibold uppercase tracking-wide text-accent">
                           {isKo ? "매체 지정 요율" : "Media rate"}
                         </span>
                       ) : null}
                       {billed.usesProRataFallback ? (
-                        <p className="mt-1 text-[10px] leading-snug text-amber-700 dark:text-amber-300">
+                        <p className="mt-1 tkad-type-note leading-snug text-amber-700 dark:text-amber-300">
                           {isKo
                             ? "이 매체는 해당 기간 요율이 미등록이라 일할 계산됩니다."
                             : "No period rate registered — prorated by days/30."}
@@ -326,7 +326,7 @@ export function AdminQuoteLinesEditor({
                                   : "Quantity"
                             }
                           />
-                          <p className="text-[10px] text-muted-foreground">
+                          <p className="tkad-type-note text-muted-foreground">
                             {isGrade
                               ? isKo
                                 ? "대"
@@ -346,7 +346,7 @@ export function AdminQuoteLinesEditor({
                       ) : (
                         <>
                           {new Intl.NumberFormat("ko-KR").format(displayUnitWon)}
-                          <span className="ml-1 text-[10px] text-muted-foreground">
+                          <span className="ml-1 tkad-type-note text-muted-foreground">
                             {formatPricePeriodShortLabel(period, locale)}
                           </span>
                         </>
@@ -385,7 +385,7 @@ export function AdminQuoteLinesEditor({
                             });
                           }
                         }}
-                        className="h-9 w-full text-right text-sm font-semibold tabular-nums"
+                        className="h-9 w-full text-right tkad-type-title tabular-nums"
                         aria-label={
                           priceOnInquiry
                             ? isKo
@@ -397,7 +397,7 @@ export function AdminQuoteLinesEditor({
                         }
                       />
                       {billed.amountOverridden ? (
-                        <p className="mt-1 text-[10px] text-muted-foreground">
+                        <p className="mt-1 tkad-type-note text-muted-foreground">
                           {catalogOnInquiry
                             ? inquiryLabel
                             : `${isKo ? "자동" : "Auto"} ${formatWon(billed.autoAmount)}`}
@@ -414,13 +414,13 @@ export function AdminQuoteLinesEditor({
                           </button>
                         </p>
                       ) : priceOnInquiry ? (
-                        <p className="mt-1 text-[10px] text-muted-foreground">
+                        <p className="mt-1 tkad-type-note text-muted-foreground">
                           {isKo
                             ? "합계 제외 · 협의가 입력 가능"
                             : "Excluded from total · enter negotiated amount"}
                         </p>
                       ) : (
-                        <p className="mt-1 text-[10px] text-muted-foreground">
+                        <p className="mt-1 tkad-type-note text-muted-foreground">
                           {isKo ? "자동 계산 · 수정 가능" : "Auto · editable"}
                         </p>
                       )}

@@ -71,7 +71,7 @@ export function PlanCartItemAddonEditor({
                   key={name}
                   type="button"
                   onClick={() => addLine({ name })}
-                  className="inline-flex items-center gap-1 rounded-lg border border-dashed border-amber-400/45 bg-amber-500/5 px-3 py-1.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-500/10 dark:text-amber-200"
+                  className="inline-flex items-center gap-1 rounded-lg border border-dashed border-amber-400/45 bg-amber-500/5 px-3 py-1.5 tkad-type-title text-amber-800 transition hover:bg-amber-500/10 dark:text-amber-200"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   {name}
@@ -81,7 +81,7 @@ export function PlanCartItemAddonEditor({
           <button
             type="button"
             onClick={() => addLine()}
-            className="inline-flex items-center gap-1 rounded-lg border border-dashed border-amber-400/45 bg-amber-500/5 px-3 py-1.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-500/10 dark:text-amber-200"
+            className="inline-flex items-center gap-1 rounded-lg border border-dashed border-amber-400/45 bg-amber-500/5 px-3 py-1.5 tkad-type-title text-amber-800 transition hover:bg-amber-500/10 dark:text-amber-200"
           >
             <Plus className="h-3.5 w-3.5" />
             {isKo ? "부가비용 추가" : "Add-on cost"}
@@ -99,10 +99,10 @@ export function PlanCartItemAddonEditor({
                 className="space-y-2 rounded-lg border border-dashed border-amber-300/50 bg-amber-50/50 p-2.5 dark:border-amber-400/20 dark:bg-amber-500/[0.06]"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-800/80 dark:text-amber-200/80">
+                  <span className="tkad-type-note font-semibold uppercase tracking-wide text-amber-800/80 dark:text-amber-200/80">
                     {isKo ? "부가비용" : "Add-on"}
                   </span>
-                  <span className="text-[11px] font-bold tabular-nums text-amber-900 dark:text-amber-100">
+                  <span className="tkad-type-caption font-bold tabular-nums text-amber-900 dark:text-amber-100">
                     {formatCatalogPriceFieldWon(subtotal, locale)}
                   </span>
                 </div>
@@ -114,7 +114,7 @@ export function PlanCartItemAddonEditor({
                   className="h-9 w-full rounded-lg border border-gray-200 bg-white px-2.5 text-sm dark:border-white/12 dark:bg-black/20 dark:text-white"
                 />
                 <div className="flex flex-wrap items-center gap-2">
-                  <label className="flex min-w-[7rem] flex-1 items-center gap-1.5 text-[11px] text-gray-500 dark:text-white/50">
+                  <label className="flex min-w-[7rem] flex-1 items-center gap-1.5 tkad-type-caption text-gray-500 dark:text-white/50">
                     {isKo ? "금액(원)" : "Amount"}
                     <input
                       type="number"
@@ -129,7 +129,7 @@ export function PlanCartItemAddonEditor({
                       className="h-9 w-full min-w-0 rounded-lg border border-gray-200 bg-white px-2 text-sm tabular-nums dark:border-white/12 dark:bg-black/20 dark:text-white"
                     />
                   </label>
-                  <label className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-white/50">
+                  <label className="flex items-center gap-1.5 tkad-type-caption text-gray-500 dark:text-white/50">
                     {isKo ? "수량" : "Qty"}
                     <input
                       type="number"
@@ -176,7 +176,7 @@ export function PlanCartAddonAddButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-1 rounded-lg border border-dashed border-amber-400/45 bg-amber-500/5 px-3 py-1.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-500/10 dark:text-amber-200",
+        "inline-flex items-center gap-1 rounded-lg border border-dashed border-amber-400/45 bg-amber-500/5 px-3 py-1.5 tkad-type-title text-amber-800 transition hover:bg-amber-500/10 dark:text-amber-200",
         className,
       )}
     >

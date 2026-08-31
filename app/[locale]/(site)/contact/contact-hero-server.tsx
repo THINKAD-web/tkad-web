@@ -48,10 +48,10 @@ export async function ContactHeroServer({ locale }: Props) {
             key={item.label}
             className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-4 backdrop-blur"
           >
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+            <p className="tkad-type-label dark:text-white text-gray-500">
               {item.label}
             </p>
-            <p className="mt-2 text-sm font-semibold dark:text-white text-gray-800">{item.value}</p>
+            <p className="mt-2 tkad-type-title dark:text-white text-gray-800">{item.value}</p>
           </div>
         ))}
       </div>

@@ -14,7 +14,7 @@ export default async function AdminEntitlementsPage({ params }: Props) {
   return (
     <div className="space-y-8 p-6">
       <header>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ OPS / ENTITLEMENTS ]
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">

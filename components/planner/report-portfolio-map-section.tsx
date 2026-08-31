@@ -88,13 +88,13 @@ export function ReportPortfolioMapSection({ portfolio, isKo }: Props) {
       <div className="space-y-1 text-center">
         <p className="text-xs font-medium text-gray-600">{summaryLine}</p>
         {unmappedCount > 0 ? (
-          <p className="text-[11px] text-gray-400">
+          <p className="tkad-type-caption text-gray-400">
             {isKo
               ? `좌표 미등록 ${unmappedCount}건 — 목록의 위치 텍스트를 참고하세요`
               : `${unmappedCount} without map coordinates — see location text in the lineup`}
           </p>
         ) : null}
-        <p className="text-[11px] text-gray-400">
+        <p className="tkad-type-caption text-gray-400">
           {isKo
             ? "매체 위치 지도는 화면에서만 제공됩니다 (PDF·PPT에는 포함되지 않음)."
             : "Media location map is available on-screen only (not included in PDF/PPT)."}

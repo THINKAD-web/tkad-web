@@ -115,7 +115,7 @@ export function AdminMonitoringClient({ locale }: Props) {
     <div className="space-y-8 pb-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/80">
+          <p className="tkad-type-label text-[color:var(--qp-accent)]/80">
             [ Ops Monitoring ]
           </p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
@@ -133,7 +133,7 @@ export function AdminMonitoringClient({ locale }: Props) {
                 type="button"
                 onClick={() => setPeriod(p.key)}
                 className={cn(
-                  "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                  "rounded-lg px-3 py-1.5 tkad-type-title transition-colors",
                   period === p.key
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -170,7 +170,7 @@ export function AdminMonitoringClient({ locale }: Props) {
         <>
           {/* 1. Visitors */}
           <section className="rounded-2xl border border-border/60 bg-card/40 p-5 backdrop-blur">
-            <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <h2 className="flex items-center gap-2 tkad-type-label text-muted-foreground">
               <Users className="h-4 w-4 text-[color:var(--qp-accent)]/80" />
               [ 방문자 현황 ]
             </h2>
@@ -185,7 +185,7 @@ export function AdminMonitoringClient({ locale }: Props) {
               <StatCard label="이번 달" value={data.visitors.month} />
             </div>
             <div className="mt-6">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="tkad-type-label text-muted-foreground">
                 페이지별 조회 Top 10
               </p>
               <ol className="mt-2 space-y-1">
@@ -212,7 +212,7 @@ export function AdminMonitoringClient({ locale }: Props) {
 
           {/* 2. Funnel */}
           <section className="rounded-2xl border border-border/60 bg-card/40 p-5 backdrop-blur">
-            <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <h2 className="flex items-center gap-2 tkad-type-label text-muted-foreground">
               <Activity className="h-4 w-4 text-[color:var(--qp-accent)]/80" />
               [ 전환 퍼널 ]
             </h2>
@@ -269,7 +269,7 @@ export function AdminMonitoringClient({ locale }: Props) {
 
           {/* 4. Alerts */}
           <section className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5">
-            <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-amber-200/90">
+            <h2 className="flex items-center gap-2 tkad-type-label text-amber-200/90">
               <AlertTriangle className="h-4 w-4" />
               [ 알림 센터 ]
             </h2>
@@ -320,7 +320,7 @@ export function AdminMonitoringClient({ locale }: Props) {
 
           {/* 5. System */}
           <section className="rounded-2xl border border-border/60 bg-card/40 p-5 backdrop-blur">
-            <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <h2 className="flex items-center gap-2 tkad-type-label text-muted-foreground">
               <Server className="h-4 w-4" />
               [ 시스템 상태 ]
             </h2>
@@ -348,7 +348,7 @@ export function AdminMonitoringClient({ locale }: Props) {
               ) : null}
             </div>
             <div className="mt-4">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="tkad-type-label text-muted-foreground">
                 최근 에러 로그
               </p>
               {data.system.recentErrors.length === 0 ? (
@@ -358,7 +358,7 @@ export function AdminMonitoringClient({ locale }: Props) {
                   {data.system.recentErrors.map((e) => (
                     <li
                       key={e.id}
-                      className="rounded-lg border border-border/50 bg-card/50 px-3 py-2 text-[11px]"
+                      className="rounded-lg border border-border/50 bg-card/50 px-3 py-2 tkad-type-caption"
                     >
                       <span className="text-rose-400">{e.status}</span>{" "}
                       {e.tag ?? "api"} · {e.path ?? "—"}
@@ -402,7 +402,7 @@ function StatCard({
           : "border-border/60 bg-card/60",
       )}
     >
-      <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+      <p className="tkad-type-label text-muted-foreground">
         {label}
       </p>
       <p className="mt-1 text-2xl font-bold tabular-nums">{value.toLocaleString()}</p>
@@ -419,7 +419,7 @@ function RankingCard({
 }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-card/40 p-4 backdrop-blur">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+      <p className="tkad-type-label text-muted-foreground">
         {title}
       </p>
       <ol className="mt-3 space-y-2">
@@ -462,7 +462,7 @@ function AlertBlock({
   return (
     <div className="rounded-xl border border-border/50 bg-card/40 p-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold">{title}</p>
+        <p className="tkad-type-title">{title}</p>
         <span
           className={cn(
             "rounded-full px-2 py-0.5  text-xs font-bold",
@@ -484,7 +484,7 @@ function AlertBlock({
       ) : null}
       <Link
         href={href}
-        className="mt-3 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.16em] text-[color:var(--qp-accent)] hover:underline"
+        className="mt-3 inline-flex items-center gap-1 tkad-type-label text-[color:var(--qp-accent)] hover:underline"
       >
         관리 화면
         <ArrowRight className="h-3 w-3" />
@@ -505,7 +505,7 @@ function ServiceRow({
       <StatusDot ok={status.ok} />
       <Database className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
       <span>{label}</span>
-      <span className="ml-auto text-[10px] text-muted-foreground">
+      <span className="ml-auto tkad-type-note text-muted-foreground">
         {status.ok ? "OK" : status.detail ?? "ERR"}
       </span>
     </li>

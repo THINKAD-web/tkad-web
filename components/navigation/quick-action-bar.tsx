@@ -71,7 +71,7 @@ const qpSidebarCta =
 
 function actionRowClass(compact: boolean) {
   return cn(
-    "relative flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors",
+    "relative flex items-center justify-center gap-2 rounded-lg tkad-type-title transition-colors",
     compact ? "px-2 py-2.5" : "px-3 py-2.5",
   );
 }
@@ -219,12 +219,12 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
             <Icon className="h-4 w-4 shrink-0" aria-hidden />
             {!compact ? <span className="min-w-0 flex-1 truncate text-left">{label}</span> : null}
             {!compact && action.badge != null && action.badge > 0 ? (
-              <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-white">
+              <span className="rounded-full bg-white/20 px-1.5 py-0.5 tkad-type-note font-bold tabular-nums text-white">
                 {action.badge > 99 ? "99+" : action.badge}
               </span>
             ) : null}
             {compact && action.badge != null && action.badge > 0 ? (
-              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 tkad-type-note font-bold text-white">
                 {action.badge > 99 ? "99+" : action.badge}
               </span>
             ) : null}

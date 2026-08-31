@@ -158,7 +158,7 @@ function PlannerAxisList({
               size="rank"
             />
             <div className="min-w-0 overflow-hidden">
-              <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+              <p className="line-clamp-2 tkad-type-title leading-snug text-foreground">
                 {isKo ? item.media.name : item.media.nameEn || item.media.name}
               </p>
               <div className="mt-0.5 flex w-full min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-xs tabular-nums text-muted-foreground">
@@ -169,12 +169,12 @@ function PlannerAxisList({
                 ))}
               </div>
               {axisPts ? (
-                <p className="mt-0.5 text-[11px] font-medium text-violet-600 dark:text-violet-300">
+                <p className="mt-0.5 tkad-type-caption font-medium text-violet-600 dark:text-violet-300">
                   {t(`recommendTabScore.${effectiveAxis}`, { score: axisPts })}
                 </p>
               ) : null}
               {selected ? (
-                <p className="mt-0.5 text-[10px] text-muted-foreground">
+                <p className="mt-0.5 tkad-type-note text-muted-foreground">
                   {t("recommendTabQtyHint")}
                 </p>
               ) : null}
@@ -186,7 +186,7 @@ function PlannerAxisList({
               className={cn(
                 "shrink-0 justify-center whitespace-nowrap",
                 selected
-                  ? "inline-flex items-center gap-1 rounded-full border border-rose-400/50 bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-200"
+                  ? "inline-flex items-center gap-1 rounded-full border border-rose-400/50 bg-rose-500/15 px-3 py-1.5 tkad-type-title text-rose-700 dark:text-rose-200"
                   : cn(plannerNeon.ctaSm, "py-1.5 px-3 text-xs"),
               )}
             >
@@ -255,7 +255,7 @@ function RecommendAxisList({
               size="rank"
             />
             <div className="min-w-0 overflow-hidden">
-              <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+              <p className="line-clamp-2 tkad-type-title leading-snug text-foreground">
                 {isKo ? item.media.name : item.media.nameEn || item.media.name}
               </p>
               <div className="mt-0.5 flex w-full min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-xs tabular-nums text-muted-foreground">
@@ -269,7 +269,7 @@ function RecommendAxisList({
             <PlanCartToggleButton
               item={planCartItemFromMediaItem(item.media, "ai_recommend")}
               addedFrom="ai_recommend"
-              className="!h-8 !rounded-lg !px-2.5 !text-[11px]"
+              className="!h-8 !rounded-lg !px-2.5 !tkad-type-caption"
             />
           </li>
         );
@@ -471,8 +471,8 @@ export function RecommendationAxisTabs(props: RecommendationAxisTabsProps) {
   );
 
   const eyebrowClass = isPlanner
-    ? cn("text-xs font-semibold uppercase tracking-wider", plannerNeon.subtext)
-    : "font-display text-xs font-medium uppercase tracking-[0.22em] text-accent";
+    ? cn("tkad-type-title uppercase tracking-wider", plannerNeon.subtext)
+    : "tkad-type-label text-accent";
 
   const headingClass = isPlanner
     ? cn("text-base font-semibold", plannerNeon.headline)
@@ -480,11 +480,11 @@ export function RecommendationAxisTabs(props: RecommendationAxisTabsProps) {
 
   const descClass = isPlanner
     ? cn("text-sm", plannerNeon.subtext)
-    : "text-[11px] tracking-tight text-muted-foreground sm:text-xs";
+    : "tkad-type-caption tracking-tight text-muted-foreground sm:text-xs";
 
   const controlBtn = (active: boolean) =>
     cn(
-      "inline-flex items-center justify-center gap-1 rounded-full border px-2.5 py-1.5 text-xs font-semibold transition-colors",
+      "inline-flex items-center justify-center gap-1 rounded-full border px-2.5 py-1.5 tkad-type-title transition-colors",
       active
         ? "border-violet-400/60 bg-violet-500/15 text-violet-700 dark:text-violet-200"
         : "border-border bg-background text-muted-foreground hover:border-violet-300/40",
@@ -563,7 +563,7 @@ export function RecommendationAxisTabs(props: RecommendationAxisTabsProps) {
             aria-selected={effectiveAxis === axis}
             onClick={() => setActiveAxis(axis)}
             className={cn(
-              "shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors sm:px-4 sm:text-sm",
+              "shrink-0 rounded-full border px-3 py-1.5 tkad-type-title transition-colors sm:px-4 sm:text-sm",
               effectiveAxis === axis
                 ? "border-violet-400/60 bg-violet-500/15 text-violet-700 dark:text-violet-200"
                 : "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white text-muted-foreground hover:border-violet-300/40",

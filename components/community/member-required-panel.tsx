@@ -27,7 +27,7 @@ export function CommunityMemberRequiredPanel({
         className,
       )}
     >
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+      <p className="tkad-type-label dark:text-white text-gray-500">
         [ MEMBERS ONLY ]
       </p>
       <h2 className="mt-3 flex items-center gap-2 text-xl font-bold tracking-tight dark:text-white text-gray-900">
@@ -38,7 +38,7 @@ export function CommunityMemberRequiredPanel({
       <div className="mt-6 flex flex-wrap gap-3">
         <Link
           href={loginHref}
-          className="inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes/15 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:bg-hermes/20"
+          className="inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes/15 px-5 py-3 tkad-type-label dark:text-white text-gray-900 transition-colors hover:bg-hermes/20"
         >
           {isKo ? "로그인하고 계속하기" : "Sign in to continue"}
           <ArrowRight className="h-3.5 w-3.5" />

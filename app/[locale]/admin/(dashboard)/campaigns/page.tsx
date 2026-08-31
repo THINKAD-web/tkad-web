@@ -936,7 +936,7 @@ export default function AdminCampaignsPage() {
             ) : (
               <>
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-navy">
+                  <h3 className="mb-2 flex items-center gap-1 tkad-type-title text-navy">
                     <Link2 className="h-4 w-4" />
                     연결된 견적 요청
                   </h3>
@@ -988,7 +988,7 @@ export default function AdminCampaignsPage() {
                           </span>
                           <button
                             type="button"
-                            className="shrink-0 text-[11px] text-rose-600 underline"
+                            className="shrink-0 tkad-type-caption text-rose-600 underline"
                             onClick={() => unlinkQuote(q.id)}
                           >
                             해제
@@ -1000,7 +1000,7 @@ export default function AdminCampaignsPage() {
                 </div>
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-navy">
+                  <h3 className="mb-2 flex items-center gap-1 tkad-type-title text-navy">
                     <Camera className="h-4 w-4" />
                     송출 증빙 사진
                   </h3>
@@ -1035,7 +1035,7 @@ export default function AdminCampaignsPage() {
                       </div>
                     </div>
                   ) : null}
-                  <p className="mb-2 text-[11px] text-muted-foreground">
+                  <p className="mb-2 tkad-type-caption text-muted-foreground">
                     GPS 위치 첨부를 권장합니다. 거부해도 업로드는 가능합니다.
                   </p>
                   <label className="mb-2 inline-flex cursor-pointer items-center gap-2 rounded border border-dashed border-slate-300 px-3 py-2 text-xs hover:bg-slate-50">
@@ -1080,7 +1080,7 @@ export default function AdminCampaignsPage() {
                           />
                           <button
                             type="button"
-                            className="absolute right-0 top-0 bg-rose-600/90 px-1 text-[10px] text-white"
+                            className="absolute right-0 top-0 bg-rose-600/90 px-1 tkad-type-note text-white"
                             onClick={() => delProof(p.id)}
                           >
                             삭제
@@ -1094,21 +1094,21 @@ export default function AdminCampaignsPage() {
                 {/* #ADMIN-CAMPAIGNS-1: 보고서 액션 버튼 brutalist 통일.
                     (CURSOR_RULES) AI 자동 생성 경로는 비노출 */}
                 <div className="space-y-2 border-2 border-bx-black bg-bx-white p-3">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <p className="font-mono tkad-type-note font-bold uppercase tracking-[0.22em] text-bx-accent">
                     [ REPORT ACTIONS ]
                   </p>
                   <div className="flex flex-wrap gap-0">
                     <button
                       type="button"
                       onClick={() => setShowReportPreview((v) => !v)}
-                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono tkad-type-caption font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       {showReportPreview ? "미리보기 닫기" : "보고서 미리보기"}
                     </button>
                     <a
                       href={`/api/admin/campaigns/${selectedId}/completion-report`}
-                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono tkad-type-caption font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -1119,13 +1119,13 @@ export default function AdminCampaignsPage() {
                       type="button"
                       disabled={pdfBusy}
                       onClick={() => void issueAndSendCompletionReport()}
-                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-accent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-50"
+                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-accent px-4 py-2 font-mono tkad-type-caption font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-50"
                     >
                       <FileText className="h-3.5 w-3.5" />
                       {pdfBusy ? "처리 중…" : "리포트 생성·발송"}
                     </button>
                   </div>
-                  <p className="font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                  <p className="font-mono tkad-type-note tracking-tight text-bx-gray-dim">
                     {`// `}미리보기 / 간단 PDF / 생성·발송(이메일 + reportGeneratedAt + completed)
                   </p>
                 </div>
@@ -1184,7 +1184,7 @@ export default function AdminCampaignsPage() {
 
                 {/* 집행 매체 연결 */}
                 <div>
-                  <h3 className="mb-2 text-sm font-semibold text-navy">집행 매체 연결</h3>
+                  <h3 className="mb-2 tkad-type-title text-navy">집행 매체 연결</h3>
                   <div className="space-y-2">
                     <div className="relative">
                       <Input
@@ -1216,11 +1216,11 @@ export default function AdminCampaignsPage() {
                     {bookingForm.mediaId && (
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="mb-1 block text-[10px] text-muted-foreground">시작일</label>
+                          <label className="mb-1 block tkad-type-note text-muted-foreground">시작일</label>
                           <Input type="date" value={bookingForm.startsAt} onChange={e => setBookingForm(f => ({ ...f, startsAt: e.target.value }))} className="text-xs" />
                         </div>
                         <div>
-                          <label className="mb-1 block text-[10px] text-muted-foreground">종료일</label>
+                          <label className="mb-1 block tkad-type-note text-muted-foreground">종료일</label>
                           <Input type="date" value={bookingForm.endsAt} onChange={e => setBookingForm(f => ({ ...f, endsAt: e.target.value }))} className="text-xs" />
                         </div>
                       </div>
@@ -1252,7 +1252,7 @@ export default function AdminCampaignsPage() {
                 </div>
 
                 <div>
-                  <h3 className="mb-2 text-sm font-semibold text-navy">
+                  <h3 className="mb-2 tkad-type-title text-navy">
                     송출·일정
                   </h3>
                   <div className="mb-2 grid gap-2 sm:grid-cols-2">
@@ -1314,7 +1314,7 @@ export default function AdminCampaignsPage() {
                 </div>
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-navy">
+                  <h3 className="mb-2 flex items-center gap-1 tkad-type-title text-navy">
                     <FileText className="h-4 w-4" />
                     견적 / 계약 / 청구
                   </h3>

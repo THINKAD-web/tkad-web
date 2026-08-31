@@ -37,7 +37,7 @@ export function HotspotRegionChips({
       <p
         className={cn(
           "mb-1.5 font-bold text-[color:var(--qp-accent)]",
-          compact ? "text-[10px]" : "text-xs",
+          compact ? "tkad-type-note" : "text-xs",
         )}
       >
         {isKo ? "인기 지역" : "Hot areas"}
@@ -59,7 +59,7 @@ export function HotspotRegionChips({
               }}
               className={cn(
                 "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-semibold transition-ui",
-                compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs sm:text-sm",
+                compact ? "px-2.5 py-1 tkad-type-caption" : "px-3 py-1.5 text-xs sm:text-sm",
                 active
                   ? "bg-hermes text-white shadow-sm shadow-hermes/25"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15",
@@ -70,7 +70,7 @@ export function HotspotRegionChips({
               <span
                 className={cn(
                   "tabular-nums opacity-70",
-                  compact ? "text-[9px]" : "text-[10px]",
+                  compact ? "tkad-type-note" : "tkad-type-note",
                 )}
               >
                 {h.mediaCount}

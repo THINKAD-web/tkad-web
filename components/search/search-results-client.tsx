@@ -158,7 +158,7 @@ function SearchResultsInner() {
             />
             <button
               type="submit"
-              className="inline-flex h-11 items-center gap-2 rounded-xl border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-4 text-sm font-semibold dark:text-white text-gray-900 hover:bg-white/15"
+              className="inline-flex h-11 items-center gap-2 rounded-xl border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-4 tkad-type-title dark:text-white text-gray-900 hover:bg-white/15"
             >
               <Search className="h-4 w-4" />
               {t("submit")}
@@ -176,7 +176,7 @@ function SearchResultsInner() {
                     type="button"
                     onClick={() => setTab(item.key)}
                     className={cn(
-                      "rounded-full border px-4 py-1.5 font-display text-xs font-medium uppercase tracking-wide transition-colors",
+                      "rounded-full border px-4 py-1.5 tkad-type-label transition-colors",
                       tab === item.key
                         ? "border-accent bg-accent/15 text-accent"
                         : "border-border text-muted-foreground hover:border-accent/40",
@@ -207,7 +207,7 @@ function SearchResultsInner() {
                 </p>
                 {similar.length > 0 ? (
                   <div className="mt-6">
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                    <p className="tkad-type-label text-muted-foreground">
                       {t("similarQueries")}
                     </p>
                     <div className="mt-3 flex flex-wrap justify-center gap-2">
@@ -242,7 +242,7 @@ function SearchResultsInner() {
               <div className="space-y-10">
                 {showMedia.length > 0 && mediaItems.length > 0 ? (
                   <section>
-                    <h2 className="mb-4 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                    <h2 className="mb-4 tkad-type-label text-muted-foreground">
                       🏢 {t("sectionMedia")}
                     </h2>
                     <div className={MEDIA_CATALOG_GRID_CLASS}>
@@ -261,7 +261,7 @@ function SearchResultsInner() {
 
                 {showPackages.length > 0 ? (
                   <section>
-                    <h2 className="mb-4 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                    <h2 className="mb-4 tkad-type-label text-muted-foreground">
                       📦 {t("sectionPackages")}
                     </h2>
                     <ul className="space-y-2">
@@ -282,7 +282,7 @@ function SearchResultsInner() {
 
                 {showContent.length > 0 ? (
                   <section>
-                    <h2 className="mb-4 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                    <h2 className="mb-4 tkad-type-label text-muted-foreground">
                       {t("tabContent")}
                     </h2>
                     <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
@@ -298,7 +298,7 @@ function SearchResultsInner() {
                                 {h.subtitle}
                               </p>
                             </div>
-                            <span className="shrink-0 font-display text-xs font-medium uppercase tracking-wider text-accent">
+                            <span className="shrink-0 tkad-type-label text-accent">
                               {h.kind}
                             </span>
                           </Link>

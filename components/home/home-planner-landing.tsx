@@ -59,7 +59,7 @@ function SectionShell({
     >
       <div className="mx-auto max-w-5xl">
         <header className="mb-10 max-w-2xl md:mb-12">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+          <p className="tkad-type-label text-hermes">
             {eyebrow}
           </p>
           <h2
@@ -165,14 +165,14 @@ export async function HomePlannerLanding({
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link
             href="/planner"
-            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-hermes px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-hermes/90"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-hermes px-5 py-2.5 tkad-type-title text-white transition-colors hover:bg-hermes/90"
           >
             {t("speedCtaPrimary")}
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
           <Link
             href="/media"
-            className="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-300 bg-white px-5 py-2.5 tkad-type-title text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
           >
             {t("speedCtaSecondary")}
           </Link>
@@ -197,7 +197,7 @@ export async function HomePlannerLanding({
                 key={s.n}
                 className="relative rounded-lg border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/[0.04]"
               >
-                <span className="text-xs font-semibold tracking-[0.12em] text-hermes">
+                <span className="tkad-type-title tracking-[0.12em] text-hermes">
                   {s.n}
                 </span>
                 <div className="mt-3 flex items-start gap-3">
@@ -245,7 +245,7 @@ export async function HomePlannerLanding({
           />
           <Link
             href="/planner"
-            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-md border border-hermes/40 bg-hermes/5 px-5 py-2.5 text-sm font-semibold text-hermes transition-colors hover:bg-hermes/10 sm:w-auto lg:self-end"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-md border border-hermes/40 bg-hermes/5 px-5 py-2.5 tkad-type-title text-hermes transition-colors hover:bg-hermes/10 sm:w-auto lg:self-end"
           >
             {t("precisionCta")}
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -291,7 +291,7 @@ export async function HomePlannerLanding({
       >
         <div className="mx-auto max-w-5xl">
           <header className="mb-8 max-w-2xl md:mb-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+            <p className="tkad-type-title uppercase tracking-[0.14em] text-hermes">
               {t("coverageEyebrow")}
             </p>
             <h2
@@ -307,7 +307,7 @@ export async function HomePlannerLanding({
 
           <div className="space-y-8">
             <div>
-              <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">
+              <h3 className="mb-3 tkad-type-title text-gray-900 dark:text-white">
                 {t("coverageOohLabel")}
               </h3>
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -317,7 +317,7 @@ export async function HomePlannerLanding({
                       {isKo ? tile.labelKo : tile.labelEn}
                     </p>
                     {tile.count > 0 ? (
-                      <p className="mt-1 text-[10px] text-gray-500 dark:text-white/45 sm:text-xs">
+                      <p className="mt-1 tkad-type-note text-gray-500 dark:text-white/45 sm:text-xs">
                         {t("coverageCount", { count: tile.count })}
                       </p>
                     ) : null}
@@ -327,7 +327,7 @@ export async function HomePlannerLanding({
             </div>
 
             <div>
-              <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">
+              <h3 className="mb-3 tkad-type-title text-gray-900 dark:text-white">
                 {t("coverageDigitalLabel")}
               </h3>
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -343,7 +343,7 @@ export async function HomePlannerLanding({
                       {isKo ? tile.labelKo : tile.labelEn}
                     </p>
                     {tile.count > 0 ? (
-                      <p className="mt-1 text-[10px] text-gray-500 dark:text-white/45 sm:text-xs">
+                      <p className="mt-1 tkad-type-note text-gray-500 dark:text-white/45 sm:text-xs">
                         {t("coverageCount", { count: tile.count })}
                       </p>
                     ) : null}
@@ -390,7 +390,7 @@ export async function HomePlannerLanding({
       >
         <div className="mx-auto max-w-5xl">
           <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-white to-gray-50 px-6 py-10 dark:border-white/10 dark:from-white/[0.06] dark:to-white/[0.02] md:px-10 md:py-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+            <p className="tkad-type-title uppercase tracking-[0.14em] text-hermes">
               {t("closeEyebrow")}
             </p>
             <h2
@@ -405,14 +405,14 @@ export async function HomePlannerLanding({
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/planner"
-                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-hermes px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-hermes/90"
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-hermes px-5 py-2.5 tkad-type-title text-white transition-colors hover:bg-hermes/90"
               >
                 {t("closeCtaPrimary")}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link
                 href="/media"
-                className="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-300 bg-white px-5 py-2.5 tkad-type-title text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
               >
                 {t("closeCtaSecondary")}
               </Link>

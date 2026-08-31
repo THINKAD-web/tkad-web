@@ -144,7 +144,7 @@ export function NetworkHero({ isKo, stats }: Props) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-violet-600 dark:text-violet-400">
+          <div className="flex items-center gap-2 tkad-type-title uppercase tracking-[0.2em] text-violet-600 dark:text-violet-400">
             <Network className="h-4 w-4" aria-hidden />
             {isKo ? "네트워크 옥외광고" : "Network OOH"}
           </div>
@@ -174,7 +174,7 @@ export function NetworkHero({ isKo, stats }: Props) {
               value={
                 <>
                   {formatNetworkPriceWon(stats.nationalAvgPriceManWon, isKo)}
-                  <span className="ml-0.5 text-[10px] font-semibold text-gray-400 dark:text-white/40">
+                  <span className="ml-0.5 tkad-type-note font-semibold text-gray-400 dark:text-white/40">
                     {isKo ? "/월" : "/mo"}
                   </span>
                 </>

@@ -69,7 +69,7 @@ export function PriceCalculator({
             <div className="mb-3 flex items-center justify-between">
               <label
                 htmlFor="network-points"
-                className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 dark:text-white/45"
+                className="tkad-type-note font-semibold uppercase tracking-widest text-gray-500 dark:text-white/45"
               >
                 {isKo ? "지점 수" : "Number of sites"}
               </label>
@@ -86,7 +86,7 @@ export function PriceCalculator({
               onChange={(e) => setPoints(Number(e.target.value))}
               className="h-2 w-full cursor-pointer accent-violet-500"
             />
-            <div className="mt-1 flex justify-between text-[11px] text-gray-400 dark:text-white/35">
+            <div className="mt-1 flex justify-between tkad-type-caption text-gray-400 dark:text-white/35">
               <span>1</span>
               <span>100</span>
             </div>
@@ -94,7 +94,7 @@ export function PriceCalculator({
 
           {regions.length > 0 ? (
             <div>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500 dark:text-white/45">
+              <p className="mb-2 tkad-type-note font-semibold uppercase tracking-widest text-gray-500 dark:text-white/45">
                 {isKo ? "지역 (평균 단가)" : "Region (avg. unit price)"}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -117,7 +117,7 @@ export function PriceCalculator({
           ) : null}
 
           <div>
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500 dark:text-white/45">
+            <p className="mb-2 tkad-type-note font-semibold uppercase tracking-widest text-gray-500 dark:text-white/45">
               {isKo ? "집행 기간" : "Duration"}
             </p>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -146,7 +146,7 @@ export function PriceCalculator({
             "flex flex-col justify-center border-violet-500/25 bg-gradient-to-br from-violet-500/10 via-transparent to-cyan-500/10 dark:border-violet-400/20",
           )}
         >
-          <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500 dark:text-white/45">
+          <p className="flex items-center gap-2 tkad-type-note font-semibold uppercase tracking-widest text-gray-500 dark:text-white/45">
             <Sparkles className="h-3.5 w-3.5 text-violet-500" />
             {isKo ? "총 예상 비용" : "Estimated total"}
           </p>

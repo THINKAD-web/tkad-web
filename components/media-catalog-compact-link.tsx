@@ -85,30 +85,30 @@ export function MediaCatalogCompactLinkRow({
         {thumbnailOverlay}
       </MediaCatalogThumbnail>
       <div className="relative z-[1] flex min-w-0 flex-1 flex-col items-start justify-center gap-1 text-card-foreground">
-        <div className="flex min-w-0 flex-wrap items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5 tkad-type-label text-muted-foreground">
           <span className="text-card-foreground">
             [ {isKo
               ? (typeLabels[media.type]?.ko ?? media.type)
               : (typeLabels[media.type]?.en ?? media.type)} ]
           </span>
           {popularIds?.has(media.id) ? (
-            <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-accent bg-accent px-1.5 py-[2px] text-[9px] font-bold tracking-[0.18em] text-accent-foreground">
+            <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-accent bg-accent px-1.5 py-[2px] tkad-type-note font-bold tracking-[0.18em] text-accent-foreground">
               <Flame className="h-2 w-2" />
               {isKo ? "인기" : "Hot"}
             </span>
           ) : null}
         </div>
-        <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug tracking-tight text-card-foreground sm:line-clamp-1 sm:text-sm">
+        <p className="line-clamp-2 min-w-0 break-words tkad-type-body font-bold leading-snug tracking-tight text-card-foreground sm:line-clamp-1 sm:text-sm">
           {isKo ? media.name : (media.nameEn || media.name)}
         </p>
-        <p className="line-clamp-2 min-w-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground sm:line-clamp-1">
+        <p className="line-clamp-2 min-w-0 tkad-type-label text-muted-foreground sm:line-clamp-1">
           {`// `}
           {formatMediaLocationShort(media, isKo)}
         </p>
-        <p className="min-w-0 shrink-0 break-words font-display text-[13px] font-bold tabular-nums leading-tight text-card-foreground sm:text-sm">
+        <p className="min-w-0 shrink-0 break-words font-display tkad-type-body font-bold tabular-nums leading-tight text-card-foreground sm:text-sm">
           {formatMediaPriceWonWithSymbol(priceWon)}
           {showPricePeriod ? (
-            <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="ml-1 tkad-type-note font-normal uppercase tracking-[0.18em] text-muted-foreground">
               · {periodLabel}
             </span>
           ) : null}

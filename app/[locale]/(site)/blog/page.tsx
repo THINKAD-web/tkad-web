@@ -193,7 +193,7 @@ export default function BlogPage() {
                       setSelectedCategory(cat.key as BlogCategoryKey | "all")
                     }
                     className={cn(
-                      "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                      "rounded-full px-3 py-1.5 tkad-type-title transition-colors",
                       isActive
                         ? "bg-hermes text-white"
                         : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
@@ -249,11 +249,11 @@ export default function BlogPage() {
                     <Sparkles className="h-10 w-10 text-white/80" />
                   </div>
                   {categoryLabel ? (
-                    <span className="absolute left-3 top-3 rounded-full bg-black/30 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
+                    <span className="absolute left-3 top-3 rounded-full bg-black/30 px-2.5 py-0.5 tkad-type-caption font-semibold text-white backdrop-blur-sm">
                       {categoryLabel}
                     </span>
                   ) : null}
-                  <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-[11px] font-medium text-white/90">
+                  <div className="absolute bottom-3 left-3 flex items-center gap-1.5 tkad-type-caption font-medium text-white/90">
                     <Calendar className="h-3.5 w-3.5" aria-hidden />
                     {formattedDate}
                   </div>
@@ -265,7 +265,7 @@ export default function BlogPage() {
                   <p className="mt-2 flex-1 text-xs leading-relaxed text-gray-500 dark:text-white/60 sm:text-sm">
                     {summary}
                   </p>
-                  <span className="mt-4 text-xs font-semibold text-hermes group-hover:text-hermes/80">
+                  <span className="mt-4 tkad-type-title text-hermes group-hover:text-hermes/80">
                     {isKo ? "Read more →" : "Read more →"}
                   </span>
                 </div>

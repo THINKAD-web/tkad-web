@@ -74,7 +74,7 @@ function PrimaryNavCard({
       <span className="min-w-0 flex-1 pt-0.5">
         <span
           className={cn(
-            "block text-[14px] font-bold leading-tight tracking-tight",
+            "block text-sm font-bold leading-tight tracking-tight",
             active
               ? "text-[color:var(--qp-ink)] dark:text-white"
               : "text-foreground",
@@ -83,7 +83,7 @@ function PrimaryNavCard({
           {item.label}
         </span>
         {item.description ? (
-          <span className="mt-0.5 block text-[10px] leading-snug text-muted-foreground">
+          <span className="mt-0.5 block tkad-type-note leading-snug text-muted-foreground">
             {item.description}
           </span>
         ) : null}
@@ -110,7 +110,7 @@ function SecondaryLink({
       href={navHref(locale, item.href)}
       onClick={onNavigate}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition-colors",
+        "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 tkad-type-caption font-semibold transition-colors",
         active
           ? "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-ink)] dark:bg-[color:var(--qp-accent)]/15 dark:text-white"
           : "border-border/60 bg-card/60 text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -156,7 +156,7 @@ function GroupSection({
         className="flex w-full items-center justify-between rounded-md py-1.5 pl-2 pr-1 text-left"
         aria-expanded={open}
       >
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <span className="tkad-type-note font-bold uppercase tracking-widest text-muted-foreground">
           {label}
         </span>
         <ChevronDown
@@ -179,7 +179,7 @@ function GroupSection({
                   href={navHref(locale, item.href)}
                   onClick={onNavigate}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-r-md py-2 pl-2.5 pr-2 text-[13px] font-medium transition-colors",
+                    "flex items-center gap-2.5 rounded-r-md py-2 pl-2.5 pr-2 tkad-type-body font-medium transition-colors",
                     active
                       ? "border-l-2 border-[color:var(--qp-accent)] bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)] dark:bg-white/10 dark:text-white"
                       : "border-l-2 border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -263,7 +263,7 @@ export function AdminShellNav({
 
   return (
     <nav className="relative flex-1 overflow-y-auto px-2 py-3">
-      <p className="mb-2 px-1 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+      <p className="mb-2 px-1 font-display tkad-type-caption font-bold uppercase tracking-[0.18em] text-muted-foreground">
         {isKo ? "자주 쓰는" : "Quick access"}
       </p>
       <ul className="grid grid-cols-1 gap-2">
@@ -281,7 +281,7 @@ export function AdminShellNav({
 
       {secondaryItems.length > 0 ? (
         <div className="mt-3">
-          <p className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="mb-1.5 px-1 tkad-type-note font-bold uppercase tracking-widest text-muted-foreground">
             {isKo ? "빠른 작업" : "Quick actions"}
           </p>
           <div className="flex flex-wrap gap-1.5 px-0.5">
@@ -303,7 +303,7 @@ export function AdminShellNav({
           type="button"
           onClick={() => setMoreOpen((v) => !v)}
           className={cn(
-            "flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold transition-colors",
+            "flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left tkad-type-title transition-colors",
             moreOpen
               ? "border-border bg-muted/50 text-foreground"
               : "border-dashed border-border/80 text-muted-foreground hover:bg-muted/30",

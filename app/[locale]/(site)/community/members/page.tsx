@@ -93,7 +93,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
 
   const tabCls = (active: boolean) =>
     cn(
-      "inline-flex items-center justify-center rounded-full border px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
+      "inline-flex items-center justify-center rounded-full border px-4 py-2 tkad-type-label transition-colors",
       active
         ? "border-white/22 bg-white/12 dark:text-white text-gray-900"
         : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:border-white/16 hover:dark:text-white text-gray-700",
@@ -101,7 +101,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
 
   const regionTabCls = (active: boolean) =>
     cn(
-      "inline-flex items-center justify-center rounded-full border px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors sm:px-4",
+      "inline-flex items-center justify-center rounded-full border px-3 py-2 tkad-type-label transition-colors sm:px-4",
       active
         ? "border-hermes/40 bg-hermes/10 text-hermes"
         : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:border-white/16 hover:dark:text-white text-gray-700",
@@ -113,7 +113,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
         <NeonSection tone="qp" className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href="/community"
-            className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
+            className="inline-flex items-center gap-2 tkad-type-label dark:text-white transition-colors hover:dark:text-white text-gray-900"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {isKo ? "커뮤니티 홈" : "Community home"}
@@ -138,7 +138,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
                 meta="community directory"
                 className="mb-0"
               />
-              <p className="mt-6 max-w-3xl text-[15px] leading-relaxed dark:text-white text-gray-700 sm:text-lg">
+              <p className="mt-6 max-w-3xl text-base leading-relaxed dark:text-white text-gray-700 sm:text-lg">
                 {isKo
                   ? "광고주·매체사·대행사·프리랜서가 모여 있습니다"
                   : "Advertisers, media owners, agencies, and freelancers — all in one place."}
@@ -174,7 +174,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                      <p className="tkad-type-label dark:text-white text-gray-500">
                         {item.label}
                       </p>
                       <p className="mt-2 font-display text-2xl font-black tracking-tight dark:text-white text-gray-900">
@@ -192,7 +192,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
         <NeonSection tone="qp" className="pt-0 pb-20 sm:pb-24">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+              <p className="tkad-type-label dark:text-white text-gray-500">
                 {isKo ? "// directory" : "// directory"}
               </p>
               <h2 className="mt-2 text-2xl font-black tracking-[-0.05em] dark:text-white text-gray-900 sm:text-3xl">
@@ -201,7 +201,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
             </div>
             <Link
               href="/community/write"
-              className="inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes/15 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:bg-hermes/20"
+              className="inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes/15 px-5 py-3 tkad-type-label dark:text-white text-gray-900 transition-colors hover:bg-hermes/20"
             >
               {isKo ? "글쓰기 시작" : "Start posting"}
             </Link>
@@ -209,7 +209,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
 
           <div className="mt-6 space-y-4">
             <div>
-              <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white">
+              <p className="mb-2 tkad-type-label dark:text-white">
                 {isKo ? "역할" : "Role"}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -229,7 +229,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
             </div>
 
             <div>
-              <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white">
+              <p className="mb-2 tkad-type-label dark:text-white">
                 {isKo ? "지역" : "Region"}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -251,7 +251,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
 
           {members.length === 0 ? (
             <div className="mt-6 rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-12 text-center backdrop-blur tkad-neon-border">
-              <p className="font-display text-[12px] uppercase tracking-[0.22em] dark:text-white">
+              <p className="font-display tkad-type-meta uppercase tracking-[0.22em] dark:text-white">
                 {isKo ? "// 조건에 맞는 멤버가 없습니다." : "// no members match these filters"}
               </p>
             </div>
@@ -264,7 +264,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
               </div>
 
               {totalPages > 1 ? (
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-[11px] dark:text-white">
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3 tkad-type-caption dark:text-white">
                   <Link
                     href={directoryHref({
                       role: roleFilter,

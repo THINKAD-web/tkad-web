@@ -26,7 +26,7 @@ export function MediaTrustBadges({
           className={cn(
             "inline-flex items-center rounded-full border font-semibold",
             compact
-              ? "border-border/70 bg-card/95 px-2 py-0.5 text-[10px] shadow-sm backdrop-blur-sm"
+              ? "border-border/70 bg-card/95 px-2 py-0.5 tkad-type-note shadow-sm backdrop-blur-sm"
               : "border-border/60 bg-muted/50 px-2.5 py-1 text-xs",
           )}
         >

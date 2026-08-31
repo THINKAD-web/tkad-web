@@ -206,7 +206,7 @@ export function PlanCartLineCard({
           <div className="mt-2 flex flex-wrap items-end justify-between gap-2 border-t border-gray-100 pt-2 dark:border-white/10">
             <div className="min-w-0">
               {showMultiOptionSummary ? (
-                <p className="text-[11px] text-gray-500 dark:text-white/50">
+                <p className="tkad-type-caption text-gray-500 dark:text-white/50">
                   {multiOptionSummary}
                   {units > 1
                     ? isKo
@@ -216,7 +216,7 @@ export function PlanCartLineCard({
                 </p>
               ) : null}
               {showQtyBreakdown ? (
-                <p className="text-[11px] text-gray-500 dark:text-white/50">
+                <p className="tkad-type-caption text-gray-500 dark:text-white/50">
                   {formatCatalogPriceFieldWon(unitMonthlyWon, locale)}
                   {isKo ? "/월" : "/mo"}
                   <span className="mx-1">×</span>
@@ -227,21 +227,21 @@ export function PlanCartLineCard({
               ) : null}
               <p className="text-sm font-extrabold tabular-nums tkad-home-accent-text">
                 {formatCatalogPriceFieldWon(lineMonthlyWon, locale)}
-                <span className="ml-0.5 text-xs font-semibold text-gray-500 dark:text-white/50">
+                <span className="ml-0.5 tkad-type-title text-gray-500 dark:text-white/50">
                   {isKo ? "/월" : "/mo"}
                 </span>
               </p>
               {itemAddonTotal > 0 ? (
-                <p className="text-[11px] font-semibold tabular-nums text-amber-800 dark:text-amber-200">
+                <p className="tkad-type-caption font-semibold tabular-nums text-amber-800 dark:text-amber-200">
                   {isKo ? "부가비용 " : "Add-ons "}
                   {formatCatalogPriceFieldWon(itemAddonTotal, locale)}
                 </p>
               ) : null}
-              <p className="text-[10px] text-gray-400 dark:text-white/40">
+              <p className="tkad-type-note text-gray-400 dark:text-white/40">
                 {isKo ? "제작비·부가세 별도" : "Production & VAT extra"}
               </p>
             </div>
-            <span className="inline-block rounded-full dark:bg-white/10 bg-gray-200 px-2 py-0.5 text-[10px] font-semibold dark:text-white/70 text-gray-600">
+            <span className="inline-block rounded-full dark:bg-white/10 bg-gray-200 px-2 py-0.5 tkad-type-note font-semibold dark:text-white/70 text-gray-600">
               {planCartAddedFromLabel(item.addedFrom, isKo)}
             </span>
           </div>

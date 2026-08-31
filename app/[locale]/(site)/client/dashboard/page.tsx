@@ -347,7 +347,7 @@ export default function ClientDashboardPage() {
               <p>{m.text}</p>
               <p
                 className={cn(
-                  "mt-1 text-[10px] opacity-70",
+                  "mt-1 tkad-type-note opacity-70",
                   m.from === "client" ? "text-right" : "",
                 )}
               >
@@ -382,7 +382,7 @@ export default function ClientDashboardPage() {
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        <p className="text-[11px] text-muted-foreground">
+        <p className="tkad-type-caption text-muted-foreground">
           {isKo
             ? "데모: 자동 응답만 제공됩니다. 실서비스에서는 담당 팀과 연동됩니다."
             : "Demo: auto-replies only. Production connects to your account team."}
@@ -430,7 +430,7 @@ export default function ClientDashboardPage() {
                   <MessageCircle className="mr-1.5 h-4 w-4 text-gold" />
                   {isKo ? "1:1 채팅" : "Chat"}
                   {chatUnread > 0 ? (
-                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-cta px-1 text-[9px] font-bold dark:text-white text-gray-900">
+                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-cta px-1 tkad-type-note font-bold dark:text-white text-gray-900">
                       {chatUnread > 9 ? "9+" : chatUnread}
                     </span>
                   ) : null}
@@ -472,7 +472,7 @@ export default function ClientDashboardPage() {
                 <Zap className="h-4 w-4 text-amber-500" />
                 {isKo ? "실시간 누적 노출" : "Live impressions"}
               </CardTitle>
-              <CardDescription className="text-[11px]">
+              <CardDescription className="tkad-type-caption">
                 {isKo ? "집행 중 캠페인 합산 (데모 시뮬.)" : "Sum of live campaigns (demo)"}
               </CardDescription>
             </CardHeader>
@@ -480,7 +480,7 @@ export default function ClientDashboardPage() {
               <p className="text-2xl font-extrabold tabular-nums text-navy">
                 {formatImp(totalLiveImpressions, isKo)}
               </p>
-              <p className="mt-1 flex items-center gap-1 text-[11px] text-emerald-600">
+              <p className="mt-1 flex items-center gap-1 tkad-type-caption text-emerald-600">
                 <Radio className="h-3 w-3 animate-pulse" />
                 {isKo ? "4초마다 갱신" : "Updates every 4s"}
               </p>
@@ -498,7 +498,7 @@ export default function ClientDashboardPage() {
               <p className="text-2xl font-extrabold tabular-nums text-gold-dark">
                 {avgCtrLive != null ? `${avgCtrLive.toFixed(2)}%` : "—"}
               </p>
-              <p className="mt-1 text-[11px] text-muted-foreground">
+              <p className="mt-1 tkad-type-caption text-muted-foreground">
                 {isKo ? "집행 중 캠페인 기준" : "Across in-flight campaigns"}
               </p>
             </CardContent>
@@ -510,7 +510,7 @@ export default function ClientDashboardPage() {
                 <ChartPie className="h-4 w-4 text-gold" />
                 {isKo ? "예산 사용률" : "Budget used"}
               </CardTitle>
-              <CardDescription className="text-[11px]">
+              <CardDescription className="tkad-type-caption">
                 {isKo ? "등록된 모든 캠페인 예산" : "All budgeted projects"}
               </CardDescription>
             </CardHeader>
@@ -524,7 +524,7 @@ export default function ClientDashboardPage() {
                   style={{ width: `${budgetPct}%` }}
                 />
               </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">
+              <p className="mt-1 tkad-type-caption text-muted-foreground">
                 {formatImp(budgetAggregate.spent, isKo)} /{" "}
                 {formatImp(budgetAggregate.total, isKo)}
                 {isKo ? "만원" : " (₩10K)"}
@@ -565,7 +565,7 @@ export default function ClientDashboardPage() {
                     >
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-navy">{p.title}</p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="tkad-type-caption text-muted-foreground">
                           {p.id}
                         </p>
                       </div>
@@ -614,7 +614,7 @@ export default function ClientDashboardPage() {
                   <CardHeader className="pb-2">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="tkad-type-caption text-muted-foreground">
                           {p.id}
                         </p>
                         <CardTitle className="text-base text-navy">
@@ -631,33 +631,33 @@ export default function ClientDashboardPage() {
                     {p.status === "in_progress" && p.metrics && imp !== null ? (
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div className="rounded-xl bg-navy/5 p-3">
-                          <p className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                          <p className="flex items-center gap-1.5 tkad-type-caption font-medium text-muted-foreground">
                             <LineChart className="h-3.5 w-3.5 text-gold" />
                             {isKo ? "누적 노출 (실시간)" : "Impressions (live)"}
                           </p>
                           <p className="mt-1 text-xl font-extrabold tabular-nums text-navy">
                             {formatImp(imp, isKo)}
                           </p>
-                          <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          <p className="mt-0.5 tkad-type-note text-muted-foreground">
                             +{formatImp(p.metrics.impressionsPerDay, isKo)}{" "}
                             {isKo ? "/ 일 추정 증가" : "/ day est."}
                           </p>
                           <div className="mt-2 border-t border-slate-200/80 pt-2">
-                            <p className="mb-1 text-[10px] font-medium text-muted-foreground">
+                            <p className="mb-1 tkad-type-note font-medium text-muted-foreground">
                               {isKo ? "노출 추이" : "Trend"}
                             </p>
                             <ClientMiniSparkline values={spark} />
                           </div>
                         </div>
                         <div className="rounded-xl bg-navy/5 p-3">
-                          <p className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                          <p className="flex items-center gap-1.5 tkad-type-caption font-medium text-muted-foreground">
                             <BarChart3 className="h-3.5 w-3.5 text-gold" />
                             CTR
                           </p>
                           <p className="mt-1 text-xl font-extrabold tabular-nums text-gold-dark">
                             {p.metrics.ctrPercent.toFixed(2)}%
                           </p>
-                          <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          <p className="mt-0.5 tkad-type-note text-muted-foreground">
                             {isKo
                               ? p.metrics.ctrTrendKo
                               : p.metrics.ctrTrendEn}
@@ -722,7 +722,7 @@ export default function ClientDashboardPage() {
                       </Button>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3 text-[11px] text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3 tkad-type-caption text-muted-foreground">
                       <User className="h-3.5 w-3.5 text-gold" />
                       <span>
                         {p.manager.name} · {p.manager.email}
@@ -762,10 +762,10 @@ export default function ClientDashboardPage() {
                     >
                       <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-navy">
+                        <p className="tkad-type-title text-navy">
                           {isKo ? alert.titleKo : alert.titleEn}
                         </p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="tkad-type-caption text-muted-foreground">
                           {alert.date} · {project.id}
                         </p>
                       </div>
@@ -787,7 +787,7 @@ export default function ClientDashboardPage() {
           <Card className="border-navy/10 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[520px] text-left text-sm">
-                <thead className="border-b border-slate-100 bg-slate-50 text-xs font-semibold text-muted-foreground">
+                <thead className="border-b border-slate-100 bg-slate-50 tkad-type-title text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 sm:px-6">{isKo ? "프로젝트" : "Project"}</th>
                     <th className="px-4 py-3">{isKo ? "기간" : "Period"}</th>
@@ -801,7 +801,7 @@ export default function ClientDashboardPage() {
                     <tr key={p.id} className="hover:bg-slate-50/80">
                       <td className="px-4 py-3 sm:px-6">
                         <p className="font-medium text-navy">{p.title}</p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="tkad-type-caption text-muted-foreground">
                           {p.id}
                         </p>
                       </td>
@@ -845,7 +845,7 @@ export default function ClientDashboardPage() {
       >
         <MessageCircle className="h-6 w-6" />
         {chatUnread > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-cta px-1 text-[10px] font-bold">
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-cta px-1 tkad-type-note font-bold">
             {chatUnread > 9 ? "9+" : chatUnread}
           </span>
         ) : null}
@@ -876,7 +876,7 @@ export default function ClientDashboardPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-auto max-w-full whitespace-normal rounded-xl border-navy/15 px-3 py-2 text-left text-[11px] leading-snug"
+                className="h-auto max-w-full whitespace-normal rounded-xl border-navy/15 px-3 py-2 text-left tkad-type-caption leading-snug"
                 onClick={() => appendPreset(line)}
               >
                 {line}

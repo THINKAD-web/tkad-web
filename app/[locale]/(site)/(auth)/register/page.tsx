@@ -129,7 +129,7 @@ function RegisterPageInner() {
                     ? "Google·카카오·네이버로 간편 가입하거나 이메일로 가입하세요"
                     : "Sign up with Google, Kakao, Naver, or email"}
                 </p>
-                <p className="mt-2 text-center text-xs font-semibold text-[color:var(--qp-accent)]">
+                <p className="mt-2 text-center tkad-type-title text-[color:var(--qp-accent)]">
                   {isKo ? proTrialSignupHeadlineKo() : proTrialSignupHeadlineEn()}
                 </p>
                 <p className={`mt-1 ${authSubtitleClass}`}>
@@ -143,7 +143,7 @@ function RegisterPageInner() {
                 <div className="absolute inset-0 flex items-center" aria-hidden>
                   <div className="w-full border-t dark:border-white/12 border-gray-200" />
                 </div>
-                <p className="relative text-center font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white">
+                <p className="relative text-center tkad-type-label dark:text-white">
                   {isKo ? "또는 이메일로" : "Or with email"}
                 </p>
               </div>

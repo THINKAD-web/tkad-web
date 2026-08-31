@@ -267,13 +267,13 @@ export default function AdminReportNewClient() {
     <div className="space-y-6 p-6 text-foreground">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/80">
+          <p className="tkad-type-label text-[color:var(--qp-accent)]/80">
             [ TREND REPORT ]
           </p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight">
             트렌드 리포트 작성
           </h1>
-          <p className="mt-1 text-[11px] text-muted-foreground">
+          <p className="mt-1 tkad-type-caption text-muted-foreground">
             {`// Tavily 뉴스 + Claude 초안 → 검토 후 발행 · 상태: ${status}`}
           </p>
         </div>
@@ -301,7 +301,7 @@ export default function AdminReportNewClient() {
       <section className="rounded-2xl border border-border/60 bg-card/40 p-4 backdrop-blur">
         <div className="flex flex-wrap items-end gap-4">
           <div>
-            <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <label className="tkad-type-label text-muted-foreground">
               대상 월
             </label>
             <Input
@@ -344,11 +344,11 @@ export default function AdminReportNewClient() {
 
       {reportId || titleKo ? (
         <section className="space-y-4 rounded-2xl border border-border/60 bg-card/30 p-4">
-          <h2 className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          <h2 className="tkad-type-label text-muted-foreground">
             [ 초안 편집 ]
           </h2>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground">
+            <label className="tkad-type-title text-muted-foreground">
               제목
             </label>
             <Input
@@ -358,7 +358,7 @@ export default function AdminReportNewClient() {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground">
+            <label className="tkad-type-title text-muted-foreground">
               핵심 요약 (줄당 1 bullet, 3줄 권장)
             </label>
             <Textarea
@@ -369,7 +369,7 @@ export default function AdminReportNewClient() {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground">
+            <label className="tkad-type-title text-muted-foreground">
               본문 (Markdown, h2 3개 + 시사점)
             </label>
             <Textarea
@@ -381,7 +381,7 @@ export default function AdminReportNewClient() {
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="text-xs font-semibold text-muted-foreground">
+              <label className="tkad-type-title text-muted-foreground">
                 시장 트렌드 bullets
               </label>
               <Textarea
@@ -392,7 +392,7 @@ export default function AdminReportNewClient() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-muted-foreground">
+              <label className="tkad-type-title text-muted-foreground">
                 DOOH 트렌드 bullets
               </label>
               <Textarea

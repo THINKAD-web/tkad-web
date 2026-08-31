@@ -76,12 +76,12 @@ export function MyPlanReportPageClient() {
           <div className="mb-8">
             <Link
               href="/my/plan"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 dark:text-white/55 dark:hover:text-white"
+              className="inline-flex items-center gap-1 tkad-type-title text-gray-500 hover:text-gray-800 dark:text-white/55 dark:hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
               {tPlan("cart")}
             </Link>
-            <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-fg-muted)]">
+            <p className="mt-3 tkad-type-label text-[color:var(--qp-fg-muted)]">
               [ MY PLAN REPORT ]
             </p>
             <h1 className="mt-2 text-2xl font-black text-gray-900 dark:text-white md:text-3xl">
@@ -101,7 +101,7 @@ export function MyPlanReportPageClient() {
             </div>
           ) : cart.items.length === 0 ? (
             <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-10 text-center dark:border-white/12 dark:bg-white/5">
-              <p className="text-sm font-semibold text-gray-700 dark:text-white/80">
+              <p className="tkad-type-title text-gray-700 dark:text-white/80">
                 {isKo ? "담은 매체가 없습니다" : "No media in your plan"}
               </p>
               <div className="mt-6">
@@ -112,7 +112,7 @@ export function MyPlanReportPageClient() {
             </div>
           ) : catalogError ? (
             <div className="rounded-[28px] border border-rose-200 bg-rose-50 p-8 text-center dark:border-rose-500/30 dark:bg-rose-500/10">
-              <p className="text-sm font-semibold text-rose-800 dark:text-rose-100">
+              <p className="tkad-type-title text-rose-800 dark:text-rose-100">
                 {isKo
                   ? "매체 목록을 불러오지 못했습니다."
                   : "Could not load media catalog."}

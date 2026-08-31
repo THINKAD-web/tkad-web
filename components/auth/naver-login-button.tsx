@@ -39,7 +39,7 @@ function NaverLoginButtonInner({ className }: Props) {
     >
       <span
         aria-hidden
-        className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-white text-[10px] font-black text-[#03C75A]"
+        className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-white tkad-type-note font-black text-[#03C75A]"
       >
         N
       </span>

@@ -84,7 +84,7 @@ export function AdminExitSurveyCard() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-bold tracking-tight">이탈 설문 — “어렵다”의 정체</h2>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
+          <p className="mt-0.5 tkad-type-caption text-muted-foreground">
             매체 상세·플래너 이탈 시점 1클릭 응답 · 길을 못 찾는지 / 정보 부족인지 / 복잡한지 구분
           </p>
         </div>
@@ -95,7 +95,7 @@ export function AdminExitSurveyCard() {
               type="button"
               onClick={() => setPeriod(p)}
               className={
-                "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors " +
+                "rounded-lg px-3 py-1.5 tkad-type-title transition-colors " +
                 (period === p ? "bg-[color:var(--qp-accent)] text-white" : "text-muted-foreground hover:bg-muted/40")
               }
             >
@@ -129,7 +129,7 @@ export function AdminExitSurveyCard() {
           {data.surfaces.map((s) => (
             <div key={s.surface}>
               <div className="mb-1.5 flex items-baseline justify-between">
-                <span className="text-sm font-semibold">
+                <span className="tkad-type-title">
                   {SURFACE_LABEL[s.surface] ?? s.surface}
                 </span>
                 <span className="text-xs text-muted-foreground">{num(s.total)}건</span>

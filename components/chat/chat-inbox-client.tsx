@@ -89,7 +89,7 @@ export function ChatInboxClient({ side }: { side: "advertiser" | "owner" }) {
                   </p>
                 ) : null}
                 {overdue ? (
-                  <p className="mt-1 text-xs font-semibold text-amber-600">
+                  <p className="mt-1 tkad-type-title text-amber-600">
                     {t("slaOverdue")}
                   </p>
                 ) : null}

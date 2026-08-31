@@ -246,7 +246,7 @@ export function ChatRoomClient({ roomId }: { roomId: string }) {
         {room.side === "owner" && !room.ownerReplied && room.slaDueAt ? (
           <p className="mt-2 text-xs text-amber-600">{t("slaHint")}</p>
         ) : null}
-        <p className="mt-2 text-[11px] text-muted-foreground">{t("anonNotice")}</p>
+        <p className="mt-2 tkad-type-caption text-muted-foreground">{t("anonNotice")}</p>
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
@@ -264,7 +264,7 @@ export function ChatRoomClient({ roomId }: { roomId: string }) {
                 isSystem && "mx-auto max-w-full items-center",
               )}
             >
-              <span className="mb-0.5 text-[10px] font-display uppercase tracking-wider text-muted-foreground">
+              <span className="mb-0.5 tkad-type-note font-display uppercase tracking-wider text-muted-foreground">
                 {m.displayLabel}
                 {m.isAutoReply ? ` · ${t("autoReply")}` : ""}
               </span>
@@ -323,7 +323,7 @@ export function ChatRoomClient({ roomId }: { roomId: string }) {
               type="button"
               onClick={() => void sendMessage(q)}
               disabled={sending}
-              className="rounded-full border border-border/80 px-2.5 py-1 text-[11px] hover:bg-muted"
+              className="rounded-full border border-border/80 px-2.5 py-1 tkad-type-caption hover:bg-muted"
             >
               {q}
             </button>
@@ -335,7 +335,7 @@ export function ChatRoomClient({ roomId }: { roomId: string }) {
             type="button"
             onClick={() => void createQuote()}
             disabled={quoteLoading}
-            className="w-full rounded-xl border border-primary/40 bg-primary/10 py-2 text-sm font-semibold text-primary"
+            className="w-full rounded-xl border border-primary/40 bg-primary/10 py-2 tkad-type-title text-primary"
           >
             {quoteLoading ? t("working") : t("createQuote")}
           </button>
@@ -353,7 +353,7 @@ export function ChatRoomClient({ roomId }: { roomId: string }) {
               type="button"
               onClick={() => void acceptQuote()}
               disabled={quoteLoading}
-              className="flex-1 rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground"
+              className="flex-1 rounded-xl bg-primary py-2 tkad-type-title text-primary-foreground"
             >
               {t("acceptQuote")}
             </button>

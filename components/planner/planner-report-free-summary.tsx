@@ -91,7 +91,7 @@ export function PlannerReportFreeSummary({
           {mediaLines.map((line) => (
             <li
               key={line.key}
-              className="text-sm font-semibold leading-snug text-gray-900 dark:text-white"
+              className="tkad-type-title leading-snug text-gray-900 dark:text-white"
             >
               · {line.name}
               {line.quantityLabel ? (

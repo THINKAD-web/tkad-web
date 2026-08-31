@@ -38,7 +38,7 @@ export default function AdminQuotesHubClient() {
           type="button"
           onClick={() => setTab("sales")}
           className={cn(
-            "rounded-full px-4 py-2 font-display text-[11px] font-black uppercase tracking-[0.18em] transition-colors",
+            "rounded-full px-4 py-2 font-display tkad-type-caption font-black uppercase tracking-[0.18em] transition-colors",
             tab === "sales"
               ? "bg-[color:var(--qp-accent-soft)] text-foreground shadow-sm ring-1 ring-[color:var(--qp-accent)]/25"
               : "text-muted-foreground hover:text-foreground",
@@ -50,7 +50,7 @@ export default function AdminQuotesHubClient() {
           type="button"
           onClick={() => setTab("booking")}
           className={cn(
-            "rounded-full px-4 py-2 font-display text-[11px] font-black uppercase tracking-[0.18em] transition-colors",
+            "rounded-full px-4 py-2 font-display tkad-type-caption font-black uppercase tracking-[0.18em] transition-colors",
             tab === "booking"
               ? "bg-[color:var(--qp-accent-soft)] text-foreground shadow-sm ring-1 ring-[color:var(--qp-accent)]/25"
               : "text-muted-foreground hover:text-foreground",

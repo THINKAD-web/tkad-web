@@ -884,7 +884,7 @@ export default function MediaBrowseClient({
                   className="mt-0.5 h-4 w-4 shrink-0 text-hermes sm:mt-0"
                   aria-hidden
                 />
-                <p className="min-w-0 text-[13px] leading-snug text-foreground sm:text-sm">
+                <p className="min-w-0 tkad-type-body leading-snug text-foreground sm:text-sm">
                   <span className="font-semibold">
                     {tMedia("browseCatalogVerifiedBadge")}
                   </span>
@@ -914,7 +914,7 @@ export default function MediaBrowseClient({
                   className="mb-4"
                 />
                 <div className="mb-4 rounded-2xl border border-border bg-card p-4">
-                  <p className="mb-2 text-sm font-semibold text-foreground">
+                  <p className="mb-2 tkad-type-title text-foreground">
                     {isKo ? "가격 범위" : "Price range"}
                   </p>
                   <p className="mb-3 text-xs tabular-nums text-hermes">
@@ -963,7 +963,7 @@ export default function MediaBrowseClient({
                   <button
                     type="button"
                     onClick={resetFilters}
-                    className="inline-flex items-center gap-1 rounded-full border border-hermes/30 bg-hermes/15 px-3 py-1.5 text-xs font-semibold text-hermes"
+                    className="inline-flex items-center gap-1 rounded-full border border-hermes/30 bg-hermes/15 px-3 py-1.5 tkad-type-title text-hermes"
                   >
                     {isKo ? "필터 초기화 ×" : "Reset filters ×"}
                   </button>
@@ -1001,7 +1001,7 @@ export default function MediaBrowseClient({
                 <button
                   type="button"
                   onClick={togglePrecisionFilters}
-                  className="inline-flex w-full items-center justify-center gap-2 border-2 border-border bg-card px-4 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background sm:w-auto sm:self-start"
+                  className="inline-flex w-full items-center justify-center gap-2 border-2 border-border bg-card px-4 py-3 tkad-type-label text-foreground transition-colors hover:bg-foreground hover:text-background sm:w-auto sm:self-start"
                 >
                   {precisionFiltersOpen
                     ? t("media.advancedFiltersHide")
@@ -1014,10 +1014,10 @@ export default function MediaBrowseClient({
                 </button>
                 {!precisionFiltersOpen ? (
                   <div className="border-2 border-border bg-muted px-5 py-4 text-left">
-                    <p className="text-[15px] font-bold leading-snug tracking-tight text-foreground sm:text-base">
+                    <p className="text-base font-bold leading-snug tracking-tight text-foreground sm:text-base">
                       {t("media.advancedFiltersCollapsedHint")}
                     </p>
-                    <p className="mt-2 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                    <p className="mt-2 tkad-type-meta leading-relaxed tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersCollapsedSubhint")}
                     </p>
                   </div>
@@ -1027,10 +1027,10 @@ export default function MediaBrowseClient({
               {lgUp && precisionFiltersOpen ? (
                 <div className="space-y-4">
                   <div className="border-2 border-border bg-card px-5 py-4">
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                    <p className="tkad-type-label text-muted-foreground">
                       [ {t("media.advancedFiltersSectionLabel")} ]
                     </p>
-                    <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
+                    <p className="mt-1 tkad-type-caption tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersSectionSubtext")}
                     </p>
                     <p className="mt-3 text-sm leading-relaxed text-foreground">
@@ -1054,10 +1054,10 @@ export default function MediaBrowseClient({
                     <SheetTitle className="text-left text-base font-bold tracking-tight text-foreground">
                       {t("media.advancedFiltersSectionLabel")}
                     </SheetTitle>
-                    <p className="text-[11px] tracking-tight text-muted-foreground">
+                    <p className="tkad-type-caption tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersSectionSubtext")}
                     </p>
-                    <p className="pt-1 text-[12px] leading-relaxed text-foreground">
+                    <p className="pt-1 tkad-type-meta leading-relaxed text-foreground">
                       {tMedia("precisionFilterPanelIntro")}
                     </p>
                   </SheetHeader>
@@ -1154,7 +1154,7 @@ export default function MediaBrowseClient({
                         setCatalogPage(1);
                       }}
                       className={cn(
-                        "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-md border px-3 text-xs font-semibold leading-none transition-colors sm:text-sm",
+                        "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-md border px-3 tkad-type-title leading-none transition-colors sm:text-sm",
                         instantOnlyFilter
                           ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
                           : "border-border bg-card text-foreground hover:border-emerald-500/40",
@@ -1211,7 +1211,7 @@ export default function MediaBrowseClient({
                       <button
                         type="button"
                         onClick={() => setBrowseMode("list")}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors ${ browseMode === "list" ? "bg-hero-void text-hero-fg" : "text-foreground hover:bg-muted" }`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 tkad-type-label transition-colors ${ browseMode === "list" ? "bg-hero-void text-hero-fg" : "text-foreground hover:bg-muted" }`}
                       >
                         <LayoutList className="h-3.5 w-3.5" />
                         {t("media.browseViewList")}
@@ -1219,7 +1219,7 @@ export default function MediaBrowseClient({
                       <button
                         type="button"
                         onClick={() => setBrowseMode("map")}
-                        className={`inline-flex items-center gap-1.5 border-l-2 border-border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors ${ browseMode === "map" ? "bg-hero-void text-hero-fg" : "text-foreground hover:bg-muted" }`}
+                        className={`inline-flex items-center gap-1.5 border-l-2 border-border px-3 py-1.5 tkad-type-label transition-colors ${ browseMode === "map" ? "bg-hero-void text-hero-fg" : "text-foreground hover:bg-muted" }`}
                       >
                         <MapIcon className="h-3.5 w-3.5" />
                         {t("media.browseViewMap")}
@@ -1277,7 +1277,7 @@ export default function MediaBrowseClient({
                     className="mb-4 flex flex-col gap-3 border-2 border-accent bg-card px-4 py-3 text-sm leading-relaxed text-foreground sm:flex-row sm:items-center sm:justify-between"
                   >
                     <p className="min-w-0">
-                      <span className="mr-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+                      <span className="mr-2 tkad-type-label text-accent">
                         {`// RELAXED`}
                       </span>
                       {tMedia("precisionFilterRelaxedBanner")}
@@ -1300,7 +1300,7 @@ export default function MediaBrowseClient({
                     role="status"
                     className="mb-4 border-2 border-border bg-muted px-4 py-3 text-sm leading-relaxed text-foreground"
                   >
-                    <span className="mr-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                    <span className="mr-2 tkad-type-label text-muted-foreground">
                       {`// PADDED`}
                     </span>
                     {tMedia("catalogMinPadBanner", {
@@ -1367,7 +1367,7 @@ export default function MediaBrowseClient({
                                 </h3>
                                 <p className="mt-1.5 font-display text-sm font-bold tabular-nums text-foreground">
                                   {formatCatalogPriceFieldWon(mapSelectedMedia.price)}
-                                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
+                                  <span className="ml-1 tkad-type-note font-normal uppercase tracking-[0.18em] text-muted-foreground">
                                     ·{" "}
                                     {tMedia(
                                       mediaPricePeriodTranslationKey(
@@ -1377,7 +1377,7 @@ export default function MediaBrowseClient({
                                   </span>
                                 </p>
                                 <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
-                                <p className="mt-1.5 flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                                <p className="mt-1.5 flex items-center gap-1.5 tkad-type-label text-muted-foreground">
                                   <Users
                                     className="h-3 w-3 shrink-0 text-accent"
                                     aria-hidden

@@ -250,7 +250,7 @@ export default async function GuidesIndexPage({ params }: Props) {
 
           {seoGuides.length > 0 ? (
             <NeonSection tone="qp" className="pt-10 pb-8 sm:pt-14">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+              <p className="tkad-type-label dark:text-white text-gray-500">
                 [ {sectionCopy.seoGuides} ]
               </p>
               <ul className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -258,7 +258,7 @@ export default async function GuidesIndexPage({ params }: Props) {
                   <li key={g.slug}>
                     <Link
                       href={`/guides/${g.slug}`}
-                      className="flex items-center justify-between gap-3 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-4 text-sm font-semibold dark:text-white text-gray-900 transition hover:dark:bg-white/10 hover:bg-gray-100"
+                      className="flex items-center justify-between gap-3 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-4 tkad-type-title dark:text-white text-gray-900 transition hover:dark:bg-white/10 hover:bg-gray-100"
                     >
                       <span className="min-w-0 truncate">{g.titleKo}</span>
                       <ArrowRight className="h-4 w-4 shrink-0 dark:text-white text-gray-400" />
@@ -313,7 +313,7 @@ export default async function GuidesIndexPage({ params }: Props) {
 
             {otherGuides.length > 0 ? (
               <div className="mt-12">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="tkad-type-label dark:text-white text-gray-500">
                   [ {sectionCopy.moreGuides} ]
                 </p>
                 <ul className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -321,7 +321,7 @@ export default async function GuidesIndexPage({ params }: Props) {
                     <li key={g.slug}>
                       <Link
                         href={`/guides/${g.slug}`}
-                        className="flex items-center justify-between gap-3 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-4 text-sm font-semibold dark:text-white text-gray-900 transition hover:dark:bg-white/10 bg-gray-100"
+                        className="flex items-center justify-between gap-3 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-4 tkad-type-title dark:text-white text-gray-900 transition hover:dark:bg-white/10 bg-gray-100"
                       >
                         <span className="min-w-0 truncate">
                           {isKo ? g.titleKo : g.titleEn}

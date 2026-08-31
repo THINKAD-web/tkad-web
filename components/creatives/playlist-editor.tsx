@@ -190,7 +190,7 @@ export function PlaylistEditor({ initial }: { initial?: PlaylistDetail }) {
         {/* 헤더 입력 */}
         <div className="space-y-3 rounded-2xl border-2 border-border bg-card p-4 sm:p-5">
           <div>
-            <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+            <p className="mb-2 tkad-type-label text-accent">
               [ 이름 ]
             </p>
             <input
@@ -203,7 +203,7 @@ export function PlaylistEditor({ initial }: { initial?: PlaylistDetail }) {
             />
           </div>
           <div>
-            <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+            <p className="mb-2 tkad-type-label text-accent">
               [ 설명 ]
             </p>
             <textarea
@@ -221,10 +221,10 @@ export function PlaylistEditor({ initial }: { initial?: PlaylistDetail }) {
         <div className="rounded-2xl border-2 border-border bg-card p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+              <p className="tkad-type-label text-accent">
                 [ 소재 ({items.length}) ]
               </p>
-              <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="tkad-type-label text-muted-foreground">
                 총 길이 {totalDuration}초
               </p>
             </div>
@@ -258,7 +258,7 @@ export function PlaylistEditor({ initial }: { initial?: PlaylistDetail }) {
                   key={it.key}
                   className="flex items-center gap-3 rounded-lg border-2 border-border bg-muted/30 p-2 sm:p-3"
                 >
-                  <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-[10px] font-black text-accent-foreground">
+                  <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent tkad-type-note font-black text-accent-foreground">
                     {idx + 1}
                   </span>
                   <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
@@ -275,11 +275,11 @@ export function PlaylistEditor({ initial }: { initial?: PlaylistDetail }) {
                     <p className="line-clamp-1 text-sm font-bold text-foreground">
                       {it.creative.name}
                     </p>
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                    <p className="tkad-type-label text-muted-foreground">
                       {it.creative.type}
                     </p>
                   </div>
-                  <label className="inline-flex h-8 items-center gap-1 rounded-md border-2 border-border bg-card px-2 text-[11px] text-foreground">
+                  <label className="inline-flex h-8 items-center gap-1 rounded-md border-2 border-border bg-card px-2 tkad-type-caption text-foreground">
                     <Clock className="h-3 w-3 text-muted-foreground" />
                     <input
                       type="number"
@@ -330,7 +330,7 @@ export function PlaylistEditor({ initial }: { initial?: PlaylistDetail }) {
         {/* 스케줄 규칙 */}
         <div className="rounded-2xl border-2 border-border bg-card p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+            <p className="tkad-type-label text-accent">
               [ DOOH 스케줄 규칙 (선택) ]
             </p>
             <BtnBlock type="button" variant="secondary" size="sm" onClick={addRule}>
@@ -373,21 +373,21 @@ export function PlaylistEditor({ initial }: { initial?: PlaylistDetail }) {
       {/* 사이드 — 요약 */}
       <aside className="space-y-3">
         <div className="rounded-2xl border-2 border-accent bg-accent/10 p-4 sm:p-5">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ 요약 ]
           </p>
-          <dl className="mt-3 space-y-2 text-[12px] text-foreground/85">
+          <dl className="mt-3 space-y-2 tkad-type-meta text-foreground/85">
             <Row label="소재 수" value={`${items.length} 개`} />
             <Row label="총 길이" value={`${totalDuration} 초`} />
             <Row label="규칙 수" value={`${rules.length} 개`} />
           </dl>
-          <p className="mt-3 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
+          <p className="mt-3 inline-flex items-center gap-1 tkad-type-label text-accent">
             <CheckCircle2 className="h-3 w-3" />
             {initial ? "변경 사항이 곧 반영됩니다" : "저장 후 즉시 사용 가능"}
           </p>
         </div>
         <div className="rounded-2xl border-2 border-dashed border-border bg-muted/30 p-4 sm:p-5 text-sm text-muted-foreground">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="tkad-type-label text-muted-foreground">
             [ 도움말 ]
           </p>
           <ul className="mt-2 space-y-1.5 leading-relaxed">
@@ -428,7 +428,7 @@ function RuleRow({
         <select
           value={rule.creativeId}
           onChange={(e) => onChange({ creativeId: e.target.value })}
-          className="h-9 flex-1 rounded-md border-2 border-border bg-card px-2 text-[12px] font-bold text-foreground focus:border-accent focus:outline-none"
+          className="h-9 flex-1 rounded-md border-2 border-border bg-card px-2 tkad-type-meta font-bold text-foreground focus:border-accent focus:outline-none"
         >
           {items.map((it, idx) => (
             <option key={it.creativeId} value={it.creativeId}>
@@ -460,7 +460,7 @@ function RuleRow({
                 }
               }}
               className={cn(
-                "inline-flex h-7 w-7 items-center justify-center rounded-full border-2  text-[11px] font-bold transition-colors",
+                "inline-flex h-7 w-7 items-center justify-center rounded-full border-2  tkad-type-caption font-bold transition-colors",
                 isOn
                   ? "border-accent bg-accent text-accent-foreground"
                   : "border-border bg-card text-muted-foreground hover:border-accent/50",
@@ -470,19 +470,19 @@ function RuleRow({
             </button>
           );
         })}
-        <span className="ml-2 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="ml-2 inline-flex items-center gap-1 tkad-type-label text-muted-foreground">
           <input
             type="time"
             value={rule.startTime ?? ""}
             onChange={(e) => onChange({ startTime: e.target.value || undefined })}
-            className="h-7 rounded-md border-2 border-border bg-card px-1.5 text-[11px] text-foreground focus:border-accent focus:outline-none"
+            className="h-7 rounded-md border-2 border-border bg-card px-1.5 tkad-type-caption text-foreground focus:border-accent focus:outline-none"
           />
           <span>~</span>
           <input
             type="time"
             value={rule.endTime ?? ""}
             onChange={(e) => onChange({ endTime: e.target.value || undefined })}
-            className="h-7 rounded-md border-2 border-border bg-card px-1.5 text-[11px] text-foreground focus:border-accent focus:outline-none"
+            className="h-7 rounded-md border-2 border-border bg-card px-1.5 tkad-type-caption text-foreground focus:border-accent focus:outline-none"
           />
         </span>
       </div>

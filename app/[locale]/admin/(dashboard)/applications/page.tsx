@@ -214,7 +214,7 @@ function AdminMediaApplicationsPage() {
         <button
           type="button"
           onClick={() => setStatusFilter("all")}
-          className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${statusFilter === "all" ? "bg-primary text-primary-foreground" : ""}`}
+          className={`rounded-md border px-3 py-1.5 tkad-type-title ${statusFilter === "all" ? "bg-primary text-primary-foreground" : ""}`}
         >
           {t("filterAll")}
         </button>
@@ -223,7 +223,7 @@ function AdminMediaApplicationsPage() {
             key={s}
             type="button"
             onClick={() => setStatusFilter(s)}
-            className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${statusFilter === s ? "bg-primary text-primary-foreground" : ""}`}
+            className={`rounded-md border px-3 py-1.5 tkad-type-title ${statusFilter === s ? "bg-primary text-primary-foreground" : ""}`}
           >
             {labelMediaApplicationStatus(s, true)}
           </button>
@@ -329,7 +329,7 @@ function AdminMediaApplicationsPage() {
                   </p>
                 ) : null}
                 <label className="grid gap-1">
-                  <span className="text-xs font-semibold">{t("reviewNote")}</span>
+                  <span className="tkad-type-title">{t("reviewNote")}</span>
                   <textarea
                     rows={3}
                     className="w-full rounded-md border bg-background px-2 py-1.5 text-sm"
@@ -342,7 +342,7 @@ function AdminMediaApplicationsPage() {
                     type="button"
                     disabled={acting}
                     onClick={() => void patchStatus("REVIEWING")}
-                    className="rounded-md border px-3 py-1.5 text-xs font-semibold"
+                    className="rounded-md border px-3 py-1.5 tkad-type-title"
                   >
                     {t("statusReviewing")}
                   </button>
@@ -350,7 +350,7 @@ function AdminMediaApplicationsPage() {
                     type="button"
                     disabled={acting}
                     onClick={() => void patchStatus("REJECTED")}
-                    className="inline-flex items-center gap-1 rounded-md border border-destructive px-3 py-1.5 text-xs font-semibold text-destructive"
+                    className="inline-flex items-center gap-1 rounded-md border border-destructive px-3 py-1.5 tkad-type-title text-destructive"
                   >
                     <X className="h-3 w-3" />
                     {t("statusReject")}
@@ -359,7 +359,7 @@ function AdminMediaApplicationsPage() {
                     type="button"
                     disabled={acting || detail.status === "APPROVED"}
                     onClick={() => void approve()}
-                    className="inline-flex items-center gap-1 rounded-md bg-[#FF6600] px-3 py-1.5 text-xs font-semibold dark:text-white text-gray-900"
+                    className="inline-flex items-center gap-1 rounded-md bg-[#FF6600] px-3 py-1.5 tkad-type-title dark:text-white text-gray-900"
                   >
                     {acting ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -372,7 +372,7 @@ function AdminMediaApplicationsPage() {
                 {detail.createdMediaId ? (
                   <a
                     href={`/${locale}/admin/medias/${detail.createdMediaId}/edit`}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+                    className="inline-flex items-center gap-1 tkad-type-title text-primary"
                   >
                     {t("editCreatedMedia")}
                     <ExternalLink className="h-3 w-3" />

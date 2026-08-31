@@ -57,7 +57,7 @@ export function ReferralPageClient() {
     <HomeLandingDayNight>
       <div className="tkad-landing-neon mx-auto max-w-lg px-4 py-10">
         <div className="tkad-glass-surface tkad-neon-border rounded-[28px] border p-6 sm:p-8">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+          <p className="tkad-type-label text-primary">
             {t("referralEyebrow")}
           </p>
           <h1 className="mt-2 text-2xl font-black">{t("referralTitle")}</h1>

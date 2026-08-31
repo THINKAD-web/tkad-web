@@ -127,11 +127,11 @@ export default function AdminContentPage() {
       <div className="flex flex-wrap items-center gap-3">
         <FileText className="h-8 w-8 text-primary" />
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="tkad-type-label text-muted-foreground">
             [ CONTENT CMS ]
           </p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight">콘텐츠 관리</h1>
-          <p className="mt-1 text-[11px] text-muted-foreground">
+          <p className="mt-1 tkad-type-caption text-muted-foreground">
             AI 자동 생성 초안 검토 · 편집 · 발행
           </p>
         </div>

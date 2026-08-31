@@ -83,7 +83,7 @@ export function MediaMobileBottomBar({
           <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
           {isKo ? "필터" : "Filter"}
           {activeFilterCount > 0 ? (
-            <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-violet-500 px-1.5 text-[11px] font-bold leading-none text-white">
+            <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-violet-500 px-1.5 tkad-type-caption font-bold leading-none text-white">
               {activeFilterCount}
             </span>
           ) : null}

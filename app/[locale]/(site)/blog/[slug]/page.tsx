@@ -160,7 +160,7 @@ export default async function BlogSeoPostPage({ params }: Props) {
           <div className="mx-auto max-w-3xl px-4 sm:px-6">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-hermes"
+              className="inline-flex items-center gap-1.5 tkad-type-title text-hermes"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               {isKo ? "블로그 목록" : "Back to blog"}
@@ -206,7 +206,7 @@ export default async function BlogSeoPostPage({ params }: Props) {
                     <li key={m.id}>
                       <Link
                         href={`/media/${m.id}`}
-                        className="text-sm font-semibold text-hermes hover:underline"
+                        className="tkad-type-title text-hermes hover:underline"
                       >
                         {isKo ? m.name : m.nameEn || m.name}
                       </Link>

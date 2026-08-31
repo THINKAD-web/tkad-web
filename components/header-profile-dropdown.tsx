@@ -141,7 +141,7 @@ export function HeaderProfileDropdown({
               />
             ) : (
               <>
-          <p className="truncate px-3 py-2 text-xs font-semibold text-gray-500 dark:text-white/50">
+          <p className="truncate px-3 py-2 tkad-type-title text-gray-500 dark:text-white/50">
             {session.name}
           </p>
 
@@ -174,7 +174,7 @@ export function HeaderProfileDropdown({
               }}
               className="mx-2 mb-1 flex items-center justify-between gap-2 rounded-lg border border-violet-400/30 bg-violet-500/10 px-3 py-2 text-xs font-bold text-violet-800 dark:text-violet-200"
             >
-              <span className="rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-700 dark:border-white/15 dark:bg-white/10 dark:text-white/80">
+              <span className="rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-gray-700 dark:border-white/15 dark:bg-white/10 dark:text-white/80">
                 FREE
               </span>
               <span>{isKo ? "PRO 업그레이드 →" : "Upgrade to PRO →"}</span>
@@ -244,7 +244,7 @@ export function HeaderProfileDropdown({
                   ? "다크 모드"
                   : "Dark mode"}
               {isAutoThemeMode() ? (
-                <span className="ml-auto text-[10px] text-gray-400">{isKo ? "자동" : "Auto"}</span>
+                <span className="ml-auto tkad-type-note text-gray-400">{isKo ? "자동" : "Auto"}</span>
               ) : null}
             </button>
           ) : null}

@@ -246,7 +246,7 @@ export function CommunityCommentsSection({
     <div className="rounded-[32px] border dark:border-white/10 border-gray-200 dark:bg-black bg-white/18 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur sm:p-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.24em] dark:text-white">
+          <p className="tkad-type-label dark:text-white">
             [ Conversation ]
           </p>
           <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] dark:text-white text-gray-900 sm:text-3xl">
@@ -255,7 +255,7 @@ export function CommunityCommentsSection({
               : `Comments ${comments.length.toLocaleString()}`}
           </h2>
         </div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white">
+        <p className="tkad-type-label dark:text-white">
           {isKo
             ? `${comments.length.toLocaleString()}개 댓글`
             : `${comments.length.toLocaleString()} comments`}
@@ -263,7 +263,7 @@ export function CommunityCommentsSection({
       </div>
 
       {comments.length === 0 ? (
-        <p className="mt-6 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-6 text-center font-display text-[12px] uppercase tracking-[0.22em] dark:text-white">
+        <p className="mt-6 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-6 text-center font-display tkad-type-meta uppercase tracking-[0.22em] dark:text-white">
           {isKo ? "// 첫 댓글을 작성해주세요." : "// be the first to comment"}
         </p>
       ) : (

@@ -33,7 +33,7 @@ export function AdminQuoteTopSticky({
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
+          <p className="tkad-type-caption font-semibold uppercase tracking-[0.2em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
             {title}
           </p>
           {summary ? (
@@ -43,7 +43,7 @@ export function AdminQuoteTopSticky({
         <div className="flex w-full shrink-0 flex-col gap-2 sm:max-w-md lg:items-end">
           {emailBanner ? (
             <p
-              className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold leading-snug text-amber-950 dark:border-amber-500/40 dark:bg-amber-950/50 dark:text-amber-100"
+              className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 tkad-type-title leading-snug text-amber-950 dark:border-amber-500/40 dark:bg-amber-950/50 dark:text-amber-100"
               role="status"
             >
               {emailBanner}
@@ -69,7 +69,7 @@ export function AdminQuoteTopSticky({
             {contractLabel}
           </button>
           {blockReason ? (
-            <p className="text-sm font-semibold leading-snug text-amber-900 dark:text-amber-200">
+            <p className="tkad-type-title leading-snug text-amber-900 dark:text-amber-200">
               {blockReason}
             </p>
           ) : null}

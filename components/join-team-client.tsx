@@ -11,7 +11,7 @@ import { FullPageSpinner, Spinner } from "@/components/ui/spinner";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
 const gradientBtn =
-  "inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-3 text-sm font-semibold dark:text-white text-gray-900 shadow-[0_8px_28px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95 disabled:opacity-50";
+  "inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-3 tkad-type-title dark:text-white text-gray-900 shadow-[0_8px_28px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95 disabled:opacity-50";
 
 function JoinTeamClientInner() {
   const searchParams = useSearchParams();

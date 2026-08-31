@@ -403,7 +403,7 @@ export default function AdminQuotesListClient() {
                             >
                               {row.quoteNumber}
                             </Link>
-                            <p className="mt-0.5 text-sm font-semibold text-foreground">
+                            <p className="mt-0.5 tkad-type-title text-foreground">
                               {client.primary}
                             </p>
                             <p className="text-xs text-muted-foreground">{client.secondary}</p>
@@ -412,7 +412,7 @@ export default function AdminQuotesListClient() {
                             <p className="text-sm font-bold tabular-nums text-foreground">
                               ₩{formatWon(row.total)}
                             </p>
-                            <p className="text-[10px] text-muted-foreground">
+                            <p className="tkad-type-note text-muted-foreground">
                               {formatDate(row.createdAt)}
                             </p>
                           </div>

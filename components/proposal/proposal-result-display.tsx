@@ -105,7 +105,7 @@ export function ProposalResultDisplay({
       </div>
 
       <section className={glassCard}>
-        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes">
+        <h2 className="tkad-type-label text-hermes">
           [ {t("sectionOverview")} ]
         </h2>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed dark:text-white text-gray-800">
@@ -114,7 +114,7 @@ export function ProposalResultDisplay({
       </section>
 
       <section className={glassCard}>
-        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes">
+        <h2 className="tkad-type-label text-hermes">
           [ {t("sectionStrategy")} ]
         </h2>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed dark:text-white text-gray-800">
@@ -123,7 +123,7 @@ export function ProposalResultDisplay({
       </section>
 
       <section className={glassCard}>
-        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-pink-300">
+        <h2 className="tkad-type-label text-pink-300">
           [ {t("sectionMediaMix")} ]
         </h2>
         <ul className="mt-4 space-y-4">
@@ -138,11 +138,11 @@ export function ProposalResultDisplay({
                   {row.budgetSharePct}%
                 </span>
               </div>
-              <p className="mt-1 text-xs font-semibold dark:text-white text-gray-500">{row.role}</p>
+              <p className="mt-1 tkad-type-title dark:text-white text-gray-500">{row.role}</p>
               <p className="mt-2 text-sm dark:text-white text-gray-700">{row.rationale}</p>
               <Link
                 href={`/media/${encodeURIComponent(row.mediaId)}`}
-                className="mt-2 inline-block text-xs font-semibold text-hermes hover:underline"
+                className="mt-2 inline-block tkad-type-title text-hermes hover:underline"
               >
                 {t("viewMedia")}
               </Link>
@@ -153,7 +153,7 @@ export function ProposalResultDisplay({
 
       <section className={cn(glassCard, "grid gap-4 sm:grid-cols-2")}>
         <div>
-          <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
+          <h2 className="tkad-type-label dark:text-white text-gray-600">
             [ {t("sectionBudget")} ]
           </h2>
           <ul className="mt-3 space-y-2 text-sm dark:text-white text-gray-800">
@@ -169,7 +169,7 @@ export function ProposalResultDisplay({
           </ul>
         </div>
         <div>
-          <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
+          <h2 className="tkad-type-label dark:text-white text-gray-600">
             [ {t("sectionMetrics")} ]
           </h2>
           <dl className="mt-3 space-y-3 text-sm">
@@ -203,7 +203,7 @@ export function ProposalResultDisplay({
       </section>
 
       <section className={glassCard}>
-        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
+        <h2 className="tkad-type-label dark:text-white text-gray-600">
           [ {t("sectionTimeline")} ]
         </h2>
         <ol className="mt-4 space-y-4">
@@ -226,7 +226,7 @@ export function ProposalResultDisplay({
       </section>
 
       <section className={glassCard}>
-        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-emerald-300">
+        <h2 className="tkad-type-label text-emerald-300">
           [ {t("sectionOutcomes")} ]
         </h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm dark:text-white text-gray-800">

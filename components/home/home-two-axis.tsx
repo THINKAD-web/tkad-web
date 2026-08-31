@@ -24,7 +24,7 @@ export async function HomeTwoAxis() {
 
   const ctaClass = cn(
     "mt-auto inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md px-4 py-2.5",
-    "text-sm font-semibold transition-colors",
+    "tkad-type-title transition-colors",
   );
 
   return (
@@ -35,7 +35,7 @@ export async function HomeTwoAxis() {
     >
       <div className="mx-auto max-w-5xl">
         <div className="mb-4 md:mb-6">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+          <p className="tkad-type-label text-hermes">
             {t("eyebrow")}
           </p>
           <h2

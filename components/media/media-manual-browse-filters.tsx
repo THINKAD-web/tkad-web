@@ -686,7 +686,7 @@ export function MediaManualBrowseFilters({
   const chipRowWrap = "flex flex-wrap gap-2 pb-1";
 
   const countBadgeClass =
-    "ml-0.5 tabular-nums text-[10px] font-semibold opacity-70";
+    "ml-0.5 tabular-nums tkad-type-note font-semibold opacity-70";
 
   const renderCountBadge = (count: number | null) => {
     if (optionCountsLoading && count == null) {
@@ -828,7 +828,7 @@ export function MediaManualBrowseFilters({
         ) : null}
         {includeHotspots && showHotspotRegions ? (
           <div className="mb-3">
-            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
+            <p className="mb-1.5 tkad-type-note font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
               {isKo ? "인기" : "Popular"}
             </p>
             <HotspotRegionChips
@@ -841,7 +841,7 @@ export function MediaManualBrowseFilters({
           </div>
         ) : null}
         {includeHotspots ? (
-          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]/80">
+          <p className="mb-1.5 tkad-type-note font-bold uppercase tracking-wide text-[color:var(--qp-accent)]/80">
             {isKo ? "전체 지역" : "All regions"}
           </p>
         ) : null}
@@ -1370,7 +1370,7 @@ export function MediaManualBrowseFilters({
       <SlidersHorizontal className="h-4 w-4" aria-hidden />
       {isKo ? "필터" : "Filter"}
       {activeFilterCount > 0 ? (
-        <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1.5 text-[11px] font-bold leading-none text-white">
+        <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1.5 tkad-type-caption font-bold leading-none text-white">
           {activeFilterCount}
         </span>
       ) : null}
@@ -1397,7 +1397,7 @@ export function MediaManualBrowseFilters({
     >
       <SlidersHorizontal className="h-4 w-4" aria-hidden />
       {activeFilterCount > 0 ? (
-        <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1 text-[10px] font-bold leading-none text-white">
+        <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1 tkad-type-note font-bold leading-none text-white">
           {activeFilterCount}
         </span>
       ) : null}
@@ -1583,7 +1583,7 @@ export function MediaManualBrowseFilters({
                   aria-hidden
                 />
                 {activeFilterCount > 0 ? (
-                  <span className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1 text-[10px] font-bold leading-none text-white">
+                  <span className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1 tkad-type-note font-bold leading-none text-white">
                     {activeFilterCount}
                   </span>
                 ) : null}
@@ -1682,7 +1682,7 @@ export function MediaManualBrowseFilters({
               aria-hidden
             />
             {desktopFilterBadgeCount > 0 ? (
-              <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1.5 text-[11px] font-bold leading-none text-white">
+              <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1.5 tkad-type-caption font-bold leading-none text-white">
                 {desktopFilterBadgeCount}
               </span>
             ) : null}
@@ -1698,7 +1698,7 @@ export function MediaManualBrowseFilters({
                 <p className="text-sm font-bold text-gray-900 dark:text-white">
                   {isKo ? "필터" : "Filters"}
                   {collapsedFilterCount > 0 ? (
-                    <span className="ml-1.5 text-sm font-semibold text-[color:var(--qp-accent)]">
+                    <span className="ml-1.5 tkad-type-title text-[color:var(--qp-accent)]">
                       {collapsedFilterCount}
                     </span>
                   ) : null}
@@ -1783,7 +1783,7 @@ export function MediaManualBrowseFilters({
           <SlidersHorizontal className="h-4 w-4" aria-hidden />
           {isKo ? "필터" : "Filters"}
           {activeFilterCount > 0 ? (
-            <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1.5 text-[11px] font-bold leading-none text-white">
+            <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1.5 tkad-type-caption font-bold leading-none text-white">
               {activeFilterCount}
             </span>
           ) : null}

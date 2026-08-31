@@ -36,10 +36,10 @@ export function NeonFullPageSpinner({
             className="h-12 w-12 animate-spin rounded-full border-[3px] border-zinc-300 border-t-[color:var(--qp-accent)] sm:h-14 sm:w-14"
             aria-hidden
           />
-          <p className="font-display text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--qp-accent)] sm:text-base">
+          <p className="font-display tkad-type-title uppercase tracking-[0.22em] text-[color:var(--qp-accent)] sm:text-base">
             {label}
           </p>
-          <p className="max-w-xs font-mono text-[10px] uppercase tracking-[0.28em] text-zinc-500 dark:text-white/50 sm:text-xs">
+          <p className="max-w-xs font-mono tkad-type-note uppercase tracking-[0.28em] text-zinc-500 dark:text-white/50 sm:text-xs">
             // THINKAD
           </p>
         </div>

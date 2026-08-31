@@ -15,7 +15,7 @@ export async function IndustryPackageLinks({ slug, locale }: Props) {
   return (
     <section className="border-t border-border/80 bg-muted/50 py-12 sm:py-16">
       <div className="ui-container">
-        <p className="text-xs font-semibold text-muted-foreground sm:text-sm">
+        <p className="tkad-type-title text-muted-foreground sm:text-sm">
           {isKo ? "추천 패키지" : "Recommended packages"}
         </p>
         <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -36,7 +36,7 @@ export async function IndustryPackageLinks({ slug, locale }: Props) {
         <p className="mt-4">
           <Link
             href="/media/packages"
-            className="font-display text-xs font-medium uppercase tracking-[0.18em] text-accent underline-offset-4 hover:underline"
+            className="tkad-type-label text-accent underline-offset-4 hover:underline"
           >
             {isKo ? "전체 패키지 보기 →" : "View all packages →"}
           </Link>

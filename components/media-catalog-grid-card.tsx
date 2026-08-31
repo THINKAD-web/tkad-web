@@ -88,11 +88,11 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const thumbnailOverlays = (
     <>
       {media.catalogSource !== "network" && media.isVerified ? (
-        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hermes px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.2em] text-white shadow-sm">
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hermes px-2.5 py-1 tkad-type-label text-white shadow-sm">
           Verified
         </div>
       ) : media.catalogSource === "network" ? (
-        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hero-void px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.2em] text-hero-fg">
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hero-void px-2.5 py-1 tkad-type-label text-hero-fg">
           {tMedia("networkSitesBadge", {
             count: media.networkTotalLocations ?? 0,
           })}
@@ -101,7 +101,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
       {pickTrustBadgesForThumbnail(media.trustBadges).map((b, i) => (
         <div
           key={b.id}
-          className="absolute left-0 z-10 max-w-[calc(100%-0.5rem)] border-b-2 border-r-2 border-border bg-card/95 px-2 py-1 text-[10px] font-bold tracking-wide backdrop-blur-sm"
+          className="absolute left-0 z-10 max-w-[calc(100%-0.5rem)] border-b-2 border-r-2 border-border bg-card/95 px-2 py-1 tkad-type-note font-bold tracking-wide backdrop-blur-sm"
           style={{ top: `${i * 1.75}rem` }}
         >
           {b.emoji} {isKo ? b.labelKo : b.labelEn}
@@ -115,7 +115,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         >
           <span
             className={cn(
-              "flex h-4 w-4 items-center justify-center text-[11px] font-bold",
+              "flex h-4 w-4 items-center justify-center tkad-type-caption font-bold",
               props.selected
                 ? "bg-accent text-accent-foreground"
                 : "bg-card text-transparent",
@@ -131,7 +131,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         </div>
       ) : null}
       {popularIds?.has(media.id) ? (
-        <div className="absolute bottom-0 right-0 z-10 flex items-center gap-1 border-l-2 border-t-2 border-border bg-accent px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.2em] text-accent-foreground">
+        <div className="absolute bottom-0 right-0 z-10 flex items-center gap-1 border-l-2 border-t-2 border-border bg-accent px-2.5 py-1 tkad-type-label text-accent-foreground">
           <Flame className="h-3 w-3" />
           {isKo ? "인기" : "Hot"}
         </div>
@@ -164,7 +164,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           <span
             className={cn(
               "font-semibold text-foreground/85",
-              denseMobile ? "text-[10px] sm:text-sm" : "text-xs sm:text-sm",
+              denseMobile ? "tkad-type-note sm:text-sm" : "text-xs sm:text-sm",
             )}
           >
             {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)}
@@ -181,7 +181,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         <p
           className={cn(
             "line-clamp-2 leading-relaxed text-muted-foreground",
-            denseMobile ? "text-[11px] sm:text-sm" : "text-sm",
+            denseMobile ? "tkad-type-caption sm:text-sm" : "text-sm",
           )}
         >
           {formatMediaLocationShort(media, isKo)}
@@ -211,7 +211,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         <p
           className={cn(
             "mt-0.5 break-words font-black tabular-nums leading-snug",
-            denseMobile ? "text-[15px] sm:text-lg" : "text-lg",
+            denseMobile ? "text-base sm:text-lg" : "text-lg",
           )}
         >
           {formatMediaPriceWonWithSymbol(priceWon)}
@@ -219,7 +219,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
             <span
               className={cn(
                 "ml-1.5 font-normal text-muted-foreground",
-                denseMobile ? "text-[11px] sm:text-sm" : "text-sm",
+                denseMobile ? "tkad-type-caption sm:text-sm" : "text-sm",
               )}
             >
               · {tMedia(mediaPricePeriodTranslationKey(displayPeriod))}

@@ -48,7 +48,7 @@ export default async function ReportDashboardPage({
     <div className="min-h-screen bg-background">
       <section className="border-b-2 border-black bg-hero-void py-12 sm:py-14">
         <div className="ui-container">
-          <p className="flex flex-wrap items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#FF6600]">
+          <p className="flex flex-wrap items-center gap-2 tkad-type-label text-[#FF6600]">
             <span>[ Report ] / Dashboard // ooh activity</span>
             <CategoryHeroBetaBadge />
           </p>
@@ -63,13 +63,13 @@ export default async function ReportDashboardPage({
           <div className="mt-5 flex flex-wrap gap-2">
             <Link
               href="/report"
-              className="inline-flex items-center gap-1.5 border-2 border-foreground bg-card px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+              className="inline-flex items-center gap-1.5 border-2 border-foreground bg-card px-3 py-1.5 tkad-type-label text-foreground transition-colors hover:bg-foreground hover:text-background"
             >
               ← {isKo ? "리포트 아카이브" : "Report archive"}
             </Link>
             <Link
               href="/insights/market"
-              className="inline-flex items-center gap-1.5 border-2 border-[#FF6600] bg-[#FF6600]/10 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-[#FF6600] transition-colors hover:bg-[#FF6600] hover:dark:text-white text-gray-900"
+              className="inline-flex items-center gap-1.5 border-2 border-[#FF6600] bg-[#FF6600]/10 px-3 py-1.5 tkad-type-label text-[#FF6600] transition-colors hover:bg-[#FF6600] hover:dark:text-white text-gray-900"
             >
               PRO · {isKo ? "시장 인사이트" : "Market insights"} →
             </Link>

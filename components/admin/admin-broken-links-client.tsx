@@ -42,7 +42,7 @@ export function AdminBrokenLinksClient({ locale }: Props) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold tracking-tight">링크 헬스</h1>
-          <p className="mt-1 text-[11px] text-muted-foreground">
+          <p className="mt-1 tkad-type-caption text-muted-foreground">
             {`// 내부 URL fetch · 404·타임아웃 · /tools 리다이렉트 확인`}
           </p>
         </div>
@@ -50,7 +50,7 @@ export function AdminBrokenLinksClient({ locale }: Props) {
           type="button"
           onClick={() => void runScan()}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 tkad-type-title hover:bg-muted disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -70,28 +70,28 @@ export function AdminBrokenLinksClient({ locale }: Props) {
       {result ? (
         <>
           <section className="rounded-2xl border border-border/60 bg-card/40 p-4 backdrop-blur">
-            <p className="text-[11px] text-muted-foreground">
+            <p className="tkad-type-caption text-muted-foreground">
               {`// base ${result.baseUrl} · scanned ${result.scanned} · ok ${result.okCount} · broken ${result.broken.length} · redirects ${result.redirected.length}`}
             </p>
-            <p className="mt-1 text-[10px] text-muted-foreground">
+            <p className="mt-1 tkad-type-note text-muted-foreground">
               {new Date(result.checkedAt).toLocaleString("ko-KR")}
             </p>
           </section>
 
           <section className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur">
-            <h2 className="flex items-center gap-2 border-b border-border/60 px-4 py-3 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <h2 className="flex items-center gap-2 border-b border-border/60 px-4 py-3 tkad-type-label text-muted-foreground">
               <Link2 className="h-4 w-4 text-red-400/80" aria-hidden />
               [ Broken links — {result.broken.length} ]
             </h2>
             {result.broken.length === 0 ? (
-              <p className="px-4 py-8 text-center text-[11px] text-emerald-400/90">
+              <p className="px-4 py-8 text-center tkad-type-caption text-emerald-400/90">
                 깨진 링크 없음
               </p>
             ) : (
               <ul className="max-h-[420px] divide-y divide-border/50 overflow-y-auto">
                 {result.broken.map((row) => (
                   <li key={row.url} className="px-4 py-3">
-                    <p className="text-[10px] text-primary">{row.path}</p>
+                    <p className="tkad-type-note text-primary">{row.path}</p>
                     <a
                       href={row.url}
                       target="_blank"
@@ -100,7 +100,7 @@ export function AdminBrokenLinksClient({ locale }: Props) {
                     >
                       {row.url}
                     </a>
-                    <p className="mt-1 text-[10px] text-amber-300">
+                    <p className="mt-1 tkad-type-note text-amber-300">
                       {row.status != null ? `HTTP ${row.status}` : "—"}
                       {row.error ? ` · ${row.error}` : ""}
                     </p>
@@ -112,17 +112,17 @@ export function AdminBrokenLinksClient({ locale }: Props) {
 
           {result.redirected.length > 0 ? (
             <section className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur">
-              <h2 className="border-b border-border/60 px-4 py-3 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              <h2 className="border-b border-border/60 px-4 py-3 tkad-type-label text-muted-foreground">
                 [ Redirects — {result.redirected.length} ]
               </h2>
               <ul className="max-h-64 divide-y divide-border/50 overflow-y-auto">
                 {result.redirected.map((row) => (
                   <li key={row.url} className="px-4 py-3">
-                    <p className="text-[10px]">{row.path}</p>
-                    <p className="mt-1 truncate text-[10px] text-muted-foreground">
+                    <p className="tkad-type-note">{row.path}</p>
+                    <p className="mt-1 truncate tkad-type-note text-muted-foreground">
                       → {row.finalUrl}
                     </p>
-                    <p className="mt-1 text-[10px] text-sky-300">
+                    <p className="mt-1 tkad-type-note text-sky-300">
                       HTTP {row.status}
                       {row.path.startsWith("/tools") ? " · /tools → /planner OK" : ""}
                     </p>
@@ -133,12 +133,12 @@ export function AdminBrokenLinksClient({ locale }: Props) {
           ) : null}
         </>
       ) : (
-        <p className="text-[11px] text-muted-foreground">
+        <p className="tkad-type-caption text-muted-foreground">
           {`// 「전수 스캔」을 눌러 시작하세요.`}
         </p>
       )}
 
-      <p className="text-[10px] text-muted-foreground">
+      <p className="tkad-type-note text-muted-foreground">
         API:{" "}
         <a
           href={`${prefix}/api/admin/health/links`}

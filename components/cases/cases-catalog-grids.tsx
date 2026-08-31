@@ -26,7 +26,7 @@ export async function CasesCatalogGrids({
         <section className="mb-12">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <p className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
+              <p className="flex items-center gap-2 tkad-type-label text-[var(--qp-accent)]">
                 <Sparkles className="h-3.5 w-3.5" />
                 [ {t("recommendedTitle")} ]
               </p>

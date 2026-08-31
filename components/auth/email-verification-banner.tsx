@@ -112,7 +112,7 @@ export function EmailVerificationBanner({ className, onDismiss, onVerified }: Pr
           aria-hidden
         />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-foreground">
+          <p className="tkad-type-title text-foreground">
             {isKo ? "이메일 인증이 필요합니다" : "Verify your email"}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
@@ -125,7 +125,7 @@ export function EmailVerificationBanner({ className, onDismiss, onVerified }: Pr
                 : "Use the link we sent at signup, or resend from settings."}
           </p>
           {error && (
-            <p className="mt-1 text-[11px] text-destructive">{error}</p>
+            <p className="mt-1 tkad-type-caption text-destructive">{error}</p>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -133,7 +133,7 @@ export function EmailVerificationBanner({ className, onDismiss, onVerified }: Pr
             type="button"
             onClick={() => void refreshStatus()}
             disabled={sending || refreshing}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/90 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60 dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/15"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/90 px-3 py-1.5 tkad-type-title text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60 dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/15"
           >
             {refreshing ? <Spinner size="sm" /> : <RefreshCw className="h-3.5 w-3.5" />}
             Refresh
@@ -142,14 +142,14 @@ export function EmailVerificationBanner({ className, onDismiss, onVerified }: Pr
             type="button"
             onClick={() => void resend()}
             disabled={sending || refreshing || sent}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/90 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60 dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/15"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/90 px-3 py-1.5 tkad-type-title text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60 dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/15"
           >
             {sending && <Spinner size="sm" />}
             {isKo ? "인증 메일 재발송" : "Resend email"}
           </button>
           <Link
             href="/my/settings"
-            className="rounded-lg border border-border bg-card/80 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-800 dark:hover:dark:bg-white/10 bg-gray-100"
+            className="rounded-lg border border-border bg-card/80 px-3 py-1.5 tkad-type-title text-foreground transition-colors hover:bg-muted/60 dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-800 dark:hover:dark:bg-white/10 bg-gray-100"
           >
             {isKo ? "설정" : "Settings"}
           </Link>

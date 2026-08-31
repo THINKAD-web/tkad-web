@@ -70,7 +70,7 @@ export function FaqPageClient({ items, isKo }: Props) {
               type="button"
               onClick={() => setActiveTab(tab.value)}
               className={cn(
-                "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
+                "rounded-full px-3.5 py-1.5 tkad-type-title transition-colors sm:text-sm",
                 activeTab === tab.value
                   ? "tkad-qp-cta text-white"
                   : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
@@ -115,12 +115,12 @@ export function FaqPageClient({ items, isKo }: Props) {
                   >
                     <span
                       aria-hidden
-                      className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[color:var(--qp-accent)] text-[11px] font-bold text-white"
+                      className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[color:var(--qp-accent)] tkad-type-caption font-bold text-white"
                     >
                       Q
                     </span>
                     <span className="min-w-0 flex-1 space-y-2">
-                      <span className="inline-block rounded-full bg-[color:var(--qp-accent)]/12 px-2.5 py-0.5 text-[11px] font-semibold text-[color:var(--qp-accent)]">
+                      <span className="inline-block rounded-full bg-[color:var(--qp-accent)]/12 px-2.5 py-0.5 tkad-type-caption font-semibold text-[color:var(--qp-accent)]">
                         {isKo ? badge.labelKo : badge.labelEn}
                       </span>
                       <span className="block font-semibold leading-snug text-gray-900 dark:text-white">
@@ -145,7 +145,7 @@ export function FaqPageClient({ items, isKo }: Props) {
                       <div className="flex items-start gap-3 border-t border-gray-100 px-4 pb-5 pt-4 dark:border-white/10 md:gap-4 md:px-5">
                         <span
                           aria-hidden
-                          className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-[11px] font-bold text-gray-600 dark:bg-white/10 dark:text-white/70"
+                          className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 tkad-type-caption font-bold text-gray-600 dark:bg-white/10 dark:text-white/70"
                         >
                           A
                         </span>

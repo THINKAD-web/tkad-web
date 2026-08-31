@@ -72,7 +72,7 @@ function Card({
       <p className="mt-1 text-2xl font-black tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
         {value}
       </p>
-      {sub ? <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p> : null}
+      {sub ? <p className="mt-0.5 tkad-type-caption text-muted-foreground">{sub}</p> : null}
     </div>
   );
 }
@@ -170,7 +170,7 @@ function DailyCostChart({ daily }: { daily: DailyPoint[] }) {
           />
         ))}
       </div>
-      <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
+      <div className="mt-1.5 flex justify-between tkad-type-note text-muted-foreground">
         <span>{pts[0]?.date.slice(5)}</span>
         <span>{pts[pts.length - 1]?.date.slice(5)}</span>
       </div>
@@ -247,7 +247,7 @@ export function AdminAiUsageDashboard() {
               type="button"
               onClick={() => setPeriod(p.key)}
               className={
-                "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors " +
+                "rounded-lg px-3 py-1.5 tkad-type-title transition-colors " +
                 (period === p.key
                   ? "bg-[color:var(--qp-accent)] text-white"
                   : "text-muted-foreground hover:bg-gray-50 dark:hover:bg-white/5")
@@ -260,12 +260,12 @@ export function AdminAiUsageDashboard() {
         <button
           type="button"
           onClick={() => void load()}
-          className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-gray-200 px-3 text-xs font-semibold dark:border-white/10"
+          className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-gray-200 px-3 tkad-type-title dark:border-white/10"
         >
           <RefreshCw className={"h-3.5 w-3.5 " + (loading ? "animate-spin" : "")} />
           새로고침
         </button>
-        <span className="text-[11px] text-muted-foreground">선택 기간 합계 ↓</span>
+        <span className="tkad-type-caption text-muted-foreground">선택 기간 합계 ↓</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -321,7 +321,7 @@ export function AdminAiUsageDashboard() {
                     <tr key={f.feature} className="border-b dark:border-white/5">
                       <td className="p-3">
                         <p className="font-semibold">{f.featureLabel}</p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="tkad-type-caption text-muted-foreground">
                           {f.models.join(", ")}
                         </p>
                       </td>
@@ -363,7 +363,7 @@ export function AdminAiUsageDashboard() {
                     <tr key={m.model} className="border-b dark:border-white/5">
                       <td className="p-3">
                         <p className="font-semibold">{m.modelLabel}</p>
-                        <p className="text-[11px] text-muted-foreground">{m.model}</p>
+                        <p className="tkad-type-caption text-muted-foreground">{m.model}</p>
                       </td>
                       <td className="p-3 text-right tabular-nums">{num(m.calls)}</td>
                       <td className="p-3 text-right tabular-nums">{num(m.tokens)}</td>
@@ -379,7 +379,7 @@ export function AdminAiUsageDashboard() {
         </div>
       )}
 
-      <p className="text-[11px] text-muted-foreground">
+      <p className="tkad-type-caption text-muted-foreground">
         ※ 비용은 모델별 입력/출력 단가(환경변수 ANTHROPIC_*_PER_1M)로 계산한 추정치이며 실제
         청구액과 다를 수 있습니다. 신규 통합 로깅(AiUsageLog) 적용 이후 호출만 집계됩니다.
       </p>

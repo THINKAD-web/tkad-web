@@ -152,7 +152,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
             <div className="mt-6 space-y-3">
               {accepted ? (
                 <>
-                  <p className="text-sm font-semibold text-emerald-600">
+                  <p className="tkad-type-title text-emerald-600">
                     {isKo
                       ? "제안이 수락되었습니다. 아래에서 견적 확인 후 전자계약을 진행하세요."
                       : "Accepted. Review the quote and sign the e-contract below."}
@@ -175,7 +175,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
                   </div>
                 </>
               ) : (
-                <p className="text-sm font-semibold text-emerald-600">
+                <p className="tkad-type-title text-emerald-600">
                   {isKo
                     ? "제안이 접수되었습니다. 수락 시 이 화면과 이메일로 계약 링크가 열립니다."
                     : "Submitted. If accepted, contract links appear here and by email."}
@@ -190,7 +190,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
                 void submit();
               }}
             >
-              <label className="block text-xs font-semibold">
+              <label className="block tkad-type-title">
                 {isKo ? "희망 월 단가 (만원)" : "Target monthly (×10K KRW)"}
                 <input
                   type="number"
@@ -201,7 +201,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
                   className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
                 />
               </label>
-              <label className="block text-xs font-semibold">
+              <label className="block tkad-type-title">
                 Email
                 <input
                   type="email"
@@ -211,7 +211,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
                   className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
                 />
               </label>
-              <label className="block text-xs font-semibold">
+              <label className="block tkad-type-title">
                 {isKo ? "연락처" : "Phone"}
                 <input
                   type="tel"
@@ -221,7 +221,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
                   className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
                 />
               </label>
-              <label className="block text-xs font-semibold">
+              <label className="block tkad-type-title">
                 {isKo ? "회사명 (선택)" : "Company (optional)"}
                 <input
                   type="text"
@@ -230,7 +230,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
                   className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
                 />
               </label>
-              <label className="block text-xs font-semibold">
+              <label className="block tkad-type-title">
                 {isKo ? "메모 (선택)" : "Note (optional)"}
                 <textarea
                   value={message}

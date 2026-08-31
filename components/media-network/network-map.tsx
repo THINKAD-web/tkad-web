@@ -100,7 +100,7 @@ export function NetworkMap({ isKo, mapPoints }: Props) {
 
           {selected ? (
             <div className="absolute bottom-4 left-4 right-4 z-[500] rounded-2xl border border-gray-200 bg-white/95 p-4 text-gray-900 shadow-lg backdrop-blur sm:left-auto sm:right-4 sm:max-w-xs dark:border-white/10 dark:bg-white/10 dark:text-white">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-300">
+              <p className="tkad-type-note font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-300">
                 {selected.regionLabelKo}
               </p>
               <p className="mt-1 font-bold">{selected.name}</p>

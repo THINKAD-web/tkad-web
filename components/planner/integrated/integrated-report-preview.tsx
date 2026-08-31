@@ -355,7 +355,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           </section>
         </IntegratedProBlindSection>
 
-        <p className="text-[10px] text-gray-500 dark:text-gray-400">
+        <p className="tkad-type-note text-gray-500 dark:text-gray-400">
           {isKo
             ? "본 제안서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체·플랫폼 재고에 따라 달라질 수 있습니다."
             : "This proposal uses THINKAD internal estimates; actual delivery may vary by inventory."}

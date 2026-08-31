@@ -95,7 +95,7 @@ export function CampaignProofSection({
 
   return (
     <section ref={sectionRef} id="proof" className="mt-8 scroll-mt-24">
-      <h2 className="mb-3 flex items-center gap-2 font-display text-[11px] font-black uppercase tracking-[0.24em]">
+      <h2 className="mb-3 flex items-center gap-2 font-display tkad-type-caption font-black uppercase tracking-[0.24em]">
         {isKo ? "인증 사진" : "Proof photos"}
         {unseen ? (
           <span
@@ -127,7 +127,7 @@ export function CampaignProofSection({
                 unoptimized
               />
               {p.caption ? (
-                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-[10px] dark:text-white text-gray-900">
+                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 tkad-type-note dark:text-white text-gray-900">
                   {p.caption}
                 </span>
               ) : null}

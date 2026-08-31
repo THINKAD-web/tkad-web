@@ -231,7 +231,7 @@ export default function AdminPlanSnapshotsPage() {
             </span>
             <Link
               href={`/${locale}/admin/plan-snapshots`}
-              className="text-xs font-semibold text-[color:var(--qp-accent)] underline dark:text-[color:var(--qp-accent)]"
+              className="tkad-type-title text-[color:var(--qp-accent)] underline dark:text-[color:var(--qp-accent)]"
             >
               필터 해제
             </Link>
@@ -273,7 +273,7 @@ export default function AdminPlanSnapshotsPage() {
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm font-semibold"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 tkad-type-title"
           >
             <RefreshCw className="h-4 w-4" />
             새로고침
@@ -308,7 +308,7 @@ export default function AdminPlanSnapshotsPage() {
                     {!userIdFilter ? (
                       <Link
                         href={`/${locale}/admin/plan-snapshots?userId=${row.user.id}`}
-                        className="mb-0.5 block text-xs font-semibold text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
+                        className="mb-0.5 block tkad-type-title text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
                       >
                         {row.user.name} · {row.user.email}
                       </Link>
@@ -342,7 +342,7 @@ export default function AdminPlanSnapshotsPage() {
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full min-w-[56rem] border-collapse text-sm">
           <thead>
-            <tr className="border-b bg-muted/50 text-left text-xs font-semibold text-muted-foreground">
+            <tr className="border-b bg-muted/50 text-left tkad-type-title text-muted-foreground">
               <th className="px-3 py-2.5">제목 / 목표</th>
               <th className="px-3 py-2.5">작성자</th>
               <th className="px-3 py-2.5">구성</th>
@@ -478,7 +478,7 @@ export default function AdminPlanSnapshotsPage() {
             ) : detail ? (
               <div className="mt-4 space-y-5 text-sm">
                 <section className="rounded-lg border border-border bg-muted/20 p-3">
-                  <p className="text-xs font-semibold text-muted-foreground">작성자</p>
+                  <p className="tkad-type-title text-muted-foreground">작성자</p>
                   <p className="mt-1 font-semibold">{detail.user.name}</p>
                   <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
                     <div>
@@ -560,7 +560,7 @@ export default function AdminPlanSnapshotsPage() {
                 ) : null}
 
                 <section>
-                  <p className="mb-2 text-xs font-semibold text-muted-foreground">
+                  <p className="mb-2 tkad-type-title text-muted-foreground">
                     매체 ({detail.items.length})
                   </p>
                   <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border p-2 text-xs">
@@ -579,7 +579,7 @@ export default function AdminPlanSnapshotsPage() {
 
                 {detail.reportSummary?.regionalBreakdown?.length ? (
                   <section>
-                    <p className="mb-2 text-xs font-semibold text-muted-foreground">
+                    <p className="mb-2 tkad-type-title text-muted-foreground">
                       지역별 요약
                     </p>
                     <ul className="space-y-1 text-xs">
@@ -593,7 +593,7 @@ export default function AdminPlanSnapshotsPage() {
                 ) : null}
 
                 <section className="rounded-lg border border-dashed border-border p-3">
-                  <p className="text-xs font-semibold text-muted-foreground">
+                  <p className="tkad-type-title text-muted-foreground">
                     사례·커뮤니티 승격
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -604,7 +604,7 @@ export default function AdminPlanSnapshotsPage() {
                       type="button"
                       disabled={promoting !== null}
                       onClick={() => void promote("case")}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 tkad-type-title text-white disabled:opacity-50"
                     >
                       {promoting === "case" ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -617,7 +617,7 @@ export default function AdminPlanSnapshotsPage() {
                       type="button"
                       disabled={promoting !== null}
                       onClick={() => void promote("community")}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 tkad-type-title text-white disabled:opacity-50"
                     >
                       {promoting === "community" ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -665,7 +665,7 @@ export default function AdminPlanSnapshotsPage() {
                 </section>
 
                 <section>
-                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">
+                  <label className="mb-1 block tkad-type-title text-muted-foreground">
                     운영 메모
                   </label>
                   <textarea
@@ -679,7 +679,7 @@ export default function AdminPlanSnapshotsPage() {
                     type="button"
                     disabled={savingNote}
                     onClick={() => void saveAdminNote()}
-                    className="mt-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
+                    className="mt-2 rounded-lg bg-primary px-4 py-2 tkad-type-title text-primary-foreground"
                   >
                     메모 저장
                   </button>

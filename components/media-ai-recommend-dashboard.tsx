@@ -61,7 +61,7 @@ function RecommendDashboardActionCell({
 }) {
   const Icon = action.icon;
   const className =
-    "flex h-full min-h-[2.75rem] w-full items-center justify-center gap-2 px-3 py-2.5 text-center text-sm font-semibold text-foreground transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--qp-accent)]/40";
+    "flex h-full min-h-[2.75rem] w-full items-center justify-center gap-2 px-3 py-2.5 text-center tkad-type-title text-foreground transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--qp-accent)]/40";
 
   if (action.kind === "link") {
     return (
@@ -266,7 +266,7 @@ export default function MediaAiRecommendDashboard({
         {/* 상단 헤더 — TKAD bot 테마 */}
         <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2 text-center sm:text-left">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+            <p className="tkad-type-label text-accent">
               [ {isKo ? "AI MEDIA EXPLORER · TKAD BOT" : "AI MEDIA EXPLORER · TKAD BOT"} ]
             </p>
             <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -282,7 +282,7 @@ export default function MediaAiRecommendDashboard({
               });
               if (!questionLine) return null;
               return (
-                <p className="mx-auto max-w-xl rounded-xl border border-border/80 bg-muted/60 px-3 py-2 text-left text-[12px] leading-relaxed text-foreground sm:mx-0 sm:text-sm">
+                <p className="mx-auto max-w-xl rounded-xl border border-border/80 bg-muted/60 px-3 py-2 text-left tkad-type-meta leading-relaxed text-foreground sm:mx-0 sm:text-sm">
                   <span className="font-semibold text-accent">
                     {isKo ? "질문: " : "Q: "}
                   </span>
@@ -290,7 +290,7 @@ export default function MediaAiRecommendDashboard({
                 </p>
               );
             })()}
-            <p className="max-w-xl text-[12px] leading-relaxed tracking-tight text-muted-foreground sm:text-sm">
+            <p className="max-w-xl tkad-type-meta leading-relaxed tracking-tight text-muted-foreground sm:text-sm">
               {`// `}{isKo
                 ? "TKAD bot이 골라온 매체입니다. 여기서 견적·상담까지 완료할 수 있어요."
                 : "Placements TKAD bot picked for you. Finish with a quote or expert consult here."}
@@ -305,7 +305,7 @@ export default function MediaAiRecommendDashboard({
               <span className="relative z-10 text-[34px] leading-none" aria-hidden>
                 🤖
               </span>
-              <span className="pointer-events-none absolute -bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-border/80 bg-card/80 px-2.5 py-1 font-display text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-xs backdrop-blur">
+              <span className="pointer-events-none absolute -bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-border/80 bg-card/80 px-2.5 py-1 font-display tkad-type-note font-black uppercase tracking-[0.22em] text-muted-foreground shadow-xs backdrop-blur">
                 TKAD bot
               </span>
             </div>
@@ -316,11 +316,11 @@ export default function MediaAiRecommendDashboard({
         <section className="space-y-6">
           <div className="min-w-0 space-y-3">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-              <h3 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
+              <h3 className="flex items-center gap-2 tkad-type-label text-foreground">
                 <MapPin className="h-4 w-4 text-accent" />
                 [ {isKo ? "MEDIA MAP" : "MEDIA MAP"} ]
               </h3>
-              <p className="text-[10px] tracking-tight text-muted-foreground">
+              <p className="tkad-type-note tracking-tight text-muted-foreground">
                 {`// `}{isKo
                   ? "핀을 클릭하면 해당 매체의 핵심 정보를 바로 볼 수 있어요."
                   : "Tap a pin to peek at that placement's key details."}
@@ -339,11 +339,11 @@ export default function MediaAiRecommendDashboard({
           {/* TOP 3 — 반응형 가로 그리드 (단일 카드, ui-container 전폭) */}
           <div className="min-w-0 space-y-4 border-2 border-border bg-muted p-5 sm:p-6">
             <div>
-              <h3 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
+              <h3 className="flex items-center gap-2 tkad-type-label text-foreground">
                 <Trophy className="h-4 w-4 text-accent" />
                 [ {isKo ? "TKAD BOT TOP 3" : "TKAD BOT TOP 3"} ]
               </h3>
-              <p className="mt-2 text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-xs">
+              <p className="mt-2 tkad-type-caption leading-relaxed tracking-tight text-muted-foreground sm:text-xs">
                 {`// `}{isKo
                   ? "왼쪽부터 순서대로, 이번 탐험에서 가장 궁합이 좋았던 매체들이에요."
                   : "Left to right: the three strongest matches from this run."}
@@ -377,22 +377,22 @@ export default function MediaAiRecommendDashboard({
 
         {/* 간단 Achievement 영역 */}
         <section className="border-2 border-accent bg-card p-5">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ ACHIEVEMENTS ]
           </p>
           <p className="mt-1 text-sm font-bold tracking-tight text-foreground">
             {isKo ? "TKAD Bot의 탐험 결과" : "Maddy's achievements for this run"}
           </p>
           <div className="mt-3 flex flex-wrap gap-0">
-            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 tkad-type-label text-foreground">
               <Sparkles className="h-3 w-3 text-accent" />
               {isKo ? "첫 번째 탐험" : "First exploration"}
             </span>
-            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 tkad-type-label text-foreground">
               <Star className="h-3 w-3 text-accent" />
               {isKo ? "매체 궁합 폭발" : "Perfect match vibes"}
             </span>
-            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 tkad-type-label text-foreground">
               <MapPin className="h-3 w-3 text-accent" />
               {isKo ? "도심 탐험가" : "City explorer"}
             </span>
@@ -408,11 +408,11 @@ export default function MediaAiRecommendDashboard({
             className="flex w-full items-center justify-between gap-3 p-5 text-left"
           >
             <span className="flex min-w-0 flex-col gap-1">
-              <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
+              <span className="tkad-type-label text-foreground">
                 <Star className="mr-2 inline h-4 w-4 text-accent" aria-hidden />
                 [ {isKo ? "전체 분포 보기" : "Full distribution"} ]
               </span>
-              <span className="text-[11px] text-muted-foreground sm:text-xs">
+              <span className="tkad-type-caption text-muted-foreground sm:text-xs">
                 {isKo
                   ? "추천 점수·월간 노출 산점도 — 필요할 때만 펼쳐 보세요."
                   : "Fit score vs. estimated reach — expand when you need the big picture."}
@@ -431,7 +431,7 @@ export default function MediaAiRecommendDashboard({
             <div className="border-t-2 border-border px-5 pb-5 pt-4">
               <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-muted p-4">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                  <p className="tkad-type-label text-muted-foreground">
                     [ {isKo ? "읽는 법" : "How to read"} ]
                   </p>
                   <ul className="mt-2 space-y-1 text-sm leading-relaxed text-foreground">
@@ -447,12 +447,12 @@ export default function MediaAiRecommendDashboard({
                   </ul>
                 </div>
                 <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                  <p className="tkad-type-label text-muted-foreground">
                     [ {isKo ? "어려운 용어" : "Terms"} ]
                   </p>
                   <dl className="mt-2 space-y-2 text-sm text-foreground">
                     <div>
-                      <dt className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+                      <dt className="tkad-type-label text-foreground">
                         {isKo ? "추천 점수" : "Fit score"}
                       </dt>
                       <dd className="text-muted-foreground">
@@ -460,7 +460,7 @@ export default function MediaAiRecommendDashboard({
                       </dd>
                     </div>
                     <div>
-                      <dt className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+                      <dt className="tkad-type-label text-foreground">
                         {isKo ? "월간 노출(추정)" : "Est. monthly reach"}
                       </dt>
                       <dd className="text-muted-foreground">
@@ -470,7 +470,7 @@ export default function MediaAiRecommendDashboard({
                   </dl>
                 </div>
                 <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 sm:col-span-2 lg:col-span-1">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                  <p className="tkad-type-label text-muted-foreground">
                     [ {isKo ? "빠른 팁" : "Quick tip"} ]
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">

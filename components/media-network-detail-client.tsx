@@ -266,7 +266,7 @@ export default function MediaNetworkDetailClient({
               </Badge>
               <Badge
                 variant="outline"
-                className="border-white/40 dark:bg-black bg-white/30 text-xs font-semibold dark:text-white text-gray-900"
+                className="border-white/40 dark:bg-black bg-white/30 tkad-type-title dark:text-white text-gray-900"
               >
                 {isKo ? typeLb.ko : typeLb.en}
               </Badge>
@@ -479,16 +479,16 @@ export default function MediaNetworkDetailClient({
                         <MapPin className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-navy">
+                        <p className="truncate tkad-type-title text-navy">
                           {loc.name}
                         </p>
                         {(loc.fullAddress || loc.address) && (
-                          <p className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">
+                          <p className="mt-0.5 line-clamp-2 tkad-type-caption text-muted-foreground">
                             {loc.fullAddress || loc.address}
                           </p>
                         )}
                         {loc.dailyFootfall != null && (
-                          <p className="mt-0.5 text-[11px] text-muted-foreground">
+                          <p className="mt-0.5 tkad-type-caption text-muted-foreground">
                             {t("locationDailyFootfall", {
                               count: loc.dailyFootfall.toLocaleString(),
                             })}
@@ -505,28 +505,28 @@ export default function MediaNetworkDetailClient({
             {selectedLocation && (
               <div className="pointer-events-none absolute bottom-4 right-4 hidden max-w-sm rounded-2xl border border-navy/20 bg-white/95 p-4 text-xs shadow-xl shadow-navy/20 backdrop-blur-md md:block">
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold text-navy">
+                  <p className="tkad-type-title text-navy">
                     {selectedLocation.name}
                   </p>
                   {(selectedLocation.fullAddress || selectedLocation.address) && (
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="tkad-type-caption text-muted-foreground">
                       {selectedLocation.fullAddress || selectedLocation.address}
                     </p>
                   )}
                   {selectedLocation.dailyFootfall != null && (
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="tkad-type-caption text-muted-foreground">
                       {t("locationDailyFootfall", {
                         count: selectedLocation.dailyFootfall.toLocaleString(),
                       })}
                     </p>
                   )}
                   {selectedLocation.priceNote && (
-                    <p className="mt-1 text-[11px] text-navy/80 whitespace-pre-wrap">
+                    <p className="mt-1 tkad-type-caption text-navy/80 whitespace-pre-wrap">
                       {selectedLocation.priceNote}
                     </p>
                   )}
                   {selectedLocation.note && (
-                    <p className="mt-1 text-[11px] text-navy/80 whitespace-pre-wrap">
+                    <p className="mt-1 tkad-type-caption text-navy/80 whitespace-pre-wrap">
                       {selectedLocation.note}
                     </p>
                   )}
@@ -587,16 +587,16 @@ export default function MediaNetworkDetailClient({
                           : "border-navy/10 bg-white hover:border-navy/20"
                       }`}
                     >
-                      <p className="truncate text-sm font-semibold text-navy">
+                      <p className="truncate tkad-type-title text-navy">
                         {loc.name}
                       </p>
                       {(loc.fullAddress || loc.address) && (
-                        <p className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">
+                        <p className="mt-0.5 line-clamp-2 tkad-type-caption text-muted-foreground">
                           {loc.fullAddress || loc.address}
                         </p>
                       )}
                       {loc.dailyFootfall != null && (
-                        <p className="mt-1 text-[11px] text-muted-foreground">
+                        <p className="mt-1 tkad-type-caption text-muted-foreground">
                           {t("locationDailyFootfall", {
                             count: loc.dailyFootfall.toLocaleString(),
                           })}
@@ -609,28 +609,28 @@ export default function MediaNetworkDetailClient({
 
               {selectedLocation && (
                 <div className="rounded-2xl border border-navy/10 bg-white p-4 text-xs shadow-sm">
-                  <p className="text-sm font-semibold text-navy">
+                  <p className="tkad-type-title text-navy">
                     {selectedLocation.name}
                   </p>
                   {(selectedLocation.fullAddress || selectedLocation.address) && (
-                    <p className="mt-1 text-[11px] text-muted-foreground">
+                    <p className="mt-1 tkad-type-caption text-muted-foreground">
                       {selectedLocation.fullAddress || selectedLocation.address}
                     </p>
                   )}
                   {selectedLocation.dailyFootfall != null && (
-                    <p className="mt-1 text-[11px] text-muted-foreground">
+                    <p className="mt-1 tkad-type-caption text-muted-foreground">
                       {t("locationDailyFootfall", {
                         count: selectedLocation.dailyFootfall.toLocaleString(),
                       })}
                     </p>
                   )}
                   {selectedLocation.priceNote && (
-                    <p className="mt-1 text-[11px] text-navy/80 whitespace-pre-wrap">
+                    <p className="mt-1 tkad-type-caption text-navy/80 whitespace-pre-wrap">
                       {selectedLocation.priceNote}
                     </p>
                   )}
                   {selectedLocation.note && (
-                    <p className="mt-1 text-[11px] text-navy/80 whitespace-pre-wrap">
+                    <p className="mt-1 tkad-type-caption text-navy/80 whitespace-pre-wrap">
                       {selectedLocation.note}
                     </p>
                   )}
@@ -755,7 +755,7 @@ export default function MediaNetworkDetailClient({
               )}
               {data.features && (
                 <div className="rounded-2xl border border-navy/10 bg-slate-50/80 p-6">
-                  <h3 className="text-sm font-semibold text-navy">{t("featuresTitle")}</h3>
+                  <h3 className="tkad-type-title text-navy">{t("featuresTitle")}</h3>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-navy/85">
                     {data.features}
                   </p>
@@ -812,7 +812,7 @@ function NetworkStatCard({
           : "border-navy/10 bg-white shadow-sm shadow-navy/5"
       }`}
     >
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <p className="tkad-type-title uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
       <p
@@ -955,7 +955,7 @@ function NetworkPriceCalculator({
       {/* 수량 */}
       <div className="mt-5">
         <div className="flex items-end justify-between gap-3">
-          <label className="text-sm font-semibold text-navy">
+          <label className="tkad-type-title text-navy">
             {unitMode === "package"
               ? isKo
                 ? `패키지 (${quantitySuffix})`
@@ -992,7 +992,7 @@ function NetworkPriceCalculator({
                 key={opt.key}
                 type="button"
                 onClick={() => opt.units != null && setUnits(opt.units)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                className={`rounded-full border px-3 py-1.5 tkad-type-title transition-colors ${
                   units === opt.units
                     ? "border-gold bg-gold/15 text-gold-dark"
                     : "border-navy/15 bg-white text-navy hover:border-gold"
@@ -1014,7 +1014,7 @@ function NetworkPriceCalculator({
               className="mt-3 w-full cursor-pointer accent-gold"
               aria-label={isKo ? "설치 수량" : "Units"}
             />
-            <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
+            <div className="mt-1 flex justify-between tkad-type-caption text-muted-foreground">
               <span>{minUnits.toLocaleString()}</span>
               <span>{sliderMax.toLocaleString()}+</span>
             </div>
@@ -1024,7 +1024,7 @@ function NetworkPriceCalculator({
                   key={q}
                   type="button"
                   onClick={() => setUnits(clampUnits(q))}
-                  className="rounded-full border border-navy/15 bg-white px-3 py-1 text-xs font-semibold text-navy hover:border-gold"
+                  className="rounded-full border border-navy/15 bg-white px-3 py-1 tkad-type-title text-navy hover:border-gold"
                 >
                   {q.toLocaleString()}
                   {isKo ? "대" : ""}
@@ -1037,7 +1037,7 @@ function NetworkPriceCalculator({
 
       {/* 기간 */}
       <div className="mt-5">
-        <label className="text-sm font-semibold text-navy">
+        <label className="tkad-type-title text-navy">
           {isKo ? "집행 기간" : "Duration"}
         </label>
         <div className="mt-2 flex gap-2">
@@ -1046,7 +1046,7 @@ function NetworkPriceCalculator({
               key={m}
               type="button"
               onClick={() => setMonths(m)}
-              className={`flex-1 rounded-xl border px-3 py-2 text-sm font-semibold transition-colors ${
+              className={`flex-1 rounded-xl border px-3 py-2 tkad-type-title transition-colors ${
                 months === m
                   ? "border-gold bg-gold/15 text-gold-dark"
                   : "border-navy/15 bg-white text-navy hover:border-navy/30"
@@ -1069,14 +1069,14 @@ function NetworkPriceCalculator({
           </span>
         </div>
         <div className="mt-2 flex items-center justify-between border-t border-navy/10 pt-2">
-          <span className="text-sm font-semibold text-navy">
+          <span className="tkad-type-title text-navy">
             {isKo ? `총액 (${months}개월)` : `Total (${months} mo)`}
           </span>
           <span className="text-2xl font-black tabular-nums text-gold-dark">
             ₩{total.toLocaleString()}
           </span>
         </div>
-        <p className="mt-1 text-[11px] text-muted-foreground">
+        <p className="mt-1 tkad-type-caption text-muted-foreground">
           {isKo ? "부가세 별도 · 구간 단가 적용" : "VAT excl. · tiered pricing"}
         </p>
       </div>
@@ -1166,7 +1166,7 @@ function NetworkPackages({
                 }`}
               >
                 {m.popular ? (
-                  <span className="absolute -top-2.5 left-5 rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-bold text-navy">
+                  <span className="absolute -top-2.5 left-5 rounded-full bg-gold px-2.5 py-0.5 tkad-type-caption font-bold text-navy">
                     {isKo ? "인기" : "Popular"}
                   </span>
                 ) : null}
@@ -1280,7 +1280,7 @@ function RegionInstallTable({
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-gold-dark hover:underline"
+            className="mt-3 inline-flex items-center gap-1.5 tkad-type-title text-gold-dark hover:underline"
           >
             <ChevronDown
               className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`}
@@ -1357,7 +1357,7 @@ function NetworkFaq({
               key={it.q}
               className="group rounded-xl border border-navy/10 bg-white px-4 py-3"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-navy">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 tkad-type-title text-navy">
                 {it.q}
                 <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
               </summary>
@@ -1388,7 +1388,7 @@ function CoreFact({
         <Icon className="h-5 w-5" strokeWidth={1.75} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <p className="tkad-type-title uppercase tracking-wide text-muted-foreground">
           {label}
         </p>
         <div className="mt-1.5 min-w-0 text-sm leading-relaxed text-navy">
@@ -1417,7 +1417,7 @@ function EffectMemoCallout({
           <Sparkles className="h-5 w-5" strokeWidth={1.75} aria-hidden />
         </div>
         <div className="min-w-0 flex-1 pt-0.5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-navy/75">
+          <p className="tkad-type-title uppercase tracking-wider text-navy/75">
             {title}
           </p>
           <div className="mt-3">{children}</div>

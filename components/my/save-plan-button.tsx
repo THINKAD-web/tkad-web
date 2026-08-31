@@ -146,7 +146,7 @@ export function SavePlanButton({
             ) : (
               <div className="mt-4 space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600 dark:text-white/60">
+                  <label className="mb-1 block tkad-type-title text-gray-600 dark:text-white/60">
                     {isKo ? "제목" : "Title"}
                   </label>
                   <input
@@ -156,7 +156,7 @@ export function SavePlanButton({
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600 dark:text-white/60">
+                  <label className="mb-1 block tkad-type-title text-gray-600 dark:text-white/60">
                     {isKo ? "메모 (선택)" : "Note (optional)"}
                   </label>
                   <textarea

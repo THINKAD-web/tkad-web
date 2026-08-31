@@ -20,7 +20,7 @@ export function MapNavigationLoading() {
         className="h-10 w-10 animate-spin text-[color:var(--qp-accent)]"
         aria-hidden
       />
-      <p className="text-sm font-semibold text-gray-800 dark:text-white/90">
+      <p className="tkad-type-title text-gray-800 dark:text-white/90">
         {isKo ? "지도 불러오는 중…" : "Loading map…"}
       </p>
     </div>

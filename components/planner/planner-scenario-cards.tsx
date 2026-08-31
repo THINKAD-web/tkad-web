@@ -74,7 +74,7 @@ export function PlannerScenarioCards({
             <div className="flex items-start justify-between gap-2">
               <span
                 className={cn(
-                  "inline-block rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
+                  "inline-block rounded-full border px-2 py-0.5 tkad-type-note font-medium uppercase tracking-wider",
                   selected
                     ? "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent)]/20 text-[color:var(--qp-accent)]"
                     : "border-border text-muted-foreground",
@@ -109,7 +109,7 @@ export function PlannerScenarioCards({
                 onApply(scenario);
               }}
               className={cn(
-                "mt-3 w-full rounded-lg border px-3 py-2 text-[11px] font-semibold transition-colors",
+                "mt-3 w-full rounded-lg border px-3 py-2 tkad-type-caption font-semibold transition-colors",
                 selected
                   ? "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent)]/20 text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent)]/30"
                   : "border-[color:var(--qp-accent)]/30 text-[color:var(--qp-accent)]/90 hover:border-[color:var(--qp-accent)]/50 hover:bg-[color:var(--qp-accent)]/10",

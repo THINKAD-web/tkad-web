@@ -29,7 +29,7 @@ export async function ContactInfoSidebar({ locale }: Props) {
               aria-hidden
             />
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-white/50">
+              <p className="tkad-type-title uppercase tracking-wide text-gray-500 dark:text-white/50">
                 {label}
               </p>
               <p className="mt-0.5 text-sm font-medium leading-relaxed text-gray-800 dark:text-white/90">

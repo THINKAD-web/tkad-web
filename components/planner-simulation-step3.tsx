@@ -247,7 +247,7 @@ export default function PlannerSimulationStep3({
             >
               <div className="flex flex-col items-center justify-center gap-2 text-center">
                 <ImageUp className="h-8 w-8 text-[color:var(--qp-accent)]" aria-hidden />
-                <p className={cn("text-sm font-semibold", plannerNeon.headline)}>
+                <p className={cn("tkad-type-title", plannerNeon.headline)}>
                   {t("creativeUploadCta")}
                 </p>
                 <p className={cn("text-xs", plannerNeon.subtext)}>
@@ -310,7 +310,7 @@ export default function PlannerSimulationStep3({
                     </p>
                   </div>
                 ) : upload.status === "done" ? (
-                  <p className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[color:var(--qp-accent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                  <p className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[color:var(--qp-accent)] px-2 py-0.5 tkad-type-note font-bold uppercase tracking-widest text-white">
                     <Check className="h-3 w-3" aria-hidden />
                     {t("creativeUploadSuccess")}
                   </p>

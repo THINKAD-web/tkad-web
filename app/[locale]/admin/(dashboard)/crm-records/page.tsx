@@ -198,7 +198,7 @@ export default function AdminCrmRecordsPage() {
   return (
     <div className="space-y-6 text-foreground">
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ CRM RECORDS ]
         </p>
         <h2 className="mt-2 text-lg font-bold tracking-tight">CRM · 고객 히스토리</h2>
@@ -280,7 +280,7 @@ export default function AdminCrmRecordsPage() {
                   </div>
                   <p className="text-xs text-muted-foreground">{a.email}</p>
                   <div className="mt-1 flex flex-wrap gap-1">
-                    <Badge variant="outline" className="text-[10px]">
+                    <Badge variant="outline" className="tkad-type-note">
                       {TIER_LABEL[a.tier ?? "standard"]}
                     </Badge>
                     <Badge variant="secondary">로그 {a._count.contactLogs}</Badge>
@@ -307,7 +307,7 @@ export default function AdminCrmRecordsPage() {
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-2 rounded border-2 border-border bg-muted p-3 bg-muted/60">
-                  <span className="text-sm font-semibold text-foreground">
+                  <span className="tkad-type-title text-foreground">
                     고객 등급
                   </span>
                   <select
@@ -325,7 +325,7 @@ export default function AdminCrmRecordsPage() {
 
                 {preferredMedia.length > 0 ? (
                   <div>
-                    <h3 className="mb-2 text-sm font-semibold text-foreground">
+                    <h3 className="mb-2 tkad-type-title text-foreground">
                       선호 매체 (연결 캠페인 견적 기준)
                     </h3>
                     <ul className="space-y-1 text-xs">
@@ -347,7 +347,7 @@ export default function AdminCrmRecordsPage() {
                 ) : null}
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
+                  <h3 className="mb-2 flex items-center gap-1 tkad-type-title">
                     <MessageSquare className="h-4 w-4" />
                     상담 히스토리 (타임라인)
                   </h3>
@@ -392,7 +392,7 @@ export default function AdminCrmRecordsPage() {
                 </div>
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
+                  <h3 className="mb-2 flex items-center gap-1 tkad-type-title">
                     <StickyNote className="h-4 w-4" />
                     메모
                   </h3>
@@ -420,7 +420,7 @@ export default function AdminCrmRecordsPage() {
                 </div>
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
+                  <h3 className="mb-2 flex items-center gap-1 tkad-type-title">
                     <Bell className="h-4 w-4" />
                     팔로업
                   </h3>

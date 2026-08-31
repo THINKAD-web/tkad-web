@@ -147,7 +147,7 @@ export function MediaFavoritesPageClient({
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
       <header className="mb-8 border-b-2 border-border pb-6">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <p className="tkad-type-label text-accent">
           {t("eyebrow")}
         </p>
         <h1 className="mt-2 flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -158,7 +158,7 @@ export function MediaFavoritesPageClient({
           {t("subtitle")}
         </p>
         {!loggedIn ? (
-          <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          <p className="mt-3 tkad-type-label text-muted-foreground">
             {t("guestHint")}
           </p>
         ) : null}
@@ -176,7 +176,7 @@ export function MediaFavoritesPageClient({
           action={
             <Link
               href="/media"
-              className="inline-flex items-center gap-2 border-2 border-border bg-card px-6 py-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+              className="inline-flex items-center gap-2 border-2 border-border bg-card px-6 py-3 tkad-type-label text-foreground transition-colors hover:bg-foreground hover:text-background"
             >
               {t("browseCta")}
               <ArrowRight className="h-4 w-4" aria-hidden />
@@ -201,7 +201,7 @@ export function MediaFavoritesPageClient({
       )}
 
       {items.length > 0 ? (
-        <p className="mt-6 text-center font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="mt-6 text-center tkad-type-label text-muted-foreground">
           {isKo
             ? `선택 ${items.length}개 · 비교는 매체 목록에서 진행`
             : `${items.length} saved · compare from media browse`}

@@ -64,7 +64,7 @@ export function SeoContextualLinks({
       className="rounded-2xl border border-border/80 bg-card/40 p-4"
       aria-label={title}
     >
-      <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+      <p className="tkad-type-label text-muted-foreground">
         {title}
       </p>
       <ul className="mt-3 flex flex-wrap gap-2">
@@ -72,7 +72,7 @@ export function SeoContextualLinks({
           <li key={p.href}>
             <Link
               href={p.href}
-              className="inline-flex rounded-full border border-primary/25 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-primary/10"
+              className="inline-flex rounded-full border border-primary/25 bg-primary/5 px-3 py-1.5 tkad-type-title text-foreground transition-colors hover:bg-primary/10"
             >
               {p.label}
             </Link>

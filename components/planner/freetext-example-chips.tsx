@@ -92,7 +92,7 @@ export function FreetextExampleChips({
             onClick={handleShuffle}
             disabled={disabled || isRefreshing}
             className={cn(
-              "inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--qp-accent)] underline-offset-2 transition-opacity hover:underline dark:text-[color:var(--qp-accent)]",
+              "inline-flex items-center gap-1 tkad-type-title text-[color:var(--qp-accent)] underline-offset-2 transition-opacity hover:underline dark:text-[color:var(--qp-accent)]",
               (disabled || isRefreshing) && "opacity-60",
             )}
           >

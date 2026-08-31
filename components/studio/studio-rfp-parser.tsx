@@ -310,7 +310,7 @@ export function StudioRfpParser({ locale }: { locale: string }) {
               ? "예: [RFP] … 공항 권역 / 핵심 상권 / 지하철 역사 …"
               : "Paste full RFP body…"
           }
-          className={`${field} mt-3 min-h-[220px] font-mono text-[13px] leading-relaxed`}
+          className={`${field} mt-3 min-h-[220px] font-mono tkad-type-body leading-relaxed`}
         />
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <button
@@ -341,7 +341,7 @@ export function StudioRfpParser({ locale }: { locale: string }) {
             <button
               type="button"
               onClick={addGroup}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 px-3 text-xs font-semibold dark:border-white/15"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 px-3 tkad-type-title dark:border-white/15"
             >
               <Plus className="h-3.5 w-3.5" />
               {isKo ? "그룹 추가" : "Add group"}
@@ -564,7 +564,7 @@ export function StudioRfpParser({ locale }: { locale: string }) {
                     {isKo ? "건" : " items"}
                   </span>
                 </h3>
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 tkad-type-caption text-muted-foreground">
                   regions: {g.input.regions.join(", ") || "—"}
                   {g.input.categories?.length
                     ? ` · categories: ${g.input.categories.join(", ")}`
@@ -589,12 +589,12 @@ export function StudioRfpParser({ locale }: { locale: string }) {
                         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                           <Link
                             href={`/${locale}/media/${m.mediaId}`}
-                            className="text-sm font-semibold text-gray-900 underline-offset-2 hover:underline dark:text-white"
+                            className="tkad-type-title text-gray-900 underline-offset-2 hover:underline dark:text-white"
                           >
                             {isKo ? m.name : m.nameEn || m.name}
                           </Link>
                           {m.pinned && (
-                            <span className="text-[10px] font-medium text-hermes">
+                            <span className="tkad-type-note font-medium text-hermes">
                               {isKo ? "수동 추가" : "pinned"}
                             </span>
                           )}
@@ -629,7 +629,7 @@ export function StudioRfpParser({ locale }: { locale: string }) {
 
                 {excluded.length > 0 && (
                   <div className="mt-3 rounded-lg bg-gray-50 px-3 py-2 dark:bg-white/5">
-                    <p className="text-[11px] font-medium text-muted-foreground">
+                    <p className="tkad-type-caption font-medium text-muted-foreground">
                       {isKo ? "제외됨" : "Excluded"}
                     </p>
                     <ul className="mt-1 space-y-1">
@@ -677,7 +677,7 @@ export function StudioRfpParser({ locale }: { locale: string }) {
                     type="button"
                     onClick={() => void addMediaById(g.groupId)}
                     disabled={matchLoading || !(addIdDraft[g.groupId] ?? "").trim()}
-                    className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-gray-200 px-3 text-xs font-semibold disabled:opacity-40 dark:border-white/15"
+                    className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-gray-200 px-3 tkad-type-title disabled:opacity-40 dark:border-white/15"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     {isKo ? "추가" : "Add"}

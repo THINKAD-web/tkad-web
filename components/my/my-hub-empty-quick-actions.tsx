@@ -40,7 +40,7 @@ export function MyHubEmptyQuickActions({ isKo, className }: Props) {
 
   return (
     <div className={cn("mt-6", className)}>
-      <p className="mb-3 text-center text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+      <p className="mb-3 text-center tkad-type-title uppercase tracking-[0.14em] text-muted-foreground">
         {isKo ? "이렇게 시작해 보세요" : "Get started"}
       </p>
       <div className="grid gap-3 sm:grid-cols-3">
@@ -61,7 +61,7 @@ export function MyHubEmptyQuickActions({ isKo, className }: Props) {
               <span className="text-sm font-bold text-foreground">
                 {isKo ? action.titleKo : action.titleEn}
               </span>
-              <span className="text-[11px] leading-snug text-muted-foreground">
+              <span className="tkad-type-caption leading-snug text-muted-foreground">
                 {isKo ? action.descKo : action.descEn}
               </span>
             </Link>

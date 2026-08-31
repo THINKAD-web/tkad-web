@@ -61,7 +61,7 @@ export function IndustryBudgetCalculator({ slug, priceRefs }: Props) {
         <p className="text-center text-sm dark:text-white text-gray-700">{t("budgetLead")}</p>
         <p className="mt-4 text-center font-display text-2xl font-black tabular-nums dark:text-white text-gray-900">
           {formatted}
-          <span className="mt-1 block text-xs font-semibold text-[color:var(--qp-accent)]/80">
+          <span className="mt-1 block tkad-type-title text-[color:var(--qp-accent)]/80">
             {tc("budgetPerMonth")}
           </span>
         </p>
@@ -75,7 +75,7 @@ export function IndustryBudgetCalculator({ slug, priceRefs }: Props) {
           className="mt-6 w-full accent-cyan-400"
           aria-label={t("budgetAria")}
         />
-        <div className="mt-2 flex justify-between text-[10px] dark:text-white text-gray-400">
+        <div className="mt-2 flex justify-between tkad-type-note dark:text-white text-gray-400">
           <span>100{isKo ? "만" : "M"}</span>
           <span>5,000{isKo ? "만" : "M"}</span>
         </div>

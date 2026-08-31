@@ -43,7 +43,7 @@ export function MetricsWriteWarningsModal({
                 key={`${w.code}-${i}`}
                 className="rounded-md border border-amber-200/80 bg-amber-50 px-3 py-2 text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-50"
               >
-                <span className="font-mono text-[11px] uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                <span className="font-mono tkad-type-caption uppercase tracking-wide text-amber-700 dark:text-amber-300">
                   {w.field} · {w.code}
                 </span>
                 <p className="mt-1 leading-snug">{w.message}</p>

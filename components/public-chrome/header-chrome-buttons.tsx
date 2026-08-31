@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 /** 모바일 햄버거 패널 — 찜·알림·담은 매체 등 행 (다크: 부모 배경 상속, 라이트: hover만) */
 export const headerMobileMenuRowClass =
-  "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 text-sm font-semibold tracking-normal text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:bg-transparent dark:text-white dark:hover:bg-white/6";
+  "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 tkad-type-title tracking-normal text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:bg-transparent dark:text-white dark:hover:bg-white/6";
 
 const headerChromeHover =
   "transition-colors duration-200 hover:border-[color:var(--qp-accent)]/40 hover:bg-[color:var(--qp-accent-soft)] hover:text-[color:var(--qp-fg)] dark:hover:border-[color:var(--qp-accent)]/45 dark:hover:bg-[color:var(--qp-accent)]/15 dark:hover:text-white";
@@ -48,12 +48,12 @@ export const headerChromeDropdownBackdropMobileClass =
 export const headerChromeTextButtonClass = cn(
   headerChromeBase,
   headerChromeHover,
-  "h-10 rounded-[var(--qp-radius-md)] px-3.5 text-sm font-semibold",
+  "h-10 rounded-[var(--qp-radius-md)] px-3.5 tkad-type-title",
 );
 
 /** 회원가입 — Quiet Professional 단색 CTA (그라데이션·glow 없음) */
 export const headerChromeSignupButtonClass = cn(
-  "tkad-qp-cta inline-flex h-10 shrink-0 items-center justify-center rounded-[var(--qp-radius-md)] px-3.5 text-sm font-semibold",
+  "tkad-qp-cta inline-flex h-10 shrink-0 items-center justify-center rounded-[var(--qp-radius-md)] px-3.5 tkad-type-title",
   "border border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)]",
   "transition-colors hover:bg-[color:var(--qp-accent-hover)]",
 );

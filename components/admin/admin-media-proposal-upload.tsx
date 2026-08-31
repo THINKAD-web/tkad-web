@@ -110,11 +110,11 @@ export function AdminMediaProposalUpload({
     <div className="rounded-xl border-2 border-border bg-muted/40 p-4">
       <div className="mb-2 flex items-center gap-2">
         <FileText className="h-4 w-4 text-[color:var(--qp-accent)]" />
-        <span className="text-xs font-semibold text-foreground">
+        <span className="tkad-type-title text-foreground">
           제안서 PDF 업로드
         </span>
       </div>
-      <p className="mb-3 text-[11px] leading-relaxed text-muted-foreground">
+      <p className="mb-3 tkad-type-caption leading-relaxed text-muted-foreground">
         BunnyCDN 경로:{" "}
         <code className="rounded bg-card px-1">
           tkad/proposals/{mediaId}/proposal.pdf

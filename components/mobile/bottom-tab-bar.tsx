@@ -96,7 +96,7 @@ function isHiddenPath(pathname: string | null): boolean {
 function TabBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="absolute -top-1.5 -right-2 z-10 inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-[#05050a]">
+    <span className="absolute -top-1.5 -right-2 z-10 inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1 tkad-type-note font-bold leading-none text-white ring-2 ring-white dark:ring-[#05050a]">
       {count > 99 ? "99+" : count}
     </span>
   );
@@ -154,7 +154,7 @@ function TabLabel({ active, children }: { active: boolean; children: ReactNode }
   return (
     <span
       className={cn(
-        "mt-1 w-full truncate text-center text-[10px] transition-colors duration-[--motion-fast]",
+        "mt-1 w-full truncate text-center tkad-type-note transition-colors duration-[--motion-fast]",
         active ? TAB_LABEL_ACTIVE : TAB_LABEL_INACTIVE,
       )}
     >

@@ -16,7 +16,7 @@ export function HowToUseStepsGrid({ steps, isKo }: Props) {
           className="tkad-glass-surface flex h-full flex-col rounded-[24px] border border-gray-200 p-6 backdrop-blur dark:border-white/12"
         >
           <div className="flex items-start justify-between gap-3">
-            <span className="font-display text-xs font-medium uppercase tracking-[0.2em] text-primary">
+            <span className="tkad-type-label text-primary">
               STEP {item.step}
             </span>
             <span className="text-2xl" aria-hidden>
@@ -41,7 +41,7 @@ export function HowToUseStepsGrid({ steps, isKo }: Props) {
           </ul>
           <Link
             href={item.href}
-            className="mt-5 inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.14em] text-primary transition-opacity hover:opacity-80"
+            className="mt-5 inline-flex items-center gap-1.5 tkad-type-label text-primary transition-opacity hover:opacity-80"
           >
             {isKo ? item.ctaKo : item.ctaEn}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden />

@@ -31,10 +31,10 @@ export function HomeFreetextEntry({
       {!embedded && !slim ? (
         <div className="mb-4 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-sm border border-hermes/30 bg-hermes/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-hermes">
+            <span className="rounded-sm border border-hermes/30 bg-hermes/10 px-2 py-0.5 tkad-type-note font-bold uppercase tracking-wider text-hermes">
               {isKo ? "무료 · 규칙" : "Free · Rules"}
             </span>
-            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+            <span className="tkad-type-note font-medium uppercase tracking-wider text-muted-foreground">
               {isKo ? "빠른 추천 · 0토큰" : "Quick picks · 0 tokens"}
             </span>
           </div>
@@ -53,7 +53,7 @@ export function HomeFreetextEntry({
       ) : null}
 
       {slim && !embedded ? (
-        <span className="mb-3 inline-flex rounded-sm border border-hermes/30 bg-hermes/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-hermes">
+        <span className="mb-3 inline-flex rounded-sm border border-hermes/30 bg-hermes/10 px-2 py-0.5 tkad-type-note font-bold uppercase tracking-wider text-hermes">
           {isKo ? "무료 · 0토큰" : "Free · 0 tokens"}
         </span>
       ) : null}
@@ -84,7 +84,7 @@ export function HomeFreetextEntry({
         <Link
           href="/planner"
           className={cn(
-            "text-center text-xs font-semibold text-gray-500 underline-offset-2 hover:underline dark:text-white/55",
+            "text-center tkad-type-title text-gray-500 underline-offset-2 hover:underline dark:text-white/55",
             slim ? "sm:ml-1" : "inline-flex w-full items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-3 dark:border-white/12 dark:bg-white/5 sm:w-auto",
           )}
         >

@@ -274,11 +274,11 @@ export function SupportAiChatModal({ open, onClose }: Props) {
             <Bot className="h-5 w-5" aria-hidden />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500">
+            <p className="tkad-type-label dark:text-white text-gray-500">
               {t("eyebrow")}
             </p>
             <p className="truncate text-sm font-black">{t("title")}</p>
-            <p className="truncate text-[11px] text-muted-foreground">
+            <p className="truncate tkad-type-caption text-muted-foreground">
               {claudeQuota != null
                 ? t("remaining", {
                     remaining: claudeQuota.remaining,
@@ -363,7 +363,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
                 {msg.role === "assistant" && !showMedia ? (
                   <Link
                     href="/contact"
-                    className="mr-auto flex max-w-[92%] items-center justify-center gap-2 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2 text-[11px] font-bold dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100"
+                    className="mr-auto flex max-w-[92%] items-center justify-center gap-2 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2 tkad-type-caption font-bold dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100"
                   >
                     {t("contactCta")}
                     <ArrowRight className="h-3 w-3" aria-hidden />
@@ -374,7 +374,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
           })}
           {loading ? (
             <div className="mr-auto max-w-[92%] space-y-2 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black/40 bg-white/60 px-3 py-2.5">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-violet-200 text-violet-700">
+              <p className="tkad-type-label dark:text-violet-200 text-violet-700">
                 {t("analyzing")}
               </p>
               <div className="flex gap-1 pt-1" aria-hidden>
@@ -392,7 +392,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
         </div>
 
         <div className="relative shrink-0 border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white/30 p-3">
-          <p className="mb-1.5 text-[10px] font-medium text-muted-foreground">
+          <p className="mb-1.5 tkad-type-note font-medium text-muted-foreground">
             {t("suggestionsLabel")}
           </p>
           <div className="mb-2 flex flex-wrap gap-1.5">
@@ -403,7 +403,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
                   type="button"
                   disabled={loading}
                   onClick={() => void send(t(key))}
-                  className="rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-2 py-1 text-[10px] font-bold dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100 disabled:opacity-40"
+                  className="rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-2 py-1 tkad-type-note font-bold dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100 disabled:opacity-40"
                 >
                   {t(key)}
                 </button>
@@ -445,7 +445,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
             <MessageCircle className="h-4 w-4" aria-hidden />
             {t("kakaoHandoff")}
           </a>
-          <p className="mt-2 text-center font-display text-[9px] uppercase tracking-[0.14em] dark:text-white text-gray-400">
+          <p className="mt-2 text-center font-display tkad-type-note uppercase tracking-[0.14em] dark:text-white text-gray-400">
             {t("disclaimer")}
           </p>
         </div>

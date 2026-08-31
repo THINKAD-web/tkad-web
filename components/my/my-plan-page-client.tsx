@@ -181,7 +181,7 @@ export function MyPlanPageClient() {
       <div className={cn(MOBILE_CHROME_BOTTOM_PAD)}>
         <PageContainer>
           <div className="mb-8">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-fg-muted)]">
+            <p className="tkad-type-label text-[color:var(--qp-fg-muted)]">
               [ MY PLAN ]
             </p>
             <h1 className="mt-2 text-2xl font-black text-gray-900 dark:text-white md:text-3xl">
@@ -195,7 +195,7 @@ export function MyPlanPageClient() {
             <div className="mt-3">
               <Link
                 href="/my/plan/saved"
-                className="text-xs font-semibold text-[color:var(--qp-accent)] hover:opacity-90"
+                className="tkad-type-title text-[color:var(--qp-accent)] hover:opacity-90"
               >
                 {isKo ? `${tPlan("saved")} 보기 →` : `View ${tPlan("saved")} →`}
               </Link>
@@ -204,7 +204,7 @@ export function MyPlanPageClient() {
 
           {cart.items.length === 0 ? (
             <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-10 text-center">
-              <p className="text-sm font-semibold text-gray-700 dark:text-white/80">
+              <p className="tkad-type-title text-gray-700 dark:text-white/80">
                 {isKo ? "아직 담은 매체가 없어요" : "No media in your plan yet"}
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -229,12 +229,12 @@ export function MyPlanPageClient() {
               <div className="grid gap-6 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-start lg:gap-8">
               <div className="space-y-6 lg:sticky lg:top-24">
               <section className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black/40 bg-white/70 p-5 backdrop-blur">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/50">
+                <p className="tkad-type-label text-gray-500 dark:text-white/50">
                   {isKo ? "캠페인 설정" : "Campaign settings"}
                 </p>
                 <div className="mt-4 space-y-4">
                   <div>
-                    <label className="mb-2 block text-xs font-semibold text-gray-600 dark:text-white/60">
+                    <label className="mb-2 block tkad-type-title text-gray-600 dark:text-white/60">
                       {isKo ? "목표" : "Goal"}
                     </label>
                     <PlannerCampaignGoalGrid
@@ -244,7 +244,7 @@ export function MyPlanPageClient() {
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-xs font-semibold text-gray-600 dark:text-white/60">
+                    <label className="mb-2 block tkad-type-title text-gray-600 dark:text-white/60">
                       {isKo ? "예산 (만원/월)" : "Budget (10K KRW/mo)"}
                     </label>
                     <input
@@ -271,7 +271,7 @@ export function MyPlanPageClient() {
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-xs font-semibold text-gray-600 dark:text-white/60">
+                    <label className="mb-2 block tkad-type-title text-gray-600 dark:text-white/60">
                       {tPlanner("industryLabel")}
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -281,7 +281,7 @@ export function MyPlanPageClient() {
                           type="button"
                           onClick={() => updateMeta({ industryKey: k })}
                           className={cn(
-                            "tkad-plan-cart-chip rounded-full px-3.5 py-2 text-sm font-semibold transition",
+                            "tkad-plan-cart-chip rounded-full px-3.5 py-2 tkad-type-title transition",
                             selectedIndustry === k
                               ? "tkad-plan-cart-chip-active bg-[color:var(--qp-accent)] shadow-sm ring-1 ring-[color:var(--qp-accent)]/40"
                               : "border border-gray-200 bg-white text-gray-900 dark:border-white/15 dark:bg-white/10 dark:text-white",
@@ -293,7 +293,7 @@ export function MyPlanPageClient() {
                     </div>
                   </div>
                   <div>
-                    <label className="mb-2 block text-xs font-semibold text-gray-600 dark:text-white/60">
+                    <label className="mb-2 block tkad-type-title text-gray-600 dark:text-white/60">
                       {isKo ? "기간" : "Duration"}
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -303,7 +303,7 @@ export function MyPlanPageClient() {
                           type="button"
                           onClick={() => updateMeta({ duration: d.value })}
                           className={cn(
-                            "tkad-plan-cart-chip rounded-full px-3.5 py-2 text-sm font-semibold transition",
+                            "tkad-plan-cart-chip rounded-full px-3.5 py-2 tkad-type-title transition",
                             (cart.duration ?? 1) === d.value
                               ? "tkad-plan-cart-chip-active bg-[color:var(--qp-accent)] shadow-sm ring-1 ring-[color:var(--qp-accent)]/40"
                               : "border border-gray-200 bg-white text-gray-900 dark:border-white/15 dark:bg-white/10 dark:text-white",
@@ -362,10 +362,10 @@ export function MyPlanPageClient() {
               <div className="min-w-0 space-y-6">
               <section className="space-y-3">
                 <div className="flex flex-wrap items-end justify-between gap-2">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/50">
+                  <p className="tkad-type-label text-gray-500 dark:text-white/50">
                     {isKo ? `담긴 매체 (${cart.items.length})` : `Media (${cart.items.length})`}
                   </p>
-                  <p className="text-[11px] text-gray-500 dark:text-white/45">
+                  <p className="tkad-type-caption text-gray-500 dark:text-white/45">
                     {isKo
                       ? "드래그하거나 ↑↓로 순서 변경 · 보고서에 반영됩니다"
                       : "Drag or use ↑↓ to reorder · reflected in report"}

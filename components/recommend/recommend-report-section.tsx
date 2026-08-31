@@ -81,7 +81,7 @@ function RecommendMediaRationale({
   if (scoredPortfolio.length === 0) return null;
   return (
     <div className="rounded-2xl border-2 border-border bg-card p-5">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]">
+      <p className="tkad-type-label text-[color:var(--qp-accent)]">
         [ {isKo ? "왜 이 매체?" : "Why this media?"} ]
       </p>
       <ul className="mt-4 space-y-4">
@@ -99,7 +99,7 @@ function RecommendMediaRationale({
             <li key={scored.item.id} className="border-t border-border pt-4 first:border-t-0 first:pt-0">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-sm font-bold text-foreground">{name}</p>
-                <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="tkad-type-label text-muted-foreground">
                   {isKo ? "적합도" : "Fit"} {Math.round(scored.score)}
                 </span>
               </div>
@@ -477,7 +477,7 @@ export function RecommendReportSection({
         <div className="flex items-center gap-3">
           <Sparkles className="h-5 w-5 shrink-0 text-[color:var(--qp-accent)]" />
           <div>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]">
+            <p className="tkad-type-label text-[color:var(--qp-accent)]">
               [ {isKo ? "AI 효과 보고서" : "AI effect report"} ]
             </p>
             <h2 className="mt-1 text-lg font-bold text-foreground">
@@ -523,7 +523,7 @@ export function RecommendReportSection({
                   key={kpi.label}
                   className="rounded-2xl border-2 border-border bg-card p-4"
                 >
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="tkad-type-label text-muted-foreground">
                     {kpi.label}
                   </p>
                   <p className="mt-2 text-xl font-bold tabular-nums text-foreground">

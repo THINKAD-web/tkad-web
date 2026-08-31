@@ -80,7 +80,7 @@ export default async function CommunityProfilePage({ params }: Props) {
         <NeonSection tone="qp" className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href="/community/members"
-            className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
+            className="inline-flex items-center gap-2 tkad-type-label dark:text-white transition-colors hover:dark:text-white text-gray-900"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {isKo ? "멤버 목록" : "Members"}
@@ -102,7 +102,7 @@ export default async function CommunityProfilePage({ params }: Props) {
                 </h1>
                 <RoleBadge role={profile.member.role} locale={locale} />
                 {profile.member.company ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-2 tkad-type-label dark:text-white">
                     <Building2 className="h-3.5 w-3.5" />
                     {profile.member.company}
                   </span>
@@ -110,12 +110,12 @@ export default async function CommunityProfilePage({ params }: Props) {
               </div>
 
               {profile.member.region ? (
-                <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
+                <p className="mt-3 tkad-type-label dark:text-white">
                   {isKo ? "지역" : "Region"} · {profile.member.region}
                 </p>
               ) : null}
 
-              <p className="mt-6 whitespace-pre-wrap text-[15px] leading-relaxed dark:text-white sm:text-lg">
+              <p className="mt-6 whitespace-pre-wrap text-base leading-relaxed dark:text-white sm:text-lg">
                 {profile.member.bio ??
                   (isKo
                     ? "아직 자기소개가 등록되지 않았습니다."
@@ -163,7 +163,7 @@ export default async function CommunityProfilePage({ params }: Props) {
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                      <p className="tkad-type-label dark:text-white text-gray-500">
                         {item.label}
                       </p>
                       <p className="mt-2 font-display text-2xl font-black tracking-tight dark:text-white text-gray-900">
@@ -192,7 +192,7 @@ export default async function CommunityProfilePage({ params }: Props) {
         <NeonSection tone="qp" className="pt-0 pb-20 sm:pb-24">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+              <p className="tkad-type-label dark:text-white text-gray-500">
                 [ POSTS ]
               </p>
               <h2 className="mt-2 text-2xl font-black tracking-[-0.05em] dark:text-white text-gray-900 sm:text-3xl">
@@ -203,7 +203,7 @@ export default async function CommunityProfilePage({ params }: Props) {
 
           {profile.recentPosts.length === 0 ? (
             <div className="mt-6 rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-10 text-center backdrop-blur tkad-neon-border">
-              <p className="font-display text-[12px] uppercase tracking-[0.22em] dark:text-white">
+              <p className="font-display tkad-type-meta uppercase tracking-[0.22em] dark:text-white">
                 {isKo ? "// 아직 공개 글이 없습니다." : "// no public posts yet"}
               </p>
             </div>

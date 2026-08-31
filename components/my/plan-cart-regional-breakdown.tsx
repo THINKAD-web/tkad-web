@@ -27,7 +27,7 @@ export function PlanCartRegionalBreakdown({ rows, isKo, className }: Props) {
       aria-labelledby="plan-regional-breakdown-heading"
     >
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--qp-fg-muted)]">
+        <p className="tkad-type-label text-[color:var(--qp-fg-muted)]">
           {isKo ? "지역별 요약" : "By region"}
         </p>
         <h2
@@ -68,7 +68,7 @@ export function PlanCartRegionalBreakdown({ rows, isKo, className }: Props) {
               <h3 className="text-base font-bold text-gray-900 dark:text-white">
                 {row.label}
               </h3>
-              <span className="shrink-0 rounded-full bg-[color:var(--qp-accent)]/12 px-2.5 py-0.5 text-[10px] font-bold text-[color:var(--qp-accent)]">
+              <span className="shrink-0 rounded-full bg-[color:var(--qp-accent)]/12 px-2.5 py-0.5 tkad-type-note font-bold text-[color:var(--qp-accent)]">
                 {isKo ? `매체 ${row.mediaCount}개` : `${row.mediaCount} media`}
               </span>
             </div>

@@ -65,7 +65,7 @@ export function SpecialHotspotMap({ hotspots, isKo, className }: Props) {
                 type="button"
                 onClick={() => setSelectedId(h.id)}
                 className={cn(
-                  "rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+                  "rounded-full border px-4 py-2 tkad-type-title transition-colors",
                   active
                     ? "border-pink-500/50 bg-pink-500/15 text-pink-700 dark:text-pink-200"
                     : "border-gray-200 bg-white dark:border-white/15 dark:bg-white/5",

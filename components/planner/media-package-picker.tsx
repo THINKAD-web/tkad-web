@@ -65,7 +65,7 @@ export function PlannerMediaPackagePicker({
       onKeyDown={(e) => e.stopPropagation()}
     >
       {!compact ? (
-        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        <p className="tkad-type-caption font-medium uppercase tracking-wide text-muted-foreground">
           {isKo
             ? isNetwork
               ? `패키지 (${networkUnitSuffix})`
@@ -108,7 +108,7 @@ export function PlannerMediaPackagePicker({
               className={cn(
                 "rounded-md border text-left transition-colors",
                 compact
-                  ? "min-w-0 max-w-full shrink rounded-lg px-2.5 py-1.5 text-[11px] leading-snug"
+                  ? "min-w-0 max-w-full shrink rounded-lg px-2.5 py-1.5 tkad-type-caption leading-snug"
                   : "max-w-full shrink-0 rounded-lg px-3 py-2 text-xs leading-snug",
                 selected
                   ? "border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)]/15 font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
@@ -119,7 +119,7 @@ export function PlannerMediaPackagePicker({
             >
               <span className="block truncate font-medium">{primary}</span>
               {!compact && !isNetwork && opt.description && selected ? (
-                <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground line-clamp-1">
+                <span className="mt-0.5 block tkad-type-caption font-normal text-muted-foreground line-clamp-1">
                   {opt.description}
                 </span>
               ) : null}
@@ -127,7 +127,7 @@ export function PlannerMediaPackagePicker({
                 <span
                   className={cn(
                     "block tabular-nums text-muted-foreground",
-                    compact ? "text-[10px]" : "mt-0.5 text-[11px]",
+                    compact ? "tkad-type-note" : "mt-0.5 tkad-type-caption",
                   )}
                 >
                   {formatCatalogPriceFieldWon(
@@ -137,7 +137,7 @@ export function PlannerMediaPackagePicker({
                 </span>
               ) : null}
               {compact && !isNetwork ? (
-                <span className="block truncate text-[10px] tabular-nums text-muted-foreground">
+                <span className="block truncate tkad-type-note tabular-nums text-muted-foreground">
                   {formatCatalogPriceFieldWon(
                     opt.price,
                     isKo ? "ko-KR" : "en-US",

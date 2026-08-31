@@ -60,13 +60,13 @@ export function DiscoveryMediaCardActions({
   const btnClass =
     size === "comfortable"
       ? "min-w-0 flex-1 !h-9 !rounded-lg !px-2 !text-xs"
-      : "min-w-0 flex-1 !h-8 !px-1 !text-[10px]";
+      : "min-w-0 flex-1 !h-8 !px-1 !tkad-type-note";
 
   const primaryLinkClass =
-    "inline-flex h-9 min-h-9 min-w-0 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white px-2 text-[11px] font-semibold leading-none text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12";
+    "inline-flex h-9 min-h-9 min-w-0 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white px-2 tkad-type-caption font-semibold leading-none text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12";
 
   const contactLinkClass =
-    "tkad-media-map-sheet-cta inline-flex h-9 min-h-9 min-w-0 items-center justify-center gap-1 rounded-lg border border-violet-700/30 bg-violet-700 px-2 text-[11px] font-semibold leading-none text-white shadow-sm shadow-violet-900/20 transition-colors hover:bg-violet-800";
+    "tkad-media-map-sheet-cta inline-flex h-9 min-h-9 min-w-0 items-center justify-center gap-1 rounded-lg border border-violet-700/30 bg-violet-700 px-2 tkad-type-caption font-semibold leading-none text-white shadow-sm shadow-violet-900/20 transition-colors hover:bg-violet-800";
 
   if (layout === "preview") {
     return (
@@ -83,7 +83,7 @@ export function DiscoveryMediaCardActions({
           item={planItem}
           addedFrom={addedFrom}
           gridInline
-          className="!col-span-1 !h-9 !min-h-9 !min-w-0 !rounded-lg !px-1 !text-[11px]"
+          className="!col-span-1 !h-9 !min-h-9 !min-w-0 !rounded-lg !px-1 !tkad-type-caption"
         />
         <Link
           href={contactHref}
@@ -99,7 +99,7 @@ export function DiscoveryMediaCardActions({
 
   if (layout === "grid-cell") {
     const shortBtn =
-      "inline-flex h-8 min-h-8 min-w-0 flex-1 items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-semibold leading-none whitespace-nowrap";
+      "inline-flex h-8 min-h-8 min-w-0 flex-1 items-center justify-center gap-0.5 rounded-lg px-1 tkad-type-note font-semibold leading-none whitespace-nowrap";
     return (
       <div className={cn("space-y-1.5", className)}>
         <div className="grid grid-cols-2 gap-1">
@@ -130,14 +130,14 @@ export function DiscoveryMediaCardActions({
                 nameEn: planItem.mediaName,
               }}
               gridInline
-              className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
+              className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !tkad-type-note"
             />
           ) : null}
           <PlanCartToggleButton
             item={planItem}
             addedFrom={addedFrom}
             gridInline
-            className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
+            className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !tkad-type-note"
           />
         </div>
       </div>
@@ -151,7 +151,7 @@ export function DiscoveryMediaCardActions({
           item={planItem}
           addedFrom={addedFrom}
           gridInline
-          className="!h-8 !min-w-0 !flex-1 !rounded-lg !px-2 !text-[11px]"
+          className="!h-8 !min-w-0 !flex-1 !rounded-lg !px-2 !tkad-type-caption"
         />
         {onToggleCompare ? (
           <MediaCompareSelectButton
@@ -162,7 +162,7 @@ export function DiscoveryMediaCardActions({
               nameEn: planItem.mediaName,
             }}
             gridInline
-            className="!h-8 !min-w-0 !flex-1 !rounded-lg !px-2 !text-[11px]"
+            className="!h-8 !min-w-0 !flex-1 !rounded-lg !px-2 !tkad-type-caption"
           />
         ) : null}
       </div>
@@ -176,7 +176,7 @@ export function DiscoveryMediaCardActions({
           <Link
             href={detailHref}
             onClick={guardCardClick(stopPropagation)}
-            className={cn(primaryLinkClass, "!h-8 !min-h-8 !text-[11px]")}
+            className={cn(primaryLinkClass, "!h-8 !min-h-8 !tkad-type-caption")}
           >
             <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
             <span className="whitespace-nowrap">{isKo ? "상세" : "Details"}</span>
@@ -184,7 +184,7 @@ export function DiscoveryMediaCardActions({
           <Link
             href={contactHref}
             onClick={guardCardClick(stopPropagation)}
-            className={cn(contactLinkClass, "!h-8 !min-h-8 !text-[11px]")}
+            className={cn(contactLinkClass, "!h-8 !min-h-8 !tkad-type-caption")}
           >
             <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
             <span className="whitespace-nowrap">{isKo ? "문의" : "Contact"}</span>
@@ -200,14 +200,14 @@ export function DiscoveryMediaCardActions({
                 nameEn: planItem.mediaName,
               }}
               gridInline
-              className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
+              className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !tkad-type-note"
             />
           ) : null}
           <PlanCartToggleButton
             item={planItem}
             addedFrom={addedFrom}
             gridInline
-            className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
+            className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !tkad-type-note"
           />
         </div>
       </div>

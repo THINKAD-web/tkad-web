@@ -102,7 +102,7 @@ export function AdvertiserCampaignDetailClient({
     <div className="mx-auto max-w-3xl px-4 py-5 pb-24 sm:py-8">
       <Link
         href="/dashboard"
-        className="mb-4 inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+        className="mb-4 inline-flex items-center gap-2 tkad-type-label text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         {isKo ? "대시보드" : "Dashboard"}
@@ -111,7 +111,7 @@ export function AdvertiserCampaignDetailClient({
       <h1 className="text-xl font-black tracking-tight sm:text-2xl">
         {initial.name}
       </h1>
-      <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+      <p className="mt-1 tkad-type-label text-muted-foreground">
         {initial.startDate ?? "—"} ~ {initial.endDate ?? "—"} · {initial.status}
       </p>
 
@@ -126,13 +126,13 @@ export function AdvertiserCampaignDetailClient({
       </div>
 
       <section className="mt-6">
-        <h2 className="mb-3 font-display text-[11px] font-black uppercase tracking-[0.24em]">
+        <h2 className="mb-3 font-display tkad-type-caption font-black uppercase tracking-[0.24em]">
           {isKo ? "매체 예약 상태" : "Media booking status"}
         </h2>
         {bookings.length > 0 ? (
           <div className="overflow-hidden rounded-[20px] border border-border">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-border bg-muted/40 font-display text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+              <thead className="border-b border-border bg-muted/40 font-display tkad-type-note font-bold uppercase tracking-[0.16em] text-muted-foreground">
                 <tr>
                   <th className="px-3 py-2.5 font-bold">
                     {isKo ? "매체" : "Media"}
@@ -164,7 +164,7 @@ export function AdvertiserCampaignDetailClient({
                             {b.location}
                           </p>
                         ) : null}
-                        <p className="mt-1 text-[11px] text-muted-foreground sm:hidden">
+                        <p className="mt-1 tkad-type-caption text-muted-foreground sm:hidden">
                           {b.startsAt} ~ {b.endsAt}
                         </p>
                       </td>
@@ -197,7 +197,7 @@ export function AdvertiserCampaignDetailClient({
       </section>
 
       <section className="mt-6">
-        <h2 className="mb-3 font-display text-[11px] font-black uppercase tracking-[0.24em]">
+        <h2 className="mb-3 font-display tkad-type-caption font-black uppercase tracking-[0.24em]">
           {isKo ? "집행 매체 지도" : "Media map"}
         </h2>
         {initial.mapPins.length > 0 ? (
@@ -220,11 +220,11 @@ export function AdvertiserCampaignDetailClient({
       </section>
 
       <section className="mt-8">
-        <h2 className="mb-3 font-display text-[11px] font-black uppercase tracking-[0.24em]">
+        <h2 className="mb-3 font-display tkad-type-caption font-black uppercase tracking-[0.24em]">
           {isKo ? "일별 노출 추이" : "Daily impressions"}
         </h2>
         <AdvertiserImpressionsChart data={initial.dailySeries} isKo={isKo} />
-        <p className="mt-2 text-center text-[10px] text-muted-foreground">
+        <p className="mt-2 text-center tkad-type-note text-muted-foreground">
           {isKo
             ? `누적 추정 노출 ${initial.impressionsTotal.toLocaleString("ko-KR")}`
             : `Total est. impressions ${initial.impressionsTotal.toLocaleString("en-US")}`}
@@ -240,7 +240,7 @@ export function AdvertiserCampaignDetailClient({
       />
 
       <section className="mt-8">
-        <h2 className="mb-3 font-display text-[11px] font-black uppercase tracking-[0.24em]">
+        <h2 className="mb-3 font-display tkad-type-caption font-black uppercase tracking-[0.24em]">
           {isKo ? "결과 리포트" : "Completion report"}
         </h2>
         {reportReady ? (

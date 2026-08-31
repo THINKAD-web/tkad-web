@@ -151,7 +151,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
       <div className="mt-5 grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold dark:border-white/12 border-gray-200">
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 tkad-type-title dark:border-white/12 border-gray-200">
               <input
                 type="radio"
                 name="durationMode"
@@ -160,7 +160,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
               />
               {isKo ? "기간 단위" : "By unit"}
             </label>
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold dark:border-white/12 border-gray-200">
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 tkad-type-title dark:border-white/12 border-gray-200">
               <input
                 type="radio"
                 name="durationMode"

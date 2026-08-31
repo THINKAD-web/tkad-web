@@ -155,7 +155,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
 
       <Link
         href={contactHref}
-        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-muted px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/80"
+        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-muted px-5 tkad-type-title text-foreground transition-colors hover:bg-muted/80"
       >
         {isKo ? "이 견적으로 문의하기" : "Inquire with this estimate"}
       </Link>

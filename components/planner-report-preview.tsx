@@ -227,7 +227,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                         }}
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center font-display text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+                      <div className="flex h-full w-full items-center justify-center font-display tkad-type-note uppercase tracking-[0.18em] text-muted-foreground">
                         {t("reportPreviewNoImage")}
                       </div>
                     )}
@@ -259,16 +259,16 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                     <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
                       {name}
                     </p>
-                    <p className={cn("mt-1 line-clamp-2 text-[11px] leading-relaxed", plannerNeon.subtext)}>
+                    <p className={cn("mt-1 line-clamp-2 tkad-type-caption leading-relaxed", plannerNeon.subtext)}>
                       {loc}
                     </p>
-                    <span className="mt-1.5 inline-block rounded-md bg-[color:var(--qp-accent)]/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
+                    <span className="mt-1.5 inline-block rounded-md bg-[color:var(--qp-accent)]/12 px-2 py-0.5 tkad-type-note font-semibold uppercase tracking-[0.14em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                       {typeLabel(m)}
                     </span>
                     <div className="my-2 border-t dark:border-white/10 border-gray-200" />
                     <p className="text-sm font-bold tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                       {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
-                      <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
+                      <span className="ml-1 tkad-type-note font-normal uppercase tracking-[0.18em] text-muted-foreground">
                         /{formatPricePeriodShortLabel(m.pricePeriod, isKo ? "ko" : "en")}
                       </span>
                     </p>
@@ -277,7 +277,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                       const badge = priceOptionBadge(m);
                       if (!badge) return null;
                       return (
-                        <p className={cn("mt-1 text-[10px] font-medium", plannerNeon.kpiLabel)}>
+                        <p className={cn("mt-1 tkad-type-note font-medium", plannerNeon.kpiLabel)}>
                           {badge}
                         </p>
                       );
@@ -463,7 +463,7 @@ function PortfolioTrafficSection({
           {isKo ? "노출 패턴 (시간대 · 요일 · 월별)" : "Exposure pattern (hourly · weekday · monthly)"}
         </PlannerNeonLabel>
         {!agg.allReal ? (
-          <span className="rounded-lg border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-[color:var(--qp-accent)]">
+          <span className="rounded-lg border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/10 px-2 py-0.5 tkad-type-note font-semibold uppercase tracking-widest text-[color:var(--qp-accent)]">
             {isKo ? "일부 추정치" : "partly estimated"}
           </span>
         ) : null}
@@ -541,10 +541,10 @@ function TrafficBarBlock({
       )}
     >
       <div className="mb-2 flex items-baseline justify-between gap-2">
-        <p className={cn("text-xs font-semibold uppercase tracking-widest", plannerNeon.label)}>
+        <p className={cn("tkad-type-title uppercase tracking-widest", plannerNeon.label)}>
           {title}
         </p>
-        <span className="rounded-md bg-[color:var(--qp-accent)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
+        <span className="rounded-md bg-[color:var(--qp-accent)] px-1.5 py-0.5 tkad-type-note font-bold uppercase tracking-widest text-white">
           {peakLabel}
         </span>
       </div>
@@ -571,7 +571,7 @@ function TrafficBarBlock({
         {labels.map((label, i) => (
           <div
             key={i}
-            className="flex-1 text-center font-display text-[8px] font-bold leading-tight tracking-[0.18em] text-muted-foreground"
+            className="flex-1 text-center font-display tkad-type-note font-bold leading-tight tracking-[0.18em] text-muted-foreground"
           >
             {label}
           </div>

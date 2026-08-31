@@ -187,11 +187,11 @@ export function TeamManagementSection() {
       <div className={myHubGlassCard}>
         <div className="mb-4 flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+          <p className="tkad-type-label text-primary">
             {isKo ? "팀 설정" : "Team settings"}
           </p>
         </div>
-        <label className="block text-sm font-semibold text-foreground">
+        <label className="block tkad-type-title text-foreground">
           {isKo ? "팀 이름" : "Team name"}
         </label>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
@@ -216,7 +216,7 @@ export function TeamManagementSection() {
 
       {perms?.canInvite ? (
         <form onSubmit={sendInvite} className={myHubGlassCard}>
-          <p className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+          <p className="mb-3 tkad-type-label text-primary">
             {isKo ? "팀원 초대" : "Invite member"}
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -248,26 +248,26 @@ export function TeamManagementSection() {
       ) : null}
 
       <div className={cn(myHubGlassPanel, "p-5 sm:p-6 lg:p-8")}>
-        <p className="mb-5 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="mb-5 tkad-type-label text-muted-foreground">
           {isKo ? `팀원 (${members.length})` : `Members (${members.length})`}
         </p>
         <div className="overflow-x-auto rounded-[20px] border border-border/60 dark:border-white/10 border-gray-200">
           <table className="w-full min-w-[640px] border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-border/60 bg-muted/40 dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50">
-                <th className="px-4 py-3.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <th className="px-4 py-3.5 tkad-type-label text-muted-foreground">
                   {isKo ? "이름" : "Name"}
                 </th>
-                <th className="px-4 py-3.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <th className="px-4 py-3.5 tkad-type-label text-muted-foreground">
                   {isKo ? "이메일" : "Email"}
                 </th>
-                <th className="px-4 py-3.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <th className="px-4 py-3.5 tkad-type-label text-muted-foreground">
                   {isKo ? "가입일" : "Joined"}
                 </th>
-                <th className="px-4 py-3.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <th className="px-4 py-3.5 tkad-type-label text-muted-foreground">
                   {isKo ? "역할" : "Role"}
                 </th>
-                <th className="px-4 py-3.5 text-right font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <th className="px-4 py-3.5 text-right tkad-type-label text-muted-foreground">
                   {isKo ? "관리" : "Actions"}
                 </th>
               </tr>
@@ -299,7 +299,7 @@ export function TeamManagementSection() {
                         ))}
                       </select>
                     ) : (
-                      <span className="inline-flex rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold text-primary">
+                      <span className="inline-flex rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 tkad-type-note font-semibold text-primary">
                         {isKo ? TEAM_ROLE_LABEL[m.role].ko : TEAM_ROLE_LABEL[m.role].en}
                       </span>
                     )}

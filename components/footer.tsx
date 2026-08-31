@@ -69,7 +69,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold tracking-wide text-gold">
+            <h4 className="tkad-type-title tracking-wide text-gold">
               {t("footer.quickLinks")}
             </h4>
             <ul className="mt-4 space-y-2.5">
@@ -87,7 +87,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold tracking-wide text-gold">
+            <h4 className="tkad-type-title tracking-wide text-gold">
               {t("footer.contactInfo")}
             </h4>
             <ul className="mt-4 space-y-2.5 text-sm text-silver/90">
@@ -129,7 +129,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold tracking-wide text-gold">
+            <h4 className="tkad-type-title tracking-wide text-gold">
               {t("footer.services")}
             </h4>
             <ul className="mt-4 space-y-2.5">

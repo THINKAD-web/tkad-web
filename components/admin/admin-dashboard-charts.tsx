@@ -36,7 +36,7 @@ export function AdminDashboardCharts({
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div className="rounded-2xl border border-border/60 bg-card/50 p-4 backdrop-blur">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ 최근 4주 문의 추이 ]
         </p>
         <div className="mt-4 h-56 w-full">
@@ -78,7 +78,7 @@ export function AdminDashboardCharts({
       </div>
 
       <div className="rounded-2xl border border-border/60 bg-card/50 p-4 backdrop-blur">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ 문의 유형별 ]
         </p>
         <div className="mt-4 flex h-56 flex-col items-center sm:flex-row sm:gap-4">

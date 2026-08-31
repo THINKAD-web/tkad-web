@@ -230,7 +230,7 @@ export function PublicNavSidebar({
                     {group.label}
                   </span>
                   {!isPanel ? (
-                    <span className="mt-0.5 block font-display text-[11px] font-medium lowercase tracking-[0.22em] text-gray-400 dark:text-white/35">
+                    <span className="mt-0.5 block font-display tkad-type-caption font-medium lowercase tracking-[0.22em] text-gray-400 dark:text-white/35">
                       {group.labelEn}
                     </span>
                   ) : null}

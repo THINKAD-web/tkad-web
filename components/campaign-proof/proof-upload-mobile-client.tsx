@@ -154,7 +154,7 @@ export function ProofUploadMobileClient({
 
   return (
     <div className="mx-auto min-h-[100dvh] max-w-lg px-4 py-6 pb-10">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-violet-300/80">
+      <p className="tkad-type-label text-violet-300/80">
         {title ?? (isKo ? "현장 인증" : "Field proof")}
       </p>
       <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900">
@@ -173,7 +173,7 @@ export function ProofUploadMobileClient({
             <button
               type="button"
               onClick={() => void refreshGeo()}
-              className="text-xs font-semibold text-violet-300 underline underline-offset-2"
+              className="tkad-type-title text-violet-300 underline underline-offset-2"
             >
               {isKo ? "위치 다시 요청" : "Retry location"}
             </button>
@@ -249,7 +249,7 @@ export function ProofUploadMobileClient({
 
       {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
 
-      <p className="mt-8 text-center text-[11px] dark:text-white text-gray-400">
+      <p className="mt-8 text-center tkad-type-caption dark:text-white text-gray-400">
         {isKo
           ? "촬영 시각·매체명이 자동 태그되며 THINKAD 워터마크가 적용됩니다. GPS는 권장이며 필수는 아닙니다."
           : "Capture time and media name are tagged; THINKAD watermark applied. GPS is recommended, not required."}

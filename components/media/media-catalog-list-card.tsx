@@ -77,7 +77,7 @@ export function MediaCatalogListCard({
     >
       {rank != null ? (
         <span
-          className="absolute left-2 top-2 z-10 flex h-5 min-w-[1.25rem] items-center justify-center rounded-md bg-orange-500 px-1 text-[11px] font-bold text-white shadow-sm"
+          className="absolute left-2 top-2 z-10 flex h-5 min-w-[1.25rem] items-center justify-center rounded-md bg-orange-500 px-1 tkad-type-caption font-bold text-white shadow-sm"
           aria-hidden
         >
           {rank}
@@ -97,7 +97,7 @@ export function MediaCatalogListCard({
         <div className="min-w-0 space-y-0.5">
           <h3 className="line-clamp-1 text-sm font-bold text-gray-900 dark:text-white">
             {isNetwork ? (
-              <span className="mr-1 inline-flex items-center gap-0.5 rounded bg-hermes/15 px-1 py-0.5 align-middle text-[10px] font-bold text-hermes">
+              <span className="mr-1 inline-flex items-center gap-0.5 rounded bg-hermes/15 px-1 py-0.5 align-middle tkad-type-note font-bold text-hermes">
                 <span aria-hidden>🌐</span>
                 {isKo ? "네트워크" : "Network"}
               </span>
@@ -119,7 +119,7 @@ export function MediaCatalogListCard({
             </p>
           ) : null}
           {execCount > 0 ? (
-            <p className="text-[10px] text-gray-400 dark:text-white/40">
+            <p className="tkad-type-note text-gray-400 dark:text-white/40">
               {isKo ? `${execCount}회 집행` : `${execCount} flights`}
               {monthsAgo != null
                 ? isKo
@@ -137,7 +137,7 @@ export function MediaCatalogListCard({
               {isNetwork && networkPerUnit != null && networkPerUnit > 0 ? (
                 <>
                   {formatMediaPriceWonWithSymbol(networkPerUnit)}
-                  <span className="ml-0.5 text-[10px] font-normal text-gray-500 dark:text-white/50">
+                  <span className="ml-0.5 tkad-type-note font-normal text-gray-500 dark:text-white/50">
                     {isKo ? "/대·월" : "/unit·mo"}
                   </span>
                 </>
@@ -145,7 +145,7 @@ export function MediaCatalogListCard({
                 <>
                   {formatMediaPriceWonWithSymbol(priceWon)}
                   {showPricePeriod ? (
-                    <span className="ml-0.5 text-[10px] font-normal text-gray-500 dark:text-white/50">
+                    <span className="ml-0.5 tkad-type-note font-normal text-gray-500 dark:text-white/50">
                       /{periodLabel}
                     </span>
                   ) : null}
@@ -154,7 +154,7 @@ export function MediaCatalogListCard({
             </p>
             <MediaPriceExclNote isKo={isKo} className="mt-0.5 text-right" />
             {hotBadge ? (
-              <span className="text-[10px] font-semibold text-hermes">
+              <span className="tkad-type-note font-semibold text-hermes">
                 {isKo ? "인기" : "Hot"}
               </span>
             ) : null}

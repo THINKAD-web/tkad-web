@@ -173,7 +173,7 @@ export default function MediaAiRecommendPanel({
     return (
       <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-[#0a1628]/95 backdrop-blur-md">
         <div className="w-full max-w-sm space-y-6 px-6">
-          <p className="text-center text-sm font-semibold text-gold">
+          <p className="text-center tkad-type-title text-gold">
             {tr("loadingTitle")}
           </p>
           <div className="space-y-3 rounded-2xl border border-gold/20 bg-navy/80 p-6 shadow-xl">
@@ -275,7 +275,7 @@ export default function MediaAiRecommendPanel({
                 type="button"
                 onClick={() => setView("list")}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors touch-manipulation",
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 tkad-type-title transition-colors touch-manipulation",
                   view === "list"
                     ? "bg-navy dark:text-white text-gray-900"
                     : "text-muted-foreground hover:bg-slate-50",
@@ -288,7 +288,7 @@ export default function MediaAiRecommendPanel({
                 type="button"
                 onClick={() => setView("map")}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors touch-manipulation",
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 tkad-type-title transition-colors touch-manipulation",
                   view === "map"
                     ? "bg-navy dark:text-white text-gray-900"
                     : "text-muted-foreground hover:bg-slate-50",
@@ -337,7 +337,7 @@ export default function MediaAiRecommendPanel({
                   type="button"
                   onClick={() => setRowLayout("card")}
                   className={cn(
-                    "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                    "rounded-full px-3 py-1.5 tkad-type-title transition-colors",
                     rowLayout === "card"
                       ? "bg-navy dark:text-white text-gray-900"
                       : "text-muted-foreground hover:bg-slate-50",
@@ -349,7 +349,7 @@ export default function MediaAiRecommendPanel({
                   type="button"
                   onClick={() => setRowLayout("compact")}
                   className={cn(
-                    "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                    "rounded-full px-3 py-1.5 tkad-type-title transition-colors",
                     rowLayout === "compact"
                       ? "bg-navy dark:text-white text-gray-900"
                       : "text-muted-foreground hover:bg-slate-50",
@@ -386,12 +386,12 @@ export default function MediaAiRecommendPanel({
           </div>
         ) : (
           <div className="overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-b from-slate-100 to-slate-200 shadow-inner">
-            <p className="border-b border-navy/10 dark:bg-white/8 bg-gray-100 px-4 py-2 text-center text-[11px] text-muted-foreground">
+            <p className="border-b border-navy/10 dark:bg-white/8 bg-gray-100 px-4 py-2 text-center tkad-type-caption text-muted-foreground">
               {t("media.ai.mapHint")}
             </p>
             <div className="relative mx-auto aspect-[16/11] max-h-[420px] w-full">
               <div className="absolute inset-3 rounded-xl border border-navy/10 bg-[#e8eef5] shadow-sm">
-                <span className="absolute left-2 top-2 text-[10px] font-bold text-navy/40">
+                <span className="absolute left-2 top-2 tkad-type-note font-bold text-navy/40">
                   KOR
                 </span>
                 {results.map((s) => {
@@ -403,7 +403,7 @@ export default function MediaAiRecommendPanel({
                       style={{ left: `${x}%`, top: `${y}%` }}
                       title={isKo ? s.item.name : (s.item.nameEn || s.item.name)}
                     >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gold text-[10px] font-extrabold text-navy shadow-md">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gold tkad-type-note font-extrabold text-navy shadow-md">
                         {s.score}
                       </div>
                     </div>
@@ -504,7 +504,7 @@ function AiResultCard({
         </Badge>
         <div
           className={cn(
-            "absolute top-2 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold dark:text-white text-gray-900",
+            "absolute top-2 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 tkad-type-note font-bold dark:text-white text-gray-900",
             compact ? "left-1/2 -translate-x-1/2" : "left-2",
           )}
         >
@@ -542,14 +542,14 @@ function AiResultCard({
             )}
           >
             {exposure ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-navy/5 px-2.5 py-1 text-[11px] font-semibold text-navy">
+              <span className="inline-flex items-center gap-1 rounded-full bg-navy/5 px-2.5 py-1 tkad-type-caption font-semibold text-navy">
                 👥 {exposure}
               </span>
             ) : null}
             {availability ? (
               <span
                 className={cn(
-                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 tkad-type-caption font-semibold",
                   availability.className,
                 )}
               >
@@ -576,7 +576,7 @@ function AiResultCard({
         </div>
         <ul
           className={cn(
-            "space-y-1 text-[11px] leading-relaxed text-navy/80",
+            "space-y-1 tkad-type-caption leading-relaxed text-navy/80",
             compact && "text-center",
           )}
         >

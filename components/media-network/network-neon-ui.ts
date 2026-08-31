@@ -6,7 +6,7 @@ export const NETWORK_CARD =
   "rounded-[22px] border border-gray-200 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)]";
 
 export const NETWORK_CHIP =
-  "rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-700 transition dark:border-white/12 dark:bg-white/6 dark:text-white/80";
+  "rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 tkad-type-title text-gray-700 transition dark:border-white/12 dark:bg-white/6 dark:text-white/80";
 
 export const NETWORK_CHIP_ACTIVE =
   "border-violet-500/50 bg-violet-500/10 text-violet-700 dark:text-violet-300";

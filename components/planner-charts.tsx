@@ -92,7 +92,7 @@ export function PlannerImpressionsLineChart({
                 x={padL - 6}
                 y={yy + 4}
                 textAnchor="end"
-                className="fill-muted-foreground text-[9px]"
+                className="fill-muted-foreground tkad-type-note"
                 style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {formatCompact(v, isKo)}
@@ -127,7 +127,7 @@ export function PlannerImpressionsLineChart({
             x={p.x}
             y={H - 8}
             textAnchor="middle"
-            className="fill-muted-foreground text-[9px] font-bold"
+            className="fill-muted-foreground tkad-type-note font-bold"
             style={{ fontFamily: "JetBrains Mono, monospace" }}
           >
             {isKo ? `${p.month}M` : `M${p.month}`}
@@ -205,7 +205,7 @@ export function PlannerRoiLineChart({
           x={W - padR}
           y={18}
           textAnchor="end"
-          className="fill-muted-foreground text-[8px]"
+          className="fill-muted-foreground tkad-type-note"
           style={{ fontFamily: "JetBrains Mono, monospace" }}
         >
           {roiUnit}
@@ -243,14 +243,14 @@ export function PlannerRoiLineChart({
             x={xFor(i)}
             y={H - 10}
             textAnchor="middle"
-            className="fill-muted-foreground text-[9px] font-bold"
+            className="fill-muted-foreground tkad-type-note font-bold"
             style={{ fontFamily: "JetBrains Mono, monospace" }}
           >
             {isKo ? `${d.month}M` : `M${d.month}`}
           </text>
         ))}
       </svg>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground sm:text-[11px]">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 tkad-type-label text-muted-foreground sm:tkad-type-caption">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-[2px] w-4 border-t-2 border-dashed border-muted-foreground" />
           {legendConservative}
@@ -309,7 +309,7 @@ export function PlannerDailyReachBarChart({
         role="img"
         aria-label={title}
       >
-        <text x={padL} y={14} className="fill-foreground text-[11px] font-bold">
+        <text x={padL} y={14} className="fill-foreground tkad-type-caption font-bold">
           {title}
         </text>
         {data.map((p, i) => {
@@ -330,7 +330,7 @@ export function PlannerDailyReachBarChart({
                 x={x + barW / 2}
                 y={y - 4}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[8px] font-bold"
+                className="fill-muted-foreground tkad-type-note font-bold"
                 style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {formatBarTick(p.value)}
@@ -339,7 +339,7 @@ export function PlannerDailyReachBarChart({
                 x={x + barW / 2}
                 y={H - 10}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[9px] font-bold"
+                className="fill-muted-foreground tkad-type-note font-bold"
                 style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {p.label}
@@ -351,7 +351,7 @@ export function PlannerDailyReachBarChart({
           x={W - padR}
           y={H - 2}
           textAnchor="end"
-          className="fill-muted-foreground text-[8px]"
+          className="fill-muted-foreground tkad-type-note"
           style={{ fontFamily: "JetBrains Mono, monospace" }}
         >
           {valueLabel}
@@ -416,7 +416,7 @@ export function PlannerReachDonutChart({
         </g>
       </svg>
       <div className="space-y-2 text-sm">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ {title} ]
         </p>
         <div className="flex items-center gap-2 text-xs">
@@ -474,7 +474,7 @@ export function PlannerBudgetPieChart({
 
   return (
     <div className="w-full space-y-3">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+      <p className="tkad-type-label text-muted-foreground">
         [ {title} ]
       </p>
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-8">
@@ -546,7 +546,7 @@ export function PlannerCpmCompareChart({
         role="img"
         aria-label={title}
       >
-        <text x={padL} y={18} className="fill-foreground text-[11px] font-bold">
+        <text x={padL} y={18} className="fill-foreground tkad-type-caption font-bold">
           {title}
         </text>
         {data.map((p, i) => {
@@ -574,7 +574,7 @@ export function PlannerCpmCompareChart({
                 x={x + barW / 2}
                 y={y - 4}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[8px] font-bold"
+                className="fill-muted-foreground tkad-type-note font-bold"
                 style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {p.value >= 1000
@@ -585,7 +585,7 @@ export function PlannerCpmCompareChart({
                 x={x + barW / 2}
                 y={H - 10}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[9px] font-bold"
+                className="fill-muted-foreground tkad-type-note font-bold"
                 style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {p.label}
@@ -597,7 +597,7 @@ export function PlannerCpmCompareChart({
           x={W - padR}
           y={H - 2}
           textAnchor="end"
-          className="fill-muted-foreground text-[8px]"
+          className="fill-muted-foreground tkad-type-note"
           style={{ fontFamily: "JetBrains Mono, monospace" }}
         >
           {unitLabel}
@@ -637,7 +637,7 @@ export function PlannerMonthCompareChart({
         role="img"
         aria-label={title}
       >
-        <text x={padL} y={14} className="fill-foreground text-[11px] font-bold">
+        <text x={padL} y={14} className="fill-foreground tkad-type-caption font-bold">
           {title}
         </text>
         {[1, 0.5, 0].map((t, i) => {
@@ -658,7 +658,7 @@ export function PlannerMonthCompareChart({
                 x={padL - 6}
                 y={yy + 4}
                 textAnchor="end"
-                className="fill-muted-foreground text-[9px]"
+                className="fill-muted-foreground tkad-type-note"
                 style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {formatBarTick(v)}
@@ -684,7 +684,7 @@ export function PlannerMonthCompareChart({
                 x={x + barW / 2}
                 y={H - 10}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[9px] font-bold"
+                className="fill-muted-foreground tkad-type-note font-bold"
                 style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {barLabels[i] ?? `${d.months}M`}

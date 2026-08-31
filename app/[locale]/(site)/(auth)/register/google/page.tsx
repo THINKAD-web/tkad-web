@@ -58,13 +58,13 @@ function GoogleRegisterForm() {
       <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10">
         <AuthCardShell>
           <div className="mb-6 text-center">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
+            <p className="tkad-type-label dark:text-white text-gray-600">
               [ GOOGLE SIGNUP ]
             </p>
             <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
               Google 계정 가입
             </h1>
-            <p className="mt-2 text-[12px] tracking-tight dark:text-white text-gray-500">
+            <p className="mt-2 tkad-type-meta tracking-tight dark:text-white text-gray-500">
               {`// `}역할을 선택하면 가입이 완료됩니다
             </p>
           </div>
@@ -76,7 +76,7 @@ function GoogleRegisterForm() {
           />
 
           {error && (
-            <div className="mt-4 rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 text-[12px] tracking-tight dark:text-white text-gray-800">
+            <div className="mt-4 rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 tkad-type-meta tracking-tight dark:text-white text-gray-800">
               {`// `}
               {error}
             </div>
@@ -94,7 +94,7 @@ function GoogleRegisterForm() {
             {loading ? "가입 중…" : "가입 완료"}
           </BtnBlock>
 
-          <p className="mt-6 text-center text-[12px] tracking-tight dark:text-white text-gray-500">
+          <p className="mt-6 text-center tkad-type-meta tracking-tight dark:text-white text-gray-500">
             {`// `}
             <Link
               href="/login"

@@ -111,7 +111,7 @@ export function MediaCompareSelectButton({
             ? mediaActionBlockClass(
                 selected,
                 "compare",
-                "h-8 flex-1 px-2 text-[11px]",
+                "h-8 flex-1 px-2 tkad-type-caption",
               )
             : mediaActionPillClass(selected, "compare"),
         className,

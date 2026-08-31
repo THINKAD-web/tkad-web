@@ -6,7 +6,7 @@ import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { cn } from "@/lib/utils";
 
 export const THUMBNAIL_BADGE_CHIP_BASE =
-  "inline-flex max-w-full items-center gap-0.5 truncate rounded-md px-1.5 py-0.5 text-[9px] font-bold tracking-wide backdrop-blur-sm sm:text-[10px]";
+  "inline-flex max-w-full items-center gap-0.5 truncate rounded-md px-1.5 py-0.5 tkad-type-note font-bold tracking-wide backdrop-blur-sm sm:tkad-type-note";
 
 export type ThumbnailBadge = {
   key: string;

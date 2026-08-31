@@ -71,7 +71,7 @@ export function PlannerMediaQuantityStepper({
       onKeyDown={(e) => e.stopPropagation()}
     >
       {!compact ? (
-        <span className="text-[11px] font-medium text-muted-foreground">
+        <span className="tkad-type-caption font-medium text-muted-foreground">
           {isKo ? "수량" : "Qty"}
         </span>
       ) : null}
@@ -103,11 +103,11 @@ export function PlannerMediaQuantityStepper({
                 (e.target as HTMLInputElement).blur();
               }
             }}
-            className="h-7 w-14 border-x border-[color:var(--qp-accent)]/35 bg-white px-1 text-center text-xs font-semibold tabular-nums text-foreground outline-none focus:ring-1 focus:ring-[color:var(--qp-accent-ring)] dark:border-[color:var(--qp-accent)]/25 dark:bg-white/5"
+            className="h-7 w-14 border-x border-[color:var(--qp-accent)]/35 bg-white px-1 text-center tkad-type-title tabular-nums text-foreground outline-none focus:ring-1 focus:ring-[color:var(--qp-accent-ring)] dark:border-[color:var(--qp-accent)]/25 dark:bg-white/5"
             aria-label={isKo ? "수량 직접 입력" : "Quantity input"}
           />
         ) : (
-          <span className="min-w-[3.5rem] px-1 text-center text-xs font-semibold tabular-nums text-foreground">
+          <span className="min-w-[3.5rem] px-1 text-center tkad-type-title tabular-nums text-foreground">
             {label}
           </span>
         )}

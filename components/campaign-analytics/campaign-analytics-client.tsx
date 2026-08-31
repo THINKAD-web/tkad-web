@@ -138,7 +138,7 @@ export function CampaignAnalyticsClient({
       <AnalyticsShell>
         <Link
           href={backHref}
-          className="mb-4 inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500 hover:dark:text-white text-gray-900"
+          className="mb-4 inline-flex items-center gap-2 tkad-type-label dark:text-white text-gray-500 hover:dark:text-white text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" />
           {mode === "admin"
@@ -152,13 +152,13 @@ export function CampaignAnalyticsClient({
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+            <p className="tkad-type-label text-[#22d3ee]">
               [ {isKo ? "성과 분석" : "PERFORMANCE ANALYTICS"} ]
             </p>
             <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900 sm:text-3xl">
               {data.name}
             </h1>
-            <p className="mt-2 text-[11px] tracking-tight dark:text-white text-gray-500">
+            <p className="mt-2 tkad-type-caption tracking-tight dark:text-white text-gray-500">
               {data.startDate ?? "—"} ~ {data.endDate ?? "—"} · {data.status}
               {data.clientCompany ? ` · ${data.clientCompany}` : ""}
             </p>
@@ -166,7 +166,7 @@ export function CampaignAnalyticsClient({
           <BarChart3 className="hidden h-10 w-10 text-[#a855f7] sm:block" aria-hidden />
         </div>
 
-        <p className="mt-4 text-[10px] tracking-tight dark:text-white">
+        <p className="mt-4 tkad-type-note tracking-tight dark:text-white">
           {`// `}
           {isKo
             ? "집행 기간·매체 DB 기반 추정치입니다. 공식 집행 리포트는 PDF를 참고하세요."
@@ -179,7 +179,7 @@ export function CampaignAnalyticsClient({
               key={card.label}
               className={`rounded-[20px] border dark:border-white/12 border-gray-200 bg-gradient-to-br ${card.accent} dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur`}
             >
-              <p className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
+              <p className="tkad-type-label dark:text-white text-gray-500">
                 {card.label}
               </p>
               <p className="mt-2 text-2xl font-black tabular-nums tracking-tight dark:text-white text-gray-900">
@@ -192,10 +192,10 @@ export function CampaignAnalyticsClient({
         <PredictedVsActual data={data} mode={mode} isKo={isKo} />
 
         <section className="mt-8 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
-          <h2 className="font-display text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
+          <h2 className="font-display tkad-type-caption font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
             {isKo ? "노출 추이" : "Impression trend"}
           </h2>
-          <p className="mt-1 text-[10px] dark:text-white">
+          <p className="mt-1 tkad-type-note dark:text-white">
             {isKo
               ? "평일(시안) · 주말(핑크) 구분"
               : "Weekday (cyan) · weekend (pink)"}
@@ -281,10 +281,10 @@ export function CampaignAnalyticsClient({
 
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <section className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
-            <h2 className="font-display text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
+            <h2 className="font-display tkad-type-caption font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
               {isKo ? "매체별 기여도" : "Media contribution"}
             </h2>
-            <p className="mt-1 text-[10px] dark:text-white">
+            <p className="mt-1 tkad-type-note dark:text-white">
               {isKo ? "조각 클릭 시 매체 상세로 이동" : "Click a slice for media detail"}
             </p>
             {pieData.length === 0 ? (
@@ -355,7 +355,7 @@ export function CampaignAnalyticsClient({
                         {m.name}
                       </span>
                     </span>
-                    <span className="shrink-0 text-[11px] dark:text-white text-gray-500">
+                    <span className="shrink-0 tkad-type-caption dark:text-white text-gray-500">
                       {m.sharePct}%
                     </span>
                   </Link>
@@ -365,10 +365,10 @@ export function CampaignAnalyticsClient({
           </section>
 
           <section className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
-            <h2 className="font-display text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
+            <h2 className="font-display tkad-type-caption font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
               {isKo ? "지역별 커버리지" : "Regional coverage"}
             </h2>
-            <p className="mt-1 text-[10px] dark:text-white">
+            <p className="mt-1 tkad-type-note dark:text-white">
               {isKo ? "집행 지역별 추정 노출 비중" : "Share of est. impressions by region"}
             </p>
             {data.regionShares.length === 0 ? (
@@ -392,7 +392,7 @@ export function CampaignAnalyticsClient({
         </div>
 
         <section className="mt-8 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
-          <h2 className="font-display text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
+          <h2 className="font-display tkad-type-caption font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
             {isKo ? "집행 인증 사진" : "Proof photos"}
           </h2>
           {data.proofPhotos.length === 0 ? (
@@ -422,7 +422,7 @@ export function CampaignAnalyticsClient({
                     unoptimized
                   />
                   {p.caption ? (
-                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent p-2 text-[10px] dark:text-white text-gray-900">
+                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent p-2 tkad-type-note dark:text-white text-gray-900">
                       {p.caption}
                     </span>
                   ) : null}
@@ -433,7 +433,7 @@ export function CampaignAnalyticsClient({
         </section>
 
         <section className="mt-10 space-y-3 pb-8">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+          <p className="tkad-type-label dark:text-white text-gray-500">
             [ {isKo ? "다음 액션" : "NEXT ACTIONS"} ]
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -577,11 +577,11 @@ function PredictedVsActual({
   return (
     <section className="mt-8 rounded-[24px] border border-[#a855f7]/30 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-display text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
+        <h2 className="font-display tkad-type-caption font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
           {isKo ? "예측 vs 실제" : "Predicted vs Actual"}
         </h2>
         {actual?.enteredAt ? (
-          <span className="text-[10px] dark:text-white/55 text-gray-500">
+          <span className="tkad-type-note dark:text-white/55 text-gray-500">
             {formatActualSource(actual.source, isKo)} ·{" "}
             {actual.enteredAt.slice(0, 10)}
           </span>
@@ -592,7 +592,7 @@ function PredictedVsActual({
         <div className="mt-4 overflow-hidden rounded-[16px] border dark:border-white/10 border-gray-200">
           <table className="w-full text-sm">
             <thead>
-              <tr className="dark:bg-white/5 bg-gray-50 text-left text-[11px] uppercase tracking-wide dark:text-white/55 text-gray-500">
+              <tr className="dark:bg-white/5 bg-gray-50 text-left tkad-type-caption uppercase tracking-wide dark:text-white/55 text-gray-500">
                 <th className="px-3 py-2 font-semibold">{isKo ? "지표" : "Metric"}</th>
                 <th className="px-3 py-2 text-right font-semibold">{isKo ? "예측" : "Predicted"}</th>
                 <th className="px-3 py-2 text-right font-semibold">{isKo ? "실제" : "Actual"}</th>
@@ -627,12 +627,12 @@ function PredictedVsActual({
 
       {canEdit ? (
         <div className="mt-5 rounded-[16px] border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-4">
-          <p className="font-display text-[11px] font-medium uppercase tracking-[0.18em] dark:text-white/70 text-gray-500">
+          <p className="font-display tkad-type-caption font-medium uppercase tracking-[0.18em] dark:text-white/70 text-gray-500">
             {isKo ? "실적 입력 (관리자)" : "Enter actuals (admin)"}
           </p>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="text-[11px] dark:text-white/60 text-gray-500">
+              <span className="tkad-type-caption dark:text-white/60 text-gray-500">
                 {isKo ? "실제 노출수" : "Actual impressions"}
               </span>
               <input
@@ -645,7 +645,7 @@ function PredictedVsActual({
               />
             </label>
             <label className="block">
-              <span className="text-[11px] dark:text-white/60 text-gray-500">
+              <span className="tkad-type-caption dark:text-white/60 text-gray-500">
                 {isKo ? "실제 도달수" : "Actual reach"}
               </span>
               <input
@@ -671,7 +671,7 @@ function PredictedVsActual({
             {savedMsg ? (
               <span className="text-xs dark:text-emerald-400 text-emerald-600">{savedMsg}</span>
             ) : (
-              <span className="text-[11px] dark:text-white/45 text-gray-400">
+              <span className="tkad-type-caption dark:text-white/45 text-gray-400">
                 {isKo ? "빈 칸 저장 시 실적 삭제" : "Empty = clear actuals"}
               </span>
             )}
@@ -693,9 +693,9 @@ function RegionShareRow({
     <>
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold dark:text-white text-gray-900">{row.region}</span>
-        <span className="text-[11px] text-[#22d3ee]">{row.sharePct}%</span>
+        <span className="tkad-type-caption text-[#22d3ee]">{row.sharePct}%</span>
       </div>
-      <p className="mt-1 text-[10px] dark:text-white">
+      <p className="mt-1 tkad-type-note dark:text-white">
         {isKo ? "추정 노출" : "Est. imp."}{" "}
         {row.impressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
       </p>

@@ -241,7 +241,7 @@ export default function AdminNetworksListClient({
     return (
       <Badge
         variant="outline"
-        className="border-amber-500/50 bg-amber-50 text-[10px] text-amber-900"
+        className="border-amber-500/50 bg-amber-50 tkad-type-note text-amber-900"
         title={
           isKo
             ? `미설정: ${labels.warnings.join(", ")}`
@@ -327,7 +327,7 @@ export default function AdminNetworksListClient({
                 setTypeFilter(opt.value);
                 setPage(1);
               }}
-              className={`rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
+              className={`rounded-full px-2.5 py-1 tkad-type-title transition-colors ${
                 typeFilter === opt.value
                   ? "border-2 border-border bg-foreground text-background"
                   : "border-2 border-border bg-card text-foreground hover:bg-muted/50"
@@ -352,7 +352,7 @@ export default function AdminNetworksListClient({
       </div>
 
       <div className="rounded-2xl border border-border bg-muted/15 px-2 py-2 sm:px-2.5">
-        <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <p className="mb-1.5 tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
           {isKo ? "노출 필터" : "Visibility"}
         </p>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -373,7 +373,7 @@ export default function AdminNetworksListClient({
                 setPublicFilter(opt.value);
                 setPage(1);
               }}
-              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors sm:px-2.5 sm:text-xs ${
+              className={`rounded-full px-2 py-1 tkad-type-caption font-semibold transition-colors sm:px-2.5 sm:text-xs ${
                 publicFilter === opt.value
                   ? "border-2 border-border bg-foreground text-background"
                   : "border-2 border-border bg-card text-foreground hover:bg-muted/50"
@@ -408,19 +408,19 @@ export default function AdminNetworksListClient({
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="text-sm font-semibold leading-snug">{row.name}</p>
+                        <p className="tkad-type-title leading-snug">{row.name}</p>
                         {renderTaxonomyWarnings(row)}
                       </div>
                       <div className="flex flex-wrap gap-1.5">
-                        <Badge variant="outline" className="text-[10px]">
+                        <Badge variant="outline" className="tkad-type-note">
                           {catalogLabel(row)}
                         </Badge>
                         {tx.venueLabel ? (
-                          <Badge variant="outline" className="text-[10px]">
+                          <Badge variant="outline" className="tkad-type-note">
                             {tx.venueLabel}
                           </Badge>
                         ) : null}
-                        <Badge variant="secondary" className="text-[10px]">
+                        <Badge variant="secondary" className="tkad-type-note">
                           {t("registeredPins", { count: row._count.locations })}
                         </Badge>
                       </div>
@@ -504,7 +504,7 @@ export default function AdminNetworksListClient({
                     <td className="px-1.5 py-2.5 align-middle">
                       <Badge
                         variant="secondary"
-                        className="max-w-full truncate text-[10px]"
+                        className="max-w-full truncate tkad-type-note"
                         title={catalogLabel(row)}
                       >
                         {catalogLabel(row)}
@@ -522,7 +522,7 @@ export default function AdminNetworksListClient({
                       </span>
                     </td>
                     <td className="px-1.5 py-2.5 align-middle">
-                      <span className="line-clamp-2 text-[10px] text-muted-foreground">
+                      <span className="line-clamp-2 tkad-type-note text-muted-foreground">
                         {tx.targetLabels.length > 0
                           ? tx.targetLabels.join(", ")
                           : "—"}
@@ -593,7 +593,7 @@ export default function AdminNetworksListClient({
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
                   </Button>
-                  <span className="flex items-center px-1 text-[11px] text-muted-foreground">
+                  <span className="flex items-center px-1 tkad-type-caption text-muted-foreground">
                     {page}/{totalPages}
                   </span>
                   <Button

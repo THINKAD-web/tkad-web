@@ -69,14 +69,14 @@ export function ReportSectionVisibilityPanel({
       )}
       data-screenshot="planner-report-section-visibility"
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-semibold text-gray-800 dark:text-white/90 [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 tkad-type-title text-gray-800 dark:text-white/90 [&::-webkit-details-marker]:hidden">
         <span>
           {isKo ? "다운로드에 포함할 섹션" : "Sections to include in export"}
         </span>
         <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" aria-hidden />
       </summary>
       <div className="space-y-2 border-t border-gray-100 px-4 py-3 dark:border-white/10">
-        <p className="text-[11px] leading-snug text-gray-500 dark:text-white/50">
+        <p className="tkad-type-caption leading-snug text-gray-500 dark:text-white/50">
           {isKo
             ? "미리보기와 PDF·PPT에 동일하게 반영됩니다. 개요·KPI·매체 구성·면책은 항상 포함됩니다."
             : "Applies to preview and PDF/PPT. Overview, KPIs, media lineup, and disclaimer are always included."}
@@ -109,7 +109,7 @@ export function ReportSectionVisibilityPanel({
                   >
                     <span className="font-medium">{label}</span>
                     {disabled && reason ? (
-                      <span className="ml-1.5 text-[11px] text-gray-400">
+                      <span className="ml-1.5 tkad-type-caption text-gray-400">
                         ({reason})
                       </span>
                     ) : null}

@@ -167,7 +167,7 @@ export default function AdvertiserDashboardPage() {
           />
           <PageContainer className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.24em] dark:text-white text-gray-500">
+              <p className="tkad-type-label dark:text-white text-gray-500">
                 {isKo ? "// 광고주 포털" : "// Advertiser portal"}
               </p>
               <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] font-[950] leading-[0.95] tracking-[-0.05em] dark:text-white text-gray-900">
@@ -207,7 +207,7 @@ export default function AdvertiserDashboardPage() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "tkad-glass-surface flex items-center justify-center gap-2 rounded-[22px] border px-4 py-4 font-display text-xs font-medium uppercase tracking-[0.14em] backdrop-blur transition-ui sm:py-5 sm:text-[13px]",
+                    "tkad-glass-surface flex items-center justify-center gap-2 rounded-[22px] border px-4 py-4 tkad-type-label backdrop-blur transition-ui sm:py-5 sm:tkad-type-body",
                     "text-foreground hover:-translate-y-0.5 hover:border-primary/30",
                     "muted" in item && item.muted && "text-muted-foreground",
                   )}
@@ -234,7 +234,7 @@ export default function AdvertiserDashboardPage() {
                   <item.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                   {item.label}
                   {"badge" in item && item.badge ? (
-                    <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-primary-foreground">
+                    <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 tkad-type-note font-black text-primary-foreground">
                       {item.badge > 9 ? "9+" : item.badge}
                     </span>
                   ) : null}
@@ -251,7 +251,7 @@ export default function AdvertiserDashboardPage() {
                       type="button"
                       onClick={() => setTab(t.key)}
                       className={cn(
-                        "shrink-0 rounded-full border px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] transition-ui sm:px-5 sm:py-2.5 sm:text-[13px]",
+                        "shrink-0 rounded-full border px-4 py-2 tkad-type-label transition-ui sm:px-5 sm:py-2.5 sm:tkad-type-body",
                         tab === t.key
                           ? "border-primary/45 bg-primary/15 text-primary"
                           : "border-border bg-muted/30 text-muted-foreground hover:border-primary/25 hover:text-foreground",
@@ -306,7 +306,7 @@ export default function AdvertiserDashboardPage() {
                       <p className="mt-3 text-base leading-relaxed text-muted-foreground">
                         {row.body}
                       </p>
-                      <p className="mt-4 font-display text-xs font-medium uppercase tracking-[0.2em] text-primary">
+                      <p className="mt-4 tkad-type-label text-primary">
                         {row.status}
                       </p>
                     </article>

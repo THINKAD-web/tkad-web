@@ -19,7 +19,7 @@ export function ClientMiniSparkline({
   if (v.length < 2) {
     return (
       <div
-        className={`flex h-12 items-center justify-center rounded-lg bg-slate-100/80 text-[10px] text-muted-foreground ${className}`}
+        className={`flex h-12 items-center justify-center rounded-lg bg-slate-100/80 tkad-type-note text-muted-foreground ${className}`}
       >
         —
       </div>

@@ -2443,7 +2443,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         {periodSnapTarget ? (
                           <button
                             type="button"
-                            className="w-full rounded-lg border border-amber-600/50 bg-amber-500/15 px-3 py-2 text-left text-xs font-semibold text-amber-950 transition hover:bg-amber-500/25 dark:text-amber-50 sm:text-sm"
+                            className="w-full rounded-lg border border-amber-600/50 bg-amber-500/15 px-3 py-2 text-left tkad-type-title text-amber-950 transition hover:bg-amber-500/25 dark:text-amber-50 sm:text-sm"
                             onClick={() => setPeriod(periodSnapTarget)}
                           >
                             {t("quote.alignCampaignPeriod", {

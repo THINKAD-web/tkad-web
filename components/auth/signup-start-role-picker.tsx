@@ -36,7 +36,7 @@ export function SignupStartRolePicker({ value, onChange, ariaLabel }: Props) {
           <p className="text-sm font-bold tracking-tight">{t(opt.labelKey)}</p>
           <p
             className={cn(
-              "mt-1 text-[11px]",
+              "mt-1 tkad-type-caption",
               value === opt.value ? "tkad-qp-text-muted-on-accent" : "tkad-qp-text-muted",
             )}
           >

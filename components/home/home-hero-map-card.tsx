@@ -89,7 +89,7 @@ export default function HomeHeroMapCard({ pins }: Props) {
               }}
             >
               <Popup>
-                <span className="text-sm font-semibold text-neutral-900">
+                <span className="tkad-type-title text-neutral-900">
                   {p.name}
                 </span>
               </Popup>
@@ -105,7 +105,7 @@ export default function HomeHeroMapCard({ pins }: Props) {
           { k: t("heroMapStatResponse"), v: "24h" },
         ].map((s) => (
           <div key={s.k} className="min-w-0 text-center">
-            <p className="font-display text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <p className="tkad-type-label text-muted-foreground">
               {s.k}
             </p>
             <p className="mt-1 truncate text-base font-black tabular-nums tracking-tight text-foreground sm:text-lg">

@@ -108,7 +108,7 @@ export function AdminUserPlanActivityPanel({
           {showFullLink ? (
             <Link
               href={fullHref}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
+              className="inline-flex items-center gap-1 tkad-type-title text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
             >
               전체 보기
               <ExternalLink className="h-3 w-3" />
@@ -126,7 +126,7 @@ export function AdminUserPlanActivityPanel({
 
         {savedPlans.length > 0 ? (
           <section>
-            <p className="mb-2 text-xs font-semibold text-muted-foreground">
+            <p className="mb-2 tkad-type-title text-muted-foreground">
               최근 저장 플랜
             </p>
             <ul className="space-y-2 text-sm">
@@ -152,7 +152,7 @@ export function AdminUserPlanActivityPanel({
 
         {activities.length > 0 ? (
           <section>
-            <p className="mb-2 text-xs font-semibold text-muted-foreground">
+            <p className="mb-2 tkad-type-title text-muted-foreground">
               최근 보고서 활동
             </p>
             <ul className="divide-y divide-border text-sm">

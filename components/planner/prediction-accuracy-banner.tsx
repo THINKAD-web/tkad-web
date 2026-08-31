@@ -25,10 +25,10 @@ export function PredictionAccuracyBanner({
       />
       <div className="relative flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 font-display text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400">
+          <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 font-display tkad-type-note font-black uppercase tracking-[0.18em] text-emerald-400">
             {isKo ? "예측 정확도" : "Prediction accuracy"}
           </span>
-          <p className="text-sm font-semibold tabular-nums text-foreground">
+          <p className="tkad-type-title tabular-nums text-foreground">
             {isKo
               ? `예측 정확도: ${accuracy.accuracyPct}%`
               : `Prediction accuracy: ${accuracy.accuracyPct}%`}

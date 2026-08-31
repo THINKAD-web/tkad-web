@@ -14,7 +14,7 @@ export async function IndustryOtherLinks({ slug, locale }: Props) {
   return (
     <section className="tkad-media-links-footer border-t border-border/80 bg-muted py-12 text-foreground sm:py-16">
       <div className="ui-container">
-        <p className="text-xs font-semibold text-muted-foreground sm:text-sm">
+        <p className="tkad-type-title text-muted-foreground sm:text-sm">
           {t("otherIndustriesEyebrow")}
         </p>
         <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">

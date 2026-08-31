@@ -323,7 +323,7 @@ export default function ClientMonitoringPage() {
                   className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-2"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-navy">{p.title}</p>
+                    <p className="tkad-type-title text-navy">{p.title}</p>
                     <p className="text-xs text-muted-foreground">{p.id}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -447,14 +447,14 @@ function PinDetailCard({ pin, isKo }: { pin: CampaignMapPin; isKo: boolean }) {
           href={`https://map.kakao.com/link/map/${encodeURIComponent(isKo ? pin.spotNameKo : pin.spotNameEn)},${pin.lat},${pin.lng}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gold-dark underline-offset-4 hover:underline"
+          className="inline-flex items-center gap-1.5 tkad-type-title text-gold-dark underline-offset-4 hover:underline"
         >
           <ExternalLink className="h-3.5 w-3.5" />
           {isKo ? "카카오맵에서 위치 보기" : "Open in Kakao Map"}
         </a>
         <div className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
               {isKo ? "금일 추정 노출" : "Est. today"}
             </p>
             <p className="text-lg font-bold text-navy">
@@ -462,7 +462,7 @@ function PinDetailCard({ pin, isKo }: { pin: CampaignMapPin; isKo: boolean }) {
             </p>
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
               {isKo ? "누적 노출" : "Total impressions"}
             </p>
             <p className="text-lg font-bold text-navy">

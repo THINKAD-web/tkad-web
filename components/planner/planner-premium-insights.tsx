@@ -21,13 +21,13 @@ export function PlannerPremiumInsightsPanel({
   const content = (
     <div className="space-y-8 border-2 border-border bg-card p-5 sm:p-6">
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+        <p className="tkad-type-label text-primary">
           [ {isKo ? "캠페인 타임라인" : "Campaign timeline"} ]
         </p>
         <div className="mt-4 space-y-3">
           {insights.gantt.map((row) => (
             <div key={row.mediaId} className="space-y-1.5">
-              <p className="text-sm font-semibold leading-snug text-foreground">
+              <p className="tkad-type-title leading-snug text-foreground">
                 {row.name}
               </p>
               <div className="relative h-7 overflow-hidden rounded-lg bg-muted/60">
@@ -47,10 +47,10 @@ export function PlannerPremiumInsightsPanel({
       </div>
 
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+        <p className="tkad-type-label text-primary">
           [ {isKo ? "예산 배분 추천" : "Budget allocation"} ]
         </p>
-        <p className="mt-2 text-sm font-semibold leading-relaxed text-foreground">
+        <p className="mt-2 tkad-type-title leading-relaxed text-foreground">
           {highlightReportScanText(isKo ? insights.budgetSummaryKo : insights.budgetSummaryEn)}
         </p>
         <ul className="mt-3 space-y-2">
@@ -92,7 +92,7 @@ export function PlannerPremiumInsightsPanel({
       </div>
 
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+        <p className="tkad-type-label text-primary">
           [ {isKo ? "경쟁사 노출 분석" : "Competitor exposure"} ]
         </p>
         <ul className="mt-3 space-y-2">

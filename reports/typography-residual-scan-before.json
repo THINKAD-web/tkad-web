@@ -1,0 +1,135 @@
+{
+  "scannedAt": "2026-08-31T08:56:19.650Z",
+  "total": 1103,
+  "fileCount": 309,
+  "byZone": {
+    "site-public": 133,
+    "admin": 331,
+    "other": 543,
+    "brutalist": 20,
+    "document": 22,
+    "pdf-export": 54
+  },
+  "topFiles": [
+    {
+      "file": "app/[locale]/admin/(dashboard)/medias/admin-medias-client.tsx",
+      "count": 65
+    },
+    {
+      "file": "components/quote-pdf-preview.tsx",
+      "count": 25
+    },
+    {
+      "file": "app/[locale]/(site)/client/dashboard/page.tsx",
+      "count": 20
+    },
+    {
+      "file": "components/campaign-analytics/campaign-analytics-client.tsx",
+      "count": 20
+    },
+    {
+      "file": "components/brutalist/nav.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/planner/report-document.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/planner-charts.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/quote/quote-premium.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/media-network-detail-client.tsx",
+      "count": 15
+    },
+    {
+      "file": "components/document/quote-media-line-card.tsx",
+      "count": 14
+    },
+    {
+      "file": "app/[locale]/(site)/academy/academy-page-client.tsx",
+      "count": 13
+    },
+    {
+      "file": "components/discovery/discovery-media-card-actions.tsx",
+      "count": 13
+    },
+    {
+      "file": "app/[locale]/(site)/insights/insights-page-client.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/admin/admin-contracts-client.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/admin/admin-ooh-contract-detail.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/discovery/media-card-compact.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/quote/quote-formal-preview.tsx",
+      "count": 12
+    },
+    {
+      "file": "app/[locale]/admin/(dashboard)/crm/page.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/admin/admin-broken-links-client.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/admin-quote-new-client.tsx",
+      "count": 11
+    },
+    {
+      "file": "app/[locale]/(site)/client/page.tsx",
+      "count": 10
+    },
+    {
+      "file": "app/[locale]/(site)/partner/page.tsx",
+      "count": 10
+    },
+    {
+      "file": "app/[locale]/admin/(dashboard)/campaigns/page.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/admin-inquiry-list-item.tsx",
+      "count": 10
+    },
+    {
+      "file": "app/[locale]/admin/(dashboard)/analytics/page.tsx",
+      "count": 9
+    },
+    {
+      "file": "app/[locale]/admin/(dashboard)/inquiries/page.tsx",
+      "count": 9
+    },
+    {
+      "file": "app/[locale]/admin/(dashboard)/media-hub/page.tsx",
+      "count": 9
+    },
+    {
+      "file": "app/[locale]/admin/(dashboard)/networks/admin-networks-list-client.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/media-metric-viz.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/admin/admin-quote-lines-editor.tsx",
+      "count": 8
+    }
+  ]
+}

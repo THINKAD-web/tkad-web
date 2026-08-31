@@ -97,7 +97,7 @@ export function NetworkPackages({ isKo }: Props) {
             )}
           >
             {pkg.featured ? (
-              <span className="mb-3 w-fit rounded-full bg-violet-600 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+              <span className="mb-3 w-fit rounded-full bg-violet-600 px-2.5 py-0.5 tkad-type-note font-bold uppercase tracking-wider text-white">
                 {isKo ? "인기" : "Popular"}
               </span>
             ) : (

@@ -53,7 +53,7 @@ export function CreativeCard({
             <Film className="h-10 w-10 dark:text-white text-gray-600" />
           </div>
         )}
-        <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-md border border-border bg-card/95 px-1.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+        <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-md border border-border bg-card/95 px-1.5 py-0.5 tkad-type-label text-foreground">
           {item.type === "video" ? (
             <>
               <Film className="h-3 w-3" /> Video
@@ -65,7 +65,7 @@ export function CreativeCard({
           )}
         </span>
         {item.usageCount > 0 ? (
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md border border-accent bg-accent px-1.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent-foreground">
+          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md border border-accent bg-accent px-1.5 py-0.5 tkad-type-label text-accent-foreground">
             <CheckCircle2 className="h-3 w-3" /> 사용 {item.usageCount}
           </span>
         ) : null}
@@ -87,7 +87,7 @@ export function CreativeCard({
         <p className="line-clamp-2 text-sm font-bold leading-snug text-foreground">
           {item.name}
         </p>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           {item.width && item.height ? `${item.width}×${item.height}` : "—"}
           {item.type === "video" && item.duration ? ` · ${formatDuration(item.duration)}` : ""}
           {" · "}
@@ -98,7 +98,7 @@ export function CreativeCard({
             {item.tags.slice(0, 4).map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-0.5 rounded-md border border-border bg-muted px-1.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.14em] text-foreground/80"
+                className="inline-flex items-center gap-0.5 rounded-md border border-border bg-muted px-1.5 py-0.5 tkad-type-label text-foreground/80"
               >
                 <Tag className="h-2.5 w-2.5" /> {tag}
               </span>

@@ -44,7 +44,7 @@ export function AdminOohPipelineStepper({ row, variant }: Props) {
         {exception ? (
           <p
             className={cn(
-              "text-[10px] font-semibold uppercase tracking-wide",
+              "tkad-type-note font-semibold uppercase tracking-wide",
               exception === "cancelled"
                 ? "text-red-600 dark:text-red-400"
                 : "text-muted-foreground",
@@ -86,7 +86,7 @@ export function AdminOohPipelineStepper({ row, variant }: Props) {
           </div>
         )}
         {!exception && action ? (
-          <p className="truncate text-[10px] text-muted-foreground">
+          <p className="truncate tkad-type-note text-muted-foreground">
             {t("pipelineNext")}: {t(actionLabelKey(action))}
           </p>
         ) : null}
@@ -96,7 +96,7 @@ export function AdminOohPipelineStepper({ row, variant }: Props) {
 
   return (
     <div className="mb-4 rounded-lg border border-border/60 bg-card/40 p-4 dark:bg-card/20">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+      <p className="tkad-type-note font-semibold uppercase tracking-[0.2em] text-muted-foreground">
         {t("pipelineTitle")}
       </p>
 
@@ -162,7 +162,7 @@ export function AdminOohPipelineStepper({ row, variant }: Props) {
                   <div className="min-w-0 flex-1">
                     <p
                       className={cn(
-                        "text-sm font-semibold",
+                        "tkad-type-title",
                         done && "text-foreground",
                         isCurrent && "text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]",
                         !done && !isCurrent && "text-muted-foreground",
@@ -170,7 +170,7 @@ export function AdminOohPipelineStepper({ row, variant }: Props) {
                     >
                       {t(stepLabelKey(milestone.id))}
                       {isCurrent ? (
-                        <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
+                        <span className="ml-2 tkad-type-note font-semibold uppercase tracking-wider text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                           {t("pipelineCurrent")}
                         </span>
                       ) : null}

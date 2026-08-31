@@ -68,7 +68,7 @@ export function AboutBrandTimeline({
                     <div>
                       <p
                         className={cn(
-                          "text-sm font-semibold",
+                          "tkad-type-title",
                           item.current
                             ? "text-hermes"
                             : "text-gray-500 dark:text-white/50",

@@ -55,10 +55,10 @@ export function AdminInquiryQuotePanel({ inquiryId, quote }: Props) {
 
   return (
     <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-5">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-emerald-800">
+      <p className="tkad-type-label text-emerald-800">
         [ 견적서 초안 ]
       </p>
-      <p className="mt-2 text-sm font-semibold text-emerald-950">
+      <p className="mt-2 tkad-type-title text-emerald-950">
         상태: {quote.status} · ₩{quote.totalAmount.toLocaleString("ko-KR")}만 ·{" "}
         {quote.period}
       </p>
@@ -70,7 +70,7 @@ export function AdminInquiryQuotePanel({ inquiryId, quote }: Props) {
           href={`/quote/${quote.id}/preview`}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-white px-3 py-2 text-xs font-semibold text-emerald-900 hover:bg-emerald-50"
+          className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-white px-3 py-2 tkad-type-title text-emerald-900 hover:bg-emerald-50"
         >
           <FileText className="h-3.5 w-3.5" />
           견적서 초안 보기
@@ -78,7 +78,7 @@ export function AdminInquiryQuotePanel({ inquiryId, quote }: Props) {
         </Link>
         <Link
           href={`/admin/quotes?tab=booking&highlight=${quote.id}`}
-          className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-white px-3 py-2 text-xs font-semibold text-emerald-900 hover:bg-emerald-50"
+          className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-white px-3 py-2 tkad-type-title text-emerald-900 hover:bg-emerald-50"
         >
           연결된 견적 보기
         </Link>

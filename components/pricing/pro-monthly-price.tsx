@@ -24,7 +24,7 @@ export function ProMonthlyPriceDisplay({
   return (
     <div className={cn("space-y-1", className)}>
       {d.hasDiscount ? (
-        <span className="inline-flex items-center rounded-full border border-pink-400/40 bg-pink-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-pink-700 dark:text-pink-200">
+        <span className="inline-flex items-center rounded-full border border-pink-400/40 bg-pink-500/10 px-2 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-pink-700 dark:text-pink-200">
           {isKo ? `${d.discountPercent}% 할인` : `${d.discountPercent}% off`}
         </span>
       ) : null}
@@ -32,7 +32,7 @@ export function ProMonthlyPriceDisplay({
         {d.hasDiscount ? (
           <span
             className={cn(
-              "text-sm font-semibold text-gray-400 line-through decoration-gray-400/80 dark:text-white/35",
+              "tkad-type-title text-gray-400 line-through decoration-gray-400/80 dark:text-white/35",
               size === "card" && "text-base",
             )}
             aria-hidden

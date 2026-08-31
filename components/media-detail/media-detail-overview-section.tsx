@@ -64,7 +64,7 @@ export function MediaDetailOverviewSection({
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="mt-3 text-xs font-semibold text-[color:var(--qp-accent)] hover:text-[color:var(--qp-accent-hover)] dark:text-[color:var(--qp-accent)] dark:hover:text-[color:var(--qp-accent)]"
+          className="mt-3 tkad-type-title text-[color:var(--qp-accent)] hover:text-[color:var(--qp-accent-hover)] dark:text-[color:var(--qp-accent)] dark:hover:text-[color:var(--qp-accent)]"
         >
           {expanded
             ? isKo

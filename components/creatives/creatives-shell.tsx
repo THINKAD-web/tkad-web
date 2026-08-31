@@ -50,7 +50,7 @@ export function CreativesShell({
               {showBackToLibrary ? (
                 <Link
                   href="/creatives"
-                  className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-gray-600 transition-colors hover:text-gray-900 dark:text-white/70 dark:hover:text-white"
+                  className="inline-flex items-center gap-1.5 tkad-type-label text-gray-600 transition-colors hover:text-gray-900 dark:text-white/70 dark:hover:text-white"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" aria-hidden />{" "}
                   {isKo ? "라이브러리로" : "Library"}
@@ -59,7 +59,7 @@ export function CreativesShell({
               {eyebrow ? (
                 <p
                   className={cn(
-                    "font-display text-xs font-medium uppercase tracking-[0.28em] text-gray-600 dark:text-white/60",
+                    "tkad-type-label text-gray-600 dark:text-white/60",
                     showBackToLibrary ? "mt-3" : null,
                   )}
                 >

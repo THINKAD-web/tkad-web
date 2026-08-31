@@ -1391,13 +1391,13 @@ export default function PlannerPageClient({
           <PlannerNeonPageBody
             className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6"
           >
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground/70">
+            <p className="tkad-type-label text-foreground/70">
               [ EMPTY CATALOG ]
             </p>
             <p className="mt-3 text-lg font-bold tracking-tight text-foreground">
               {t("preparingMedia")}
             </p>
-            <p className="mt-2 text-[12px] tracking-tight text-muted-foreground">
+            <p className="mt-2 tkad-type-meta tracking-tight text-muted-foreground">
               {t("preparingMediaDesc")}
             </p>
             <div className="mt-8 inline-block">
@@ -1518,7 +1518,7 @@ export default function PlannerPageClient({
                   <div className={plannerNeon.cardHeader}>
                     <div className="flex flex-wrap items-center gap-2">
                       <PlannerNeonLabel>{t("mapTitle")}</PlannerNeonLabel>
-                      <span className="rounded-full border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/10 px-2 py-0.5 text-[10px] font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
+                      <span className="rounded-full border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/10 px-2 py-0.5 tkad-type-note font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                         {t("requiredMark")}
                       </span>
                     </div>
@@ -1604,7 +1604,7 @@ export default function PlannerPageClient({
                           onClick={() => toggleAgeKey(k)}
                           aria-pressed={ageKeys.includes(k)}
                           className={cn(
-                            "inline-flex shrink-0 items-center rounded-full px-3 py-1.5 text-xs font-semibold transition-ui touch-manipulation sm:text-sm",
+                            "inline-flex shrink-0 items-center rounded-full px-3 py-1.5 tkad-type-title transition-ui touch-manipulation sm:text-sm",
                             ageKeys.includes(k)
                               ? "bg-[color:var(--qp-accent)] text-white shadow-sm shadow-[color:var(--qp-accent)]/25"
                               : "dark:bg-white/10 bg-gray-100 text-gray-800 hover:bg-gray-200 dark:text-white/85 dark:hover:bg-white/15",
@@ -2344,7 +2344,7 @@ export default function PlannerPageClient({
               )}
             >
               <span
-                className="min-w-0 flex-1 truncate text-[10px] font-medium tabular-nums text-gray-600 dark:text-white/55"
+                className="min-w-0 flex-1 truncate tkad-type-note font-medium tabular-nums text-gray-600 dark:text-white/55"
                 aria-live="polite"
               >
                 {t("stepOf", {

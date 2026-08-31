@@ -613,7 +613,7 @@ export function CampaignMonitoringMap({
           aria-label={isKo ? "캠페인 위치(데모 지도)" : "Campaign locations (demo map)"}
         >
           <div className="pointer-events-none absolute inset-0 opacity-[0.12] [background-image:linear-gradient(#0f172a_1px,transparent_1px),linear-gradient(90deg,#0f172a_1px,transparent_1px)] [background-size:28px_28px]" />
-          <div className="absolute left-3 top-3 rounded-2xl bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-navy shadow-sm backdrop-blur">
+          <div className="absolute left-3 top-3 rounded-2xl bg-white/90 px-2.5 py-1 tkad-type-note font-semibold text-navy shadow-sm backdrop-blur">
             {isKo ? "데모 지도 · API 키로 카카오/구글 전환" : "Demo map · add Kakao or Google API key"}
           </div>
           {pins.map((p) => {
@@ -643,7 +643,7 @@ export function CampaignMonitoringMap({
                 <span className="relative">
                   <MapPin className="h-5 w-5" />
                   {isNow ? (
-                    <span className="absolute -right-6 -top-2 rounded-full bg-white px-1.5 py-0.5 text-[9px] font-extrabold tracking-tight text-emerald-700 shadow">
+                    <span className="absolute -right-6 -top-2 rounded-full bg-white px-1.5 py-0.5 tkad-type-note font-extrabold tracking-tight text-emerald-700 shadow">
                       NOW
                     </span>
                   ) : null}
@@ -671,7 +671,7 @@ export function CampaignMonitoringMap({
         aria-label={isKo ? "캠페인 위치 지도" : "Campaign location map"}
       />
       {showFooterCaption ? (
-        <p className="border-t border-navy/10 bg-white px-3 py-2 text-[11px] text-muted-foreground">
+        <p className="border-t border-navy/10 bg-white px-3 py-2 tkad-type-caption text-muted-foreground">
           {provider === "google"
             ? isKo
               ? "Google 지도 · 핀을 눌러 매체 상세를 확인하세요."

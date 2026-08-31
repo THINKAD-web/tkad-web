@@ -76,7 +76,7 @@ function MatrixTable({
                   className="sticky left-0 z-10 bg-card px-3 py-2.5 text-left font-medium"
                 >
                   <span className="block">{row.label}</span>
-                  <span className="mt-0.5 block font-mono text-[10px] font-normal text-muted-foreground">
+                  <span className="mt-0.5 block font-mono tkad-type-note font-normal text-muted-foreground">
                     {row.id}
                   </span>
                 </th>

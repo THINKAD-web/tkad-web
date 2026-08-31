@@ -67,7 +67,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
               key={s.slot}
               className="rounded-xl border border-border bg-card p-3 text-center"
             >
-              <p className="text-xs font-semibold text-muted-foreground">
+              <p className="tkad-type-title text-muted-foreground">
                 {isKo ? s.labelKo : s.labelEn}
               </p>
               <p className="mt-1 text-2xl font-black text-primary">{s.index}</p>
@@ -199,7 +199,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
           <ul className="mt-3 space-y-2">
             {targetData.map((t) => (
               <li key={t.key}>
-                <div className="flex justify-between text-xs font-semibold">
+                <div className="flex justify-between tkad-type-title">
                   <span>{t.label}</span>
                   <span>{t.score}/100</span>
                 </div>

@@ -83,7 +83,7 @@ function PipelineCardView({
       {card.tags.length > 0 ? (
         <div className="mt-2 flex flex-wrap gap-1">
           {card.tags.slice(0, 3).map((t) => (
-            <Badge key={t} variant="secondary" className="text-[10px]">
+            <Badge key={t} variant="secondary" className="tkad-type-note">
               {t}
             </Badge>
           ))}
@@ -152,7 +152,7 @@ function DroppableColumn({
       )}
     >
       <div className="border-b border-border bg-card px-3 py-2">
-        <p className="text-sm font-semibold">{label}</p>
+        <p className="tkad-type-title">{label}</p>
         <p className="text-xs text-muted-foreground">
           {column.count}건 · 합계 {formatKrw(column.totalAmount)}원
         </p>

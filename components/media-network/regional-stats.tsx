@@ -41,7 +41,7 @@ export function RegionalStats({ isKo, regions }: Props) {
       <div className={cn(NETWORK_NEON_PANEL, "mt-8 overflow-x-auto p-0 sm:p-0")}>
         <table className="w-full min-w-[640px] border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b border-gray-200 text-[10px] uppercase tracking-widest text-gray-500 dark:border-white/10 dark:text-white/45">
+            <tr className="border-b border-gray-200 tkad-type-note uppercase tracking-widest text-gray-500 dark:border-white/10 dark:text-white/45">
               <th className="px-5 py-3 font-semibold">{isKo ? "지역" : "Region"}</th>
               <th className="px-5 py-3 font-semibold">{isKo ? "지점 수" : "Locations"}</th>
               <th className="px-5 py-3 font-semibold">{isKo ? "설치 면수" : "Units"}</th>

@@ -44,7 +44,7 @@ export function HomeMediaScroll({
     <div className={cn(!embedded && "py-4")}>
       <div className={cn("mb-4", !embedded && "px-4")}>
         {eyebrow ? (
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+          <p className="tkad-type-title uppercase tracking-[0.14em] text-hermes">
             {eyebrow}
           </p>
         ) : null}

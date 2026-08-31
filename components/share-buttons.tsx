@@ -77,7 +77,7 @@ export default function ShareButtons({
         title={isKo ? "카카오톡" : "KakaoTalk"}
         className={
           compact
-            ? "h-7 min-h-7 gap-1 rounded-full border-yellow-300/80 bg-[#FEE500]/10 px-2.5 text-[11px] font-semibold text-yellow-900 hover:bg-[#FEE500]/25"
+            ? "h-7 min-h-7 gap-1 rounded-full border-yellow-300/80 bg-[#FEE500]/10 px-2.5 tkad-type-caption font-semibold text-yellow-900 hover:bg-[#FEE500]/25"
             : "h-11 min-h-11 gap-2 rounded-full border-yellow-300 bg-[#FEE500]/10 px-5 text-base font-semibold text-yellow-800 hover:bg-[#FEE500]/30"
         }
       >
@@ -92,7 +92,7 @@ export default function ShareButtons({
         title={isKo ? "링크 복사" : "Copy link"}
         className={
           compact
-            ? "h-7 min-h-7 gap-1 rounded-full px-2.5 text-[11px] font-semibold"
+            ? "h-7 min-h-7 gap-1 rounded-full px-2.5 tkad-type-caption font-semibold"
             : "h-11 min-h-11 gap-2 rounded-full px-5 text-base font-semibold"
         }
       >
@@ -117,7 +117,7 @@ export default function ShareButtons({
           title={isKo ? "공유" : "Share"}
           className={
             compact
-              ? "h-7 min-h-7 gap-1 rounded-full px-2.5 text-[11px] font-semibold"
+              ? "h-7 min-h-7 gap-1 rounded-full px-2.5 tkad-type-caption font-semibold"
               : "h-11 min-h-11 gap-2 rounded-full px-5 text-base font-semibold"
           }
         >
@@ -130,7 +130,7 @@ export default function ShareButtons({
         <span
           className={
             compact
-              ? "w-full text-[10px] font-medium text-emerald-600"
+              ? "w-full tkad-type-note font-medium text-emerald-600"
               : "animate-fade-in-up text-xs font-medium text-emerald-600"
           }
         >

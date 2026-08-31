@@ -11,10 +11,10 @@ export function PerPageSelect({ value, onChange }: Props) {
   const t = useTranslations("media");
 
   return (
-    <label className="inline-flex items-center gap-2 border-2 border-border bg-card px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+    <label className="inline-flex items-center gap-2 border-2 border-border bg-card px-3 py-1.5 tkad-type-label text-foreground">
       <span className="text-muted-foreground">{t("perPage")}</span>
       <select
-        className="border-l-2 border-border bg-card pl-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground focus:outline-none"
+        className="border-l-2 border-border bg-card pl-2 tkad-type-label text-foreground focus:outline-none"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
       >

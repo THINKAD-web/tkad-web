@@ -67,7 +67,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
 
   const filterPill = (active: boolean) =>
     cn(
-      "inline-flex items-center justify-center rounded-full px-4 py-2.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-ui",
+      "inline-flex items-center justify-center rounded-full px-4 py-2.5 tkad-type-label transition-ui",
       active
         ? "tkad-qp-cta text-white shadow-sm"
         : "border border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted/80 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100",
@@ -111,7 +111,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
           <div className="ui-container">
             {reports.length === 0 ? (
               <div className="mx-auto max-w-xl rounded-[28px] border border-border bg-card p-10 text-center shadow-[0_24px_80px_rgba(0,0,0,0.08)] dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:backdrop-blur-md dark:shadow-[0_36px_140px_rgba(0,0,0,0.72)]">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-primary">
+                <p className="tkad-type-label text-primary">
                   [ {isKo ? "준비 중" : "Coming soon"} ]
                 </p>
                 <p className="mt-4 text-lg font-bold text-foreground">
@@ -141,7 +141,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                           category={r.category}
                           className="absolute inset-0 h-full w-full"
                           badge={
-                            <span className="absolute top-3 left-3 inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary backdrop-blur-sm dark:border-white/15 dark:bg-black/45 dark:text-white">
+                            <span className="absolute top-3 left-3 inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 tkad-type-label text-primary backdrop-blur-sm dark:border-white/15 dark:bg-black/45 dark:text-white">
                               {labelForReportCategory(r.category, isKo)}
                             </span>
                           }
@@ -151,7 +151,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <time
                             dateTime={r.publishedAt?.toISOString()}
-                            className="font-display text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+                            className="font-display tkad-type-note font-semibold uppercase tracking-[0.16em] text-muted-foreground"
                           >
                             {formatPublished(r.publishedAt, locale)}
                           </time>
@@ -173,7 +173,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
 
                 {totalPages > 1 ? (
                   <nav
-                    className="mt-12 flex flex-wrap items-center justify-center gap-3 border-t border-border pt-10 font-display text-xs font-medium uppercase tracking-[0.14em] dark:border-white/10 border-gray-200"
+                    className="mt-12 flex flex-wrap items-center justify-center gap-3 border-t border-border pt-10 tkad-type-label dark:border-white/10 border-gray-200"
                     aria-label={isKo ? "페이지" : "Pagination"}
                   >
                     {curPage > 1 ? (

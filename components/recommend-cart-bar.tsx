@@ -85,7 +85,7 @@ export default function RecommendCartBar({
         <div className="max-h-[min(44dvh,360px)] overflow-y-auto border-b border-border/70 px-4 py-3 sm:px-6">
           <div className="mx-auto max-w-7xl">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <p className="min-w-0 truncate text-sm font-semibold text-foreground">
+              <p className="min-w-0 truncate tkad-type-title text-foreground">
                 {expandedItem.mediaName}
               </p>
               <button
@@ -123,7 +123,7 @@ export default function RecommendCartBar({
       ) : null}
 
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-6 lg:px-8">
-        <div className="flex shrink-0 items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+        <div className="flex shrink-0 items-center gap-2 tkad-type-label text-foreground">
           <ShoppingCart className="h-4 w-4 text-accent" />
           {t("cartTitle")}{" "}
           <span className="text-muted-foreground">
@@ -179,7 +179,7 @@ export default function RecommendCartBar({
                     {item.mediaName}
                   </span>
                   {usesMultiEditor ? (
-                    <span className="block text-[10px] tabular-nums text-muted-foreground">
+                    <span className="block tkad-type-note tabular-nums text-muted-foreground">
                       {multiSummary ?? (isKo ? "옵션 편집" : "Edit options")}
                       {" · "}
                       {formatCatalogPriceFieldWon(lineMonthly, localeTag)}

@@ -149,7 +149,7 @@ function NeonErrorShell({
               />
             </div>
 
-            <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-hermes">
+            <p className="tkad-type-label text-hermes">
               {eyebrow}
             </p>
 
@@ -170,7 +170,7 @@ function NeonErrorShell({
             {children}
 
             {footerNote ? (
-              <p className="mt-6 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-400">
+              <p className="mt-6 tkad-type-label dark:text-white text-gray-400">
                 {footerNote}
               </p>
             ) : null}

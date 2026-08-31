@@ -63,7 +63,7 @@ function CommunityEmptyState({ isKo }: { isKo: boolean }) {
           className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_top,rgba(255,98,0,0.12),transparent_55%)]"
         />
         <div className="relative flex flex-col gap-4">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
+          <p className="tkad-type-label dark:text-white text-gray-600">
             {isKo ? "// 멤버 커뮤니티" : "// members community"}
           </p>
           <p className="text-base leading-relaxed dark:text-white text-gray-800 sm:text-lg">
@@ -83,7 +83,7 @@ function CommunityEmptyState({ isKo }: { isKo: boolean }) {
           </ul>
           <Link
             href="/register"
-            className="group mt-2 inline-flex w-fit items-center gap-2 rounded-full border border-hermes/30 bg-hermes px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-white shadow-sm transition-transform hover:-translate-y-0.5"
+            className="group mt-2 inline-flex w-fit items-center gap-2 rounded-full border border-hermes/30 bg-hermes px-5 py-3 tkad-type-label text-white shadow-sm transition-transform hover:-translate-y-0.5"
           >
             {t("communityJoin")}
             <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
@@ -109,7 +109,7 @@ export function HomeCommunitySection({ posts, locale }: Props) {
           meta={t("communityMeta")}
           className="mb-0"
         />
-        <p className="max-w-2xl text-[15px] leading-relaxed dark:text-white text-gray-700 sm:text-base">
+        <p className="max-w-2xl text-base leading-relaxed dark:text-white text-gray-700 sm:text-base">
           {t("communityLead")}
         </p>
       </div>
@@ -131,12 +131,12 @@ export function HomeCommunitySection({ posts, locale }: Props) {
                 <article className="relative flex h-full flex-col gap-3 p-4 sm:p-5">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <span
-                      className="inline-flex max-w-full items-center rounded-full border border-hermes/30 bg-hermes px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.2em] text-white shadow-sm"
+                      className="inline-flex max-w-full items-center rounded-full border border-hermes/30 bg-hermes px-2.5 py-0.5 tkad-type-label text-white shadow-sm"
                       style={{ wordBreak: "break-word" }}
                     >
                       {isKo ? labels.shortKo : labels.en}
                     </span>
-                    <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.16em] dark:text-white text-gray-500">
+                    <span className="shrink-0 font-display tkad-type-note font-semibold uppercase tracking-[0.16em] dark:text-white text-gray-500">
                       {fmtRelative(post.createdAt, locale)}
                     </span>
                   </div>
@@ -145,14 +145,14 @@ export function HomeCommunitySection({ posts, locale }: Props) {
                     {post.title}
                   </h3>
 
-                  <div className="mt-auto flex flex-wrap items-center gap-2 border-t dark:border-white/10 border-gray-200 pt-3 font-display text-xs font-medium uppercase tracking-[0.14em] dark:text-white text-gray-500">
+                  <div className="mt-auto flex flex-wrap items-center gap-2 border-t dark:border-white/10 border-gray-200 pt-3 tkad-type-label dark:text-white text-gray-500">
                     <span className="font-bold dark:text-white text-gray-800">{post.authorName}</span>
                     {!post.isAnonymous && post.author ? (
                       <RoleBadge role={post.author.role} locale={locale} />
                     ) : null}
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-2 font-display text-[11px] font-semibold uppercase tracking-[0.14em] dark:text-white text-gray-500">
+                  <div className="flex flex-wrap items-center justify-between gap-2 font-display tkad-type-caption font-semibold uppercase tracking-[0.14em] dark:text-white text-gray-500">
                     <span className="inline-flex items-center gap-3">
                       <span className="inline-flex items-center gap-1 dark:text-white text-gray-700">
                         <Heart
@@ -179,7 +179,7 @@ export function HomeCommunitySection({ posts, locale }: Props) {
       <div className="mt-8 flex flex-col gap-3 border-t dark:border-white/10 border-gray-200 pt-8 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
         <Link
           href="/community"
-          className="group inline-flex items-center gap-2 border-b-2 border-transparent font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-800 transition-colors hover:border-white/40 hover:dark:text-white text-gray-900"
+          className="group inline-flex items-center gap-2 border-b-2 border-transparent tkad-type-label dark:text-white text-gray-800 transition-colors hover:border-white/40 hover:dark:text-white text-gray-900"
         >
           {t("communityViewAll")}
           <span aria-hidden className="transition-transform group-hover:translate-x-1">
@@ -189,7 +189,7 @@ export function HomeCommunitySection({ posts, locale }: Props) {
         {posts.length > 0 ? (
           <Link
             href="/register"
-            className="group inline-flex items-center gap-2 border-b-2 border-transparent font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-800 transition-colors hover:border-hermes/70 hover:dark:text-white text-gray-900"
+            className="group inline-flex items-center gap-2 border-b-2 border-transparent tkad-type-label dark:text-white text-gray-800 transition-colors hover:border-hermes/70 hover:dark:text-white text-gray-900"
           >
             {t("communityJoin")}
             <span aria-hidden className="transition-transform group-hover:translate-x-1">

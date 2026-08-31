@@ -64,7 +64,7 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
   if (loadState === "loading") {
     return (
       <div className={cardClass}>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
+        <p className="mb-3 tkad-type-title uppercase tracking-widest dark:text-white/45 text-gray-400">
           {isKo ? "주변 POI" : "Nearby POI"}
         </p>
         <p className="text-sm dark:text-white/40 text-gray-400">
@@ -77,7 +77,7 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
   if (loadState === "empty" || loadState === "error") {
     return (
       <div className={cardClass} data-screenshot="media-nearby-poi-empty">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
+        <p className="mb-3 tkad-type-title uppercase tracking-widest dark:text-white/45 text-gray-400">
           {isKo ? "주변 POI" : "Nearby POI"}
         </p>
         <p className="text-sm dark:text-white/50 text-gray-500">
@@ -95,7 +95,7 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
 
   return (
     <div className={cardClass} data-screenshot="media-nearby-poi">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
+      <p className="mb-3 tkad-type-title uppercase tracking-widest dark:text-white/45 text-gray-400">
         {isKo ? "주변 POI" : "Nearby POI"}
       </p>
       <ul className="space-y-1.5 text-sm dark:text-white/75 text-gray-700">

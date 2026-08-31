@@ -133,7 +133,7 @@ export function HeaderNotificationsBell({
         <Bell className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
         <span className="flex-1">{isKo ? "알림" : "Notifications"}</span>
         {unreadCount > 0 ? (
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold dark:text-white text-gray-900">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 tkad-type-note font-bold dark:text-white text-gray-900">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         ) : null}
@@ -157,7 +157,7 @@ export function HeaderNotificationsBell({
       >
         <Bell className="h-4 w-4" strokeWidth={2} aria-hidden />
         {unreadCount > 0 ? (
-          <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold dark:text-white text-gray-900 ring-1 ring-white/30">
+          <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 tkad-type-note font-bold dark:text-white text-gray-900 ring-1 ring-white/30">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         ) : null}
@@ -192,7 +192,7 @@ export function HeaderNotificationsBell({
                     <>
                       <p
                         className={cn(
-                          "text-sm font-semibold leading-snug",
+                          "tkad-type-title leading-snug",
                           !n.isRead
                             ? "text-foreground dark:text-white text-gray-900"
                             : "text-muted-foreground",
@@ -237,7 +237,7 @@ export function HeaderNotificationsBell({
                 setOpen(false);
                 onNavigate?.();
               }}
-              className="block rounded-xl px-3 py-2 text-center text-xs font-semibold text-violet-600 hover:bg-muted/50 dark:text-cyan-300 dark:hover:dark:bg-white/6 bg-gray-50"
+              className="block rounded-xl px-3 py-2 text-center tkad-type-title text-violet-600 hover:bg-muted/50 dark:text-cyan-300 dark:hover:dark:bg-white/6 bg-gray-50"
             >
               {isKo ? "전체 보기" : "View all"}
             </Link>

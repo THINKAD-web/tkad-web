@@ -100,7 +100,7 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
       <p className="mt-1 text-2xl font-black tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
         {value}
       </p>
-      {sub ? <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p> : null}
+      {sub ? <p className="mt-0.5 tkad-type-caption text-muted-foreground">{sub}</p> : null}
     </div>
   );
 }
@@ -225,7 +225,7 @@ export function AdminChatbotDashboard() {
               disabled={savingStatus}
               onClick={() => void toggleStatus(val)}
               className={
-                "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 " +
+                "rounded-lg px-3 py-1.5 tkad-type-title transition-colors disabled:opacity-50 " +
                 (botStatus === val
                   ? val === "maintenance"
                     ? "bg-amber-500 text-white"
@@ -265,7 +265,7 @@ export function AdminChatbotDashboard() {
                 setPage(1);
               }}
               className={
-                "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors " +
+                "rounded-lg px-3 py-1.5 tkad-type-title transition-colors " +
                 (period === p.key
                   ? "bg-[color:var(--qp-accent)] text-white"
                   : "text-muted-foreground hover:bg-gray-50 dark:hover:bg-white/5")
@@ -295,7 +295,7 @@ export function AdminChatbotDashboard() {
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-gray-200 px-3 text-xs font-semibold dark:border-white/10"
+            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-gray-200 px-3 tkad-type-title dark:border-white/10"
           >
             <RefreshCw className={"h-3.5 w-3.5 " + (loading ? "animate-spin" : "")} />
             새로고침
@@ -350,7 +350,7 @@ export function AdminChatbotDashboard() {
                       <div className="min-w-0">
                         <p className="truncate font-semibold">{s.userName}</p>
                         {s.userEmail ? (
-                          <p className="truncate text-[11px] text-muted-foreground">
+                          <p className="truncate tkad-type-caption text-muted-foreground">
                             {s.userEmail}
                           </p>
                         ) : null}
@@ -365,17 +365,17 @@ export function AdminChatbotDashboard() {
                     </p>
                   </td>
                   <td className="p-3 text-center">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--qp-accent)]/10 px-2 py-0.5 text-xs font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--qp-accent)]/10 px-2 py-0.5 tkad-type-title text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                       <MessageSquare className="h-3 w-3" />
                       {s.turns}
                     </span>
                   </td>
                   <td className="max-w-[160px] p-3">
-                    <p className="truncate text-[11px] text-muted-foreground">
+                    <p className="truncate tkad-type-caption text-muted-foreground">
                       {s.pageUrl || "—"}
                     </p>
                   </td>
-                  <td className="whitespace-nowrap p-3 text-[11px] text-muted-foreground">
+                  <td className="whitespace-nowrap p-3 tkad-type-caption text-muted-foreground">
                     {s.ip || "—"}
                   </td>
                 </tr>
@@ -392,7 +392,7 @@ export function AdminChatbotDashboard() {
             type="button"
             disabled={page <= 1 || loading}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold disabled:opacity-40 dark:border-white/10"
+            className="rounded-lg border border-gray-200 px-3 py-1.5 tkad-type-title disabled:opacity-40 dark:border-white/10"
           >
             이전
           </button>
@@ -401,7 +401,7 @@ export function AdminChatbotDashboard() {
             type="button"
             disabled={!data?.hasMore || loading}
             onClick={() => setPage((p) => p + 1)}
-            className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold disabled:opacity-40 dark:border-white/10"
+            className="rounded-lg border border-gray-200 px-3 py-1.5 tkad-type-title disabled:opacity-40 dark:border-white/10"
           >
             다음
           </button>
@@ -423,7 +423,7 @@ export function AdminChatbotDashboard() {
                 <p className="font-bold">
                   {detail.meta?.userName || "비로그인 사용자"}
                 </p>
-                <p className="truncate text-[11px] text-muted-foreground">
+                <p className="truncate tkad-type-caption text-muted-foreground">
                   {[
                     detail.meta?.userEmail,
                     detail.meta?.ip,
@@ -467,7 +467,7 @@ export function AdminChatbotDashboard() {
                         <p className="whitespace-pre-wrap break-words">{m.message}</p>
                         <p
                           className={
-                            "mt-1 text-[10px] " +
+                            "mt-1 tkad-type-note " +
                             (isUser ? "text-white/60" : "text-muted-foreground")
                           }
                         >

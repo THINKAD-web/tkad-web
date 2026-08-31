@@ -68,7 +68,7 @@ export function CommunityPostCard({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <span
             className={cn(
-              "inline-flex items-center border-2 border-accent bg-accent px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent-foreground",
+              "inline-flex items-center border-2 border-accent bg-accent px-2 py-0.5 tkad-type-label text-accent-foreground",
               isNeon &&
                 "rounded-full dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1 dark:text-white text-gray-900",
             )}
@@ -77,7 +77,7 @@ export function CommunityPostCard({
           </span>
           <span
             className={cn(
-              "font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground",
+              "tkad-type-label text-muted-foreground",
               isNeon && "dark:text-white text-gray-500",
             )}
           >
@@ -100,7 +100,7 @@ export function CommunityPostCard({
             className={cn(
               "line-clamp-3 text-sm leading-relaxed text-muted-foreground",
               isNeon && "dark:text-white",
-              variant === "community" && "line-clamp-4 text-[15px]",
+              variant === "community" && "line-clamp-4 text-base",
             )}
           >
             {post.bodyExcerpt}
@@ -111,7 +111,7 @@ export function CommunityPostCard({
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={cn(
-                "font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground",
+                "tkad-type-label text-foreground",
                 isNeon && "dark:text-white text-gray-800",
               )}
             >
@@ -127,7 +127,7 @@ export function CommunityPostCard({
             {!post.isAnonymous && post.author?.company ? (
               <span
                 className={cn(
-                  "font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground",
+                  "tkad-type-label text-muted-foreground",
                   isNeon && "dark:text-white text-gray-500",
                 )}
               >
@@ -138,7 +138,7 @@ export function CommunityPostCard({
 
           <div
             className={cn(
-              "flex flex-wrap items-center gap-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground",
+              "flex flex-wrap items-center gap-3 tkad-type-label text-muted-foreground",
               isNeon && "dark:text-white text-gray-500",
               variant === "community" && "justify-between gap-y-2",
             )}

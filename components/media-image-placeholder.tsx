@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 const sizeClass = {
-  xs: "text-[10px] leading-tight",
+  xs: "tkad-type-note leading-tight",
   sm: "text-xs",
   md: "text-sm",
   lg: "text-base",

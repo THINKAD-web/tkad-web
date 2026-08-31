@@ -26,7 +26,7 @@ export function GuidesBeginnerCta({
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,color-mix(in_srgb,var(--qp-accent)_16%,transparent),transparent_55%)]"
       />
       <div className="relative">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
+        <p className="tkad-type-label text-[color:var(--qp-accent)]/90">
           [ {isKo ? "시작하기" : "GET STARTED"} ]
         </p>
         <h2 className="mt-3 text-2xl font-black dark:text-white text-gray-900 sm:text-3xl">{title}</h2>
@@ -40,7 +40,7 @@ export function GuidesBeginnerCta({
               <p className="text-2xl font-black text-[color:var(--qp-accent)]">
                 {isKo ? m.valueKo : m.valueEn}
               </p>
-              <p className="mt-1 text-xs font-semibold leading-snug dark:text-white text-gray-600">
+              <p className="mt-1 tkad-type-title leading-snug dark:text-white text-gray-600">
                 {isKo ? m.labelKo : m.labelEn}
               </p>
             </li>

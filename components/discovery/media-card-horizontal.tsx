@@ -83,7 +83,7 @@ export function DiscoveryMediaCardHorizontal({
   const thumbInner = (
     <>
       {rank != null ? (
-        <span className="absolute left-1.5 top-1.5 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-hermes text-[10px] font-black text-white shadow-md">
+        <span className="absolute left-1.5 top-1.5 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-hermes tkad-type-note font-black text-white shadow-md">
           {rank}
         </span>
       ) : null}
@@ -184,7 +184,7 @@ export function DiscoveryMediaCardHorizontal({
         }}
         title={isInPlan ? (isKo ? "다시 누르면 빼기" : "Tap again to remove") : undefined}
         className={cn(
-          "flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-semibold transition-colors",
+          "flex w-full items-center justify-center gap-1.5 rounded-xl py-2 tkad-type-title transition-colors",
           isInPlan
             ? "border border-rose-400/50 bg-rose-500/15 text-rose-700 dark:text-rose-200"
             : "bg-hermes text-white",

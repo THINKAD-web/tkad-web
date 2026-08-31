@@ -103,7 +103,7 @@ function KpiTile({
         )}
         aria-hidden
       />
-      <p className="mt-2 text-[11px] font-semibold leading-snug text-muted-foreground">
+      <p className="mt-2 tkad-type-caption font-semibold leading-snug text-muted-foreground">
         {label}
       </p>
       <p className="mt-1 text-lg font-black tabular-nums text-foreground dark:text-white">

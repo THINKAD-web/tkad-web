@@ -143,14 +143,14 @@ function ReelsSlide({
         <div className="flex items-center gap-2">
           <Link
             href={href}
-            className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/25 bg-white/12 px-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
+            className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/25 bg-white/12 px-3 tkad-type-title text-white backdrop-blur-sm transition hover:bg-white/20"
           >
             <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden />
             {isKo ? "상세" : "Details"}
           </Link>
           <Link
             href={contactHref}
-            className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-hermes px-3 text-sm font-semibold text-white shadow-lg shadow-hermes/30 transition hover:bg-hermes/90"
+            className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-hermes px-3 tkad-type-title text-white shadow-lg shadow-hermes/30 transition hover:bg-hermes/90"
           >
             <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
             {isKo ? "문의" : "Contact"}
