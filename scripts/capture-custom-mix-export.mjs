@@ -24,7 +24,7 @@ const briefSeed = {
     flightStart: "2026-09-01",
     flightEnd: "2026-09-30",
     freeText: "",
-    wizardStep: 3,
+    wizardStep: 2,
     entryMode: "detailed",
     channelMode: "ooh_only",
     digitalBudgetPct: 30,
@@ -46,7 +46,7 @@ const briefSeed = {
 };
 
 async function dismissDialogs(page) {
-  for (const label of [/이어서 진행|Continue/i, /유지|Keep mix/i]) {
+  for (const label of [/이어서 진행|Continue/i, /유지|Keep mix/i, /닫기|Close/i]) {
     const btn = page.getByRole("button", { name: label });
     if (await btn.isVisible({ timeout: 1500 }).catch(() => false)) {
       await btn.click();
@@ -61,6 +61,14 @@ async function main() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1400, height: 960 } });
 
+  await page.route("**/api/report-access**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ allowed: true, tier: "pro", reason: "qa_mock" }),
+    });
+  });
+
   await page.addInitScript((brief) => {
     localStorage.setItem("tkad-planner-brief-v1", JSON.stringify(brief));
   }, briefSeed);
@@ -74,45 +82,82 @@ async function main() {
 
   await page.waitForSelector('[data-testid="brief-mix-card-row"]', {
     timeout: 60_000,
-  }).catch(() => {});
-
-  if (briefSeed.state.mixUnits && Object.keys(briefSeed.state.mixUnits).length === 0) {
-    const addBtn = page
-      .locator('[data-testid="brief-mix-card-row"]')
-      .first()
-      .getByRole("button", { name: /추가|Add/i });
-    if (await addBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await addBtn.click();
-      await page.waitForTimeout(800);
-      await dismissDialogs(page);
-    }
-  }
-
-  await page.getByTestId("brief-step-two-next").click({ force: true }).catch(async () => {
-    await page.getByRole("button", { name: /결과 보기|See result/i }).click({ force: true });
   });
-  await page.waitForTimeout(3000);
+
+  const firstAdd = page
+    .locator('[data-testid="brief-mix-card-row"]')
+    .first()
+    .getByRole("button", { name: /추가|Add/i });
+  await firstAdd.click();
+  await page.waitForTimeout(800);
   await dismissDialogs(page);
 
   await page.screenshot({
-    path: path.join(OUT, "01-step3-mixed.png"),
+    path: path.join(OUT, "01-step2-mixed.png"),
     fullPage: true,
   });
 
-  const quote = page.getByTestId("report-quote-summary");
-  if (await quote.isVisible({ timeout: 10_000 }).catch(() => false)) {
-    await quote.screenshot({ path: path.join(OUT, "02-quote-summary.png") });
+  await dismissDialogs(page);
+
+  const nextBtn = page.getByTestId("brief-step-two-next");
+  await nextBtn.scrollIntoViewIfNeeded();
+  await nextBtn.click({ force: true });
+  await page.waitForTimeout(4000);
+  await dismissDialogs(page);
+
+  await page.getByText(/확정 믹스|Confirmed mix/).waitFor({
+    state: "visible",
+    timeout: 60_000,
+  });
+
+  await page.screenshot({
+    path: path.join(OUT, "02-step3-mixed.png"),
+    fullPage: true,
+  });
+
+  const customRow = page.getByTestId("brief-step-three-custom-row");
+  if (await customRow.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await customRow.screenshot({ path: path.join(OUT, "04-custom-row.png") });
   }
 
-  const pdfBtn = page.getByRole("button", { name: /PDF/i }).first();
-  if (await pdfBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-    const [download] = await Promise.all([
-      page.waitForEvent("download", { timeout: 120_000 }),
-      pdfBtn.click(),
-    ]);
-    const pdfPath = path.join(OUT, "export-mixed.pdf");
-    await download.saveAs(pdfPath);
-    console.log("Saved PDF:", pdfPath);
+  const quote = page.getByTestId("report-quote-summary");
+  await page.getByText(/제안서 미리보기|Proposal preview/).scrollIntoViewIfNeeded();
+  await page.waitForTimeout(1500);
+  if (await quote.isVisible({ timeout: 15_000 }).catch(() => false)) {
+    await quote.screenshot({ path: path.join(OUT, "03-quote-summary.png") });
+  }
+
+  const preview = page.locator('[data-testid="report-quote-summary"]').locator("..").locator("..");
+  if (await preview.count()) {
+    await page.locator(".document-preview-frame, [class*='DocumentPreview']").first()
+      .scrollIntoViewIfNeeded()
+      .catch(() => {});
+    await page.waitForTimeout(1000);
+    await page.screenshot({
+      path: path.join(OUT, "05-proposal-preview.png"),
+      fullPage: false,
+    }).catch(() => {});
+  }
+
+  const pdfBtn = page.getByRole("button", { name: /제안서 PDF 생성|Generate proposal PDF/i });
+  if (await pdfBtn.isVisible({ timeout: 10_000 }).catch(() => false)) {
+    const exportResponse = page.waitForResponse(
+      (res) => res.url().includes("/api/planner/report/export"),
+      { timeout: 120_000 },
+    );
+    await pdfBtn.click();
+    const response = await exportResponse.catch(() => null);
+    if (response?.ok()) {
+      const pdfPath = path.join(OUT, "export-mixed.pdf");
+      await writeFile(pdfPath, await response.body());
+      console.log("Saved:", pdfPath);
+    } else {
+      console.warn(
+        "PDF export API requires authenticated PRO — see custom-mix-export.test.ts smoke",
+      );
+    }
+  } else {
+    console.warn("PDF button not visible — preview may still be gated");
   }
 
   await browser.close();

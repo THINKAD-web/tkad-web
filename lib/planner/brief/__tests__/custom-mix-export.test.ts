@@ -175,3 +175,37 @@ test("custom mix PDF smoke", async () => {
   const pdf = await buildPlannerReportPdf(payload, {});
   assert.ok(pdf.length > 50_000);
 });
+
+test("custom mix PPTX smoke", async () => {
+  const snap = buildCampaignPlanSnapshot({
+    brief: {
+      ...EMPTY_BRIEF,
+      budgetInputWon: 30_000_000,
+      budgetMode: "total",
+      flightStart: "2026-09-01",
+      flightEnd: "2026-09-30",
+    },
+    catalog: [catalogMedia],
+    mixUnits: { [catalogMedia.id]: 1 },
+    customLines: [
+      {
+        lineId: "custom-pptx",
+        name: "PPTX 커스텀",
+        quantity: 1,
+        unitPriceWon: 2_000_000,
+      },
+    ],
+  });
+  const payload = buildBriefReportPayload({
+    plan: snap,
+    catalog: [catalogMedia],
+    isKo: true,
+  });
+  const { buildPlannerReportPptx } = await import(
+    "@/lib/planner-report-export/build-pptx"
+  );
+  const pptx = await buildPlannerReportPptx(payload, {});
+  assert.ok(pptx.length > 20_000);
+  const customRow = payload.portfolio.find((r) => r.kind === "custom");
+  assert.ok(customRow?.metricsUnavailableLabel);
+});

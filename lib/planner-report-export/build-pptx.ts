@@ -661,7 +661,7 @@ export async function buildPlannerReportPptx(
         y: rightY,
         w: barW,
         rows: ch.reachSummary,
-        color: INK_DEEP,
+        color: INK_DEEP_BAR,
         face,
         fmt: (n) => fmtImp(n, isKo),
       });
@@ -1479,7 +1479,7 @@ export async function buildPlannerReportPptx(
       s4.addText(p.digitalSummary, { x: 0.6, y: 1.2, w: 12.1, h: 0.5, fontFace: face, fontSize: 12, color: GRAY });
     }
     const dHead = [isKo ? "플랫폼" : "Platform", isKo ? "비중" : "Share", isKo ? "예상 노출" : "Est. impressions"].map((t) => ({
-      text: t, options: { fill: { color: INK_DEEP }, color: WHITE, bold: true, fontFace: face, fontSize: 12 },
+      text: t, options: { fill: { color: INK_DEEP_BAR }, color: WHITE, bold: true, fontFace: face, fontSize: 12 },
     }));
     const dBody = p.digital.map((r, i) => {
       const fill = i % 2 ? { color: LIGHT } : { color: WHITE };
