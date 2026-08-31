@@ -50,6 +50,8 @@ export {
   linearMonthlyDeviation,
   normalizePriceOptions,
   periodToDays,
+  readCustomPeriodDays,
+  resolveOptionDays,
   resolvePrice,
   PERIOD_DAYS,
 } from "./price";

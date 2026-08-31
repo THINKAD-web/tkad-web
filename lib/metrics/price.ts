@@ -24,6 +24,26 @@ export function periodToDays(period: string | null | undefined): number | null {
   return typeof days === "number" ? days : null;
 }
 
+/** JSON priceOptions 행 또는 base row의 custom 일수 */
+export function readCustomPeriodDays(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  const rounded = Math.round(value);
+  return rounded > 0 ? rounded : null;
+}
+
+/**
+ * 판매 기간 일수 — `periodDays`/`pricePeriodDays` 우선, 없으면 period enum.
+ * 기존 매체(custom 일수 없음)는 periodToDays 와 동일 결과.
+ */
+export function resolveOptionDays(
+  period: string | null | undefined,
+  customDays?: number | null | undefined,
+): number | null {
+  const explicit = readCustomPeriodDays(customDays ?? null);
+  if (explicit != null) return explicit;
+  return periodToDays(period);
+}
+
 function usable(option: PriceOption): boolean {
   return (
     Number.isFinite(option.days) &&
