@@ -11,8 +11,8 @@
  */
 import type { MediaItem, MediaPriceOption } from "@/lib/media-data";
 import { isAddonSurchargePriceOption } from "@/lib/media-price-addon-option";
-import { parseLabelDays } from "./audit-rules";
-import { minSellableDaysAbove, periodToDays, resolvePrice } from "./price";
+import { parseLabelDays } from "./label-parse";
+import { minSellableDaysAbove, resolveOptionDays, resolvePrice } from "./price";
 import type { PriceOption, PriceResult } from "./types";
 
 /** 어댑터가 필요한 최소 필드 */
@@ -22,6 +22,7 @@ export type MediaPriceSource = Pick<
 > & {
   name?: string | null;
   priceNote?: string | null;
+  pricePeriodDays?: number | null;
 };
 
 function hasExplicitPriceOptions(media: MediaPriceSource): boolean {
@@ -44,7 +45,7 @@ export function isBaseOnlyPriceMedia(media: MediaPriceSource): boolean {
 /** day/week base-only — 선형 환산(×7·×30)이 견적을 부풀릴 수 있는 구간 */
 export function isRiskyBaseOnlyPricePeriod(media: MediaPriceSource): boolean {
   if (!isBaseOnlyPriceMedia(media)) return false;
-  const baseDays = periodToDays(media.pricePeriod);
+  const baseDays = resolveOptionDays(media.pricePeriod, media.pricePeriodDays);
   return baseDays != null && baseDays < 7;
 }
 
@@ -73,12 +74,15 @@ export function mediaPriceOptions(media: MediaPriceSource): PriceOption[] {
     if (typeof price !== "number" || !Number.isFinite(price) || price <= 0) {
       return;
     }
-    const days = periodToDays(opt.period ?? media.pricePeriod);
+    const days = resolveOptionDays(
+      opt.period ?? media.pricePeriod,
+      opt.periodDays,
+    );
     if (days == null) return;
     explicit.push({ days, price, id: `po-${idx}`, label: opt.label });
   });
 
-  const baseDays = periodToDays(media.pricePeriod);
+  const baseDays = resolveOptionDays(media.pricePeriod, media.pricePeriodDays);
   if (baseDays == null || typeof media.price !== "number" || media.price <= 0) {
     return explicit;
   }
@@ -144,7 +148,7 @@ export function resolveMediaProductPrice(
 ): PriceResult | null {
   const options = resolveMediaPriceOptions(media);
   const result = resolvePrice(options, days);
-  const baseDays = periodToDays(media.pricePeriod);
+  const baseDays = resolveOptionDays(media.pricePeriod, media.pricePeriodDays);
   // Fix 2 — day/week base-only 를 장기 일수로 외삽하면 M-CITY×30 급 부풀림
   if (
     result &&

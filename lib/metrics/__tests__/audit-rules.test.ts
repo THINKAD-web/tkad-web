@@ -14,6 +14,7 @@ import {
   type AuditMediaRow,
   type RuleId,
 } from "../audit-rules";
+import { parseLabelDays } from "../label-parse";
 
 function row(overrides: Partial<AuditMediaRow> = {}): AuditMediaRow {
   return {
@@ -177,20 +178,29 @@ test("R-02: 범위 상단 이탈도 잡는다", () => {
 
 // ── R-03 기간 환산 ──────────────────────────────────────────────
 
-test("R-03: 주 단가 선형 환산이 실제 월 상품가와 어긋나면 잡힌다 (D-04)", () => {
-  const acc = createAccumulator();
-  auditRow(
+test("R-03: 등록 tier ladder(주+월)는 engine exact — 오탐 없음", () => {
+  const fired = rulesFired(
     row({
       price: 25_000_000,
       pricePeriod: "week",
       priceOptions: [{ label: "1개월", price: 70_000_000, period: "month" }],
     }),
+  );
+  assert.equal(fired.has("R-03"), false);
+});
+
+test("R-03: base-only day + 월 옵션 없음 — risky base 위반", () => {
+  const acc = createAccumulator();
+  auditRow(
+    row({
+      price: 70_000_000,
+      pricePeriod: "day",
+      priceOptions: [],
+    }),
     acc,
   );
   const r03 = acc.violations.find((v) => v.rule === "R-03");
   assert.ok(r03, "R-03 미탐지");
-  // 25,000,000 / 7 × 30 = 107,142,857 → +53%
-  assert.ok((r03.detail?.deviation as number) > 0.5);
 });
 
 test("R-03: 월 상품가가 선형 환산과 일치하면 잡히지 않는다", () => {
@@ -385,14 +395,13 @@ test("모든 규칙에 severity 와 라벨이 정의되어 있다", () => {
 
 // ── R-5 심화: 라벨 vs period 불일치 (M-CITY 근본 원인 탐지) ──
 
-import { parseLabelDays } from "../audit-rules";
-
 test("R-05b: priceOption 라벨 파싱 — 일/주/개월", () => {
   assert.equal(parseLabelDays("7일"), 7);
   assert.equal(parseLabelDays("1개월"), 30);
   assert.equal(parseLabelDays("2주"), 14);
   assert.equal(parseLabelDays("1 week"), 7);
   assert.equal(parseLabelDays("20초 기준"), null);
+  assert.equal(parseLabelDays("20초 (1일 100회)"), null);
   assert.equal(parseLabelDays(null), null);
 });
 
