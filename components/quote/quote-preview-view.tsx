@@ -330,7 +330,7 @@ export default function QuotePreviewView({
         >
           <div className="flex flex-wrap items-center justify-center gap-3">
             <QuoteStatusBadge status={quote.status} />
-            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="tkad-type-label text-muted-foreground">
               #{quote.id.slice(-8).toUpperCase()}
             </span>
           </div>
@@ -340,7 +340,7 @@ export default function QuotePreviewView({
           <div className="mx-auto max-w-[88rem] px-4 sm:px-6 lg:px-8">
             <Link
               href="/my"
-              className="group mb-6 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-primary"
+              className="group mb-6 inline-flex items-center gap-1 tkad-type-label text-muted-foreground transition-colors hover:text-primary"
             >
               <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
               {isKo ? "대시보드로" : "Dashboard"}
@@ -348,7 +348,7 @@ export default function QuotePreviewView({
 
             {isDraft ? (
               <div className="mb-6 rounded-[22px] border-2 border-amber-400/40 bg-amber-50/90 px-5 py-4 dark:border-amber-400/30 dark:bg-amber-500/10">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-amber-800 dark:text-amber-200">
+                <p className="tkad-type-label text-amber-800 dark:text-amber-200">
                   [ {t("draftBannerTitle")} ]
                 </p>
                 <p className="mt-1 text-sm font-medium text-amber-950 dark:text-amber-50/90">
@@ -359,7 +359,7 @@ export default function QuotePreviewView({
 
             {showSentBanner ? (
               <div className="mb-6 rounded-[22px] border-2 border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-5 py-4">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-[color:var(--qp-accent)]">
+                <p className="tkad-type-label text-[color:var(--qp-accent)]">
                   [ {t("sentBannerTitle")} ]
                 </p>
                 <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white/90">
@@ -417,7 +417,7 @@ export default function QuotePreviewView({
                       onClick={() => setTemplate(val)}
                       aria-pressed={template === val}
                       className={cn(
-                        "rounded-xl px-3 py-1.5 font-display text-xs font-semibold uppercase tracking-[0.14em] transition-colors",
+                        "rounded-xl px-3 py-1.5 tkad-type-label transition-colors",
                         template === val
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:bg-muted",
@@ -515,7 +515,7 @@ export default function QuotePreviewView({
             </div>
 
             {canProceed ? (
-              <p className="mb-6 text-right text-[11px] leading-snug text-muted-foreground">
+              <p className="mb-6 text-right tkad-type-caption leading-snug text-muted-foreground">
                 {t("proceedNote")}
                 <span className="mt-0.5 block text-primary">{t("proceedContractHint")}</span>
               </p>
@@ -535,7 +535,7 @@ export default function QuotePreviewView({
             <div ref={captureRef} className="space-y-8">
               <section className="space-y-4">
                 <div className="space-y-2">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                  <p className="tkad-type-label text-primary">
                     {isKo ? "[ PDF 미리보기 ]" : "[ PDF PREVIEW ]"}
                   </p>
                   <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -565,7 +565,7 @@ export default function QuotePreviewView({
 
               <div className="tkad-glass-surface border-gray-200 dark:border-white/12 relative overflow-hidden rounded-[32px] border backdrop-blur-md">
                 <div className="border-b border-border px-6 py-5 sm:px-8">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                  <p className="tkad-type-label text-primary">
                     [ {isKo ? "캠페인 정보" : "Campaign info"} ]
                   </p>
                 </div>
@@ -590,10 +590,10 @@ export default function QuotePreviewView({
 
               <section className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                  <p className="tkad-type-label text-primary">
                     [ {isKo ? "선택 매체" : "Selected media"} ]
                   </p>
-                  <span className="font-display text-sm font-bold tabular-nums text-foreground">
+                  <span className="font-sans text-sm font-bold tabular-nums text-foreground">
                     {quote.medias.length}
                     {isKo ? "건" : ""}
                   </span>
@@ -610,10 +610,10 @@ export default function QuotePreviewView({
               <div className="tkad-glass-surface border-gray-200 dark:border-white/12 rounded-[32px] border p-6 sm:p-8">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                    <p className="tkad-type-label text-primary">
                       [ {isKo ? "총 견적" : "Total"} ]
                     </p>
-                    <p className="mt-2 font-display text-3xl font-black tabular-nums text-foreground sm:text-4xl">
+                    <p className="mt-2 font-sans text-3xl font-black tabular-nums text-foreground sm:text-4xl">
                       {totalDisplayKrw}
                     </p>
                     <p className="mt-2 text-xs text-muted-foreground">
@@ -685,7 +685,7 @@ function InfoField({
         <Icon className="h-4 w-4" aria-hidden />
       </span>
       <div className="min-w-0">
-        <dt className="font-display text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        <dt className="tkad-type-label text-muted-foreground">
           {label}
         </dt>
         <dd className="mt-1 break-words text-sm font-bold text-foreground">{value}</dd>

@@ -108,7 +108,7 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center gap-2 font-display text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+      <div className="flex min-h-[40vh] items-center justify-center gap-2 tkad-type-label text-muted-foreground">
         <Loader2 className="h-6 w-6 animate-spin text-accent" />
         {`// LOADING`}
       </div>
@@ -118,14 +118,14 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
   if (!session) {
     return (
       <div className="mx-auto max-w-lg space-y-6 border-2 border-border bg-card px-6 py-10 text-center">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <p className="tkad-type-label text-accent">
           [ UNAVAILABLE ]
         </p>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
           {t("notAvailableTitle")}
         </h1>
         <p className="text-sm text-muted-foreground">{t("notAvailableBody")}</p>
-        <p className="text-[11px] tracking-tight text-muted-foreground">
+        <p className="tkad-type-caption tracking-tight text-muted-foreground">
           {`// `}{t("unavailable")}
         </p>
         <div className="flex flex-col items-center gap-3">
@@ -146,13 +146,13 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
         <div className="mx-auto flex h-14 w-14 items-center justify-center border-2 border-accent bg-accent text-accent-foreground">
           <CheckCircle2 className="h-8 w-8" />
         </div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <p className="tkad-type-label text-accent">
           [ SIGNED ]
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           {t("signedTitle")}
         </h1>
-        <p className="text-[12px] tracking-tight text-muted-foreground">
+        <p className="tkad-type-meta tracking-tight text-muted-foreground">
           {`// `}{t("signedBody")}
         </p>
         <div className="flex flex-col items-center gap-3">
@@ -160,7 +160,7 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
             href={`/api/quote/${quoteId}/contract/signed`}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 border-2 border-border bg-hero-void px-6 py-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-hero-fg transition-colors hover:bg-accent hover:border-accent"
+            className="inline-flex items-center gap-2 border-2 border-border bg-hero-void px-6 py-3 tkad-type-label text-hero-fg transition-colors hover:bg-accent hover:border-accent"
           >
             <FileDown className="h-4 w-4" />
             {t("downloadSigned")}
@@ -176,7 +176,7 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
   if (!session.canSign) {
     return (
       <div className="mx-auto max-w-lg space-y-6 border-2 border-border bg-muted px-6 py-10 text-center">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <p className="tkad-type-label text-accent">
           [ NOT READY ]
         </p>
         <h1 className="text-lg font-bold text-foreground">{t("notYet")}</h1>
@@ -197,20 +197,20 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
   return (
     <div className="mx-auto max-w-3xl space-y-6 py-10">
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <p className="tkad-type-label text-accent">
           [ CONTRACT SIGN ]
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           {t("title")}
         </h1>
-        <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
+        <p className="mt-1 tkad-type-caption tracking-tight text-muted-foreground">
           {`// `}{t("subtitle")}
         </p>
       </div>
 
       <div className="border-2 border-border bg-card">
         <div className="border-b-2 border-border p-5">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ PREVIEW ]
           </p>
           <h2 className="mt-2 text-base font-bold tracking-tight text-foreground">
@@ -230,7 +230,7 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
 
       <div className="border-2 border-border bg-card">
         <div className="border-b-2 border-border p-5">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ SIGNATURE ]
           </p>
           <h2 className="mt-2 text-base font-bold tracking-tight text-foreground">
@@ -240,7 +240,7 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
         <div className="space-y-4 p-5">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+              <label className="mb-2 block tkad-type-label text-accent">
                 [ {t("signerName")} ]
               </label>
               <input
@@ -250,7 +250,7 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
               />
             </div>
             <div>
-              <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+              <label className="mb-2 block tkad-type-label text-accent">
                 [ {t("signerEmail")} ]
               </label>
               <input
@@ -263,7 +263,7 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
           </div>
 
           <div>
-            <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+            <p className="mb-2 tkad-type-label text-accent">
               [ {t("padLabel")} ]
             </p>
             <div className="border-2 border-border bg-card">

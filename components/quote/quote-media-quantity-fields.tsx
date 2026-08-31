@@ -88,7 +88,7 @@ export function QuoteMediaQuantityFields({
 
       {isNw ? (
         <div>
-          <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <label className="mb-2 block tkad-type-label text-accent">
             [ {networkRegionLabel} ]
           </label>
           <select

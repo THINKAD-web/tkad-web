@@ -220,7 +220,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
             <div className="flex flex-col gap-8">
             <div className="min-w-0">
               <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+                <div className="tkad-type-label text-foreground">
                   {t("media.results")}:{" "}
                   <span className="tabular-nums text-accent">
                     {visibleItems.length}
@@ -233,7 +233,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     gridLabel={t("media.browseCardLayoutGrid")}
                     compactLabel={t("media.browseCardLayoutCompact")}
                   />
-                  <div className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent shadow-sm backdrop-blur dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 dark:text-foreground">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 tkad-type-label text-accent shadow-sm backdrop-blur dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 dark:text-foreground">
                     <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
                     <span>{tMedia("browseCatalogVerifiedBadge")}</span>
                   </div>
@@ -369,7 +369,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                       {isKo ? "이미지 저장" : "Save Image"}
                     </BtnBlock>
                   </div>
-                  <p className="text-center font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                  <p className="text-center tkad-type-label text-muted-foreground">
                     {isKo
                       ? "견적·상세: 위 매체 ID가 그대로 전달됩니다."
                       : "Quote and detail links pass the same media IDs."}

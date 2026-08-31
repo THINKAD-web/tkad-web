@@ -47,7 +47,7 @@ export function QuoteContractCta({
           href={`/api/quote/${quoteId}/contract/signed`}
           target="_blank"
           rel="noreferrer"
-          className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300"
+          className="mt-4 inline-flex items-center gap-2 tkad-type-title text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300"
         >
           {t("contractSignedDownload")} →
         </a>
@@ -80,12 +80,12 @@ export function QuoteContractCta({
       </p>
       <Link
         href={`/quote/${quoteId}/contract`}
-        className="inline-flex items-center gap-2 rounded-xl bg-[color:var(--qp-accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[color:var(--qp-accent-hover)]"
+        className="inline-flex items-center gap-2 rounded-xl bg-[color:var(--qp-accent)] px-5 py-2.5 tkad-type-title text-white shadow-sm transition-colors hover:bg-[color:var(--qp-accent-hover)]"
       >
         {t("openContract")} →
       </Link>
       {!canSignContract ? (
-        <p className="mt-3 text-[11px] text-gray-500 dark:text-white/45">
+        <p className="mt-3 tkad-type-caption text-gray-500 dark:text-white/45">
           {t("contractSignRetryHint")}
         </p>
       ) : null}

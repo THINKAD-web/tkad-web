@@ -70,7 +70,7 @@ export default function CompareBar({
   const countLabel = formatSelectionCountLabel(planCount, count, isKo);
 
   const blockClass =
-    "w-full min-h-12 min-w-0 justify-center px-2 text-[11px] sm:min-h-10 sm:px-4 sm:text-[12px]";
+    "w-full min-h-12 min-w-0 justify-center px-2 tkad-type-caption sm:min-h-10 sm:px-4 sm:tkad-type-meta";
 
   if (isLight) {
     return (
@@ -90,7 +90,7 @@ export default function CompareBar({
         >
           <div className={STICKY_ACTION_BAR_ROW}>
             <span
-              className="min-w-0 flex-1 truncate text-[10px] font-medium tabular-nums text-gray-600 dark:text-white/55"
+              className="min-w-0 flex-1 truncate tkad-type-note font-medium tabular-nums text-gray-600 dark:text-white/55"
               aria-live="polite"
             >
               {countLabel}

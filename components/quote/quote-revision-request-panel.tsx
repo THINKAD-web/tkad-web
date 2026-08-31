@@ -89,7 +89,7 @@ export function QuoteRevisionRequestPanel({
               "focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/35",
             )}
           />
-          <p className="text-[11px] text-muted-foreground">
+          <p className="tkad-type-caption text-muted-foreground">
             {t("revisionRequestHint")}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -130,7 +130,7 @@ export function QuoteRevisionRequestPanel({
   if (embedded) {
     return (
       <div className="mt-4 border-t border-border pt-4 dark:border-white/10">
-        <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <p className="mb-2 tkad-type-label text-accent">
           [ {t("revisionRequestTitle")} ]
         </p>
         {body}
@@ -140,7 +140,7 @@ export function QuoteRevisionRequestPanel({
 
   return (
     <div className="border-2 border-border bg-card p-5">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+      <p className="tkad-type-label text-accent">
         [ {t("revisionRequestTitle")} ]
       </p>
       <div className="mt-3">{body}</div>

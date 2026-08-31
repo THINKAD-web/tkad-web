@@ -1423,7 +1423,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         headlineGradient={isKo ? "견적 요청" : "Quote"}
         subtitle={t("quote.subtitle")}
       >
-        <p className="mx-auto max-w-xl font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
+        <p className="mx-auto max-w-xl tkad-type-label dark:text-white text-gray-500">
           {`// `}{t("quote.wizardSubtitle")}
         </p>
       </CategoryExploreHero>
@@ -1431,7 +1431,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       <section className="border-t border-white/8 bg-transparent py-12 sm:py-16 lg:py-20">
         <div className="mx-auto max-w-[88rem] px-4 sm:px-6 lg:px-8">
           <div className="mb-12 sm:mb-14">
-            <p className="mb-5 text-center font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
+            <p className="mb-5 text-center tkad-type-label text-muted-foreground sm:text-xs">
               [ {t("quote.wizardTitle")} ]
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
@@ -1462,7 +1462,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   </button>
                   <span
                     className={cn(
-                      "tkad-quote-wizard-step-label hidden max-w-[100px] font-display text-xs font-medium uppercase tracking-[0.18em] sm:block",
+                      "tkad-quote-wizard-step-label hidden max-w-[100px] tkad-type-label sm:block",
                       step === n && "tkad-quote-wizard-step-label-active",
                     )}
                   >
@@ -1474,7 +1474,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-center font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mt-3 text-center tkad-type-label text-muted-foreground">
               {`// `}{t("quote.stepOf", { current: step, total: 4 })}
             </p>
           </div>
@@ -1484,7 +1484,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
               <div className="tkad-glass-surface relative min-h-[380px] overflow-x-clip overflow-y-visible rounded-[32px] border border-gray-200 dark:border-white/12 sm:min-h-[420px]">
                 <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0" />
                 <div className="relative border-b dark:border-white/10 border-gray-200 p-6 sm:p-8">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
+                  <p className="tkad-type-label text-muted-foreground sm:text-xs">
                     [ STEP {step} / 4 ]
                   </p>
                   <h3 className="mt-3 flex items-center gap-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -1500,7 +1500,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           {errors.media}
                         </p>
                       ) : null}
-                      <p className="mb-4 text-[11px] tracking-tight text-muted-foreground">
+                      <p className="mb-4 tkad-type-caption tracking-tight text-muted-foreground">
                         {`// `}{t("quote.selectMediaDesc")}
                       </p>
                       <div className="flex flex-col gap-6">
@@ -1580,7 +1580,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               <div className="inline-flex overflow-hidden rounded-xl border border-gray-200 dark:border-white/10">
                                 <button
                                   type="button"
-                                  className="px-2.5 py-1.5 text-[11px] font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-40 dark:text-white/80 dark:hover:bg-white/10"
+                                  className="px-2.5 py-1.5 tkad-type-caption font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-40 dark:text-white/80 dark:hover:bg-white/10"
                                   onClick={() => {
                                     setSelectedIds(
                                       new Set(pagedCatalog.map((m) => m.id)),
@@ -1592,7 +1592,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 </button>
                                 <button
                                   type="button"
-                                  className="border-l border-gray-200 px-2.5 py-1.5 text-[11px] font-semibold text-gray-500 transition hover:bg-gray-50 disabled:opacity-40 dark:border-white/10 dark:text-white/60 dark:hover:bg-white/10"
+                                  className="border-l border-gray-200 px-2.5 py-1.5 tkad-type-caption font-semibold text-gray-500 transition hover:bg-gray-50 disabled:opacity-40 dark:border-white/10 dark:text-white/60 dark:hover:bg-white/10"
                                   onClick={() => setSelectedIds(new Set())}
                                   disabled={selectedIds.size === 0}
                                 >
@@ -1617,7 +1617,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
                         <div className="min-w-0">
                       {filteredCatalog.length === 0 ? (
-                        <div className="flex h-64 items-center justify-center border-2 border-border bg-muted font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                        <div className="flex h-64 items-center justify-center border-2 border-border bg-muted tkad-type-label text-muted-foreground">
                           {isKo ? "조건에 맞는 매체가 없습니다." : "No media matches your filters."}
                         </div>
                       ) : mediaLayout === "grid" ? (
@@ -1712,7 +1712,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     >
                                       <span
                                         className={cn(
-                                          "absolute right-1 top-1 z-20 flex size-7 items-center justify-center border-2 text-[10px] font-bold",
+                                          "absolute right-1 top-1 z-20 flex size-7 items-center justify-center border-2 tkad-type-note font-bold",
                                           checked
                                             ? "border-accent bg-accent text-white"
                                             : "border-border bg-card text-foreground",
@@ -1724,28 +1724,28 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     </MediaCatalogThumbnail>
                                     <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 overflow-hidden sm:gap-1.5">
                                       <div className="flex min-w-0 flex-wrap items-center gap-1 sm:gap-1.5">
-                                        <span className="max-w-full shrink border-2 border-border bg-card px-1.5 py-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground sm:text-[10px]">
+                                        <span className="max-w-full shrink border-2 border-border bg-card px-1.5 py-0 tkad-type-label text-foreground sm:tkad-type-note">
                                           {isKo
                                             ? (typeLabel?.ko ?? media.type)
                                             : (typeLabel?.en ?? media.type)}
                                         </span>
                                         {popularIds.has(media.id) ? (
-                                          <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-accent bg-accent px-1.5 py-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-white">
+                                          <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-accent bg-accent px-1.5 py-0 tkad-type-label text-white">
                                             <Flame className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
                                             {isKo ? "인기" : "Hot"}
                                           </span>
                                         ) : null}
                                       </div>
-                                      <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug tracking-tight text-foreground sm:line-clamp-1 sm:text-sm">
+                                      <p className="line-clamp-2 min-w-0 break-words tkad-type-body font-bold leading-snug tracking-tight text-foreground sm:line-clamp-1 sm:text-sm">
                                         {isKo ? media.name : (media.nameEn || media.name)}
                                       </p>
-                                      <p className="flex min-w-0 items-start gap-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground sm:items-center sm:text-[11px]">
+                                      <p className="flex min-w-0 items-start gap-0.5 tkad-type-label text-muted-foreground sm:items-center sm:tkad-type-caption">
                                         <MapPin className="mt-0.5 h-2.5 w-2.5 shrink-0 sm:mt-0 sm:h-3 sm:w-3" />
                                         <span className="min-w-0 line-clamp-2 sm:line-clamp-1">
                                           {formatMediaLocationShort(media, isKo)}
                                         </span>
                                       </p>
-                                      <p className="min-w-0 break-words font-display text-[13px] font-bold tabular-nums leading-tight text-accent sm:text-sm sm:leading-none">
+                                      <p className="min-w-0 break-words font-sans tkad-type-body font-bold tabular-nums leading-tight text-accent sm:text-sm sm:leading-none">
                                         {priceLabel}
                                       </p>
                                       <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
@@ -1764,7 +1764,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           <button
                             type="button"
                             onClick={() => setMediaPage((p) => p + 1)}
-                            className="w-full rounded-2xl border border-gray-200 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/5"
+                            className="w-full rounded-2xl border border-gray-200 py-3 tkad-type-title text-gray-700 transition hover:bg-gray-50 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/5"
                           >
                             {tMedia("loadMoreBrowse")}
                           </button>
@@ -1777,11 +1777,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
                   {step === 2 && (
                     <div className="space-y-6">
-                      <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                      <p className="tkad-type-label text-muted-foreground">
                         {`// `}{t("quote.periodBudgetPdfHint")}
                       </p>
                       <div>
-                        <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+                        <label className="mb-2 block tkad-type-label text-accent">
                           [ {t("quote.period")} ]
                         </label>
                         <select
@@ -1821,7 +1821,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   {step === 3 && (
                     <div className="space-y-6">
                       <div>
-                        <p className="mb-4 text-[11px] tracking-tight text-muted-foreground">
+                        <p className="mb-4 tkad-type-caption tracking-tight text-muted-foreground">
                           {`// `}{t("quote.templateDesc")}
                         </p>
                         <div className="grid gap-0 sm:grid-cols-2">
@@ -1841,7 +1841,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 template === "default" ? "text-white" : "text-accent",
                               )}
                             />
-                            <p className="font-display text-xs font-medium uppercase tracking-[0.22em]">
+                            <p className="tkad-type-label">
                               [ DEFAULT ]
                             </p>
                             <p className="mt-1 font-bold tracking-tight">
@@ -1849,7 +1849,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             </p>
                             <p
                               className={cn(
-                                "mt-2  text-[11px] tracking-tight",
+                                "mt-2  tkad-type-caption tracking-tight",
                                 template === "default" ? "text-white/85" : "text-muted-foreground",
                               )}
                             >
@@ -1872,7 +1872,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 template === "premium" ? "text-white" : "text-accent",
                               )}
                             />
-                            <p className="font-display text-xs font-medium uppercase tracking-[0.22em]">
+                            <p className="tkad-type-label">
                               [ PREMIUM ]
                             </p>
                             <p className="mt-1 font-bold tracking-tight">
@@ -1880,7 +1880,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             </p>
                             <p
                               className={cn(
-                                "mt-2  text-[11px] tracking-tight",
+                                "mt-2  tkad-type-caption tracking-tight",
                                 template === "premium" ? "text-white/85" : "text-muted-foreground",
                               )}
                             >
@@ -1890,14 +1890,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </div>
                       </div>
                       <div>
-                        <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+                        <label className="mb-2 block tkad-type-label text-accent">
                           [ {t("quote.logoLabel")} ]
                         </label>
-                        <p className="mb-3 text-[11px] tracking-tight text-muted-foreground">
+                        <p className="mb-3 tkad-type-caption tracking-tight text-muted-foreground">
                           {`// `}{t("quote.logoHint")}
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
-                          <label className="inline-flex cursor-pointer items-center gap-2 border-2 border-border bg-card px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background">
+                          <label className="inline-flex cursor-pointer items-center gap-2 border-2 border-border bg-card px-4 py-2 tkad-type-label text-foreground transition-colors hover:bg-foreground hover:text-background">
                             <ImagePlus className="h-4 w-4" />
                             {isKo ? "파일 선택" : "Choose file"}
                             <input
@@ -1937,13 +1937,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       {selectedMedia.length > 0 ? (
                         <section className="space-y-4">
                           <div className="space-y-2">
-                            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                            <p className="tkad-type-label text-primary">
                               {isKo ? "[ PDF 미리보기 ]" : "[ PDF PREVIEW ]"}
                             </p>
                             <h3 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                               {t("quote.pdfPreviewTitle")}
                             </h3>
-                            <p className="text-[11px] tracking-tight text-muted-foreground sm:text-xs">
+                            <p className="tkad-type-caption tracking-tight text-muted-foreground sm:text-xs">
                               {`// `}
                               {template === "premium"
                                 ? isKo
@@ -1980,31 +1980,31 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           className="pointer-events-none absolute inset-0 opacity-0"
                         />
                         <div className="relative border-b dark:border-white/10 border-gray-200 px-6 py-5 sm:px-8 sm:py-6">
-                          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">
+                          <p className="tkad-type-label text-primary sm:text-xs">
                             [ {t("quote.reviewTitle")} ]
                           </p>
                         </div>
                         <ul className="relative divide-y divide-white/10 px-6 py-2 text-sm sm:px-8">
                           <li className="flex flex-wrap items-baseline justify-between gap-2 py-3.5">
-                            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                            <span className="tkad-type-label text-muted-foreground">
                               {t("quote.reviewMediaCount")}
                             </span>
-                            <span className="font-display text-base font-bold tabular-nums text-foreground">
+                            <span className="font-sans text-base font-bold tabular-nums text-foreground">
                               {selectedMedia.length}
                               {isKo ? "건" : ""}
                             </span>
                           </li>
                           <li className="flex flex-wrap items-baseline justify-between gap-2 py-3.5">
-                            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                            <span className="tkad-type-label text-muted-foreground">
                               {t("quote.period")}
                             </span>
                             <span className="font-bold text-foreground">{pdfPeriodLabel}</span>
                           </li>
                           <li className="flex flex-wrap items-baseline justify-between gap-2 py-3.5">
-                            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                            <span className="tkad-type-label text-muted-foreground">
                               {t("quote.budgetRange")}
                             </span>
-                            <span className="font-display text-sm font-bold tabular-nums text-foreground">
+                            <span className="font-sans text-sm font-bold tabular-nums text-foreground">
                               {budgetMinN != null || budgetMaxN != null ? (
                                 <>
                                   {budgetMinN != null
@@ -2022,7 +2022,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             </span>
                           </li>
                           <li className="flex flex-wrap items-baseline justify-between gap-2 py-3.5">
-                            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                            <span className="tkad-type-label text-muted-foreground">
                               {t("quote.reviewTemplate")}
                             </span>
                             <span className="font-bold text-foreground">
@@ -2032,7 +2032,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             </span>
                           </li>
                           <li className="flex flex-wrap items-baseline justify-between gap-2 py-3.5">
-                            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                            <span className="tkad-type-label text-muted-foreground">
                               {t("quote.reviewLogo")}
                             </span>
                             <span className="font-bold text-foreground">
@@ -2059,13 +2059,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </div>
                         <div className="relative flex flex-col gap-5 border-b dark:border-white/10 border-gray-200 p-6 sm:flex-row sm:items-start sm:justify-between sm:gap-6 sm:p-8">
                           <div className="min-w-0">
-                            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">
+                            <p className="tkad-type-label text-primary sm:text-xs">
                               [ PDF DOCUMENT ]
                             </p>
                             <h3 className="mt-3 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                               {t("quote.pdfDocumentTitle")}
                             </h3>
-                            <p className="mt-2 text-[11px] tracking-tight text-muted-foreground sm:text-xs">
+                            <p className="mt-2 tkad-type-caption tracking-tight text-muted-foreground sm:text-xs">
                               {`// `}
                               {isKo
                                 ? "견적서 PDF·PPT 다운로드·이메일 전송은 PRO 전용입니다. (14일 무료 체험)"
@@ -2221,7 +2221,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           className="pointer-events-none absolute inset-0 opacity-0"
                         />
                         <div className="relative border-b dark:border-white/10 border-gray-200 px-6 py-5 sm:px-8 sm:py-6">
-                          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">
+                          <p className="tkad-type-label text-primary sm:text-xs">
                             [ GET QUOTE ]
                           </p>
                           <h3 className="mt-3 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -2255,7 +2255,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
                           <div className="grid gap-5 sm:grid-cols-2">
                             <div>
-                              <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                              <label className="mb-2 block tkad-type-label text-primary">
                                 [ {t("quote.company")} ]
                               </label>
                               <input
@@ -2268,7 +2268,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               />
                             </div>
                             <div>
-                              <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                              <label className="mb-2 block tkad-type-label text-primary">
                                 [ {t("quote.name")} ]{" "}
                                 <span className="text-primary">*</span>
                               </label>
@@ -2286,7 +2286,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               {fieldError("name")}
                             </div>
                             <div>
-                              <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                              <label className="mb-2 block tkad-type-label text-primary">
                                 [ {t("quote.phone")} ]{" "}
                                 <span className="text-primary">*</span>
                               </label>
@@ -2304,7 +2304,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               {fieldError("phone")}
                             </div>
                             <div>
-                              <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                              <label className="mb-2 block tkad-type-label text-primary">
                                 [ {t("quote.email")} ]
                               </label>
                               <input
@@ -2320,7 +2320,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           </div>
 
                           <div>
-                            <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                            <label className="mb-2 block tkad-type-label text-primary">
                               [ {t("quote.message")} ]
                             </label>
                             <textarea
@@ -2368,13 +2368,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/15 shadow-[0_0_24px_rgba(255,98,0,0.18)]">
                           <CheckCircle className="h-9 w-9 text-primary" aria-hidden />
                         </div>
-                        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">
+                        <p className="tkad-type-label text-primary sm:text-xs">
                           [ SUCCESS ]
                         </p>
                         <p className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                           {t("quote.successTitle")}
                         </p>
-                        <p className="max-w-md text-[12px] leading-relaxed tracking-tight text-muted-foreground sm:text-sm">
+                        <p className="max-w-md tkad-type-meta leading-relaxed tracking-tight text-muted-foreground sm:text-sm">
                           {`// `}{t("quote.successDesc")}
                         </p>
                       </div>
@@ -2414,7 +2414,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
               <div className="space-y-0">
                 <div className="tkad-glass-surface overflow-hidden rounded-[32px] border border-gray-200 bg-gray-50 dark:border-white/12 dark:bg-white/6 backdrop-blur-md">
                   <div className="border-b dark:border-white/10 border-gray-200 p-6 sm:p-7">
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">
+                    <p className="tkad-type-label text-primary sm:text-xs">
                       [ ESTIMATE ]
                     </p>
                     <h3 className="mt-3 flex items-center gap-2.5 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -2467,7 +2467,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             className="text-xs leading-relaxed text-muted-foreground sm:text-sm"
                           >
                             {row.usesMediaPartialRate ? (
-                              <span className="mr-1.5 inline-block rounded-md border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                              <span className="mr-1.5 inline-block rounded-md border border-accent/40 bg-accent/10 px-1.5 py-0.5 tkad-type-note font-semibold uppercase tracking-wide text-accent">
                                 {isKo ? "매체 지정 요율" : "Media rate"}
                               </span>
                             ) : null}
@@ -2477,10 +2477,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       </ul>
                     ) : null}
                     <div>
-                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
+                      <p className="tkad-type-label text-muted-foreground sm:text-xs">
                         [ {t(hasProrationLine ? "quote.packagePriceSum" : "quote.unitPriceSum")} ]
                       </p>
-                      <p className="mt-2 font-display text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
+                      <p className="mt-2 font-sans text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
                         {isKo
                           ? `${Math.round(unitPriceSumMan).toLocaleString()}만원`
                           : `₩${Math.round(unitPriceSumMan * 10_000).toLocaleString()}`}
@@ -2488,10 +2488,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                     </div>
                     <div className="border-t dark:border-white/10 border-gray-200 pt-4">
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">
+                        <span className="tkad-type-label text-primary sm:text-xs">
                           [ {t("quote.total")} ]
                         </span>
-                        <span className="tkad-home-accent-text font-display text-3xl font-bold tabular-nums sm:text-4xl">
+                        <span className="tkad-home-accent-text font-sans text-3xl font-bold tabular-nums sm:text-4xl">
                           {isKo
                             ? `${Math.round(totalCost).toLocaleString()}만원`
                             : `₩${Math.round(totalCost * 10_000).toLocaleString()}`}
@@ -2499,7 +2499,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       </div>
                     </div>
                     {step >= 3 ? (
-                      <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                      <p className="tkad-type-label text-muted-foreground">
                         {`// `}
                         {t("quote.sidebarDocSummary", {
                           template:
@@ -2583,7 +2583,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
             >
               ✓
             </span>
-            <span className="min-w-0 truncate font-display text-sm font-bold tabular-nums text-foreground sm:text-base">
+            <span className="min-w-0 truncate font-sans text-sm font-bold tabular-nums text-foreground sm:text-base">
               {t("quote.floatingSelectedCount", {
                 count: displaySelectedForBar.length,
               })}
