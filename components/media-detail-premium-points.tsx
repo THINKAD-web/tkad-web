@@ -25,7 +25,7 @@ export default function MediaDetailPremiumPoints({
             <Sparkles className="h-6 w-6" strokeWidth={2} aria-hidden />
           </span>
           <div>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="tkad-type-label text-muted-foreground">
               [ THINKAD PREMIUM SELECTION ]
             </p>
             <h2
@@ -49,7 +49,7 @@ export default function MediaDetailPremiumPoints({
                     <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground group-hover:text-hero-fg/60">
+                    <span className="tkad-type-label text-muted-foreground group-hover:text-hero-fg/60">
                       [{String(i + 1).padStart(2, "0")}]
                     </span>
                     <p className="mt-1 text-base font-bold leading-snug tracking-tight text-foreground group-hover:text-background">

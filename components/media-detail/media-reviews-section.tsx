@@ -185,7 +185,7 @@ export function MediaReviewsSection({
 
   return (
     <section className="mt-12" aria-labelledby="media-reviews-heading">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+      <p className="tkad-type-label text-accent">
         [ REVIEWS ]
       </p>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
@@ -280,7 +280,7 @@ export function MediaReviewsSection({
                       {review.authorLabel}
                     </span>
                     {review.isVerified ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
                         <BadgeCheck className="h-3 w-3" />
                         {isKo ? "실집행 인증" : "Verified execution"}
                       </span>
@@ -295,7 +295,7 @@ export function MediaReviewsSection({
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {review.body}
                   </p>
-                  <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+                  <div className="mt-3 flex flex-wrap gap-2 tkad-type-caption text-muted-foreground">
                     {review.campaignPeriod ? (
                       <span className="rounded-md border border-border/60 px-2 py-0.5">
                         {review.campaignPeriod}

@@ -101,7 +101,7 @@ function MediaDetailQuoteModalBody({
           <div className="min-w-0">
             <h2
               id="media-quote-modal-title"
-              className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-600"
+              className="tkad-type-label dark:text-white text-gray-600"
             >
               [ {t("quoteModalTitle")} ]
             </h2>
@@ -143,7 +143,7 @@ function MediaDetailQuoteModalBody({
             role="radiogroup"
             aria-label={t("quoteModalPriceOptionLabel")}
           >
-            <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500">
+            <p className="mb-2 tkad-type-label dark:text-white text-gray-500">
               [ {t("quoteModalPriceOptionLabel")} ]
             </p>
             <div className="flex flex-col gap-2">
@@ -178,7 +178,7 @@ function MediaDetailQuoteModalBody({
                 >
                   <span
                     className={cn(
-                      "absolute right-2.5 top-2.5 flex size-6 items-center justify-center rounded-xl border text-[9px] font-black",
+                      "absolute right-2.5 top-2.5 flex size-6 items-center justify-center rounded-xl border tkad-type-note font-black",
                       selectedCard
                         ? "dark:border-white/18 border-gray-300 bg-[color:var(--qp-accent)] text-white"
                         : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 text-transparent",
@@ -194,21 +194,21 @@ function MediaDetailQuoteModalBody({
                     {formatCatalogPriceKrwLong(o.price, locale)}
                   </span>
                   {periodLabel ? (
-                    <span className="mt-1.5 font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
+                    <span className="mt-1.5 tkad-type-label dark:text-white text-gray-500">
                       {periodLabel}
                     </span>
                   ) : null}
                   {o.description?.trim() ? (
-                    <span className="mt-2 block border-t dark:border-white/10 border-gray-200 pt-2 text-[11px] leading-relaxed dark:text-white text-gray-600">
+                    <span className="mt-2 block border-t dark:border-white/10 border-gray-200 pt-2 tkad-type-caption leading-relaxed dark:text-white text-gray-600">
                       {o.description}
                     </span>
                   ) : null}
                   {o.stores?.trim() ? (
                     <details className="mt-2 border-t dark:border-white/10 border-gray-200 pt-2">
-                      <summary className="cursor-pointer list-none text-[11px] font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/90 [&::-webkit-details-marker]:hidden">
+                      <summary className="cursor-pointer list-none tkad-type-caption font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/90 [&::-webkit-details-marker]:hidden">
                         {isKo ? "포함 지점 보기" : "View locations"}
                       </summary>
-                      <span className="mt-1.5 block text-[11px] leading-relaxed dark:text-white/70 text-gray-600">
+                      <span className="mt-1.5 block tkad-type-caption leading-relaxed dark:text-white/70 text-gray-600">
                         {o.stores}
                       </span>
                     </details>
@@ -219,7 +219,7 @@ function MediaDetailQuoteModalBody({
           </div>
           {selected ? (
             <p className="mt-3 border-t dark:border-white/10 border-gray-200 pt-3 text-sm dark:text-white text-gray-700">
-              <span className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
+              <span className="tkad-type-label dark:text-white text-gray-500">
                 {t("quoteModalSelectedPriceLine")}{" "}
               </span>
               <span className="font-black dark:text-white text-gray-900">
@@ -235,13 +235,13 @@ function MediaDetailQuoteModalBody({
         </p>
       ) : (
         <div className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-3 py-3 dark:text-white text-gray-900 backdrop-blur">
-          <p className="font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
+          <p className="tkad-type-label dark:text-white text-gray-500">
             {isKo ? "기준 요금" : "Base rate"}
           </p>
           <p className="mt-1.5 text-lg font-black tabular-nums dark:text-white text-gray-900">
             {formatCatalogPriceKrwLong(media.price, locale)}
           </p>
-          <p className="mt-0.5 text-[9px] dark:text-white text-gray-500">
+          <p className="mt-0.5 tkad-type-note dark:text-white text-gray-500">
             {t(
               mediaDetailPricePeriodTranslationKey(media.pricePeriod),
             )}

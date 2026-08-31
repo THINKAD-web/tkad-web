@@ -287,7 +287,7 @@ export function MediaAvailabilityCalendar({
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ {t("eyebrow")} ]
           </p>
           <h2
@@ -300,7 +300,7 @@ export function MediaAvailabilityCalendar({
             />
             {t("title")}
           </h2>
-          <p className="mt-1 max-w-xl text-[11px] tracking-tight text-muted-foreground">
+          <p className="mt-1 max-w-xl tkad-type-caption tracking-tight text-muted-foreground">
             {`// `}
             {t("desc")}
           </p>
@@ -328,7 +328,7 @@ export function MediaAvailabilityCalendar({
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <span className="min-w-[96px] text-center font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+          <span className="min-w-[96px] text-center tkad-type-label text-foreground">
             {viewMonth.getFullYear()}.
             {String(viewMonth.getMonth() + 1).padStart(2, "0")}
           </span>
@@ -354,7 +354,7 @@ export function MediaAvailabilityCalendar({
           className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-950 dark:text-amber-100"
         >
           <p className="font-semibold tracking-tight">{t("sparseTitle")}</p>
-          <p className="mt-1 text-[13px] leading-snug opacity-90">
+          <p className="mt-1 tkad-type-body leading-snug opacity-90">
             {t("sparseDesc")}
           </p>
         </div>
@@ -365,7 +365,7 @@ export function MediaAvailabilityCalendar({
           type="button"
           disabled={loading}
           onClick={onQuickThisMonth}
-          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 tkad-type-label text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
         >
           {t("quickThisMonth")}
         </button>
@@ -373,7 +373,7 @@ export function MediaAvailabilityCalendar({
           type="button"
           disabled={loading}
           onClick={onQuickNextMonth}
-          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 tkad-type-label text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
         >
           {t("quickNextMonth")}
         </button>
@@ -381,7 +381,7 @@ export function MediaAvailabilityCalendar({
           type="button"
           disabled={loading}
           onClick={onQuickTwoWeeks}
-          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 tkad-type-label text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
         >
           {t("quickTwoWeeks")}
         </button>
@@ -389,18 +389,18 @@ export function MediaAvailabilityCalendar({
 
       <div className="mt-6">
         {loading ? (
-          <div className="flex items-center justify-center gap-2 rounded-[24px] border border-border/80 bg-muted/40 px-4 py-12 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground shadow-xs backdrop-blur">
+          <div className="flex items-center justify-center gap-2 rounded-[24px] border border-border/80 bg-muted/40 px-4 py-12 tkad-type-label text-muted-foreground shadow-xs backdrop-blur">
             <Loader2 className="h-4 w-4 animate-spin" />
             {t("loading")}
           </div>
         ) : error ? (
-          <p className="rounded-[22px] border border-accent/60 bg-card/80 px-4 py-3 text-[11px] tracking-tight text-accent shadow-xs backdrop-blur">
+          <p className="rounded-[22px] border border-accent/60 bg-card/80 px-4 py-3 tkad-type-caption tracking-tight text-accent shadow-xs backdrop-blur">
             {`// `}
             {t("error")}
           </p>
         ) : (
           <>
-            <p className="mb-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mb-3 tkad-type-label text-muted-foreground">
               {rangeStart && !rangeEnd
                 ? t("rangeSelectEnd")
                 : t("rangeSelectStart")}
@@ -413,7 +413,7 @@ export function MediaAvailabilityCalendar({
                     <div
                       key={d}
                       className={cn(
-                        "font-display text-[8px] font-black uppercase tracking-[0.2em]",
+                        "tkad-type-note font-black uppercase",
                         i === 6
                           ? "text-accent"
                           : i === 5
@@ -446,7 +446,7 @@ export function MediaAvailabilityCalendar({
                     const selectable = !isPast && !blocked;
 
                     let cls =
-                      "relative flex aspect-square w-full items-center justify-center rounded-[10px] border text-[11px] font-black tabular-nums transition-colors";
+                      "relative flex aspect-square w-full items-center justify-center rounded-[10px] border tkad-type-caption font-black tabular-nums transition-colors";
                     if (isPast) {
                       cls +=
                         " border-transparent bg-transparent text-muted-foreground/40";
@@ -517,7 +517,7 @@ export function MediaAvailabilityCalendar({
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 font-display text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 tkad-type-note uppercase text-muted-foreground">
               <span className="inline-flex items-center gap-2">
                 <span className="inline-block h-3 w-3 border border-border bg-card" />
                 {t("legendAvailable")}
@@ -539,7 +539,7 @@ export function MediaAvailabilityCalendar({
             </div>
 
             <div className="mt-4 space-y-3 border-t border-border/15 pt-4">
-              <p className="text-[12.5px] leading-relaxed text-foreground">
+              <p className="tkad-type-body leading-relaxed text-foreground">
                 {t("statsAvailable", { n: stats.availableDays })}
                 {stats.blockedDays > 0
                   ? `  ·  ${t("statsBlocked", { n: stats.blockedDays })}`
@@ -551,7 +551,7 @@ export function MediaAvailabilityCalendar({
                   className="rounded-[18px] border border-border/80 bg-muted/30 px-4 py-3"
                   aria-live="polite"
                 >
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  <p className="tkad-type-label text-muted-foreground">
                     {t("rangeLabel")}
                   </p>
                   {rangeComplete && rangeStart && rangeEnd ? (
@@ -585,7 +585,7 @@ export function MediaAvailabilityCalendar({
                       </span>
                     </p>
                   )}
-                  <p className="mt-1 text-[10px] text-muted-foreground">
+                  <p className="mt-1 tkad-type-note text-muted-foreground">
                     {mediaName}
                   </p>
                 </div>
@@ -595,19 +595,19 @@ export function MediaAvailabilityCalendar({
                 {contactHref ? (
                   <Link
                     href={contactHref}
-                    className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-foreground bg-foreground px-4 py-2.5 text-center font-display text-[10px] font-black uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90"
+                    className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-foreground bg-foreground px-4 py-2.5 text-center tkad-type-label text-background transition-opacity hover:opacity-90"
                   >
                     {t("ctaInquiryPeriod")}
                   </Link>
                 ) : (
-                  <span className="inline-flex cursor-not-allowed items-center justify-center rounded-[14px] border border-border/50 bg-muted/40 px-4 py-2.5 font-display text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                  <span className="inline-flex cursor-not-allowed items-center justify-center rounded-[14px] border border-border/50 bg-muted/40 px-4 py-2.5 tkad-type-label text-muted-foreground">
                     {t("ctaInquiryPeriod")}
                   </span>
                 )}
                 {instantBookingEligible && bookHref ? (
                   <Link
                     href={bookHref}
-                    className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-accent bg-accent px-4 py-2.5 text-center font-display text-[10px] font-black uppercase tracking-[0.2em] text-accent-foreground transition-opacity hover:opacity-95"
+                    className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-accent bg-accent px-4 py-2.5 text-center tkad-type-label text-accent-foreground transition-opacity hover:opacity-95"
                   >
                     {t("ctaInstantBook")}
                   </Link>

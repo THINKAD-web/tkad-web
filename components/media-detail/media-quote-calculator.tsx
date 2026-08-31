@@ -73,7 +73,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
       )}
       id="media-quote-calculator"
     >
-      <p className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/90">
+      <p className="inline-flex items-center gap-2 tkad-type-label text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/90">
         <Calculator className="h-3.5 w-3.5" aria-hidden />
         {isKo ? "간편 견적" : "Quick estimate"}
       </p>
@@ -94,7 +94,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
             type="button"
             onClick={() => setDays(d)}
             className={cn(
-              "rounded-lg border px-3 py-1.5  text-[11px] font-bold transition-colors",
+              "rounded-lg border px-3 py-1.5  tkad-type-caption font-bold transition-colors",
               days === d
                 ? "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/15 text-[color:var(--qp-accent)] dark:border-[color:var(--qp-accent)]/50 dark:text-[color:var(--qp-accent)]"
                 : "border-border text-muted-foreground hover:border-foreground/25 hover:text-foreground",
@@ -104,7 +104,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
             {isKo ? "일" : "d"}
           </button>
         ))}
-        <label className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-[11px] text-muted-foreground">
+        <label className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 tkad-type-caption text-muted-foreground">
           <input
             type="number"
             min={1}
@@ -138,7 +138,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
       </p>
 
       {quote.impressions > 0 && (
-        <p className="mt-2 text-[12px] text-muted-foreground">
+        <p className="mt-2 tkad-type-meta text-muted-foreground">
           {isKo ? "예상 노출 " : "Est. reach "}
           {quote.impressions.toLocaleString(localeTag)}
           {isKo ? "회" : ""}

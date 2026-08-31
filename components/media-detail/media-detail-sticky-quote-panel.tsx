@@ -341,7 +341,7 @@ export function MediaDetailStickyQuotePanel({
               <div className="flex flex-wrap items-center gap-1.5">
                 <Link
                   href={plannerHref}
-                  className="inline-flex h-8 flex-1 min-w-[4.5rem] items-center justify-center gap-1 rounded-lg border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/8 px-2 text-[10px] font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
+                  className="inline-flex h-8 flex-1 min-w-[4.5rem] items-center justify-center gap-1 rounded-lg border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/8 px-2 tkad-type-note font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
                 >
                   <Sparkles className="h-3 w-3 shrink-0" aria-hidden />
                   {isKo ? "플래너" : "Planner"}
@@ -366,7 +366,7 @@ export function MediaDetailStickyQuotePanel({
                       void navigator.clipboard?.writeText(window.location.href);
                     }
                   }}
-                  className="inline-flex h-8 flex-1 min-w-[3.5rem] items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2 text-[10px] font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:bg-white/6 dark:text-white/80 dark:hover:bg-white/10"
+                  className="inline-flex h-8 flex-1 min-w-[3.5rem] items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2 tkad-type-note font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:bg-white/6 dark:text-white/80 dark:hover:bg-white/10"
                 >
                   <Share2 className="h-3 w-3 shrink-0" aria-hidden />
                   {isKo ? "공유" : "Share"}
