@@ -141,19 +141,19 @@ export function TrafficCharts({
     <section className="overflow-hidden rounded-[28px] border border-border/80 bg-card/80 shadow-sm backdrop-blur">
       <header className="flex flex-col gap-3 border-b border-border/70 px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
         <div className="space-y-1">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ TRAFFIC PATTERN ]
           </p>
           <h3 className="text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground">
             {t("title")}
           </h3>
-          <p className="text-[11px] tracking-tight text-muted-foreground">
+          <p className="tkad-type-caption tracking-tight text-muted-foreground">
             {t("desc")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {showEstimatedBadge ? (
-            <span className="rounded-xl border border-accent/70 bg-card/70 px-2.5 py-1 font-display text-[10px] font-black uppercase tracking-[0.18em] text-accent shadow-xs backdrop-blur">
+            <span className="rounded-xl border border-accent/70 bg-card/70 px-2.5 py-1 tkad-type-label text-accent shadow-xs backdrop-blur">
               {t("estimatedBadge")}
             </span>
           ) : null}
@@ -182,7 +182,7 @@ export function TrafficCharts({
                 type="button"
                 onClick={() => setTab(k)}
                 className={cn(
-                  "rounded-[14px] px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
+                  "rounded-[14px] px-3 py-1.5 tkad-type-label transition-colors",
                   tab === k
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-foreground hover:bg-background/70",
@@ -289,15 +289,15 @@ export function TrafficCharts({
         </div>
 
         <ul className="grid gap-2 border-t-2 border-border pt-4 sm:grid-cols-3">
-          <li className="text-[11px] tracking-tight">
+          <li className="tkad-type-caption tracking-tight">
             <span className="text-muted-foreground">{t("insightHour")}: </span>
             <span className="font-bold text-foreground">{insights.peakHourLabel}</span>
           </li>
-          <li className="text-[11px] tracking-tight">
+          <li className="tkad-type-caption tracking-tight">
             <span className="text-muted-foreground">{t("insightWeekday")}: </span>
             <span className="font-bold text-foreground">{insights.peakWeekdayLabel}</span>
           </li>
-          <li className="text-[11px] tracking-tight">
+          <li className="tkad-type-caption tracking-tight">
             <span className="text-muted-foreground">{t("insightMonth")}: </span>
             <span className="font-bold text-foreground">{insights.peakMonthLabel}</span>
           </li>

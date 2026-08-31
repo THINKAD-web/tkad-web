@@ -33,7 +33,7 @@ export function CompetitorOohSection({ report, isKo, access }: Props) {
           </p>
         </div>
       ))}
-      <p className="text-[10px] text-muted-foreground">
+      <p className="tkad-type-note text-muted-foreground">
         {isKo
           ? "* THINKAD 자체 DB + 공개 집행 사례 기반 (추정 포함)"
           : "* Based on THINKAD DB and published cases"}
@@ -43,7 +43,7 @@ export function CompetitorOohSection({ report, isKo, access }: Props) {
 
   return (
     <section className="mt-10">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+      <p className="tkad-type-label text-muted-foreground">
         [ {isKo ? "경쟁사 OOH 집행 분석" : "Competitor OOH booking trends"} ]
       </p>
       <h3 className="mt-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight">
@@ -84,7 +84,7 @@ export function WeatherEventPanel({
 
   return (
     <section className="mt-10 rounded-xl border border-border bg-card/50 p-5">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+      <p className="tkad-type-label text-primary">
         [ {isKo ? "날씨·이벤트" : "Weather & events"} ]
       </p>
       {sensitivity ? (
@@ -129,7 +129,7 @@ export function DataMethodologyPanel({
 
   return (
     <section className="mt-10 border-t border-border pt-8">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+      <p className="tkad-type-label text-muted-foreground">
         [ {isKo ? "데이터 출처 및 방법론" : "Data sources & methodology"} ]
       </p>
       <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-muted-foreground">

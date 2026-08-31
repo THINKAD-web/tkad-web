@@ -46,7 +46,7 @@ export default function MediaDetailPerformance({
     >
       <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-display text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-accent">
+          <p className="font-sans text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-accent">
             [ PERFORMANCE METRICS ]
           </p>
           <h2
@@ -56,14 +56,14 @@ export default function MediaDetailPerformance({
             {t("performanceTitle")}
           </h2>
         </div>
-        <p className="text-[11px] tracking-tight text-muted-foreground">
+        <p className="tkad-type-caption tracking-tight text-muted-foreground">
           {t("performanceDisclaimer")}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-0 sm:grid-cols-2">
         <div className="-mt-[2px] -ml-[2px] rounded-[22px] border border-border/80 bg-muted/40 px-6 py-7 shadow-xs backdrop-blur">
-          <p className="font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
+          <p className="font-sans text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
             [ {t("performanceStatMonthly")} ]
           </p>
           <p className="mt-3 text-3xl font-bold tabular-nums tracking-tight text-foreground whitespace-nowrap sm:text-4xl">
@@ -71,7 +71,7 @@ export default function MediaDetailPerformance({
           </p>
         </div>
         <div className="-mt-[2px] -ml-[2px] rounded-[22px] border border-border/80 bg-muted/40 px-6 py-7 shadow-xs backdrop-blur">
-          <p className="font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
+          <p className="font-sans text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
             [ {t("performanceStatDaily")} ]
           </p>
           <p className="mt-3 text-3xl font-bold tabular-nums tracking-tight text-foreground whitespace-nowrap sm:text-4xl">
@@ -88,7 +88,7 @@ export default function MediaDetailPerformance({
       {metrics.dailyAdjustedReach ? (
         <div className="-ml-[2px] rounded-[22px] border border-border/80 bg-card px-6 py-5 shadow-xs">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-            <p className="font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
+            <p className="font-sans text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
               [ {t("performanceStatDailyReach")} ]
             </p>
             <span className="flex items-center gap-1.5">
@@ -101,7 +101,7 @@ export default function MediaDetailPerformance({
               />
             </span>
           </div>
-          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+          <p className="mt-2 tkad-type-caption leading-relaxed text-muted-foreground">
             {t("performanceStatDailyReachNote")}
           </p>
         </div>
@@ -109,7 +109,7 @@ export default function MediaDetailPerformance({
 
       <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:items-center">
         <div>
-          <p className="mb-4 font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
+          <p className="mb-4 font-sans text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
             [ {t("performanceDonutTitle")} ]
           </p>
           <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
@@ -133,7 +133,7 @@ export default function MediaDetailPerformance({
                       style={{ backgroundColor: seg.color }}
                       aria-hidden
                     />
-                    <span className="font-display text-xs font-medium uppercase tracking-[0.18em]">
+                    <span className="tkad-type-label">
                       {t(DONUT_LABEL_KEYS[seg.key])}
                     </span>
                   </span>
@@ -147,14 +147,14 @@ export default function MediaDetailPerformance({
         </div>
 
         <div>
-          <p className="mb-4 font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
+          <p className="mb-4 font-sans text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
             [ {t("performanceBarsTitle")} ]
           </p>
           <ul className="space-y-5">
             {metrics.bars.map((row) => (
               <li key={row.key}>
                 <div className="mb-1.5 flex items-center justify-between gap-2 text-sm">
-                  <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+                  <span className="tkad-type-label text-foreground">
                     {t(BAR_LABEL_KEYS[row.key])}
                   </span>
                   <span className="font-sans text-lg font-bold tabular-nums text-foreground">
@@ -182,15 +182,15 @@ export default function MediaDetailPerformance({
 
       <div className="mt-10 rounded-[24px] border border-border/80 bg-muted/30 px-6 py-7 text-foreground shadow-xs backdrop-blur sm:px-7 sm:py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="font-display text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-accent">
+          <p className="font-sans text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-accent">
             [ {t("performanceVisibilityTitle")} ]
           </p>
           {visibilityBadge ? (
             <span
               className={
                 metrics.visibilityScore >= 90
-                  ? "rounded-xl border border-accent bg-accent px-3 py-1 font-display text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-accent-foreground"
-                  : "rounded-xl border border-border/80 bg-card/70 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground shadow-xs backdrop-blur"
+                  ? "rounded-xl border border-accent bg-accent px-3 py-1 font-sans text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-accent-foreground"
+                  : "rounded-xl border border-border/80 bg-card/70 px-3 py-1 tkad-type-label text-foreground shadow-xs backdrop-blur"
               }
             >
               {visibilityBadge}
@@ -201,7 +201,7 @@ export default function MediaDetailPerformance({
           <span className="text-5xl font-bold tabular-nums tracking-tight text-accent sm:text-6xl">
             {metrics.visibilityScore}
           </span>
-          <span className="mb-2 font-display text-sm uppercase tracking-[0.18em] text-hero-fg/60">
+          <span className="mb-2 tkad-type-label text-sm text-hero-fg/60">
             / 100
           </span>
         </div>
@@ -221,7 +221,7 @@ export default function MediaDetailPerformance({
       </div>
 
       <p className="mt-8 rounded-[22px] border border-border/80 bg-muted/40 px-5 py-4 text-sm font-medium leading-relaxed text-foreground shadow-xs backdrop-blur sm:px-6">
-        <span className="mr-2 font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
+        <span className="mr-2 font-sans text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
           {`// NOTE`}
         </span>
         {compareNote}

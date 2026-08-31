@@ -58,7 +58,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
       ) : null}
 
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ {isKo ? "시간대별 유동" : "Time-slot heatmap"} ]
         </p>
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -83,7 +83,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
       </div>
 
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ {isKo ? "요일별 노출 지수" : "Day-of-week index"} ]
         </p>
         <div className="mt-4 h-48">
@@ -109,7 +109,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
       </div>
 
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ {isKo ? "주변 상권 (반경 500m)" : "Trade area (500m)"} ]
         </p>
         <div className="mt-4 h-44">
@@ -138,7 +138,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
       </div>
 
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ {isKo ? "경쟁 매체 비교" : "Competitor comparison"} ]
         </p>
         <div className="mt-4 overflow-x-auto rounded-xl border border-border">
@@ -171,7 +171,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="tkad-type-label text-muted-foreground">
             [ {isKo ? "계절·시즌 지수" : "Season index"} ]
           </p>
           <ul className="mt-3 space-y-2">
@@ -193,7 +193,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
           </p>
         </div>
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="tkad-type-label text-muted-foreground">
             [ {isKo ? "타겟 적합도" : "Target fit"} ]
           </p>
           <ul className="mt-3 space-y-2">
@@ -230,7 +230,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
 
   return (
     <section className="mt-12 border-t-2 border-border pt-12">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+      <p className="tkad-type-label text-primary">
         [ {isKo ? "매체 분석 보고서" : "Media analytics report"} ]
       </p>
       <h2 className="mt-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight">

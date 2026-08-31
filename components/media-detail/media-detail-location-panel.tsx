@@ -307,13 +307,13 @@ export function MediaDetailLocationPanel({
                         </p>
                       ) : null}
                       {loc.dailyFootfall ? (
-                        <p className="text-[11px] dark:text-white/45 text-gray-400">
+                        <p className="tkad-type-caption dark:text-white/45 text-gray-400">
                           {isKo ? "일 " : ""}
                           {loc.dailyFootfall.toLocaleString(isKo ? "ko-KR" : "en-US")}
                         </p>
                       ) : null}
                       {!hasCoord ? (
-                        <p className="text-[10px] text-amber-500">
+                        <p className="tkad-type-note text-amber-500">
                           {isKo ? "지도 미표시" : "no map"}
                         </p>
                       ) : null}

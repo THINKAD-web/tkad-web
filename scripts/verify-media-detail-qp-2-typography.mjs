@@ -11,15 +11,23 @@ const SLUG = "gwanghwamun-rumi-midieo-jeongwangpan-gwanggo";
 const OUT = join(process.cwd(), "tmp/media-detail-qp-2-typography");
 mkdirSync(OUT, { recursive: true });
 
+async function launchBrowser() {
+  try {
+    return await chromium.launch({ channel: "chrome", headless: true });
+  } catch {
+    return await chromium.launch({ headless: true });
+  }
+}
+
 async function main() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchBrowser();
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },
     colorScheme: "light",
   });
   const page = await context.newPage();
   const url = `${BASE}/ko/media/${SLUG}`;
-  await page.goto(url, { waitUntil: "networkidle", timeout: 90000 });
+  await page.goto(url, { waitUntil: "load", timeout: 90000 });
   await page.waitForSelector(".tkad-media-page h1", { timeout: 30000 });
 
   // Ensure execution tab for specs h2
@@ -121,7 +129,7 @@ async function main() {
     hasTouch: true,
   });
   const mpage = await mobile.newPage();
-  await mpage.goto(url, { waitUntil: "networkidle", timeout: 90000 });
+  await mpage.goto(url, { waitUntil: "load", timeout: 90000 });
   await mpage.waitForSelector(".tkad-media-page h1");
   await mpage.screenshot({ path: join(OUT, "mobile-fold.png"), fullPage: false });
   await mobile.close();

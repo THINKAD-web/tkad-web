@@ -22,14 +22,14 @@ export function RelatedCases({ cases, isKo }: Props) {
   return (
     <section className="overflow-hidden rounded-[28px] border border-border/80 bg-card/80 shadow-sm backdrop-blur">
       <header className="border-b border-border/70 px-6 py-5">
-        <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <div className="flex items-center gap-2 tkad-type-label text-accent">
           <Briefcase className="h-3.5 w-3.5" aria-hidden />
           [ RELATED CASES ]
         </div>
         <h2 className="mt-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground">
           {t("title")}
         </h2>
-        <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
+        <p className="mt-1 tkad-type-caption tracking-tight text-muted-foreground">
           {t("desc")}
         </p>
       </header>
@@ -44,7 +44,7 @@ export function RelatedCases({ cases, isKo }: Props) {
                   className="group flex h-full flex-col gap-2 rounded-[22px] border border-border/80 bg-card/80 p-4 shadow-xs backdrop-blur transition-colors hover:bg-muted/50"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <span className="rounded-xl border border-border/80 bg-card/70 px-2.5 py-1 font-display text-[10px] font-black uppercase tracking-[0.18em] text-foreground shadow-xs backdrop-blur">
+                    <span className="rounded-xl border border-border/80 bg-card/70 px-2.5 py-1 tkad-type-label text-foreground shadow-xs backdrop-blur">
                       {c.industry}
                     </span>
                     <ArrowRight
@@ -55,10 +55,10 @@ export function RelatedCases({ cases, isKo }: Props) {
                   <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
                     {title}
                   </p>
-                  <p className="line-clamp-3 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                  <p className="line-clamp-3 tkad-type-caption leading-relaxed tracking-tight text-muted-foreground">
                     {stripMarkdown(c.summaryKo)}
                   </p>
-                  <p className="mt-auto font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
+                  <p className="mt-auto tkad-type-label text-accent">
                     {`// `}
                     {c.clientName}
                   </p>

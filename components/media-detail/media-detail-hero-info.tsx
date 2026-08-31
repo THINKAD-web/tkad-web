@@ -57,7 +57,7 @@ function KpiChip({
       <p className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
         {label}
       </p>
-      <p className="mt-1 font-display text-[length:var(--qp-text-body)] font-bold tabular-nums dark:text-white text-gray-900">
+      <p className="mt-1 font-sans text-[length:var(--qp-text-body)] font-bold tabular-nums dark:text-white text-gray-900">
         {value}
       </p>
     </div>
@@ -108,7 +108,7 @@ export function MediaDetailHeroInfo({
       </span>
     )
   ) : (
-    <span className="font-display text-[1.75rem] font-black tabular-nums leading-none text-[color:var(--qp-accent)]">
+    <span className="font-sans text-[1.75rem] font-black tabular-nums leading-none text-[color:var(--qp-accent)]">
       {!isKo && multiPriceOptions ? (
         <span className="text-[length:var(--qp-text-meta)] font-bold text-gray-600 dark:text-white/70">
           from{" "}
@@ -128,10 +128,10 @@ export function MediaDetailHeroInfo({
     >
       {/* 그룹 1: 제목 + 핵심 태그 */}
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
+        <p className="tkad-type-label text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
           {typeLabel}
         </p>
-        <h1 className="mt-2 text-balance text-2xl font-black leading-tight tracking-tight dark:text-white text-gray-900 sm:text-3xl">
+        <h1 className="tkad-type-display mt-2 text-balance font-black dark:text-white text-gray-900">
           {displayName}
         </h1>
         {summaryTags.length > 0 ? (
@@ -229,7 +229,7 @@ export function MediaDetailHeroTopBar({ backLabel }: TopBarProps) {
     <div className="mb-5 hidden items-start justify-between gap-3 md:flex">
       <Link
         href="/media"
-        className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-700 transition hover:bg-gray-100 hover:text-gray-900 dark:border-white/15 dark:bg-white/8 dark:text-white/90 dark:hover:bg-white/12 dark:hover:text-white"
+        className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5 tkad-type-label text-gray-700 transition hover:bg-gray-100 hover:text-gray-900 dark:border-white/15 dark:bg-white/8 dark:text-white/90 dark:hover:bg-white/12 dark:hover:text-white"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         {backLabel}

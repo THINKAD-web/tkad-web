@@ -31,6 +31,7 @@
     "smoke": "tsx scripts/smoke-test.ts",
     "audit:media": "tsx scripts/audit-media-metrics.ts",
     "test:metrics": "tsx --test lib/metrics/__tests__/*.test.ts",
+    "test:media-detail-typography": "tsx --test lib/ui/__tests__/media-detail-typography.test.ts",
     "test:planner-calc": "tsx --test lib/planner/calc/__tests__/*.test.ts",
     "test:import-csv": "node --experimental-test-module-mocks --import tsx --test app/api/admin/medias/import-csv/route.test.ts",
     "build:metro-geo": "tsx scripts/build-metro-geojson.mts",

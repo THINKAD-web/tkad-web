@@ -53,7 +53,7 @@ export function MediaDetailMobileBar({
     >
       <div className={STICKY_ACTION_BAR_ROW}>
         <div className="min-w-0 flex-1 truncate">
-          <p className="truncate font-display text-[length:var(--qp-text-body)] font-bold leading-tight tabular-nums text-[color:var(--qp-accent)]">
+          <p className="truncate font-sans text-[length:var(--qp-text-body)] font-bold leading-tight tabular-nums text-[color:var(--qp-accent)]">
             <span className="whitespace-nowrap">
               {formatCatalogPriceFieldWon(displayPrice.priceWon, locale, media.country)}
               {multiPriceOptions && isKo ? "~" : null}
@@ -84,7 +84,7 @@ export function MediaDetailMobileBar({
           className={cn(
             STICKY_ACTION_BAR_BTN,
             STICKY_ACTION_BAR_BTN_VIOLET,
-            "!h-8 !w-auto shrink-0 !rounded-lg !border-0 !px-2.5 !text-[11px] !font-semibold !shadow-sm !tracking-normal",
+            "!h-8 !w-auto shrink-0 !rounded-lg !border-0 !px-2.5 !tkad-type-caption !font-semibold !shadow-sm !tracking-normal",
           )}
         />
       </div>

@@ -132,7 +132,7 @@ export default function MediaDetailExtras({
       <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-8">
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-6 rounded-[24px] border border-border/80 bg-card/80 p-6 shadow-sm backdrop-blur lg:max-w-md">
           <div>
-            <p className="mb-2 flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+            <p className="mb-2 flex items-center gap-2 tkad-type-label text-accent">
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
               {labels.locationAddressLabel}
             </p>
@@ -141,7 +141,7 @@ export default function MediaDetailExtras({
             </p>
           </div>
           <div>
-            <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="mb-2 tkad-type-label text-muted-foreground">
               [ {labels.locationRegionLabel} ]
             </p>
             <p className="text-base font-bold text-foreground">{regionDisplay}</p>
@@ -154,7 +154,7 @@ export default function MediaDetailExtras({
               href={kakaoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground underline underline-offset-4 transition-colors hover:text-accent"
+              className="tkad-type-label text-foreground underline underline-offset-4 transition-colors hover:text-accent"
             >
               {labels.openKakao}
             </a>
@@ -167,7 +167,7 @@ export default function MediaDetailExtras({
               href={googleUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground underline underline-offset-4 transition-colors hover:text-accent"
+              className="tkad-type-label text-foreground underline underline-offset-4 transition-colors hover:text-accent"
             >
               {labels.openGoogle}
             </a>
@@ -175,7 +175,7 @@ export default function MediaDetailExtras({
           ) : null}
         </div>
         <div className="min-w-0 flex-1 overflow-hidden rounded-[24px] border border-border/80 bg-card/80 shadow-sm backdrop-blur lg:min-w-0 lg:flex-[1.15]">
-          <p className="border-b border-border/70 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="border-b border-border/70 px-4 py-2 tkad-type-label text-muted-foreground">
             [ {useLeafletMap ? (isKo ? "지도" : "Map") : isKo ? "카카오 지도" : "Kakao map"} ]
           </p>
           <div className="h-[400px]">
