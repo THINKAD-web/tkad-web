@@ -1,5 +1,8 @@
 import { revalidatePath, revalidateTag } from "next/cache";
-import { PUBLIC_MEDIA_CATALOG_CACHE_TAG } from "@/lib/public-media-catalog";
+import {
+  PUBLIC_MEDIA_CATALOG_DETAIL_CACHE_TAG,
+  PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG,
+} from "@/lib/media-catalog-cache-tags";
 import { MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG } from "@/lib/media-trust-catalog";
 
 const MEDIA_CACHE_LOCALES = ["ko", "en"] as const;
@@ -7,7 +10,6 @@ const MEDIA_CACHE_LOCALES = ["ko", "en"] as const;
 /**
  * `export const revalidate` + CDN Cache-Control 로 edge 캐시되는 공개 API.
  * tag 무효화만으로는 Vercel CDN 이 stale 응답을 계속 줄 수 있어 path 도 함께 무효화.
- * `/api/public/media` 는 force-dynamic — tag 만으로 충분.
  */
 const PUBLIC_MEDIA_CDN_CACHED_API_PATHS = [
   "/api/public/media-filter-counts",
@@ -20,31 +22,44 @@ function revalidatePublicMediaCatalogApiPaths(): void {
   }
 }
 
+export type RevalidateMediaCachesOptions = {
+  /** When false, skip list/browse tag + list path (detail-only admin edit). Default true. */
+  invalidateList?: boolean;
+};
+
+function revalidateDetailMediaPaths(detailRefs: Set<string>): void {
+  for (const locale of MEDIA_CACHE_LOCALES) {
+    for (const detailRef of detailRefs) {
+      revalidatePath(`/${locale}/media/${detailRef}`);
+    }
+  }
+}
+
 /**
  * 단일 매체 등록/수정/삭제 시 영향받는 캐시만 정밀 무효화.
  *
- * - 무효화 대상: 해당 매체 상세(`/media/{slug}`, `/media/{id}`) + 공개 목록(`/media`).
- *   상세 경로는 리터럴 path 이므로 Route Handler 에서 호출 시 "그 페이지 1개"만
- *   stale 처리되고 다음 방문 때 갱신된다(즉시 반영 보장, wave 없음).
- * - 의도적으로 `/planner`·`/quote`·`/compare` 는 건드리지 않는다. 이들은
- *   revalidate=86400 상세/목록은 어드민 편집 시에만 여기서 무효화한다.
- *   planner·quote·compare 까지 매 편집마다 건드리면 ISR write wave 가 난다.
+ * List tag (`public-media-catalog-list`) — browse/landing ISR only.
+ * Detail tag (`public-media-catalog-detail`) — detail ISR + companion catalog.
  */
-export function revalidateMediaCaches(ref: {
-  id: string;
-  slug?: string | null;
-}): void {
+export function revalidateMediaCaches(
+  ref: { id: string; slug?: string | null },
+  opts?: RevalidateMediaCachesOptions,
+): void {
+  const invalidateList = opts?.invalidateList !== false;
   const detailRefs = new Set<string>([ref.id]);
   const slug = ref.slug?.trim();
   if (slug) detailRefs.add(slug);
+
   try {
-    revalidateTag(PUBLIC_MEDIA_CATALOG_CACHE_TAG, "max");
+    revalidateTag(PUBLIC_MEDIA_CATALOG_DETAIL_CACHE_TAG, "max");
     revalidateTag(MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG, "max");
-    revalidatePublicMediaCatalogApiPaths();
-    for (const locale of MEDIA_CACHE_LOCALES) {
-      revalidatePath(`/${locale}/media`);
-      for (const detailRef of detailRefs) {
-        revalidatePath(`/${locale}/media/${detailRef}`);
+    revalidateDetailMediaPaths(detailRefs);
+
+    if (invalidateList) {
+      revalidateTag(PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG, "max");
+      revalidatePublicMediaCatalogApiPaths();
+      for (const locale of MEDIA_CACHE_LOCALES) {
+        revalidatePath(`/${locale}/media`);
       }
     }
   } catch {
@@ -53,14 +68,14 @@ export function revalidateMediaCaches(ref: {
 }
 
 /**
- * 대량 임포트 전용: 공개 목록은 로케일당 1회만 무효화(행별 wave 방지),
- * 영향 상세는 매체별로 1회씩만 무효화(중복 제거).
+ * 대량 임포트 전용: list tag 1회 + 영향 상세 path만 (행별 list wave 방지).
  */
 export function revalidateMediaCachesBulk(
   refs: ReadonlyArray<{ id: string; slug?: string | null }>,
 ): void {
   try {
-    revalidateTag(PUBLIC_MEDIA_CATALOG_CACHE_TAG, "max");
+    revalidateTag(PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG, "max");
+    revalidateTag(PUBLIC_MEDIA_CATALOG_DETAIL_CACHE_TAG, "max");
     revalidateTag(MEDIA_TRUST_BADGE_CONTEXT_CACHE_TAG, "max");
     revalidatePublicMediaCatalogApiPaths();
     for (const locale of MEDIA_CACHE_LOCALES) {
@@ -71,9 +86,7 @@ export function revalidateMediaCachesBulk(
       const detailRef = ref.slug?.trim() || ref.id;
       if (seen.has(detailRef)) continue;
       seen.add(detailRef);
-      for (const locale of MEDIA_CACHE_LOCALES) {
-        revalidatePath(`/${locale}/media/${detailRef}`);
-      }
+      revalidateDetailMediaPaths(new Set([detailRef]));
     }
   } catch {
     /* optional */

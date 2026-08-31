@@ -1,7 +1,7 @@
 # ISR catalog cache tag 분리 설계 (C — 실행 보류)
 
 **작성:** 2026-08-27  
-**상태:** 설계만. 코드 변경 없음.
+**상태:** 구현 완료 (2026-09-01) — list/detail tag 분리 + admin list-field gate.
 
 ## 배경
 

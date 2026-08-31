@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
+import { mediaListCacheNeedsInvalidation } from "@/lib/media-list-cache-invalidation";
 import { assertAdminDb, json, jsonWithHeaders } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { enrichQuickAddRowForPersist } from "@/lib/media-quick-add-enrich-one";
@@ -129,7 +130,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
     console.log("[admin-api] media JSON PUT", { id: media.id, name: media.name });
   }
 
-  revalidateMediaCaches({ id, slug: media.slug });
+  revalidateMediaCaches(
+    { id, slug: media.slug },
+    { invalidateList: mediaListCacheNeedsInvalidation(before, media) },
+  );
 
   const refreshed = await db.media.findUnique({ where: { id } });
   const forJson = refreshed ?? media;

@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { MediaAvailability } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
+import { mediaListCacheNeedsInvalidation } from "@/lib/media-list-cache-invalidation";
 import { assertAdminDb, json, jsonWithHeaders } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { kakaoFillForMediaPatch } from "@/lib/media-location-enrich";
@@ -878,7 +879,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         newPriceWon: media.price,
       }).catch((err) => console.error("[admin/media] price alert", err));
     }
-    revalidateMediaCaches({ id, slug: media.slug });
+    revalidateMediaCaches(
+      { id, slug: media.slug },
+      {
+        invalidateList: mediaListCacheNeedsInvalidation(existing, media),
+      },
+    );
     void maybeAutoRecomputeMediaMetrics(db, id);
     if (bunnyUrlsToPurge.length > 0) {
       void deleteBunnyPublicUrls(bunnyUrlsToPurge);
