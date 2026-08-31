@@ -23,7 +23,6 @@ import {
   type BriefGoal,
   type BriefIndustry,
   type BriefWizardStep,
-  type BriefEntryMode,
   type BudgetMode,
   type CampaignBriefInput,
 } from "@/lib/planner/brief/types";
@@ -70,6 +69,10 @@ export type BriefStoreState = CampaignBriefInput & {
   mixBriefFingerprint: string | null;
   /** P1: 예산 내만 랭킹 필터 (기본 ON) */
   budgetWithinOnly: boolean;
+  /** 예산 초과 A/B 배너 — Option B(현재 mix 유지) 선택 시 숨김 (persist 제외) */
+  overBudgetChoiceDismissed: boolean;
+  /** Option A 적용 직전 mix — 되돌리기용 (persist 제외) */
+  mixUndoBeforeOptionA: Record<string, number> | null;
 };
 
 export type BriefStoreActions = {
@@ -118,6 +121,14 @@ export type BriefStoreActions = {
   /** 현재 브리프 기준으로 mix 지문을 갱신 (담은 매체 유지 확인) */
   acknowledgeMixForCurrentBrief: () => void;
   setBudgetWithinOnly: (value: boolean) => void;
+  /** Option B — 배너만 닫고 현재 mix 유지 */
+  dismissOverBudgetChoice: () => void;
+  /** Option A — 예산 내 자동 구성 적용 (이전 mix 임시 보관) */
+  applyOverBudgetOptionA: (
+    lines: readonly { mediaId: string; units: number }[],
+  ) => void;
+  /** Option A 적용 직전 mix 로 복원 */
+  restoreMixBeforeOptionA: () => void;
 };
 
 export type BriefStore = BriefStoreState & BriefStoreActions;
@@ -132,7 +143,19 @@ const INITIAL: BriefStoreState = {
   mixUnits: {},
   mixBriefFingerprint: null,
   budgetWithinOnly: true,
+  overBudgetChoiceDismissed: false,
+  mixUndoBeforeOptionA: null,
 };
+
+function clearOverBudgetUiState(): Pick<
+  BriefStoreState,
+  "overBudgetChoiceDismissed" | "mixUndoBeforeOptionA"
+> {
+  return {
+    overBudgetChoiceDismissed: false,
+    mixUndoBeforeOptionA: null,
+  };
+}
 
 function normalizeDigitalChannelIds(raw: unknown): DigitalChannelId[] {
   if (!Array.isArray(raw) || raw.length === 0) return defaultDigitalChannelIds();
@@ -231,6 +254,7 @@ export const useBriefStore = create<BriefStore>()(
           const next = { ...s, mixUnits };
           return {
             mixUnits,
+            ...clearOverBudgetUiState(),
             ...(countMixUnits(s.mixUnits) === 0
               ? stampMixFingerprint(next)
               : {}),
@@ -242,7 +266,11 @@ export const useBriefStore = create<BriefStore>()(
           const next = { ...s.mixUnits };
           delete next[mediaId];
           const state = { ...s, mixUnits: next };
-          return { mixUnits: next, ...stampMixFingerprint(state) };
+          return {
+            mixUnits: next,
+            ...clearOverBudgetUiState(),
+            ...stampMixFingerprint(state),
+          };
         }),
 
       setMixUnits: (mediaId, units) =>
@@ -257,6 +285,7 @@ export const useBriefStore = create<BriefStore>()(
           const state = { ...s, mixUnits: next };
           return {
             mixUnits: next,
+            ...clearOverBudgetUiState(),
             ...(countMixUnits(next) === 0 || countMixUnits(s.mixUnits) === 0
               ? stampMixFingerprint(state)
               : {}),
@@ -271,7 +300,11 @@ export const useBriefStore = create<BriefStore>()(
             if (Number.isFinite(n) && n > 0) mixUnits[l.mediaId] = n;
           }
           const state = { ...s, mixUnits };
-          return { mixUnits, ...stampMixFingerprint(state) };
+          return {
+            mixUnits,
+            ...clearOverBudgetUiState(),
+            ...stampMixFingerprint(state),
+          };
         }),
 
       addMixLines: (lines) =>
@@ -303,6 +336,40 @@ export const useBriefStore = create<BriefStore>()(
         set((s) => stampMixFingerprint(s)),
 
       setBudgetWithinOnly: (value) => set({ budgetWithinOnly: value }),
+
+      dismissOverBudgetChoice: () =>
+        set({ overBudgetChoiceDismissed: true }),
+
+      applyOverBudgetOptionA: (lines) =>
+        set((s) => {
+          const mixUnits: Record<string, number> = {};
+          for (const l of lines) {
+            const n = Math.floor(l.units);
+            if (Number.isFinite(n) && n > 0) mixUnits[l.mediaId] = n;
+          }
+          const undo =
+            countMixUnits(s.mixUnits) > 0 ? { ...s.mixUnits } : null;
+          const state = { ...s, mixUnits };
+          return {
+            mixUnits,
+            mixUndoBeforeOptionA: undo,
+            overBudgetChoiceDismissed: false,
+            ...stampMixFingerprint(state),
+          };
+        }),
+
+      restoreMixBeforeOptionA: () =>
+        set((s) => {
+          if (!s.mixUndoBeforeOptionA) return {};
+          const mixUnits = { ...s.mixUndoBeforeOptionA };
+          const state = { ...s, mixUnits };
+          return {
+            mixUnits,
+            mixUndoBeforeOptionA: null,
+            overBudgetChoiceDismissed: false,
+            ...stampMixFingerprint(state),
+          };
+        }),
     }),
     {
       name: BRIEF_STORAGE_KEY,

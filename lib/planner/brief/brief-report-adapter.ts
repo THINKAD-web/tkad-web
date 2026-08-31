@@ -58,6 +58,7 @@ import {
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
 import { buildReportBudgetHonesty } from "@/lib/planner/report-budget-honesty";
+import { buildPlannerOverBudgetAppendixSpecs } from "@/lib/planner/brief/over-budget-options";
 import {
   blendedCpmExcludingQuoteOnly,
   categoryCpmBarsExcludingQuoteOnly,
@@ -588,6 +589,22 @@ export function buildBriefReportPayload(
     mixSource: args.mixSource,
   });
 
+  const plannerAppendixSpecs =
+    args.mixSource === "inquiry_match"
+      ? undefined
+      : buildPlannerOverBudgetAppendixSpecs({
+          brief,
+          catalog,
+          mixUnits: quantities,
+          isKo,
+        });
+  const appendixSectionTitle =
+    plannerAppendixSpecs && plannerAppendixSpecs.length > 0
+      ? isKo
+        ? "부록 · 예산 초과로 제외된 매체"
+        : "Appendix · excluded (over budget)"
+      : undefined;
+
   const payload = buildOohReportPayload({
     isKo,
     goalTitle: cover.goalTitle,
@@ -631,6 +648,8 @@ export function buildBriefReportPayload(
         ? executiveSummaryLines
         : undefined,
     productionCostWon: copy?.productionCostWon,
+    appendixSectionTitle,
+    appendixMediaSpecs: plannerAppendixSpecs,
   });
 
   if (!copy?.documentTitle?.trim()) {

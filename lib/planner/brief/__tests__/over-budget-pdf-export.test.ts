@@ -128,6 +128,58 @@ test("PDF export checklist: hand-pick within budget — no banner, 직접 선택
   assert.ok(pdf.byteLength > 10_000);
 });
 
+test("PDF export checklist: hand-pick over budget — banner + appendix excluded media", async () => {
+  const cheap: MediaItem = {
+    ...catalogMedia,
+    id: "m-cheap",
+    price: 5_000_000,
+    pricePeriod: "month",
+  };
+  const pricey: MediaItem = {
+    ...catalogMedia,
+    id: "m-pdf-over",
+    price: 35_000_000,
+    pricePeriod: "month",
+    district: "서초구",
+    type: "static",
+  };
+  const overPlan: CampaignPlanSnapshot = {
+    ...withinBudgetPlan,
+    mediaMix: [
+      {
+        ...withinBudgetPlan.mediaMix[0]!,
+        mediaId: cheap.id,
+        name: cheap.name,
+        units: 1,
+        priceWon: 5_000_000,
+      },
+      {
+        ...withinBudgetPlan.mediaMix[0]!,
+        mediaId: pricey.id,
+        name: pricey.name,
+        units: 1,
+        priceWon: 35_000_000,
+      },
+    ],
+    metrics: {
+      ...withinBudgetPlan.metrics,
+      totalCostWon: 40_000_000,
+      overBudgetWon: 10_000_000,
+      budgetUsedRate: 40_000_000 / 30_000_000,
+    },
+  };
+  const payload = buildBriefReportPayload({
+    plan: overPlan,
+    catalog: [cheap, pricey],
+    isKo: true,
+  });
+  assert.ok(payload.budgetHonesty?.overBudgetBanner?.includes("예산 초과"));
+  assert.ok(payload.appendixMediaSpecs && payload.appendixMediaSpecs.length >= 1);
+  assert.ok(payload.appendixSectionTitle?.includes("제외"));
+  const pdf = await buildPlannerReportPdf(payload);
+  assert.ok(pdf.byteLength > 10_000);
+});
+
 test("PDF export checklist: hand-pick over budget — banner + 직접 선택한", async () => {
   const pricey: MediaItem = {
     ...catalogMedia,

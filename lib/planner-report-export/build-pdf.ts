@@ -1615,7 +1615,8 @@ export async function buildPlannerReportPdf(
     const tableH =
       headerH + rowLayouts.reduce((sum, row) => sum + row.rowH + rowGap, 0) + 4;
     sectionTitle(
-      isKo ? "부록 · 지정 매체 스펙" : "Appendix · specified media specs",
+      p.appendixSectionTitle ??
+        (isKo ? "부록 · 지정 매체 스펙" : "Appendix · specified media specs"),
       tableH,
     );
 

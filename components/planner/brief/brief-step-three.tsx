@@ -20,6 +20,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
+import { OverBudgetChoicePanel } from "@/components/planner/brief/over-budget-choice-panel";
+import { resolveOverBudgetChoice } from "@/lib/planner/brief/over-budget-options";
 import { BriefResultSummary } from "@/components/planner/brief/brief-result-summary";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import { useBriefStore } from "@/lib/planner/brief/store";
@@ -216,6 +218,19 @@ export function BriefStepThree({
       }),
     [lines, days, budgetWon, store.genders, store.ageBands],
   );
+
+  const overBudgetChoice = useMemo(() => {
+    if (budgetWon <= 0 || lines.length === 0) return null;
+    return resolveOverBudgetChoice({
+      brief: store,
+      catalog,
+      mixUnits: store.mixUnits,
+      isKo,
+    });
+  }, [budgetWon, lines.length, store, catalog, isKo, store.mixUnits]);
+
+  const showOverBudgetPanel =
+    overBudgetChoice != null && !store.overBudgetChoiceDismissed;
 
   const [savedPlan, setSavedPlan] = useState<SavedCampaignPlan | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(Boolean(planFromUrl));
@@ -605,6 +620,19 @@ export function BriefStepThree({
       </div>
 
       <div className="min-w-0 max-w-full lg:sticky lg:top-4 lg:self-start">
+        {showOverBudgetPanel && overBudgetChoice ? (
+          <OverBudgetChoicePanel
+            choice={overBudgetChoice}
+            isKo={isKo}
+            onApplyOptionA={() =>
+              store.applyOverBudgetOptionA(overBudgetChoice.optionA.mixLines)
+            }
+            onKeepCurrentMix={() => store.dismissOverBudgetChoice()}
+            onRestorePreviousMix={() => store.restoreMixBeforeOptionA()}
+            canRestorePreviousMix={store.mixUndoBeforeOptionA != null}
+          />
+        ) : null}
+
         <MetricsPanel metrics={displayMetrics} isKo={isKo} />
 
         <div className="mt-3 rounded-xl border border-border bg-card p-4">

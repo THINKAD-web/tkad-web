@@ -38,6 +38,8 @@ import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import { BriefDigitalPanel } from "@/components/planner/brief/brief-digital-panel";
 import { BriefMediaCard } from "@/components/planner/brief/brief-media-card";
+import { OverBudgetChoicePanel } from "@/components/planner/brief/over-budget-choice-panel";
+import { resolveOverBudgetChoice } from "@/lib/planner/brief/over-budget-options";
 
 export function BriefStepTwo({
   catalog,
@@ -142,6 +144,19 @@ export function BriefStepTwo({
     refetch: refetchMix,
   } = useIntegratedMix(mixRequest, mixEnabled);
 
+  const overBudgetChoice = useMemo(() => {
+    if (budgetWon <= 0 || lines.length === 0) return null;
+    return resolveOverBudgetChoice({
+      brief: store,
+      catalog,
+      mixUnits: store.mixUnits,
+      isKo,
+    });
+  }, [budgetWon, lines.length, store, catalog, isKo, store.mixUnits]);
+
+  const showOverBudgetPanel =
+    overBudgetChoice != null && !store.overBudgetChoiceDismissed;
+
   return (
     <div className="mx-auto grid w-full min-w-0 max-w-6xl gap-6 lg:grid-cols-[1fr_320px]">
       {/* ── 좌: 추천 리스트 ── */}
@@ -245,6 +260,19 @@ export function BriefStepTwo({
 
       {/* ── 우: 지표 패널 ── */}
       <div className="min-w-0 max-w-full lg:sticky lg:top-4 lg:self-start">
+        {showOverBudgetPanel && overBudgetChoice ? (
+          <OverBudgetChoicePanel
+            choice={overBudgetChoice}
+            isKo={isKo}
+            onApplyOptionA={() =>
+              store.applyOverBudgetOptionA(overBudgetChoice.optionA.mixLines)
+            }
+            onKeepCurrentMix={() => store.dismissOverBudgetChoice()}
+            onRestorePreviousMix={() => store.restoreMixBeforeOptionA()}
+            canRestorePreviousMix={store.mixUndoBeforeOptionA != null}
+          />
+        ) : null}
+
         <MetricsPanel metrics={metrics} isKo={isKo} />
 
         <div className="mt-3 rounded-xl border border-border bg-card p-3">
