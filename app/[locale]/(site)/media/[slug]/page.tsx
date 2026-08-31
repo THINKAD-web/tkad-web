@@ -40,7 +40,7 @@ import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import { RelatedCases } from "@/components/media-detail/related-cases";
 import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import {
-  fetchPublicMediaCatalogList,
+  fetchPublicMediaCatalogListForDetail,
   getMediaSlugsForStaticBuild,
   resolveMediaForDetail,
 } from "@/lib/public-media-catalog";
@@ -179,9 +179,10 @@ export default async function MediaDetailPage({ params }: Props) {
     console.error("[media-detail] trust enrich failed", media.id, e);
   }
 
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogListForDetail>> =
+    [];
   try {
-    catalog = await fetchPublicMediaCatalogList();
+    catalog = await fetchPublicMediaCatalogListForDetail();
   } catch (e) {
     console.error("[media-detail] catalog fetch failed", media.id, e);
   }

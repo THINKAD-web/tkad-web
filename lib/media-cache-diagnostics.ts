@@ -6,6 +6,7 @@ export function logMediaCacheMiss(
   source:
     | "public-media-catalog"
     | "public-media-catalog-list"
+    | "public-media-detail"
     | "daily-engagement-scores"
     | "trust-badge-context",
   detail?: Record<string, unknown>,

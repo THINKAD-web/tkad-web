@@ -39,6 +39,11 @@ import {
 import { parseCoverageDongsWithPopulation } from "@/lib/planner/brief/reach-adapter";
 import { fetchMoisPopulationIndex } from "@/lib/metrics/mois-population-index";
 import { publicActiveMediaWhere } from "@/lib/media-review-status";
+import {
+  PUBLIC_MEDIA_CATALOG_DETAIL_CACHE_TAG,
+  PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG,
+  PUBLIC_MEDIA_CATALOG_CACHE_TAG,
+} from "@/lib/media-catalog-cache-tags";
 
 /** Catalog/detail 쿼리용: 집행 이력 + demo·coverage·FactSheet 스냅샷 */
 export type MediaWithAdvertiserExecutions = Media & {
@@ -436,9 +441,14 @@ async function appendNetworksIfAny(base: MediaItem[]): Promise<MediaItem[]> {
   }
 }
 
-/** `/ko/media`·browse API — cross-request catalog cache (admin save 시 tag 무효화). */
-export const PUBLIC_MEDIA_CATALOG_CACHE_TAG = "public-media-catalog";
+/** @see media-catalog-cache-tags.ts */
+export {
+  PUBLIC_MEDIA_CATALOG_CACHE_TAG,
+  PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG,
+  PUBLIC_MEDIA_CATALOG_DETAIL_CACHE_TAG,
+} from "@/lib/media-catalog-cache-tags";
 export const PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS = 3600;
+export const PUBLIC_MEDIA_CATALOG_DETAIL_REVALIDATE_SECONDS = 604800;
 
 /** Shared DB pipeline for full catalog rows (uncached). */
 export async function loadPublicMediaCatalogRowsFromDb(): Promise<MediaItem[]> {
@@ -518,10 +528,51 @@ async function loadPublicMediaCatalogListFromDb(): Promise<MediaCatalogListItem[
 
 const getCrossRequestPublicMediaCatalogList = unstable_cache(
   loadPublicMediaCatalogListFromDb,
-  ["public-media-catalog-list-v1"],
+  ["public-media-catalog-list-v2"],
   {
     revalidate: PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS,
-    tags: [PUBLIC_MEDIA_CATALOG_CACHE_TAG],
+    tags: [PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG],
+  },
+);
+
+/** Detail ISR only — same slim rows as list but separate tag (no list-page cascade). */
+const getCrossRequestPublicMediaCatalogDetailCompanion = unstable_cache(
+  loadPublicMediaCatalogListFromDb,
+  ["public-media-catalog-detail-companion-v1"],
+  {
+    revalidate: PUBLIC_MEDIA_CATALOG_DETAIL_REVALIDATE_SECONDS,
+    tags: [PUBLIC_MEDIA_CATALOG_DETAIL_CACHE_TAG],
+  },
+);
+
+/**
+ * Detail page companion catalog (similar media, analytics fusion).
+ * Uses the detail cache tag so list-only admin edits do not regen detail ISR pages.
+ */
+export const fetchPublicMediaCatalogListForDetail = cache(
+  async function fetchPublicMediaCatalogListForDetail(): Promise<MediaItem[]> {
+    const forceMockOnly =
+      process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "1" ||
+      process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "true";
+
+    if (!isDatabaseConfigured() || forceMockOnly) {
+      return catalogListItemsToMediaItems(
+        await appendNetworkListItems(
+          mediaItemsToCatalogListItems(getMediaBrowseMockCatalog()),
+        ),
+      );
+    }
+
+    try {
+      const slim = await getCrossRequestPublicMediaCatalogDetailCompanion();
+      return catalogListItemsToMediaItems(slim);
+    } catch (e) {
+      console.error(
+        "[fetchPublicMediaCatalogListForDetail] DB query failed — returning empty catalog",
+        e instanceof Error ? `${e.name}: ${e.message}` : e,
+      );
+      return [];
+    }
   },
 );
 
@@ -898,6 +949,36 @@ export async function fetchPlannerMediaCatalog(): Promise<{
   }
 }
 
+async function loadMediaDetailRowFromDb(
+  slugOrId: string,
+): Promise<MediaItem | null> {
+  const db = getPrisma();
+  const row = await db.media.findFirst({
+    where: publicActiveMediaWhere({
+      OR: [{ id: slugOrId }, { slug: slugOrId }],
+    }),
+    include: PUBLIC_MEDIA_CATALOG_INCLUDE,
+  });
+  if (!row) return null;
+  const [rowWithCoverage] = await attachPublicMediaCatalogExtras(db, [row], {
+    includeInstallLocations: true,
+  });
+  return prismaMediaToMediaItem(rowWithCoverage);
+}
+
+const getCrossRequestMediaDetail = unstable_cache(
+  async (slugOrId: string) => {
+    const { logMediaCacheMiss } = await import("@/lib/media-cache-diagnostics");
+    logMediaCacheMiss("public-media-detail", { slug: slugOrId });
+    return loadMediaDetailRowFromDb(slugOrId);
+  },
+  ["public-media-detail-v1"],
+  {
+    revalidate: PUBLIC_MEDIA_CATALOG_DETAIL_REVALIDATE_SECONDS,
+    tags: [PUBLIC_MEDIA_CATALOG_DETAIL_CACHE_TAG],
+  },
+);
+
 /** Detail: static catalog, keyword-filter JSON, then DB by slug or cuid. */
 export async function resolveMediaForDetail(
   slugOrId: string,
@@ -913,20 +994,7 @@ export async function resolveMediaForDetail(
   if (fromKeywordFilter) return fromKeywordFilter;
   if (!isDatabaseConfigured()) return null;
   try {
-    const db = getPrisma();
-    const row = await db.media.findFirst({
-      where: publicActiveMediaWhere({
-        OR: [{ id: slugOrId }, { slug: slugOrId }],
-      }),
-      include: PUBLIC_MEDIA_CATALOG_INCLUDE,
-    });
-    if (!row) return null;
-    const [rowWithCoverage] = await attachPublicMediaCatalogExtras(
-      db,
-      [row],
-      { includeInstallLocations: true },
-    );
-    return prismaMediaToMediaItem(rowWithCoverage);
+    return await getCrossRequestMediaDetail(slugOrId);
   } catch {
     return null;
   }
