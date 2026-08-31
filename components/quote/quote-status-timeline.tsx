@@ -78,7 +78,7 @@ export function QuoteStatusTimeline({
               >
                 {label}
                 {isCurrent && !done ? (
-                  <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--qp-accent)]">
+                  <span className="ml-2 tkad-type-note font-semibold uppercase tracking-wider text-[color:var(--qp-accent)]">
                     {t("timelineCurrent")}
                   </span>
                 ) : null}

@@ -81,13 +81,13 @@ export function CompareRadarChart({ items, isKo, className }: Props) {
       )}
     >
       <div className="mb-4">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <p className="tkad-type-label text-accent">
           {`[ ${isKo ? "레이더" : "RADAR"} ]`}
         </p>
         <h2 className="mt-1 text-base font-bold tracking-tight text-foreground sm:text-lg">
           {isKo ? "5축 성과 비교" : "5-axis performance"}
         </h2>
-        <p className="mt-1 text-[11px] text-muted-foreground">
+        <p className="mt-1 tkad-type-caption text-muted-foreground">
           {isKo
             ? "비교군 내 상대 점수(0–100). CPM 효율은 낮을수록 높은 점수입니다."
             : "Relative scores within this set (0–100). Lower CPM scores higher."}

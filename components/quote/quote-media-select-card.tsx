@@ -101,7 +101,7 @@ export function QuoteMediaSelectCard({
         </span>
       </div>
       <div className="p-3">
-        <p className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
+        <p className="line-clamp-2 tkad-type-title text-gray-900 dark:text-white">
           {isKo ? media.name : media.nameEn || media.name}
         </p>
         <p className="mt-1 text-xs text-gray-400 dark:text-white/40">{metaLine}</p>

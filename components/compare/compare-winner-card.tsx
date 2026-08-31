@@ -36,7 +36,7 @@ export function CompareWinnerCard({ items, isKo, className }: Props) {
       />
       <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
-          <p className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-emerald-600 dark:text-emerald-400">
+          <p className="inline-flex items-center gap-2 tkad-type-label text-emerald-600 dark:text-emerald-400">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {isKo ? "승자 추천" : "Top pick"}
           </p>
@@ -50,7 +50,7 @@ export function CompareWinnerCard({ items, isKo, className }: Props) {
             </Link>
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{reason}</p>
-          <dl className="mt-4 flex flex-wrap gap-4 text-[11px] tabular-nums">
+          <dl className="mt-4 flex flex-wrap gap-4 tkad-type-caption tabular-nums">
             <div>
               <dt className="text-muted-foreground">{isKo ? "CPM" : "CPM"}</dt>
               <dd className="mt-0.5 font-bold text-emerald-700 dark:text-emerald-300">
@@ -68,7 +68,7 @@ export function CompareWinnerCard({ items, isKo, className }: Props) {
           </dl>
           <MediaPriceExclNote isKo={isKo} className="mt-2" />
         </div>
-        <p className="shrink-0 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
+        <p className="shrink-0 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 tkad-type-label text-emerald-700 dark:text-emerald-300">
           {isKo ? "AI · CPM 효율" : "AI · CPM efficiency"}
         </p>
       </div>
