@@ -39,10 +39,14 @@ const briefSeed = {
 };
 
 async function dismissDialogs(page) {
-  const resume = page.getByRole("button", { name: /이어서|Continue/i });
-  if (await resume.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await resume.click();
+  for (const label of [/이어서 진행|Continue/i, /유지|Keep mix/i, /닫기|Close/i]) {
+    const btn = page.getByRole("button", { name: label });
+    if (await btn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await btn.click();
+      await page.waitForTimeout(400);
+    }
   }
+  await page.keyboard.press("Escape").catch(() => {});
 }
 
 async function main() {
@@ -102,7 +106,9 @@ async function main() {
     path: path.join(OUT, "04-metrics-panel.png"),
   });
 
-  await page.getByTestId("brief-custom-line-edit").click();
+  await dismissDialogs(page);
+
+  await page.getByTestId("brief-custom-line-edit").click({ force: true });
   await page.getByTestId("brief-custom-line-quantity").fill("3");
   await page.getByTestId("brief-custom-line-submit").click();
   await page.waitForTimeout(600);

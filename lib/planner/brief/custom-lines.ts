@@ -2,7 +2,6 @@
  * 브리프 Step 2 — 카탈로그 외 커스텀 mix 라인 (세션/스냅샷용).
  */
 
-import { randomBytes } from "node:crypto";
 import type { CampaignPlanCustomMixEntry } from "@/lib/campaign-plan-mix-entry";
 
 export type BriefCustomLine = {
@@ -13,8 +12,12 @@ export type BriefCustomLine = {
   notes?: string;
 };
 
+/** client bundle safe — store.ts 가 import 한다 */
 export function newBriefCustomLineId(): string {
-  return `custom-${randomBytes(8).toString("hex")}`;
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `custom-${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+  }
+  return `custom-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export function createBriefCustomLine(
