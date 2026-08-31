@@ -79,8 +79,8 @@ function totalImpressionsOf(days: number, endDate: string): number {
     plan: snapshotFor(days, endDate), catalog: CATALOG, isKo: true,
   });
   const summary = p.charts?.reachSummary ?? [];
-  const total = summary.find((d) => d.label === "총 노출");
-  assert.ok(total, "총 노출 요약이 있어야 한다");
+  const total = summary.find((d) => d.label === "총 실노출(추정)");
+  assert.ok(total, "총 실노출(추정) 요약이 있어야 한다");
   return total.value;
 }
 
@@ -125,7 +125,7 @@ test("기간 표기와 총노출 기준이 서로 맞는다", () => {
     plan: snapshotFor(21, "2026-09-21"), catalog: CATALOG, isKo: true,
   });
   assert.match(p.periodDisplay, /21일/);
-  const total = (p.charts?.reachSummary ?? []).find((d) => d.label === "총 노출");
+  const total = (p.charts?.reachSummary ?? []).find((d) => d.label === "총 실노출(추정)");
   assert.equal(total?.value, DAILY_SUM * 21);
 });
 

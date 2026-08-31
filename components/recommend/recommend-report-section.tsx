@@ -16,6 +16,7 @@ import { usePlannerStore } from "@/lib/planner/store";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
+import { PLANNER_TOTAL_REACH_LABEL } from "@/lib/planner-report-performance-guide";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import {
   buildRecommendReportContext,
@@ -498,11 +499,11 @@ export function RecommendReportSection({
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 {
-                  label: isKo ? "월간 노출(추정)" : "Est. monthly reach",
+                  label: isKo ? "월 실노출(추정)" : "Est. monthly reach",
                   value: metrics.estimatedMonthlyImpressions.toLocaleString(),
                 },
                 {
-                  label: isKo ? "총 노출(추정)" : "Est. total reach",
+                  label: isKo ? PLANNER_TOTAL_REACH_LABEL.ko : PLANNER_TOTAL_REACH_LABEL.en,
                   value: metrics.estimatedTotalImpressions.toLocaleString(),
                 },
                 {

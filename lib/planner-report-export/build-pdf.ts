@@ -21,6 +21,7 @@ import { plannerChartColorRgb } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 import { formatExportBudgetWonLabel } from "@/lib/planner-report-export/format-export-money";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
+import { footfallVsReachShortFootnote } from "@/lib/planner-report-performance-guide";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import {
   filterExportSections,
@@ -955,6 +956,11 @@ export async function buildPlannerReportPdf(
     const colW = (textW - 3) / 2;
     const specs = collectMediaCardSpecs(row, isKo);
     const showContrib = showMediaCardContributions(p.portfolio.length, row);
+    const showFootfallFootnote =
+      showContrib &&
+      row.dailyTraffic != null &&
+      row.dailyTraffic > 0 &&
+      row.exposureContributionPct != null;
     const mediaUrl = plannerMediaPageUrl(row.id, isKo);
     const linkBlockH = mediaUrl ? 11 : 0;
 
@@ -971,6 +977,7 @@ export async function buildPlannerReportPdf(
       contentH += 4 + Math.min(reasonLines.length, 3) * 3.8;
     }
     if (showContrib) contentH += 16;
+    if (showFootfallFootnote) contentH += 7;
     contentH += linkBlockH + pad;
 
     const thumbColH = thumbSlot ? thumbBox.h + pad * 2 : 0;
@@ -1105,7 +1112,7 @@ export async function buildPlannerReportPdf(
           textX,
           barY,
           barW,
-          isKo ? "노출 기여" : "Exposure share",
+          isKo ? "실노출 기여(추정)" : "Reach share (est.)",
           row.exposureContributionPct!,
           QP_INK,
         );
@@ -1123,7 +1130,7 @@ export async function buildPlannerReportPdf(
           textX,
           barY,
           barW,
-          isKo ? "노출 기여" : "Exposure share",
+          isKo ? "실노출 기여(추정)" : "Reach share (est.)",
           row.exposureContributionPct!,
           QP_INK,
         );
@@ -1136,6 +1143,18 @@ export async function buildPlannerReportPdf(
           row.budgetContributionPct!,
           QP_ACCENT,
         );
+      }
+      if (showFootfallFootnote) {
+        ty += 1.5;
+        doc.setFont(FONT, "normal");
+        doc.setFontSize(6);
+        setText(GRAY_500);
+        const noteLines = doc.splitTextToSize(
+          footfallVsReachShortFootnote(isKo),
+          textW,
+        ) as string[];
+        doc.text(noteLines, textX, ty);
+        ty += noteLines.length * 2.8;
       }
     }
 

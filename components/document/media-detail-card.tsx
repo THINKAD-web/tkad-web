@@ -13,6 +13,7 @@ import {
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
+import { footfallVsReachShortFootnote } from "@/lib/planner-report-performance-guide";
 
 const LIGHT = {
   bg: "#FFFFFF",
@@ -235,7 +236,7 @@ export function MediaDetailCard({
           <div className="grid gap-2 border-t pt-3 sm:grid-cols-2" style={{ borderColor: LIGHT.divider }}>
             {detail.exposureContributionPct != null ? (
               <ContributionBar
-                label={isKo ? "노출 기여" : "Exposure share"}
+                label={isKo ? "실노출 기여(추정)" : "Reach share (est.)"}
                 pct={detail.exposureContributionPct}
                 color="#06B6D4"
               />
@@ -257,6 +258,15 @@ export function MediaDetailCard({
               )
             ) : null}
           </div>
+        ) : null}
+
+        {showContributionBars &&
+        detail.dailyTraffic != null &&
+        detail.dailyTraffic > 0 &&
+        detail.exposureContributionPct != null ? (
+          <p className="text-[10px] leading-relaxed text-[#6B7280]">
+            {footfallVsReachShortFootnote(isKo)}
+          </p>
         ) : null}
 
         {mediaPageHref ? (
@@ -304,7 +314,7 @@ export function MediaDetailTableRow({
       ? `${isKo ? "운영" : "Hours"} ${detail.operatingHours}`
       : null,
     detail.dailyTraffic
-      ? `${isKo ? "일일" : "Daily"} ${detail.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}`
+      ? `${isKo ? "유동" : "Footfall"} ${detail.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}`
       : null,
   ].filter(Boolean);
 

@@ -161,7 +161,7 @@ test("1p KPI 총노출이 저장 스냅샷 값이다 (유도값이 아니다)", 
 
 test("4p 노출 요약도 저장값이다", () => {
   const p = payloadOf(snapshot());
-  const row = (p.charts?.reachSummary ?? []).find((d) => d.label === "총 노출");
+  const row = (p.charts?.reachSummary ?? []).find((d) => d.label === "총 실노출(추정)");
   assert.equal(row?.value, STORED_TOTAL);
 });
 

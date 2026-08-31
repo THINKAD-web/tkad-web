@@ -21,7 +21,7 @@ import type {
   PlannerExportCharts,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
-import { buildPerformanceChartGuide } from "@/lib/planner-report-performance-guide";
+import { buildPerformanceChartGuide, PLANNER_TOTAL_REACH_LABEL } from "@/lib/planner-report-performance-guide";
 import { buildPartialRateNotice } from "@/lib/planner/partial-rate-notice";
 import { buildQuoteOnlyNotice } from "@/lib/planner/quote-only-portfolio";
 import {
@@ -280,22 +280,22 @@ export function buildOohReportPayload(
     reachSummary: usePortfolioReach
       ? [
           {
-            label: isKo ? "월 노출" : "Monthly",
+            label: isKo ? "월 실노출(추정)" : "Monthly reach (est.)",
             value: portfolioMetrics.monthlyImpressions,
           },
           {
-            label: isKo ? "총 노출" : "Total",
+            label: isKo ? PLANNER_TOTAL_REACH_LABEL.ko : PLANNER_TOTAL_REACH_LABEL.en,
             value: portfolioMetrics.totalImpressions,
           },
         ].filter((d) => d.value > 0)
       : a.metrics
         ? [
             {
-              label: isKo ? "월 노출" : "Monthly",
+              label: isKo ? "월 실노출(추정)" : "Monthly reach (est.)",
               value: a.metrics.estimatedMonthlyImpressions,
             },
             {
-              label: isKo ? "총 노출" : "Total",
+              label: isKo ? PLANNER_TOTAL_REACH_LABEL.ko : PLANNER_TOTAL_REACH_LABEL.en,
               value: a.metrics.estimatedTotalImpressions,
             },
           ].filter((d) => d.value > 0)

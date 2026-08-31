@@ -168,7 +168,7 @@ function kpiTotalImpressions(p: ReturnType<typeof payload>): number {
 }
 
 function summaryTotalImpressions(p: ReturnType<typeof payload>): number {
-  const row = (p.charts?.reachSummary ?? []).find((d) => d.label === "총 노출");
+  const row = (p.charts?.reachSummary ?? []).find((d) => d.label === "총 실노출(추정)");
   assert.ok(row, "4p 총 노출 요약이 있어야 한다");
   return row.value;
 }

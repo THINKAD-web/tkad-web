@@ -11,6 +11,10 @@ import type { MixMetrics } from "@/lib/planner/brief/mix-metrics";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import type { MetricBasis } from "@/lib/metrics/defaults";
 import { overBudgetBannerLine } from "@/lib/planner/brief/over-budget-copy";
+import {
+  footfallVsReachFootnote,
+  PLANNER_TOTAL_REACH_LABEL,
+} from "@/lib/planner-report-performance-guide";
 
 function Row({
   label,
@@ -115,11 +119,14 @@ export function MetricsPanel({
           isKo={isKo}
         />
         <Row
-          label={isKo ? "총 노출" : "Total impressions"}
+          label={isKo ? PLANNER_TOTAL_REACH_LABEL.ko : PLANNER_TOTAL_REACH_LABEL.en}
           value={metrics.totalImpressions.value.toLocaleString()}
           basis={metrics.totalImpressions.basis}
           isKo={isKo}
         />
+        <p className="px-0 py-1 text-[10px] leading-relaxed text-muted-foreground">
+          {footfallVsReachFootnote(isKo)}
+        </p>
         <Row
           label={isKo ? "혼합 CPM" : "Mix CPM"}
           value={
