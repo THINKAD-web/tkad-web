@@ -217,6 +217,8 @@ export type PlannerReportExportPayload = {
   quoteSummary?: PlannerExportQuoteSummary;
   /** 문의 자동 제안 부록 — 지정 매체 스펙표 (없으면 PDF 부록 미렌더) */
   appendixMediaSpecs?: PlannerExportAppendixMediaSpec[];
+  /** 부록 섹션 제목 (없으면 inquiry 기본 문구) */
+  appendixSectionTitle?: string;
   disclaimer: string;
 };
 

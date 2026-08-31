@@ -124,6 +124,9 @@ export type BuildOohPayloadArgs = {
   reportExecutiveSummaryLines?: string[];
   /** C-full-3a — 캠페인 총 제작비 (직접 입력) */
   productionCostWon?: number | null;
+  /** 부록 표 제목 (없으면 지정 매체 스펙 기본값) */
+  appendixSectionTitle?: string;
+  appendixMediaSpecs?: import("@/lib/planner-report-export/types").PlannerExportAppendixMediaSpec[];
 };
 
 export function buildOohReportPayload(
@@ -601,6 +604,8 @@ export function buildOohReportPayload(
       : undefined,
     pricingFootnote: plannerReportPricingFootnote(isKo),
     quoteSummary,
+    appendixSectionTitle: a.appendixSectionTitle,
+    appendixMediaSpecs: a.appendixMediaSpecs,
     disclaimer: isKo
       ? "본 보고서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
       : "This report uses THINKAD internal estimates; actual delivery may vary by inventory and terms.",
