@@ -125,59 +125,67 @@ async function main() {
   const results: Array<Record<string, unknown>> = [];
 
   try {
-    await db.$transaction(async (tx) => {
-      for (const row of approveRows) {
-        const before = await tx.media.findUnique({
-          where: { id: row.id },
-          select: {
-            id: true,
-            slug: true,
-            name: true,
-            price: true,
-            cpm: true,
-            pricePeriod: true,
-          },
-        });
-        if (!before) {
-          results.push({ id: row.id, error: "not_found" });
-          continue;
-        }
-        if (before.price !== row.currentPrice) {
-          results.push({
-            id: row.id,
-            name: before.name,
-            error: "price_drift",
-            expected: row.currentPrice,
-            actual: before.price,
-          });
-          throw new Error(
-            `Price drift on ${before.name}: expected ${row.currentPrice}, got ${before.price}`,
-          );
-        }
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < approveRows.length; i += BATCH_SIZE) {
+      const batch = approveRows.slice(i, i + BATCH_SIZE);
+      await db.$transaction(
+        async (tx) => {
+          for (const row of batch) {
+            const before = await tx.media.findUnique({
+              where: { id: row.id },
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                price: true,
+                cpm: true,
+                pricePeriod: true,
+              },
+            });
+            if (!before) {
+              results.push({ id: row.id, error: "not_found" });
+              continue;
+            }
+            if (before.price !== row.currentPrice) {
+              results.push({
+                id: row.id,
+                name: before.name,
+                error: "price_drift",
+                expected: row.currentPrice,
+                actual: before.price,
+              });
+              throw new Error(
+                `Price drift on ${before.name}: expected ${row.currentPrice}, got ${before.price}`,
+              );
+            }
 
-        const afterPrice = row.correctedPrice;
-        const afterCpm = row.correctedCpm;
+            const afterPrice = row.correctedPrice;
+            const afterCpm = row.correctedCpm;
 
-        await tx.media.update({
-          where: { id: row.id },
-          data: {
-            price: afterPrice,
-            ...(afterCpm != null ? { cpm: afterCpm } : {}),
-          },
-        });
+            await tx.media.update({
+              where: { id: row.id },
+              data: {
+                price: afterPrice,
+                ...(afterCpm != null ? { cpm: afterCpm } : {}),
+              },
+            });
 
-        results.push({
-          id: row.id,
-          slug: before.slug,
-          name: before.name,
-          priceBefore: before.price,
-          priceAfter: afterPrice,
-          cpmBefore: before.cpm,
-          cpmAfter: afterCpm,
-          pricePeriod: before.pricePeriod,
-        });
-      }
-    });
+            results.push({
+              id: row.id,
+              slug: before.slug,
+              name: before.name,
+              priceBefore: before.price,
+              priceAfter: afterPrice,
+              cpmBefore: before.cpm,
+              cpmAfter: afterCpm,
+              pricePeriod: before.pricePeriod,
+            });
+          }
+        },
+        { maxWait: 30_000, timeout: 120_000 },
+      );
+      console.log(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} rows committed`);
+    }
 
     const cacheRefs = approveRows.map((r) => ({ id: r.id, slug: r.slug }));
     revalidateMediaCachesBulk(cacheRefs);
