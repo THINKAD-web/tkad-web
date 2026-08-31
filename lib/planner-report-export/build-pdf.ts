@@ -949,8 +949,9 @@ export async function buildPlannerReportPdf(
   }
 
   function drawMediaCard(row: PlannerExportMediaRow, thumb?: string) {
+    const isCustom = row.kind === "custom";
     const pad = PDF_LAYOUT.detailPadMm;
-    const thumbSlot = Boolean(row.thumbUrl?.trim());
+    const thumbSlot = !isCustom && Boolean(row.thumbUrl?.trim());
     const thumbW = thumbSlot ? thumbBox.w : 0;
     const textX = M + pad + (thumbSlot ? thumbW + 3 : 0);
     const textW = contentW - pad * 2 - (thumbSlot ? thumbW + 3 : 0);
@@ -962,7 +963,7 @@ export async function buildPlannerReportPdf(
       row.dailyTraffic != null &&
       row.dailyTraffic > 0 &&
       row.exposureContributionPct != null;
-    const mediaUrl = plannerMediaPageUrl(row.id, isKo);
+    const mediaUrl = isCustom ? null : plannerMediaPageUrl(row.id, isKo);
     const linkBlockH = mediaUrl ? 11 : 0;
 
     let contentH = 5;
@@ -1015,6 +1016,14 @@ export async function buildPlannerReportPdf(
     const nameLines = doc.splitTextToSize(row.name, textW) as string[];
     doc.text(nameLines.slice(0, 2), textX, ty);
     ty += nameLines.slice(0, 2).length * 4.2 + 1;
+
+    if (isCustom && row.categoryLabel) {
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(PDF_LAYOUT.detailBodyPt);
+      setText("7C3AED");
+      doc.text(row.categoryLabel, textX, ty);
+      ty += 4.2;
+    }
 
     doc.setFont(FONT, "normal");
     doc.setFontSize(PDF_LAYOUT.detailBodyPt);

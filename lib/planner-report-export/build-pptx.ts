@@ -243,6 +243,7 @@ function estimatePptCardHeight(
   if (row.monthlyPriceLabel || row.lineTotalLabel) h += 0.48;
   if (row.recommendReason?.trim()) h += 0.38;
   if (showMediaCardContributions(portfolioLen, row)) h += 0.42;
+  if (row.kind === "custom") return Math.max(h + 0.35, 1.1);
   return Math.max(h + 0.35, thumbHIn + 0.4);
 }
 
@@ -888,6 +889,7 @@ export async function buildPlannerReportPptx(
     cardY: number,
     cardH: number,
   ) {
+    const isCustom = row.kind === "custom";
     slide.addShape(pptx.ShapeType.roundRect, {
       x: CARD_X,
       y: cardY,
@@ -895,10 +897,11 @@ export async function buildPlannerReportPptx(
       h: cardH,
       fill: { color: WHITE },
       rectRadius: 0.08,
-      line: { color: "E5E7EB", width: 0.75 },
+      line: { color: isCustom ? "C4B5FD" : "E5E7EB", width: 0.75 },
     });
-    const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
-    const textX = 0.75 + THUMB_W_IN + 0.25;
+    const hasThumb = !isCustom && Boolean(row.thumbUrl?.trim());
+    const thumb = hasThumb && row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
+    const textX = hasThumb ? 0.75 + THUMB_W_IN + 0.25 : 0.75;
     const textW = CARD_X + CARD_W - textX - 0.25;
     const colW = (textW - 0.15) / 2;
 
@@ -914,7 +917,7 @@ export async function buildPlannerReportPptx(
       } catch {
         /* broken thumb */
       }
-    } else if (row.thumbUrl?.trim()) {
+    } else if (hasThumb && row.thumbUrl?.trim()) {
       slide.addShape(pptx.ShapeType.roundRect, {
         x: 0.75,
         y: cardY + 0.2,

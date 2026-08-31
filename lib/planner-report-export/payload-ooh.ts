@@ -127,6 +127,9 @@ export type BuildOohPayloadArgs = {
   /** 부록 표 제목 (없으면 지정 매체 스펙 기본값) */
   appendixSectionTitle?: string;
   appendixMediaSpecs?: import("@/lib/planner-report-export/types").PlannerExportAppendixMediaSpec[];
+  /** 카탈로그 외 커스텀 mix — portfolio 카드 뒤에 append */
+  customPortfolioRows?: import("@/lib/planner-report-export/types").PlannerExportMediaRow[];
+  customLineCount?: number;
 };
 
 export function buildOohReportPayload(
@@ -458,16 +461,19 @@ export function buildOohReportPayload(
   const adjustedDailyReachById = Object.fromEntries(
     plan.mediaItems.map((mi) => [mi.id, Math.round(mi.dailyImpressions)]),
   );
-  const portfolioRows = orderedPortfolio.map((m) =>
-    mediaItemToExportRow(m, isKo, {
-      months,
-      periodCtx,
-      contributions,
-      pricing,
-      planCartItem: a.planCartItems?.find((item) => item.mediaId === m.id),
-      adjustedDailyReachById,
-    }),
-  );
+  const portfolioRows = [
+    ...orderedPortfolio.map((m) =>
+      mediaItemToExportRow(m, isKo, {
+        months,
+        periodCtx,
+        contributions,
+        pricing,
+        planCartItem: a.planCartItems?.find((item) => item.mediaId === m.id),
+        adjustedDailyReachById,
+      }),
+    ),
+    ...(a.customPortfolioRows ?? []),
+  ];
 
   const recommendRationale = buildPlannerRecommendRationale({
     portfolio: orderedPortfolio,
@@ -543,6 +549,7 @@ export function buildOohReportPayload(
           groupLabel: quoteOnlyNotice.groupLabel,
         }
       : undefined,
+    customLineCount: a.customLineCount,
     isKo,
   });
 

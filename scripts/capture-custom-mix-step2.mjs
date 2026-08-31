@@ -77,13 +77,14 @@ async function main() {
     .getByRole("button", { name: /추가|Add/i });
   await firstAdd.click();
   await page.waitForTimeout(800);
+  await dismissDialogs(page);
 
   await page.screenshot({
     path: path.join(OUT, "01-catalog-added.png"),
     fullPage: true,
   });
 
-  await page.getByTestId("brief-custom-line-add-open").click();
+  await page.getByTestId("brief-custom-line-add-open").click({ force: true });
   await page.getByTestId("brief-custom-line-name").fill("특수 협의 매체");
   await page.getByTestId("brief-custom-line-quantity").fill("2");
   await page.getByTestId("brief-custom-line-unit-price").fill("1500000");

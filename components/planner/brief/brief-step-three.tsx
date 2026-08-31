@@ -483,7 +483,7 @@ export function BriefStepThree({
     keepEdits: keepReportCopyEdits,
   } = useReportCopyAutoDraft({
     isKo,
-    enabled: exportPortfolio.length > 0 && copyStrategyInput != null,
+    enabled: hasMix && copyStrategyInput != null,
     fingerprint: {
       mediaIds: exportPortfolio.map((m) => m.id),
       quantities: exportQuantities,
@@ -810,7 +810,7 @@ export function BriefStepThree({
       </div>
     </div>
 
-    {exportPayload && exportPortfolio.length > 0 ? (
+    {exportPayload && exportPayload.portfolio.length > 0 ? (
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
