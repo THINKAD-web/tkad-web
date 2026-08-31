@@ -149,7 +149,7 @@ export function MediaKeywordSearchHero({
             onClick={() => applySuggestion(phrase)}
             className={cn(
               "rounded-full border px-2.5 py-1 text-left font-medium shadow-sm backdrop-blur-md",
-              "transition-all duration-200 ease-out",
+              "transition-ui duration-200 ease-out",
               "hover:-translate-y-0.5 hover:border-gold hover:bg-gold/15 hover:dark:text-white text-gray-900 hover:shadow-lg hover:shadow-gold/25 motion-reduce:hover:translate-y-0",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2",
               isFeaturedEmbed

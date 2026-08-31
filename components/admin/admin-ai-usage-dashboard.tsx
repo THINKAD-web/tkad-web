@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, RefreshCw } from "lucide-react";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 type FeatureRow = {
   feature: string;
@@ -40,7 +41,7 @@ const num = (n: number) => n.toLocaleString("ko-KR");
 
 const MODEL_COLORS: Record<string, string> = {
   Haiku: "#22c55e",
-  Sonnet: "#ff6200",
+  Sonnet: BRAND_ACCENT,
   Opus: "#ef4444",
 };
 function modelColor(label: string): string {

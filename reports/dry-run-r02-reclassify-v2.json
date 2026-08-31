@@ -1,0 +1,97 @@
+{
+  "generatedAt": "2026-08-31T00:28:46.418Z",
+  "total": 552,
+  "v1": {
+    "approve": 423,
+    "reject": 128,
+    "review": 1
+  },
+  "v2": {
+    "approve": 410,
+    "reject": 141,
+    "review": 1
+  },
+  "changedCount": 13,
+  "approveToReject": 13,
+  "rejectToApprove": 0,
+  "changes": [
+    {
+      "id": "cmrwgei4j000b04lat8caj53b",
+      "name": "인천지하철 1호선 인천시청역 I-SCREEN 영상광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmp0gi5je000g04jile8iqnr5",
+      "name": "인천지하철 1호선 부평역 디지털사이니지 (디지털포스터) 광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmrx2jg0z001n04jr751ualgm",
+      "name": "KTX 전주역 맞이방 영상광고 (4번) 광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmp3csmb2000004l43sen816g",
+      "name": "지하철 신분당선 메트로 라이브 광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmp0gg9e3000e04jicm5nl221",
+      "name": "인천지하철 1호선 작전역 디지털사이니지 (디지털포스터) 광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmp0gd45o000c04ji4usu8p0e",
+      "name": "인천지하철 1호선 예술회관역 디지털사이니지 (디지털포스터) 광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmp3biu21000004l8a8ijkh9c",
+      "name": "지하철 2호선 메트로라이브 광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmrwg26u0000104l20ofjcxkk",
+      "name": "인천지하철 2호선 주안역 I-SCREEN 영상광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmqp7sr5k000004jpyzaczfao",
+      "name": "분당선 압구정로데오역 헬로 로데오 DS 광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmp0geb4p000i04ibjncqsfya",
+      "name": "인천지하철 1호선 부평구청역 디지털사이니지 (디지털포스터) 광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmrwib77h000m04l28pi9b6ro",
+      "name": "인천지하철 1호선 인천터미널역 디지털사이니지 (디지털포스터) 광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmp0gjlox000m04ib37h33kgd",
+      "name": "인천지하철 1호선 원인재역 디지털사이니지 (디지털포스터) 광고",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    },
+    {
+      "id": "cmqsuxgmu00010akq6pgm99bi",
+      "name": "천호역 지하철 5호선 CM보드 광고 (조명)",
+      "v1": "approve_candidate",
+      "v2": "reject_not_in_bounds"
+    }
+  ]
+}

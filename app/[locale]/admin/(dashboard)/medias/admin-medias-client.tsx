@@ -2362,7 +2362,7 @@ export default function AdminMediasClient({
         >
           <ShieldCheck
             className={`h-[18px] w-[18px] ${
-              media.isVerified ? "text-[#ff6200]" : "text-slate-300"
+              media.isVerified ? "text-[color:var(--qp-accent)]" : "text-slate-300"
             }`}
             aria-hidden
           />
@@ -4699,7 +4699,7 @@ export default function AdminMediasClient({
                             <div className="space-y-1">
                               <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                                 <div
-                                  className="h-full rounded-full bg-primary transition-all"
+                                  className="h-full rounded-full bg-primary transition-bar"
                                   style={{ width: `${item.progress}%` }}
                                 />
                               </div>

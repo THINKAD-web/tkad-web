@@ -18,6 +18,7 @@ import {
 } from "@/lib/planner/brief/mix-metrics";
 import { briefToTargetSpec } from "@/lib/planner/brief/reach-adapter";
 import {
+  BRIEF_DEFAULT_DAYS,
   flightDays,
   toCampaignPlanBrief,
   type CampaignBriefInput,
@@ -42,7 +43,7 @@ export function buildCampaignPlanSnapshot(params: {
   mixUnits: Record<string, number>;
 }): CampaignPlanSnapshot {
   const planBrief = toCampaignPlanBrief(params.brief);
-  const days = flightDays(params.brief) ?? 1;
+  const days = flightDays(params.brief) ?? BRIEF_DEFAULT_DAYS;
   const lines = buildMixLines(params.catalog, params.mixUnits);
   const metrics = calcMixMetrics({
     lines,

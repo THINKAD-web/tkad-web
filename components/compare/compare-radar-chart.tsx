@@ -14,6 +14,16 @@ import {
 import type { MediaItem } from "@/lib/media-data";
 import { buildCompareRadarData } from "@/lib/compare-quote";
 import { cn } from "@/lib/utils";
+import { CHART_SERIES_HEX } from "@/lib/planner-chart-colors";
+
+const COLORS = [
+  CHART_SERIES_HEX.primary,
+  CHART_SERIES_HEX.ink,
+  CHART_SERIES_HEX.slate,
+  CHART_SERIES_HEX.indigo,
+  CHART_SERIES_HEX.rose,
+  "#475569",
+];
 
 const AXIS_LABELS_KO: Record<string, string> = {
   impressions: "노출수",
@@ -30,8 +40,6 @@ const AXIS_LABELS_EN: Record<string, string> = {
   accessibility: "Access",
   availability: "Availability",
 };
-
-const COLORS = ["#0D9488", "#0D1B2E", "#64748B", "#6366F1", "#E11D48", "#475569"];
 
 type Props = {
   items: MediaItem[];

@@ -8,13 +8,13 @@ const HEADLINE_ACCENT = "tkad-home-accent-text";
 /** `/media/packages` 히어로 CTA와 동일한 스타일 토큰 — 컴팩트 */
 export const categoryHeroCtaPrimaryClass = cn(
   "category-hero-cta-primary tkad-qp-cta",
-  "inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium text-white transition-all hover:opacity-95 active:scale-95 sm:text-sm",
+  "inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium text-white transition-ui hover:opacity-95 active:scale-95 sm:text-sm",
   "shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--qp-accent)]/40 focus-visible:ring-offset-2",
 );
 
 export const categoryHeroCtaSecondaryClass = cn(
   "category-hero-cta-secondary",
-  "inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-3.5 py-1.5 text-xs font-medium text-gray-700 transition-all hover:bg-gray-50 active:scale-95 sm:text-sm",
+  "inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-3.5 py-1.5 text-xs font-medium text-gray-700 transition-ui hover:bg-gray-50 active:scale-95 sm:text-sm",
   "dark:border-white/20 dark:text-white dark:hover:bg-white/10",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 dark:focus-visible:ring-white/40",
 );

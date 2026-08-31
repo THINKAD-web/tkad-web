@@ -1128,7 +1128,7 @@ function ContactInquiryForm() {
                   })
                 }
                 className={cn(
-                  "rounded-xl border px-3 py-3 text-sm font-semibold transition-all",
+                  "rounded-xl border px-3 py-3 text-sm font-semibold transition-ui",
                   inquiryType === tab.value ? chipActive : chipIdle,
                 )}
               >
@@ -1271,7 +1271,7 @@ function ContactInquiryForm() {
                     type="button"
                     onClick={() => toggleGoal(g)}
                     className={cn(
-                      "rounded-xl border px-3 py-2 text-xs font-semibold transition-all",
+                      "rounded-xl border px-3 py-2 text-xs font-semibold transition-ui",
                       on ? chipActive : chipIdle,
                     )}
                   >
@@ -1299,7 +1299,7 @@ function ContactInquiryForm() {
                     type="button"
                     onClick={() => toggleRegion(r)}
                     className={cn(
-                      "rounded-xl border px-3 py-2 text-xs font-semibold transition-all",
+                      "rounded-xl border px-3 py-2 text-xs font-semibold transition-ui",
                       on ? chipActive : chipIdle,
                     )}
                   >

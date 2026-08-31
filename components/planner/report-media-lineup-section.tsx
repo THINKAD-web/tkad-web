@@ -389,7 +389,7 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
                   aria-label={isKo ? mode.labelKo : mode.labelEn}
                   aria-pressed={active}
                   className={cn(
-                    "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-all",
+                    "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-ui",
                     active ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
                   )}
                 >

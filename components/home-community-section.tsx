@@ -123,9 +123,9 @@ export function HomeCommunitySection({ posts, locale }: Props) {
                 key={post.id}
                 href={`/community/post/${post.id}`}
                 className={cn(
-                  "tkad-neon-border group relative block overflow-hidden rounded-[22px] border border-gray-200 bg-white text-gray-900 shadow-sm transition-all duration-200 hover:shadow-md dark:border-white/12 dark:bg-white/5 dark:text-white dark:shadow-none",
+                  "tkad-neon-border group relative block overflow-hidden rounded-[22px] border border-gray-200 bg-white text-gray-900 shadow-sm transition-ui duration-200 hover:shadow-md dark:border-white/12 dark:bg-white/5 dark:text-white dark:shadow-none",
                   "hover:-translate-y-0.5 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md dark:hover:border-white/22 dark:hover:bg-white/[0.07] dark:hover:shadow-[0_24px_72px_rgba(0,0,0,0.55)]",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hermes focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-[#ff6200] dark:focus-visible:ring-offset-[#05050a]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hermes focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-[color:var(--qp-accent)] dark:focus-visible:ring-offset-[#05050a]",
                 )}
               >
                 <article className="relative flex h-full flex-col gap-3 p-4 sm:p-5">

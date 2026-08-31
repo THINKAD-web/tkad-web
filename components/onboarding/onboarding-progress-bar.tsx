@@ -119,7 +119,7 @@ export function OnboardingProgressBar() {
               aria-label={t("progressLabel")}
             >
               <div
-                className="h-full rounded-full bg-gradient-to-r from-violet-500 via-cyan-400 to-pink-400 shadow-[0_0_14px_rgba(34,211,238,0.45)] transition-all duration-500"
+                className="h-full rounded-full bg-gradient-to-r from-violet-500 via-cyan-400 to-pink-400 shadow-[0_0_14px_rgba(34,211,238,0.45)] transition-bar duration-500"
                 style={{ width: `${Math.max(pct, 6)}%` }}
               />
             </div>
@@ -129,7 +129,7 @@ export function OnboardingProgressBar() {
             className={cn(
               "inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 font-display text-[10px] font-semibold uppercase tracking-[0.16em]",
               "border-violet-500/25 bg-white/70 text-gray-900 shadow-sm",
-              "transition-all group-hover:border-cyan-400/40 group-hover:bg-white group-hover:shadow-[0_0_20px_rgba(34,211,238,0.2)]",
+              "transition-bar group-hover:border-cyan-400/40 group-hover:bg-white group-hover:shadow-[0_0_20px_rgba(34,211,238,0.2)]",
               "dark:border-white/15 dark:bg-white/8 dark:text-white/90 dark:group-hover:bg-white/12",
             )}
           >

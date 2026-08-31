@@ -1,88 +1,33 @@
 "use client";
 
 /**
- * O-2 빠른 추천 — scoreMediaCandidates() 랭킹 목록 (믹스 편집 없음).
+ * O-2 빠른 추천 — scoreMediaCandidates() 랭킹 목록.
+ *
+ * 카드는 Step 2(믹스 편집)와 완전히 동일한 `BriefMediaCard` 를 쓴다 — 같은
+ * 사용자가 같은 흐름에서 보는 화면이라 정보량이 갈릴 이유가 없다. 순위 배지만
+ * 빠른 추천 고유 정보로 `rank` prop 을 통해 얹는다. 수량 조정도 여기서 바로
+ * 가능하다(예전엔 Step 2 로 넘겨야 했다).
  */
 
 import { useMemo } from "react";
 import type { MediaItem } from "@/lib/media-data";
 import { useBriefStore } from "@/lib/planner/brief/store";
-import { briefQuickRequiredStatus } from "@/lib/planner/brief/types";
+import {
+  BRIEF_DEFAULT_DAYS,
+  briefQuickRequiredStatus,
+} from "@/lib/planner/brief/types";
 import { filterBriefCatalogByRegion } from "@/lib/planner/brief/regions";
 import {
   scoreMediaCandidates,
   briefRankingBasisLabel,
-  type ScoredMedia,
 } from "@/lib/planner/brief/scoring";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
-import { PlannerMediaThumb } from "@/components/planner/planner-media-thumb";
+import { BriefMediaCard } from "@/components/planner/brief/brief-media-card";
 import { partitionScoredByBudget } from "@/lib/planner/brief/budget-ranking";
 import { BudgetFilterBar } from "@/components/planner/brief/budget-filter-bar";
 import { totalBudgetWon } from "@/lib/planner/brief/types";
 
-const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
-  target: { ko: "타깃 적합", en: "Target fit" },
-  budget: { ko: "예산 효율", en: "Budget efficiency" },
-  region: { ko: "지역 적합", en: "Region fit" },
-  industry: { ko: "업종 적합", en: "Industry fit" },
-};
-
-const QUICK_DAYS = 30;
-
-function RankRow({ scored, rank, isKo }: { scored: ScoredMedia; rank: number; isKo: boolean }) {
-  const { media, axes, total } = scored;
-  const mediaName = isKo ? media.name : media.nameEn || media.name;
-
-  return (
-    <li
-      className="rounded-xl border border-border bg-card p-3"
-      data-testid="brief-quick-rank-row"
-    >
-      <div className="flex items-start gap-3">
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-bold tabular-nums">
-          {rank}
-        </span>
-        <PlannerMediaThumb
-          media={media}
-          alt={mediaName}
-          size="rank"
-          isKo={isKo}
-        />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{mediaName}</p>
-              <p className="truncate text-xs text-muted-foreground">
-                {isKo ? media.location : media.locationEn || media.location}
-              </p>
-              {scored.overBudget ? (
-                <p className="mt-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
-                  {isKo ? "예산 초과" : "Over budget"}
-                </p>
-              ) : null}
-            </div>
-            <span className="shrink-0 rounded-lg bg-muted px-2 py-1 text-xs font-bold tabular-nums">
-              {total}
-            </span>
-          </div>
-          {axes.length > 0 ? (
-            <ul className="mt-2 space-y-0.5">
-              {axes.map((a) => (
-                <li key={a.key} className="text-[11px] leading-snug text-muted-foreground">
-                  <span className="font-medium text-foreground">
-                    {AXIS_LABEL[a.key]?.[isKo ? "ko" : "en"] ?? a.key} {a.score}
-                  </span>
-                  {" ← "}
-                  {a.rationale}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      </div>
-    </li>
-  );
-}
+const QUICK_DAYS = BRIEF_DEFAULT_DAYS;
 
 export function BriefQuickRankPanel({
   catalog,
@@ -162,7 +107,18 @@ export function BriefQuickRankPanel({
 
       <ul className="space-y-2">
         {visibleScored.slice(0, 20).map((s, i) => (
-          <RankRow key={s.media.id} scored={s} rank={i + 1} isKo={isKo} />
+          <BriefMediaCard
+            key={s.media.id}
+            scored={s}
+            rank={i + 1}
+            units={store.mixUnits[s.media.id] ?? 0}
+            isKo={isKo}
+            days={QUICK_DAYS}
+            onAdd={() => store.addMediaToMix(s.media.id, 1)}
+            onRemove={() => store.removeMediaFromMix(s.media.id)}
+            onUnits={(n) => store.setMixUnits(s.media.id, n)}
+            testIdPrefix="brief-quick-rank"
+          />
         ))}
       </ul>
 

@@ -174,7 +174,7 @@ function addBudgetSplitShapes(
   return barY + barH + 0.22 + rows.length * 0.4 + 0.1;
 }
 
-const CYAN_BAR = "1C1C1F";
+const INK_DEEP_BAR = "1C1C1F";
 const BAR_TRACK = "F3F4F6";
 
 function addPptContributionBar(
@@ -278,7 +278,6 @@ export async function buildPlannerReportPptx(
   );
   const lineupViewMode = assets?.lineupViewMode ?? "detail";
 
-  const ACCENT_LT = theme.pptx.accentLight;
   const wordmark = (size: number) => [
     { text: "THINK", options: { color: theme.coverMode === "filled" ? WHITE : COVER_TEXT, bold: true } },
     { text: "AD", options: { color: ACCENT_LT, bold: true } },
@@ -293,6 +292,8 @@ export async function buildPlannerReportPptx(
     : null;
 
   // ── 1. 표지 ──
+  // 배경은 화면 미리보기(DocumentGradientHero, bg-[#1c1c1f])와 통일한다.
+  // INK_DEEP 상수가 이름과 달리 값은 이미 "1C1C1F" 라 그대로 근흑색 배경으로 쓴다.
   const cover = pptx.addSlide();
   cover.background = { color: COVER_BG };
   if (coverLogoData) {
@@ -659,7 +660,7 @@ export async function buildPlannerReportPptx(
         y: rightY,
         w: barW,
         rows: ch.reachSummary,
-        color: CYAN,
+        color: INK_DEEP,
         face,
         fmt: (n) => fmtImp(n, isKo),
       });
@@ -1060,7 +1061,7 @@ export async function buildPlannerReportPptx(
           colW,
           isKo ? "실노출 기여(추정)" : "Reach share (est.)",
           row.exposureContributionPct,
-          CYAN_BAR,
+          INK_DEEP_BAR,
           face,
         );
         addPptContributionBar(
@@ -1083,7 +1084,7 @@ export async function buildPlannerReportPptx(
           textW,
           isKo ? "실노출 기여(추정)" : "Reach share (est.)",
           row.exposureContributionPct,
-          CYAN_BAR,
+          INK_DEEP_BAR,
           face,
         );
       } else if (row.budgetContributionPct != null) {
@@ -1475,7 +1476,7 @@ export async function buildPlannerReportPptx(
       s4.addText(p.digitalSummary, { x: 0.6, y: 1.2, w: 12.1, h: 0.5, fontFace: face, fontSize: 12, color: GRAY });
     }
     const dHead = [isKo ? "플랫폼" : "Platform", isKo ? "비중" : "Share", isKo ? "예상 노출" : "Est. impressions"].map((t) => ({
-      text: t, options: { fill: { color: CYAN }, color: WHITE, bold: true, fontFace: face, fontSize: 12 },
+      text: t, options: { fill: { color: INK_DEEP }, color: WHITE, bold: true, fontFace: face, fontSize: 12 },
     }));
     const dBody = p.digital.map((r, i) => {
       const fill = i % 2 ? { color: LIGHT } : { color: WHITE };

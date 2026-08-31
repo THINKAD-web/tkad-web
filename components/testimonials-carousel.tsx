@@ -14,7 +14,7 @@ type Props = {
 };
 
 const cardClass =
-  "group relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden rounded-[28px] border border-border/60 bg-card/90 p-7 shadow-[0_14px_44px_rgba(0,0,0,0.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 tkad-neon-border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:shadow-[0_18px_72px_rgba(0,0,0,0.45)] sm:p-8 md:basis-[48%] lg:basis-[32%]";
+  "group relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden rounded-[28px] border border-border/60 bg-card/90 p-7 shadow-[0_14px_44px_rgba(0,0,0,0.06)] backdrop-blur-md transition-ui duration-200 hover:-translate-y-1 tkad-neon-border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:shadow-[0_18px_72px_rgba(0,0,0,0.45)] sm:p-8 md:basis-[48%] lg:basis-[32%]";
 
 /**
  * Embla 기반 캐러셀 — 5초 간격 자동 재생, hover 정지, 모바일은 스와이프·데스크톱은 화살표.
@@ -158,7 +158,7 @@ export function TestimonialsCarousel({ items }: Props) {
           onClick={scrollPrev}
           disabled={!canPrev}
           aria-label="이전 후기"
-          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-card/95 text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-border hover:bg-card disabled:opacity-40 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100"
+          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-card/95 text-foreground shadow-sm backdrop-blur transition-ui hover:-translate-y-0.5 hover:border-border hover:bg-card disabled:opacity-40 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -167,7 +167,7 @@ export function TestimonialsCarousel({ items }: Props) {
           onClick={scrollNext}
           disabled={!canNext}
           aria-label="다음 후기"
-          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-card/95 text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-border hover:bg-card disabled:opacity-40 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100"
+          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-card/95 text-foreground shadow-sm backdrop-blur transition-ui hover:-translate-y-0.5 hover:border-border hover:bg-card disabled:opacity-40 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
@@ -182,7 +182,7 @@ export function TestimonialsCarousel({ items }: Props) {
             aria-label={`${i + 1}번 후기로 이동`}
             aria-current={selected === i}
             className={cn(
-              "h-2 transition-all",
+              "h-2 transition-ui",
               selected === i
                 ? "w-8 bg-[linear-gradient(90deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)]"
                 : "w-2 bg-muted-foreground/25 hover:bg-muted-foreground/40 dark:bg-white/12 dark:hover:bg-white/22",

@@ -15,6 +15,10 @@ import {
   footfallVsReachFootnote,
   PLANNER_TOTAL_REACH_LABEL,
 } from "@/lib/planner-report-performance-guide";
+import {
+  DATA_QUALITY_PENDING_HINT,
+  dataQualityExcludedNote,
+} from "@/lib/planner/brief/data-quality-copy";
 
 function Row({
   label,
@@ -63,7 +67,8 @@ function PendingRow({
   );
 }
 
-function formatReach(n: number, isKo: boolean): string {
+/** 큰 수를 만/백만 단위로 압축 표시 — 결과 요약 카드도 같은 표기를 쓴다 */
+export function formatReach(n: number, isKo: boolean): string {
   if (n >= 1_000_000) {
     const m = n / 1_000_000;
     return isKo ? `${m.toFixed(1)}백만` : `${m.toFixed(1)}M`;
@@ -88,8 +93,8 @@ export function MetricsPanel({
       : `₩${n.toLocaleString("en-US")}`;
 
   const pendingHint = isKo
-    ? "커버리지·인구 데이터가 있는 매체가 없습니다"
-    : "No media with coverage population data in this mix";
+    ? DATA_QUALITY_PENDING_HINT.ko
+    : DATA_QUALITY_PENDING_HINT.en;
 
   const usedPct = Math.round(metrics.budgetUsedRate * 100);
   const reachReady = metrics.netReach != null;
@@ -97,10 +102,16 @@ export function MetricsPanel({
 
   return (
     <aside className="rounded-xl border border-border bg-card p-4">
-      <p className="mb-3 rounded-lg border border-amber-400/40 bg-amber-400/10 p-2.5 text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
+      {/*
+        면책 문구는 내보내기(PDF/PPTX)와 같은 말을 해야 한다.
+        `lib/planner-report-export/payload-ooh.ts` 의 disclaimer 와 표현을 맞춘다 —
+        화면은 "쓰지 말라" 하고 PDF 는 "써도 된다" 하던 불일치를 없앤 것이다.
+        문구를 고칠 때는 양쪽을 함께 고칠 것.
+      */}
+      <p className="mb-3 rounded-lg border border-border bg-muted/50 p-2.5 text-[11px] leading-relaxed text-muted-foreground">
         {isKo
-          ? "노출·도달은 추정치입니다. 데이터 정합성 작업 진행 중 — 대외 제안서에 사용 금지."
-          : "Impressions and reach are estimates. Data integrity work in progress — do not use in client-facing proposals."}
+          ? "노출·도달은 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
+          : "Impressions and reach use THINKAD internal estimates; actual delivery may vary by inventory and terms."}
       </p>
 
       <h3 className="mb-1 text-sm font-semibold">
@@ -203,9 +214,7 @@ export function MetricsPanel({
 
         {excluded > 0 ? (
           <p className="mt-2 rounded-lg border border-border bg-muted/50 p-2 text-[11px] text-muted-foreground">
-            {isKo
-              ? `${excluded}개 매체는 인구·커버리지 데이터 미비로 도달 계산에서 제외되었습니다.`
-              : `${excluded} media excluded from reach — missing coverage population data.`}
+            {dataQualityExcludedNote(excluded, isKo)}
           </p>
         ) : null}
       </div>

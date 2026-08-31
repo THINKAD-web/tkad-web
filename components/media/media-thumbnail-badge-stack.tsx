@@ -26,8 +26,8 @@ export function buildVerifiedThumbnailBadge(isKo: boolean): ThumbnailBadge {
     key: "verified",
     label: isKo ? "검증" : "Verified",
     title: isKo
-      ? "싱커드 4단계 검증: 현장 방문 → 촬영 실측 → 데이터 검증 → 등록"
-      : "THINKAD 4-step verified inventory",
+      ? "운영팀이 매체 정보를 확인해 등록한 매체입니다. 지표는 이상값 검사를 거칩니다."
+      : "Media details reviewed by our ops team before listing. Metrics pass an outlier check.",
     className: cn(
       THUMBNAIL_BADGE_CHIP_BASE,
       "pointer-events-auto bg-[color:var(--qp-accent)] uppercase text-white shadow-none",

@@ -223,7 +223,7 @@ export function DiscoveryMediaCardHorizontal({
             ? "border-hermes/50 dark:border-hermes/40"
             : "border-gray-100 dark:border-white/10",
         interactive &&
-          "cursor-pointer transition-all hover:shadow-md active:scale-[0.99]",
+          "cursor-pointer transition-ui hover:shadow-md active:scale-[0.99]",
         className,
       )}
       data-discovery-media-card="horizontal"

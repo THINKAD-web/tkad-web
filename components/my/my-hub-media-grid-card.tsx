@@ -37,7 +37,7 @@ export function MyHubMediaGridCard({
     <li
       className={cn(
         myHubGlassCard,
-        "group relative overflow-hidden p-4 transition-all hover:-translate-y-0.5 hover:border-primary/25 sm:p-5",
+        "group relative overflow-hidden p-4 transition-ui hover:-translate-y-0.5 hover:border-primary/25 sm:p-5",
         className,
       )}
     >
@@ -53,7 +53,7 @@ export function MyHubMediaGridCard({
             <img
               src={item.image}
               alt=""
-              className="h-full w-full object-cover grayscale-[20%] transition-all duration-300 group-hover:grayscale-0"
+              className="h-full w-full object-cover grayscale-[20%] transition-ui duration-200 group-hover:grayscale-0"
             />
           ) : null}
         </div>

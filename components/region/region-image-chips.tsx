@@ -121,7 +121,7 @@ export function RegionImageChips({
             <>
               <div
                 className={cn(
-                  "flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br ring-2 ring-offset-2 ring-offset-white transition-all dark:ring-offset-gray-950",
+                  "flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br ring-2 ring-offset-2 ring-offset-white transition-ui dark:ring-offset-gray-950",
                   size,
                   region.gradient,
                   active

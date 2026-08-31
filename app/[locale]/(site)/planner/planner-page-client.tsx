@@ -207,6 +207,7 @@ function PlannerNeonPageBody({
 }
 
 import { PLANNER_CAMPAIGN_GOAL_DEFS } from "@/lib/planner/campaign-goal-defs";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 const CATEGORIES: {
   key: PlannerCategory;
@@ -1603,7 +1604,7 @@ export default function PlannerPageClient({
                           onClick={() => toggleAgeKey(k)}
                           aria-pressed={ageKeys.includes(k)}
                           className={cn(
-                            "inline-flex shrink-0 items-center rounded-full px-3 py-1.5 text-xs font-semibold transition-all touch-manipulation sm:text-sm",
+                            "inline-flex shrink-0 items-center rounded-full px-3 py-1.5 text-xs font-semibold transition-ui touch-manipulation sm:text-sm",
                             ageKeys.includes(k)
                               ? "bg-[color:var(--qp-accent)] text-white shadow-sm shadow-[color:var(--qp-accent)]/25"
                               : "dark:bg-white/10 bg-gray-100 text-gray-800 hover:bg-gray-200 dark:text-white/85 dark:hover:bg-white/15",
@@ -1721,7 +1722,7 @@ export default function PlannerPageClient({
                       disabled={budgetFieldFocused}
                       onChange={(e) => setBudget(e.target.value)}
                       className="h-2 w-full cursor-pointer appearance-none rounded-full dark:bg-white/10 bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-                      style={{ accentColor: "#ff6200" }}
+                      style={{ accentColor: BRAND_ACCENT }}
                       aria-label={t("budget")}
                     />
                     <div className="mt-4 flex flex-wrap items-end gap-3">
@@ -2147,7 +2148,7 @@ export default function PlannerPageClient({
                       <Link
                         key={m.id}
                         href={mediaItemDetailPath(m)}
-                        className="group flex flex-col gap-2 rounded-[22px] border border-gray-200/80 bg-white/90 p-3 transition-all hover:-translate-y-0.5 hover:bg-white dark:border-white/12 dark:bg-white/8 dark:hover:bg-white/12"
+                        className="group flex flex-col gap-2 rounded-[22px] border border-gray-200/80 bg-white/90 p-3 transition-ui hover:-translate-y-0.5 hover:bg-white dark:border-white/12 dark:bg-white/8 dark:hover:bg-white/12"
                       >
                         <CompositePreview
                           mediaImageUrl={getPrimaryMediaImageUrl(m)}

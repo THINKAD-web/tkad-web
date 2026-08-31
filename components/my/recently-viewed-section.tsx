@@ -51,7 +51,7 @@ export function RecentlyViewedSection() {
                 <img
                   src={m.thumbnail}
                   alt=""
-                  className="h-full w-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
+                  className="h-full w-full object-cover grayscale transition-ui duration-200 group-hover:grayscale-0"
                 />
               ) : null}
             </div>

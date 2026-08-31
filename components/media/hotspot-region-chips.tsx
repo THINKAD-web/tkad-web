@@ -58,7 +58,7 @@ export function HotspotRegionChips({
                 onSelect(h.regionMain, h.regionSub);
               }}
               className={cn(
-                "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-semibold transition-all",
+                "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-semibold transition-ui",
                 compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs sm:text-sm",
                 active
                   ? "bg-hermes text-white shadow-sm shadow-hermes/25"

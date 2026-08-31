@@ -54,7 +54,7 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
   return (
     <article
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 dark:bg-white/8 bg-gray-100 p-6 backdrop-blur transition-all duration-200",
+        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 dark:bg-white/8 bg-gray-100 p-6 backdrop-blur transition-ui duration-200",
         "hover:-translate-y-1 hover:bg-white/95 hover:shadow-[0_24px_72px_rgba(15,23,42,0.18)]",
         "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 dark:hover:bg-white/[0.08]",
         "dark:hover:shadow-[0_24px_72px_rgba(0,0,0,0.55)]",

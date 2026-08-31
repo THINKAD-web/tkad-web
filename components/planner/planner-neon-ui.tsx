@@ -8,6 +8,7 @@ import { buildFeatureGateMessage } from "@/lib/entitlements/gate-messages";
 import { TierGatePanel } from "@/components/entitlements/tier-gate-panel";
 import { plannerProGateTrialHint, plannerTrialBannerText } from "@/lib/entitlements/gate-ui";
 import { cn } from "@/lib/utils";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 /** 플래너 Quiet Professional UI 공통 클래스 (legacy export name 유지) */
 export const plannerNeon = {
@@ -34,7 +35,7 @@ export const plannerNeon = {
 } as const;
 
 export const PLANNER_CHART_COLORS = {
-  violet: "#ff6200",
+  violet: BRAND_ACCENT,
   cyan: "#1c1c1f",
   pink: "#5a5a5e",
   indigo: "#08080a",

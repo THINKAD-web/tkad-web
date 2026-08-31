@@ -46,7 +46,7 @@ export function SubTabs({ tabs, currentPath }: SubTabsProps) {
                 key={tab.href}
                 href={tab.href}
                 className={cn(
-                  "flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all",
+                  "flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-ui",
                   isActive
                     ? "tkad-qp-cta text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/8 dark:text-white/70 hover:dark:bg-white/15",

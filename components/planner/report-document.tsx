@@ -11,7 +11,7 @@ import type {
   PlannerExportChartDatum,
 } from "@/lib/planner-report-export/types";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
-import { plannerChartColor } from "@/lib/planner-chart-colors";
+import { plannerChartColor, CHART_SERIES_HEX } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 import { formatExportBudgetWonLabel } from "@/lib/planner-report-export/format-export-money";
 import {
@@ -40,7 +40,13 @@ function fmtBudget(man: number, isKo: boolean) {
   return isKo ? `${man.toLocaleString()}만원` : `${man.toLocaleString()}M KRW`;
 }
 
-const CHART_COLORS = ["#0D9488", "#0D1B2E", "#64748B", "#6366F1", "#E11D48"];
+const CHART_COLORS = [
+  CHART_SERIES_HEX.primary,
+  CHART_SERIES_HEX.ink,
+  CHART_SERIES_HEX.slate,
+  CHART_SERIES_HEX.indigo,
+  CHART_SERIES_HEX.rose,
+];
 
 function chartDatumColor(d: PlannerExportChartDatum, index: number): string {
   return plannerChartColor(d.colorKey, index);

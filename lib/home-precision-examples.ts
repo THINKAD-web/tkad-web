@@ -100,3 +100,17 @@ export const HOME_PRECISION_EXAMPLES: Record<
     },
   ],
 };
+
+/**
+ * 예시 하나를 고른다 — **서버 컴포넌트에서만 호출할 것.**
+ *
+ * 클라이언트에서 부르면 서버가 뽑은 것과 달라져 hydration 이 깨진다.
+ * 홈은 ISR 이라 재생성 주기(1시간)마다 바뀐다.
+ */
+export function pickHomePrecisionExample(
+  examples: readonly HomePrecisionExample[],
+): HomePrecisionExample {
+  return (
+    examples[Math.floor(Math.random() * examples.length)] ?? examples[0]!
+  );
+}

@@ -427,7 +427,7 @@ export default function AdminAnalyticsPage() {
                 </div>
                 <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className={`h-full rounded-full ${stage.color} transition-all`}
+                    className={`h-full rounded-full ${stage.color} transition-bar`}
                     style={{ width: `${(stage.count / maxFunnel) * 100}%` }}
                   />
                 </div>

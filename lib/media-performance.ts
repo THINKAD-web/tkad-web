@@ -1,14 +1,82 @@
 import type { MediaItem } from "@/lib/media-data";
 import { resolveMonthlyImpressions } from "@/lib/media-metrics";
+import type { MetricBasis } from "@/lib/metrics/defaults";
+import {
+  resolveContactRateWithBasis,
+  resolveSovShareWithBasis,
+  weakestBasis,
+} from "@/lib/metrics/defaults";
+import { calcImpressions } from "@/lib/metrics/impressions";
 
 export type PerformanceDonutKey = "peak" | "standard" | "extended";
 
 export type PerformanceBarKey = "reach" | "dwell" | "recall";
 
+/**
+ * 일 실노출(추정) — 접촉률·SOV 보정을 반영한, 실제로 내 광고를 보는 사람 수.
+ *
+ * `dailyFootfall` 은 매체 앞을 **지나간** 사람(OTS)이라 실노출과 유형별로
+ * 최대 20배까지 차이 난다. 상세 화면이 유동인구만 보여주면 광고주가 그 수를
+ * 노출로 오해하므로 둘을 나란히 놓는다.
+ *
+ * SOV 근거가 없으면 `resolveSovShareWithBasis` 가 기본값으로 덮되 basis 를
+ * `default` 로 실어 보낸다 — 화면은 그 basis 로 [추정] 배지를 띄운다.
+ * 유동인구 자체가 없으면 계산 대상이 아니므로 null 이다.
+ */
+export type DailyAdjustedReach = {
+  value: number;
+  basis: MetricBasis;
+};
+
+function mediaSovSource(media: MediaItem) {
+  return {
+    type: media.type,
+    subCategory: media.subCategory ?? media.mediaSubCategory,
+    mainCategory: media.mediaCategory?.[0],
+    name: media.name,
+    forceLoopSov: media.forceLoopSov,
+    spotDuration: media.spotDurationSec,
+    loopDuration: media.loopDurationSec,
+    playsPerHour: media.playsPerHour,
+  };
+}
+
+export function resolveDailyAdjustedReach(
+  media: MediaItem,
+): DailyAdjustedReach | null {
+  const traffic = media.dailyFootTraffic;
+  if (!Number.isFinite(traffic) || traffic <= 0) return null;
+
+  const contactRate = resolveContactRateWithBasis({
+    type: media.type,
+    subCategory: media.subCategory ?? media.mediaSubCategory,
+    mainCategory: media.mediaCategory?.[0],
+    name: media.name,
+  });
+  const sovShare = resolveSovShareWithBasis(mediaSovSource(media));
+
+  const { dailyImpressions } = calcImpressions({
+    dailyTraffic: traffic,
+    contactRate: contactRate.value,
+    sovShare: sovShare.value,
+    units: 1,
+    days: 1,
+  });
+
+  if (dailyImpressions <= 0) return null;
+
+  return {
+    value: dailyImpressions,
+    basis: weakestBasis([contactRate.basis, sovShare.basis]),
+  };
+}
+
 export type MediaPerformanceMetrics = {
   visibilityScore: number;
   monthlyImpressions: number;
   dailyFootfall: number;
+  /** 접촉률·SOV 보정 일 실노출. 유동인구가 없으면 null */
+  dailyAdjustedReach: DailyAdjustedReach | null;
   donut: readonly {
     key: PerformanceDonutKey;
     percent: number;
@@ -63,6 +131,7 @@ export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMet
     visibilityScore,
     monthlyImpressions: monthly,
     dailyFootfall: media.dailyFootTraffic,
+    dailyAdjustedReach: resolveDailyAdjustedReach(media),
     donut: [
       // Premium neon palette (matches landing day/night)
       { key: "peak", percent: peak, color: "#a855f7" }, // violet

@@ -434,6 +434,7 @@ export async function buildPlannerReportPdf(
   const titleLines = doc.splitTextToSize(p.documentTitle, contentW) as string[];
   doc.text(titleLines, M, 92);
 
+  // 화면 미리보기 title rule 과 대응 — 배경 대비에 맞춰 accent 로 그린다.
   setFill(QP_ACCENT);
   doc.rect(M, 92 + titleLines.length * 11, 28, 1.6, "F");
 

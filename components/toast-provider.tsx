@@ -88,7 +88,7 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
             <div
               key={t.id}
               className={cn(
-                "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border p-4 shadow-lg transition-all duration-300",
+                "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border p-4 shadow-lg transition-ui duration-200",
                 STYLES[t.type],
                 t.removing
                   ? "translate-x-full opacity-0"

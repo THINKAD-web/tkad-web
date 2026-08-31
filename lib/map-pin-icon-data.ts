@@ -4,6 +4,7 @@ import {
   visibilityPinTierDefForScore,
   visibilityPinTierForScore,
 } from "@/lib/map-pin-visibility-colors";
+import { BRAND_ACCENT, BRAND_ACCENT_STROKE, BRAND_ACCENT_STROKE_ALT } from "@/lib/brand-palette";
 
 export type PinShapeKind = "circle" | "rounded-square" | "diamond";
 
@@ -21,10 +22,10 @@ export function pinColorForType(type: string): {
 } {
   const t = (type || "").toLowerCase();
   if (t.includes("office") || t.includes("thinkad")) {
-    return { fill: "#ff6200", stroke: "#c24e00", text: "#ffffff" };
+    return { fill: BRAND_ACCENT, stroke: BRAND_ACCENT_STROKE, text: "#ffffff" };
   }
   if (t.includes("digital")) {
-    return { fill: "#ff6200", stroke: "#ea580c", text: "#ffffff" };
+    return { fill: BRAND_ACCENT, stroke: BRAND_ACCENT_STROKE_ALT, text: "#ffffff" };
   }
   if (t.includes("static")) {
     return { fill: "#334155", stroke: "#475569", text: "#ffffff" };
@@ -88,7 +89,7 @@ export const MEDIA_TYPE_PIN_LEGEND_ENTRIES: readonly MediaTypePinLegendEntry[] =
     },
   ] as const;
 
-const MAP_PIN_SELECTION_RING = "#ff6200";
+const MAP_PIN_SELECTION_RING = BRAND_ACCENT;
 
 const pinDataUrlCache = new Map<string, string>();
 

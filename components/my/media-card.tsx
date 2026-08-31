@@ -33,7 +33,7 @@ export function MediaCard({
         <img
           src={item.image}
           alt=""
-          className="pointer-events-none relative h-20 w-20 flex-shrink-0 border-2 border-border object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
+          className="pointer-events-none relative h-20 w-20 flex-shrink-0 border-2 border-border object-cover grayscale transition-ui duration-200 group-hover:grayscale-0"
         />
       ) : (
         <div className="relative h-20 w-20 flex-shrink-0 border-2 border-border bg-muted" />

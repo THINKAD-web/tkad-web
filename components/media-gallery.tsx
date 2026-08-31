@@ -133,7 +133,7 @@ export default function MediaGallery({
               openLightbox(idx);
             }}
             className={cn(
-              "group relative aspect-video w-full cursor-zoom-in overflow-hidden rounded-lg border border-navy/10 bg-slate-100 text-left shadow-sm outline-none ring-offset-2 transition-all duration-300 hover:border-gold/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-gold/60",
+              "group relative aspect-video w-full cursor-zoom-in overflow-hidden rounded-lg border border-navy/10 bg-slate-100 text-left shadow-sm outline-none ring-offset-2 transition-ui duration-200 hover:border-gold/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-gold/60",
               "lg:aspect-auto lg:min-h-0",
             )}
             aria-label={`${L.expand} — ${idx + 1} / ${n}`}

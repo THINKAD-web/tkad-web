@@ -84,7 +84,7 @@ export function HomeCommunityNewsletter({ isKo, className }: Props) {
             disabled={status === "loading" || status === "success"}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={isKo ? "work@company.com" : "work@company.com"}
-            className="h-11 min-w-0 flex-1 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-4 text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-colors focus:border-white/22 focus:ring-2 focus:ring-[#ff6200]/30 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-11 min-w-0 flex-1 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-4 text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-colors focus:border-white/22 focus:ring-2 focus:ring-[color:var(--qp-accent)]/30 disabled:cursor-not-allowed disabled:opacity-60"
           />
           <button
             type="submit"

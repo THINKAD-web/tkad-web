@@ -55,7 +55,7 @@ export function AdvertiserCampaignCard({ item, isKo }: Props) {
       href={`/dashboard/campaigns/${item.id}?tab=proof`}
       className={cn(
         "tkad-glass-surface tkad-neon-border flex gap-4 rounded-[28px] border p-4 backdrop-blur-md sm:p-5",
-        "transition-all hover:-translate-y-0.5 hover:border-primary/25 active:scale-[0.99]",
+        "transition-ui hover:-translate-y-0.5 hover:border-primary/25 active:scale-[0.99]",
       )}
     >
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[18px] border border-border bg-muted/40 sm:h-28 sm:w-28">

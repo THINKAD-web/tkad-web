@@ -122,7 +122,7 @@ export default function VerificationQueueClient() {
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-all ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-ui ${
                 active
                   ? "bg-[color:var(--qp-accent-soft)] text-foreground shadow-sm ring-1 ring-[color:var(--qp-accent)]/25"
                   : "text-muted-foreground hover:text-foreground"

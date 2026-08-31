@@ -1,6 +1,7 @@
+import { BRAND_ACCENT, BRAND_ACCENT_STROKE, BRAND_ACCENT_STROKE_ALT } from "@/lib/brand-palette";
 /** `/media/map` 가시성 점수 핀 — Quiet Professional orange 명도 그라데이션 */
 
-export const VISIBILITY_PIN_BRAND_NEON = "#ff6200";
+export const VISIBILITY_PIN_BRAND_NEON = BRAND_ACCENT;
 
 export type VisibilityPinTier = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -72,7 +73,7 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     min: 92,
     max: 94,
     fill: "#F97316",
-    stroke: "#EA580C",
+    stroke: BRAND_ACCENT_STROKE_ALT,
     text: "#0f172a",
     labelKo: "높음",
     labelEn: "High",
@@ -83,8 +84,8 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 5,
     min: 95,
     max: 100,
-    fill: "#ff6200",
-    stroke: "#C24E00",
+    fill: BRAND_ACCENT,
+    stroke: BRAND_ACCENT_STROKE,
     text: "#ffffff",
     labelKo: "최상",
     labelEn: "Top",
@@ -127,7 +128,7 @@ export const VISIBILITY_PIN_TIERS_DARK: readonly VisibilityPinTierDef[] = [
     min: 85,
     max: 88,
     fill: "#C2410C",
-    stroke: "#EA580C",
+    stroke: BRAND_ACCENT_STROKE_ALT,
     text: "#FFEDD5",
     labelKo: "표준",
     labelEn: "Standard",
@@ -138,7 +139,7 @@ export const VISIBILITY_PIN_TIERS_DARK: readonly VisibilityPinTierDef[] = [
     tier: 3,
     min: 89,
     max: 91,
-    fill: "#EA580C",
+    fill: BRAND_ACCENT_STROKE_ALT,
     stroke: "#FB923C",
     text: "#FFF7ED",
     labelKo: "양호",
@@ -162,7 +163,7 @@ export const VISIBILITY_PIN_TIERS_DARK: readonly VisibilityPinTierDef[] = [
     tier: 5,
     min: 95,
     max: 100,
-    fill: "#ff6200",
+    fill: BRAND_ACCENT,
     stroke: "#FDBA74",
     text: "#ffffff",
     labelKo: "최상",

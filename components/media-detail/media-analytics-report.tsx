@@ -17,6 +17,7 @@ import {
   DataAttributionList,
   OverallConfidenceBar,
 } from "@/components/data-confidence-badge";
+import { BRAND_ACCENT } from "@/lib/brand-palette";
 
 type Props = {
   report: MediaAnalyticsReport;
@@ -101,7 +102,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
                   borderRadius: 8,
                 }}
               />
-              <Bar dataKey="index" fill="#ff6200" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="index" fill={BRAND_ACCENT} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

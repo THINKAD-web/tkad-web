@@ -18,11 +18,10 @@ import type { AuditAccumulator, AuditMediaRow } from "../lib/metrics/audit-rules
 import { periodToDays } from "../lib/metrics/price.ts";
 import { classifyMedia } from "../lib/metrics/classify.ts";
 import { CPM_BOUNDS } from "../lib/metrics/constants.ts";
-
-function simpleCpmWon(price: number, impressions: number): number | null {
-  if (price <= 0 || impressions < 1000) return null;
-  return Math.round(price / (impressions / 1000));
-}
+import {
+  estimateCatalogCpmWon,
+  resolveDisplayCpmWon,
+} from "../lib/media-metrics.ts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 config({ path: resolve(root, ".env") });
@@ -149,21 +148,46 @@ async function main() {
       name: row.name,
     });
     const bounds = CPM_BOUNDS[mediaClass];
-    const impressions =
-      row.impressions ?? Math.round((row.dailyFootfall ?? 0) * 30);
-    const currentCpm = simpleCpmWon(row.price, impressions);
+    const metricsInput = {
+      cpm: row.cpm ?? undefined,
+      price: row.price,
+      impressions: row.impressions ?? undefined,
+      dailyFootTraffic: row.dailyFootfall ?? 0,
+    };
+    const currentDisplayCpm = resolveDisplayCpmWon(metricsInput);
+    const currentRecalcCpm = estimateCatalogCpmWon(metricsInput);
     const correctedPrice = row.price * 10;
-    const correctedCpm = simpleCpmWon(correctedPrice, impressions);
+    const correctedMetricsInput = {
+      ...metricsInput,
+      price: correctedPrice,
+      // execute 스크립트와 동일 — stored CPM 도 ×10 반영
+      cpm:
+        typeof row.cpm === "number" && row.cpm > 0
+          ? Math.round(row.cpm * 10)
+          : undefined,
+    };
+    const correctedDisplayCpm = resolveDisplayCpmWon(correctedMetricsInput);
+    const correctedRecalcCpm = estimateCatalogCpmWon(correctedMetricsInput);
     const cross = labelPeriodCrossCheck(row);
-    const inBoundsAfter =
-      correctedCpm != null &&
-      correctedCpm >= bounds[0] &&
-      correctedCpm <= bounds[1];
 
     const auditBefore = emptyAcc();
     auditRow(row, auditBefore);
     const auditAfter = emptyAcc();
-    auditRow({ ...row, price: correctedPrice }, auditAfter);
+    auditRow(
+      {
+        ...row,
+        price: correctedPrice,
+        cpm: correctedMetricsInput.cpm ?? row.cpm,
+      },
+      auditAfter,
+    );
+
+    const displayInBoundsAfter =
+      correctedDisplayCpm != null &&
+      correctedDisplayCpm >= bounds[0] &&
+      correctedDisplayCpm <= bounds[1];
+    const auditCleanAfter =
+      auditAfter.violations.filter((v) => v.rule === "R-02").length === 0;
 
     return {
       id: row.id,
@@ -175,19 +199,32 @@ async function main() {
       correctedPrice,
       pricePeriod: row.pricePeriod,
       priceOptions: row.priceOptions,
+      impressions: row.impressions,
+      dailyFootfall: row.dailyFootfall,
       crossCheck: cross,
       monthlyProductLikely: cross.looksMonthly,
-      currentCpm,
-      correctedCpm,
+      currentCpm: row.cpm,
+      currentDisplayCpm:
+        currentDisplayCpm != null ? Math.round(currentDisplayCpm) : null,
+      currentRecalcCpm:
+        currentRecalcCpm != null ? Math.round(currentRecalcCpm) : null,
+      correctedCpm: correctedMetricsInput.cpm ?? null,
+      correctedDisplayCpm:
+        correctedDisplayCpm != null ? Math.round(correctedDisplayCpm) : null,
+      correctedRecalcCpm:
+        correctedRecalcCpm != null ? Math.round(correctedRecalcCpm) : null,
       cpmBounds: bounds,
-      inBoundsAfter,
+      displayInBoundsAfter,
+      auditCleanAfter,
+      inBoundsAfter: displayInBoundsAfter && auditCleanAfter,
       r02Before: auditBefore.violations.filter((v) => v.rule === "R-02").length,
       r02After: auditAfter.violations.filter((v) => v.rule === "R-02").length,
-      recommendation: inBoundsAfter
-        ? cross.looksMonthly
-          ? "approve_candidate"
-          : "review_label_mismatch"
-        : "reject_not_in_bounds",
+      recommendation:
+        displayInBoundsAfter && auditCleanAfter
+          ? cross.looksMonthly
+            ? "approve_candidate"
+            : "review_label_mismatch"
+          : "reject_not_in_bounds",
     };
   });
 

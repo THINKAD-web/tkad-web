@@ -27,6 +27,7 @@ import {
   quoteCampaignDaysFromPeriodKey,
 } from "@/lib/quote-wizard-pricing";
 import { QuoteStampImage } from "@/components/quote/quote-stamp-image";
+import { BRAND_ACCENT, BRAND_ACCENT_STROKE } from "@/lib/brand-palette";
 
 export type QuotePremiumProps = {
   /** BILL TO 회사명 */
@@ -85,10 +86,10 @@ const PROPOSAL_TOKENS: ThemeTokens = {
     padding: 18,
     boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
   },
-  sectionTitle: "#ff6200",
+  sectionTitle: BRAND_ACCENT,
   label: "#6B7280",
   value: "#111827",
-  durationValue: "#ff6200",
+  durationValue: BRAND_ACCENT,
   bodyMuted: "#6B7280",
   tableHead: "#9CA3AF",
   tableCell: "#111827",
@@ -117,8 +118,8 @@ function RoiChart() {
           <stop offset="100%" stopColor="rgba(255,98,0,0.04)" />
         </linearGradient>
         <linearGradient id={lineId} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#ff6200" />
-          <stop offset="100%" stopColor="#c24e00" />
+          <stop offset="0%" stopColor={BRAND_ACCENT} />
+          <stop offset="100%" stopColor={BRAND_ACCENT_STROKE} />
         </linearGradient>
       </defs>
       <path
@@ -143,7 +144,7 @@ function ThinkadLogo() {
       <span
         className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-black text-white"
         style={{
-          background: "linear-gradient(135deg, #ff6200 0%, #c24e00 100%)",
+          background: `linear-gradient(135deg, ${BRAND_ACCENT} 0%, ${BRAND_ACCENT_STROKE} 100%)`,
         }}
       >
         T

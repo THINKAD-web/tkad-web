@@ -12,8 +12,15 @@ import {
   YAxis,
 } from "recharts";
 import type { InquiryTypeSlice, WeeklyInquiryPoint } from "@/lib/admin-dashboard-data";
+import { CHART_SERIES_HEX } from "@/lib/planner-chart-colors";
 
-const PIE_COLORS = ["#0D9488", "#0D1B2E", "#E11D48", "#6366F1", "#64748B"];
+const PIE_COLORS = [
+  CHART_SERIES_HEX.primary,
+  CHART_SERIES_HEX.ink,
+  CHART_SERIES_HEX.rose,
+  CHART_SERIES_HEX.indigo,
+  CHART_SERIES_HEX.slate,
+];
 
 type Props = {
   weeklyInquiries: WeeklyInquiryPoint[];
@@ -60,9 +67,9 @@ export function AdminDashboardCharts({
                 type="monotone"
                 dataKey="count"
                 name="문의"
-                stroke="#ff6200"
+                stroke={CHART_SERIES_HEX.primary}
                 strokeWidth={2.5}
-                dot={{ r: 4, fill: "#ff6200" }}
+                dot={{ r: 4, fill: CHART_SERIES_HEX.primary }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>

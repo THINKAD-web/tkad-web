@@ -154,7 +154,7 @@ function TabLabel({ active, children }: { active: boolean; children: ReactNode }
   return (
     <span
       className={cn(
-        "mt-1 w-full truncate text-center text-[10px] transition-colors duration-200",
+        "mt-1 w-full truncate text-center text-[10px] transition-colors duration-[--motion-fast]",
         active ? TAB_LABEL_ACTIVE : TAB_LABEL_INACTIVE,
       )}
     >
@@ -206,7 +206,7 @@ export function BottomTabBar() {
                 <Link
                   href={tab.href}
                   onClick={() => hapticLight()}
-                  className="tkad-mobile-tab-fab relative z-10 -translate-y-2 flex w-full min-w-0 flex-col items-center transition-all duration-200 active:scale-95"
+                  className="tkad-mobile-tab-fab relative z-10 -translate-y-2 flex w-full min-w-0 flex-col items-center transition-ui duration-[--motion-fast] active:scale-[0.97]"
                   aria-current={active ? "page" : undefined}
                 >
                   <span className="tkad-qp-cta tkad-mobile-tab-fab relative z-10 flex h-14 w-14 items-center justify-center rounded-full">
@@ -235,7 +235,7 @@ export function BottomTabBar() {
                     prefetchSupportAiChatModal();
                     openContactChannelSheet();
                   }}
-                  className="flex w-full min-w-0 flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
+                  className="flex w-full min-w-0 flex-col items-center pb-2 pt-1 transition-ui duration-[--motion-fast] active:scale-[0.97]"
                   aria-current={active ? "page" : undefined}
                 >
                   <TabNeonIcon
@@ -255,7 +255,7 @@ export function BottomTabBar() {
             <li key={tab.id} className="flex min-w-0 flex-1 basis-0">
               <Link
                 href={tab.href}
-                className="flex w-full min-w-0 flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
+                className="flex w-full min-w-0 flex-col items-center pb-2 pt-1 transition-ui duration-[--motion-fast] active:scale-[0.97]"
                 aria-current={active ? "page" : undefined}
                 onClick={() => hapticLight()}
               >

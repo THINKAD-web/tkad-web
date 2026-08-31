@@ -16,6 +16,7 @@ import { resolveQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 import type { QuoteExportPayload, QuoteExportLine } from "@/lib/quote-export/types";
 import { formatCampaignDurationMeta } from "@/lib/quote-campaign-period";
 import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
+import { BRAND_ACCENT_RGB } from "@/lib/brand-palette";
 
 function amt(p: Pick<QuoteExportPayload, "isKo" | "amountUnit">, won: number): string {
   const unit: QuoteAmountDisplayUnit = p.amountUnit === "won" ? "won" : "manwon";
@@ -44,8 +45,8 @@ function amountUnitNote(p: Pick<QuoteExportPayload, "isKo" | "amountUnit">): str
   return p.isKo ? "금액 단위: 만원 (₩10,000)" : "Amounts in 10K KRW";
 }
 
-/** Quiet Professional — 흑백 + 주황 단일 액센트 (#ff6200) */
-const ACCENT = [255, 98, 0] as const;
+/** Quiet Professional — 흑백 + 브랜드 액센트 1종 (lib/brand-palette.ts) */
+const ACCENT = BRAND_ACCENT_RGB;
 const ACCENT_DK = [194, 78, 0] as const;
 const ACCENT_SOFT = [255, 243, 232] as const;
 const INK = [17, 24, 39] as const;

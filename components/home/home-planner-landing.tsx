@@ -16,7 +16,10 @@ import type {
 import { HomeMediaScroll } from "@/components/home/home-media-scroll";
 import { HomeContentFeed } from "@/components/home/home-content-feed";
 import { HomePrecisionExamplePanel } from "@/components/home/home-precision-example-panel";
-import { HOME_PRECISION_EXAMPLES } from "@/lib/home-precision-examples";
+import {
+  HOME_PRECISION_EXAMPLES,
+  pickHomePrecisionExample,
+} from "@/lib/home-precision-examples";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import type { HomeReportItem } from "@/lib/report-queries";
 import type { HomeCaseItem } from "@/lib/case-queries";
@@ -228,7 +231,9 @@ export async function HomePlannerLanding({
       >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <HomePrecisionExamplePanel
-            examples={HOME_PRECISION_EXAMPLES[isKo ? "ko" : "en"]}
+            example={pickHomePrecisionExample(
+              HOME_PRECISION_EXAMPLES[isKo ? "ko" : "en"],
+            )}
             exampleLabel={t("precisionExampleLabel")}
             hint={t("precisionHint")}
             columnLabels={{

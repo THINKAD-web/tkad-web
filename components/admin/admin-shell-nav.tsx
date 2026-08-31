@@ -54,7 +54,7 @@ function PrimaryNavCard({
       href={navHref(locale, item.href)}
       onClick={onNavigate}
       className={cn(
-        "group flex min-h-[4rem] items-start gap-3 rounded-2xl border px-3 py-3 transition-all active:scale-[0.99]",
+        "group flex min-h-[4rem] items-start gap-3 rounded-2xl border px-3 py-3 transition-ui active:scale-[0.99]",
         active
           ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] dark:bg-[color:var(--qp-accent)]/15"
           : "border-border/70 bg-card/80 hover:border-[color:var(--qp-accent)]/30 hover:bg-[color:var(--qp-accent-soft)] dark:bg-white/[0.04] dark:hover:border-[color:var(--qp-accent)]/30 dark:hover:bg-[color:var(--qp-accent)]/10",
