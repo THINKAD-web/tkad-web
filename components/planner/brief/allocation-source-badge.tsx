@@ -45,7 +45,7 @@ export function AllocationSourceBadge({
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold ${TONE[source]} ${className}`}
+      className={`inline-flex shrink-0 items-center rounded border px-1.5 py-0.5 tkad-type-note font-semibold ${TONE[source]} ${className}`}
       title={detail}
       data-allocation-source={source}
     >

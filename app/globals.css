@@ -1594,6 +1594,19 @@ body:has(.tkad-media-map-shell) .tkad-media-app-shell.tkad-media-map-shell {
     font-weight: 400;
     color: var(--tkad-fg-muted);
   }
+
+  /** 쓰는 화면(플래너·비교) — 11px 보조 문구. label 과 동일 크기, uppercase 없음 */
+  .tkad-type-caption {
+    font-size: var(--text-tkad-label);
+    line-height: var(--text-tkad-label--line-height);
+    font-weight: 400;
+    color: var(--tkad-fg-muted);
+  }
+
+  /** 쓰는 화면 섹션 구분선 — border 색만 통일 */
+  .tkad-work-divider {
+    border-color: var(--border);
+  }
 }
 
 /* 다크와 동일: 래퍼는 블록만. flex/gap/padding 추가 시 히어로 너비·간격이 어긋남 */

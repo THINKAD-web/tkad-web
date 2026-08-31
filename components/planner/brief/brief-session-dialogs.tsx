@@ -29,7 +29,7 @@ export function BriefResumeDialog({
       className="max-w-md"
     >
       <div className="relative p-6 pt-10 sm:p-8">
-        <h2 className="text-lg font-bold">
+        <h2 className="tkad-type-price text-lg sm:text-xl">
           {isKo ? "이전에 담아두신 매체가 있습니다" : "You have media from last time"}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -74,7 +74,7 @@ export function BriefMixStaleDialog({
       className="max-w-md"
     >
       <div className="relative p-6 pt-10 sm:p-8">
-        <h2 className="text-lg font-bold">
+        <h2 className="tkad-type-price text-lg sm:text-xl">
           {isKo ? "브리프 조건이 바뀌었습니다" : "Your brief has changed"}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">

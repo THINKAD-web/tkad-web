@@ -33,16 +33,16 @@ export default async function PlannerPage({ params }: Props) {
 
   return (
     <main className="mx-auto w-full min-w-0 max-w-5xl overflow-x-clip px-4 py-10">
-      <header className="mx-auto mb-8 max-w-3xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+      <header className="mx-auto mb-8 max-w-3xl border-b border-border pb-6 text-center">
+        <p className="tkad-type-label text-primary">
           {isKo ? "미디어 플래너 · 3단계" : "Media Planner · 3 steps"}
         </p>
-        <h1 className="mt-2 text-2xl font-bold sm:text-3xl">
+        <h1 className="tkad-type-display mt-2">
           {isKo
             ? "브리프만 적으면 매체 믹스가 나옵니다"
             : "Write a brief, get a media mix"}
         </h1>
-        <p className="mt-3 text-sm text-muted-foreground">
+        <p className="tkad-type-body mt-3 text-muted-foreground">
           {isKo
             ? "예산과 기간만 필수입니다. 나머지는 전국·전 타깃 기준으로 자동 진행됩니다."
             : "Only budget and flight are required. The rest defaults to nationwide, all audiences."}

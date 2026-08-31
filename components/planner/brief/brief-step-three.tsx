@@ -151,7 +151,7 @@ function BriefSummary({
 
   return (
     <div className="rounded-xl border border-border bg-card p-4">
-      <h3 className="mb-3 text-sm font-semibold">
+      <h3 className="mb-3 tkad-type-title">
         {isKo ? "캠페인 브리프" : "Campaign brief"}
       </h3>
       <dl className="grid gap-2 text-sm">
@@ -614,7 +614,7 @@ export function BriefStepThree({
 
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold">
+            <h3 className="tkad-type-title">
               {isKo ? "확정 믹스" : "Confirmed mix"}
             </h3>
             <Badge variant="secondary">
@@ -633,7 +633,7 @@ export function BriefStepThree({
                   >
                     <div className="min-w-0">
                       <p className="truncate font-medium">
-                        <span className="mr-1.5 rounded bg-violet-600/15 px-1 py-0.5 text-[10px] font-bold text-violet-700 dark:text-violet-300">
+                        <span className="mr-1.5 rounded bg-violet-600/15 px-1 py-0.5 tkad-type-note font-bold text-violet-700 dark:text-violet-300">
                           {isKo ? "커스텀" : "Custom"}
                         </span>
                         {row.name}
@@ -724,10 +724,10 @@ export function BriefStepThree({
         />
 
         <div className="mt-3 rounded-xl border border-border bg-card p-4">
-          <label htmlFor="brief-production-cost" className="text-sm font-semibold">
+          <label htmlFor="brief-production-cost" className="tkad-type-title">
             {isKo ? "제작비 (캠페인 총액)" : "Production cost (campaign total)"}
           </label>
-          <p className="mt-1 text-[11px] text-muted-foreground">
+          <p className="mt-1 tkad-type-caption text-muted-foreground">
             {isKo
               ? "견적 요약 표에 반영됩니다. 부가세는 매체비+제작비 기준 10%입니다."
               : "Shown in the quote summary. VAT is 10% of media + production."}
@@ -777,19 +777,19 @@ export function BriefStepThree({
           <Button type="button" variant="outline" className="w-full" disabled>
             {isKo ? "공유 링크 (준비 중)" : "Share link (coming soon)"}
           </Button>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="tkad-type-caption text-muted-foreground">
             {isKo
               ? "공유는 행정동 인구 데이터 연동 후 제공됩니다."
               : "Sharing unlocks after dong population data is connected."}
           </p>
 
-          <p className="text-[11px] text-muted-foreground">
+          <p className="tkad-type-caption text-muted-foreground">
             {isKo
               ? "제안서 PDF·이메일은 아래 미리보기에서 이용할 수 있습니다."
               : "Export and email the proposal from the preview below."}
           </p>
           {store.channelMode === "ooh_digital" ? (
-            <p className="text-[11px] text-muted-foreground">
+            <p className="tkad-type-caption text-muted-foreground">
               {isKo
                 ? "디지털 채널 배분은 이번 보고서에 포함되지 않았습니다."
                 : "Digital channel allocation is not included in this report."}
@@ -814,7 +814,7 @@ export function BriefStepThree({
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold">
+            <h3 className="tkad-type-title">
               {isKo ? "제안서 미리보기" : "Proposal preview"}
             </h3>
             <p className="text-xs text-muted-foreground">

@@ -154,7 +154,7 @@ function SectionLabel({
   required?: boolean;
 }) {
   return (
-    <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
+    <div className="mb-2 flex items-center gap-1.5 tkad-type-title">
       {children}
       {required ? (
         <span className="text-destructive" aria-hidden>

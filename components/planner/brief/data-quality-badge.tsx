@@ -102,7 +102,7 @@ export function DataQualityBadge({
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         title={detail}
-        className={`inline-flex shrink-0 cursor-help items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold ${TONE[kind]} ${className}`}
+        className={`inline-flex shrink-0 cursor-help items-center rounded border px-1.5 py-0.5 tkad-type-note font-semibold ${TONE[kind]} ${className}`}
       >
         {isKo ? `[${label}]` : label}
       </button>
@@ -111,7 +111,7 @@ export function DataQualityBadge({
         <span
           id={panelId}
           role="tooltip"
-          className={`absolute top-full z-30 mt-1 w-56 rounded-lg border border-border bg-popover p-2 text-[11px] font-normal leading-relaxed text-popover-foreground shadow-md ${
+          className={`absolute top-full z-30 mt-1 w-56 rounded-lg border border-border bg-popover p-2 tkad-type-caption font-normal leading-relaxed text-popover-foreground shadow-md ${
             alignLeft ? "left-0" : "right-0"
           }`}
         >

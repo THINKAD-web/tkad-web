@@ -20,6 +20,7 @@ import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types"
 import { plannerChartColor } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 import { formatReach } from "@/components/planner/brief/metrics-panel";
+import { plannerNeon } from "@/components/planner/planner-neon-ui";
 import { buildPlainLanguageSummary } from "@/lib/planner/brief/plain-language-summary";
 
 /** #1c1c1f — 라이트 인쇄용 "디지털" 색. 다크 카드 배경과 거의 구분이 안 된다. */
@@ -86,7 +87,7 @@ function BudgetSplitDonut({
         {data.map((d, i) => {
           const pct = d.pct ?? (total > 0 ? (d.value / total) * 100 : 0);
           return (
-            <li key={d.label} className="flex items-center gap-2 text-sm">
+            <li key={d.label} className="flex items-center gap-2 tkad-type-body">
               <span
                 className="inline-block size-2.5 shrink-0 rounded-sm"
                 style={{ background: segmentColor(d.colorKey, i, dark) }}
@@ -139,14 +140,14 @@ export function BriefResultSummary({
       className="rounded-xl border border-primary/40 bg-primary/5 p-4 sm:p-5"
       data-testid="brief-result-summary"
     >
-      <span className="mb-2 inline-flex items-center rounded border border-primary/50 bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+      <span className="mb-2 inline-flex items-center rounded border border-primary/50 bg-primary/10 px-1.5 py-0.5 tkad-type-note font-semibold text-primary">
         {isKo ? "한눈에 요약" : "At a glance"}
       </span>
 
-      <p className="text-lg font-bold leading-snug text-balance sm:text-xl">
+      <p className={plannerNeon.summaryLead}>
         {sentence}
       </p>
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className="mt-2 tkad-type-meta">
         {isKo
           ? "* 노출·도달은 추정치입니다. 아래 실시간 지표에서 자세한 근거를 볼 수 있습니다."
           : "* Impressions and reach are estimates. See the detailed metrics below for basis."}
@@ -157,7 +158,7 @@ export function BriefResultSummary({
       >
         {hasDonut ? (
           <div>
-            <p className="mb-2 text-xs font-semibold text-muted-foreground">
+            <p className="mb-2 tkad-type-title text-muted-foreground">
               {isKo ? "예산 배분 (매체 유형별)" : "Budget by media type"}
             </p>
             <BudgetSplitDonut data={budgetSplit!} />
@@ -165,7 +166,7 @@ export function BriefResultSummary({
         ) : null}
 
         <div className="flex flex-col justify-center gap-2 border-t border-border pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
-          <div className="flex items-center justify-between gap-3 text-sm">
+          <div className="flex items-center justify-between gap-3 tkad-type-body">
             <span className="text-muted-foreground">
               {isKo ? "선택 매체" : "Media selected"}
             </span>
@@ -174,7 +175,7 @@ export function BriefResultSummary({
               {isKo ? "개" : ""}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-3 text-sm">
+          <div className="flex items-center justify-between gap-3 tkad-type-body">
             <span className="text-muted-foreground">
               {isKo ? "집행 기간" : "Flight"}
             </span>
@@ -183,7 +184,7 @@ export function BriefResultSummary({
               {isKo ? "일" : "d"}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-3 text-sm">
+          <div className="flex items-center justify-between gap-3 tkad-type-body">
             <span className="text-muted-foreground">
               {isKo ? "핵심 타깃" : "Target"}
             </span>

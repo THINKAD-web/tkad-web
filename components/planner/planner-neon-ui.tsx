@@ -13,25 +13,29 @@ import { BRAND_ACCENT } from "@/lib/brand-palette";
 /** 플래너 Quiet Professional UI 공통 클래스 (legacy export name 유지) */
 export const plannerNeon = {
   pageBg: "dark:bg-[#020202] bg-gray-50",
-  card: "rounded-[var(--qp-radius-lg)] border shadow-sm dark:bg-white/5 bg-white dark:border-white/10 border-[color:var(--qp-line)]",
-  cardHeader: "border-b dark:border-white/10 border-[color:var(--qp-line)] p-5 sm:p-6",
-  label:
-    "text-xs font-semibold tracking-widest uppercase text-[color:var(--qp-fg-muted)]",
-  headline: "font-bold text-foreground",
-  subtext: "text-sm text-muted-foreground",
+  card: "rounded-[var(--qp-radius-lg)] border border-border shadow-sm dark:bg-white/5 bg-white dark:border-white/10",
+  cardHeader: "border-b border-border dark:border-white/10 p-5 sm:p-6",
+  label: "tkad-type-label",
+  headline: "tkad-type-title",
+  subtext: "tkad-type-body text-muted-foreground",
   kpiCard:
-    "rounded-[var(--qp-radius-md)] border dark:bg-white/5 bg-[color:var(--qp-accent-soft)] dark:border-white/10 border-[color:var(--qp-line)] p-4",
+    "rounded-[var(--qp-radius-md)] border dark:bg-white/5 bg-[color:var(--qp-accent-soft)] dark:border-white/10 border-border p-4",
   kpiValue: "text-2xl font-bold tabular-nums dark:text-white text-gray-900",
-  kpiLabel: "text-xs dark:text-white/40 text-gray-400",
-  cta: "inline-flex items-center justify-center gap-2 bg-[color:var(--qp-accent)] text-white rounded-[var(--qp-radius-md)] px-5 py-2.5 text-sm font-medium transition-colors hover:bg-[color:var(--qp-accent-hover)]",
+  kpiLabel: "tkad-type-meta",
+  cta: "inline-flex items-center justify-center gap-2 bg-[color:var(--qp-accent)] text-white rounded-[var(--qp-radius-md)] px-5 py-2.5 tkad-type-body font-medium transition-colors hover:bg-[color:var(--qp-accent-hover)]",
   ctaSm:
-    "inline-flex items-center justify-center gap-1.5 bg-[color:var(--qp-accent)] text-white rounded-[var(--qp-radius-md)] px-4 py-2 text-sm font-medium transition-colors hover:bg-[color:var(--qp-accent-hover)]",
+    "inline-flex items-center justify-center gap-1.5 bg-[color:var(--qp-accent)] text-white rounded-[var(--qp-radius-md)] px-4 py-2 tkad-type-body font-medium transition-colors hover:bg-[color:var(--qp-accent-hover)]",
   selectChip:
-    "rounded-[var(--qp-radius-md)] border px-4 py-2.5 text-sm font-medium transition-colors touch-manipulation",
+    "rounded-[var(--qp-radius-md)] border px-4 py-2.5 tkad-type-body font-medium transition-colors touch-manipulation",
   selectChipActive:
     "border-[color:var(--qp-accent)]/60 bg-[color:var(--qp-accent-soft)] dark:bg-[color:var(--qp-accent)]/20 dark:text-white text-gray-900",
   selectChipIdle:
     "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white dark:text-white/80 text-gray-700 hover:border-[color:var(--qp-accent)]/35",
+  sectionTitle: "tkad-type-title",
+  sectionMeta: "tkad-type-meta",
+  caption: "tkad-type-caption",
+  note: "tkad-type-note",
+  summaryLead: "tkad-type-price leading-snug text-balance font-bold text-foreground",
 } as const;
 
 export const PLANNER_CHART_COLORS = {

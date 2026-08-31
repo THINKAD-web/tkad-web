@@ -38,7 +38,7 @@ export function OverBudgetChoicePanel({
       className="mb-3 space-y-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3"
       data-testid="over-budget-choice-panel"
     >
-      <p className="text-xs font-semibold text-destructive">
+      <p className="tkad-type-title text-destructive">
         {isKo
           ? "현재 mix가 예산을 초과했습니다"
           : "Your mix exceeds the budget"}
@@ -131,7 +131,7 @@ export function OverBudgetChoicePanel({
             />
           </button>
           {excludedOpen ? (
-            <ul className="border-t border-border px-3 py-2 text-[11px] text-muted-foreground">
+            <ul className="border-t border-border px-3 py-2 tkad-type-caption text-muted-foreground">
               {excluded.map((row) => (
                 <li
                   key={row.mediaId}

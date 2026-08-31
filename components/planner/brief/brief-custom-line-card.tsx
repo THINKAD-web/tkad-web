@@ -9,7 +9,7 @@ import { BriefCustomLineForm } from "@/components/planner/brief/brief-custom-lin
 
 function UnmeasurableBadge({ isKo }: { isKo: boolean }) {
   return (
-    <span className="inline-flex shrink-0 items-center rounded border border-zinc-400/50 bg-zinc-400/10 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-600 dark:text-zinc-400">
+    <span className="inline-flex shrink-0 items-center rounded border border-zinc-400/50 bg-zinc-400/10 px-1.5 py-0.5 tkad-type-note font-semibold text-zinc-600 dark:text-zinc-400">
       {isKo ? "[산정 불가]" : "N/A"}
     </span>
   );
@@ -67,27 +67,27 @@ export function BriefCustomLineCard({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-1.5">
-            <span className="rounded bg-violet-600/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+            <span className="rounded bg-violet-600/15 px-1.5 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-violet-700 dark:text-violet-300">
               {isKo ? "커스텀" : "Custom"}
             </span>
             <UnmeasurableBadge isKo={isKo} />
           </div>
-          <p className="truncate text-sm font-semibold">{line.name}</p>
-          <p className="mt-0.5 text-[11px] text-muted-foreground tabular-nums">
+          <p className="truncate tkad-type-title">{line.name}</p>
+          <p className="mt-0.5 tkad-type-caption text-muted-foreground tabular-nums">
             ×{line.quantity} · ₩{line.unitPriceWon.toLocaleString()}
             {isKo ? "/단위" : " each"}
           </p>
           {line.notes ? (
-            <p className="mt-1 text-[11px] text-muted-foreground">{line.notes}</p>
+            <p className="mt-1 tkad-type-caption text-muted-foreground">{line.notes}</p>
           ) : null}
-          <p className="mt-1 text-[10px] text-muted-foreground">
+          <p className="mt-1 tkad-type-note text-muted-foreground">
             {isKo
               ? "노출·CPM·도달 집계에서 제외"
               : "Excluded from impressions, CPM, and reach"}
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <span className="text-sm font-semibold tabular-nums">
+          <span className="tkad-type-title tabular-nums">
             ₩{totalWon.toLocaleString()}
           </span>
           <div className="flex gap-1">
