@@ -7,11 +7,12 @@
 
 import type { MediaItem } from "@/lib/media-data";
 import type {
-  CampaignPlanMediaLine,
+  CampaignPlanMixEntry,
   CampaignPlanSnapshot,
   CampaignPlanStoredMetrics,
 } from "@/lib/campaign-plan-schema";
 import {
+  filterCatalogMixEntries,
   isEngineVersionCurrent,
   resolveStoredOverBudget,
 } from "@/lib/campaign-plan-schema";
@@ -151,16 +152,16 @@ export function resolveBriefPortfolio(
   catalog: readonly MediaItem[],
 ): MediaItem[] {
   const byId = new Map(catalog.map((m) => [m.id, m]));
-  return plan.mediaMix
+  return filterCatalogMixEntries(plan.mediaMix)
     .map((line) => byId.get(line.mediaId))
     .filter((m): m is MediaItem => m != null);
 }
 
 export function briefMixQuantities(
-  mediaMix: readonly CampaignPlanMediaLine[],
+  mediaMix: readonly CampaignPlanMixEntry[],
 ): Record<string, number> {
   const out: Record<string, number> = {};
-  for (const line of mediaMix) {
+  for (const line of filterCatalogMixEntries(mediaMix)) {
     if (line.units > 0) out[line.mediaId] = line.units;
   }
   return out;
@@ -173,11 +174,12 @@ export function briefMixQuantities(
  * 집계 합이 저장 총계와도, 유도 총계와도 맞지 않는 제3의 값이 되기 때문이다.
  */
 export function briefMixImpressions(
-  mediaMix: readonly CampaignPlanMediaLine[],
+  mediaMix: readonly CampaignPlanMixEntry[],
 ): Record<string, number> | undefined {
-  if (mediaMix.length === 0) return undefined;
+  const catalogLines = filterCatalogMixEntries(mediaMix);
+  if (catalogLines.length === 0) return undefined;
   const out: Record<string, number> = {};
-  for (const line of mediaMix) {
+  for (const line of catalogLines) {
     if (!Number.isFinite(line.impressions) || line.impressions < 0) {
       return undefined;
     }
@@ -187,12 +189,12 @@ export function briefMixImpressions(
 }
 
 export function briefPriceOptionIndex(
-  mediaMix: readonly CampaignPlanMediaLine[],
+  mediaMix: readonly CampaignPlanMixEntry[],
   catalog: readonly MediaItem[],
 ): Record<string, number> {
   const byId = new Map(catalog.map((m) => [m.id, m]));
   const out: Record<string, number> = {};
-  for (const line of mediaMix) {
+  for (const line of filterCatalogMixEntries(mediaMix)) {
     if (!line.optionId) continue;
     const media = byId.get(line.mediaId);
     if (!media) continue;

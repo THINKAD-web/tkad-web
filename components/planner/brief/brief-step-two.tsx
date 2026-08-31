@@ -9,7 +9,7 @@
  * 성별·연령 demo 스냅샷(PR-3 Phase 3)으로 타깃 축을 계산한다.
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import type { MediaItem } from "@/lib/media-data";
 import type { DigitalChannel } from "@/lib/planner/digital-channels";
@@ -38,8 +38,14 @@ import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import { BriefDigitalPanel } from "@/components/planner/brief/brief-digital-panel";
 import { BriefMediaCard } from "@/components/planner/brief/brief-media-card";
+import { BriefCustomLineCard } from "@/components/planner/brief/brief-custom-line-card";
+import { BriefCustomLineForm } from "@/components/planner/brief/brief-custom-line-form";
 import { OverBudgetChoicePanel } from "@/components/planner/brief/over-budget-choice-panel";
 import { resolveOverBudgetChoice } from "@/lib/planner/brief/over-budget-options";
+import {
+  applyCustomLinesToMixMetrics,
+  hasBriefMixContent,
+} from "@/lib/planner/brief/custom-mix-metrics";
 
 export function BriefStepTwo({
   catalog,
@@ -54,10 +60,16 @@ export function BriefStepTwo({
   const isKo = locale === "ko";
   const store = useBriefStore();
   const localeKey = isKo ? "ko" : "en";
+  const [showAddCustomForm, setShowAddCustomForm] = useState(false);
+  const [editingCustomLineId, setEditingCustomLineId] = useState<string | null>(
+    null,
+  );
 
   const days = flightDays(store) ?? BRIEF_DEFAULT_DAYS;
   const budgetWon = totalBudgetWon(store);
   const showDigital = store.channelMode === "ooh_digital";
+  const customLines = store.customLines;
+  const hasMix = hasBriefMixContent(store.mixUnits, customLines);
 
   const candidates = useMemo(
     () => filterBriefCatalogByRegion(catalog, store.regionCodes),
@@ -95,7 +107,7 @@ export function BriefStepTwo({
     return out;
   }, [catalog, store.mixUnits]);
 
-  const metrics = useMemo(
+  const catalogMetrics = useMemo(
     () =>
       calcMixMetrics({
         lines,
@@ -104,6 +116,11 @@ export function BriefStepTwo({
         target: briefToTargetSpec(store),
       }),
     [lines, days, budgetWon, store.genders, store.ageBands],
+  );
+
+  const metrics = useMemo(
+    () => applyCustomLinesToMixMetrics(catalogMetrics, customLines),
+    [catalogMetrics, customLines],
   );
 
   const overIncl = useMemo(
@@ -157,11 +174,12 @@ export function BriefStepTwo({
   const showOverBudgetPanel =
     overBudgetChoice != null && !store.overBudgetChoiceDismissed;
 
+  const mixItemCount = lines.length + customLines.length;
+
   return (
     <div className="mx-auto grid w-full min-w-0 max-w-6xl gap-6 lg:grid-cols-[1fr_320px]">
       {/* ── 좌: 추천 리스트 ── */}
       <div className="min-w-0 max-w-full">
-        {/* 과대포함 경고 — 무엇이 섞이는지 이름을 댄다 */}
         {overIncl.length > 0 ? (
           <div className="mb-3 rounded-lg border border-amber-400/40 bg-amber-400/10 p-2.5">
             {overIncl.map((row) => (
@@ -175,7 +193,6 @@ export function BriefStepTwo({
           </div>
         ) : null}
 
-        {/* demo 타깃 추정 안내 */}
         {store.genders.length > 0 || store.ageBands.length > 0 ? (
           <p className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 p-2.5 text-[11px] text-muted-foreground">
             <span>
@@ -273,29 +290,79 @@ export function BriefStepTwo({
           />
         ) : null}
 
-        <MetricsPanel metrics={metrics} isKo={isKo} />
+        <MetricsPanel
+          metrics={metrics}
+          isKo={isKo}
+          customLineCount={customLines.length}
+        />
 
-        <div className="mt-3 rounded-xl border border-border bg-card p-3">
-          <p className="mb-2 text-xs font-semibold">
-            {isKo ? `선택 ${lines.length}개 매체` : `${lines.length} media selected`}
-          </p>
-          {lines.length === 0 ? (
+        <div
+          className="mt-3 rounded-xl border border-border bg-card p-3"
+          data-testid="brief-mix-list"
+        >
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold">
+              {isKo
+                ? `믹스 ${mixItemCount}건`
+                : `${mixItemCount} mix item(s)`}
+            </p>
+            {!showAddCustomForm ? (
+              <Button
+                type="button"
+                size="xs"
+                variant="outline"
+                onClick={() => {
+                  setEditingCustomLineId(null);
+                  setShowAddCustomForm(true);
+                }}
+                data-testid="brief-custom-line-add-open"
+              >
+                {isKo ? "+ 커스텀 항목" : "+ Custom line"}
+              </Button>
+            ) : null}
+          </div>
+
+          {showAddCustomForm ? (
+            <div className="mb-3">
+              <BriefCustomLineForm
+                isKo={isKo}
+                mode="add"
+                onSubmit={(values) => {
+                  store.addCustomLine({
+                    name: values.name,
+                    quantity: values.quantity,
+                    unitPriceWon: values.unitPriceWon,
+                    notes: values.notes || undefined,
+                  });
+                  setShowAddCustomForm(false);
+                }}
+                onCancel={() => setShowAddCustomForm(false)}
+              />
+            </div>
+          ) : null}
+
+          {!hasMix ? (
             <p className="text-[11px] text-muted-foreground">
               {isKo
-                ? "왼쪽에서 매체를 추가하면 지표가 즉시 갱신됩니다."
-                : "Add media on the left — metrics update instantly."}
+                ? "카탈로그 매체를 추가하거나 커스텀 항목을 등록하면 지표가 갱신됩니다."
+                : "Add catalog media or a custom line to update metrics."}
             </p>
           ) : (
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {metrics.lines.map((l) => {
                 const media = catalog.find((m) => m.id === l.mediaId);
                 return (
                   <li
                     key={l.mediaId}
-                    className="flex items-center justify-between gap-2 text-[11px]"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/20 px-2 py-1.5 text-[11px]"
+                    data-testid="brief-mix-catalog-row"
                   >
                     <span className="truncate">
-                      {media ? (isKo ? media.name : media.nameEn || media.name) : l.mediaId}
+                      {media
+                        ? isKo
+                          ? media.name
+                          : media.nameEn || media.name
+                        : l.mediaId}
                       <span className="text-muted-foreground"> ×{l.units}</span>
                     </span>
                     <span className="flex shrink-0 items-center gap-1 tabular-nums">
@@ -312,6 +379,34 @@ export function BriefStepTwo({
                   </li>
                 );
               })}
+              {customLines.map((line) => (
+                <BriefCustomLineCard
+                  key={line.lineId}
+                  line={line}
+                  isKo={isKo}
+                  isEditing={editingCustomLineId === line.lineId}
+                  onEdit={() => {
+                    setShowAddCustomForm(false);
+                    setEditingCustomLineId(line.lineId);
+                  }}
+                  onRemove={() => {
+                    store.removeCustomLine(line.lineId);
+                    if (editingCustomLineId === line.lineId) {
+                      setEditingCustomLineId(null);
+                    }
+                  }}
+                  onSaveEdit={(values) => {
+                    store.updateCustomLine(line.lineId, {
+                      name: values.name,
+                      quantity: values.quantity,
+                      unitPriceWon: values.unitPriceWon,
+                      notes: values.notes || undefined,
+                    });
+                    setEditingCustomLineId(null);
+                  }}
+                  onCancelEdit={() => setEditingCustomLineId(null)}
+                />
+              ))}
             </ul>
           )}
         </div>
@@ -328,8 +423,9 @@ export function BriefStepTwo({
           <Button
             type="button"
             className="flex-1"
-            disabled={lines.length === 0}
+            disabled={!hasMix}
             onClick={() => store.setWizardStep(3)}
+            data-testid="brief-step-two-next"
           >
             {isKo ? "결과 보기" : "See result"}
           </Button>

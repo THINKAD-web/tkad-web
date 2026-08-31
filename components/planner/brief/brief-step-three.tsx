@@ -15,6 +15,7 @@ import type { MediaItem } from "@/lib/media-data";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import {
   resolveStoredOverBudget,
+  isCustomMixEntry,
   type CampaignPlanStoredMetrics,
 } from "@/lib/campaign-plan-schema";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,10 @@ import { Badge } from "@/components/ui/badge";
 import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
 import { OverBudgetChoicePanel } from "@/components/planner/brief/over-budget-choice-panel";
 import { resolveOverBudgetChoice } from "@/lib/planner/brief/over-budget-options";
+import {
+  applyCustomLinesToMixMetrics,
+  hasBriefMixContent,
+} from "@/lib/planner/brief/custom-mix-metrics";
 import { BriefResultSummary } from "@/components/planner/brief/brief-result-summary";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import { useBriefStore } from "@/lib/planner/brief/store";
@@ -208,7 +213,7 @@ export function BriefStepThree({
     [catalog, store.mixUnits],
   );
 
-  const liveMetrics = useMemo(
+  const liveCatalogMetrics = useMemo(
     () =>
       calcMixMetrics({
         lines,
@@ -217,6 +222,12 @@ export function BriefStepThree({
         target: briefToTargetSpec(store),
       }),
     [lines, days, budgetWon, store.genders, store.ageBands],
+  );
+
+  const liveMetrics = useMemo(
+    () =>
+      applyCustomLinesToMixMetrics(liveCatalogMetrics, store.customLines),
+    [liveCatalogMetrics, store.customLines],
   );
 
   const overBudgetChoice = useMemo(() => {
@@ -297,6 +308,61 @@ export function BriefStepThree({
 
   const mixRows = savedPlan?.mediaMix ?? null;
 
+  const displayMixRows = useMemo(() => {
+    if (mixRows) {
+      return mixRows.map((entry) => {
+        if (isCustomMixEntry(entry)) {
+          return {
+            kind: "custom" as const,
+            lineId: entry.lineId,
+            name: entry.name,
+            quantity: entry.quantity,
+            unitPriceWon: entry.unitPriceWon,
+            priceWon: entry.priceWon,
+          };
+        }
+        return {
+          kind: "catalog" as const,
+          mediaId: entry.mediaId,
+          name: entry.name,
+          units: entry.units,
+          priceWon: entry.priceWon,
+          impressions: entry.impressions,
+        };
+      });
+    }
+    return [
+      ...lines.map((l) => ({
+        kind: "catalog" as const,
+        mediaId: l.media.id,
+        name: l.media.name,
+        units: l.units,
+        priceWon:
+          liveMetrics.lines.find((x) => x.mediaId === l.media.id)?.costWon
+            ?.value ?? 0,
+        impressions:
+          liveMetrics.lines.find((x) => x.mediaId === l.media.id)?.impressions
+            .value ?? 0,
+      })),
+      ...store.customLines.map((line) => ({
+        kind: "custom" as const,
+        lineId: line.lineId,
+        name: line.name,
+        quantity: line.quantity,
+        unitPriceWon: line.unitPriceWon,
+        priceWon: line.quantity * line.unitPriceWon,
+      })),
+    ];
+  }, [mixRows, lines, liveMetrics.lines, store.customLines]);
+
+  const customLineCount = useMemo(
+    () =>
+      mixRows
+        ? mixRows.filter(isCustomMixEntry).length
+        : store.customLines.length,
+    [mixRows, store.customLines],
+  );
+
   const handleSave = useCallback(async () => {
     setSaving(true);
     setSaveError(null);
@@ -330,6 +396,7 @@ export function BriefStepThree({
             freeText: store.freeText,
           },
           mixUnits: store.mixUnits,
+          customLines: store.customLines,
           reportCopy,
         }),
       });
@@ -357,15 +424,18 @@ export function BriefStepThree({
     }
   }, [store, isKo]);
 
+  const hasMix = hasBriefMixContent(store.mixUnits, store.customLines);
+
   const exportPlan = useMemo(() => {
     if (savedPlan) return savedPlan;
-    if (lines.length === 0) return null;
+    if (!hasMix) return null;
     return buildCampaignPlanSnapshot({
       brief: store,
       catalog,
       mixUnits: store.mixUnits,
+      customLines: store.customLines,
     });
-  }, [savedPlan, lines.length, store.mixUnits, catalog, store]);
+  }, [savedPlan, hasMix, store.mixUnits, store.customLines, catalog, store]);
 
   const exportPortfolio = useMemo(
     () => (exportPlan ? resolveBriefPortfolio(exportPlan, catalog) : []),
@@ -514,7 +584,7 @@ export function BriefStepThree({
   const won = (n: number) =>
     isKo ? `₩${n.toLocaleString("ko-KR")}` : `₩${n.toLocaleString("en-US")}`;
 
-  const summaryMediaCount = mixRows?.length ?? lines.length;
+  const summaryMediaCount = displayMixRows.length;
 
   if (loadingPlan) {
     return (
@@ -548,23 +618,37 @@ export function BriefStepThree({
               {isKo ? "확정 믹스" : "Confirmed mix"}
             </h3>
             <Badge variant="secondary">
-              {mixRows?.length ?? lines.length}
-              {isKo ? "개 매체" : " media"}
+              {displayMixRows.length}
+              {isKo ? "개 항목" : " item(s)"}
             </Badge>
           </div>
           <ul className="divide-y divide-border">
-            {(mixRows ??
-              lines.map((l) => ({
-                mediaId: l.media.id,
-                name: l.media.name,
-                units: l.units,
-                priceWon:
-                  liveMetrics.lines.find((x) => x.mediaId === l.media.id)
-                    ?.costWon?.value ?? 0,
-                impressions:
-                  liveMetrics.lines.find((x) => x.mediaId === l.media.id)
-                    ?.impressions.value ?? 0,
-              }))).map((row) => {
+            {displayMixRows.map((row) => {
+              if (row.kind === "custom") {
+                return (
+                  <li
+                    key={row.lineId}
+                    className="flex items-center justify-between gap-3 py-2.5 text-sm"
+                    data-testid="brief-step-three-custom-row"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">
+                        <span className="mr-1.5 rounded bg-violet-600/15 px-1 py-0.5 text-[10px] font-bold text-violet-700 dark:text-violet-300">
+                          {isKo ? "커스텀" : "Custom"}
+                        </span>
+                        {row.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground tabular-nums">
+                        ×{row.quantity} · ₩{row.unitPriceWon.toLocaleString()}
+                        {isKo ? " · 산정 불가" : " · N/A metrics"}
+                      </p>
+                    </div>
+                    <span className="shrink-0 font-semibold tabular-nums">
+                      {won(row.priceWon)}
+                    </span>
+                  </li>
+                );
+              }
               const media = catalog.find((m) => m.id === row.mediaId);
               const name =
                 media != null
@@ -633,7 +717,11 @@ export function BriefStepThree({
           />
         ) : null}
 
-        <MetricsPanel metrics={displayMetrics} isKo={isKo} />
+        <MetricsPanel
+          metrics={displayMetrics}
+          isKo={isKo}
+          customLineCount={customLineCount}
+        />
 
         <div className="mt-3 rounded-xl border border-border bg-card p-4">
           <label htmlFor="brief-production-cost" className="text-sm font-semibold">
@@ -670,7 +758,7 @@ export function BriefStepThree({
           <Button
             type="button"
             className="w-full"
-            disabled={saving || lines.length === 0}
+            disabled={saving || !hasMix}
             onClick={() => void handleSave()}
           >
             {saving

@@ -11,9 +11,25 @@
  * 하나의 형태를 정의할 뿐, 매체 데이터 계층을 참조하지 않는다.
  */
 
+import type { CampaignPlanMixEntry } from "@/lib/campaign-plan-mix-entry";
 import { METRICS_ENGINE_VERSION } from "@/lib/metrics/constants";
 import type { MetricBasis } from "@/lib/metrics/defaults";
 import type { PlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
+
+export type {
+  CampaignPlanCatalogMixEntry,
+  CampaignPlanCustomMixEntry,
+  CampaignPlanMixEntry,
+} from "@/lib/campaign-plan-mix-entry";
+export {
+  filterCatalogMixEntries,
+  filterCustomMixEntries,
+  isCatalogMixEntry,
+  isCustomMixEntry,
+  normalizeMediaMix,
+  normalizeMixEntry,
+  sumCustomMixTotalWon,
+} from "@/lib/campaign-plan-mix-entry";
 
 /** 계산 엔진 버전 — `CampaignPlan.engineVersion` 스냅샷에 기록 */
 export const CAMPAIGN_PLAN_ENGINE_VERSION = METRICS_ENGINE_VERSION;
@@ -116,7 +132,8 @@ export type CampaignPlanStoredMetrics = CampaignPlanMetrics & {
 
 export type CampaignPlanSnapshot = {
   brief: CampaignPlanBrief;
-  mediaMix: CampaignPlanMediaLine[];
+  /** catalog + custom 혼합. `kind` 없는 row = legacy catalog */
+  mediaMix: CampaignPlanMixEntry[];
   metrics: CampaignPlanStoredMetrics;
   engineVersion: string;
   /** 저장 시 `brief` Json 안에 함께 persist (별도 DB 컬럼 없음) */

@@ -83,9 +83,12 @@ export function formatReach(n: number, isKo: boolean): string {
 export function MetricsPanel({
   metrics,
   isKo,
+  customLineCount = 0,
 }: {
   metrics: MixMetrics;
   isKo: boolean;
+  /** 커스텀 라인 — CPM·노출 집계 제외 안내 */
+  customLineCount?: number;
 }) {
   const won = (n: number) =>
     isKo
@@ -150,6 +153,13 @@ export function MetricsPanel({
           basis={metrics.mixCpmWon.value == null ? null : metrics.mixCpmWon.basis}
           isKo={isKo}
         />
+        {customLineCount > 0 ? (
+          <p className="pb-2 text-[10px] leading-relaxed text-muted-foreground">
+            {isKo
+              ? `커스텀 ${customLineCount}건은 노출·CPM·도달 집계에서 제외됩니다.`
+              : `${customLineCount} custom line(s) excluded from impressions, CPM, and reach.`}
+          </p>
+        ) : null}
       </div>
 
       {metrics.isOverBudget ? (
