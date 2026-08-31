@@ -13,7 +13,10 @@ import {
   MAX_DAILY_FREQ,
   PLAUSIBLE_DAILY_TRAFFIC_PER_UNIT,
 } from "./constants";
-import { linearMonthlyDeviation, periodToDays } from "./price";
+import { resolveOptionDays } from "./price";
+import { evaluateR03PeriodConversion } from "./r03-period-audit.ts";
+import { parseBillingPeriodDays, parseLabelDays } from "./label-parse.ts";
+import { readPriceOptions as readPriceOptionsFromRow } from "./read-price-options.ts";
 import type { MediaMetricClass, PriceOption } from "./types";
 
 export type Severity = "P0" | "P1" | "P2";
@@ -55,6 +58,7 @@ export type AuditMediaRow = {
   description: string | null;
   price: number;
   pricePeriod: string;
+  pricePeriodDays?: number | null;
   priceOptions: unknown;
   priceNote: string | null;
   widthM: number | null;
@@ -142,35 +146,9 @@ function num(v: unknown): number | null {
   return v;
 }
 
-/** DB priceOptions(JSON) + price/pricePeriod → 엔진 PriceOption[] */
+/** @deprecated import from read-price-options.ts — 감사 호환 re-export */
 export function readPriceOptions(row: AuditMediaRow): PriceOption[] {
-  const out: PriceOption[] = [];
-
-  const baseDays = periodToDays(row.pricePeriod);
-  if (baseDays != null && row.price > 0) {
-    out.push({ days: baseDays, price: row.price, id: "base", label: "기본가" });
-  }
-
-  if (Array.isArray(row.priceOptions)) {
-    row.priceOptions.forEach((raw, idx) => {
-      if (!raw || typeof raw !== "object") return;
-      const o = raw as Record<string, unknown>;
-      const price = num(o.price);
-      if (price == null || price <= 0) return;
-      const days = periodToDays(
-        typeof o.period === "string" ? o.period : row.pricePeriod,
-      );
-      if (days == null) return;
-      out.push({
-        days,
-        price,
-        id: `po-${idx}`,
-        label: typeof o.label === "string" ? o.label : undefined,
-      });
-    });
-  }
-
-  return out;
+  return readPriceOptionsFromRow(row);
 }
 
 /** 현행 프로덕션이 카드·목록에 보여주는 월 노출 (lib/media-metrics 와 동일 규칙) */
@@ -210,22 +188,7 @@ const SELLING_UNIT_PATTERNS: Array<[RegExp, string]> = [
   [/지점\s*(당|기준)|1\s*개\s*지점/, "site"],
 ];
 
-/**
- * priceOption 라벨에 명시된 일수 (예: "7일", "1개월", "2주" → 각각 7, 30, 14).
- * 없으면 null.
- */
-export function parseLabelDays(label: string | null | undefined): number | null {
-  if (!label) return null;
-  const t = label.trim();
-  const day = t.match(/(\d+)\s*일/);
-  if (day) return Math.max(1, Number.parseInt(day[1]!, 10));
-  const week = t.match(/(\d+)\s*주/);
-  if (week) return Math.max(1, Number.parseInt(week[1]!, 10)) * 7;
-  const month = t.match(/(\d+)\s*개월/);
-  if (month) return Math.max(1, Number.parseInt(month[1]!, 10)) * 30;
-  if (/\b1\s*week\b/i.test(t)) return 7;
-  return null;
-}
+export { parseLabelDays, parseBillingPeriodDays } from "./label-parse.ts";
 
 /** 가격 표기·비고·본문·FactSheet 에서 선언된 판매 단위를 읽는다 */
 export function parseDeclaredSellingUnit(row: AuditMediaRow): string | null {
@@ -398,13 +361,13 @@ export function auditRow(row: AuditMediaRow, acc: AuditAccumulator): void {
     }
   }
 
-  // ── R-03 기간 정규화 일관성 ──────────────────────────────────
-  const deviation = linearMonthlyDeviation(readPriceOptions(row));
-  if (deviation != null && Math.abs(deviation) > 0.1) {
+  // ── R-03 기간 정규화 — engine tier 경로와 정렬 ─────────────────
+  const r03 = evaluateR03PeriodConversion(row);
+  if (r03.violation) {
     push(
       "R-03",
-      `일/주 단가 선형 환산이 실제 월 상품가와 ${(deviation * 100).toFixed(0)}% 괴리 — 선형 환산 금지`,
-      { deviation },
+      `기간 tier 불일치 — ${r03.proxy ?? "linear_deviation"}${r03.deviation != null ? ` (${(r03.deviation * 100).toFixed(0)}% 괴리)` : ""}`,
+      { deviation: r03.deviation, proxy: r03.proxy },
     );
   }
 
@@ -451,10 +414,12 @@ export function auditRow(row: AuditMediaRow, acc: AuditAccumulator): void {
       if (!raw || typeof raw !== "object") return;
       const opt = raw as Record<string, unknown>;
       const label = typeof opt.label === "string" ? opt.label : "";
-      const labelDays = parseLabelDays(label);
+      const labelDays = parseBillingPeriodDays(label);
       const periodStr =
         typeof opt.period === "string" ? opt.period : row.pricePeriod;
-      const periodDays = periodToDays(periodStr);
+      const optCustomDays =
+        typeof opt.periodDays === "number" ? opt.periodDays : null;
+      const periodDays = resolveOptionDays(periodStr, optCustomDays);
       if (labelDays == null || periodDays == null) return;
       if (labelDays !== periodDays) {
         push(
@@ -469,7 +434,7 @@ export function auditRow(row: AuditMediaRow, acc: AuditAccumulator): void {
   // R-05c — 매체 이름·설명에 "1개월"이 있는데 pricePeriod 가 "day"/"week"
   // 인 경우. M-CITY 케이스가 여기 해당한다 (홈 카드 ₩954,545 의 진짜 뿌리).
   const nameDays = parseLabelDays(row.name);
-  const baseDays = periodToDays(row.pricePeriod);
+  const baseDays = resolveOptionDays(row.pricePeriod, row.pricePeriodDays);
   if (nameDays != null && baseDays != null && nameDays !== baseDays) {
     push(
       "R-05",
