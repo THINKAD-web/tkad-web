@@ -243,6 +243,7 @@ function estimatePptCardHeight(
   if (row.monthlyPriceLabel || row.lineTotalLabel) h += 0.48;
   if (row.recommendReason?.trim()) h += 0.38;
   if (showMediaCardContributions(portfolioLen, row)) h += 0.42;
+  if (row.kind === "custom") return Math.max(h + 0.35, 1.1);
   return Math.max(h + 0.35, thumbHIn + 0.4);
 }
 
@@ -660,7 +661,7 @@ export async function buildPlannerReportPptx(
         y: rightY,
         w: barW,
         rows: ch.reachSummary,
-        color: INK_DEEP,
+        color: INK_DEEP_BAR,
         face,
         fmt: (n) => fmtImp(n, isKo),
       });
@@ -888,6 +889,7 @@ export async function buildPlannerReportPptx(
     cardY: number,
     cardH: number,
   ) {
+    const isCustom = row.kind === "custom";
     slide.addShape(pptx.ShapeType.roundRect, {
       x: CARD_X,
       y: cardY,
@@ -895,10 +897,11 @@ export async function buildPlannerReportPptx(
       h: cardH,
       fill: { color: WHITE },
       rectRadius: 0.08,
-      line: { color: "E5E7EB", width: 0.75 },
+      line: { color: isCustom ? "C4B5FD" : "E5E7EB", width: 0.75 },
     });
-    const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
-    const textX = 0.75 + THUMB_W_IN + 0.25;
+    const hasThumb = !isCustom && Boolean(row.thumbUrl?.trim());
+    const thumb = hasThumb && row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
+    const textX = hasThumb ? 0.75 + THUMB_W_IN + 0.25 : 0.75;
     const textW = CARD_X + CARD_W - textX - 0.25;
     const colW = (textW - 0.15) / 2;
 
@@ -914,7 +917,7 @@ export async function buildPlannerReportPptx(
       } catch {
         /* broken thumb */
       }
-    } else if (row.thumbUrl?.trim()) {
+    } else if (hasThumb && row.thumbUrl?.trim()) {
       slide.addShape(pptx.ShapeType.roundRect, {
         x: 0.75,
         y: cardY + 0.2,
@@ -1476,7 +1479,7 @@ export async function buildPlannerReportPptx(
       s4.addText(p.digitalSummary, { x: 0.6, y: 1.2, w: 12.1, h: 0.5, fontFace: face, fontSize: 12, color: GRAY });
     }
     const dHead = [isKo ? "플랫폼" : "Platform", isKo ? "비중" : "Share", isKo ? "예상 노출" : "Est. impressions"].map((t) => ({
-      text: t, options: { fill: { color: INK_DEEP }, color: WHITE, bold: true, fontFace: face, fontSize: 12 },
+      text: t, options: { fill: { color: INK_DEEP_BAR }, color: WHITE, bold: true, fontFace: face, fontSize: 12 },
     }));
     const dBody = p.digital.map((r, i) => {
       const fill = i % 2 ? { color: LIGHT } : { color: WHITE };

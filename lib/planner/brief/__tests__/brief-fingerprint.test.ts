@@ -112,3 +112,14 @@ test("isMixBriefStale: 브리프 변경 시 stale", () => {
 test("countMixUnits", () => {
   assert.equal(countMixUnits({ a: 1, b: 0, c: 2 }), 2);
 });
+
+test("isMixBriefStale: catalog mixUnits 없으면 stale 아님 (custom-only 대응)", () => {
+  assert.equal(
+    isMixBriefStale({
+      mixUnits: {},
+      mixBriefFingerprint: null,
+      brief: EMPTY_BRIEF,
+    }),
+    false,
+  );
+});

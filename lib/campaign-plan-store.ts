@@ -6,6 +6,7 @@ import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import {
   defaultExpiresAt,
+  normalizeMediaMix,
   type CampaignPlanSnapshot,
   type CampaignPlanStoredMetrics,
 } from "@/lib/campaign-plan-schema";
@@ -66,7 +67,7 @@ export async function createCampaignPlan(params: {
     id: row.id,
     shareToken: row.shareToken,
     brief: unpacked.brief,
-    mediaMix: row.mediaMix as SavedCampaignPlan["mediaMix"],
+    mediaMix: normalizeMediaMix(row.mediaMix),
     metrics: row.metrics as SavedCampaignPlan["metrics"],
     engineVersion: row.engineVersion,
     reportCopy: unpacked.reportCopy,
@@ -99,7 +100,7 @@ export async function getCampaignPlanById(
     id: row.id,
     shareToken: row.shareToken,
     brief: unpacked.brief,
-    mediaMix: row.mediaMix as SavedCampaignPlan["mediaMix"],
+    mediaMix: normalizeMediaMix(row.mediaMix),
     metrics: row.metrics as SavedCampaignPlan["metrics"],
     engineVersion: row.engineVersion,
     reportCopy: unpacked.reportCopy,

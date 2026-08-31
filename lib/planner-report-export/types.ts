@@ -27,6 +27,8 @@ export type PlannerExportKpi = {
 
 /** @see lib/document-media-detail.ts — 화면·PDF·PPTX 동일 필드 */
 export type PlannerExportMediaRow = {
+  /** catalog(default) | custom — 카탈로그 외 수동 항목 */
+  kind?: "catalog" | "custom";
   id?: string;
   name: string;
   region?: string;
@@ -37,6 +39,9 @@ export type PlannerExportMediaRow = {
   categoryLabel?: string;
   size?: string;
   operatingHours?: string;
+  /** custom — 노출·CPM·도달 미산정 */
+  metricsUnavailableLabel?: string;
+  notes?: string;
   /** 일 유동인구(raw) — "일 유동인구" 로 표기할 것, "일일 노출" 아님 */
   dailyTraffic?: number;
   /** 일 실노출(추정) — 접촉률·SOV 보정. 기여도·CPM·정렬의 기준값과 동일 */

@@ -36,6 +36,11 @@ import {
   countMixUnits,
 } from "@/lib/planner/brief/brief-fingerprint";
 import {
+  createBriefCustomLine,
+  normalizeBriefCustomLines,
+  type BriefCustomLine,
+} from "@/lib/planner/brief/custom-lines";
+import {
   isBriefChannelMode,
   type BriefChannelMode,
 } from "@/lib/planner/brief/brief-integrated-adapters";
@@ -65,6 +70,8 @@ export type BriefStoreState = CampaignBriefInput & {
   digitalChannelIds: DigitalChannelId[];
   /** 선택한 매체 → 구매 수량 (Step 2 믹스). 0 이하면 제거된 것으로 본다 */
   mixUnits: Record<string, number>;
+  /** 카탈로그 외 수동 mix 라인 (Step 2) */
+  customLines: BriefCustomLine[];
   /** mixUnits 가 마지막으로 확정·담긴 시점의 브리프 지문 (L-1) */
   mixBriefFingerprint: string | null;
   /** P1: 예산 내만 랭킹 필터 (기본 ON) */
@@ -118,6 +125,14 @@ export type BriefStoreActions = {
     lines: readonly { mediaId: string; units: number }[];
   }) => void;
   clearMix: () => void;
+  addCustomLine: (
+    partial?: Partial<Omit<BriefCustomLine, "lineId">>,
+  ) => void;
+  updateCustomLine: (
+    lineId: string,
+    patch: Partial<Omit<BriefCustomLine, "lineId">>,
+  ) => void;
+  removeCustomLine: (lineId: string) => void;
   /** 현재 브리프 기준으로 mix 지문을 갱신 (담은 매체 유지 확인) */
   acknowledgeMixForCurrentBrief: () => void;
   setBudgetWithinOnly: (value: boolean) => void;
@@ -141,6 +156,7 @@ const INITIAL: BriefStoreState = {
   digitalBudgetPct: 30,
   digitalChannelIds: defaultDigitalChannelIds(),
   mixUnits: {},
+  customLines: [],
   mixBriefFingerprint: null,
   budgetWithinOnly: true,
   overBudgetChoiceDismissed: false,
@@ -330,7 +346,40 @@ export const useBriefStore = create<BriefStore>()(
           return { ...brief, mixUnits, ...stampMixFingerprint(state) };
         }),
 
-      clearMix: () => set({ mixUnits: {}, mixBriefFingerprint: null }),
+      clearMix: () =>
+        set({ mixUnits: {}, customLines: [], mixBriefFingerprint: null }),
+
+      addCustomLine: (partial) =>
+        set((s) => ({
+          customLines: [...s.customLines, createBriefCustomLine(partial)],
+          ...clearOverBudgetUiState(),
+        })),
+
+      updateCustomLine: (lineId, patch) =>
+        set((s) => ({
+          customLines: s.customLines.map((line) => {
+            if (line.lineId !== lineId) return line;
+            const next: BriefCustomLine = { ...line };
+            if (typeof patch.name === "string") next.name = patch.name.trim();
+            if (typeof patch.quantity === "number") {
+              next.quantity = Math.max(1, Math.floor(patch.quantity));
+            }
+            if (typeof patch.unitPriceWon === "number") {
+              next.unitPriceWon = Math.max(0, Math.round(patch.unitPriceWon));
+            }
+            if (patch.notes !== undefined) {
+              next.notes = patch.notes?.trim() || undefined;
+            }
+            return next;
+          }),
+          ...clearOverBudgetUiState(),
+        })),
+
+      removeCustomLine: (lineId) =>
+        set((s) => ({
+          customLines: s.customLines.filter((line) => line.lineId !== lineId),
+          ...clearOverBudgetUiState(),
+        })),
 
       acknowledgeMixForCurrentBrief: () =>
         set((s) => stampMixFingerprint(s)),
@@ -392,6 +441,7 @@ export const useBriefStore = create<BriefStore>()(
         digitalBudgetPct: s.digitalBudgetPct,
         digitalChannelIds: s.digitalChannelIds,
         mixUnits: s.mixUnits,
+        customLines: s.customLines,
         mixBriefFingerprint: s.mixBriefFingerprint,
         budgetWithinOnly: s.budgetWithinOnly,
       }),
@@ -414,6 +464,7 @@ export const useBriefStore = create<BriefStore>()(
               : current.digitalBudgetPct,
           digitalChannelIds: normalizeDigitalChannelIds(p.digitalChannelIds),
           mixUnits: normalizeMixUnits(p.mixUnits),
+          customLines: normalizeBriefCustomLines(p.customLines),
           mixBriefFingerprint:
             typeof p.mixBriefFingerprint === "string"
               ? p.mixBriefFingerprint

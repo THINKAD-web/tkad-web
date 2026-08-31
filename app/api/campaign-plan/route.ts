@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/user-session";
 import { createCampaignPlan } from "@/lib/campaign-plan-store";
 import { buildCampaignPlanSnapshot } from "@/lib/planner/brief/build-plan-snapshot";
+import { normalizeBriefCustomLines } from "@/lib/planner/brief/custom-lines";
 import { normalizeBriefInput } from "@/lib/planner/brief/types";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
 import { parsePlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
@@ -12,6 +13,7 @@ export const dynamic = "force-dynamic";
 const SaveBodySchema = z.object({
   brief: z.record(z.string(), z.unknown()),
   mixUnits: z.record(z.string(), z.number()),
+  customLines: z.array(z.record(z.string(), z.unknown())).optional(),
   reportCopy: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -41,12 +43,18 @@ export async function POST(request: NextRequest) {
     const n = Math.floor(v);
     if (Number.isFinite(n) && n > 0) mixUnits[id] = n;
   }
-  if (Object.keys(mixUnits).length === 0) {
+  const customLines = normalizeBriefCustomLines(parsed.data.customLines);
+  if (Object.keys(mixUnits).length === 0 && customLines.length === 0) {
     return NextResponse.json({ error: "Empty media mix" }, { status: 400 });
   }
 
   const { catalog } = await fetchPlannerMediaCatalog();
-  const snapshot = buildCampaignPlanSnapshot({ brief, catalog, mixUnits });
+  const snapshot = buildCampaignPlanSnapshot({
+    brief,
+    catalog,
+    mixUnits,
+    customLines,
+  });
   const reportCopy = parsed.data.reportCopy
     ? parsePlannerReportCopyState(parsed.data.reportCopy)
     : null;

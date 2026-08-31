@@ -161,6 +161,7 @@ function RawFootfallMobileNote({
 }
 
 function mediaHref(row: PlannerExportMediaRow): string | null {
+  if (row.kind === "custom") return null;
   const mediaId = row.id;
   if (!mediaId || String(mediaId).startsWith("row-")) return null;
   return `/media/${mediaId}`;

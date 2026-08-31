@@ -55,3 +55,17 @@ test("buildPlannerQuoteSummary — quote-only only still renders", () => {
   assert.equal(summary!.supplyWon, 0);
   assert.match(summary!.quoteOnlyLine!.label, /1 외벽 — inquiry/);
 });
+
+test("buildPlannerQuoteSummary — custom line footnote distinct from quote_only", () => {
+  const summary = buildPlannerQuoteSummary({
+    mixWon: 10_000_000,
+    productionCostWon: 2_000_000,
+    quoteOnlyNotice: { count: 1, groupLabel: "협의가" },
+    customLineCount: 1,
+    isKo: true,
+  });
+  assert.ok(summary);
+  assert.equal(summary!.footnotes.length, 2);
+  assert.ok(summary!.footnotes.some((f) => f.includes("별도 협의 후 추가")));
+  assert.ok(summary!.footnotes.some((f) => f.includes("공급가에 포함")));
+});

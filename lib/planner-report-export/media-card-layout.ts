@@ -22,6 +22,19 @@ export function collectMediaCardSpecs(
   row: PlannerExportMediaRow,
   isKo: boolean,
 ): MediaCardSpec[] {
+  if (row.kind === "custom") {
+    const specs: MediaCardSpec[] = [];
+    if (row.quantityLabel) {
+      specs.push({ label: isKo ? "수량·단가" : "Qty · unit", value: row.quantityLabel });
+    }
+    if (row.metricsUnavailableLabel) {
+      specs.push({
+        label: isKo ? "노출·CPM" : "Impressions·CPM",
+        value: row.metricsUnavailableLabel,
+      });
+    }
+    return specs;
+  }
   const specs: MediaCardSpec[] = [];
   if (row.quantityLabel) {
     specs.push({ label: isKo ? "수량" : "Qty", value: row.quantityLabel });
@@ -52,6 +65,7 @@ export function showMediaCardContributions(
   portfolioLen: number,
   row: PlannerExportMediaRow,
 ): boolean {
+  if (row.kind === "custom") return false;
   return (
     portfolioLen > 1 &&
     (row.exposureContributionPct != null || row.budgetContributionPct != null)

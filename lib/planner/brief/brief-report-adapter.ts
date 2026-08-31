@@ -7,13 +7,16 @@
 
 import type { MediaItem } from "@/lib/media-data";
 import type {
-  CampaignPlanMediaLine,
+  CampaignPlanMixEntry,
   CampaignPlanSnapshot,
   CampaignPlanStoredMetrics,
 } from "@/lib/campaign-plan-schema";
 import {
+  filterCatalogMixEntries,
+  filterCustomMixEntries,
   isEngineVersionCurrent,
   resolveStoredOverBudget,
+  sumCustomMixTotalWon,
 } from "@/lib/campaign-plan-schema";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import {
@@ -59,6 +62,7 @@ import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
 import { buildReportBudgetHonesty } from "@/lib/planner/report-budget-honesty";
 import { buildPlannerOverBudgetAppendixSpecs } from "@/lib/planner/brief/over-budget-options";
+import { customMixEntriesToExportRows } from "@/lib/planner/brief/custom-export";
 import {
   blendedCpmExcludingQuoteOnly,
   categoryCpmBarsExcludingQuoteOnly,
@@ -151,16 +155,16 @@ export function resolveBriefPortfolio(
   catalog: readonly MediaItem[],
 ): MediaItem[] {
   const byId = new Map(catalog.map((m) => [m.id, m]));
-  return plan.mediaMix
+  return filterCatalogMixEntries(plan.mediaMix)
     .map((line) => byId.get(line.mediaId))
     .filter((m): m is MediaItem => m != null);
 }
 
 export function briefMixQuantities(
-  mediaMix: readonly CampaignPlanMediaLine[],
+  mediaMix: readonly CampaignPlanMixEntry[],
 ): Record<string, number> {
   const out: Record<string, number> = {};
-  for (const line of mediaMix) {
+  for (const line of filterCatalogMixEntries(mediaMix)) {
     if (line.units > 0) out[line.mediaId] = line.units;
   }
   return out;
@@ -173,11 +177,12 @@ export function briefMixQuantities(
  * 집계 합이 저장 총계와도, 유도 총계와도 맞지 않는 제3의 값이 되기 때문이다.
  */
 export function briefMixImpressions(
-  mediaMix: readonly CampaignPlanMediaLine[],
+  mediaMix: readonly CampaignPlanMixEntry[],
 ): Record<string, number> | undefined {
-  if (mediaMix.length === 0) return undefined;
+  const catalogLines = filterCatalogMixEntries(mediaMix);
+  if (catalogLines.length === 0) return undefined;
   const out: Record<string, number> = {};
-  for (const line of mediaMix) {
+  for (const line of catalogLines) {
     if (!Number.isFinite(line.impressions) || line.impressions < 0) {
       return undefined;
     }
@@ -187,12 +192,12 @@ export function briefMixImpressions(
 }
 
 export function briefPriceOptionIndex(
-  mediaMix: readonly CampaignPlanMediaLine[],
+  mediaMix: readonly CampaignPlanMixEntry[],
   catalog: readonly MediaItem[],
 ): Record<string, number> {
   const byId = new Map(catalog.map((m) => [m.id, m]));
   const out: Record<string, number> = {};
-  for (const line of mediaMix) {
+  for (const line of filterCatalogMixEntries(mediaMix)) {
     if (!line.optionId) continue;
     const media = byId.get(line.mediaId);
     if (!media) continue;
@@ -323,6 +328,8 @@ export function buildBriefReportCopyStrategyInput(
 ): DefaultExecutiveSummaryInput {
   const brief = briefFromPlan(plan);
   const portfolio = resolveBriefPortfolio(plan, catalog);
+  const customEntries = filterCustomMixEntries(plan.mediaMix);
+  const portfolioCount = portfolio.length + customEntries.length;
   const campaignGoal = briefGoalToPlanner(brief.goal);
   const industryKey = briefIndustryToPlanner(brief.industry);
   return {
@@ -334,9 +341,11 @@ export function buildBriefReportCopyStrategyInput(
     regionsText: summarizeSidoCodes(brief.regionCodes, isKo),
     seoulZones: [],
     followUp: {},
-    portfolioCount: portfolio.length,
+    portfolioCount,
     topMediaName:
-      portfolio[0]?.name ?? (isKo ? "핵심 매체" : "key media"),
+      portfolio[0]?.name ??
+      customEntries[0]?.name ??
+      (isKo ? "핵심 매체" : "key media"),
   };
 }
 
@@ -485,6 +494,9 @@ export function buildBriefReportPayload(
   const { plan, catalog, isKo } = args;
   const brief = briefFromPlan(plan);
   const portfolio = resolveBriefPortfolio(plan, catalog);
+  const customEntries = filterCustomMixEntries(plan.mediaMix);
+  const customPortfolioRows = customMixEntriesToExportRows(customEntries, isKo);
+  const customMixTotalWon = sumCustomMixTotalWon(customEntries);
   const quantities = briefMixQuantities(plan.mediaMix);
   const priceOptionIndex = briefPriceOptionIndex(plan.mediaMix, catalog);
   const pricing = { quantities, priceOptionIndex };
@@ -546,10 +558,11 @@ export function buildBriefReportPayload(
    * (`lib/planner/partial-rate-notice.ts`). 저장값 자체는 그대로 둔다 —
    * 협상 전 참고치로서의 역할이 따로 있다.
    */
-  const displayedMixWon = budgetAllocation.reduce(
-    (sum, s) => sum + (s.actualWon ?? s.valueWon),
-    0,
-  );
+  const displayedMixWon =
+    budgetAllocation.reduce(
+      (sum, s) => sum + (s.actualWon ?? s.valueWon),
+      0,
+    ) + customMixTotalWon;
   const budgetHonesty = buildReportBudgetHonesty({
     requestWon: plan.brief.budgetWon,
     portfolio,
@@ -560,8 +573,10 @@ export function buildBriefReportPayload(
     planMetrics: exportCalcPlan.metrics,
   });
   const blendedCpmKrw =
-    blendedCpmExcludingQuoteOnly(exportCalcPlan, portfolio) ??
-    exportCalcPlan.cpm.campaignWon;
+    customEntries.length > 0
+      ? null
+      : blendedCpmExcludingQuoteOnly(exportCalcPlan, portfolio) ??
+        exportCalcPlan.cpm.campaignWon;
   const days = flightDays(brief);
   const periodDisplay =
     brief.flightStart && brief.flightEnd
@@ -648,6 +663,8 @@ export function buildBriefReportPayload(
         ? executiveSummaryLines
         : undefined,
     productionCostWon: copy?.productionCostWon,
+    customPortfolioRows,
+    customLineCount: customEntries.length,
     appendixSectionTitle,
     appendixMediaSpecs: plannerAppendixSpecs,
   });

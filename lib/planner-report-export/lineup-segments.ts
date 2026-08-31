@@ -37,5 +37,18 @@ export function buildPortfolioLineupSegments(
       }
     }
   }
+  const groupedIds = new Set(
+    segments.flatMap((s) => s.items.map((row) => row.id).filter(Boolean)),
+  );
+  const ungroupedCustom = p.portfolio.filter(
+    (row) => row.kind === "custom" && row.id && !groupedIds.has(row.id),
+  );
+  if (ungroupedCustom.length > 0) {
+    segments.push({
+      regionLabel: "",
+      categoryLabel: "",
+      items: ungroupedCustom,
+    });
+  }
   return { grouped: true, segments };
 }
