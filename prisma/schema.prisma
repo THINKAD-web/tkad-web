@@ -345,6 +345,16 @@ model Media {
   @@map("media")
 }
 
+enum SellingUnit {
+  panel
+  vehicle
+  station
+  route
+  site
+  network_package
+  screen
+}
+
 model MediaFactSheet {
   id      String @id @default(cuid())
   mediaId String @unique @map("media_id")
@@ -381,6 +391,15 @@ model MediaFactSheet {
 
   /// Phase 1b — isStaticMedia() 우회, loop SOV 경로 강제 (bus TV·택시 영상 등)
   forceLoopSov Boolean? @map("force_loop_sov")
+
+  /// PR-3 Phase 2 — 판매 단위·크리에이티브 스펙 (migration 별도 PR)
+  sellingUnit            SellingUnit? @map("selling_unit")
+  resolutionW            Int?         @map("resolution_w")
+  resolutionH            Int?         @map("resolution_h")
+  aspectRatio            String?      @map("aspect_ratio")
+  fileFormats            String[]     @default([]) @map("file_formats")
+  submissionDeadlineDays Int?         @map("submission_deadline_days")
+  regionCode             String?      @map("region_code") @db.VarChar(2)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

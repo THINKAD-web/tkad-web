@@ -8,6 +8,12 @@
 import { estimateCatalogCpmWon } from "@/lib/media-metrics";
 import { NETWORK_DAILY_FOOTFALL_CAP } from "@/lib/media-network-footfall";
 import { classifyMedia } from "@/lib/metrics/classify";
+import {
+  isBaseOnlyPriceMedia,
+  isRiskyBaseOnlyPricePeriod,
+} from "@/lib/metrics/media-price-adapter";
+import { parseLabelDays } from "@/lib/metrics/audit-rules";
+import { periodToDays } from "@/lib/metrics/price";
 import type { MediaMetricClass } from "@/lib/metrics/types";
 
 /**
@@ -58,7 +64,7 @@ export const PACKAGE_NETWORK_KEYWORD_RE =
   /package|\bpkg\b|turn[\s-]*key|턴키|풀\s*패키지|full\s*package|네트워크\s*전체|노선\s*전체|시\/군\s*판매|통합\s*(패키지|판매|상품|역)?/i;
 
 export type MediaMetricsFieldError = {
-  field: "dailyFootfall" | "impressions" | "cpm";
+  field: "dailyFootfall" | "impressions" | "cpm" | "pricePeriod" | "priceOptions";
   code:
     | "negative"
     | "not_finite"
@@ -66,20 +72,23 @@ export type MediaMetricsFieldError = {
     | "cpm_negative"
     | "impressions_class_cap"
     | "cpm_mismatch"
-    | "package_network_scale";
+    | "package_network_scale"
+    | "base_only_risky_period";
   message: string;
-  details?: Record<string, number | string | null>;
+  details?: Record<string, number | string | null | boolean>;
 };
 
 export type MediaMetricsFieldWarning = {
-  field: "impressions" | "cpm" | "dailyFootfall";
+  field: "impressions" | "cpm" | "dailyFootfall" | "pricePeriod" | "priceOptions" | "name";
   code:
     | "impressions_vs_daily"
     | "cpm_mismatch"
     | "cpm_placeholder"
-    | "package_network_scale";
+    | "package_network_scale"
+    | "price_base_only_month"
+    | "price_name_period_mismatch";
   message: string;
-  details?: Record<string, number | string | null>;
+  details?: Record<string, number | string | null | boolean>;
 };
 
 export type MediaMetricsWritePatch = {
@@ -92,6 +101,7 @@ export type MediaMetricsWritePatch = {
 export type MediaMetricsWriteContext = {
   /** PATCH 시 기존 행 / POST 시 같은 바디의 price */
   price?: number | null;
+  pricePeriod?: string | null;
   existingDailyFootfall?: number | null;
   existingImpressions?: number | null;
   existingCpm?: number | null;
@@ -431,6 +441,79 @@ export function validateMediaMetricsWrite(
   return { ok: true, errors, warnings, values };
 }
 
+/** Fix 3 — priceOptions·pricePeriod·매체명 기간 정합 (Admin 저장) */
+export function validateMediaPriceFields(
+  ctx: Pick<
+    MediaMetricsWriteContext,
+    "price" | "pricePeriod" | "priceOptions" | "name" | "priceNote"
+  >,
+): Pick<MediaMetricsWriteResult, "ok" | "errors" | "warnings"> {
+  const errors: MediaMetricsFieldError[] = [];
+  const warnings: MediaMetricsFieldWarning[] = [];
+
+  const priceSource = {
+    price: ctx.price ?? 0,
+    pricePeriod: ctx.pricePeriod ?? undefined,
+    priceOptions: ctx.priceOptions as MediaMetricsWriteContext["priceOptions"],
+    name: ctx.name,
+    priceNote: ctx.priceNote,
+  };
+
+  if (isRiskyBaseOnlyPricePeriod(priceSource)) {
+    errors.push({
+      field: "pricePeriod",
+      code: "base_only_risky_period",
+      message:
+        'priceOptions 없이 pricePeriod가 "day"/"week"이면 견적이 부풀어 오릅니다. priceOptions를 등록하거나 pricePeriod·매체명을 확인하세요.',
+      details: { pricePeriod: ctx.pricePeriod ?? null },
+    });
+  } else if (
+    isBaseOnlyPriceMedia(priceSource) &&
+    typeof ctx.price === "number" &&
+    ctx.price > 0
+  ) {
+    warnings.push({
+      field: "pricePeriod",
+      code: "price_base_only_month",
+      message:
+        "priceOptions 없이 base row만 있습니다. pricePeriod·매체명 기간 표기를 다시 확인하세요.",
+      details: { pricePeriod: ctx.pricePeriod ?? null },
+    });
+  }
+
+  const nameDays =
+    parseLabelDays(ctx.name) ?? parseLabelDays(ctx.priceNote ?? null);
+  const baseDays = periodToDays(ctx.pricePeriod);
+  if (nameDays != null && baseDays != null && nameDays !== baseDays) {
+    warnings.push({
+      field: "name",
+      code: "price_name_period_mismatch",
+      message: `매체명·priceNote의 "${nameDays}일" 표현과 pricePeriod(${baseDays}일)가 다릅니다.`,
+      details: { nameDays, baseDays, pricePeriod: ctx.pricePeriod ?? null },
+    });
+  }
+
+  return { ok: errors.length === 0, errors, warnings };
+}
+
+/** metrics + price 검증 결과 병합 */
+export function mergeMediaWriteValidation(
+  ...parts: Array<Pick<MediaMetricsWriteResult, "ok" | "errors" | "warnings" | "values">>
+): MediaMetricsWriteResult {
+  const errors = parts.flatMap((p) => p.errors);
+  const warnings = parts.flatMap((p) => p.warnings);
+  const values = parts.reduce(
+    (acc, p) => ({ ...acc, ...p.values }),
+    {} as MediaMetricsWritePatch,
+  );
+  return {
+    ok: errors.length === 0 && parts.every((p) => p.ok),
+    errors,
+    warnings,
+    values,
+  };
+}
+
 export function gateMediaMetricsWrite(
   result: MediaMetricsWriteResult,
   opts: {
@@ -540,6 +623,7 @@ export type MappedMediaMetricsFields = {
   impressions?: number | null;
   cpm?: number | null;
   price?: number | null;
+  pricePeriod?: string | null;
   name?: string | null;
   description?: string | null;
   priceNote?: string | null;
@@ -568,8 +652,9 @@ export function validateMappedMediaMetrics(
   if (mapped.cpm !== undefined) {
     patch.cpm = mapped.cpm;
   }
-  return validateMediaMetricsWrite(patch, {
+  const metrics = validateMediaMetricsWrite(patch, {
     price: mapped.price ?? null,
+    pricePeriod: mapped.pricePeriod ?? null,
     existingDailyFootfall: existing?.dailyFootfall,
     existingImpressions: existing?.impressions,
     existingCpm: existing?.cpm,
@@ -582,6 +667,14 @@ export function validateMappedMediaMetrics(
     widthM: mapped.widthM,
     heightM: mapped.heightM,
   });
+  const price = validateMediaPriceFields({
+    price: mapped.price ?? null,
+    pricePeriod: mapped.pricePeriod ?? null,
+    priceOptions: mapped.priceOptions,
+    name: mapped.name,
+    priceNote: mapped.priceNote,
+  });
+  return mergeMediaWriteValidation(metrics, { ...price, values: {} });
 }
 
 export function validateNetworkAggregateFootfall(

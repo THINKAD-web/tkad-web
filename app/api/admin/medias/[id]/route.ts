@@ -35,10 +35,12 @@ import { persistMediaInstallLocations } from "@/lib/persist-media-install-locati
 import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
 import {
   gateMediaMetricsWrite,
+  mergeMediaWriteValidation,
   metricsWriteErrorBody,
   metricsWriteNeedsAckBody,
   readAcknowledgeMetricsWarnings,
   validateMediaMetricsWrite,
+  validateMediaPriceFields,
 } from "@/lib/media-metrics-write";
 import { stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
 import { logLockdownAttempt, logReviewStatusChange } from "@/lib/media/audit-log";
@@ -324,12 +326,22 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     body.priceNote !== undefined ||
     body.priceOptions !== undefined ||
     body.description !== undefined;
-  if (metricsTouched) {
-    const metrics = validateMediaMetricsWrite(metricsPatch, {
+  const priceTouched =
+    body.price !== undefined ||
+    body.pricePeriod !== undefined ||
+    body.priceOptions !== undefined ||
+    body.name !== undefined ||
+    body.priceNote !== undefined;
+  if (metricsTouched || priceTouched) {
+    const metricsCtx = {
       price:
         typeof data.price === "number"
           ? data.price
           : (existing.price ?? null),
+      pricePeriod:
+        body.pricePeriod !== undefined
+          ? (body.pricePeriod as string | null)
+          : (existing.pricePeriod ?? null),
       existingDailyFootfall: existing.dailyFootfall,
       existingImpressions: existing.impressions,
       existingCpm: existing.cpm,
@@ -370,7 +382,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         data.heightM !== undefined
           ? (data.heightM as number | null)
           : existing.heightM,
-    });
+    };
+    const metrics = mergeMediaWriteValidation(
+      validateMediaMetricsWrite(metricsPatch, metricsCtx),
+      priceTouched
+        ? validateMediaPriceFields(metricsCtx)
+        : { ok: true, errors: [], warnings: [] },
+    );
     const gate = gateMediaMetricsWrite(metrics, {
       acknowledgeWarnings: readAcknowledgeMetricsWarnings(body),
     });

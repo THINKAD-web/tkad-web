@@ -1,0 +1,207 @@
+{
+  "generatedAt": "2026-08-30T23:18:56.566Z",
+  "r02Total": 552,
+  "bySubCategory": {
+    "billboard": 7,
+    "wall_mural": 6,
+    "digital_signage": 256,
+    "mall": 38,
+    "subway_station": 135,
+    "digital_shelter": 8,
+    "bus_shelter": 7,
+    "airport": 32,
+    "ktx_terminal": 5,
+    "leisure": 3,
+    "전광판": 1,
+    "bus_interior": 15,
+    "bus_exterior": 16,
+    "concert": 2,
+    "banner": 1,
+    "park": 3,
+    "restaurant": 1,
+    "media_pole": 1,
+    "taxi_exterior": 2,
+    "택배카보드 광고": 1,
+    "디지털 전광판": 1,
+    "inflight": 1,
+    "market": 1,
+    "빌딩 전광판": 1,
+    "other": 1,
+    "vehicle_wrap": 1,
+    "convenience": 6
+  },
+  "byType": {
+    "static": 65,
+    "digital": 447,
+    "mobile": 40
+  },
+  "createdAtMonths": {
+    "2026-04": 96,
+    "2026-05": 199,
+    "2026-06": 144,
+    "2026-07": 110,
+    "2026-08": 3
+  },
+  "classificationCounts": {
+    "A_scale_error": 460,
+    "B_impression_denominator": 1,
+    "C_price_too_low": 0,
+    "D_bounds_mismatch": 58,
+    "E_needs_review": 33
+  },
+  "classificationSamples": {
+    "A_scale_error": [
+      {
+        "id": "cmnzkw1nr000004l7jt1x7pvx",
+        "slug": "bupyeong-eipeulreoseuesetbilding-jeongwangpan-gwanggo",
+        "name": "인천 부평 에이플러스에셋빌딩 전광판 광고",
+        "price": 3000000,
+        "pricePeriod": "month",
+        "cpm": 3100,
+        "subCategory": "digital_signage"
+      },
+      {
+        "id": "cmo3d2zum000604l65yp4p5wp",
+        "slug": "yongsanyeok-aipakeumol-midieowol-gwanggo",
+        "name": "용산역 아이파크몰 미디어월 광고",
+        "price": 7000000,
+        "pricePeriod": "month",
+        "cpm": 2745,
+        "subCategory": "mall"
+      },
+      {
+        "id": "cmo60kl2h000004ju46tn4790",
+        "slug": "seoulyeok-buyangbilding-jeongwangpan-gwanggo",
+        "name": "서울역 부양빌딩 전광판 광고",
+        "price": 12000000,
+        "pricePeriod": "month",
+        "cpm": 1263,
+        "subCategory": "digital_signage"
+      },
+      {
+        "id": "cmo60x38n000704kyuxyt2yqh",
+        "slug": "dongdaemun-dutamol-jeongwangpan-gwanggo",
+        "name": "동대문 두타몰 전광판 광고",
+        "price": 5000000,
+        "pricePeriod": "month",
+        "cpm": 1786,
+        "subCategory": "digital_signage"
+      },
+      {
+        "id": "cmo6127nn000204juf0eq8vvy",
+        "slug": "dongdaemun-rotdepiteuin-jeongwangpan-gwanggo",
+        "name": "동대문 롯데피트인 전광판 광고",
+        "price": 5000000,
+        "pricePeriod": "month",
+        "cpm": 2778,
+        "subCategory": "digital_signage"
+      }
+    ],
+    "B_impression_denominator": [
+      {
+        "id": "cmrsrt7e4000204i9y7tfd360",
+        "slug": null,
+        "name": "게릴라 포스터 광고",
+        "price": 500,
+        "pricePeriod": "month",
+        "cpm": 0.1282051282051282,
+        "subCategory": "other"
+      }
+    ],
+    "C_price_too_low": [],
+    "D_bounds_mismatch": [
+      {
+        "id": "cmnz82khn000004kzmu9sap6n",
+        "slug": "itaewon-178-panapeulrekseu-gwanggo",
+        "name": "이태원 178 파나플렉스 광고",
+        "price": 70000000,
+        "pricePeriod": "biweekly",
+        "cpm": 93333,
+        "subCategory": "billboard"
+      },
+      {
+        "id": "cmnz9yrxe000004l288jjt5uw",
+        "slug": "hongdae-l7-bilbodeu-ateuwol-gwanggo",
+        "name": "홍대 L7 빌보드 아트월 광고",
+        "price": 50000000,
+        "pricePeriod": "month",
+        "cpm": 59000,
+        "subCategory": "wall_mural"
+      },
+      {
+        "id": "cmnzdrhjl000004lbqyg22tag",
+        "slug": "koekseu-pareunaseu-deo-geuraendeu-gwanggo",
+        "name": "코엑스 파르나스 더 그랜드 광고",
+        "price": 200000000,
+        "pricePeriod": "month",
+        "cpm": 133000,
+        "subCategory": "billboard"
+      },
+      {
+        "id": "cmnzek19o000004l49pqmjq6k",
+        "slug": "sinsa-hyumeontawo-raeping-gwanggo",
+        "name": "신사 휴먼타워 래핑 광고",
+        "price": 150000000,
+        "pricePeriod": "biweekly",
+        "cpm": 83000,
+        "subCategory": "billboard"
+      },
+      {
+        "id": "cmo3f0k4a000004k43dss6zft",
+        "slug": "gangnam-sigeunicheoseukweeo-jeongwangpan-gwanggo",
+        "name": "강남 시그니처 스퀘어 전광판 광고",
+        "price": 15000000,
+        "pricePeriod": "month",
+        "cpm": 4688,
+        "subCategory": "digital_signage"
+      }
+    ],
+    "E_needs_review": [
+      {
+        "id": "cmo3ehh9u000004jp5b65rk7x",
+        "slug": "samseongdong-sinraseutei-led-jeongwangpan-gwanggo",
+        "name": "삼성동 신라스테이 전광판 광고",
+        "price": 15000000,
+        "pricePeriod": "month",
+        "cpm": 5357,
+        "subCategory": "digital_signage"
+      },
+      {
+        "id": "cmo3g31e7000004l2gr0x4hyk",
+        "slug": "gangnam-baengbaengbilding-jeongwangpan-gwanggo",
+        "name": "강남 뱅뱅빌딩 전광판 광고",
+        "price": 15000000,
+        "pricePeriod": "month",
+        "cpm": 6818,
+        "subCategory": "digital_signage"
+      },
+      {
+        "id": "cmo3gfj02000204l2qr0zhgrb",
+        "slug": "gangnam-eichiem-tawo-jeongwangpan-gwanggo",
+        "name": "강남 HM 타워 전광판 광고",
+        "price": 12000000,
+        "pricePeriod": "month",
+        "cpm": 6667,
+        "subCategory": "digital_signage"
+      },
+      {
+        "id": "cmo3gmiih000004jsmiutrtsj",
+        "slug": "gangnam-jiairaibeu-ijeutawo-jeongwangpan-gwanggo",
+        "name": "강남 GI-LIVE 이즈타워 전광판 광고",
+        "price": 16000000,
+        "pricePeriod": "month",
+        "cpm": 5000,
+        "subCategory": "digital_signage"
+      },
+      {
+        "id": "cmo5ym89i000204leidj4otua",
+        "slug": "euljiroipguyeok-me-mn-jeongwangpan-sync-gwanggo",
+        "name": "명동 ME&MN 전광판 Sync 광고",
+        "price": 15000000,
+        "pricePeriod": "month",
+        "cpm": 5357,
+        "subCategory": "digital_signage"
+      }
+    ]
+  }
+}

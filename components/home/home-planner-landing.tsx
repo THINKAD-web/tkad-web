@@ -49,23 +49,23 @@ function SectionShell({
     <section
       id={id}
       className={cn(
-        "scroll-mt-16 border-t border-gray-100 px-4 py-12 dark:border-white/5 md:px-6 md:py-16 lg:px-8",
+        "scroll-mt-16 border-t border-gray-100 px-4 py-14 dark:border-white/5 md:px-6 md:py-20 lg:px-8",
         className,
       )}
       aria-labelledby={`${id}-heading`}
     >
       <div className="mx-auto max-w-5xl">
-        <header className="mb-8 max-w-2xl md:mb-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+        <header className="mb-10 max-w-2xl md:mb-12">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
             {eyebrow}
           </p>
           <h2
             id={`${id}-heading`}
-            className="mt-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white md:text-2xl"
+            className="mt-3 font-serif text-2xl font-semibold leading-tight tracking-tight text-gray-900 dark:text-white md:text-3xl"
           >
             {title}
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-white/65 md:text-base">
+          <p className="mt-3 text-base leading-relaxed text-gray-600 dark:text-white/65 md:text-lg">
             {lead}
           </p>
         </header>
@@ -153,7 +153,7 @@ export async function HomePlannerLanding({
               <p className="text-base font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
                 {m.value}
               </p>
-              <p className="mt-1 text-[11px] leading-snug text-gray-600 dark:text-white/60 sm:mt-1.5 sm:text-sm">
+              <p className="mt-1 tkad-type-meta leading-snug text-gray-600 dark:text-white/60 sm:mt-1.5">
                 {m.label}
               </p>
             </div>

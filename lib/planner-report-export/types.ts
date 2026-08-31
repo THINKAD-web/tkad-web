@@ -240,7 +240,11 @@ export type PlannerReportExportFormat = "pdf" | "pptx";
 export type PlannerReportExportAssets = {
   sectionVisibility?: import("@/lib/planner-report-export/section-visibility").PlannerReportSectionVisibility;
   lineupViewMode?: import("@/lib/planner-report-view-mode").PlannerExportLineupViewMode;
+  /** 제안서 문서 스타일 — preview/PDF/PPTX SSOT (`document-theme.ts`) */
+  style?: import("@/lib/planner-report-export/document-theme").PlannerReportStyle;
 };
+
+export type { PlannerReportStyle } from "@/lib/planner-report-export/document-theme";
 
 export type {
   PlannerExportLineupViewMode,

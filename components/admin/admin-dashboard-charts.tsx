@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import type { InquiryTypeSlice, WeeklyInquiryPoint } from "@/lib/admin-dashboard-data";
 
-const PIE_COLORS = ["#ff6200", "#525252", "#e11d48", "#f59e0b", "#94a3b8"];
+const PIE_COLORS = ["#0D9488", "#0D1B2E", "#E11D48", "#6366F1", "#64748B"];
 
 type Props = {
   weeklyInquiries: WeeklyInquiryPoint[];

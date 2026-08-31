@@ -98,8 +98,9 @@
   --color-bx-gray-dim: var(--bx-gray-dim);
   --color-bx-accent: var(--bx-accent);
 
-  /* Typography — Pretendard (sans) · Space Grotesk (display) · JetBrains Mono (mono) */
+  /* Typography — Pretendard (sans) · Noto Serif KR (reading) · Space Grotesk (EN display) · JetBrains Mono */
   --font-sans: var(--font-pretendard), system-ui, sans-serif;
+  --font-serif: var(--font-noto-serif-kr), "Noto Serif KR", ui-serif, Georgia, serif;
   --font-display: var(--font-space-grotesk), var(--font-pretendard), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 

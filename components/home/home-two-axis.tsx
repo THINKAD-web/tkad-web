@@ -34,17 +34,17 @@ export async function HomeTwoAxis() {
       aria-labelledby="home-two-axis-heading"
     >
       <div className="mx-auto max-w-5xl">
-        <div className="mb-3 md:mb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+        <div className="mb-4 md:mb-6">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
             {t("eyebrow")}
           </p>
           <h2
             id="home-two-axis-heading"
-            className="mt-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white md:text-2xl"
+            className="mt-3 font-serif text-2xl font-semibold leading-tight tracking-tight text-gray-900 dark:text-white md:text-3xl"
           >
             {t("title")}
           </h2>
-          <p className="mt-1.5 max-w-2xl text-sm text-gray-600 dark:text-white/65 md:text-base">
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-600 dark:text-white/65 md:text-lg">
             {t("subtitle")}
           </p>
         </div>

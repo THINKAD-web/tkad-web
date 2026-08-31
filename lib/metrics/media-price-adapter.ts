@@ -11,6 +11,7 @@
  */
 import type { MediaItem, MediaPriceOption } from "@/lib/media-data";
 import { isAddonSurchargePriceOption } from "@/lib/media-price-addon-option";
+import { parseLabelDays } from "./audit-rules";
 import { minSellableDaysAbove, periodToDays, resolvePrice } from "./price";
 import type { PriceOption, PriceResult } from "./types";
 
@@ -18,7 +19,34 @@ import type { PriceOption, PriceResult } from "./types";
 export type MediaPriceSource = Pick<
   MediaItem,
   "price" | "pricePeriod" | "priceOptions"
->;
+> & {
+  name?: string | null;
+  priceNote?: string | null;
+};
+
+function hasExplicitPriceOptions(media: MediaPriceSource): boolean {
+  const options: MediaPriceOption[] = Array.isArray(media.priceOptions)
+    ? media.priceOptions
+    : [];
+  return options.some((opt) => {
+    if (!opt || typeof opt !== "object") return false;
+    const price = opt.price;
+    return typeof price === "number" && Number.isFinite(price) && price > 0;
+  });
+}
+
+/** priceOptions 없이 base row 만 있는 매체 */
+export function isBaseOnlyPriceMedia(media: MediaPriceSource): boolean {
+  if (typeof media.price !== "number" || media.price <= 0) return false;
+  return !hasExplicitPriceOptions(media);
+}
+
+/** day/week base-only — 선형 환산(×7·×30)이 견적을 부풀릴 수 있는 구간 */
+export function isRiskyBaseOnlyPricePeriod(media: MediaPriceSource): boolean {
+  if (!isBaseOnlyPriceMedia(media)) return false;
+  const baseDays = periodToDays(media.pricePeriod);
+  return baseDays != null && baseDays < 7;
+}
 
 /**
  * 등록된 가격 상품 목록.
@@ -78,7 +106,29 @@ export function mediaPriceOptions(media: MediaPriceSource): PriceOption[] {
   // base 와 정확히 같은 일수의 옵션이 이미 있으면 중복 제거.
   if (explicit.some((o) => o.days === base.days)) return explicit;
 
+  // Fix 1 — base-only: 매체명·priceNote 기간 힌트가 pricePeriod 와 크게 다르면 유도
+  if (explicit.length === 0) {
+    const nameDays =
+      parseLabelDays(media.name) ?? parseLabelDays(media.priceNote ?? null);
+    if (nameDays != null && nameDays > baseDays * 2) {
+      return [
+        {
+          days: nameDays,
+          price: media.price,
+          id: "inferred-base",
+          label: "명칭 유도",
+        },
+      ];
+    }
+    return [base];
+  }
+
   return [...explicit, base];
+}
+
+/** 등록 상품 목록 — mediaPriceOptions 와 동일 (호출부 일관성) */
+export function resolveMediaPriceOptions(media: MediaPriceSource): PriceOption[] {
+  return mediaPriceOptions(media);
 }
 
 /**
@@ -92,7 +142,20 @@ export function resolveMediaProductPrice(
   media: MediaPriceSource,
   days = 30,
 ): PriceResult | null {
-  return resolvePrice(mediaPriceOptions(media), days);
+  const options = resolveMediaPriceOptions(media);
+  const result = resolvePrice(options, days);
+  const baseDays = periodToDays(media.pricePeriod);
+  // Fix 2 — day/week base-only 를 장기 일수로 외삽하면 M-CITY×30 급 부풀림
+  if (
+    result &&
+    isRiskyBaseOnlyPricePeriod(media) &&
+    baseDays != null &&
+    days > baseDays * 2 &&
+    result.basis === "extrapolated"
+  ) {
+    return null;
+  }
+  return result;
 }
 
 /**
@@ -103,7 +166,7 @@ export function mediaMinSellableDaysAbove(
   media: MediaPriceSource,
   days: number,
 ): number | null {
-  return minSellableDaysAbove(mediaPriceOptions(media), days);
+  return minSellableDaysAbove(resolveMediaPriceOptions(media), days);
 }
 
 export type ResolvedMediaPrice = {

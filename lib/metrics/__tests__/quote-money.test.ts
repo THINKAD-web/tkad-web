@@ -66,3 +66,31 @@ test("V-5: 일 단가가 진짜인 매체는 일할 계산이 유지된다", () 
   // base 옵션 = 1일 100만 → 1일 요청은 exact
   assert.equal(calculateMediaQuoteByDays(trueDaily, 1).costWon, 1_000_000);
 });
+
+test("V-5: base-only M-CITY variant — 매체명 1개월 힌트로 30일 상품가", () => {
+  const baseOnlyMcity = {
+    ...MCITY,
+    name: "M-CITY 1개월",
+    price: 70_000_000,
+    pricePeriod: "day",
+    priceOptions: [],
+  } as unknown as MediaItem;
+  assert.equal(calculateMediaQuoteByDays(baseOnlyMcity, 30).costWon, 70_000_000);
+  assert.notEqual(
+    calculateMediaQuoteByDays(baseOnlyMcity, 30).costWon,
+    2_100_000_000,
+  );
+});
+
+test("V-5: base-only day/week — 선형 30배 폴백 차단", () => {
+  const risky = {
+    ...MCITY,
+    name: "테스트 전광판",
+    price: 70_000_000,
+    pricePeriod: "day",
+    priceOptions: [],
+  } as unknown as MediaItem;
+  const line30 = calculateMediaQuoteByDays(risky, 30);
+  assert.equal(line30.costWon, 70_000_000);
+  assert.notEqual(line30.costWon, 2_100_000_000);
+});

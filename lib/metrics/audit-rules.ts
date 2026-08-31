@@ -72,6 +72,8 @@ export type AuditMediaRow = {
   nearbyLandmarks: string | null;
   /** U-series — ISO 3166-1 alpha-2 (migration 전에는 undefined) */
   country?: string | null;
+  /** PR-3 FactSheet — audit 시 join 으로 채울 수 있음 */
+  sellingUnit?: string | null;
 };
 
 export type Violation = {
@@ -225,8 +227,11 @@ export function parseLabelDays(label: string | null | undefined): number | null 
   return null;
 }
 
-/** 가격 표기·비고·본문에서 선언된 판매 단위를 읽는다 */
+/** 가격 표기·비고·본문·FactSheet 에서 선언된 판매 단위를 읽는다 */
 export function parseDeclaredSellingUnit(row: AuditMediaRow): string | null {
+  if (typeof row.sellingUnit === "string" && row.sellingUnit.trim()) {
+    return row.sellingUnit.trim();
+  }
   const haystack = [
     row.priceNote,
     row.description?.slice(0, 400),
@@ -601,6 +606,7 @@ export function auditRow(row: AuditMediaRow, acc: AuditAccumulator): void {
     }
   }
   for (const field of SCHEMA_MISSING_FIELDS) {
+    if (field === "sellingUnit" && row.sellingUnit) continue;
     acc.fieldGaps[field] = (acc.fieldGaps[field] ?? 0) + 1;
   }
   if (missing.length > 0) {

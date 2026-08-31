@@ -6,6 +6,7 @@ import {
 } from "@/lib/planner-report-export/types";
 import { parseSectionVisibility } from "@/lib/planner-report-export/section-visibility";
 import { parseExportLineupViewMode } from "@/lib/planner-report-view-mode";
+import { parsePlannerReportStyle } from "@/lib/planner-report-export/document-theme";
 import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 import { logPlanReportActivityFireAndForget } from "@/lib/plan-report-activity/log";
 import {
@@ -54,12 +55,14 @@ export async function POST(request: NextRequest) {
     activitySource,
     sectionVisibility: rawVisibility,
     lineupViewMode: rawLineupViewMode,
+    style: rawStyle,
   } = (body ?? {}) as {
     format?: PlannerReportExportFormat;
     payload?: unknown;
     activitySource?: PlanReportActivitySource;
     sectionVisibility?: unknown;
     lineupViewMode?: unknown;
+    style?: unknown;
   };
 
   if (format !== "pdf" && format !== "pptx") {
@@ -76,7 +79,8 @@ export async function POST(request: NextRequest) {
 
   const sectionVisibility = parseSectionVisibility(rawVisibility);
   const lineupViewMode = parseExportLineupViewMode(rawLineupViewMode);
-  const exportAssets = { sectionVisibility, lineupViewMode };
+  const style = parsePlannerReportStyle(rawStyle);
+  const exportAssets = { sectionVisibility, lineupViewMode, style };
 
   const logExport = () => {
     const userId = pdfAccess.userId;

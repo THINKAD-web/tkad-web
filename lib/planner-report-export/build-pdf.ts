@@ -39,18 +39,14 @@ import {
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
 import type { PlannerExportKpi } from "@/lib/planner-report-export/types";
+import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
  * 견적서 PDF(`build-korean-quote-pdf.ts`)와 동일한 서버 생성 패턴.
+ * 색상·표지 레이아웃은 `document-theme.ts` SSOT.
  */
 
-/** Quiet Professional — 흑백 + 주황 단일 액센트 (#ff6200) */
-const QP_ACCENT = [255, 98, 0] as const;
-const QP_ACCENT_SOFT = [255, 243, 232] as const;
-/** 주황 커버·배너 위 보조 텍스트 (구 라벤더 대체) */
-const QP_ON_ACCENT_MUTED = [255, 236, 220] as const;
-const QP_INK = [28, 28, 31] as const;
 const INK = [17, 24, 39] as const;
 const GRAY_600 = [75, 85, 99] as const;
 const GRAY_500 = [107, 114, 128] as const;
@@ -142,6 +138,18 @@ export async function buildPlannerReportPdf(
   p: PlannerReportExportPayload,
   assets?: PlannerReportExportAssets,
 ): Promise<Uint8Array> {
+  const theme = getReportDocumentTheme(assets?.style);
+  const {
+    accentRgb: QP_ACCENT,
+    accentSoftRgb: QP_ACCENT_SOFT,
+    onAccentMutedRgb: QP_ON_ACCENT_MUTED,
+    inkRgb: QP_INK,
+    coverBgRgb: COVER_BG,
+    coverTextRgb: COVER_TEXT,
+    coverMutedRgb: COVER_MUTED,
+  } = theme.pdf;
+  const wordmarkOnDark = theme.coverMode === "filled";
+
   const { default: JsPDF } = await import("jspdf");
   const doc = new JsPDF({ unit: "mm", format: "a4" });
   const vis = assets?.sectionVisibility;
@@ -195,15 +203,23 @@ export async function buildPlannerReportPdf(
     y += 9;
   }
 
-  /** THINKAD 워드마크 (THINK·AD 흰색 — 주황 커버/배너 위) */
+  /** THINKAD 워드마크 */
   function drawWordmark(x: number, baseY: number, size: number) {
     doc.setFont(FONT, "normal");
     doc.setFontSize(size);
-    doc.setTextColor(255, 255, 255);
-    doc.text("THINK", x, baseY);
-    const w = doc.getTextWidth("THINK");
-    setText(WHITE);
-    doc.text("AD", x + w, baseY);
+    if (wordmarkOnDark) {
+      doc.setTextColor(255, 255, 255);
+      doc.text("THINK", x, baseY);
+      const w = doc.getTextWidth("THINK");
+      setText(QP_ACCENT);
+      doc.text("AD", x + w, baseY);
+    } else {
+      setText(QP_INK);
+      doc.text("THINK", x, baseY);
+      const w = doc.getTextWidth("THINK");
+      setText(QP_ACCENT);
+      doc.text("AD", x + w, baseY);
+    }
   }
 
   /** 도넛 차트 (삼각형 팬 + 중앙 흰 원) */
@@ -380,10 +396,16 @@ export async function buildPlannerReportPdf(
     : null;
 
   // ── 표지 페이지 ──
-  setFill(QP_ACCENT);
+  setFill(COVER_BG);
   doc.rect(0, 0, pageW, pageH, "F");
-  setFill(QP_INK);
-  doc.rect(0, 0, pageW, 3, "F");
+  if (theme.topAccentBar) {
+    setFill(QP_ACCENT);
+    doc.rect(0, 0, pageW, theme.coverMode === "minimal" ? 1.2 : 3, "F");
+  }
+  if (theme.coverMode === "filled") {
+    setFill(QP_INK);
+    doc.rect(0, 3, pageW, 1.4, "F");
+  }
 
   drawWordmark(M, 50, 26);
   if (coverLogoData) {
@@ -402,25 +424,25 @@ export async function buildPlannerReportPdf(
     }
   }
   doc.setFont(FONT, "normal");
-  setText(QP_ON_ACCENT_MUTED);
+  setText(COVER_MUTED);
   doc.setFontSize(10);
   doc.text("CAMPAIGN PLANNER", M, 58);
 
-  doc.setTextColor(255, 255, 255);
+  setText(COVER_TEXT);
   doc.setFontSize(28);
   const titleLines = doc.splitTextToSize(p.documentTitle, contentW) as string[];
   doc.text(titleLines, M, 92);
 
-  setFill(QP_INK);
+  setFill(QP_ACCENT);
   doc.rect(M, 92 + titleLines.length * 11, 28, 1.6, "F");
 
   doc.setFontSize(13);
-  setText(QP_ON_ACCENT_MUTED);
+  setText(COVER_MUTED);
   doc.text(subtitle, M, 104 + titleLines.length * 11);
 
   if (p.clientName) {
     doc.setFontSize(13);
-    doc.setTextColor(255, 255, 255);
+    setText(COVER_TEXT);
     doc.text(
       `${p.clientName} ${isKo ? "귀중" : ""}`.trim(),
       M,
@@ -428,7 +450,7 @@ export async function buildPlannerReportPdf(
     );
   }
   doc.setFontSize(10);
-  setText(QP_ON_ACCENT_MUTED);
+  setText(COVER_MUTED);
   doc.text(p.generatedAt, M, pageH - 28);
   doc.text(
     `THINKAD (싱커드)   ·   ${CONTACT_EMAIL}   ·   02-515-2772`,

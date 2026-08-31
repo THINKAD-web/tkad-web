@@ -26,14 +26,13 @@ import {
   EXPORT_BADGE_PDF,
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
+import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
  * 텍스트/표/도형 네이티브 요소라 영업팀이 PowerPoint 에서 바로 수정 가능.
  */
 
-const VIOLET = "FF6200";
-const CYAN = "1C1C1F";
 const INK = "111827";
 const GRAY = "6B7280";
 const LIGHT = "F1F1F7";
@@ -251,6 +250,14 @@ export async function buildPlannerReportPptx(
   p: PlannerReportExportPayload,
   assets?: PlannerReportExportAssets,
 ): Promise<Uint8Array> {
+  const theme = getReportDocumentTheme(assets?.style);
+  const ACCENT = theme.pptx.accent;
+  const ACCENT_LT = theme.pptx.accentLight;
+  const CYAN = theme.pptx.ink;
+  const COVER_BG = theme.pptx.coverBg;
+  const COVER_TEXT = theme.pptx.coverText;
+  const COVER_MUTED = theme.pptx.coverMuted;
+
   const PptxGenJS = (await import("pptxgenjs")).default;
   const pptx = new PptxGenJS();
   pptx.layout = "LAYOUT_WIDE"; // 13.33 x 7.5 in
@@ -271,9 +278,9 @@ export async function buildPlannerReportPptx(
   );
   const lineupViewMode = assets?.lineupViewMode ?? "detail";
 
-  const ACCENT_LT = "FFB990";
+  const ACCENT_LT = theme.pptx.accentLight;
   const wordmark = (size: number) => [
-    { text: "THINK", options: { color: WHITE, bold: true } },
+    { text: "THINK", options: { color: theme.coverMode === "filled" ? WHITE : COVER_TEXT, bold: true } },
     { text: "AD", options: { color: ACCENT_LT, bold: true } },
   ].map((r) => ({ ...r, options: { ...r.options, fontFace: face, fontSize: size } }));
 
@@ -287,7 +294,7 @@ export async function buildPlannerReportPptx(
 
   // ── 1. 표지 ──
   const cover = pptx.addSlide();
-  cover.background = { color: VIOLET };
+  cover.background = { color: COVER_BG };
   if (coverLogoData) {
     try {
       cover.addImage({
@@ -301,35 +308,38 @@ export async function buildPlannerReportPptx(
       /* broken logo */
     }
   }
+  const coverTitleColor = theme.coverMode === "filled" ? WHITE : COVER_TEXT;
+  const coverMutedColor = theme.coverMode === "filled" ? "D1D5DB" : COVER_MUTED;
+
   cover.addText(wordmark(30), { x: 0.7, y: 1.35, w: 6, h: 0.7 });
   cover.addText("CAMPAIGN PLANNER", {
     x: 0.72, y: 2.05, w: 9, h: 0.4, fontFace: face,
-    fontSize: 12, color: "D1D5DB", charSpacing: 3,
+    fontSize: 12, color: coverMutedColor, charSpacing: 3,
   });
   cover.addText(p.documentTitle, {
     x: 0.7, y: 2.7, w: 12, h: 1.4, fontFace: face,
-    fontSize: 38, bold: true, color: WHITE,
+    fontSize: 38, bold: true, color: coverTitleColor,
   });
-  cover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.0, w: 2.2, h: 0.06, fill: { color: CYAN } });
+  cover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.0, w: 2.2, h: 0.06, fill: { color: ACCENT } });
   cover.addText(
     p.kind === "integrated"
       ? isKo ? "OOH + 디지털 통합 캠페인 제안" : "OOH + Digital integrated campaign"
       : isKo ? "OOH 미디어 캠페인 플랜" : "OOH media campaign plan",
-    { x: 0.7, y: 4.25, w: 12, h: 0.5, fontFace: face, fontSize: 17, color: "E5E7EB" },
+    { x: 0.7, y: 4.25, w: 12, h: 0.5, fontFace: face, fontSize: 17, color: coverMutedColor },
   );
   if (p.clientName) {
     cover.addText(`${p.clientName} ${isKo ? "귀중" : ""}`.trim(), {
-      x: 0.7, y: 6.0, w: 12, h: 0.4, fontFace: face, fontSize: 14, color: WHITE,
+      x: 0.7, y: 6.0, w: 12, h: 0.4, fontFace: face, fontSize: 14, color: coverTitleColor,
     });
   }
   cover.addText(p.generatedAt, {
-    x: 0.7, y: 6.6, w: 12, h: 0.4, fontFace: face, fontSize: 12, color: "CFC8EC",
+    x: 0.7, y: 6.6, w: 12, h: 0.4, fontFace: face, fontSize: 12, color: coverMutedColor,
   });
 
   // 공통 헤더 그리기
   function header(slide: ReturnType<typeof pptx.addSlide>, label: string) {
     slide.background = { color: WHITE };
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.9, fill: { color: VIOLET } });
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.9, fill: { color: ACCENT } });
     slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0.9, w: W, h: 0.05, fill: { color: CYAN } });
     slide.addText(label, {
       x: 0.6, y: 0.12, w: 9, h: 0.66, fontFace: face, fontSize: 20, bold: true, color: WHITE,
@@ -376,7 +386,7 @@ export async function buildPlannerReportPptx(
       fontFace: face,
       fontSize: 10,
       bold: true,
-      color: VIOLET,
+      color: ACCENT,
     });
     return topY + 0.28;
   }
@@ -446,7 +456,7 @@ export async function buildPlannerReportPptx(
     if (k.status === "pending") {
       s2.addText("—", { x: 8.4, y: ky + 0.38, w: 4.1, h: 0.35, fontFace: face, fontSize: 16, bold: true, color: GRAY });
     } else {
-      s2.addText(k.value, { x: 8.4, y: ky + 0.38, w: 4.1, h: 0.45, fontFace: face, fontSize: 18, bold: true, color: VIOLET });
+      s2.addText(k.value, { x: 8.4, y: ky + 0.38, w: 4.1, h: 0.45, fontFace: face, fontSize: 18, bold: true, color: ACCENT });
     }
     const badgeColors = EXPORT_BADGE_PDF[k.badge];
     s2.addShape(pptx.ShapeType.roundRect, {
@@ -546,7 +556,7 @@ export async function buildPlannerReportPptx(
           text: v,
           options: {
             fill: { color: emphasis ? LIGHT : "FFFFFF" },
-            color: emphasis ? VIOLET.replace("#", "") : INK,
+            color: emphasis ? ACCENT.replace("#", "") : INK,
             bold: emphasis,
             align: "right",
             fontSize: 11,
@@ -667,7 +677,7 @@ export async function buildPlannerReportPptx(
         y: ch.reachSummary?.length ? rightY + 0.15 : rightY,
         w: barW,
         rows: ch.cpmBars,
-        color: VIOLET,
+        color: ACCENT,
         face,
         fmt: (n) => `₩${fmtImp(n, isKo)}`,
         colorByRow: true,
@@ -688,7 +698,7 @@ export async function buildPlannerReportPptx(
         text: h,
         options: {
           fill: { color: "F5F3FF" },
-          color: VIOLET,
+          color: ACCENT,
           bold: true,
           fontSize: 11,
           fontFace: face,
@@ -1000,7 +1010,7 @@ export async function buildPlannerReportPptx(
           h: 0.2,
           fontFace: face,
           fontSize: 10,
-          color: VIOLET,
+          color: ACCENT,
           bold: true,
         });
       }
@@ -1021,7 +1031,7 @@ export async function buildPlannerReportPptx(
           h: 0.2,
           fontFace: face,
           fontSize: 10,
-          color: VIOLET,
+          color: ACCENT,
           bold: true,
         });
       }
@@ -1031,7 +1041,7 @@ export async function buildPlannerReportPptx(
     if (row.recommendReason?.trim()) {
       slide.addText(
         [
-          { text: isKo ? "추천 " : "Why ", options: { color: VIOLET, bold: true, fontSize: 10 } },
+          { text: isKo ? "추천 " : "Why ", options: { color: ACCENT, bold: true, fontSize: 10 } },
           { text: row.recommendReason.trim(), options: { color: GRAY, fontSize: 10 } },
         ].map((p) => ({ ...p, options: { ...p.options, fontFace: face } })),
         { x: textX, y: ty, w: textW, h: 0.35, valign: "top" },
@@ -1061,7 +1071,7 @@ export async function buildPlannerReportPptx(
           colW,
           isKo ? "예산 비중" : "Budget share",
           row.budgetContributionPct,
-          VIOLET,
+          ACCENT,
           face,
         );
       } else if (row.exposureContributionPct != null) {
@@ -1085,7 +1095,7 @@ export async function buildPlannerReportPptx(
           textW,
           isKo ? "예산 비중" : "Budget share",
           row.budgetContributionPct,
-          VIOLET,
+          ACCENT,
           face,
         );
       }
@@ -1103,7 +1113,7 @@ export async function buildPlannerReportPptx(
         w: btnW,
         h: btnH,
         fill: { color: WHITE },
-        line: { color: VIOLET, width: 1.25 },
+        line: { color: ACCENT, width: 1.25 },
         rectRadius: 0.06,
       });
       slide.addText(plannerMediaPageButtonLabel(isKo), {
@@ -1113,7 +1123,7 @@ export async function buildPlannerReportPptx(
         h: btnH,
         fontFace: face,
         fontSize: 9,
-        color: VIOLET,
+        color: ACCENT,
         bold: true,
         align: "center",
         valign: "middle",
@@ -1201,7 +1211,7 @@ export async function buildPlannerReportPptx(
         h: 0.22,
         fontFace: face,
         fontSize: 9,
-        color: VIOLET,
+        color: ACCENT,
         bold: true,
       });
     }
@@ -1213,7 +1223,7 @@ export async function buildPlannerReportPptx(
         h: 0.2,
         fontFace: face,
         fontSize: 7.5,
-        color: VIOLET,
+        color: ACCENT,
         align: "right",
         hyperlink: { url: mediaUrl },
       });

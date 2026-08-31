@@ -25,6 +25,8 @@ import { ReportQuoteSummarySection } from "@/components/planner/report-quote-sum
 import { ReportPortfolioMapSection } from "@/components/planner/report-portfolio-map-section";
 import { sectionVisible, filterExportSections } from "@/lib/planner-report-export/section-visibility";
 import type { PlannerReportSectionVisibility } from "@/lib/planner-report-export/section-visibility";
+import type { PlannerReportStyle } from "@/lib/planner-report-export/document-theme";
+import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
 import type { MediaItem } from "@/lib/media-data";
 
 /**
@@ -38,7 +40,7 @@ function fmtBudget(man: number, isKo: boolean) {
   return isKo ? `${man.toLocaleString()}만원` : `${man.toLocaleString()}M KRW`;
 }
 
-const CHART_COLORS = ["#ff6200", "#1c1c1f", "#5a5a5e", "#10B981", "#F59E0B"];
+const CHART_COLORS = ["#0D9488", "#0D1B2E", "#64748B", "#6366F1", "#E11D48"];
 
 function chartDatumColor(d: PlannerExportChartDatum, index: number): string {
   return plannerChartColor(d.colorKey, index);
@@ -236,6 +238,7 @@ export const PlannerReportDocument = forwardRef<
     onGreetingChange?: (text: string) => void;
     editableExecutiveSummary?: boolean;
     onExecutiveSummaryChange?: (text: string) => void;
+    reportStyle?: PlannerReportStyle;
   }
 >(function PlannerReportDocument(
   {
@@ -251,10 +254,12 @@ export const PlannerReportDocument = forwardRef<
     onGreetingChange,
     editableExecutiveSummary,
     onExecutiveSummaryChange,
+    reportStyle = "brand",
   },
   ref,
 ) {
   const isKo = p.isKo;
+  const theme = getReportDocumentTheme(reportStyle);
   const vis = sectionVisibility;
   const visibleSections = filterExportSections(p.sections, vis)?.filter(
     (sec) =>
@@ -279,6 +284,7 @@ export const PlannerReportDocument = forwardRef<
       className={cn(documentCardClass, className)}
     >
       <DocumentGradientHero
+        reportStyle={reportStyle}
         badge="CAMPAIGN PLANNER"
         title={p.documentTitle}
         subtitle={`${

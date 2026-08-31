@@ -78,6 +78,8 @@ import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
 import { PlannerScenarioContextBanner } from "@/components/planner/planner-scenario-context-banner";
 import { ReportSectionVisibilityPanel } from "@/components/planner/report-section-visibility-panel";
 import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
+import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
+import { ReportStylePicker } from "@/components/planner/report-style-picker";
 import {
   lineupViewModeForExport,
   readPlannerReportViewMode,
@@ -604,6 +606,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
 
   const [internalSectionVisibility, setInternalSectionVisibility] =
     usePlannerReportSectionVisibility();
+  const [reportStyle, setReportStyle] = usePlannerReportStyle();
   const sectionVisibility =
     props.sectionVisibility ?? internalSectionVisibility;
   const setSectionVisibility =
@@ -619,6 +622,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           activitySource: props.activitySource,
           sectionVisibility,
           lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
+          style: reportStyle,
         });
         const { trackGaEvent } = await import("@/lib/ga-events");
         trackGaEvent("pdf_download", { source: `planner_report_${format}` });
@@ -632,7 +636,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         setDownloading(null);
       }
     },
-    [downloading, exportPayload, sectionVisibility, props.activitySource, t, tCommon, toast],
+    [downloading, exportPayload, sectionVisibility, reportStyle, props.activitySource, t, tCommon, toast],
   );
 
   const openEmailDialog = useCallback(() => {
@@ -771,6 +775,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                   payload={exportPayload}
                   mapPortfolio={props.portfolio}
                   sectionVisibility={sectionVisibility}
+                  reportStyle={reportStyle}
                   editableTitle
                   onDocumentTitleChange={setReportDocumentTitle}
                   editableClientName
@@ -794,6 +799,11 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
 
               <PlannerNeonCard>
                 <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:p-6">
+                  <ReportStylePicker
+                    isKo={props.isKo}
+                    value={reportStyle}
+                    onChange={setReportStyle}
+                  />
                   <ReportSectionVisibilityPanel
                     isKo={props.isKo}
                     payload={exportPayload}
