@@ -855,7 +855,7 @@ export default function MediaMapPageClient() {
       location: it.location,
       locationEn: it.location,
       region: (it.region as MediaItem["region"]) ?? "seoul",
-      type: (it.type as MediaItem["type"]) ?? "digital",
+      type: (it.type as MediaItem["type"]) ?? "dooh",
       price: it.price,
       pricePeriod: (it.pricePeriod as MediaItem["pricePeriod"]) ?? "month",
       lat: it.lat,

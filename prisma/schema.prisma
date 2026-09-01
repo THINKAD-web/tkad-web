@@ -336,6 +336,7 @@ model Media {
   factSheet       MediaFactSheet?
   externalSignals MediaExternalSignal[]
   computedMetric  MediaComputedMetric?
+  onlineSpec      MediaOnlineSpec?
 
   @@index([isFeatured, featuredOrder])
   @@index([isPopular, popularOrder])
@@ -346,6 +347,30 @@ model Media {
   @@index([regionMain, regionSub])
   @@index([ownerUserId])
   @@map("media")
+}
+
+/// Online ad pricing/spec (1:1 with `Media` when `catalog_channel='online'`). PR1b-1.
+model MediaOnlineSpec {
+  id      String @id @default(cuid())
+  mediaId String @unique @map("media_id")
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  platform  String
+  minBudget Int    @map("min_budget")
+  cpcMin    Int?   @map("cpc_min")
+  cpcMax    Int?   @map("cpc_max")
+  cpmMin    Int?   @map("cpm_min")
+  cpmMax    Int?   @map("cpm_max")
+
+  targetingOptions String[] @default([]) @map("targeting_options")
+  strengths        String[] @default([])
+  kpiHints         String[] @default([]) @map("kpi_hints")
+  bestFor          String[] @default([]) @map("best_for")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("media_online_spec")
 }
 
 enum SellingUnit {

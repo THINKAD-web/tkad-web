@@ -1,7 +1,7 @@
-/**
- * 공개 /media browse 전용 계층 taxonomy.
- * SEO `MEDIA_CATEGORY_TREE` (`lib/media-categories.ts`)와 별도 유지.
- */
+import {
+  LEGACY_BROWSE_MAIN_ALIASES,
+  normalizeBrowseMainId,
+} from "@/lib/online-browse-mains";
 
 export type BrowseSubCategory = {
   id: string;
@@ -158,17 +158,52 @@ export const MEDIA_CATEGORIES: BrowseMainCategory[] = [
     ],
   },
   {
-    id: "digital",
-    label: "디지털/온라인",
-    labelEn: "Digital",
-    icon: "Globe",
+    id: "search",
+    label: "검색광고",
+    labelEn: "Search ads",
+    icon: "Search",
     color: "indigo",
-    sub: [
-      { id: "social_media", label: "SNS 광고", labelEn: "Social media" },
-      { id: "search_ad", label: "검색 광고", labelEn: "Search ads" },
-      { id: "display_ad", label: "디스플레이 광고", labelEn: "Display ads" },
-      { id: "influencer", label: "인플루언서", labelEn: "Influencer" },
-    ],
+    sub: [],
+  },
+  {
+    id: "display",
+    label: "디스플레이",
+    labelEn: "Display",
+    icon: "Monitor",
+    color: "violet",
+    sub: [],
+  },
+  {
+    id: "video",
+    label: "영상",
+    labelEn: "Video",
+    icon: "Play",
+    color: "rose",
+    sub: [],
+  },
+  {
+    id: "sns",
+    label: "SNS",
+    labelEn: "Social",
+    icon: "Share2",
+    color: "pink",
+    sub: [],
+  },
+  {
+    id: "message",
+    label: "메시지",
+    labelEn: "Message",
+    icon: "MessageSquare",
+    color: "cyan",
+    sub: [],
+  },
+  {
+    id: "local",
+    label: "로컬·리테일",
+    labelEn: "Local & retail",
+    icon: "Store",
+    color: "amber",
+    sub: [],
   },
   {
     id: "network",
@@ -194,6 +229,14 @@ export const MEDIA_CATEGORIES: BrowseMainCategory[] = [
     sub: [{ id: "other", label: "기타", labelEn: "Other" }],
   },
 ];
+
+/** Legacy subs under retired `digital` browse main (prod 0 rows). */
+const LEGACY_DIGITAL_SUB_TO_MAIN: Record<string, string> = {
+  social_media: "sns",
+  search_ad: "search",
+  display_ad: "display",
+  influencer: "sns",
+};
 
 /** 레거시 `/media` type 칩 → browse main/sub */
 export const LEGACY_TYPE_CHIP_TO_BROWSE: Record<
@@ -254,8 +297,17 @@ export function resolveBrowseCategoryParams(input: {
   subCategory?: string | null;
   category?: string | null;
 }): { mainCategory: string | null; subCategory: string | null } {
-  const main = input.mainCategory?.trim() || null;
+  const mainRaw = input.mainCategory?.trim() || null;
+  const main = mainRaw ? normalizeBrowseMainId(mainRaw) : null;
   const sub = input.subCategory?.trim() || null;
+
+  if (sub) {
+    const fromLegacySub = LEGACY_DIGITAL_SUB_TO_MAIN[sub.toLowerCase()];
+    if (fromLegacySub && getMainCategory(fromLegacySub)) {
+      return { mainCategory: fromLegacySub, subCategory: null };
+    }
+  }
+
   if (main && sub && isValidBrowseSub(main, sub)) {
     return { mainCategory: main, subCategory: sub };
   }
@@ -265,6 +317,16 @@ export function resolveBrowseCategoryParams(input: {
 
   const legacy = input.category?.trim();
   if (!legacy) return { mainCategory: main, subCategory: sub };
+
+  const legacyMainAlias = LEGACY_BROWSE_MAIN_ALIASES[legacy.toLowerCase()];
+  if (legacyMainAlias && getMainCategory(legacyMainAlias)) {
+    return { mainCategory: legacyMainAlias, subCategory: null };
+  }
+
+  const legacySubMain = LEGACY_DIGITAL_SUB_TO_MAIN[legacy.toLowerCase()];
+  if (legacySubMain && getMainCategory(legacySubMain)) {
+    return { mainCategory: legacySubMain, subCategory: null };
+  }
 
   const mapped = LEGACY_TYPE_CHIP_TO_BROWSE[legacy];
   if (mapped) {

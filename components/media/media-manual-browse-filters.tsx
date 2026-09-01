@@ -27,6 +27,10 @@ import {
   SlidersHorizontal,
   Filter,
   Target,
+  Play,
+  Share2,
+  MessageSquare,
+  Store,
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -120,6 +124,11 @@ const MAIN_ICONS: Record<string, LucideIcon> = {
   Globe,
   Network,
   MoreHorizontal,
+  Search,
+  Play,
+  Share2,
+  MessageSquare,
+  Store,
 };
 
 const FEATURE_CHIPS = [
