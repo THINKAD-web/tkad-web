@@ -86,6 +86,7 @@ import { useBrowseFilterOptionCounts } from "@/hooks/use-browse-filter-option-co
 import { prefetchMapChunks } from "@/lib/lazy-chunk-prefetch";
 import {
   browseRegionSubCount,
+  browseMainCategoryCount,
   browseSubCategoryCount,
 } from "@/lib/media-browse-filter-option-counts";
 import {
@@ -752,6 +753,14 @@ export function MediaManualBrowseFilters({
             : mediaTypeCategories.map((main) => {
                 const Icon = MAIN_ICONS[main.icon] ?? Monitor;
                 const selected = mainCategory === main.id;
+                const mainCount = browseMainCategoryCount(optionCounts, main.id);
+                if (
+                  optionCounts &&
+                  mainCount === 0 &&
+                  !selected
+                ) {
+                  return null;
+                }
                 return (
                   <button
                     key={main.id}

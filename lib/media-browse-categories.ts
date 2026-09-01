@@ -323,6 +323,10 @@ export function resolveBrowseCategoryParams(input: {
     return { mainCategory: legacyMainAlias, subCategory: null };
   }
 
+  if (legacy.toLowerCase() === "digital" || legacy.toLowerCase() === "online") {
+    return { mainCategory: null, subCategory: null };
+  }
+
   const legacySubMain = LEGACY_DIGITAL_SUB_TO_MAIN[legacy.toLowerCase()];
   if (legacySubMain && getMainCategory(legacySubMain)) {
     return { mainCategory: legacySubMain, subCategory: null };

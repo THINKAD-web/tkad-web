@@ -69,13 +69,14 @@ See `prisma/schema.prisma` — `platform`, `minBudget`, nullable CPC/CPM, `targe
 
 ## Legacy URL compatibility
 
-| Legacy | Resolves to |
-|--------|-------------|
-| `mainCategory=digital` | `search` |
-| `subCategory=search_ad` | main `search` |
-| `subCategory=social_media` | main `sns` |
+| Legacy | Resolution |
+|--------|------------|
+| `mainCategory=digital` / `online` | **No alias** — see `docs/audit/pr1b1-legacy-digital-alias.md` |
+| `subCategory=search_ad` etc. | Maps to specific online main (unambiguous) |
 
-`resolveCatalogChannelForMediaWrite({ mediaMainCategory: "digital" })` still → `online` via alias.
+## Browse UI — zero-count mains hidden
+
+Public `/media` filter: main chips render only when `browseMainCategoryCount > 0` (or currently selected). Online mains auto-appear when PR3 seed adds inventory — no extra work.
 
 ---
 

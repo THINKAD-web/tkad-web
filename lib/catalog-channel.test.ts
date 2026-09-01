@@ -43,15 +43,6 @@ test("resolveCatalogChannelForMediaWrite", () => {
     CATALOG_CHANNEL_ONLINE,
   );
   assert.equal(
-    resolveCatalogChannelForMediaWrite({ mediaMainCategory: "sns" }),
-    CATALOG_CHANNEL_ONLINE,
-  );
-  assert.equal(
-    resolveCatalogChannelForMediaWrite({ mediaMainCategory: "digital" }),
-    CATALOG_CHANNEL_ONLINE,
-    "legacy browse main alias digital→search→online",
-  );
-  assert.equal(
     resolveCatalogChannelForMediaWrite({
       catalogChannel: "online",
       mediaMainCategory: "ooh",

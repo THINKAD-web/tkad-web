@@ -18,7 +18,8 @@ test("online browse mains", () => {
   assert.equal(isOnlineBrowseMain("search"), true);
   assert.equal(isOnlineBrowseMain("local"), true);
   assert.equal(isOnlineBrowseMain("ooh"), false);
-  assert.equal(normalizeBrowseMainId("digital"), "search");
+  assert.equal(normalizeBrowseMainId("digital"), null);
+  assert.equal(normalizeBrowseMainId("search"), "search");
 });
 
 test("catalog channel from browse main", () => {
@@ -29,8 +30,12 @@ test("catalog channel from browse main", () => {
 
 test("legacy browse URL params", () => {
   assert.deepEqual(
+    resolveBrowseCategoryParams({ category: "digital" }),
+    { mainCategory: null, subCategory: null },
+  );
+  assert.deepEqual(
     resolveBrowseCategoryParams({ mainCategory: "digital" }),
-    { mainCategory: "search", subCategory: null },
+    { mainCategory: null, subCategory: null },
   );
   assert.deepEqual(
     resolveBrowseCategoryParams({ subCategory: "search_ad" }),

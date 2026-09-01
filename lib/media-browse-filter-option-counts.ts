@@ -4,6 +4,8 @@ import { filterMediaByDiscoveryChips } from "@/lib/media-discovery-client-filter
 import type { MediaItem } from "@/lib/media-data";
 
 export type BrowseFilterOptionCounts = {
+  /** browse main id → 매칭 건수 (main 단위; 0이면 칩 미표시) */
+  mainCategory: Record<string, number>;
   /** `mainId/subId` → 매칭 건수 */
   subCategory: Record<string, number>;
   /** `regionMainId/regionSubId` → 매칭 건수 */
@@ -16,9 +18,13 @@ export type BrowseFilterOptionCounts = {
 export function buildBrowseFilterOptionCounts(
   items: MediaItem[],
 ): BrowseFilterOptionCounts {
+  const mainCategory: Record<string, number> = {};
   const subCategory: Record<string, number> = {};
   for (const main of MEDIA_CATEGORIES) {
     if (main.id === "network") continue;
+    mainCategory[main.id] = filterMediaByDiscoveryChips(items, {
+      mainCategory: main.id,
+    }).length;
     for (const sub of main.sub) {
       const key = `${main.id}/${sub.id}`;
       subCategory[key] = filterMediaByDiscoveryChips(items, {
@@ -40,11 +46,20 @@ export function buildBrowseFilterOptionCounts(
   }
 
   return {
+    mainCategory,
     subCategory,
     regionSub,
     networkFeature: filterMediaByDiscoveryChips(items, { features: "network" })
       .length,
   };
+}
+
+export function browseMainCategoryCount(
+  counts: BrowseFilterOptionCounts | null | undefined,
+  mainId: string,
+): number | null {
+  if (!counts) return null;
+  return counts.mainCategory[mainId] ?? 0;
 }
 
 export function browseSubCategoryCount(
