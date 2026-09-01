@@ -1,4 +1,5 @@
 import { plannerChartColor } from "@/lib/planner-chart-colors";
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import { boundsFromMapMarkers, isCatalogFallbackCoordinate } from "@/lib/planner-report-portfolio-map";
 
 /** 분포도 렌더 전용 — export 파이프라인에서는 미사용 (화면 미니맵만 유지) */
@@ -161,16 +162,16 @@ function buildSvg(pins: PlannerExportMapPin[], isKo: boolean): string {
 
   const legendTypes = ["static", "dooh", "mobile", "network"] as const;
   const legendLabelsKo: Record<string, string> = {
-    static: "고정형",
-    dooh: "디지털",
-    mobile: "이동형",
+    static: DISPLAY_MODE_LABELS.static.ko,
+    dooh: DISPLAY_MODE_LABELS.dooh.ko,
+    mobile: DISPLAY_MODE_LABELS.mobile.ko,
     network: "네트워크",
   };
   const legendLabelsEn: Record<string, string> = {
-    static: "Static",
-    digital: "Digital",
-    dooh: "Digital",
-    mobile: "Mobile",
+    static: DISPLAY_MODE_LABELS.static.en,
+    digital: DISPLAY_MODE_LABELS.dooh.en,
+    dooh: DISPLAY_MODE_LABELS.dooh.en,
+    mobile: DISPLAY_MODE_LABELS.mobile.en,
     network: "Network",
   };
   const legend = legendTypes

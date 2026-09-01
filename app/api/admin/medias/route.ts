@@ -11,6 +11,7 @@ import {
   CATALOG_MEDIA_TYPES,
   normalizeCatalogMediaType,
 } from "@/lib/media-auto-categorize";
+import { resolveCatalogChannelForMediaWrite } from "@/lib/catalog-channel";
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
 import { normalizePartialPeriodRatesForPrisma } from "@/lib/admin-partial-period-rates";
 import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverage-codes";
@@ -465,6 +466,11 @@ export async function POST(request: NextRequest) {
     if (locNorm.city) data.city = locNorm.city;
     if (locNorm.district) data.district = locNorm.district;
     }
+
+    data.catalogChannel = resolveCatalogChannelForMediaWrite({
+      catalogChannel: optStr(body.catalogChannel),
+      mediaMainCategory: data.mediaMainCategory as string | null | undefined,
+    });
 
     const db = getPrisma();
     if (!data.slug) {

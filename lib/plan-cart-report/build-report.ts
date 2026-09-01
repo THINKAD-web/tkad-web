@@ -1,3 +1,4 @@
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import type { MediaItem } from "@/lib/media-data";
 import type { PlanCart, PlanCartItem } from "@/lib/plan-cart";
 import { mapPlanCartGoalToPlanner } from "@/lib/plan-cart-planner-bridge";
@@ -71,7 +72,7 @@ function resolveOverlayMediaType(
     const norm = normalizeMediaTypeForPlanner(raw);
     if (norm) return norm;
   }
-  return catalog.type.trim() || cartType.trim() || "digital";
+  return catalog.type.trim() || cartType.trim() || "dooh";
 }
 
 function stubMediaFromCartItem(item: PlanCartItem): MediaItem {
@@ -82,7 +83,7 @@ function stubMediaFromCartItem(item: PlanCartItem): MediaItem {
     location: item.region || "",
     locationEn: item.region || "",
     region: "other",
-    type: item.mediaType || "digital",
+    type: item.mediaType || "dooh",
     price: item.price,
     lat: 0,
     lng: 0,
@@ -135,9 +136,12 @@ function inferCategoriesText(portfolio: readonly MediaItem[], isKo: boolean): st
   const keys = new Set<string>();
   for (const m of portfolio) {
     const key = plannerReportCategoryKey(m);
-    if (key === "digital") keys.add(isKo ? "디지털" : "Digital");
-    else if (key === "static") keys.add(isKo ? "고정형" : "Static");
-    else if (key === "mobile") keys.add(isKo ? "이동형" : "Mobile");
+    if (key === "dooh" || key === "digital")
+      keys.add(isKo ? DISPLAY_MODE_LABELS.dooh.ko : DISPLAY_MODE_LABELS.dooh.en);
+    else if (key === "static")
+      keys.add(isKo ? DISPLAY_MODE_LABELS.static.ko : DISPLAY_MODE_LABELS.static.en);
+    else if (key === "mobile")
+      keys.add(isKo ? DISPLAY_MODE_LABELS.mobile.ko : DISPLAY_MODE_LABELS.mobile.en);
   }
   return [...keys].join(", ") || (isKo ? "혼합" : "Mixed");
 }

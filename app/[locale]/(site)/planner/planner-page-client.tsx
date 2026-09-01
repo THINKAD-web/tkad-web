@@ -213,7 +213,7 @@ const CATEGORIES: {
   key: PlannerCategory;
   labelKey: "catDigital" | "catStatic" | "catMobile";
 }[] = [
-  { key: "digital", labelKey: "catDigital" },
+  { key: "dooh", labelKey: "catDigital" },
   { key: "static", labelKey: "catStatic" },
   { key: "mobile", labelKey: "catMobile" },
 ];

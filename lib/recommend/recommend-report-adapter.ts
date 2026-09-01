@@ -5,6 +5,7 @@ import type {
   TargetAudience,
 } from "@/lib/ai-media-recommend";
 import type { MediaItem } from "@/lib/media-data";
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
 import {
   comparePlansByDuration,
@@ -129,7 +130,8 @@ export function inferRecommendCategoriesText(
   const keys = new Set<string>();
   for (const m of portfolio) {
     const key = plannerReportCategoryKey(m);
-    if (key === "digital") keys.add(isKo ? "디지털" : "Digital");
+    if (key === "dooh" || key === "digital")
+      keys.add(isKo ? DISPLAY_MODE_LABELS.dooh.ko : DISPLAY_MODE_LABELS.dooh.en);
     else if (key === "static") keys.add(isKo ? "고정형" : "Static");
     else if (key === "mobile") keys.add(isKo ? "이동형" : "Mobile");
   }

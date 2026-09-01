@@ -8,6 +8,7 @@ import {
 } from "@/lib/admin-media-csv";
 import { enrichNewMediaLocationFromKakao } from "@/lib/media-location-enrich";
 import { normalizeCatalogMediaType } from "@/lib/media-auto-categorize";
+import { resolveCatalogChannelForMediaWrite } from "@/lib/catalog-channel";
 import {
   gateMediaMetricsWrite,
   metricsWriteErrorBody,
@@ -170,6 +171,7 @@ export async function createMediaFromCsvRow(
       district: filled.district,
       addressVerified: filled.addressVerified,
       isActive: false,
+      catalogChannel: resolveCatalogChannelForMediaWrite({}),
     },
   });
 

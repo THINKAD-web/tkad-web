@@ -212,6 +212,8 @@ model Media {
   mediaMainCategory     String?   @map("media_main_category")
   /// 공개 /media browse 소분류
   mediaSubCategory      String?   @map("media_sub_category")
+  /// Catalog channel: offline OOH vs online ads (`lib/catalog-channel.ts`)
+  catalogChannel        String?   @map("catalog_channel")
   /// 공개 /media browse 시도 (`lib/media-browse-regions.ts`)
   regionMain            String?   @map("region_main")
   /// 공개 /media browse 세부 지역
@@ -340,6 +342,7 @@ model Media {
   @@index([isActive, popularityScore(sort: Desc)])
   @@index([isActive, reviewStatus])
   @@index([mediaMainCategory, mediaSubCategory])
+  @@index([catalogChannel])
   @@index([regionMain, regionSub])
   @@index([ownerUserId])
   @@map("media")

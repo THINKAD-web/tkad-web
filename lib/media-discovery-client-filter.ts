@@ -129,12 +129,6 @@ function matchesBrowseCategory(
     if (!resolved.mainCategory) return true;
     if (m.mediaMainCategory === resolved.mainCategory) return true;
     if (m.mediaCategory?.includes(resolved.mainCategory)) return true;
-    if (
-      resolved.mainCategory === "digital" &&
-      (m.catalogSource === "network" || m.type === "network")
-    ) {
-      return true;
-    }
     return false;
   };
 

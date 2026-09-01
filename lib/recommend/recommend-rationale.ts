@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import { mediaRegionHaystack } from "@/lib/media-region-haystack";
 import type { MatchReason, MatchingInput, ScoreBreakdown } from "@/lib/matching-engine";
 import { PLANNER_BUSAN_ZONE_LABELS } from "@/lib/planner/busan-zones";
@@ -165,7 +166,7 @@ function mediaCategoryPhrase(m: MediaItem, isKo: boolean): string {
   if (type === "mobile" || m.mediaMainCategory === "mobile") {
     return isKo ? "이동형 매체" : "mobile OOH";
   }
-  if (type === "dooh" || m.mediaMainCategory === "digital") {
+  if (type === "dooh") {
     return isKo ? "디지털 사이니지" : "digital signage";
   }
   if (type === "static" || m.mediaMainCategory === "static") {
@@ -195,7 +196,7 @@ function categoryRequestLabel(cats: PlannerCategory[], isKo: boolean): string | 
   if (cats.length === 0) return null;
   const labels = cats.map((c) => {
     if (c === "mobile") return isKo ? "이동형" : "mobile";
-    if (c === "dooh" || c === "digital") return isKo ? "디지털" : "digital";
+    if (c === "dooh" || c === "digital") return isKo ? DISPLAY_MODE_LABELS.dooh.ko : DISPLAY_MODE_LABELS.dooh.en;
     return isKo ? "고정형" : "static";
   });
   return labels.join(isKo ? "·" : "/");

@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import type { PlanCartItem } from "@/lib/plan-cart";
 import {
   plannerReportCategoryKey,
@@ -17,9 +18,9 @@ const CATEGORY_LABELS: Record<
   PlanCartReportCategoryKey,
   { ko: string; en: string }
 > = {
-  dooh: { ko: "디지털", en: "Digital" },
-  static: { ko: "고정형", en: "Static" },
-  mobile: { ko: "이동형", en: "Mobile" },
+  dooh: DISPLAY_MODE_LABELS.dooh,
+  static: DISPLAY_MODE_LABELS.static,
+  mobile: DISPLAY_MODE_LABELS.mobile,
   other: { ko: "기타", en: "Other" },
 };
 
