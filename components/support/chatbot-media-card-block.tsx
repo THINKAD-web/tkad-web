@@ -62,7 +62,7 @@ export function ChatbotMediaCardBlock({ card, isKo, className }: Props) {
         <div className="min-w-0 flex-1">
           <Link
             href={href}
-            className="block text-sm font-semibold leading-snug text-foreground hover:underline"
+            className="block tkad-type-title leading-snug text-foreground hover:underline"
           >
             {isKo ? card.name : card.nameEn || card.name}
           </Link>
@@ -80,7 +80,7 @@ export function ChatbotMediaCardBlock({ card, isKo, className }: Props) {
       <div className="flex items-center gap-1 border-t dark:border-white/10 border-gray-100 px-2 py-1.5">
         <Link
           href={href}
-          className="shrink-0 rounded-md px-2 py-1 text-[10px] font-semibold text-muted-foreground hover:bg-gray-50 dark:hover:bg-white/10"
+          className="shrink-0 rounded-md px-2 py-1 tkad-type-note font-semibold text-muted-foreground hover:bg-gray-50 dark:hover:bg-white/10"
         >
           {t("detailLink")}
         </Link>
@@ -93,13 +93,13 @@ export function ChatbotMediaCardBlock({ card, isKo, className }: Props) {
               nameEn: card.nameEn || card.name,
             }}
             gridInline
-            className="!h-7 !px-2 !text-[10px]"
+            className="!h-7 !px-2 !tkad-type-note"
           />
           <PlanCartToggleButton
             item={planItem}
             addedFrom="ai_recommend"
             gridInline
-            className="!h-7 !px-2 !text-[10px]"
+            className="!h-7 !px-2 !tkad-type-note"
           />
         </div>
       </div>

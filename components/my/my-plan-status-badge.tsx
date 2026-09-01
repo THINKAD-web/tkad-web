@@ -46,7 +46,7 @@ export function MyPlanStatusBadge({
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
       <span
         className={cn(
-          "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide",
+          "inline-flex items-center gap-1 rounded-full px-2.5 py-1 tkad-type-caption font-bold uppercase tracking-wide",
           tone === "pro" &&
             "tkad-qp-cta text-white shadow-sm",
           tone === "trial" &&
@@ -65,7 +65,7 @@ export function MyPlanStatusBadge({
       {typeof showPoints === "number" ? (
         <Link
           href="/points"
-          className="inline-flex items-center gap-1 rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-[color:var(--qp-accent)] transition hover:bg-[color:var(--qp-accent)]/15"
+          className="inline-flex items-center gap-1 rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-2.5 py-1 tkad-type-caption font-semibold tabular-nums text-[color:var(--qp-accent)] transition hover:bg-[color:var(--qp-accent)]/15"
         >
           {showPoints.toLocaleString(isKo ? "ko-KR" : "en-US")}P
         </Link>

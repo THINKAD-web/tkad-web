@@ -89,7 +89,7 @@ export function CommunityPostInteractions({
           type="button"
           onClick={handleLike}
           disabled={likeBusy || liked}
-          className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors disabled:opacity-60 ${
+          className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 tkad-type-label transition-colors disabled:opacity-60 ${
             liked
               ? "border-hermes/40 bg-hermes/15 dark:text-white text-gray-900"
               : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white hover:dark:bg-white/10 bg-gray-100"
@@ -105,7 +105,7 @@ export function CommunityPostInteractions({
           type="button"
           onClick={handleBookmark}
           disabled={bookmarkBusy}
-          className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors disabled:opacity-60 ${
+          className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 tkad-type-label transition-colors disabled:opacity-60 ${
             bookmarked
               ? "border-hermes/40 bg-hermes/15 dark:text-white text-gray-900"
               : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white hover:dark:bg-white/10 bg-gray-100"
@@ -123,7 +123,7 @@ export function CommunityPostInteractions({
             if (goLoginIfNeeded()) return;
             setReportOpen(true);
           }}
-          className="inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-5 py-2.5 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
+          className="inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-5 py-2.5 tkad-type-label dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
         >
           <Flag className="h-3.5 w-3.5" />
           {isKo ? "신고" : "Report"}
@@ -217,7 +217,7 @@ export function ReportModal({
     >
       <div className="w-full max-w-md rounded-[28px] border dark:border-white/12 border-gray-200 bg-white dark:bg-[#090912]/92 shadow-[0_40px_140px_rgba(0,0,0,0.82)] backdrop-blur tkad-neon-border">
         <div className="flex items-center justify-between border-b dark:border-white/10 border-gray-200 px-5 py-4">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white">
+          <p className="tkad-type-label dark:text-white">
             [ {targetType === "post" ? (isKo ? "게시글 신고" : "Report post") : isKo ? "댓글 신고" : "Report comment"} ]
           </p>
           <button
@@ -232,7 +232,7 @@ export function ReportModal({
 
         {done ? (
           <div className="p-6">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white">
+            <p className="tkad-type-label dark:text-white">
               [ {isKo ? "신고 접수" : "Report submitted"} ]
             </p>
             <p className="mt-3 text-sm dark:text-white">
@@ -247,7 +247,7 @@ export function ReportModal({
             <button
               type="button"
               onClick={onClose}
-              className="mt-6 inline-flex w-full items-center justify-center rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
+              className="mt-6 inline-flex w-full items-center justify-center rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-5 py-3 tkad-type-label dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
             >
               {isKo ? "확인" : "Close"}
             </button>
@@ -255,7 +255,7 @@ export function ReportModal({
         ) : (
           <div className="p-5">
             <label className="block">
-              <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+              <span className="tkad-type-label dark:text-white text-gray-500">
                 [ {isKo ? "신고 사유" : "Reason"} ]
               </span>
               <textarea
@@ -270,12 +270,12 @@ export function ReportModal({
                 className="mt-2 w-full resize-none rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white focus:border-white/22 focus:outline-none"
                 maxLength={500}
               />
-              <p className="mt-1 text-right text-[10px] tabular-nums dark:text-white">
+              <p className="mt-1 text-right tkad-type-note tabular-nums dark:text-white">
                 {reason.length} / 500
               </p>
             </label>
             {error ? (
-              <p className="mt-3 rounded-2xl border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-3 py-2 text-[11px] tracking-tight text-rose-200">
+              <p className="mt-3 rounded-2xl border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-3 py-2 tkad-type-caption tracking-tight text-rose-200">
                 {`// `}
                 {error}
               </p>
@@ -284,7 +284,7 @@ export function ReportModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
+                className="flex-1 rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-5 py-3 tkad-type-label dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
               >
                 {isKo ? "취소" : "Cancel"}
               </button>
@@ -292,7 +292,7 @@ export function ReportModal({
                 type="button"
                 onClick={handleSubmit}
                 disabled={busy}
-                className="flex-1 rounded-full border border-hermes/40 bg-hermes/15 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:bg-hermes/20 disabled:opacity-60"
+                className="flex-1 rounded-full border border-hermes/40 bg-hermes/15 px-5 py-3 tkad-type-label dark:text-white text-gray-900 transition-colors hover:bg-hermes/20 disabled:opacity-60"
               >
                 {busy ? (isKo ? "처리 중…" : "Submitting…") : isKo ? "신고 접수" : "Submit"}
               </button>

@@ -89,12 +89,12 @@ export function ContentNotifySignup({
       <div className={className}>
         {form}
         {status === "error" ? (
-          <p className="mt-2 text-center text-[11px] text-destructive">
+          <p className="mt-2 text-center tkad-type-caption text-destructive">
             {t("error")}
           </p>
         ) : null}
         {status === "done" ? (
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+          <p className="mt-2 text-center tkad-type-caption text-muted-foreground">
             {t("successHint")}
           </p>
         ) : null}
@@ -109,19 +109,19 @@ export function ContentNotifySignup({
         className,
       )}
     >
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+      <p className="tkad-type-label text-primary">
         [ {t("badge")} ]
       </p>
       <p className="mt-2 text-base font-bold text-foreground">{t("title")}</p>
-      <p className="mt-2 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+      <p className="mt-2 tkad-type-meta leading-relaxed tracking-tight text-muted-foreground">
         {source === "report" ? t("descReport") : t("descAcademy")}
       </p>
       <div className="mt-5">{form}</div>
       {status === "error" ? (
-        <p className="mt-2 text-[11px] text-destructive">{t("error")}</p>
+        <p className="mt-2 tkad-type-caption text-destructive">{t("error")}</p>
       ) : null}
       {status === "done" ? (
-        <p className="mt-2 text-[11px] text-muted-foreground">
+        <p className="mt-2 tkad-type-caption text-muted-foreground">
           {t("successHint")}
         </p>
       ) : null}

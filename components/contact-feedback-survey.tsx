@@ -15,7 +15,7 @@ const labelCls = "mb-2 block text-sm dark:text-white text-gray-600";
 const btnPrimary =
   "tkad-qp-cta inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50";
 const btnSecondary =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-xl border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 px-4 text-sm font-semibold dark:text-white text-gray-900 transition hover:bg-white/15 disabled:opacity-50";
+  "inline-flex h-10 items-center justify-center gap-2 rounded-xl border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 px-4 tkad-type-title dark:text-white text-gray-900 transition hover:bg-white/15 disabled:opacity-50";
 const chipActive =
   "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent)] text-white shadow-sm";
 const chipIdle =
@@ -125,7 +125,7 @@ export function ContactFeedbackSurvey() {
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]">
             <CheckCircle className="h-8 w-8" />
           </div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
+          <p className="tkad-type-label text-[color:var(--qp-accent)]/90">
             [ THANKS ]
           </p>
           <p className="text-lg font-bold tracking-tight dark:text-white text-gray-900">
@@ -137,11 +137,11 @@ export function ContactFeedbackSurvey() {
         </div>
 
         <div className="rounded-2xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-6">
-          <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
+          <div className="flex items-center gap-2 tkad-type-label text-[color:var(--qp-accent)]/90">
             <Gift className="h-4 w-4" />
             [ {t("couponTitle")} ]
           </div>
-          <p className="mt-2 text-[11px] tracking-tight text-muted-foreground">
+          <p className="mt-2 tkad-type-caption tracking-tight text-muted-foreground">
             {t("couponHint")}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -153,7 +153,7 @@ export function ContactFeedbackSurvey() {
               {t("copyCode")}
             </button>
           </div>
-          <p className="mt-4 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+          <p className="mt-4 tkad-type-caption leading-relaxed tracking-tight text-muted-foreground">
             {`// `}{t("couponTerms")}
           </p>
         </div>
@@ -229,7 +229,7 @@ export function ContactFeedbackSurvey() {
               type="button"
               onClick={() => setServiceSatisfaction(n)}
               className={cn(
-                "rounded-xl border inline-flex h-10 min-w-[40px] items-center justify-center px-3 text-sm font-semibold transition-ui",
+                "rounded-xl border inline-flex h-10 min-w-[40px] items-center justify-center px-3 tkad-type-title transition-ui",
                 serviceSatisfaction === n
                   ? chipActive
                   : chipIdle,
@@ -255,7 +255,7 @@ export function ContactFeedbackSurvey() {
               type="button"
               onClick={() => setNps(n)}
               className={cn(
-                "rounded-xl border inline-flex h-9 min-w-[36px] items-center justify-center px-2 text-sm font-semibold transition-ui",
+                "rounded-xl border inline-flex h-9 min-w-[36px] items-center justify-center px-2 tkad-type-title transition-ui",
                 nps === n
                   ? chipActive
                   : chipIdle,
@@ -290,7 +290,7 @@ export function ContactFeedbackSurvey() {
                 if (v !== "yes") setCampaignResult("");
               }}
               className={cn(
-                "rounded-xl border px-4 py-2 text-xs font-semibold transition-ui",
+                "rounded-xl border px-4 py-2 tkad-type-title transition-ui",
                 campaign === v
                   ? chipActive
                   : chipIdle,
@@ -304,7 +304,7 @@ export function ContactFeedbackSurvey() {
 
       {campaign === "yes" ? (
         <div className="space-y-3 rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-4">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
+          <p className="tkad-type-label text-[color:var(--qp-accent)]/90">
             [ {t("qCampaignResult")} ]
           </p>
           <div className="flex flex-wrap gap-0">
@@ -314,7 +314,7 @@ export function ContactFeedbackSurvey() {
                 type="button"
                 onClick={() => setCampaignResult(n)}
                 className={cn(
-                  "rounded-xl border inline-flex h-10 min-w-[40px] items-center justify-center px-3 text-sm font-semibold transition-ui",
+                  "rounded-xl border inline-flex h-10 min-w-[40px] items-center justify-center px-3 tkad-type-title transition-ui",
                   campaignResult === n
                     ? chipActive
                     : chipIdle,

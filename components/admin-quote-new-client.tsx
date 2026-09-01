@@ -893,7 +893,7 @@ export default function AdminQuoteNewClient({
           <p>{editError}</p>
           <Link
             href="/admin/quotes"
-            className="mt-3 inline-block text-xs font-semibold text-accent hover:underline"
+            className="mt-3 inline-block tkad-type-title text-accent hover:underline"
           >
             {t("goToQuotesList")}
           </Link>
@@ -913,7 +913,7 @@ export default function AdminQuoteNewClient({
           </p>
           <Link
             href="/admin/quotes"
-            className="mt-2 inline-block text-xs font-semibold text-accent hover:opacity-90 hover:underline"
+            className="mt-2 inline-block tkad-type-title text-accent hover:opacity-90 hover:underline"
           >
             {t("goToQuotesList")}
           </Link>
@@ -1031,11 +1031,11 @@ export default function AdminQuoteNewClient({
                           {new Intl.NumberFormat("ko-KR").format(
                             catalogPriceFieldToWon(rawPrice),
                           )}
-                          <span className="ml-1 text-[10px] text-muted-foreground">
+                          <span className="ml-1 tkad-type-note text-muted-foreground">
                             {formatPricePeriodShortLabel(period, locale)}
                           </span>
                           {(m.priceOptions?.length ?? 0) > 1 ? (
-                            <div className="text-[10px] text-muted-foreground">
+                            <div className="tkad-type-note text-muted-foreground">
                               +{(m.priceOptions?.length ?? 1) - 1} 등급
                             </div>
                           ) : null}
@@ -1191,15 +1191,15 @@ export default function AdminQuoteNewClient({
               <span className="font-medium text-foreground dark:text-hero-fg">{t("periodSummary")}</span>{" "}
               {t("daysCount", { days })}{" "}
               {billingMode === "calendar_months" ? (
-                <Badge variant="secondary" className="ml-1 text-[10px]">
+                <Badge variant="secondary" className="ml-1 tkad-type-note">
                   온전한 {calendarMonths}개월 · 단가×{calendarMonths}
                 </Badge>
               ) : billingMode === "day_preset" ? (
-                <Badge variant="secondary" className="ml-1 text-[10px]">
+                <Badge variant="secondary" className="ml-1 tkad-type-note">
                   {presetDays}일 프리셋
                 </Badge>
               ) : (
-                <Badge variant="secondary" className="ml-1 text-[10px]">
+                <Badge variant="secondary" className="ml-1 tkad-type-note">
                   {t("monthFactor", { n: monthFactor.toFixed(2) })}
                 </Badge>
               )}
@@ -1240,19 +1240,19 @@ export default function AdminQuoteNewClient({
                 <button
                   type="button"
                   onClick={() => setVatIncluded(false)}
-                  className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${ !vatIncluded ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground" : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-card/10" }`}
+                  className={`flex-1 rounded-md py-2 tkad-type-title transition-colors ${ !vatIncluded ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground" : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-card/10" }`}
                 >
                   {t("vatExtra")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setVatIncluded(true)}
-                  className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${ vatIncluded ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground" : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-card/10" }`}
+                  className={`flex-1 rounded-md py-2 tkad-type-title transition-colors ${ vatIncluded ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground" : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-card/10" }`}
                 >
                   {t("vatIncluded")}
                 </button>
               </div>
-              <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+              <p className="mt-1.5 tkad-type-caption leading-snug text-muted-foreground">
                 {vatIncluded ? t("vatIncludedHint") : t("vatExtraHint")}
               </p>
             </div>
@@ -1342,7 +1342,7 @@ export default function AdminQuoteNewClient({
                     "border-2 border-red-500 focus-visible:ring-red-500/40 dark:border-red-400",
                 )}
               />
-              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+              <p className="mt-1 tkad-type-caption leading-snug text-muted-foreground">
                 {t("clientEmailHint")}
               </p>
             </div>
@@ -1355,7 +1355,7 @@ export default function AdminQuoteNewClient({
             <button
               type="button"
               onClick={() => setPdfStyle("basic")}
-              className={`rounded-md border px-2.5 py-1.5 text-xs font-semibold ${
+              className={`rounded-md border px-2.5 py-1.5 tkad-type-title ${
                 pdfStyle === "basic"
                   ? "border-accent bg-accent/15 text-foreground"
                   : "border-slate-200 bg-white text-muted-foreground dark:border-white/10 dark:bg-white/5"
@@ -1366,7 +1366,7 @@ export default function AdminQuoteNewClient({
             <button
               type="button"
               onClick={() => setPdfStyle("formal")}
-              className={`rounded-md border px-2.5 py-1.5 text-xs font-semibold ${
+              className={`rounded-md border px-2.5 py-1.5 tkad-type-title ${
                 pdfStyle === "formal"
                   ? "border-accent bg-accent/15 text-foreground"
                   : "border-slate-200 bg-white text-muted-foreground dark:border-white/10 dark:bg-white/5"
@@ -1450,7 +1450,7 @@ export default function AdminQuoteNewClient({
               )}
             </Button>
           </div>
-          <p className="text-[11px] text-muted-foreground">{t("pdfFontHint")}</p>
+          <p className="tkad-type-caption text-muted-foreground">{t("pdfFontHint")}</p>
         </CardContent>
       </Card>
 
@@ -1548,7 +1548,7 @@ export default function AdminQuoteNewClient({
                       );
                     }
                   }}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted/50 dark:border-white/10 dark:bg-white/5 dark:text-hero-fg dark:hover:bg-card/10"
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 tkad-type-title text-foreground hover:bg-muted/50 dark:border-white/10 dark:bg-white/5 dark:text-hero-fg dark:hover:bg-card/10"
                 >
                   <Camera className="h-4 w-4" />
                   이미지 캡처
@@ -1556,7 +1556,7 @@ export default function AdminQuoteNewClient({
                 <button
                   type="button"
                   onClick={() => void downloadPdf()}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted/50 dark:border-white/10 dark:bg-white/5 dark:text-hero-fg dark:hover:bg-card/10"
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 tkad-type-title text-foreground hover:bg-muted/50 dark:border-white/10 dark:bg-white/5 dark:text-hero-fg dark:hover:bg-card/10"
                 >
                   <Download className="h-4 w-4" />
                   PDF 저장
@@ -1661,11 +1661,11 @@ export default function AdminQuoteNewClient({
                 <span className="tabular-nums">{formatWon(totals.totalWon)}</span>
               </div>
               {inquiryLineCount > 0 ? (
-                <p className="pt-1 text-[11px] text-muted-foreground">
+                <p className="pt-1 tkad-type-caption text-muted-foreground">
                   {t("sumInquiryNote", { count: inquiryLineCount })}
                 </p>
               ) : null}
-              <p className="pt-1 text-[11px] text-muted-foreground">
+              <p className="pt-1 tkad-type-caption text-muted-foreground">
                 견적번호 {displayQuoteNumber} · 유효기간 {validUntilPdf}
               </p>
             </div>
@@ -1685,7 +1685,7 @@ export default function AdminQuoteNewClient({
       >
         <div className={cn(STICKY_ACTION_BAR_ROW, "max-w-4xl sm:max-w-full")}>
           <span
-            className="min-w-0 flex-1 truncate text-[10px] font-medium tabular-nums text-gray-600 dark:text-white/55"
+            className="min-w-0 flex-1 truncate tkad-type-note font-medium tabular-nums text-gray-600 dark:text-white/55"
             aria-live="polite"
           >
             {hasLines ? formatWon(totals.totalWon) : t("subtitle")}

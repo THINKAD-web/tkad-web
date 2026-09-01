@@ -239,7 +239,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
 
   return (
     <div className="space-y-8">
-      <ol className="flex gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+      <ol className="flex gap-2 tkad-type-label text-muted-foreground">
         {[1, 2, 3].map((n) => (
           <li
             key={n}
@@ -297,7 +297,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
-              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-display uppercase text-muted-foreground">
+              <div className="grid grid-cols-7 gap-1 text-center tkad-type-note font-display uppercase text-muted-foreground">
                 {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
                   <span key={d}>{d}</span>
                 ))}
@@ -364,14 +364,14 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
             <button
               type="button"
               onClick={() => setCreativeSource("library")}
-              className={`rounded-full px-4 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-colors ${ creativeSource === "library" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground" }`}
+              className={`rounded-full px-4 py-1.5 tkad-type-label transition-colors ${ creativeSource === "library" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground" }`}
             >
               {isKo ? "내 라이브러리" : "My Library"}
             </button>
             <button
               type="button"
               onClick={() => setCreativeSource("upload")}
-              className={`rounded-full px-4 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-colors ${ creativeSource === "upload" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground" }`}
+              className={`rounded-full px-4 py-1.5 tkad-type-label transition-colors ${ creativeSource === "upload" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground" }`}
             >
               {isKo ? "새로 업로드" : "Upload New"}
             </button>
@@ -383,7 +383,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
                 selectedId={creativeId}
                 onSelect={handlePickFromLibrary}
               />
-              <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              <p className="tkad-type-label text-muted-foreground">
                 {isKo ? "처음이신가요?" : "First time?"}{" "}
                 <Link
                   href="/creatives/upload"
@@ -417,7 +417,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
 
           {creativeUrl ? (
             <div className="rounded-2xl border-2 border-border bg-card p-3">
-              <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
+              <p className="mb-2 tkad-type-label text-accent">
                 {isKo
                   ? creativeId
                     ? "[ 선택된 소재 — 라이브러리 ]"

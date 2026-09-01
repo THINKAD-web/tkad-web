@@ -230,7 +230,7 @@ function MediaDetailQuoteModalBody({
           ) : null}
         </div>
       ) : media.keywordFilter?.priceText ? (
-        <p className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-3 py-2.5 text-sm font-semibold dark:text-white text-gray-800 backdrop-blur">
+        <p className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-3 py-2.5 tkad-type-title dark:text-white text-gray-800 backdrop-blur">
           {media.keywordFilter.priceText}
         </p>
       ) : (

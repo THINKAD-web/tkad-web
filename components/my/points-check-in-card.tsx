@@ -65,7 +65,7 @@ export function PointsCheckInCard({ className }: Props) {
   return (
     <div className={cn(myHubGlassCard, "mb-6 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between", className)}>
       <div>
-        <p className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary">
+        <p className="flex items-center gap-2 tkad-type-label text-primary">
           <CalendarCheck className="h-4 w-4" />
           {t("checkInTitle")}
         </p>
@@ -73,7 +73,7 @@ export function PointsCheckInCard({ className }: Props) {
           {checkedIn ? t("checkInDone") : t("checkInDesc")}
         </p>
         {streakDays > 0 ? (
-          <p className="mt-1 text-[11px] text-primary">
+          <p className="mt-1 tkad-type-caption text-primary">
             {t("checkInStreak", { days: streakDays })}
           </p>
         ) : null}
@@ -83,7 +83,7 @@ export function PointsCheckInCard({ className }: Props) {
         disabled={loading || checkedIn || submitting}
         onClick={() => void handleCheckIn()}
         className={cn(
-          "shrink-0 rounded-2xl px-5 py-3 font-display text-xs font-medium uppercase tracking-wider transition-ui",
+          "shrink-0 rounded-2xl px-5 py-3 tkad-type-label transition-ui",
           checkedIn
             ? "bg-muted text-muted-foreground"
             : "bg-primary text-primary-foreground hover:opacity-90",

@@ -112,14 +112,14 @@ export function MyBookingRequestsClient() {
       <div className="relative mx-auto max-w-5xl">
           <Link
             href="/my"
-            className="mb-6 inline-flex items-center gap-2 text-[12px] dark:text-white text-gray-500 transition-colors hover:dark:text-white text-gray-900"
+            className="mb-6 inline-flex items-center gap-2 tkad-type-meta dark:text-white text-gray-500 transition-colors hover:dark:text-white text-gray-900"
           >
             <ArrowLeft className="h-4 w-4" />
             {t("backToMy")}
           </Link>
 
           <header className="mb-8">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+            <p className="tkad-type-label dark:text-white text-gray-500">
               [ {t("eyebrow")} ]
             </p>
             <h1 className="mt-2 flex items-center gap-2 text-2xl font-black dark:text-white text-gray-900 sm:text-3xl">
@@ -133,7 +133,7 @@ export function MyBookingRequestsClient() {
             <div
               className={cn(
                 glassCard,
-                "flex items-center justify-center gap-2 px-4 py-12 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500",
+                "flex items-center justify-center gap-2 px-4 py-12 tkad-type-label dark:text-white text-gray-500",
               )}
             >
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -143,7 +143,7 @@ export function MyBookingRequestsClient() {
             <p
               className={cn(
                 glassCard,
-                "border-rose-400/30 px-4 py-3 text-[12px] tracking-tight text-rose-700 dark:text-rose-200",
+                "border-rose-400/30 px-4 py-3 tkad-type-meta tracking-tight text-rose-700 dark:text-rose-200",
               )}
             >
               {`// `}
@@ -151,13 +151,13 @@ export function MyBookingRequestsClient() {
             </p>
           ) : items.length === 0 ? (
             <div className={cn(glassCard, "p-12 text-center")}>
-              <p className="font-display text-[12px] uppercase tracking-[0.22em] dark:text-white text-gray-500">
+              <p className="font-display tkad-type-meta uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 {`// `}
                 {t("empty")}
               </p>
               <Link
                 href="/media"
-                className="mt-6 inline-flex items-center gap-2 rounded-xl border dark:border-white/15 border-gray-200 tkad-qp-cta px-5 py-2.5 font-display text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition-transform hover:-translate-y-0.5"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl border dark:border-white/15 border-gray-200 tkad-qp-cta px-5 py-2.5 tkad-type-label text-white shadow-sm transition-transform hover:-translate-y-0.5"
               >
                 {t("browseMedia")}
               </Link>
@@ -187,7 +187,7 @@ export function MyBookingRequestsClient() {
                           className="aspect-video w-full object-cover sm:aspect-square"
                         />
                       ) : (
-                        <div className="flex aspect-video w-full items-center justify-center bg-white/5 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500 sm:aspect-square">
+                        <div className="flex aspect-video w-full items-center justify-center bg-white/5 tkad-type-label dark:text-white text-gray-500 sm:aspect-square">
                           {`// no image`}
                         </div>
                       )}
@@ -202,14 +202,14 @@ export function MyBookingRequestsClient() {
                           >
                             {it.media.name}
                           </Link>
-                          <p className="mt-0.5 line-clamp-1 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-500">
+                          <p className="mt-0.5 line-clamp-1 tkad-type-label dark:text-white text-gray-500">
                             {`// `}
                             {it.media.location}
                           </p>
                         </div>
                         <span
                           className={cn(
-                            "shrink-0 rounded-full border px-3 py-1 font-display text-[10px] font-semibold uppercase tracking-[0.16em]",
+                            "shrink-0 rounded-full border px-3 py-1 font-display tkad-type-note font-semibold uppercase tracking-[0.16em]",
                             STATUS_STYLE[it.status],
                           )}
                         >
@@ -219,7 +219,7 @@ export function MyBookingRequestsClient() {
 
                       <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
                         <div className="flex gap-2">
-                          <dt className="w-20 shrink-0 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-500">
+                          <dt className="w-20 shrink-0 tkad-type-label dark:text-white text-gray-500">
                             {t("period")}
                           </dt>
                           <dd className="dark:text-white text-gray-800">
@@ -227,7 +227,7 @@ export function MyBookingRequestsClient() {
                           </dd>
                         </div>
                         <div className="flex gap-2">
-                          <dt className="w-20 shrink-0 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-500">
+                          <dt className="w-20 shrink-0 tkad-type-label dark:text-white text-gray-500">
                             {t("budget")}
                           </dt>
                           <dd className="dark:text-white text-gray-800">
@@ -235,7 +235,7 @@ export function MyBookingRequestsClient() {
                           </dd>
                         </div>
                         <div className="flex gap-2">
-                          <dt className="w-20 shrink-0 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-500">
+                          <dt className="w-20 shrink-0 tkad-type-label dark:text-white text-gray-500">
                             {t("requestedAt")}
                           </dt>
                           <dd className="dark:text-white text-gray-800">
@@ -244,7 +244,7 @@ export function MyBookingRequestsClient() {
                         </div>
                         {it.decidedAt ? (
                           <div className="flex gap-2">
-                            <dt className="w-20 shrink-0 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-500">
+                            <dt className="w-20 shrink-0 tkad-type-label dark:text-white text-gray-500">
                               {t("decidedAt")}
                             </dt>
                             <dd className="dark:text-white text-gray-800">
@@ -256,7 +256,7 @@ export function MyBookingRequestsClient() {
 
                       {it.notes ? (
                         <p className="rounded-xl border-l-4 border-[color:var(--qp-accent)]/50 bg-white/5 px-3 py-2 text-xs dark:text-white text-gray-700">
-                          <span className="font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-500">
+                          <span className="tkad-type-label dark:text-white text-gray-500">
                             {t("note")}:
                           </span>{" "}
                           {it.notes}

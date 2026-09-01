@@ -84,7 +84,7 @@ export function ReportDashboardClient({ isKo }: { isKo: boolean }) {
 
   return (
     <div className="space-y-6">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+      <p className="tkad-type-label text-muted-foreground">
         {`// `}
         {isKo
           ? `생성 ${new Date(data.generatedAt).toLocaleString("ko-KR")} · 데모 추정치 포함`
@@ -103,7 +103,7 @@ export function ReportDashboardClient({ isKo }: { isKo: boolean }) {
 
       <NewsletterSubscribeCard isKo={isKo} />
 
-      <div className="text-center font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+      <div className="text-center tkad-type-label text-muted-foreground">
         {`// `}
         {isKo
           ? "본 대시보드의 수치는 자체 데이터 기반의 추정치이며, 정확한 캠페인 평가 자료는 견적 시 제공됩니다."
@@ -126,7 +126,7 @@ function HotMediaCard({
     <section className="overflow-hidden rounded-2xl border-2 border-border bg-card">
       <header className="flex items-center justify-between border-b-2 border-border bg-muted/40 p-4 sm:p-5">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ {isKo ? "이번 달 인기 매체 TOP 10" : "Top Media This Month"} ]
           </p>
           <h2 className="mt-1 text-lg font-bold tracking-tight text-foreground">
@@ -149,7 +149,7 @@ function HotMediaCard({
               className="flex items-center gap-3 p-3 sm:p-4"
             >
               <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full tkad-type-caption font-black ${
                   i < 3
                     ? "bg-accent text-accent-foreground"
                     : "border-2 border-border bg-card text-foreground"
@@ -164,25 +164,25 @@ function HotMediaCard({
                 >
                   {row.name}
                 </Link>
-                <p className="mt-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                <p className="mt-0.5 tkad-type-label text-muted-foreground">
                   {row.region} · {row.type}
                 </p>
               </div>
-              <div className="hidden gap-3 text-right text-[11px] tabular-nums sm:flex">
+              <div className="hidden gap-3 text-right tkad-type-caption tabular-nums sm:flex">
                 <span title="Bookings" className="text-foreground">
                   {row.bookingCount}
-                  <span className="ml-0.5 text-[9px] text-muted-foreground">B</span>
+                  <span className="ml-0.5 tkad-type-note text-muted-foreground">B</span>
                 </span>
                 <span title="Inquiries" className="text-foreground">
                   {row.inquiryCount}
-                  <span className="ml-0.5 text-[9px] text-muted-foreground">I</span>
+                  <span className="ml-0.5 tkad-type-note text-muted-foreground">I</span>
                 </span>
                 <span title="Favorites" className="text-foreground">
                   {row.favoriteCount}
-                  <span className="ml-0.5 text-[9px] text-muted-foreground">F</span>
+                  <span className="ml-0.5 tkad-type-note text-muted-foreground">F</span>
                 </span>
               </div>
-              <span className="ml-2 inline-flex items-center rounded-full border-2 border-accent bg-accent/10 px-2 py-0.5 text-[10px] font-bold tabular-nums text-accent">
+              <span className="ml-2 inline-flex items-center rounded-full border-2 border-accent bg-accent/10 px-2 py-0.5 tkad-type-note font-bold tabular-nums text-accent">
                 {row.score}
               </span>
             </li>
@@ -203,7 +203,7 @@ function IndustrySplitCard({
   return (
     <section className="overflow-hidden rounded-2xl border-2 border-border bg-card">
       <header className="border-b-2 border-border bg-muted/40 p-4 sm:p-5">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <p className="tkad-type-label text-accent">
           [ {isKo ? "매체 유형별 비중" : "Media Type Share"} ]
         </p>
         <h2 className="mt-1 text-lg font-bold tracking-tight text-foreground">
@@ -273,7 +273,7 @@ function IndustrySplitCard({
             {rows.map((s, i) => (
               <li
                 key={s.key}
-                className="flex items-center gap-3 px-4 py-3 text-[11px]"
+                className="flex items-center gap-3 px-4 py-3 tkad-type-caption"
               >
                 <span
                   aria-hidden
@@ -305,7 +305,7 @@ function CpmTrendCard({
   return (
     <section className="overflow-hidden rounded-2xl border-2 border-border bg-card">
       <header className="border-b-2 border-border bg-muted/40 p-4 sm:p-5">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <p className="tkad-type-label text-accent">
           [ {isKo ? "월별 평균 CPM 트렌드" : "Monthly Avg CPM Trend"} ]
         </p>
         <h2 className="mt-1 text-lg font-bold tracking-tight text-foreground">
@@ -375,7 +375,7 @@ function NewMediaCard({
   return (
     <section className="overflow-hidden rounded-2xl border-2 border-border bg-card">
       <header className="border-b-2 border-border bg-muted/40 p-4 sm:p-5">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+        <p className="tkad-type-label text-accent">
           [ {isKo ? "신규 등록 매체 (30일)" : "New Media (30 days)"} ]
         </p>
         <h2 className="mt-1 text-lg font-bold tracking-tight text-foreground">
@@ -396,7 +396,7 @@ function NewMediaCard({
                 key={row.id}
                 className="flex items-center gap-3 p-3 sm:p-4"
               >
-                <span className="flex h-9 w-9 shrink-0 flex-col items-center justify-center rounded-md border-2 border-accent bg-accent/10 text-[9px] font-bold leading-none text-accent">
+                <span className="flex h-9 w-9 shrink-0 flex-col items-center justify-center rounded-md border-2 border-accent bg-accent/10 tkad-type-note font-bold leading-none text-accent">
                   <span>{d.toLocaleString(isKo ? "ko-KR" : "en-US", { month: "short" })}</span>
                   <span className="mt-0.5 text-sm">{d.getDate()}</span>
                 </span>
@@ -406,7 +406,7 @@ function NewMediaCard({
                 >
                   {row.name}
                 </Link>
-                <span className="shrink-0 font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                <span className="shrink-0 tkad-type-label text-muted-foreground">
                   {row.region} · {row.type}
                 </span>
               </li>
@@ -453,7 +453,7 @@ function NewsletterSubscribeCard({ isKo }: { isKo: boolean }) {
     <section className="overflow-hidden rounded-2xl border-2 border-accent bg-accent/5 p-5 sm:p-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1.2fr,1fr] sm:gap-6">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ {isKo ? "월간 트렌드 리포트" : "Monthly Trend Report"} ]
           </p>
           <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground">
@@ -490,7 +490,7 @@ function NewsletterSubscribeCard({ isKo }: { isKo: boolean }) {
           <button
             type="submit"
             disabled={status === "loading" || status === "success"}
-            className="h-11 shrink-0 rounded-md border-2 border-accent bg-accent px-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="h-11 shrink-0 rounded-md border-2 border-accent bg-accent px-5 tkad-type-label text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {status === "loading"
               ? isKo
@@ -507,7 +507,7 @@ function NewsletterSubscribeCard({ isKo }: { isKo: boolean }) {
         </form>
       </div>
       {status === "error" ? (
-        <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.16em] text-destructive">
+        <p className="mt-3 tkad-type-label text-destructive">
           {isKo
             ? "전송에 실패했습니다. 잠시 후 다시 시도해주세요."
             : "Failed. Please try again."}

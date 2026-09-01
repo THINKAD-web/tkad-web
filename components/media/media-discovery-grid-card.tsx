@@ -65,7 +65,7 @@ export function MediaDiscoveryGridCard({
         />
       </div>
       <div className="p-3">
-        <p className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
+        <p className="line-clamp-2 tkad-type-title text-gray-900 dark:text-white">
           {name}
         </p>
         <p className="mt-1 text-xs text-gray-400 dark:text-white/40">{metaLine}</p>
@@ -87,13 +87,13 @@ export function MediaDiscoveryGridCard({
                 nameEn: planItem.mediaName,
               }}
               gridInline
-              className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
+              className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !tkad-type-note"
             />
             <PlanCartToggleButton
               item={planItem}
               addedFrom="search"
               gridInline
-              className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
+              className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !tkad-type-note"
             />
           </div>
         </div>

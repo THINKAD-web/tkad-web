@@ -322,7 +322,7 @@ export function AnalyticsSettingsForm({ locale }: { locale: string }) {
                 disabled={!configured || loading || saving}
               />
             </div>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="tkad-type-label text-muted-foreground">
               {`// `}
               {isKo ? "마지막 저장" : "Last saved"}:{" "}
               {formatUpdatedAt(form.ga4.updatedAt, locale)}
@@ -391,7 +391,7 @@ export function AnalyticsSettingsForm({ locale }: { locale: string }) {
                 disabled={!configured || loading || saving}
               />
             </div>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="tkad-type-label text-muted-foreground">
               {`// `}
               {isKo ? "마지막 저장" : "Last saved"}:{" "}
               {formatUpdatedAt(form.gtm.updatedAt, locale)}

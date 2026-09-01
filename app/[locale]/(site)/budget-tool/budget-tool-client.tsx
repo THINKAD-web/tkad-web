@@ -88,7 +88,7 @@ export function BudgetToolClient({
               </Link>
               <Link
                 href={`/recommend?budget=${c.tier.budgetMan}&auto=1`}
-                className="text-sm font-semibold text-accent hover:underline"
+                className="tkad-type-title text-accent hover:underline"
               >
                 {isKo ? "AI 추천으로 더 보기" : "More in AI recommend"}
               </Link>

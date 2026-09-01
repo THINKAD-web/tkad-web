@@ -37,7 +37,7 @@ export function SpecialLandingHero({
       />
 
       <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-20 text-center sm:px-6 sm:pb-28 sm:pt-28 lg:px-8 lg:pb-36 lg:pt-32">
-        <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/60">
+        <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 tkad-type-label text-cyan-400/60">
           <span>{eyebrow}</span>
           <CategoryHeroBetaBadge />
         </p>

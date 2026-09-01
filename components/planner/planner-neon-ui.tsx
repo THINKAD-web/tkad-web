@@ -165,7 +165,7 @@ export function PlannerProTeaserStats({
       aria-hidden={blurred}
     >
       <div className="rounded-xl border border-gray-200 bg-white p-3 text-center dark:border-white/10 dark:bg-white/5 sm:p-4">
-        <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">
+        <p className="tkad-type-note uppercase tracking-wider text-gray-400 dark:text-white/40">
           {isKo ? "총 노출" : "Impressions"}
         </p>
         <p className="mt-1 text-lg font-bold tabular-nums text-[color:var(--qp-accent)] sm:text-xl">
@@ -173,7 +173,7 @@ export function PlannerProTeaserStats({
         </p>
       </div>
       <div className="rounded-xl border border-gray-200 bg-white p-3 text-center dark:border-white/10 dark:bg-white/5 sm:p-4">
-        <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">
+        <p className="tkad-type-note uppercase tracking-wider text-gray-400 dark:text-white/40">
           {isKo ? "도달률" : "Reach"}
         </p>
         <p className="mt-1 text-lg font-bold tabular-nums text-[color:var(--qp-fg)] sm:text-xl">
@@ -181,7 +181,7 @@ export function PlannerProTeaserStats({
         </p>
       </div>
       <div className="rounded-xl border border-gray-200 bg-white p-3 text-center dark:border-white/10 dark:bg-white/5 sm:p-4">
-        <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">
+        <p className="tkad-type-note uppercase tracking-wider text-gray-400 dark:text-white/40">
           ROI
         </p>
         <p className="mt-1 text-lg font-bold tabular-nums text-[color:var(--qp-fg-muted)] sm:text-xl">

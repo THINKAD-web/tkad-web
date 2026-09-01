@@ -232,7 +232,7 @@ export function AdminOohContractDetailPanel({
               {t("contractSectionTitle")}
             </p>
             {contract ? (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              <span className="rounded-full bg-muted px-2 py-0.5 tkad-type-note font-medium uppercase tracking-wide text-muted-foreground">
                 {contractStatusLabel(contract.status)}
               </span>
             ) : null}
@@ -240,13 +240,13 @@ export function AdminOohContractDetailPanel({
 
           <dl className="grid gap-2 sm:grid-cols-2">
             <div>
-              <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              <dt className="tkad-type-note font-medium uppercase tracking-wide text-muted-foreground">
                 {t("contractAdvertiser")}
               </dt>
               <dd className="mt-0.5 font-medium text-foreground">{display.advertiserLine}</dd>
             </div>
             <div>
-              <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              <dt className="tkad-type-note font-medium uppercase tracking-wide text-muted-foreground">
                 {t("contractCampaignName")}
               </dt>
               <dd className="mt-0.5 font-medium text-foreground">
@@ -254,13 +254,13 @@ export function AdminOohContractDetailPanel({
               </dd>
             </div>
             <div>
-              <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              <dt className="tkad-type-note font-medium uppercase tracking-wide text-muted-foreground">
                 {t("contractPeriod")}
               </dt>
               <dd className="mt-0.5 font-medium text-foreground">{display.period}</dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              <dt className="tkad-type-note font-medium uppercase tracking-wide text-muted-foreground">
                 {t("contractAmount")}
               </dt>
               <dd className="mt-0.5 font-medium text-foreground">
@@ -273,7 +273,7 @@ export function AdminOohContractDetailPanel({
               </dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              <dt className="tkad-type-note font-medium uppercase tracking-wide text-muted-foreground">
                 {t("contractMedia")}
               </dt>
               <dd className="mt-1 space-y-1">
@@ -376,7 +376,7 @@ export function AdminOohContractDetailPanel({
           </div>
 
           <div className="space-y-1.5 rounded-xl border border-gray-100 bg-muted/20 p-3 dark:border-white/10">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
               {t("contractStandardTerms")}
             </p>
             <p className="leading-relaxed text-foreground/90">
@@ -392,7 +392,7 @@ export function AdminOohContractDetailPanel({
           <div className="space-y-2">
             <label
               htmlFor={`special-terms-${quoteId}`}
-              className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"
+              className="tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground"
             >
               {t("contractSpecialTermsLabel")}
             </label>
@@ -434,12 +434,12 @@ export function AdminOohContractDetailPanel({
                   )}
                   {t("contractTermsSave")}
                 </Button>
-                <p className="self-center text-[10px] text-muted-foreground">
+                <p className="self-center tkad-type-note text-muted-foreground">
                   {t("contractTermsSaveHint")}
                 </p>
               </div>
             ) : !display.canPreview ? (
-              <p className="text-[10px] text-muted-foreground">{t("contractTermsNeedBooking")}</p>
+              <p className="tkad-type-note text-muted-foreground">{t("contractTermsNeedBooking")}</p>
             ) : null}
           </div>
 
@@ -451,7 +451,7 @@ export function AdminOohContractDetailPanel({
                   href={previewUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
+                  className="inline-flex items-center gap-1 tkad-type-caption font-semibold text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
                 >
                   <ExternalLink className="h-3 w-3" aria-hidden />
                   {t("contractPreviewNewTab")}
@@ -465,7 +465,7 @@ export function AdminOohContractDetailPanel({
               />
             </div>
           ) : (
-            <p className="text-[10px] text-muted-foreground">{t("contractPreviewUnavailable")}</p>
+            <p className="tkad-type-note text-muted-foreground">{t("contractPreviewUnavailable")}</p>
           )}
         </section>
       ) : null}

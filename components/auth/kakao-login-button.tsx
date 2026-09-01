@@ -39,7 +39,7 @@ function KakaoLoginButtonInner({ className }: Props) {
     >
       <span
         aria-hidden
-        className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-[#191600] text-[10px] font-black text-[#FEE500]"
+        className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-[#191600] tkad-type-note font-black text-[#FEE500]"
       >
         K
       </span>

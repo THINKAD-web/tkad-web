@@ -99,18 +99,18 @@ export function CampaignAlimtalkSend({
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between gap-2 text-left"
       >
-        <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <span className="flex items-center gap-2 tkad-type-title text-foreground">
           <MessageCircle className="h-4 w-4 text-[#FEE500]" />
           알림톡 발송
         </span>
-        <span className="text-[10px] text-muted-foreground">
+        <span className="tkad-type-note text-muted-foreground">
           {open ? "닫기" : "열기"}
         </span>
       </button>
       {open ? (
         <div className="mt-3 space-y-3 border-t border-border/60 pt-3">
           <div>
-            <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
+            <label className="mb-1 block tkad-type-note font-medium text-muted-foreground">
               템플릿
             </label>
             <select
@@ -126,13 +126,13 @@ export function CampaignAlimtalkSend({
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-[10px] text-muted-foreground">
+            <p className="mt-1 tkad-type-note text-muted-foreground">
               알리고에 동일 코드로 템플릿을 사전 등록해야 합니다.
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
+              <label className="mb-1 block tkad-type-note font-medium text-muted-foreground">
                 수신 번호
               </label>
               <Input
@@ -142,7 +142,7 @@ export function CampaignAlimtalkSend({
               />
             </div>
             <div>
-              <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
+              <label className="mb-1 block tkad-type-note font-medium text-muted-foreground">
                 수신자 이름
               </label>
               <Input

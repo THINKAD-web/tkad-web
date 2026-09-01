@@ -44,7 +44,7 @@ export function MediaLandingLinksFooter({
       <div className="ui-container">
         <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
+            <p className="tkad-type-label text-muted-foreground">
               {`// ${isKo ? "매체 더 탐색하기" : "Discover more media"}`}
             </p>
             <h2 className="mt-3 text-balance text-2xl font-black tracking-[-0.05em] text-foreground sm:text-3xl">
@@ -75,7 +75,7 @@ export function MediaLandingLinksFooter({
           <div className="tkad-glass-surface p-6 sm:p-7">
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
             <div className="relative">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="tkad-type-label text-muted-foreground">
                 [ {isKo ? "지역별 매체" : "BY REGION"} ]
               </p>
               <h3 className="mt-2 text-xl font-black tracking-tight text-foreground">
@@ -86,7 +86,7 @@ export function MediaLandingLinksFooter({
                   <li key={slug}>
                     <Link
                       href={`/media/region/${slug}`}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-ui hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:dark:border-white/20 border-gray-300 dark:hover:dark:bg-white/10 bg-gray-100"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 tkad-type-title text-foreground shadow-sm transition-ui hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:dark:border-white/20 border-gray-300 dark:hover:dark:bg-white/10 bg-gray-100"
                     >
                       {regionLabel(slug, locale)}
                     </Link>
@@ -99,7 +99,7 @@ export function MediaLandingLinksFooter({
           <div className="tkad-glass-surface p-6 sm:p-7">
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
             <div className="relative">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="tkad-type-label text-muted-foreground">
                 [ {isKo ? "유형별 매체" : "BY TYPE"} ]
               </p>
               <h3 className="mt-2 text-xl font-black tracking-tight text-foreground">
@@ -110,7 +110,7 @@ export function MediaLandingLinksFooter({
                   <li key={slug}>
                     <Link
                       href={`/media/type/${slug}`}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-ui hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:dark:border-white/20 border-gray-300 dark:hover:dark:bg-white/10 bg-gray-100"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 tkad-type-title text-foreground shadow-sm transition-ui hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:dark:border-white/20 border-gray-300 dark:hover:dark:bg-white/10 bg-gray-100"
                     >
                       {typeLabel(slug, locale)}
                     </Link>
@@ -125,7 +125,7 @@ export function MediaLandingLinksFooter({
           <div className="mt-6 tkad-glass-surface p-6 sm:p-7">
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
             <div className="relative">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="tkad-type-label text-muted-foreground">
                 [ {isKo ? "지구·구역" : "BY DISTRICT"} ]
               </p>
               <h3 className="mt-2 text-xl font-black tracking-tight text-foreground">
@@ -136,7 +136,7 @@ export function MediaLandingLinksFooter({
                   <li key={area}>
                     <Link
                       href={`/media/area/${encodeURIComponent(area)}`}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-ui hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:dark:border-white/20 border-gray-300 dark:hover:dark:bg-white/10 bg-gray-100"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 tkad-type-title text-foreground shadow-sm transition-ui hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:dark:border-white/20 border-gray-300 dark:hover:dark:bg-white/10 bg-gray-100"
                     >
                       {area}
                     </Link>

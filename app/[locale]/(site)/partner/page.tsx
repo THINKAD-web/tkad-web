@@ -283,7 +283,7 @@ export default function PartnerPortalPage() {
             <header>
               <div className="mb-2 flex flex-wrap gap-2">
                 <span className="border-0 bg-hero-void/90 dark:text-white text-gray-900">{t("loginBadge")}</span>
-                <span className="border-2 border-border bg-card px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+                <span className="border-2 border-border bg-card px-2 py-0.5 tkad-type-label text-foreground">
                   {t("loginPartnerOnly")}
                 </span>
               </div>
@@ -313,7 +313,7 @@ export default function PartnerPortalPage() {
               {step === "credentials" && (
                 <form className="space-y-4" onSubmit={submitCredentials}>
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-foreground/70">
+                    <label className="mb-1 block tkad-type-title text-foreground/70">
                       {t("email")}
                     </label>
                     <input
@@ -326,7 +326,7 @@ export default function PartnerPortalPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-foreground/70">
+                    <label className="mb-1 block tkad-type-title text-foreground/70">
                       {t("password")}
                     </label>
                     <input
@@ -337,7 +337,7 @@ export default function PartnerPortalPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                     />
-                    <p className="mt-1 text-[11px] text-muted-foreground">
+                    <p className="mt-1 tkad-type-caption text-muted-foreground">
                       {t("passwordHint")}
                     </p>
                   </div>
@@ -356,7 +356,7 @@ export default function PartnerPortalPage() {
                     )}
                     {t("signIn")}
                   </BtnBlock>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="tkad-type-caption text-muted-foreground">
                     {isKo
                       ? "데모: partner1@example.com / partner2@example.com — 비밀번호 6자 이상"
                       : "Demo: partner1@example.com or partner2@example.com — password 6+ chars."}
@@ -465,7 +465,7 @@ export default function PartnerPortalPage() {
               >
                 <header className="pb-2 pt-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-foreground/80">
+                    <h3 className="tkad-type-title text-foreground/80">
                       {t("tabContracts")}
                     </h3>
                     <FileSignature className="h-4 w-4 text-accent" />
@@ -479,7 +479,7 @@ export default function PartnerPortalPage() {
                       / {portalStats.contractsTotal}
                     </span>
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="tkad-type-caption text-muted-foreground">
                     {t("overviewContractsCaption")}
                   </p>
                   {portalStats.contractsRenewal > 0 ? (
@@ -507,7 +507,7 @@ export default function PartnerPortalPage() {
               >
                 <header className="pb-2 pt-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-foreground/80">
+                    <h3 className="tkad-type-title text-foreground/80">
                       {t("tabMedia")}
                     </h3>
                     <PanelLeft className="h-4 w-4 text-accent" />
@@ -517,7 +517,7 @@ export default function PartnerPortalPage() {
                   <p className="text-2xl font-extrabold text-foreground">
                     {portalStats.mediaTotal}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="tkad-type-caption text-muted-foreground">
                     {t("overviewMediaCaption")}: {portalStats.mediaLive} ·{" "}
                     {portalStats.mediaReview}
                   </p>
@@ -541,7 +541,7 @@ export default function PartnerPortalPage() {
               >
                 <header className="pb-2 pt-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-foreground/80">
+                    <h3 className="tkad-type-title text-foreground/80">
                       {t("tabSettlements")}
                     </h3>
                     <Wallet className="h-4 w-4 text-accent" />
@@ -551,10 +551,10 @@ export default function PartnerPortalPage() {
                   <p className="text-2xl font-extrabold text-foreground tabular-nums">
                     {formatMan(portalStats.settlementOutstandingMan, isKo)}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="tkad-type-caption text-muted-foreground">
                     {t("overviewSettlementCaption")}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="tkad-type-caption text-muted-foreground">
                     {t("settlementPaidSummary", {
                       paid: portalStats.settlementPaidRows,
                       total: portalStats.settlementRows,
@@ -603,7 +603,7 @@ export default function PartnerPortalPage() {
                     <div key={c.id} className="border-2 border-border bg-card">
                       <header className="pb-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="tkad-type-caption text-muted-foreground">
                             {c.id}
                           </p>
                           <span className={cn("border-0", st.className)}>
@@ -665,7 +665,7 @@ export default function PartnerPortalPage() {
             </div>
             <div className="overflow-x-auto rounded-xl border border-2 border-border">
               <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="border-b border-2 border-border bg-muted text-xs font-semibold text-foreground/70">
+                <thead className="border-b border-2 border-border bg-muted tkad-type-title text-foreground/70">
                   <tr>
                     <th className="px-3 py-2">{t("mediaName")}</th>
                     <th className="px-3 py-2">{t("mediaType")}</th>
@@ -692,7 +692,7 @@ export default function PartnerPortalPage() {
                         </td>
                         <td className="px-3 py-2 tabular-nums">{m.panelCount}</td>
                         <td className="px-3 py-2">
-                          <span className={cn("border-0 text-[10px]", st.className)}>
+                          <span className={cn("border-0 tkad-type-note", st.className)}>
                             {isKo ? st.labelKo : st.labelEn}
                           </span>
                         </td>
@@ -727,7 +727,7 @@ export default function PartnerPortalPage() {
             </div>
             <div className="overflow-x-auto rounded-xl border border-2 border-border">
               <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="border-b border-2 border-border bg-muted text-xs font-semibold text-foreground/70">
+                <thead className="border-b border-2 border-border bg-muted tkad-type-title text-foreground/70">
                   <tr>
                     <th className="px-3 py-2">{t("settlementPeriod")}</th>
                     <th className="px-3 py-2">{t("settlementAmount")}</th>
@@ -749,7 +749,7 @@ export default function PartnerPortalPage() {
                           {formatMan(s.amountMan, isKo)}
                         </td>
                         <td className="px-3 py-2">
-                          <span className={cn("border-0 text-[10px]", st.className)}>
+                          <span className={cn("border-0 tkad-type-note", st.className)}>
                             {isKo ? st.labelKo : st.labelEn}
                           </span>
                         </td>
@@ -776,7 +776,7 @@ export default function PartnerPortalPage() {
               {partner.sharedCampaigns.map((c) => (
                 <div key={c.id} className="border-2 border-border bg-card">
                   <header className="border-b-2 border-border p-5">
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="tkad-type-caption text-muted-foreground">
                       {c.id}
                     </p>
                     <h3 className="text-base text-foreground">
@@ -885,7 +885,7 @@ export default function PartnerPortalPage() {
           </h3>
           <div className="mt-4 space-y-3">
             <div>
-              <label className="text-xs font-semibold text-foreground/70">
+              <label className="tkad-type-title text-foreground/70">
                 {t("mediaName")}
               </label>
               <input
@@ -897,7 +897,7 @@ export default function PartnerPortalPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-foreground/70">
+              <label className="tkad-type-title text-foreground/70">
                 {t("mediaType")}
               </label>
               <input
@@ -909,7 +909,7 @@ export default function PartnerPortalPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-foreground/70">
+              <label className="tkad-type-title text-foreground/70">
                 {t("mediaLocation")}
               </label>
               <textarea
@@ -921,7 +921,7 @@ export default function PartnerPortalPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-foreground/70">
+              <label className="tkad-type-title text-foreground/70">
                 {t("mediaPanels")}
               </label>
               <input

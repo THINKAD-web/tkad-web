@@ -17,7 +17,7 @@ export function PageHeroCompact({
   return (
     <div className="border-b border-gray-200/80 px-4 py-3 dark:border-white/10 md:py-3.5">
       {eyebrow ? (
-        <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-white/45">
+        <p className="mb-1 tkad-type-note font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-white/45">
           {eyebrow}
         </p>
       ) : null}

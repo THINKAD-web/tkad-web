@@ -51,7 +51,7 @@ export default async function CommunityWritePage({ params }: Props) {
         <NeonSection tone="qp" className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href="/community"
-            className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
+            className="inline-flex items-center gap-2 tkad-type-label dark:text-white transition-colors hover:dark:text-white text-gray-900"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {isKo ? "커뮤니티 목록" : "Community list"}
@@ -78,7 +78,7 @@ export default async function CommunityWritePage({ params }: Props) {
                 meta="members-first authoring"
                 className="mb-0"
               />
-              <p className="mt-6 max-w-3xl text-[15px] leading-relaxed dark:text-white text-gray-700 sm:text-lg">
+              <p className="mt-6 max-w-3xl text-base leading-relaxed dark:text-white text-gray-700 sm:text-lg">
                 {isKo
                   ? "질문, 캠페인 회고, 협업 제안, 실무 인사이트를 멤버 프로필과 함께 남길 수 있습니다. 익명 대신 신뢰 가능한 업계 맥락을 중심으로 운영됩니다."
                   : "Share questions, campaign retros, partner requests, and practical insights under your verified member profile."}
@@ -86,14 +86,14 @@ export default async function CommunityWritePage({ params }: Props) {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/community/policy"
-                  className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
+                  className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-5 py-3 tkad-type-label dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
                 >
                   <Shield className="h-3.5 w-3.5" />
                   {isKo ? "운영 정책 보기" : "Read policy"}
                 </Link>
                 <Link
                   href="/community/members"
-                  className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/20 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
+                  className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/20 px-5 py-3 tkad-type-label dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
                 >
                   <Users className="h-3.5 w-3.5" />
                   {isKo ? "활동 멤버 보기" : "Browse members"}
@@ -103,7 +103,7 @@ export default async function CommunityWritePage({ params }: Props) {
 
             <div className="grid gap-4">
               <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="tkad-type-label dark:text-white text-gray-500">
                   {isKo ? "// 작성 기준" : "// posting rules"}
                 </p>
                 <div className="mt-4 space-y-3 text-sm leading-relaxed dark:text-white">
@@ -116,7 +116,7 @@ export default async function CommunityWritePage({ params }: Props) {
                 <div className="flex items-start gap-3">
                   <Sparkles className="mt-0.5 h-5 w-5 dark:text-white" />
                   <div>
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                    <p className="tkad-type-label dark:text-white text-gray-500">
                       {isKo ? "// 추천 주제" : "// strong post angles"}
                     </p>
                     <p className="mt-2 text-sm leading-relaxed dark:text-white">
@@ -161,7 +161,7 @@ export default async function CommunityWritePage({ params }: Props) {
 
             <aside className="grid gap-4 self-start">
               <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="tkad-type-label dark:text-white text-gray-500">
                   {isKo ? "// 작성 흐름" : "// workflow"}
                 </p>
                 <ol className="mt-4 space-y-3 text-sm leading-relaxed dark:text-white">
@@ -171,7 +171,7 @@ export default async function CommunityWritePage({ params }: Props) {
                 </ol>
               </div>
               <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-5 backdrop-blur">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="tkad-type-label dark:text-white text-gray-500">
                   {isKo ? "// note" : "// note"}
                 </p>
                 <p className="mt-3 text-sm leading-relaxed dark:text-white">

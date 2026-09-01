@@ -986,7 +986,7 @@ function MediaSearchPageInner({
   const loadMoreButton = (
     <div className="space-y-1.5">
       {plannerMode && embedded ? (
-        <p className="text-center text-[11px] text-muted-foreground">
+        <p className="text-center tkad-type-caption text-muted-foreground">
           {isKo
             ? `${media.length.toLocaleString("ko-KR")} / ${total.toLocaleString("ko-KR")}개 표시${media.length >= PLANNER_EMBEDDED_MAX_ITEMS ? " · 필터로 범위를 좁혀 보세요" : ""}`
             : `Showing ${media.length} of ${total}${media.length >= PLANNER_EMBEDDED_MAX_ITEMS ? " · narrow filters to refine" : ""}`}

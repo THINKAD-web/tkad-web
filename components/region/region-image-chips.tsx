@@ -94,7 +94,7 @@ export function RegionImageChips({
     <div className={className}>
       {showTitle ? (
         <div className="mb-3 flex items-center justify-between px-4 sm:px-0">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-white/80">
+          <h3 className="tkad-type-title text-gray-700 dark:text-white/80">
             {isKo ? "지역으로 찾기" : "Browse by region"}
           </h3>
           <Link
@@ -132,14 +132,14 @@ export function RegionImageChips({
                 {region.isLocation ? (
                   <MapPin className="h-5 w-5 text-white" strokeWidth={2} />
                 ) : (
-                  <span className="text-[10px] font-bold text-white/90">
+                  <span className="tkad-type-note font-bold text-white/90">
                     {label.slice(0, 2)}
                   </span>
                 )}
               </div>
               <span
                 className={cn(
-                  "max-w-[4rem] text-center text-[10px] leading-tight",
+                  "max-w-[4rem] text-center tkad-type-note leading-tight",
                   active
                     ? "font-semibold text-violet-600 dark:text-violet-300"
                     : "text-gray-600 dark:text-white/60",

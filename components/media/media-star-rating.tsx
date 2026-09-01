@@ -48,7 +48,7 @@ export function MediaStarRating({
         })}
       </span>
       {showValue ? (
-        <span className="text-sm font-semibold tabular-nums text-foreground">
+        <span className="tkad-type-title tabular-nums text-foreground">
           {rounded.toFixed(1)}
         </span>
       ) : null}

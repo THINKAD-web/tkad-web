@@ -9,7 +9,7 @@ export function DataConfidenceBadge({
   isKo?: boolean;
 }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 tkad-type-note font-medium text-muted-foreground">
       {confidenceLabel(attribution, isKo)}
     </span>
   );

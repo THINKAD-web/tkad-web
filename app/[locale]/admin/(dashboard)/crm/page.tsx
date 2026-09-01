@@ -251,11 +251,11 @@ export default function AdminCrmPage() {
   return (
     <div className="space-y-6 text-foreground">
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ CRM ]
         </p>
         <h2 className="mt-2 text-xl font-bold tracking-tight">{t("title")}</h2>
-        <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
+        <p className="mt-1 tkad-type-caption tracking-tight text-muted-foreground">
           {`// `}{t("subtitle")}
         </p>
       </div>
@@ -267,7 +267,7 @@ export default function AdminCrmPage() {
             type="button"
             onClick={() => setTab(id)}
             className={cn(
-              "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors",
+              "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 tkad-type-title transition-colors",
               tab === id
                 ? "border-2 border-border bg-foreground text-background"
                 : "border-2 border-border bg-card text-foreground hover:bg-muted/50",
@@ -304,7 +304,7 @@ export default function AdminCrmPage() {
               </div>
               <div className="flex flex-wrap gap-3 text-sm">
                 <div className="rounded-2xl border bg-white px-3 py-2">
-                  <p className="text-[10px] font-medium uppercase text-muted-foreground">
+                  <p className="tkad-type-note font-medium uppercase text-muted-foreground">
                     {t("totalImpressions")}
                   </p>
                   <p className="text-lg font-bold text-foreground">
@@ -312,7 +312,7 @@ export default function AdminCrmPage() {
                   </p>
                 </div>
                 <div className="rounded-2xl border bg-white px-3 py-2">
-                  <p className="text-[10px] font-medium uppercase text-muted-foreground">
+                  <p className="tkad-type-note font-medium uppercase text-muted-foreground">
                     {t("activeCampaigns")}
                   </p>
                   <p className="text-lg font-bold text-foreground">
@@ -320,7 +320,7 @@ export default function AdminCrmPage() {
                   </p>
                 </div>
                 <div className="rounded-2xl border bg-white px-3 py-2">
-                  <p className="text-[10px] font-medium uppercase text-muted-foreground">
+                  <p className="tkad-type-note font-medium uppercase text-muted-foreground">
                     {t("avgCtrVsBench")}
                   </p>
                   <p className="text-lg font-bold text-foreground">
@@ -330,7 +330,7 @@ export default function AdminCrmPage() {
                   </p>
                 </div>
                 <div className="rounded-2xl border bg-white px-3 py-2">
-                  <p className="text-[10px] font-medium uppercase text-muted-foreground">
+                  <p className="tkad-type-note font-medium uppercase text-muted-foreground">
                     {t("totalSpendAccount")}
                   </p>
                   <p className="text-lg font-bold text-foreground">
@@ -417,7 +417,7 @@ export default function AdminCrmPage() {
                     <>
                       <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
                         <div>
-                          <p className="text-[10px] font-medium text-muted-foreground">
+                          <p className="tkad-type-note font-medium text-muted-foreground">
                             {t("impressions")}
                           </p>
                           <p className="font-semibold text-foreground">
@@ -425,7 +425,7 @@ export default function AdminCrmPage() {
                           </p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-medium text-muted-foreground">
+                          <p className="tkad-type-note font-medium text-muted-foreground">
                             {t("reach")}
                           </p>
                           <p className="font-semibold text-foreground">
@@ -433,13 +433,13 @@ export default function AdminCrmPage() {
                           </p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-medium text-muted-foreground">
+                          <p className="tkad-type-note font-medium text-muted-foreground">
                             {t("ctr")}
                           </p>
                           <p className="font-semibold text-foreground">{cp.ctr}%</p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-medium text-muted-foreground">
+                          <p className="tkad-type-note font-medium text-muted-foreground">
                             {t("vsGoal")}
                           </p>
                           <p
@@ -569,12 +569,12 @@ export default function AdminCrmPage() {
           </Card>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-foreground">
+              <p className="tkad-type-title text-foreground">
                 {t("aiSegmentationTitle")}
               </p>
               <p className="text-xs text-muted-foreground">{t("aiSegmentationDesc")}</p>
               {segmentRunAt ? (
-                <p className="mt-1 text-[10px] text-muted-foreground">
+                <p className="mt-1 tkad-type-note text-muted-foreground">
                   {t("segmentLastRun", {
                     time: new Date(segmentRunAt).toLocaleString(isKo ? "ko-KR" : "en-US"),
                   })}
@@ -803,7 +803,7 @@ export default function AdminCrmPage() {
                           <p className="text-xs text-muted-foreground">
                             {cp.endDate}
                             {autoSchedule && (
-                              <Badge variant="secondary" className="ml-2 text-[10px]">
+                              <Badge variant="secondary" className="ml-2 tkad-type-note">
                                 {t("scheduledBadge")}
                               </Badge>
                             )}

@@ -45,7 +45,7 @@ const inputClass =
   "mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-hermes/30 focus:outline-none focus:ring-2 focus:ring-hermes/20 dark:border-white/14 dark:bg-black/40 dark:text-white dark:placeholder:text-white/40";
 
 const labelClass =
-  "block font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/70";
+  "block tkad-type-label text-gray-500 dark:text-white/70";
 
 /**
  * 낮/밤 외형은 `html.dark` 파생(Tailwind `dark:`) — night 전용 배경·노이즈는 dark 에서만.
@@ -299,7 +299,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
           >
             <div className="mx-auto max-w-3xl space-y-8">
               <div>
-                <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-hermes">
+                <p className="tkad-type-label text-hermes">
                   [ {t("resultEyebrow")} ]
                 </p>
                 <h1 className="mt-2 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
@@ -319,7 +319,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
               <button
                 type="button"
                 onClick={() => setResult(null)}
-                className="text-sm font-semibold text-hermes hover:underline"
+                className="tkad-type-title text-hermes hover:underline"
               >
                 {t("editAgain")}
               </button>
@@ -476,7 +476,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                         type="button"
                         onClick={() => setGoal(val)}
                         className={cn(
-                          "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                          "rounded-full border px-3 py-1.5 tkad-type-title transition-colors",
                           goal === val
                             ? "border-hermes/30 bg-hermes/10 text-gray-900 dark:border-hermes/30 dark:bg-hermes/15 dark:text-white"
                             : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 dark:border-white/14 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10",
@@ -533,7 +533,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                   </BtnBlock>
                   <Link
                     href="/media"
-                    className="inline-flex items-center text-xs font-semibold text-hermes hover:underline"
+                    className="inline-flex items-center tkad-type-title text-hermes hover:underline"
                   >
                     {t("browseMedia")}
                   </Link>
@@ -558,7 +558,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                           </span>
                           <span
                             className={cn(
-                              "shrink-0  text-[10px]",
+                              "shrink-0  tkad-type-note",
                               selected ? "text-hermes" : "text-gray-400 dark:text-white/50",
                             )}
                           >
@@ -569,7 +569,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                     );
                   })}
                 </ul>
-                <p className="text-[10px] text-gray-600 dark:text-white/70">
+                <p className="tkad-type-note text-gray-600 dark:text-white/70">
                   {t("selectedCount", { count: mediaIds.length })}
                 </p>
               </div>

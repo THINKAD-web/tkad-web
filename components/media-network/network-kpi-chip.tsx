@@ -20,7 +20,7 @@ export function NetworkKpiChip({
         className,
       )}
     >
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-white/40">
+      <p className="tkad-type-note font-semibold uppercase tracking-widest text-gray-400 dark:text-white/40">
         {label}
       </p>
       <p

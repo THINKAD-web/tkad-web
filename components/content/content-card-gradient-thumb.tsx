@@ -52,7 +52,7 @@ export function ContentCardGradientThumb({
             {emoji}
           </span>
           {label ? (
-            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-white/55">
+            <span className="tkad-type-note font-medium uppercase tracking-[0.14em] text-white/55">
               {label}
             </span>
           ) : null}

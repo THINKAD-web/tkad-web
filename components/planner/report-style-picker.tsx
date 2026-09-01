@@ -21,7 +21,7 @@ export function ReportStylePicker({ isKo, value, onChange, className }: Props) {
       className={cn("space-y-2", className)}
       data-screenshot="planner-report-style-picker"
     >
-      <p className="text-sm font-semibold text-gray-800 dark:text-white/90">
+      <p className="tkad-type-title text-gray-800 dark:text-white/90">
         {isKo ? "제안서 스타일" : "Proposal style"}
       </p>
       <div className="grid gap-2 sm:grid-cols-3">
@@ -56,15 +56,15 @@ export function ReportStylePicker({ isKo, value, onChange, className }: Props) {
                   style={{ background: theme.accent }}
                   aria-hidden
                 />
-                <span className="mt-2 block text-[10px] font-semibold uppercase tracking-widest opacity-70">
+                <span className="mt-2 block tkad-type-note font-semibold uppercase tracking-widest opacity-70">
                   THINKAD
                 </span>
               </div>
               <div className="space-y-0.5 bg-white px-3 py-2.5 dark:bg-white/[0.04]">
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                <span className="tkad-type-title text-gray-900 dark:text-white">
                   {isKo ? labels.ko : labels.en}
                 </span>
-                <span className="block text-[11px] leading-snug text-gray-500 dark:text-white/50">
+                <span className="block tkad-type-caption leading-snug text-gray-500 dark:text-white/50">
                   {isKo ? labels.descKo : labels.descEn}
                 </span>
               </div>

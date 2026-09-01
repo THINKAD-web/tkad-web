@@ -1539,7 +1539,7 @@ export default function KakaoMapView({
             className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--qp-accent)_18%,transparent),transparent_58%),radial-gradient(circle_at_bottom,color-mix(in_srgb,var(--qp-accent)_10%,transparent),transparent_58%)]"
           />
           <div className="relative">
-            <div className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
+            <div className="tkad-type-label dark:text-white text-gray-600">
               MAP SDK ERROR
             </div>
             <div className="mt-2 leading-relaxed dark:text-white text-gray-800">{sdkError}</div>
@@ -1566,10 +1566,10 @@ export default function KakaoMapView({
               className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--qp-accent)_18%,transparent),transparent_58%),radial-gradient(circle_at_bottom,color-mix(in_srgb,var(--qp-accent)_10%,transparent),transparent_58%)]"
             />
             <div className="relative flex flex-col items-center gap-4">
-              <div className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
+              <div className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-3 py-1 tkad-type-label dark:text-white text-gray-700">
                 LOADING
               </div>
-              <div className="text-sm font-semibold dark:text-white text-gray-800">지도 준비 중…</div>
+              <div className="tkad-type-title dark:text-white text-gray-800">지도 준비 중…</div>
               <div className="h-2 w-full overflow-hidden rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20">
                 <div className="h-full w-[42%] animate-[tkadShimmer_1.2s_ease-in-out_infinite] bg-[linear-gradient(90deg,#52525b,var(--qp-accent),#a1a1aa)]" />
               </div>

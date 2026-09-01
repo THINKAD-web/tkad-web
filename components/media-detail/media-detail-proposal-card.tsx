@@ -55,7 +55,7 @@ export function MediaDetailProposalCard({
             className={cn(
               compactSecondary
                 ? "inline-flex h-8 w-full min-w-0 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2 tkad-type-note font-medium text-gray-700 transition hover:bg-gray-100 disabled:opacity-60 dark:border-white/10 dark:bg-white/6 dark:text-white/80 dark:hover:bg-white/10"
-                : "inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 text-xs font-semibold text-gray-800 transition hover:bg-gray-100 disabled:opacity-60 dark:border-white/12 dark:bg-white/8 dark:text-white/90 dark:hover:bg-white/12",
+                : "inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 tkad-type-title text-gray-800 transition hover:bg-gray-100 disabled:opacity-60 dark:border-white/12 dark:bg-white/8 dark:text-white/90 dark:hover:bg-white/12",
               className,
             )}
           >
@@ -102,7 +102,7 @@ export function MediaDetailProposalCard({
           <FileText className="h-5 w-5 text-[color:var(--qp-accent)]" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
+          <p className="flex items-center gap-1.5 tkad-type-title text-gray-900 dark:text-white">
             {isKo ? "매체 제안서" : "Media proposal"}
             <span className="rounded-md bg-[color:var(--qp-accent)]/15 px-1.5 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
               PRO

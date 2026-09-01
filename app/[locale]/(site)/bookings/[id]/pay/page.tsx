@@ -50,7 +50,7 @@ export default async function BookingPayPage({ params }: Props) {
         </p>
         <Link
           href={`/media/${booking.mediaId}/book`}
-          className="mt-6 inline-block rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+          className="mt-6 inline-block rounded-full bg-primary px-5 py-2.5 tkad-type-title text-primary-foreground"
         >
           {tExpired("holdExpiredRebook")}
         </Link>
@@ -66,7 +66,7 @@ export default async function BookingPayPage({ params }: Props) {
     <main className="mx-auto max-w-lg px-4 py-10 sm:px-6">
       <Link
         href={`/media/${booking.mediaId}/book`}
-        className="mb-6 inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+        className="mb-6 inline-flex items-center gap-2 tkad-type-label text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         {t("back")}

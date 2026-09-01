@@ -90,13 +90,13 @@ export default function ResourcesPage() {
     <>
       <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             {`// 14 / Resources`}
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
             {isKo ? "리소스 센터" : "Resource Center"}
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
+          <p className="mx-auto mt-5 max-w-2xl tkad-type-meta tracking-tight text-hero-fg/75 sm:text-sm">
             {isKo
               ? "THINKAD의 자료를 다운로드하세요"
               : "Download THINKAD resources"}
@@ -119,11 +119,11 @@ export default function ResourcesPage() {
                   <div className="flex flex-1 flex-col">
                     <header className="border-b-2 border-border p-5">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 border-2 border-accent bg-accent px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent-foreground">
+                        <span className="inline-flex items-center gap-1 border-2 border-accent bg-accent px-2 py-0.5 tkad-type-label text-accent-foreground">
                           <FileText className="h-3 w-3" />
                           PDF
                         </span>
-                        <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                        <span className="tkad-type-label text-muted-foreground">
                           {resource.fileSize} · {resource.pages}{" "}
                           {isKo ? "페이지" : "pages"}
                         </span>
@@ -133,7 +133,7 @@ export default function ResourcesPage() {
                       </h3>
                     </header>
                     <div className="flex flex-1 flex-col justify-between gap-4 p-5">
-                      <p className="text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                      <p className="tkad-type-meta leading-relaxed tracking-tight text-muted-foreground">
                         {`// `}{isKo
                           ? resource.descriptionKo
                           : resource.descriptionEn}
@@ -155,7 +155,7 @@ export default function ResourcesPage() {
           </div>
 
           <div className="mt-12 border-2 border-accent bg-hero-void p-8 text-center">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+            <p className="tkad-type-label text-accent">
               [ NEED MORE? ]
             </p>
             <h3 className="mt-3 text-lg font-bold tracking-tight text-hero-fg">
@@ -163,7 +163,7 @@ export default function ResourcesPage() {
                 ? "더 많은 자료가 필요하신가요?"
                 : "Need more resources?"}
             </h3>
-            <p className="mt-3 text-[12px] tracking-tight text-hero-fg/75">
+            <p className="mt-3 tkad-type-meta tracking-tight text-hero-fg/75">
               {`// `}{isKo
                 ? "맞춤형 자료가 필요하시면 언제든 문의해 주세요."
                 : "Contact us anytime if you need customized materials."}

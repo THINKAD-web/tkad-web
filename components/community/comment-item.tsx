@@ -195,7 +195,7 @@ export function CommunityCommentItemCard({
   return (
     <li className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-5 backdrop-blur">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
+        <div className="flex flex-wrap items-center gap-2 tkad-type-label dark:text-white">
           <User className="h-3.5 w-3.5 dark:text-white" />
           {comment.author ? (
             <Link
@@ -220,7 +220,7 @@ export function CommunityCommentItemCard({
                 setValue(comment.body);
                 setError(null);
               }}
-              className="inline-flex rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100"
+              className="inline-flex rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-1.5 tkad-type-label dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100"
             >
               {editing ? (isKo ? "취소" : "Cancel") : isKo ? "수정" : "Edit"}
             </button>
@@ -228,7 +228,7 @@ export function CommunityCommentItemCard({
               type="button"
               onClick={handleDelete}
               disabled={busy}
-              className="inline-flex rounded-full border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-rose-200 transition-colors hover:bg-[rgba(127,29,29,0.34)] disabled:opacity-60"
+              className="inline-flex rounded-full border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-3 py-1.5 tkad-type-label text-rose-200 transition-colors hover:bg-[rgba(127,29,29,0.34)] disabled:opacity-60"
             >
               {isKo ? "삭제" : "Delete"}
             </button>
@@ -246,20 +246,20 @@ export function CommunityCommentItemCard({
             className="w-full resize-none rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white focus:border-white/22 focus:outline-none"
           />
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-[10px] tabular-nums dark:text-white">
+            <p className="tkad-type-note tabular-nums dark:text-white">
               {value.length} / {COMMUNITY_LIMITS.COMMENT_BODY_MAX}
             </p>
             <button
               type="button"
               onClick={handleSave}
               disabled={!canSubmit}
-              className="inline-flex rounded-full border border-hermes/40 bg-hermes/15 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-hermes transition-colors hover:bg-hermes/25 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex rounded-full border border-hermes/40 bg-hermes/15 px-4 py-2 tkad-type-label text-hermes transition-colors hover:bg-hermes/25 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {busy ? (isKo ? "저장 중…" : "Saving…") : isKo ? "저장" : "Save"}
             </button>
           </div>
           {error ? (
-            <p className="rounded-2xl border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-3 py-2 text-[11px] tracking-tight text-rose-200">
+            <p className="rounded-2xl border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-3 py-2 tkad-type-caption tracking-tight text-rose-200">
               {`// `}
               {error}
             </p>
@@ -272,7 +272,7 @@ export function CommunityCommentItemCard({
       )}
 
       {!editing && error ? (
-        <p className="mt-3 rounded-2xl border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-3 py-2 text-[11px] tracking-tight text-rose-200">
+        <p className="mt-3 rounded-2xl border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-3 py-2 tkad-type-caption tracking-tight text-rose-200">
           {`// `}
           {error}
         </p>

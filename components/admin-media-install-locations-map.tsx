@@ -512,7 +512,7 @@ export default function AdminMediaInstallLocationsMap({
         style={{ height: heightPx }}
         role="presentation"
       />
-      <p className="border-t border-navy/5 bg-slate-50 px-2 py-1.5 text-[10px] text-muted-foreground">
+      <p className="border-t border-navy/5 bg-slate-50 px-2 py-1.5 tkad-type-note text-muted-foreground">
         설치 지점마다 핀이 표시됩니다. 핀을 클릭해 선택한 뒤 드래그해 위치를 맞춥니다.
       </p>
     </div>

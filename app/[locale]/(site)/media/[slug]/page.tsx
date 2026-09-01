@@ -411,7 +411,7 @@ export default async function MediaDetailPage({ params }: Props) {
                 {keywordHints.map((kw) => (
                   <span
                     key={kw}
-                    className="rounded-full border dark:border-white/12 border-gray-200 px-3 py-1 text-xs font-semibold dark:text-white/70 text-gray-600"
+                    className="rounded-full border dark:border-white/12 border-gray-200 px-3 py-1 tkad-type-title dark:text-white/70 text-gray-600"
                   >
                     {kw}
                   </span>

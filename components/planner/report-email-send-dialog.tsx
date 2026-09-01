@@ -126,7 +126,7 @@ export function ReportEmailSendDialog({
     >
       <div className="relative p-5 sm:p-6">
         <div className="mb-5 pr-8">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--qp-accent)]">
+          <p className="tkad-type-title uppercase tracking-wide text-[color:var(--qp-accent)]">
             {isKo ? "발송 전 확인" : "Review before sending"}
           </p>
           <h2 className="mt-1 text-lg font-bold dark:text-white text-gray-900">
@@ -141,7 +141,7 @@ export function ReportEmailSendDialog({
 
         <div className="space-y-4">
           <label className="block space-y-1.5">
-            <span className="text-xs font-semibold dark:text-white/70 text-gray-600">
+            <span className="tkad-type-title dark:text-white/70 text-gray-600">
               {isKo ? "받는 사람" : "Recipient"}
             </span>
             <input
@@ -168,7 +168,7 @@ export function ReportEmailSendDialog({
                 <FileText className="h-5 w-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold dark:text-white/70 text-gray-600">
+                <p className="tkad-type-title dark:text-white/70 text-gray-600">
                   {isKo ? "첨부 PDF" : "PDF attachment"}
                 </p>
                 <p className="mt-0.5 break-all text-sm font-medium dark:text-white text-gray-900">
@@ -184,7 +184,7 @@ export function ReportEmailSendDialog({
           </div>
 
           <label className="block space-y-1.5">
-            <span className="text-xs font-semibold dark:text-white/70 text-gray-600">
+            <span className="tkad-type-title dark:text-white/70 text-gray-600">
               {isKo ? "메일 제목" : "Subject"}
             </span>
             <p className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black/20 bg-white px-3 py-2 text-sm dark:text-white/90 text-gray-800">
@@ -193,7 +193,7 @@ export function ReportEmailSendDialog({
           </label>
 
           <label className="block space-y-1.5">
-            <span className="text-xs font-semibold dark:text-white/70 text-gray-600">
+            <span className="tkad-type-title dark:text-white/70 text-gray-600">
               {isKo ? "메일 본문" : "Email body"}
             </span>
             <textarea

@@ -125,10 +125,10 @@ function FormField({
     <section className="space-y-2.5">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-semibold text-foreground">{label}</h3>
+          <h3 className="tkad-type-title text-foreground">{label}</h3>
           <span
             className={cn(
-              "rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+              "rounded-md px-1.5 py-0.5 tkad-type-note font-bold uppercase tracking-wide",
               required
                 ? "bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]"
                 : "bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-white/50",
@@ -816,7 +816,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
               aria-expanded={advancedOpen}
             >
               <div>
-                <p className="text-sm font-semibold">{tr("form.advancedTitle")}</p>
+                <p className="tkad-type-title">{tr("form.advancedTitle")}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {tr("form.advancedHint")}
                 </p>

@@ -147,7 +147,7 @@ export function AdminBookingRequestsReviewPanel() {
         ) : error ? (
           <p className="text-sm text-rose-600">{error}</p>
         ) : items.length === 0 ? (
-          <p className="py-4 text-center font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="py-4 text-center tkad-type-label text-muted-foreground">
             {`// 현재 대기 중인 신청이 없습니다`}
           </p>
         ) : (
@@ -164,7 +164,7 @@ export function AdminBookingRequestsReviewPanel() {
                       <p className="font-bold text-foreground dark:text-hero-fg">
                         {it.mediaName}
                       </p>
-                      <span className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                      <span className="tkad-type-label text-muted-foreground">
                         {it.mediaLocation}
                       </span>
                     </div>
@@ -207,7 +207,7 @@ export function AdminBookingRequestsReviewPanel() {
                         {it.notes}
                       </p>
                     ) : null}
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                    <p className="tkad-type-label text-muted-foreground">
                       신청: {fmt(it.createdAt)}
                     </p>
                   </div>

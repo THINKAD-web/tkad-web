@@ -54,7 +54,7 @@ export function AdminConversionFunnel() {
           <h2 className="flex items-center gap-2 text-base font-bold tracking-tight">
             방문 전환 퍼널
           </h2>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
+          <p className="mt-0.5 tkad-type-caption text-muted-foreground">
             홈 방문 → 매체 조회 → 플랜 담기 → 견적 생성 → 문의/계약 · 세션 기준
           </p>
         </div>
@@ -65,7 +65,7 @@ export function AdminConversionFunnel() {
               type="button"
               onClick={() => setPeriod(p)}
               className={
-                "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors " +
+                "rounded-lg px-3 py-1.5 tkad-type-title transition-colors " +
                 (period === p
                   ? "bg-[color:var(--qp-accent)] text-white"
                   : "text-muted-foreground hover:bg-muted/40")
@@ -96,7 +96,7 @@ export function AdminConversionFunnel() {
                   <div className="flex items-center justify-center py-1">
                     <span
                       className={
-                        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums " +
+                        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 tkad-type-caption font-bold tabular-nums " +
                         (bottleneck
                           ? "bg-red-500/15 text-red-500"
                           : "text-muted-foreground")
@@ -138,7 +138,7 @@ export function AdminConversionFunnel() {
                         </span>
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[10px] text-muted-foreground">{s.source}</p>
+                    <p className="mt-0.5 tkad-type-note text-muted-foreground">{s.source}</p>
                   </div>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export function AdminConversionFunnel() {
         </p>
       ) : null}
 
-      <p className="mt-2 text-[10px] text-muted-foreground">
+      <p className="mt-2 tkad-type-note text-muted-foreground">
         ※ 세션(익명 sessionId) 단위 distinct 집계. ‘플랜 담기’는 /planner 진입 기준,
         견적·문의는 전환 이벤트(quote_request·contract) 우선.
       </p>

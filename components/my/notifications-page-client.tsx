@@ -25,10 +25,10 @@ const glassCard =
   "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-5";
 
 const gradientBtn =
-  "inline-flex items-center justify-center rounded-xl tkad-qp-cta px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-95 disabled:opacity-50";
+  "inline-flex items-center justify-center rounded-xl tkad-qp-cta px-4 py-2.5 tkad-type-title text-white shadow-sm transition-opacity hover:opacity-95 disabled:opacity-50";
 
 const outlineBtn =
-  "inline-flex items-center justify-center rounded-xl border dark:border-white/18 border-gray-300 dark:bg-white/5 bg-gray-50 px-4 py-2.5 text-sm font-semibold dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:opacity-50";
+  "inline-flex items-center justify-center rounded-xl border dark:border-white/18 border-gray-300 dark:bg-white/5 bg-gray-50 px-4 py-2.5 tkad-type-title dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:opacity-50";
 
 export function NotificationsPageClient() {
   const router = useRouter();
@@ -103,7 +103,7 @@ export function NotificationsPageClient() {
       <PageContainer variant="prose" className="py-4 sm:py-6">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-[color:var(--qp-fg-muted)]">
+            <p className="tkad-type-label text-[color:var(--qp-fg-muted)]">
               {isKo ? "// MY · ALERTS" : "// MY · ALERTS"}
             </p>
             <h1 className="mt-2 flex items-center gap-2 text-2xl font-black tracking-tight dark:text-white text-gray-900 sm:text-3xl">
@@ -129,7 +129,7 @@ export function NotificationsPageClient() {
               type="button"
               onClick={() => setFilter(key)}
               className={cn(
-                "rounded-full px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
+                "rounded-full px-4 py-2 tkad-type-label transition-colors",
                 filter === key
                   ? "tkad-qp-cta text-white"
                   : "border dark:border-white/18 border-gray-300 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:dark:bg-white/10 bg-gray-100",
@@ -189,7 +189,7 @@ export function NotificationsPageClient() {
                         {n.title}
                       </p>
                       <p className="mt-1 text-sm dark:text-white text-gray-600">{n.body}</p>
-                      <p className="mt-2 font-display text-xs font-medium uppercase tracking-[0.14em] dark:text-white text-gray-400">
+                      <p className="mt-2 tkad-type-label dark:text-white text-gray-400">
                         {new Date(n.createdAt).toLocaleString(
                           isKo ? "ko-KR" : "en-US",
                         )}

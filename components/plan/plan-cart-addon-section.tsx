@@ -42,10 +42,10 @@ export function PlanCartAddonSection({
     <section className={cn("space-y-3", className)}>
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/50">
+          <p className="tkad-type-label text-gray-500 dark:text-white/50">
             {isKo ? "부가 비용" : "Add-on costs"}
           </p>
-          <p className="mt-1 text-[11px] text-gray-500 dark:text-white/45">
+          <p className="mt-1 tkad-type-caption text-gray-500 dark:text-white/45">
             {isKo
               ? "제작비·설치비 등 견적서 커스텀 항목 — 기간 총액에 1회 합산"
               : "Production, install, etc. — added once to period total"}
@@ -77,7 +77,7 @@ export function PlanCartAddonSection({
                   }),
                 )
               }
-              className="rounded-full border border-dashed border-hermes/30 bg-hermes/5 px-3 py-1.5 text-xs font-semibold text-hermes transition hover:bg-hermes/10"
+              className="rounded-full border border-dashed border-hermes/30 bg-hermes/5 px-3 py-1.5 tkad-type-title text-hermes transition hover:bg-hermes/10"
             >
               + {preset.name}
             </button>

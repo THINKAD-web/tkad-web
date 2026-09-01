@@ -99,7 +99,7 @@ export function HomeContentFeed({
         >
           <div className="min-w-0 max-w-2xl">
             {eyebrow ? (
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+              <p className="tkad-type-title uppercase tracking-[0.14em] text-hermes">
                 {eyebrow}
               </p>
             ) : null}

@@ -112,7 +112,7 @@ export function IntegratedMixErrorBanner({
               <button
                 type="button"
                 onClick={onRetry}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-600/30 bg-white px-3 py-1.5 text-xs font-semibold text-amber-950 hover:bg-amber-100 dark:bg-white/5 dark:text-amber-100 dark:hover:bg-white/10"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-600/30 bg-white px-3 py-1.5 tkad-type-title text-amber-950 hover:bg-amber-100 dark:bg-white/5 dark:text-amber-100 dark:hover:bg-white/10"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
                 {"retry" in copy ? copy.retry : "Retry"}
@@ -122,7 +122,7 @@ export function IntegratedMixErrorBanner({
               <button
                 type="button"
                 onClick={onContact}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[color:var(--qp-accent)] px-3 py-1.5 text-xs font-semibold text-white"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[color:var(--qp-accent)] px-3 py-1.5 tkad-type-title text-white"
               >
                 {"contact" in copy ? copy.contact : "Contact"}
               </button>

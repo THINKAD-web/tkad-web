@@ -437,7 +437,7 @@ export default function AdminStandaloneContractClient() {
           </div>
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
           <p className="mt-1 text-xs text-muted-foreground">{t("pipelineHint")}</p>
-          <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold">
+          <div className="mt-2 flex flex-wrap gap-3 tkad-type-title">
             <Link
               href="/admin/contracts"
               className="text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
@@ -524,7 +524,7 @@ export default function AdminStandaloneContractClient() {
                 aria-invalid={showClientEmailError || undefined}
                 className={cn(fieldErrorClass(showClientEmailError))}
               />
-              <p className="text-[11px] leading-snug text-muted-foreground">
+              <p className="tkad-type-caption leading-snug text-muted-foreground">
                 {t("clientEmailHint")}
               </p>
               {showClientEmailError ? (
@@ -718,7 +718,7 @@ export default function AdminStandaloneContractClient() {
                           {new Intl.NumberFormat("ko-KR").format(
                             catalogPriceFieldToWon(rawPrice),
                           )}
-                          <span className="ml-1 text-[10px] text-muted-foreground">
+                          <span className="ml-1 tkad-type-note text-muted-foreground">
                             {formatPricePeriodShortLabel(period, locale)}
                           </span>
                         </td>

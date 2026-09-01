@@ -54,7 +54,7 @@ export function ProTrialBanner({ trial, isKo, className }: Props) {
       </div>
 
       <div className="mt-4">
-        <div className="mb-1.5 flex justify-between font-display text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <div className="mb-1.5 flex justify-between tkad-type-label text-muted-foreground">
           <span>{isKo ? "체험 진행" : "Trial progress"}</span>
           <span>{trial.progressPct}%</span>
         </div>

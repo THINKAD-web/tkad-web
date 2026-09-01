@@ -43,7 +43,7 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={t("iframeTitle", { name: mediaName })}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-4 py-2.5 text-sm font-semibold text-[color:var(--qp-accent)] transition hover:bg-[color:var(--qp-accent)]/20 dark:text-[color:var(--qp-accent)]"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-4 py-2.5 tkad-type-title text-[color:var(--qp-accent)] transition hover:bg-[color:var(--qp-accent)]/20 dark:text-[color:var(--qp-accent)]"
         >
           {t("openExternal")}
           <ExternalLink className="h-4 w-4" aria-hidden />

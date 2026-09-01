@@ -31,7 +31,7 @@ export function MediaTrustScoreBadge({
       className={cn(
         "inline-flex items-center gap-1 rounded-full border font-semibold tabular-nums",
         tone,
-        compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs",
+        compact ? "px-2 py-0.5 tkad-type-note" : "px-2.5 py-1 text-xs",
         className,
       )}
     >

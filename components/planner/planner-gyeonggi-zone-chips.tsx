@@ -39,7 +39,7 @@ export function PlannerGyeonggiZoneChips({
 
   const chipClass = (active: boolean, isSuggested: boolean) =>
     cn(
-      "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-ui touch-manipulation sm:text-sm",
+      "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 tkad-type-title transition-ui touch-manipulation sm:text-sm",
       active
         ? "bg-[color:var(--qp-accent)] text-white shadow-sm shadow-[color:var(--qp-accent)]/25"
         : isSuggested
@@ -66,7 +66,7 @@ export function PlannerGyeonggiZoneChips({
             >
               {label}
               {isSuggested ? (
-                <span className="text-[10px] opacity-70">
+                <span className="tkad-type-note opacity-70">
                   {t("seoulZoneSuggested")}
                 </span>
               ) : null}

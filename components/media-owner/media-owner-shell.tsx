@@ -82,7 +82,7 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
     <HomeLandingDayNight>
       <div className="mx-auto flex min-h-[80vh] max-w-6xl flex-col gap-6 px-4 py-8 lg:flex-row lg:py-12">
         <aside className="lg:w-56 lg:shrink-0">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-violet-300/80">
+          <p className="tkad-type-label text-violet-300/80">
             {isKo ? "매체사 포털" : "Media owner"}
           </p>
           <h1 className="mt-2 text-lg font-bold dark:text-white text-gray-900">{me.name}</h1>

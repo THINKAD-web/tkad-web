@@ -77,10 +77,10 @@ export async function CasesPageContent({ locale, cases }: Props) {
                     key={card.titleKey}
                     className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur"
                   >
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
+                    <p className="tkad-type-label text-[var(--qp-accent)]">
                       [ {t(card.titleKey)} ]
                     </p>
-                    <p className="mt-3 text-[12px] leading-relaxed tracking-tight dark:text-white text-gray-500">
+                    <p className="mt-3 tkad-type-meta leading-relaxed tracking-tight dark:text-white text-gray-500">
                       {t(card.descKey)}
                     </p>
                   </div>
@@ -95,7 +95,7 @@ export async function CasesPageContent({ locale, cases }: Props) {
             </div>
           ) : (
             <>
-              <p className="mb-4 text-center text-[12px] tracking-tight dark:text-white text-gray-500 sm:text-sm">
+              <p className="mb-4 text-center tkad-type-meta tracking-tight dark:text-white text-gray-500 sm:text-sm">
                 {`// `}{t("cases.listIntro")}
               </p>
               <Suspense fallback={null}>
@@ -109,13 +109,13 @@ export async function CasesPageContent({ locale, cases }: Props) {
               </Suspense>
 
               <div className="mt-16 rounded-[24px] border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent-soft)] px-6 py-10 text-center">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
+                <p className="tkad-type-label text-[var(--qp-accent)]">
                   [ NEXT STEP ]
                 </p>
                 <h2 className="mt-3 text-xl font-bold tracking-tight dark:text-white text-gray-900 sm:text-2xl">
                   {t("cases.sectionCtaTitle")}
                 </h2>
-                <p className="mx-auto mt-3 max-w-xl text-[12px] tracking-tight dark:text-white text-gray-500">
+                <p className="mx-auto mt-3 max-w-xl tkad-type-meta tracking-tight dark:text-white text-gray-500">
                   {`// `}{t("cases.sectionCtaDesc")}
                 </p>
                 <div className="mt-6 inline-flex">

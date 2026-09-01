@@ -150,7 +150,7 @@ export function IntegratedOohRecommendationPanel({
                       <span
                         key={r.key}
                         className={cn(
-                          "rounded-full border px-2 py-0.5 text-[10px] font-semibold",
+                          "rounded-full border px-2 py-0.5 tkad-type-note font-semibold",
                           REASON_COLORS[r.key],
                         )}
                       >

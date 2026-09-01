@@ -26,17 +26,17 @@ export function PartialPeriodRatesFields({
 }) {
   return (
     <div className={compact ? "space-y-1.5" : "space-y-2"}>
-      <p className="text-[10px] font-medium text-muted-foreground">
+      <p className="tkad-type-note font-medium text-muted-foreground">
         부분기간 요율 (%)
       </p>
-      <p className="text-[10px] leading-relaxed text-muted-foreground">
+      <p className="tkad-type-note leading-relaxed text-muted-foreground">
         비워두면 기존 선형/고정 로직 사용. 패키지 단가 대비 집행 기간 비율(예: 15일
         60% → 0.6). 운영 단위: 1·3·5·7·15·30일.
       </p>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {PARTIAL_PERIOD_RATE_UI.map(({ key, label }) => (
           <div key={key}>
-            <label className="mb-0.5 block text-[10px] text-muted-foreground">
+            <label className="mb-0.5 block tkad-type-note text-muted-foreground">
               {label}
             </label>
             <div className="relative">
@@ -49,7 +49,7 @@ export function PartialPeriodRatesFields({
                   onChange({ ...draft, [key]: e.target.value })
                 }
               />
-              <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+              <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 tkad-type-note text-muted-foreground">
                 %
               </span>
             </div>

@@ -26,7 +26,7 @@ export function IntegratedPlannerStepper({
       role="group"
       aria-label={stepOfLabel}
     >
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+      <p className="tkad-type-label text-primary">
         [ {stepOfLabel} ]
       </p>
       <ol className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">

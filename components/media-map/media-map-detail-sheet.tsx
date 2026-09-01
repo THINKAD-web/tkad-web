@@ -200,7 +200,7 @@ function MapMarkerPreviewBody({
               sizes="92px"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-[10px] text-tkad-muted">
+            <div className="flex h-full w-full items-center justify-center tkad-type-note text-tkad-muted">
               —
             </div>
           )}
@@ -431,7 +431,7 @@ function MediaMapDetailBody({
                   sizes="80px"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-300 dark:text-white/20">
+                <div className="flex h-full w-full items-center justify-center tkad-type-note text-gray-300 dark:text-white/20">
                   —
                 </div>
               )}
@@ -441,7 +441,7 @@ function MediaMapDetailBody({
                 <div className="mb-1 flex flex-wrap gap-1">
                   {item.isInstantBooking ? (
                     <span
-                      className="rounded bg-[color:var(--qp-accent-soft)] px-1.5 py-0.5 text-[10px] font-semibold text-[color:var(--qp-accent)]"
+                      className="rounded bg-[color:var(--qp-accent-soft)] px-1.5 py-0.5 tkad-type-note font-semibold text-[color:var(--qp-accent)]"
                       title={
                         isKo
                           ? "운영자가 즉시 예약 경로를 켠 매체입니다. 날짜별 재고는 캘린더·영업 확인이 필요합니다."
@@ -452,7 +452,7 @@ function MediaMapDetailBody({
                     </span>
                   ) : null}
                   {item.isVerified ? (
-                    <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200">
+                    <span className="rounded bg-emerald-100 px-1.5 py-0.5 tkad-type-note font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200">
                       {isKo ? "검증" : "Verified"}
                     </span>
                   ) : null}

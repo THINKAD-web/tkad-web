@@ -189,19 +189,19 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-1 block text-xs font-semibold text-muted-foreground">{isKo ? "브랜드/주체 *" : "Brand *"}</span>
+            <span className="mb-1 block tkad-type-title text-muted-foreground">{isKo ? "브랜드/주체 *" : "Brand *"}</span>
             <input className={field} value={brandName} onChange={(e) => setBrandName(e.target.value)} placeholder={isKo ? "예: 싱커드" : "Brand"} />
           </label>
           <label className="block">
-            <span className="mb-1 block text-xs font-semibold text-muted-foreground">{isKo ? "업종 *" : "Industry *"}</span>
+            <span className="mb-1 block tkad-type-title text-muted-foreground">{isKo ? "업종 *" : "Industry *"}</span>
             <input className={field} value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder={isKo ? "예: F&B, 뷰티, IT" : "Industry"} />
           </label>
           <label className="block sm:col-span-2">
-            <span className="mb-1 block text-xs font-semibold text-muted-foreground">{isKo ? "제안명" : "Proposal name"}</span>
+            <span className="mb-1 block tkad-type-title text-muted-foreground">{isKo ? "제안명" : "Proposal name"}</span>
             <input className={field} value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder={isKo ? "예: 2026 봄 신제품 런칭" : "Name"} />
           </label>
           <label className="block">
-            <span className="mb-1 block text-xs font-semibold text-muted-foreground">{isKo ? "목적" : "Goal"}</span>
+            <span className="mb-1 block tkad-type-title text-muted-foreground">{isKo ? "목적" : "Goal"}</span>
             <select className={field} value={goal} onChange={(e) => setGoal(e.target.value as ProposalGoal)}>
               {PROPOSAL_GOALS.map((g) => (
                 <option key={g} value={g}>{isKo ? GOAL_LABEL[g] : g}</option>
@@ -209,15 +209,15 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
             </select>
           </label>
           <label className="block">
-            <span className="mb-1 block text-xs font-semibold text-muted-foreground">{isKo ? "예산 (만원)" : "Budget (10k KRW)"}</span>
+            <span className="mb-1 block tkad-type-title text-muted-foreground">{isKo ? "예산 (만원)" : "Budget (10k KRW)"}</span>
             <input className={field} type="number" min={0} value={budgetManwon} onChange={(e) => setBudgetManwon(e.target.value)} />
           </label>
           <label className="block sm:col-span-2">
-            <span className="mb-1 block text-xs font-semibold text-muted-foreground">{isKo ? "타깃 (연령·특성)" : "Target"}</span>
+            <span className="mb-1 block tkad-type-title text-muted-foreground">{isKo ? "타깃 (연령·특성)" : "Target"}</span>
             <input className={field} value={targetAge} onChange={(e) => setTargetAge(e.target.value)} placeholder={isKo ? "예: 20-30대 직장인" : "e.g. 20-30s"} />
           </label>
           <div className="sm:col-span-2">
-            <span className="mb-1 block text-xs font-semibold text-muted-foreground">{isKo ? "지역" : "Regions"}</span>
+            <span className="mb-1 block tkad-type-title text-muted-foreground">{isKo ? "지역" : "Regions"}</span>
             <div className="flex flex-wrap gap-2">
               {REGION_OPTIONS.map((r) => (
                 <button
@@ -225,7 +225,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
                   type="button"
                   onClick={() => toggleRegion(r)}
                   className={
-                    "rounded-full border px-3 py-1.5 text-xs font-semibold transition " +
+                    "rounded-full border px-3 py-1.5 tkad-type-title transition " +
                     (regions.includes(r)
                       ? "border-hermes bg-hermes/10 text-hermes dark:text-hermes"
                       : "border-gray-200 text-gray-600 dark:border-white/10 dark:text-white/60")
@@ -237,7 +237,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
             </div>
           </div>
           <label className="block sm:col-span-2">
-            <span className="mb-1 block text-xs font-semibold text-muted-foreground">{isKo ? "자유 요청 (선택)" : "Free request (optional)"}</span>
+            <span className="mb-1 block tkad-type-title text-muted-foreground">{isKo ? "자유 요청 (선택)" : "Free request (optional)"}</span>
             <textarea className={field} rows={3} value={freeRequest} onChange={(e) => setFreeRequest(e.target.value)} placeholder={isKo ? "추가로 강조하고 싶은 내용을 적어주세요" : "Anything to emphasize"} />
           </label>
         </div>
@@ -336,7 +336,7 @@ function Stepper({ step, isKo }: { step: 1 | 2 | 3; isKo: boolean }) {
             >
               {n}
             </span>
-            <span className={"text-xs font-semibold " + (active ? "text-hermes dark:text-hermes" : "text-muted-foreground")}>{l}</span>
+            <span className={"tkad-type-title " + (active ? "text-hermes dark:text-hermes" : "text-muted-foreground")}>{l}</span>
             {i < 2 ? <span className="mx-1 h-px w-6 bg-gray-300 dark:bg-white/20" /> : null}
           </div>
         );

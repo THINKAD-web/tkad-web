@@ -28,7 +28,7 @@ export function OfflineClient() {
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-hermes/30 bg-hermes/10 shadow-sm">
             <WifiOff className="h-8 w-8 text-hermes" aria-hidden />
           </div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes">
+          <p className="tkad-type-label text-hermes">
             [ OFFLINE ]
           </p>
           <h1 className="mt-3 text-2xl font-extrabold leading-tight tracking-tight">
@@ -43,7 +43,7 @@ export function OfflineClient() {
 
         {saved.length > 0 ? (
           <section className="mt-10">
-            <h2 className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white">
+            <h2 className="tkad-type-label dark:text-white">
               오프라인 저장 ({saved.length})
             </h2>
             <ul className="mt-4 flex flex-col gap-3">
@@ -77,7 +77,7 @@ export function OfflineClient() {
         ) : null}
 
         <section className="mt-10">
-          <h2 className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white">
+          <h2 className="tkad-type-label dark:text-white">
             마지막으로 본 매체
           </h2>
           {items.length === 0 ? (
@@ -94,7 +94,7 @@ export function OfflineClient() {
           )}
         </section>
 
-        <p className="mt-12 text-center font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-300">
+        <p className="mt-12 text-center tkad-type-label dark:text-white text-gray-300">
           THINKAD · 싱커드
         </p>
       </div>

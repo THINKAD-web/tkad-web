@@ -143,11 +143,11 @@ function DonutChart({
 function PerformanceGuideBlock({ guide }: { guide: PlannerPerformanceGuide }) {
   return (
     <div className="rounded-xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-4 sm:p-5">
-      <p className="text-sm font-semibold text-gray-900">{guide.title}</p>
+      <p className="tkad-type-title text-gray-900">{guide.title}</p>
       <div className="mt-3 overflow-x-auto rounded-lg border border-[color:var(--qp-line)] bg-white">
         <table className="w-full min-w-[16rem] border-collapse text-sm">
           <thead>
-            <tr className="border-b border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] text-left text-xs font-semibold text-[color:var(--qp-accent)]">
+            <tr className="border-b border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] text-left tkad-type-title text-[color:var(--qp-accent)]">
               {guide.table.headers.map((h) => (
                 <th key={h} className="px-3 py-2.5 first:min-w-[5.5rem]">
                   {h}
@@ -387,7 +387,7 @@ export const PlannerReportDocument = forwardRef<
             {summary.map(([label, value]) => (
               <div key={label} className="min-w-0">
                 <dt className="text-xs font-medium text-gray-500">{label}</dt>
-                <dd className="mt-0.5 break-words text-sm font-semibold text-gray-900">
+                <dd className="mt-0.5 break-words tkad-type-title text-gray-900">
                   {value}
                 </dd>
               </div>
@@ -406,21 +406,21 @@ export const PlannerReportDocument = forwardRef<
                   k.status === "pending" ? "report-kpi-pending" : "report-kpi-value"
                 }
               >
-                <p className="text-[11px] font-medium text-gray-500">{k.label}</p>
+                <p className="tkad-type-caption font-medium text-gray-500">{k.label}</p>
                 {k.status === "pending" ? (
                   <div className="mt-1">
                     <p className="font-sans text-lg font-bold tabular-nums text-gray-400">
                       —
                     </p>
                     <span
-                      className={`mt-0.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold ${EXPORT_BADGE_HTML_CLASS[k.badge]}`}
+                      className={`mt-0.5 inline-flex items-center rounded border px-1.5 py-0.5 tkad-type-note font-semibold ${EXPORT_BADGE_HTML_CLASS[k.badge]}`}
                       data-testid="report-kpi-badge"
                       data-kpi-badge={k.badge}
                     >
                       {exportBadgeBracketLabel(k.badge, isKo)}
                     </span>
                     {k.pendingHint ? (
-                      <p className="mt-0.5 text-[10px] leading-snug text-gray-500">
+                      <p className="mt-0.5 tkad-type-note leading-snug text-gray-500">
                         {k.pendingHint}
                       </p>
                     ) : null}
@@ -431,7 +431,7 @@ export const PlannerReportDocument = forwardRef<
                       {k.value}
                     </p>
                     <span
-                      className={`mt-0.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold ${EXPORT_BADGE_HTML_CLASS[k.badge]}`}
+                      className={`mt-0.5 inline-flex items-center rounded border px-1.5 py-0.5 tkad-type-note font-semibold ${EXPORT_BADGE_HTML_CLASS[k.badge]}`}
                       data-testid="report-kpi-badge"
                       data-kpi-badge={k.badge}
                     >
@@ -450,7 +450,7 @@ export const PlannerReportDocument = forwardRef<
 
         {p.cpmFootnote ? (
           <p
-            className="text-[11px] leading-snug text-gray-500"
+            className="tkad-type-caption leading-snug text-gray-500"
             data-testid="report-cpm-footnote"
           >
             {p.cpmFootnote}
@@ -459,7 +459,7 @@ export const PlannerReportDocument = forwardRef<
 
         {p.budgetHonesty?.overBudgetBanner ? (
           <p
-            className="rounded-xl border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-[12px] font-medium text-destructive"
+            className="rounded-xl border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 tkad-type-meta font-medium text-destructive"
             data-testid="report-over-budget-banner"
           >
             {p.budgetHonesty.overBudgetBanner}
@@ -468,7 +468,7 @@ export const PlannerReportDocument = forwardRef<
 
         {p.portfolio.length > 0 && p.unpricedMediaNotice ? (
           <p
-            className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-2.5 text-[12px] leading-snug text-amber-900 dark:text-amber-200"
+            className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-2.5 tkad-type-meta leading-snug text-amber-900 dark:text-amber-200"
             data-testid="report-unpriced-media-notice"
           >
             {p.unpricedMediaNotice}
@@ -490,10 +490,10 @@ export const PlannerReportDocument = forwardRef<
               <div className="grid gap-4 sm:grid-cols-2">
                 {p.charts.budgetSplit && p.charts.budgetSplit.length > 0 ? (
                   <div className="rounded-xl border border-gray-200 p-4">
-                    <p className="mb-1 text-xs font-semibold text-gray-500">
+                    <p className="mb-1 tkad-type-title text-gray-500">
                       {isKo ? "예산 배분 (유형별)" : "Budget by type"}
                     </p>
-                    <p className="mb-3 text-[10px] leading-snug text-gray-400">
+                    <p className="mb-3 tkad-type-note leading-snug text-gray-400">
                       {isKo
                         ? "디지털·고정형·이동형 — 선택 매체 월 단가 합"
                         : "Digital · static · mobile — monthly rate share"}
@@ -504,10 +504,10 @@ export const PlannerReportDocument = forwardRef<
                 {p.charts.browseBudgetSplit &&
                 p.charts.browseBudgetSplit.length > 0 ? (
                   <div className="rounded-xl border border-gray-200 p-4">
-                    <p className="mb-1 text-xs font-semibold text-gray-500">
+                    <p className="mb-1 tkad-type-title text-gray-500">
                       {isKo ? "예산 배분 (카테고리별)" : "Budget by category"}
                     </p>
-                    <p className="mb-3 text-[10px] leading-snug text-gray-400">
+                    <p className="mb-3 tkad-type-note leading-snug text-gray-400">
                       {isKo
                         ? "OOH·교통·쉘터 등 발견하기 카테고리 기준"
                         : "OOH · transit · shelter — browse category share"}
@@ -520,17 +520,17 @@ export const PlannerReportDocument = forwardRef<
             <div className="grid gap-6 sm:grid-cols-2">
               {p.charts.reachSummary && p.charts.reachSummary.length > 0 ? (
                 <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                  <p className="mb-3 tkad-type-title text-gray-500">
                     {isKo ? "노출 요약" : "Impressions"}
                   </p>
                   <BarChart data={p.charts.reachSummary} color="#1c1c1f" isKo={isKo} />
                   {p.charts.impressionSplit &&
                   p.charts.impressionSplit.length > 0 ? (
                     <div className="mt-4 border-t border-gray-100 pt-4">
-                      <p className="mb-2.5 text-[11px] font-semibold text-gray-500">
+                      <p className="mb-2.5 tkad-type-caption font-semibold text-gray-500">
                         {isKo ? "유형별 노출 비중" : "Impression share by type"}
                       </p>
-                      <p className="mb-2.5 text-[10px] leading-snug text-gray-400">
+                      <p className="mb-2.5 tkad-type-note leading-snug text-gray-400">
                         {isKo
                           ? "CPM이 낮은 유형일수록 같은 예산 대비 노출이 많아집니다"
                           : "Lower CPM types deliver more impressions per won spent"}
@@ -543,7 +543,7 @@ export const PlannerReportDocument = forwardRef<
             </div>
             {p.charts.cpmBars && p.charts.cpmBars.length > 0 ? (
               <div className="rounded-xl border border-gray-200 p-4">
-                <p className="mb-1 text-xs font-semibold text-gray-500">
+                <p className="mb-1 tkad-type-title text-gray-500">
                   {isKo ? "CPM 비교 (원)" : "CPM comparison (KRW)"}
                   {p.cpmExcludesQuoteOnly
                     ? isKo
@@ -551,7 +551,7 @@ export const PlannerReportDocument = forwardRef<
                       : " (excl. inquiry)"
                     : ""}
                 </p>
-                <p className="mb-3 text-[10px] leading-snug text-gray-400">
+                <p className="mb-3 tkad-type-note leading-snug text-gray-400">
                   {isKo
                     ? "유형별 천 회당 비용 — 예산 비중과 노출 비중은 다를 수 있음"
                     : "Cost per 1,000 impressions by type — budget share ≠ impression share"}
@@ -576,7 +576,7 @@ export const PlannerReportDocument = forwardRef<
               {p.charts?.regionBudgetSplit &&
               p.charts.regionBudgetSplit.length > 1 ? (
                 <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                  <p className="mb-3 tkad-type-title text-gray-500">
                     {isKo ? "지역별 예산 비중" : "Budget share by region"}
                   </p>
                   <DonutChart data={p.charts.regionBudgetSplit} />
@@ -585,7 +585,7 @@ export const PlannerReportDocument = forwardRef<
               {p.charts?.regionImpressionSplit &&
               p.charts.regionImpressionSplit.length > 1 ? (
                 <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                  <p className="mb-3 tkad-type-title text-gray-500">
                     {isKo ? "지역별 노출 비중" : "Impression share by region"}
                   </p>
                   <ShareBarChart data={p.charts.regionImpressionSplit} />
@@ -595,7 +595,7 @@ export const PlannerReportDocument = forwardRef<
             <div className="min-w-0 overflow-x-auto rounded-xl border border-gray-200">
               <table className="w-full min-w-[32rem] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600">
+                  <tr className="border-b border-gray-200 bg-gray-50 text-left tkad-type-title text-gray-600">
                     <th className="px-3 py-2.5">{isKo ? "지역" : "Region"}</th>
                     <th className="px-3 py-2.5">{isKo ? "매체" : "Media"}</th>
                     <th className="px-3 py-2.5">{isKo ? "월 예산" : "Monthly"}</th>
@@ -644,7 +644,7 @@ export const PlannerReportDocument = forwardRef<
               </span>
             </p>
             {p.regionSubdivision.coverageNote ? (
-              <p className="text-[11px] leading-snug text-amber-700">
+              <p className="tkad-type-caption leading-snug text-amber-700">
                 {p.regionSubdivision.coverageNote}
               </p>
             ) : null}
@@ -652,7 +652,7 @@ export const PlannerReportDocument = forwardRef<
               {p.charts?.regionSubdivisionBudgetSplit &&
               p.charts.regionSubdivisionBudgetSplit.length > 1 ? (
                 <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                  <p className="mb-3 tkad-type-title text-gray-500">
                     {isKo ? "세분화 예산 비중" : "Budget by sub-area"}
                   </p>
                   <DonutChart data={p.charts.regionSubdivisionBudgetSplit} />
@@ -661,7 +661,7 @@ export const PlannerReportDocument = forwardRef<
               {p.charts?.regionSubdivisionImpressionSplit &&
               p.charts.regionSubdivisionImpressionSplit.length > 1 ? (
                 <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                  <p className="mb-3 tkad-type-title text-gray-500">
                     {isKo ? "세분화 노출 비중" : "Impressions by sub-area"}
                   </p>
                   <ShareBarChart data={p.charts.regionSubdivisionImpressionSplit} />
@@ -671,7 +671,7 @@ export const PlannerReportDocument = forwardRef<
             <div className="min-w-0 overflow-x-auto rounded-xl border border-gray-200">
               <table className="w-full min-w-[32rem] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600">
+                  <tr className="border-b border-gray-200 bg-gray-50 text-left tkad-type-title text-gray-600">
                     <th className="px-3 py-2.5">
                       {isKo ? "상권·권역" : "Sub-area"}
                     </th>
@@ -755,7 +755,7 @@ export const PlannerReportDocument = forwardRef<
             <div className="min-w-0 overflow-x-auto rounded-xl border border-gray-200">
               <table className="w-full min-w-[30rem] border-collapse text-sm">
                 <thead>
-                  <tr className="bg-[color:var(--qp-accent)] text-left text-xs font-semibold uppercase tracking-wide text-white">
+                  <tr className="bg-[color:var(--qp-accent)] text-left tkad-type-title uppercase tracking-wide text-white">
                     <th className="px-3 py-2.5">{isKo ? "플랫폼" : "Platform"}</th>
                     <th className="px-3 py-2.5">{isKo ? "비중" : "Share"}</th>
                     <th className="px-3 py-2.5 text-right">{isKo ? "예상 노출" : "Est. impressions"}</th>
@@ -798,19 +798,19 @@ export const PlannerReportDocument = forwardRef<
 
         {/* 면책 */}
         {p.currencyFootnote ? (
-          <p className="border-t border-gray-100 pt-5 text-[11px] leading-relaxed text-gray-500">
+          <p className="border-t border-gray-100 pt-5 tkad-type-caption leading-relaxed text-gray-500">
             {p.currencyFootnote}
           </p>
         ) : null}
         {p.pricingFootnote ? (
           <p
-            className={`text-[11px] leading-relaxed text-gray-500 ${p.currencyFootnote ? "pt-2" : "border-t border-gray-100 pt-5"}`}
+            className={`tkad-type-caption leading-relaxed text-gray-500 ${p.currencyFootnote ? "pt-2" : "border-t border-gray-100 pt-5"}`}
           >
             {p.pricingFootnote}
           </p>
         ) : null}
         <p
-          className={`text-[11px] leading-relaxed text-gray-400 ${p.currencyFootnote || p.pricingFootnote ? "pt-2" : "border-t border-gray-100 pt-5"}`}
+          className={`tkad-type-caption leading-relaxed text-gray-400 ${p.currencyFootnote || p.pricingFootnote ? "pt-2" : "border-t border-gray-100 pt-5"}`}
         >
           {p.disclaimer}
         </p>

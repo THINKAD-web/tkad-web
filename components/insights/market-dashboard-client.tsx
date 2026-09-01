@@ -131,7 +131,7 @@ export function MarketDashboardClient({ isKo, access }: Props) {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+        <p className="tkad-type-label text-primary">
           [ PRO · MARKET INSIGHTS ]
         </p>
         <h1 className="text-3xl font-black tracking-tight">
@@ -145,7 +145,7 @@ export function MarketDashboardClient({ isKo, access }: Props) {
         {!access.allowed ? (
           <Link
             href="/pricing?trial=1"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+            className="inline-flex items-center gap-1.5 tkad-type-title text-primary hover:underline"
           >
             <Sparkles className="h-4 w-4" />
             {isKo ? "PRO 14일 무료 체험" : "Start 14-day PRO trial"}
@@ -243,14 +243,14 @@ function DistrictSection({
             key={c.gu}
             type="button"
             onClick={() => onSelect(c.gu === selected?.gu ? null : c.gu)}
-            className="rounded-lg px-2 py-2 text-center text-[10px] font-bold transition ring-offset-2 hover:ring-2 hover:ring-primary/40 sm:text-xs"
+            className="rounded-lg px-2 py-2 text-center tkad-type-note font-bold transition ring-offset-2 hover:ring-2 hover:ring-primary/40 sm:text-xs"
             style={{
               backgroundColor: DISTRICT_TIER_COLORS[c.tier],
               color: c.tier === "low" ? "#422006" : "#fff",
             }}
           >
             {c.gu.replace("구", "")}
-            <span className="mt-0.5 block text-[9px] font-normal opacity-90">
+            <span className="mt-0.5 block tkad-type-note font-normal opacity-90">
               {c.avgPriceManwon.toLocaleString()}
               {isKo ? "만" : "M"}
             </span>
@@ -272,7 +272,7 @@ function DistrictSection({
         </div>
       ) : null}
       <div className="mt-6 h-64">
-        <p className="mb-2 text-sm font-semibold">
+        <p className="mb-2 tkad-type-title">
           {isKo ? "지난 6개월 가격 트렌드 (상위 5개 구)" : "6-month price trend (top 5 districts)"}
         </p>
         <ResponsiveContainer width="100%" height="100%">
@@ -440,7 +440,7 @@ function DownloadSection({
           <a
             key={item.dataset}
             href={`${base}&dataset=${item.dataset}`}
-            className="rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold hover:border-primary"
+            className="rounded-xl border border-border bg-card px-3 py-2 tkad-type-title hover:border-primary"
           >
             {item.label}
           </a>

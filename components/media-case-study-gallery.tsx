@@ -108,7 +108,7 @@ export default function MediaCaseStudyGallery({
     <>
       {useHorizontalScroller ? (
         <div className="mb-3 flex items-center justify-end gap-2">
-          <span className="min-w-[3.5rem] text-center font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="min-w-[3.5rem] text-center tkad-type-label text-muted-foreground">
             {activeIndex + 1} / {photos.length}
           </span>
           <button
@@ -167,7 +167,7 @@ export default function MediaCaseStudyGallery({
                   className="h-full w-full object-cover grayscale transition-[filter,transform] duration-500 ease-out group-hover:grayscale-0 group-hover:scale-[1.02]"
                 />
                 <span
-                  className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1 rounded-2xl border border-white/16 dark:bg-black bg-white/35 px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur"
+                  className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1 rounded-2xl border border-white/16 dark:bg-black bg-white/35 px-3 py-1 font-display tkad-type-note font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur"
                   aria-hidden
                 >
                   <ZoomIn className="h-3 w-3" />
@@ -175,7 +175,7 @@ export default function MediaCaseStudyGallery({
                 </span>
               </button>
               {cap ? (
-                <figcaption className="border-t border-border/70 px-4 py-3 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                <figcaption className="border-t border-border/70 px-4 py-3 tkad-type-meta leading-relaxed tracking-tight text-muted-foreground">
                   {cap}
                 </figcaption>
               ) : null}

@@ -61,7 +61,7 @@ function PrecisionGroupHeader({
       </h3>
       <div className="flex flex-wrap items-center justify-end gap-2">
         <span
-          className="min-w-[2.25rem] rounded-full bg-navy/[0.08] px-2 py-0.5 text-center text-xs font-semibold tabular-nums text-navy"
+          className="min-w-[2.25rem] rounded-full bg-navy/[0.08] px-2 py-0.5 text-center tkad-type-title tabular-nums text-navy"
           aria-live="polite"
         >
           ({selectedCount})
@@ -70,7 +70,7 @@ function PrecisionGroupHeader({
           <button
             type="button"
             onClick={onSelectAll}
-            className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-navy shadow-sm transition-colors hover:bg-slate-50"
+            className="rounded-md border border-slate-200 bg-white px-2.5 py-1 tkad-type-title text-navy shadow-sm transition-colors hover:bg-slate-50"
           >
             {selectAllLabel}
           </button>
@@ -79,7 +79,7 @@ function PrecisionGroupHeader({
           <button
             type="button"
             onClick={onClear}
-            className="rounded-md px-2.5 py-1 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-navy hover:underline"
+            className="rounded-md px-2.5 py-1 tkad-type-title text-muted-foreground underline-offset-2 hover:text-navy hover:underline"
           >
             {clearLabel}
           </button>
@@ -109,7 +109,7 @@ function CheckboxGrid({
           <label
             key={key}
             className={cn(
-              "flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200/60 dark:bg-white/8 bg-gray-100 px-2.5 py-2 text-[13px] leading-snug transition-colors",
+              "flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200/60 dark:bg-white/8 bg-gray-100 px-2.5 py-2 tkad-type-body leading-snug transition-colors",
               checked
                 ? "border-navy/30 bg-navy/[0.06] text-navy ring-1 ring-navy/10"
                 : "text-muted-foreground hover:border-slate-300",
@@ -382,7 +382,7 @@ export function MediaPrecisionFiltersAssistant({
             </button>
             <div className="flex flex-wrap items-center justify-end gap-2">
               <span
-                className="min-w-[2.25rem] rounded-full bg-navy/[0.08] px-2 py-0.5 text-center text-xs font-semibold tabular-nums text-navy"
+                className="min-w-[2.25rem] rounded-full bg-navy/[0.08] px-2 py-0.5 text-center tkad-type-title tabular-nums text-navy"
                 aria-live="polite"
               >
                 ({specialSel})
@@ -393,7 +393,7 @@ export function MediaPrecisionFiltersAssistant({
                   e.stopPropagation();
                   selectAllInCategory("specialFeature", specialKeys);
                 }}
-                className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-navy shadow-sm transition-colors hover:bg-slate-50"
+                className="rounded-md border border-slate-200 bg-white px-2.5 py-1 tkad-type-title text-navy shadow-sm transition-colors hover:bg-slate-50"
               >
                 {tMedia("filterGroupSelectAll")}
               </button>
@@ -403,7 +403,7 @@ export function MediaPrecisionFiltersAssistant({
                   e.stopPropagation();
                   clearCategory("specialFeature");
                 }}
-                className="rounded-md px-2.5 py-1 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-navy hover:underline"
+                className="rounded-md px-2.5 py-1 tkad-type-title text-muted-foreground underline-offset-2 hover:text-navy hover:underline"
               >
                 {tMedia("filterGroupClear")}
               </button>
@@ -448,7 +448,7 @@ export function MediaPrecisionFiltersAssistant({
             type="button"
             variant="outline"
             size="sm"
-            className="h-9 rounded-full border-slate-300/90 px-5 text-xs font-semibold"
+            className="h-9 rounded-full border-slate-300/90 px-5 tkad-type-title"
             onClick={onReset}
           >
             {tCommon("reset")}

@@ -161,7 +161,7 @@ export function MobileSearchModal({ suggestions = [] }: Props) {
       >
         {query.trim().length >= 2 && autocomplete.length > 0 ? (
           <section>
-            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <h2 className="mb-2 tkad-type-title uppercase tracking-wider text-gray-400">
               {isKo ? "자동완성" : "Suggestions"}
             </h2>
             <ul className="divide-y divide-gray-200 dark:divide-white/10">
@@ -183,7 +183,7 @@ export function MobileSearchModal({ suggestions = [] }: Props) {
           <>
             {recent.length > 0 ? (
               <section className="mb-6">
-                <h2 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <h2 className="mb-2 flex items-center gap-1.5 tkad-type-title uppercase tracking-wider text-gray-400">
                   <Clock className="h-3.5 w-3.5" />
                   {isKo ? "최근 검색" : "Recent"}
                 </h2>
@@ -207,7 +207,7 @@ export function MobileSearchModal({ suggestions = [] }: Props) {
             ) : null}
 
             <section>
-              <h2 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <h2 className="mb-2 flex items-center gap-1.5 tkad-type-title uppercase tracking-wider text-gray-400">
                 <TrendingUp className="h-3.5 w-3.5" />
                 {isKo ? "인기 검색" : "Popular"}
               </h2>

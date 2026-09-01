@@ -39,7 +39,7 @@ export function MediaDetailTabs({
             aria-selected={active === tab.id}
             onClick={() => setActive(tab.id)}
             className={cn(
-              "shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition sm:px-4 sm:text-sm",
+              "shrink-0 rounded-xl px-3 py-2 tkad-type-title transition sm:px-4 sm:text-sm",
               active === tab.id
                 ? "bg-[color:var(--qp-accent)]/15 text-[color:var(--qp-accent)] dark:text-white"
                 : "dark:text-white/55 text-gray-500 hover:dark:text-white/80 hover:text-gray-800",

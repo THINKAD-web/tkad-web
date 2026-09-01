@@ -2292,9 +2292,9 @@ export default function AdminMediasClient({
 
   const renderMediaListActionBar = (media: AdminMediaDto) => (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-      <span className="text-[10px] font-semibold text-muted-foreground">노출</span>
+      <span className="tkad-type-note font-semibold text-muted-foreground">노출</span>
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[10px] text-muted-foreground">공개</span>
+        <span className="tkad-type-note text-muted-foreground">공개</span>
         <button
           type="button"
           title={
@@ -2316,7 +2316,7 @@ export default function AdminMediasClient({
         </button>
         {isActiveFlaggedHiddenFromCustomer(media) ? (
           <span
-            className="max-w-[14rem] text-[10px] font-medium leading-snug text-amber-900 dark:text-amber-200"
+            className="max-w-[14rem] tkad-type-note font-medium leading-snug text-amber-900 dark:text-amber-200"
             title="isActive는 켜져 있지만 reviewStatus=flagged라 고객 카탈로그·검색·상세에서 제외됩니다."
           >
             공개 ON · 검토 필요로 고객 미노출
@@ -2324,7 +2324,7 @@ export default function AdminMediasClient({
         ) : null}
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="text-[10px] text-muted-foreground">즉시예약</span>
+        <span className="tkad-type-note text-muted-foreground">즉시예약</span>
         <button
           type="button"
           title={
@@ -2351,7 +2351,7 @@ export default function AdminMediasClient({
       <span className="hidden h-4 w-px shrink-0 bg-border sm:inline" aria-hidden />
 
       <div className="flex items-center gap-1.5">
-        <span className="text-[10px] font-semibold text-muted-foreground">검증</span>
+        <span className="tkad-type-note font-semibold text-muted-foreground">검증</span>
         <button
           type="button"
           title={
@@ -2371,7 +2371,7 @@ export default function AdminMediasClient({
         </button>
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="text-[10px] font-semibold text-muted-foreground">추천</span>
+        <span className="tkad-type-note font-semibold text-muted-foreground">추천</span>
         <button
           type="button"
           title={
@@ -2408,7 +2408,7 @@ export default function AdminMediasClient({
           variant="ghost"
           size="xs"
           asChild
-          className="h-7 px-2 text-[11px] text-muted-foreground md:hidden"
+          className="h-7 px-2 tkad-type-caption text-muted-foreground md:hidden"
         >
           <Link href={`/admin/medias/${media.id}/edit`} title="JSON으로 편집">
             JSON
@@ -2472,7 +2472,7 @@ export default function AdminMediasClient({
                   setTypeFilter(opt.value);
                   setPage(1);
                 }}
-                className={`rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
+                className={`rounded-full px-2.5 py-1 tkad-type-title transition-colors ${
                   typeFilter === opt.value
                     ? "border-2 border-border bg-foreground text-background"
                     : "border-2 border-border bg-card text-foreground hover:bg-muted/50"
@@ -2485,7 +2485,7 @@ export default function AdminMediasClient({
                 전용 관리 화면으로 이동시킨다. */}
             <Link
               href="/admin/networks"
-              className="inline-flex items-center gap-1 rounded-full border-2 border-border bg-card px-2.5 py-1 text-xs font-semibold text-foreground transition-colors hover:bg-muted/50"
+              className="inline-flex items-center gap-1 rounded-full border-2 border-border bg-card px-2.5 py-1 tkad-type-title text-foreground transition-colors hover:bg-muted/50"
             >
               네트워크
               <ChevronRight className="h-3 w-3" aria-hidden />
@@ -2510,7 +2510,7 @@ export default function AdminMediasClient({
                 setSortOrder(e.target.value as MediaSortOrder);
                 setPage(1);
               }}
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-xs font-semibold sm:w-auto"
+              className="h-9 w-full rounded-md border border-input bg-background px-2 tkad-type-title sm:w-auto"
               aria-label="정렬"
             >
               <option value="updated">최근 수정순</option>
@@ -2589,7 +2589,7 @@ export default function AdminMediasClient({
         />
 
         <div className="rounded-2xl border border-border bg-muted/15 px-2 py-2 sm:px-2.5">
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="mb-1.5 tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
             노출 필터
           </p>
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-start sm:gap-4">
@@ -2618,7 +2618,7 @@ export default function AdminMediasClient({
                     setPublicFilter(opt.value);
                     setPage(1);
                   }}
-                  className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors sm:px-2.5 sm:text-xs ${
+                  className={`rounded-full px-2 py-1 tkad-type-caption font-semibold transition-colors sm:px-2.5 sm:text-xs ${
                     publicFilter === opt.value
                       ? "border-2 border-border bg-foreground text-background"
                       : "border-2 border-border bg-card text-foreground hover:bg-muted/50"
@@ -2656,7 +2656,7 @@ export default function AdminMediasClient({
                     setAvailabilityFilter(opt.value);
                     setPage(1);
                   }}
-                  className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors sm:px-2.5 sm:text-xs ${
+                  className={`rounded-full px-2 py-1 tkad-type-caption font-semibold transition-colors sm:px-2.5 sm:text-xs ${
                     availabilityFilter === opt.value
                       ? "border-2 border-border bg-foreground text-background"
                       : "border-2 border-border bg-card text-foreground hover:bg-muted/50"
@@ -2716,7 +2716,7 @@ export default function AdminMediasClient({
                     variant="outline"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px]"
+                    className="h-7 tkad-type-caption"
                     onClick={() => bulkVerifiedOn()}
                   >
                     Verified 켜기
@@ -2726,7 +2726,7 @@ export default function AdminMediasClient({
                     variant="outline"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px]"
+                    className="h-7 tkad-type-caption"
                     onClick={() => bulkVerifiedOff()}
                   >
                     Verified 끄기
@@ -2736,7 +2736,7 @@ export default function AdminMediasClient({
                     variant="outline"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px]"
+                    className="h-7 tkad-type-caption"
                     onClick={() => bulkFeaturedOn()}
                   >
                     추천 켜기
@@ -2746,7 +2746,7 @@ export default function AdminMediasClient({
                     variant="outline"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px]"
+                    className="h-7 tkad-type-caption"
                     onClick={() => bulkFeaturedOff()}
                   >
                     추천 끄기
@@ -2756,7 +2756,7 @@ export default function AdminMediasClient({
                     variant="default"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px]"
+                    className="h-7 tkad-type-caption"
                     onClick={() => void bulkFeaturedOrderByList()}
                   >
                     추천 순서(목록순)
@@ -2766,7 +2766,7 @@ export default function AdminMediasClient({
                     variant="outline"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px]"
+                    className="h-7 tkad-type-caption"
                     onClick={() => bulkPopularOn()}
                   >
                     인기 켜기
@@ -2776,7 +2776,7 @@ export default function AdminMediasClient({
                     variant="outline"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px]"
+                    className="h-7 tkad-type-caption"
                     onClick={() => bulkPopularOff()}
                   >
                     인기 끄기
@@ -2786,7 +2786,7 @@ export default function AdminMediasClient({
                     variant="default"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px]"
+                    className="h-7 tkad-type-caption"
                     onClick={() => void bulkPopularOrderByList()}
                   >
                     인기 순서(목록순)
@@ -2796,7 +2796,7 @@ export default function AdminMediasClient({
                     variant="outline"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px] border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                    className="h-7 tkad-type-caption border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
                     onClick={() => bulkActivate()}
                   >
                     활성화
@@ -2806,7 +2806,7 @@ export default function AdminMediasClient({
                     variant="outline"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px] border-amber-500/40 text-amber-800 dark:text-amber-200"
+                    className="h-7 tkad-type-caption border-amber-500/40 text-amber-800 dark:text-amber-200"
                     onClick={() => bulkDeactivate()}
                   >
                     비활성화
@@ -2816,7 +2816,7 @@ export default function AdminMediasClient({
                     variant="outline"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px] border-[color:var(--qp-accent)]/40 text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
+                    className="h-7 tkad-type-caption border-[color:var(--qp-accent)]/40 text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
                     onClick={() => bulkInstantBookingOn()}
                   >
                     즉시예약 켜기
@@ -2826,7 +2826,7 @@ export default function AdminMediasClient({
                     variant="outline"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px] border-[color:var(--qp-accent)]/40 text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
+                    className="h-7 tkad-type-caption border-[color:var(--qp-accent)]/40 text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
                     onClick={() => bulkInstantBookingOff()}
                   >
                     즉시예약 끄기
@@ -2836,7 +2836,7 @@ export default function AdminMediasClient({
                     variant="ghost"
                     size="xs"
                     disabled={bulkBusy}
-                    className="h-7 text-[11px]"
+                    className="h-7 tkad-type-caption"
                     onClick={clearRowSelection}
                   >
                     선택 해제
@@ -2884,7 +2884,7 @@ export default function AdminMediasClient({
                         <div className="flex min-w-0 flex-1 flex-col gap-2.5">
                           <div className="min-w-0 space-y-1">
                             <p
-                              className="truncate text-sm font-semibold leading-snug text-foreground"
+                              className="truncate tkad-type-title leading-snug text-foreground"
                               title={nameLine}
                             >
                               <span>{media.name}</span>
@@ -2907,7 +2907,7 @@ export default function AdminMediasClient({
                               />
                               <Badge
                                 variant="secondary"
-                                className="border border-border bg-card text-[10px] font-display font-bold uppercase tracking-[0.1em] text-foreground"
+                                className="border border-border bg-card tkad-type-note font-display font-bold uppercase tracking-[0.1em] text-foreground"
                               >
                                 {typeBadgeLabel(media.type)}
                               </Badge>
@@ -2915,7 +2915,7 @@ export default function AdminMediasClient({
                                 score={mediaQualityScore(media)}
                               />
                               <MediaLayerBadges badges={media.layerBadges} />
-                              <span className="text-xs font-semibold tabular-nums text-foreground">
+                              <span className="tkad-type-title tabular-nums text-foreground">
                                 ₩{media.price.toLocaleString()}
                               </span>
                             </div>
@@ -3030,7 +3030,7 @@ export default function AdminMediasClient({
                             <td className="px-2 py-2.5 align-middle">
                               <Badge
                                 variant="secondary"
-                                className="max-w-full truncate border border-border bg-card px-2 py-0.5 text-[11px] font-display font-bold uppercase tracking-[0.06em] text-foreground"
+                                className="max-w-full truncate border border-border bg-card px-2 py-0.5 tkad-type-caption font-display font-bold uppercase tracking-[0.06em] text-foreground"
                                 title={typeBadgeLabel(media.type)}
                               >
                                 {typeBadgeLabel(media.type)}
@@ -3101,7 +3101,7 @@ export default function AdminMediasClient({
                       >
                         <ChevronLeft className="h-3.5 w-3.5" />
                       </Button>
-                      <span className="flex items-center px-1 text-[11px] text-muted-foreground">
+                      <span className="flex items-center px-1 tkad-type-caption text-muted-foreground">
                         {page}/{totalPages}
                       </span>
                       <Button
@@ -3145,7 +3145,7 @@ export default function AdminMediasClient({
                   {editing ? "매체 수정" : "매체 추가"}
                 </CardTitle>
                 {!editing ? (
-                  <p className="mt-1 text-[10px] text-muted-foreground">
+                  <p className="mt-1 tkad-type-note text-muted-foreground">
                     {draftSavedAt
                       ? `임시저장 ${new Date(draftSavedAt).toLocaleTimeString("ko-KR")} · 30초마다 자동 저장`
                       : "필수(*) 항목만 채워도 저장 가능 · 주소 입력 시 좌표 자동 변환"}
@@ -3154,7 +3154,7 @@ export default function AdminMediasClient({
                   <>
                     <Link
                       href={`/admin/medias/${editing.id}/edit`}
-                      className="mt-1 inline-block text-[11px] font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                      className="mt-1 inline-block tkad-type-caption font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
                     >
                       JSON으로 편집
                     </Link>
@@ -3164,7 +3164,7 @@ export default function AdminMediasClient({
                         type="button"
                         variant="outline"
                         size="xs"
-                        className="h-7 text-[11px]"
+                        className="h-7 tkad-type-caption"
                         disabled={recomputeLoading || editDetailLoading}
                         onClick={() => void handleRecompute()}
                       >
@@ -3197,7 +3197,7 @@ export default function AdminMediasClient({
               {saveError && (
                 <p className="text-sm text-red-600">{saveError}</p>
               )}
-              <p className="rounded-md border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
+              <p className="rounded-md border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/5 px-3 py-2 tkad-type-caption font-semibold uppercase tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                 필수 정보
               </p>
               <div>
@@ -3231,7 +3231,7 @@ export default function AdminMediasClient({
                   ))}
                 </select>
                 {isOverseasMedia ? (
-                  <p className="mt-1 text-[10px] text-amber-700">
+                  <p className="mt-1 tkad-type-note text-amber-700">
                     해외 매체: 주소는 자유 입력, 좌표는 수동 입력 필수. 카카오
                     지오코딩은 사용하지 않습니다.
                   </p>
@@ -3274,7 +3274,7 @@ export default function AdminMediasClient({
                       : "경기도 가평군 설악면 미사리로540번길 51"
                   }
                 />
-                <p className="mt-1 text-[10px] text-muted-foreground">
+                <p className="mt-1 tkad-type-note text-muted-foreground">
                   카탈로그·검색에 쓰는 대표 주소입니다. 실제 설치 좌표는 아래
                   「설치 지점」에서 방향별로 넣습니다.
                 </p>
@@ -3282,14 +3282,14 @@ export default function AdminMediasClient({
 
               <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xs font-semibold text-foreground">
+                  <p className="tkad-type-title text-foreground">
                     설치 지점 (방향별 좌표)
                   </p>
                   <Button
                     type="button"
                     variant="outline"
                     size="xs"
-                    className="h-7 gap-1 text-[11px]"
+                    className="h-7 gap-1 tkad-type-caption"
                     onClick={() => {
                       const row = newInstallRow();
                       setForm((f) => ({
@@ -3318,7 +3318,7 @@ export default function AdminMediasClient({
                         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                           <button
                             type="button"
-                            className="text-left text-[11px] font-medium text-foreground"
+                            className="text-left tkad-type-caption font-medium text-foreground"
                             onClick={() => setActiveInstallKey(row.key)}
                           >
                             지점 {idx + 1}
@@ -3331,7 +3331,7 @@ export default function AdminMediasClient({
                               type="button"
                               variant="ghost"
                               size="xs"
-                              className="h-6 text-[10px] text-red-600"
+                              className="h-6 tkad-type-note text-red-600"
                               onClick={() => {
                                 setForm((f) => {
                                   const next = f.installLocations.filter(
@@ -3360,7 +3360,7 @@ export default function AdminMediasClient({
                         </div>
                         <div className="grid gap-2 sm:grid-cols-2">
                           <div className="sm:col-span-2">
-                            <label className="mb-1 block text-[10px] text-muted-foreground">
+                            <label className="mb-1 block tkad-type-note text-muted-foreground">
                               방향·라벨 (예: 춘천방향, 서울방향)
                             </label>
                             <Input
@@ -3381,7 +3381,7 @@ export default function AdminMediasClient({
                             />
                           </div>
                           <div className="sm:col-span-2">
-                            <label className="mb-1 block text-[10px] text-muted-foreground">
+                            <label className="mb-1 block tkad-type-note text-muted-foreground">
                               지점 주소 (선택)
                             </label>
                             <div className="flex gap-2">
@@ -3406,7 +3406,7 @@ export default function AdminMediasClient({
                                 type="button"
                                 variant="outline"
                                 size="xs"
-                                className="h-8 shrink-0 text-[10px]"
+                                className="h-8 shrink-0 tkad-type-note"
                                 disabled={
                                   isOverseasMedia ||
                                   geoLookupLoading ||
@@ -3480,7 +3480,7 @@ export default function AdminMediasClient({
                             </div>
                           </div>
                           <div>
-                            <label className="mb-1 block text-[10px] text-muted-foreground">
+                            <label className="mb-1 block tkad-type-note text-muted-foreground">
                               위도{isOverseasMedia ? " *" : ""}
                             </label>
                             <Input
@@ -3505,7 +3505,7 @@ export default function AdminMediasClient({
                             />
                           </div>
                           <div>
-                            <label className="mb-1 block text-[10px] text-muted-foreground">
+                            <label className="mb-1 block tkad-type-note text-muted-foreground">
                               경도{isOverseasMedia ? " *" : ""}
                             </label>
                             <Input
@@ -3537,7 +3537,7 @@ export default function AdminMediasClient({
                 {geoLookupError ? (
                   <p className="text-xs text-amber-700">{geoLookupError}</p>
                 ) : null}
-                <p className="text-[10px] text-muted-foreground">
+                <p className="tkad-type-note text-muted-foreground">
                   휴게소처럼 상·하행이 나뉘면 「지점 추가」로 춘천방향·서울방향을
                   각각 넣으세요. 지도에 핀이 모두 표시됩니다.
                 </p>
@@ -3559,7 +3559,7 @@ export default function AdminMediasClient({
               )}
 
               <div className="rounded-2xl border-2 border-border bg-muted p-3 bg-muted/60">
-                <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-foreground">
+                <div className="mb-2 flex items-center gap-2 tkad-type-title text-foreground">
                   <MapPin className="h-3.5 w-3.5 text-primary" />
                   주변 정보 미리보기
                 </div>
@@ -3713,7 +3713,7 @@ export default function AdminMediasClient({
                 공개 카탈로그 Verified 리본 (isVerified)
               </label>
               {form.autoPopulatedAt.trim() ? (
-                <p className="text-[11px] text-muted-foreground">
+                <p className="tkad-type-caption text-muted-foreground">
                   자동 수집 시각:{" "}
                   {Number.isNaN(Date.parse(form.autoPopulatedAt))
                     ? form.autoPopulatedAt
@@ -3737,7 +3737,7 @@ export default function AdminMediasClient({
                     className={isOverseasMedia ? LOCKED_INPUT_CLASS : undefined}
                   />
                   {isOverseasMedia ? (
-                    <p className="mt-1 text-[10px] text-muted-foreground">
+                    <p className="mt-1 tkad-type-note text-muted-foreground">
                       해외 매체는 country 코드({form.country}) 기준으로 저장됩니다.
                       한국 taxonomy(seoul/national) 값은 사용하지 않습니다.
                     </p>
@@ -3765,18 +3765,18 @@ export default function AdminMediasClient({
 
               {form.type.trim() === "mobile" ? (
                 <div className="rounded-2xl border border-border bg-muted/40 p-3">
-                  <p className="mb-2 text-xs font-semibold text-foreground">
+                  <p className="mb-2 tkad-type-title text-foreground">
                     이동형 — 서비스 구역 (전국 시·군·구)
                   </p>
-                  <p className="mb-3 text-[10px] text-muted-foreground">
+                  <p className="mb-3 tkad-type-note text-muted-foreground">
                     행정구역 5자리 코드 기준 근사 영역이 지도에 겹쳐 보입니다. 실제 경계와 다를 수
                     있습니다.
                   </p>
                   <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-end">
-                    <label className="flex min-w-0 flex-1 flex-col gap-1 text-[10px]">
+                    <label className="flex min-w-0 flex-1 flex-col gap-1 tkad-type-note">
                       <span className="font-medium text-muted-foreground">시·도</span>
                       <select
-                        className="h-9 rounded-md border border-input bg-background px-2 text-[11px] shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        className="h-9 rounded-md border border-input bg-background px-2 tkad-type-caption shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         value={coverageSidoFilter}
                         onChange={(e) => setCoverageSidoFilter(e.target.value)}
                       >
@@ -3787,7 +3787,7 @@ export default function AdminMediasClient({
                         ))}
                       </select>
                     </label>
-                    <label className="flex min-w-0 flex-1 flex-col gap-1 text-[10px]">
+                    <label className="flex min-w-0 flex-1 flex-col gap-1 tkad-type-note">
                       <span className="font-medium text-muted-foreground">검색 (이름·코드)</span>
                       <Input
                         value={coverageSigunguSearch}
@@ -3798,14 +3798,14 @@ export default function AdminMediasClient({
                     </label>
                   </div>
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="tkad-type-note text-muted-foreground">
                       {coverageSidoFilter} 선택 {coverageRowsSelectedCount}/{coverageRowsForPicker.length}
                     </span>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="h-7 px-2 text-[10px]"
+                      className="h-7 px-2 tkad-type-note"
                       disabled={!coverageRowsForPicker.length || coverageRowsAllSelected}
                       onClick={() => {
                         setForm((f) => {
@@ -3824,7 +3824,7 @@ export default function AdminMediasClient({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-7 px-2 text-[10px]"
+                      className="h-7 px-2 tkad-type-note"
                       disabled={!coverageRowsSelectedCount}
                       onClick={() => {
                         setForm((f) => {
@@ -3844,7 +3844,7 @@ export default function AdminMediasClient({
                   <div className="mb-3 max-h-44 overflow-y-auto rounded-md border border-border/60 bg-card/80 p-2">
                     {coverageSigunguSearch.trim().length >= 1 &&
                     !coverageSearchHits.length ? (
-                      <p className="py-2 text-center text-[11px] text-muted-foreground">
+                      <p className="py-2 text-center tkad-type-caption text-muted-foreground">
                         검색 결과가 없습니다.
                       </p>
                     ) : (
@@ -3855,7 +3855,7 @@ export default function AdminMediasClient({
                         ).map((g) => (
                           <label
                             key={g.code}
-                            className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-[11px] hover:bg-muted/80"
+                            className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 tkad-type-caption hover:bg-muted/80"
                           >
                             <input
                               type="checkbox"
@@ -3924,11 +3924,11 @@ export default function AdminMediasClient({
                   }
                   placeholder="700000"
                 />
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 tkad-type-caption text-muted-foreground">
                   원 단위로 입력 (예: 70만원 → 700000)
                 </p>
                 {jpyPricePreview ? (
-                  <p className="mt-1 text-[11px] font-medium text-amber-800">
+                  <p className="mt-1 tkad-type-caption font-medium text-amber-800">
                     ¥ 미리보기: {jpyPricePreview}
                     <span className="ml-1 font-normal text-muted-foreground">
                       (저장값은 원화 그대로)
@@ -3954,11 +3954,11 @@ export default function AdminMediasClient({
                   <option value="fixed">고정 단가 (fixed)</option>
                   <option value="quote_only">협의가 (quote_only)</option>
                 </select>
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 tkad-type-caption text-muted-foreground">
                   외벽광고 신규 등록 시 기본값은 협의가입니다.
                 </p>
               </div>
-              <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="rounded-md border border-border bg-muted/40 px-3 py-2 tkad-type-caption font-semibold uppercase tracking-wide text-muted-foreground">
                 선택 정보
               </p>
               <div className="grid grid-cols-2 gap-3">
@@ -4181,7 +4181,7 @@ export default function AdminMediasClient({
               </div>
               <div className="rounded-xl border-2 border-border bg-muted p-4 bg-muted/60">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <label className="text-xs font-semibold text-foreground">
+                  <label className="tkad-type-title text-foreground">
                     가격 옵션
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -4215,7 +4215,7 @@ export default function AdminMediasClient({
                     </Button>
                   </div>
                 </div>
-                <p className="mb-3 text-[11px] leading-relaxed text-muted-foreground">
+                <p className="mb-3 tkad-type-caption leading-relaxed text-muted-foreground">
                   카드로 편집하면 아래 JSON이 함께 갱신됩니다. 직접 JSON을
                   수정한 뒤에는「JSON → 카드」로 불러오세요. 금액은 원(KRW)
                   단위로 입력합니다 (예: 70만원 → 700000).
@@ -4232,7 +4232,7 @@ export default function AdminMediasClient({
                         className="space-y-2 rounded-2xl border-2 border-border bg-card p-3 shadow-sm"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-bold text-muted-foreground">
+                          <span className="tkad-type-caption font-bold text-muted-foreground">
                             옵션 {idx + 1}
                           </span>
                           <Button
@@ -4253,7 +4253,7 @@ export default function AdminMediasClient({
                         </div>
                         <div className="grid gap-2 sm:grid-cols-2">
                           <div className="sm:col-span-2">
-                            <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                            <label className="mb-0.5 block tkad-type-note font-medium text-muted-foreground">
                               라벨 (예: 20초 / 2주 패키지)
                             </label>
                             <Input
@@ -4269,7 +4269,7 @@ export default function AdminMediasClient({
                             />
                           </div>
                           <div>
-                            <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                            <label className="mb-0.5 block tkad-type-note font-medium text-muted-foreground">
                               금액 (숫자)
                             </label>
                             <Input
@@ -4286,7 +4286,7 @@ export default function AdminMediasClient({
                             />
                           </div>
                           <div>
-                            <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                            <label className="mb-0.5 block tkad-type-note font-medium text-muted-foreground">
                               기간
                             </label>
                             <select
@@ -4321,7 +4321,7 @@ export default function AdminMediasClient({
                             />
                           </div>
                           <div className="sm:col-span-2">
-                            <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                            <label className="mb-0.5 block tkad-type-note font-medium text-muted-foreground">
                               설명 (선택)
                             </label>
                             <Input
@@ -4488,7 +4488,7 @@ export default function AdminMediasClient({
                       mediaSubCategory: form.browseSubCategory,
                     }) ? (
                       <span
-                        className="rounded border border-amber-400/50 bg-amber-400/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400"
+                        className="rounded border border-amber-400/50 bg-amber-400/10 px-1.5 py-0.5 tkad-type-note font-semibold text-amber-600 dark:text-amber-400"
                         title="loop 매체인데 소재 점유율(SOV)이 반영돼 있지 않습니다. 노출이 과다 산정되며, 값이 정상 범위 안이라 CPM 가드에도 걸리지 않습니다."
                       >
                         {sovBadgeLabel()}
@@ -4530,7 +4530,7 @@ export default function AdminMediasClient({
                   placeholder="예: 삼성, LG, 현대"
                   className="text-sm"
                 />
-                <p className="mt-1 text-[10px] text-muted-foreground">
+                <p className="mt-1 tkad-type-note text-muted-foreground">
                   비우면 공개 카탈로그·비교표에는 집행 이력(MediaAdvertiserExecution)에서
                   자동 요약됩니다.
                 </p>
@@ -4705,7 +4705,7 @@ export default function AdminMediasClient({
                                   style={{ width: `${item.progress}%` }}
                                 />
                               </div>
-                              <p className="text-[10px] text-muted-foreground">
+                              <p className="tkad-type-note text-muted-foreground">
                                 {Math.round(item.progress)}%
                               </p>
                             </div>

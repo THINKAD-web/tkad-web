@@ -45,14 +45,14 @@ export function MySubscriptionCard({
         <div>
           <p
             id="my-subscription-heading"
-            className="font-display text-[10px] font-medium uppercase tracking-[0.2em] tkad-qp-text-muted"
+            className="font-display tkad-type-note font-medium uppercase tracking-[0.2em] tkad-qp-text-muted"
           >
             {isKo ? "현재 플랜" : "Current plan"}
           </p>
           <div className="mt-2">
             <MyPlanStatusBadge user={user} isKo={isKo} />
           </div>
-          <p className="mt-2 text-sm font-semibold tkad-qp-text-primary">
+          <p className="mt-2 tkad-type-title tkad-qp-text-primary">
             {info.planLabel}
           </p>
           {info.expiryLabel ? (

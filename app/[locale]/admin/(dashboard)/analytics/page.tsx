@@ -265,11 +265,11 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-6 text-foreground">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="tkad-type-label text-muted-foreground">
             [ ANALYTICS ]
           </p>
           <h2 className="mt-2 text-xl font-bold tracking-tight">분석 대시보드</h2>
-          <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
+          <p className="mt-1 tkad-type-caption tracking-tight text-muted-foreground">
             {`// `}문의, 견적, 계약 데이터를 한눈에 확인하세요.
             {useDb ? (
               <span className="ml-2 text-primary">· DB 실데이터</span>
@@ -282,7 +282,7 @@ export default function AdminAnalyticsPage() {
         </div>
         <Link
           href={`/${locale}/admin/analytics/settings`}
-          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 tkad-type-title text-foreground shadow-sm transition-colors hover:bg-muted"
         >
           <Settings2 className="h-4 w-4" />
           방문자 통계 설정
@@ -299,7 +299,7 @@ export default function AdminAnalyticsPage() {
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="text-2xl font-bold text-foreground">{kpi.value}</span>
                 <span
-                  className={`inline-flex items-center gap-0.5 text-xs font-semibold ${ kpi.up ? "text-emerald-600" : "text-rose-600" }`}
+                  className={`inline-flex items-center gap-0.5 tkad-type-title ${ kpi.up ? "text-emerald-600" : "text-rose-600" }`}
                 >
                   {kpi.up ? (
                     <ArrowUpRight className="h-3 w-3" />
@@ -353,7 +353,7 @@ export default function AdminAnalyticsPage() {
                   >
                     <div className="flex w-full items-end gap-0.5">
                       <div className="flex flex-1 flex-col items-center gap-1">
-                        <span className="text-[10px] font-semibold text-foreground">
+                        <span className="tkad-type-note font-semibold text-foreground">
                           {d.count}
                         </span>
                         <div
@@ -365,7 +365,7 @@ export default function AdminAnalyticsPage() {
                         />
                       </div>
                       <div className="flex flex-1 flex-col items-center gap-1">
-                        <span className="text-[10px] font-semibold text-primary">
+                        <span className="tkad-type-note font-semibold text-primary">
                           {d.quotes}
                         </span>
                         <div
@@ -378,7 +378,7 @@ export default function AdminAnalyticsPage() {
                       </div>
                       {useDb && revH > 0 ? (
                         <div className="flex flex-1 flex-col items-center gap-1">
-                          <span className="text-[9px] font-semibold text-emerald-700">
+                          <span className="tkad-type-note font-semibold text-emerald-700">
                             {(d as { revenueKrw: number }).revenueKrw >=
                             100000000
                               ? `${Math.round((d as { revenueKrw: number }).revenueKrw / 100000000)}억`
@@ -391,7 +391,7 @@ export default function AdminAnalyticsPage() {
                         </div>
                       ) : null}
                     </div>
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="tkad-type-caption text-muted-foreground">
                       {d.label}
                     </span>
                   </div>
@@ -457,16 +457,16 @@ export default function AdminAnalyticsPage() {
                     {item.name}
                   </p>
                   <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                    <Badge variant="secondary" className="text-[10px]">
+                    <Badge variant="secondary" className="tkad-type-note">
                       {item.type}
                     </Badge>
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="tkad-type-caption text-muted-foreground">
                       견적 선택 {item.picks}회
                     </span>
                   </div>
                 </div>
                 {item.trend ? (
-                  <span className="shrink-0 text-sm font-semibold text-emerald-600">
+                  <span className="shrink-0 tkad-type-title text-emerald-600">
                     {item.trend}
                   </span>
                 ) : null}
@@ -487,7 +487,7 @@ export default function AdminAnalyticsPage() {
                   {conversionData.rate}%
                 </span>
                 <span
-                  className={`inline-flex items-center gap-0.5 text-sm font-semibold ${ conversionData.rate >= conversionData.prevRate ? "text-emerald-600" : "text-rose-600" }`}
+                  className={`inline-flex items-center gap-0.5 tkad-type-title ${ conversionData.rate >= conversionData.prevRate ? "text-emerald-600" : "text-rose-600" }`}
                 >
                   {conversionData.rate >= conversionData.prevRate ? (
                     <ArrowUpRight className="h-3.5 w-3.5" />
@@ -524,7 +524,7 @@ export default function AdminAnalyticsPage() {
                     key={d.month}
                     className="flex flex-1 flex-col items-center gap-1"
                   >
-                    <span className="text-[10px] font-semibold text-foreground">
+                    <span className="tkad-type-note font-semibold text-foreground">
                       {d.rate}%
                     </span>
                     <div
@@ -534,7 +534,7 @@ export default function AdminAnalyticsPage() {
                         minHeight: 4,
                       }}
                     />
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="tkad-type-note text-muted-foreground">
                       {d.month}
                     </span>
                   </div>

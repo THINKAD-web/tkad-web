@@ -108,7 +108,7 @@ export default async function ServicesPage({ params }: Props) {
               <AnimatedCard key={p.title} delay={staggerDelayMs(i)}>
                 <article className="group relative h-full rounded-[28px] dark:bg-white/5 bg-gray-50 p-7 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)] transition-ui hover:-translate-y-1 hover:dark:bg-white/6">
                   <div className="flex items-center justify-between">
-                    <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                    <span className="tkad-type-label dark:text-white text-gray-500">
                       [{String(i + 1).padStart(2, "0")}]
                     </span>
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900">
@@ -149,7 +149,7 @@ export default async function ServicesPage({ params }: Props) {
                 <h3 className="mt-4 text-base font-black tracking-tight dark:text-white text-gray-900">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-[12px] leading-relaxed dark:text-white text-gray-600">
+                <p className="mt-2 tkad-type-meta leading-relaxed dark:text-white text-gray-600">
                   {step.body}
                 </p>
               </article>
@@ -196,7 +196,7 @@ export default async function ServicesPage({ params }: Props) {
       {/* Final CTA */}
       <NeonSection innerClassName="text-center">
         <ScrollAnimate className="mx-auto max-w-4xl">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.24em] dark:text-white text-gray-600">
+          <p className="tkad-type-label dark:text-white text-gray-600">
             [ NEXT STEP ]
           </p>
           <ClipboardList className="mx-auto mt-4 h-10 w-10 dark:text-white text-gray-700" aria-hidden />

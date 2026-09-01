@@ -56,8 +56,8 @@ export function MediaKeywordLandingHero({
         <p
           className={
             isQp
-              ? "tkad-media-keyword-hero__eyebrow flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]"
-              : "tkad-media-keyword-hero__eyebrow flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/60"
+              ? "tkad-media-keyword-hero__eyebrow flex flex-wrap items-center justify-center gap-x-2 gap-y-1 tkad-type-label text-[color:var(--qp-accent)]"
+              : "tkad-media-keyword-hero__eyebrow flex flex-wrap items-center justify-center gap-x-2 gap-y-1 tkad-type-label text-cyan-400/60"
           }
         >
           <span>{eyebrow}</span>

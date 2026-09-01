@@ -52,7 +52,7 @@ export function MediaCategoryFilterPanel({
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <p className="mb-2 tkad-type-title uppercase tracking-wide text-muted-foreground">
           {isKo ? "매체 유형" : "Media type"}
         </p>
         <ul className="space-y-3">
@@ -97,7 +97,7 @@ export function MediaCategoryFilterPanel({
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <p className="mb-2 tkad-type-title uppercase tracking-wide text-muted-foreground">
           {isKo ? "캠페인 목적" : "Campaign purpose"}
         </p>
         <ul className="space-y-2">

@@ -86,10 +86,10 @@ export function OnboardingProgressBar() {
             <Sparkles className="h-4 w-4" aria-hidden />
           </span>
           <div className="min-w-0">
-            <p className="font-display text-[10px] font-medium uppercase tracking-[0.24em] text-cyan-600/80 dark:text-cyan-400/80">
+            <p className="font-display tkad-type-note font-medium uppercase tracking-[0.24em] text-cyan-600/80 dark:text-cyan-400/80">
               [ {t("progressKicker")} ]
             </p>
-            <p className="mt-0.5 text-sm font-semibold leading-snug text-gray-900 dark:text-white/90">
+            <p className="mt-0.5 tkad-type-title leading-snug text-gray-900 dark:text-white/90">
               {t.rich("progressMessage", {
                 percent: pct,
                 accent: (chunks) => (
@@ -104,7 +104,7 @@ export function OnboardingProgressBar() {
 
         <div className="flex shrink-0 items-center gap-3 sm:max-w-sm sm:flex-1">
           <div className="min-w-0 flex-1">
-            <div className="mb-1 flex justify-between font-display text-[10px] font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/45">
+            <div className="mb-1 flex justify-between font-display tkad-type-note font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/45">
               <span>{t("progressLabel")}</span>
               <span className="tabular-nums text-cyan-600 dark:text-cyan-400">
                 {pct}%
@@ -127,7 +127,7 @@ export function OnboardingProgressBar() {
 
           <span
             className={cn(
-              "inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 font-display text-[10px] font-semibold uppercase tracking-[0.16em]",
+              "inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 font-display tkad-type-note font-semibold uppercase tracking-[0.16em]",
               "border-violet-500/25 bg-white/70 text-gray-900 shadow-sm",
               "transition-bar group-hover:border-cyan-400/40 group-hover:bg-white group-hover:shadow-[0_0_20px_rgba(34,211,238,0.2)]",
               "dark:border-white/15 dark:bg-white/8 dark:text-white/90 dark:group-hover:bg-white/12",

@@ -106,7 +106,7 @@ export function MyHubShell({ children }: Props) {
               className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)]"
             />
             <PageContainer className="relative">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-[color:var(--qp-fg-muted)]">
+              <p className="tkad-type-label text-[color:var(--qp-fg-muted)]">
                 {isKo ? "// 마이 허브" : "// My hub"}
               </p>
               <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -153,7 +153,7 @@ export function MyHubShell({ children }: Props) {
               <div className="min-w-0">
                 <Link
                   href="/my"
-                  className="text-xs font-semibold text-[color:var(--qp-accent)]"
+                  className="tkad-type-title text-[color:var(--qp-accent)]"
                 >
                   {isKo ? "← 마이페이지" : "← My hub"}
                 </Link>

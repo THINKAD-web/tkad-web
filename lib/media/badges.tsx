@@ -77,7 +77,7 @@ export function MediaLayerBadges({
 export function LockedComputedFieldBadge() {
   return (
     <span
-      className="ml-1 inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+      className="ml-1 inline-flex items-center rounded bg-muted px-1.5 py-0.5 tkad-type-note font-medium text-muted-foreground"
       title={LOCKED_FIELD_TOOLTIP}
     >
       🔒 자동 계산

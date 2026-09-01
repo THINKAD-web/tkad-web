@@ -35,7 +35,7 @@ export default function PlannerError({
             className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--qp-accent)_10%,transparent),transparent_55%)]"
           />
           <div className="relative">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-fg-muted)]/80 dark:text-[color:var(--qp-fg-muted)]/75">
+            <p className="tkad-type-label text-[color:var(--qp-fg-muted)]/80 dark:text-[color:var(--qp-fg-muted)]/75">
               [ PLANNER ]
             </p>
             <h1 className="mt-4 text-xl font-black text-gray-900 dark:text-white">

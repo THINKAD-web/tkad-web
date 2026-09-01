@@ -181,7 +181,7 @@ export function CommandPalette({ open, onClose }: Props) {
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
         ) : null}{" "}
-        <kbd className="hidden rounded border border-gray-200 px-1.5 py-0.5 text-[10px] text-gray-400 sm:inline dark:border-white/15">
+        <kbd className="hidden rounded border border-gray-200 px-1.5 py-0.5 tkad-type-note text-gray-400 sm:inline dark:border-white/15">
           {" "}
           ESC{" "}
         </kbd>{" "}
@@ -207,7 +207,7 @@ export function CommandPalette({ open, onClose }: Props) {
               <div key={row.id}>
                 {" "}
                 {showGroup ? (
-                  <p className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/40">
+                  <p className="px-3 pb-1 pt-3 tkad-type-note font-bold uppercase tracking-wider text-gray-400 dark:text-white/40">
                     {" "}
                     {row.group}{" "}
                   </p>
@@ -237,7 +237,7 @@ export function CommandPalette({ open, onClose }: Props) {
                   </span>{" "}
                   <span className="min-w-0 flex-1">
                     {" "}
-                    <span className="block truncate text-sm font-semibold text-gray-900 dark:text-white">
+                    <span className="block truncate tkad-type-title text-gray-900 dark:text-white">
                       {" "}
                       {row.label}{" "}
                     </span>{" "}
@@ -260,7 +260,7 @@ export function CommandPalette({ open, onClose }: Props) {
       </div>{" "}
       <div className="border-t border-gray-200 px-4 py-2 dark:border-white/10">
         {" "}
-        <p className="text-[10px] text-gray-400 dark:text-white/40">
+        <p className="tkad-type-note text-gray-400 dark:text-white/40">
           {" "}
           ↑↓ {isKo ? "탐색" : "navigate"} · Enter {isKo ? "이동" : "go"} · ⌘K{" "}
           {isKo ? "열기" : "open"}{" "}

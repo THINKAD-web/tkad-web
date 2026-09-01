@@ -227,20 +227,20 @@ export function MySettingsPageClient() {
       <div className="relative mx-auto max-w-2xl">
           <Link
             href="/my"
-            className="mb-6 inline-flex items-center gap-2 text-[12px] dark:text-white text-gray-500 transition-colors hover:dark:text-white text-gray-900"
+            className="mb-6 inline-flex items-center gap-2 tkad-type-meta dark:text-white text-gray-500 transition-colors hover:dark:text-white text-gray-900"
           >
             <ArrowLeft className="h-4 w-4" />
             {isKo ? "마이페이지" : "My hub"}
           </Link>
 
           <header className="mb-8">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+            <p className="tkad-type-label dark:text-white text-gray-500">
               [ SETTINGS ]
             </p>
             <h1 className="mt-2 text-2xl font-black dark:text-white text-gray-900 sm:text-3xl">
               {isKo ? "계정 설정" : "Account settings"}
             </h1>
-            <p className="mt-1 text-[11px] dark:text-white">{data.email}</p>
+            <p className="mt-1 tkad-type-caption dark:text-white">{data.email}</p>
           </header>
 
           <MySubscriptionCard
@@ -276,7 +276,7 @@ export function MySettingsPageClient() {
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {verified ? (
-                <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-600/25 bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-200">
+                <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-600/25 bg-emerald-500/15 px-3 py-1 tkad-type-title text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-200">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {isKo ? "인증 완료" : "Verified"}
                 </span>
@@ -286,7 +286,7 @@ export function MySettingsPageClient() {
                     type="button"
                     onClick={() => void resendVerification()}
                     disabled={resending || refreshing}
-                    className="inline-flex items-center gap-2 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1.5 text-xs font-semibold dark:text-white text-gray-900 hover:bg-white/15 disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1.5 tkad-type-title dark:text-white text-gray-900 hover:bg-white/15 disabled:opacity-60"
                   >
                     {resending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                     {isKo ? "인증 메일 재발송" : "Resend verification"}
@@ -295,7 +295,7 @@ export function MySettingsPageClient() {
                     type="button"
                     onClick={() => void refreshVerificationStatus()}
                     disabled={resending || refreshing}
-                    className="inline-flex items-center gap-2 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1.5 text-xs font-semibold dark:text-white text-gray-900 hover:bg-white/15 disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1.5 tkad-type-title dark:text-white text-gray-900 hover:bg-white/15 disabled:opacity-60"
                   >
                     {refreshing ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -312,19 +312,19 @@ export function MySettingsPageClient() {
           <form onSubmit={saveProfile} className={cn(glassCard, "mb-6 space-y-4")}>
             <h2 className="text-sm font-bold dark:text-white text-gray-900">{isKo ? "프로필" : "Profile"}</h2>
             <div>
-              <label className="mb-1.5 block font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
+              <label className="mb-1.5 block tkad-type-label dark:text-white text-gray-500">
                 {isKo ? "이름" : "Name"}
               </label>
               <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div>
-              <label className="mb-1.5 block font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
+              <label className="mb-1.5 block tkad-type-label dark:text-white text-gray-500">
                 {isKo ? "회사명" : "Company"}
               </label>
               <input className={inputCls} value={company} onChange={(e) => setCompany(e.target.value)} />
             </div>
             <div>
-              <label className="mb-1.5 block font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
+              <label className="mb-1.5 block tkad-type-label dark:text-white text-gray-500">
                 {isKo ? "연락처" : "Phone"}
               </label>
               <input className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} />
@@ -346,7 +346,7 @@ export function MySettingsPageClient() {
             </h2>
             {data.hasPassword && (
               <div>
-                <label className="mb-1.5 block font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
+                <label className="mb-1.5 block tkad-type-label dark:text-white text-gray-500">
                   {isKo ? "현재 비밀번호" : "Current password"}
                 </label>
                 <input
@@ -359,7 +359,7 @@ export function MySettingsPageClient() {
               </div>
             )}
             <div>
-              <label className="mb-1.5 block font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
+              <label className="mb-1.5 block tkad-type-label dark:text-white text-gray-500">
                 {isKo ? "새 비밀번호" : "New password"}
               </label>
               <input
@@ -395,7 +395,7 @@ export function MySettingsPageClient() {
                     className="flex items-center justify-between rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 px-3 py-2 text-sm dark:text-white text-gray-800"
                   >
                     <span>{PROVIDER_LABEL[p] ?? p}</span>
-                    <span className="text-[10px] text-emerald-300/90">
+                    <span className="tkad-type-note text-emerald-300/90">
                       {isKo ? "연결됨" : "Connected"}
                     </span>
                   </li>
@@ -438,7 +438,7 @@ export function MySettingsPageClient() {
               type="button"
               onClick={() => void deleteAccount()}
               disabled={deleting}
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-400/40 bg-red-500/15 py-2.5 text-sm font-semibold text-red-200 hover:bg-red-500/25 disabled:opacity-60"
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-400/40 bg-red-500/15 py-2.5 tkad-type-title text-red-200 hover:bg-red-500/25 disabled:opacity-60"
             >
               {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
               {isKo ? "계정 삭제" : "Delete account"}

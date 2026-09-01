@@ -126,7 +126,7 @@ export default function AdminPotentialMediaLeadsPage() {
           type="button"
           onClick={() => void runDiscover()}
           disabled={discovering}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 tkad-type-title text-primary-foreground disabled:opacity-60"
         >
           {discovering ? (
             <Loader2 className="h-4 w-4 animate-spin" />

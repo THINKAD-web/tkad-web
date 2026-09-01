@@ -146,13 +146,13 @@ export default function AdminQuoteTemplatesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ QUOTE TEMPLATES ]
         </p>
         <h2 className="mt-2 text-lg font-bold tracking-tight text-foreground">
           견적서 PDF · 템플릿
         </h2>
-        <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
+        <p className="mt-1 tkad-type-caption tracking-tight text-muted-foreground">
           {`// `}HTML 템플릿을 저장하고 PDF로 생성·다운로드하거나 이메일로 발송합니다.
         </p>
       </div>
@@ -164,7 +164,7 @@ export default function AdminQuoteTemplatesPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {loading ? (
-              <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="tkad-type-label text-muted-foreground">
                 {`// `}불러오는 중…
               </p>
             ) : (
@@ -174,7 +174,7 @@ export default function AdminQuoteTemplatesPage() {
                     <button
                       type="button"
                       className={[
-                        "w-full border-2 border-border bg-card px-2 py-2 text-left font-display text-xs font-medium uppercase tracking-[0.12em] transition-colors hover:bg-muted/50",
+                        "w-full border-2 border-border bg-card px-2 py-2 text-left tkad-type-label transition-colors hover:bg-muted/50",
                         sel?.id === t.id
                           ? "bg-foreground text-background"
                           : "text-foreground",
@@ -191,7 +191,7 @@ export default function AdminQuoteTemplatesPage() {
               </ul>
             )}
             <div className="space-y-2 border-t pt-3">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="tkad-type-label text-muted-foreground">
                 [ 새 템플릿 ]
               </p>
               <Input
@@ -301,12 +301,12 @@ export default function AdminQuoteTemplatesPage() {
                 </Button>
               </>
             ) : (
-              <p className="text-[11px] tracking-tight text-muted-foreground">
+              <p className="tkad-type-caption tracking-tight text-muted-foreground">
                 {`// `}템플릿을 선택하거나 새로 만드세요.
               </p>
             )}
             <div className="border-t pt-3">
-              <p className="mb-1 text-[11px] tracking-tight text-muted-foreground">
+              <p className="mb-1 tkad-type-caption tracking-tight text-muted-foreground">
                 {`// `}{DEFAULT_VARS}
               </p>
               <textarea

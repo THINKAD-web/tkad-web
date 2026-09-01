@@ -58,7 +58,7 @@ export function PlannerCampaignGoalGrid({
             <p
               className={cn(
                 "leading-relaxed",
-                compact || dense ? "mt-0.5 text-[11px]" : "mt-2 text-xs",
+                compact || dense ? "mt-0.5 tkad-type-caption" : "mt-2 text-xs",
                 active
                   ? "dark:text-white/70 text-gray-600"
                   : plannerNeon.subtext,

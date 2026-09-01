@@ -220,7 +220,7 @@ export default function AdminCommunityPage() {
     <div className="space-y-6 text-foreground">
       <Card className="py-4">
         <CardHeader className="gap-2 pb-2">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="tkad-type-label text-muted-foreground">
             [ ADMIN · COMMUNITY MODERATION ]
           </p>
           <CardTitle className="text-2xl font-bold tracking-tight">
@@ -428,7 +428,7 @@ function StatusBadge({ status }: { status: string }) {
   const cfg = map[status] ?? map.published;
   return (
     <span
-      className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${cfg.cls}`}
+      className={`inline-flex rounded-md border px-2 py-0.5 tkad-type-note font-semibold uppercase tracking-wide ${cfg.cls}`}
     >
       {cfg.label}
     </span>
@@ -454,7 +454,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={onViewReports}
-          className="inline-flex items-center gap-1 rounded-md border border-primary bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/20"
+          className="inline-flex items-center gap-1 rounded-md border border-primary bg-primary/10 px-2 py-1 tkad-type-caption font-medium text-primary transition-colors hover:bg-primary/20"
           title="신고 사유 보기"
         >
           <Flag className="h-3 w-3" />
@@ -465,7 +465,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={() => onUpdateStatus("published")}
-          className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 tkad-type-caption font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
           title="복구"
         >
           <Eye className="h-3 w-3" />
@@ -476,7 +476,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={() => onUpdateStatus("hidden")}
-          className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 tkad-type-caption font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
           title="숨김 처리"
         >
           <EyeOff className="h-3 w-3" />
@@ -486,7 +486,7 @@ function ActionButtons({
       <button
         type="button"
         onClick={() => onUpdateStatus("deleted")}
-        className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+        className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 tkad-type-caption font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
         title="소프트 삭제 (복구 가능)"
       >
         <Trash2 className="h-3 w-3" />
@@ -495,7 +495,7 @@ function ActionButtons({
       <button
         type="button"
         onClick={onHardDelete}
-        className="inline-flex items-center gap-1 rounded-md border border-destructive/40 bg-destructive/5 px-2 py-1 text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/10"
+        className="inline-flex items-center gap-1 rounded-md border border-destructive/40 bg-destructive/5 px-2 py-1 tkad-type-caption font-medium text-destructive transition-colors hover:bg-destructive/10"
         title="DB 영구 삭제 (복구 불가)"
       >
         <AlertTriangle className="h-3 w-3" />
@@ -579,7 +579,7 @@ function PostsTable({
                 </td>
                 <td className="px-4 py-3 pr-3 align-top text-center">
                   <span
-                    className={`text-sm font-semibold tabular-nums ${ r.reportCount > 0 ? "text-primary" : "text-muted-foreground" }`}
+                    className={`tkad-type-title tabular-nums ${ r.reportCount > 0 ? "text-primary" : "text-muted-foreground" }`}
                   >
                     {r.reportCount}
                   </span>
@@ -670,7 +670,7 @@ function CommentsTable({
                     href={`/${locale}/community/post/${r.postId}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="line-clamp-2 text-sm font-semibold text-primary underline-offset-2 hover:underline"
+                    className="line-clamp-2 tkad-type-title text-primary underline-offset-2 hover:underline"
                   >
                     {r.postTitle}
                   </a>
@@ -685,7 +685,7 @@ function CommentsTable({
                 </td>
                 <td className="px-4 py-3 pr-3 align-top text-center">
                   <span
-                    className={`text-sm font-semibold tabular-nums ${ r.reportCount > 0 ? "text-primary" : "text-muted-foreground" }`}
+                    className={`tkad-type-title tabular-nums ${ r.reportCount > 0 ? "text-primary" : "text-muted-foreground" }`}
                   >
                     {r.reportCount}
                   </span>
@@ -762,7 +762,7 @@ function ReportsModal({
     >
       <div className="flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
         <div className="flex items-center justify-between border-b border-border bg-muted/30 px-4 py-3">
-          <p className="text-sm font-semibold text-foreground">
+          <p className="tkad-type-title text-foreground">
             {targetType === "post" ? "게시글" : "댓글"} 신고 사유
           </p>
           <button

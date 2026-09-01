@@ -136,7 +136,7 @@ export function CreativeDetailClient({ id }: { id: string }) {
                 {detail.name}
               </p>
             )}
-            <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="tkad-type-label text-muted-foreground">
               {detail.type === "video" ? "VIDEO" : "IMAGE"} ·{" "}
               {detail.width && detail.height ? `${detail.width}×${detail.height}` : "—"} ·{" "}
               {formatFileSize(detail.fileSize)}
@@ -147,14 +147,14 @@ export function CreativeDetailClient({ id }: { id: string }) {
 
         <div className="rounded-2xl border-2 border-border bg-muted/40 p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+            <p className="tkad-type-label text-accent">
               [ 태그 ]
             </p>
             {editing ? null : (
               <button
                 type="button"
                 onClick={() => setEditing(true)}
-                className="inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
+                className="inline-flex items-center gap-1 tkad-type-label text-muted-foreground hover:text-foreground"
               >
                 <Pencil className="h-3 w-3" /> 편집
               </button>
@@ -167,7 +167,7 @@ export function CreativeDetailClient({ id }: { id: string }) {
                   key={t}
                   type="button"
                   onClick={() => setTags((cur) => cur.filter((x) => x !== t))}
-                  className="inline-flex items-center gap-1 rounded-md border-2 border-border bg-card px-2 py-1 font-display text-xs font-medium uppercase tracking-[0.14em] text-foreground hover:border-destructive hover:text-destructive"
+                  className="inline-flex items-center gap-1 rounded-md border-2 border-border bg-card px-2 py-1 tkad-type-label text-foreground hover:border-destructive hover:text-destructive"
                 >
                   #{t}
                   <Trash2 className="h-3 w-3" />
@@ -189,7 +189,7 @@ export function CreativeDetailClient({ id }: { id: string }) {
                 }}
                 maxLength={30}
                 placeholder="추가 (Enter)"
-                className="h-7 w-40 rounded-md border-2 border-dashed border-border bg-card px-2 text-[11px] focus:border-accent focus:outline-none"
+                className="h-7 w-40 rounded-md border-2 border-dashed border-border bg-card px-2 tkad-type-caption focus:border-accent focus:outline-none"
               />
             </div>
           ) : detail.tags.length > 0 ? (
@@ -197,7 +197,7 @@ export function CreativeDetailClient({ id }: { id: string }) {
               {detail.tags.map((t) => (
                 <span
                   key={t}
-                  className="rounded-md border-2 border-border bg-card px-2 py-1 font-display text-xs font-medium uppercase tracking-[0.14em] text-foreground"
+                  className="rounded-md border-2 border-border bg-card px-2 py-1 tkad-type-label text-foreground"
                 >
                   #{t}
                 </span>
@@ -230,7 +230,7 @@ export function CreativeDetailClient({ id }: { id: string }) {
 
       <aside className="space-y-4">
         <div className="rounded-2xl border-2 border-border bg-card p-4 sm:p-5">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ 사용 이력 ]
           </p>
           {detail.usages.length === 0 ? (
@@ -254,10 +254,10 @@ export function CreativeDetailClient({ id }: { id: string }) {
                     className="flex flex-1 items-center justify-between text-foreground hover:text-accent"
                   >
                     <div className="min-w-0">
-                      <p className="line-clamp-2 text-[13px] font-medium leading-snug">
+                      <p className="line-clamp-2 tkad-type-body font-medium leading-snug">
                         {u.title}
                       </p>
-                      <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                      <p className="tkad-type-label text-muted-foreground">
                         {new Date(u.createdAt).toLocaleDateString("ko-KR")}
                         {u.status ? ` · ${u.status}` : ""}
                       </p>
@@ -271,10 +271,10 @@ export function CreativeDetailClient({ id }: { id: string }) {
         </div>
 
         <div className="rounded-2xl border-2 border-border bg-card p-4 sm:p-5">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="tkad-type-label text-accent">
             [ 메타 ]
           </p>
-          <dl className="mt-3 grid grid-cols-2 gap-3 font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <dl className="mt-3 grid grid-cols-2 gap-3 tkad-type-label text-muted-foreground">
             <Meta label="유형" value={detail.type} />
             <Meta label="등록일" value={new Date(detail.createdAt).toLocaleDateString("ko-KR")} />
             <Meta label="해상도" value={detail.width && detail.height ? `${detail.width}×${detail.height}` : "—"} />
@@ -296,7 +296,7 @@ export function CreativeDetailClient({ id }: { id: string }) {
               </BtnBlock>
             </div>
           ) : (
-            <div className="mt-4 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="mt-4 inline-flex items-center gap-1 tkad-type-label text-muted-foreground">
               <CheckCircle2 className="h-3 w-3 text-accent" />
               사용 중인 소재라 삭제할 수 없습니다.
             </div>

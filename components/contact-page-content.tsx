@@ -34,7 +34,7 @@ export default function ContactPageContent() {
   const [mainTab, setMainTab] = useState<MainTab>("inquiry");
 
   const tabBase =
-    "-mt-[2px] -ml-[2px] inline-flex min-w-[140px] flex-1 items-center justify-center gap-2 border-2 px-4 py-3 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors";
+    "-mt-[2px] -ml-[2px] inline-flex min-w-[140px] flex-1 items-center justify-center gap-2 border-2 px-4 py-3 tkad-type-label transition-colors";
 
   return (
     <>
@@ -72,7 +72,7 @@ export default function ContactPageContent() {
                       {t("tabFeedback")}
                     </button>
                   </div>
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                  <p className="tkad-type-label text-primary">
                     [ {mainTab === "inquiry" ? "INQUIRY" : "FEEDBACK"} ]
                   </p>
                   <h2 className="text-xl font-bold tracking-normal text-foreground">
@@ -96,7 +96,7 @@ export default function ContactPageContent() {
             <div className="-ml-[2px] lg:col-span-2 lg:mt-0">
               <div className="border-2 border-border bg-card shadow-sm">
                 <div className="border-b-2 border-border p-5">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                  <p className="tkad-type-label text-primary">
                     [ INFO ]
                   </p>
                   <h2 className="mt-2 text-xl font-bold tracking-normal text-foreground">
@@ -109,7 +109,7 @@ export default function ContactPageContent() {
                       <MapPin className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                      <div className="tkad-type-label text-primary">
                         ADDRESS
                       </div>
                       <div className="mt-1 text-sm text-foreground">
@@ -122,7 +122,7 @@ export default function ContactPageContent() {
                       <Phone className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                      <div className="tkad-type-label text-primary">
                         PHONE
                       </div>
                       <div className="mt-1 tabular-nums text-sm text-foreground">
@@ -135,7 +135,7 @@ export default function ContactPageContent() {
                       <Mail className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                      <div className="tkad-type-label text-primary">
                         EMAIL
                       </div>
                       <div className="mt-1 text-sm text-foreground">
@@ -148,7 +148,7 @@ export default function ContactPageContent() {
                       <Clock className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                      <div className="tkad-type-label text-primary">
                         HOURS
                       </div>
                       <div className="mt-1 text-sm text-foreground">
@@ -165,7 +165,7 @@ export default function ContactPageContent() {
 
       <section className="bg-background py-20 sm:py-24">
         <div className="ui-container">
-          <p className="text-center font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+          <p className="text-center tkad-type-label text-primary">
             [ DIRECTIONS ]
           </p>
           <h2 className="mt-3 mb-10 text-center text-2xl font-bold tracking-normal text-foreground sm:text-3xl">
@@ -190,10 +190,10 @@ export default function ContactPageContent() {
                   <Train className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                  <div className="tkad-type-label text-primary">
                     [ {t("subway")} ]
                   </div>
-                  <p className="mt-1 text-[11px] leading-relaxed tracking-normal text-muted-foreground">
+                  <p className="mt-1 tkad-type-caption leading-relaxed tracking-normal text-muted-foreground">
                     {t("subwayDesc")}
                   </p>
                 </div>
@@ -204,10 +204,10 @@ export default function ContactPageContent() {
                   <Bus className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                  <div className="tkad-type-label text-primary">
                     [ {t("busTitle")} ]
                   </div>
-                  <p className="mt-1 text-[11px] leading-relaxed tracking-normal text-muted-foreground">
+                  <p className="mt-1 tkad-type-caption leading-relaxed tracking-normal text-muted-foreground">
                     {t("busDesc")}
                   </p>
                 </div>
@@ -218,10 +218,10 @@ export default function ContactPageContent() {
                   <ParkingCircle className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                  <div className="tkad-type-label text-primary">
                     [ {t("parkingTitle")} ]
                   </div>
-                  <p className="mt-1 text-[11px] leading-relaxed tracking-normal text-muted-foreground">
+                  <p className="mt-1 tkad-type-caption leading-relaxed tracking-normal text-muted-foreground">
                     {t("parkingDesc")}
                   </p>
                 </div>

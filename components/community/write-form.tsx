@@ -121,7 +121,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="rounded-[26px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 shadow-[0_28px_100px_rgba(0,0,0,0.55)] backdrop-blur tkad-neon-border">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <p className="tkad-type-label dark:text-white text-gray-500">
           [ 작성자 ]
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -130,7 +130,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
           </span>
           <RoleBadge role={memberRole} locale={locale} />
           {currentUser.company ? (
-            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
+            <span className="tkad-type-label dark:text-white">
               {currentUser.company}
             </span>
           ) : null}
@@ -139,7 +139,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
 
       <div>
         <label className="block">
-          <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+          <span className="tkad-type-label dark:text-white text-gray-500">
             [ 카테고리 ]
           </span>
         </label>
@@ -152,13 +152,13 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
                 key={cat}
                 type="button"
                 onClick={() => setCategory(cat)}
-                className={`inline-flex min-w-[150px] flex-col items-start gap-1 rounded-[20px] border px-4 py-3 text-left font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors ${ active ? "border-hermes/40 bg-hermes/15 dark:text-white text-gray-900 shadow-sm" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 hover:dark:bg-white/10 bg-gray-100" }`}
+                className={`inline-flex min-w-[150px] flex-col items-start gap-1 rounded-[20px] border px-4 py-3 text-left tkad-type-label transition-colors ${ active ? "border-hermes/40 bg-hermes/15 dark:text-white text-gray-900 shadow-sm" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 hover:dark:bg-white/10 bg-gray-100" }`}
               >
                 <span>
                   {labels.emoji} {labels.ko}
                 </span>
                 <span
-                  className={`text-[9px] tracking-tight ${ active ? "dark:text-white text-gray-600" : "dark:text-white" }`}
+                  className={`tkad-type-note tracking-tight ${ active ? "dark:text-white text-gray-600" : "dark:text-white" }`}
                   style={{ textTransform: "none", letterSpacing: 0 }}
                 >
                   {labels.description.ko}
@@ -171,13 +171,13 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
 
       {category === "media_recommend" ? (
         <div className="grid gap-4 rounded-[24px] border border-hermes/30 bg-hermes/10 p-5">
-          <p className="text-sm font-semibold text-hermes">
+          <p className="tkad-type-title text-hermes">
             {isKo
               ? "AI 추천을 위해 아래 항목을 입력해주세요."
               : "Fill in the fields below for AI recommendations."}
           </p>
           <label className="block">
-            <span className="text-xs font-semibold dark:text-white text-gray-700">
+            <span className="tkad-type-title dark:text-white text-gray-700">
               {isKo ? "월 예산 (원)" : "Monthly budget (KRW)"}
             </span>
             <input
@@ -192,7 +192,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-semibold dark:text-white text-gray-700">
+            <span className="tkad-type-title dark:text-white text-gray-700">
               {isKo ? "희망 지역" : "Region"}
             </span>
             <select
@@ -208,7 +208,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
             </select>
           </label>
           <label className="block">
-            <span className="text-xs font-semibold dark:text-white text-gray-700">
+            <span className="tkad-type-title dark:text-white text-gray-700">
               {isKo ? "업종" : "Industry"}
             </span>
             <select
@@ -228,13 +228,13 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
 
       {category === "execution_review" ? (
         <div className="grid gap-4 rounded-[24px] border dark:border-emerald-400/30 border-emerald-200 dark:bg-emerald-500/5 bg-emerald-50/50 p-5">
-          <p className="text-sm font-semibold dark:text-emerald-200 text-emerald-800">
+          <p className="tkad-type-title dark:text-emerald-200 text-emerald-800">
             {isKo
               ? "집행 매체를 선택하면 매체 리뷰로도 등록되며 200P가 지급됩니다."
               : "Select the media — also posted as a review (+200P)."}
           </p>
           <div>
-            <span className="text-xs font-semibold dark:text-white text-gray-700">
+            <span className="tkad-type-title dark:text-white text-gray-700">
               {isKo ? "집행 매체" : "Media"}
             </span>
             <div className="mt-2">
@@ -252,7 +252,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
             ) : null}
           </div>
           <div>
-            <span className="text-xs font-semibold dark:text-white text-gray-700">
+            <span className="tkad-type-title dark:text-white text-gray-700">
               {isKo ? "별점" : "Rating"}
             </span>
             <div className="mt-2 flex gap-1">
@@ -275,7 +275,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
       ) : null}
 
       <label className="block">
-        <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <span className="tkad-type-label dark:text-white text-gray-500">
           [ 제목 ]
         </span>
         <input
@@ -290,7 +290,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
       </label>
 
       <label className="block">
-        <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <span className="tkad-type-label dark:text-white text-gray-500">
           [ 본문 ]
         </span>
         <textarea
@@ -334,7 +334,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
       <button
         type="submit"
         disabled={!canSubmit}
-        className="inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes px-6 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-white disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes px-6 py-3 tkad-type-label text-white disabled:opacity-50"
       >
         <Send className="h-3.5 w-3.5" />
         {busy ? "전송 중…" : "글 등록"}

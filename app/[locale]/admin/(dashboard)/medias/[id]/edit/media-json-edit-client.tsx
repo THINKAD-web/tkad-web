@@ -272,7 +272,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
       ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="tkad-type-label text-muted-foreground">
             [ MEDIA JSON EDIT ]
           </p>
           <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground">
@@ -375,7 +375,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
                               <td className="px-2 py-1.5 font-semibold text-foreground">{opt.label}</td>
                               <td className="px-2 py-1.5 text-right tabular-nums text-primary">₩{opt.price.toLocaleString("ko-KR")}</td>
                               <td className="px-2 py-1.5 text-right text-muted-foreground">{opt.period ?? "month"}</td>
-                              <td className="max-w-[10rem] px-2 py-1.5 text-left text-[11px] text-muted-foreground">
+                              <td className="max-w-[10rem] px-2 py-1.5 text-left tkad-type-caption text-muted-foreground">
                                 {opt.description?.trim() ? opt.description : "—"}
                               </td>
                             </tr>

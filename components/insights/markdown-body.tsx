@@ -80,7 +80,7 @@ export function InsightMarkdownBody({ markdown }: { markdown: string }) {
             </div>
           ),
           th: ({ children }) => (
-            <th className="border-b-2 border-border bg-hero-void px-3 py-2 text-left font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
+            <th className="border-b-2 border-border bg-hero-void px-3 py-2 text-left tkad-type-label text-accent">
               {children}
             </th>
           ),

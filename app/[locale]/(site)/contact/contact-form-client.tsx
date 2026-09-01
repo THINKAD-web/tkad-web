@@ -20,7 +20,7 @@ export function ContactFormClient() {
   const [mainTab, setMainTab] = useState<MainTab>("inquiry");
 
   const tabBase =
-    "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-3 text-sm font-semibold backdrop-blur transition-ui";
+    "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-3 tkad-type-title backdrop-blur transition-ui";
 
   const tabActive =
     "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] dark:text-white text-gray-900 shadow-sm";
@@ -54,7 +54,7 @@ export function ContactFormClient() {
                     {t("tabFeedback")}
                   </button>
                 </div>
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="tkad-type-label dark:text-white text-gray-500">
                   [ {mainTab === "inquiry" ? "INQUIRY" : "FEEDBACK"} ]
                 </p>
                 <h2 className="text-xl font-black tracking-tight dark:text-white text-gray-900">
@@ -74,7 +74,7 @@ export function ContactFormClient() {
 
           <div className="lg:col-span-2">
             <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 backdrop-blur sm:p-8">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+              <p className="tkad-type-label dark:text-white text-gray-500">
                 [ INFO ]
               </p>
               <h3 className="mt-2 text-xl font-black tracking-tight dark:text-white text-gray-900">
@@ -86,16 +86,16 @@ export function ContactFormClient() {
                     key={item.label}
                     className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3"
                   >
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                    <p className="tkad-type-label dark:text-white text-gray-500">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-sm font-semibold dark:text-white text-gray-800">{item.value}</p>
+                    <p className="mt-1 tkad-type-title dark:text-white text-gray-800">{item.value}</p>
                   </div>
                 ))}
               </div>
 
               <div className="mt-6 rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-3">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="tkad-type-label dark:text-white text-gray-500">
                   {t("directionsTitle")}
                 </p>
                 <div className="mt-2 space-y-2 text-sm dark:text-white text-gray-700">
@@ -137,19 +137,19 @@ export function ContactFormClient() {
           </div>
           <div className="grid gap-0 sm:grid-cols-3">
             <div className="border-b dark:border-white/10 border-gray-200 p-5 sm:border-b-0 sm:border-r sm:dark:border-white/10">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+              <p className="tkad-type-label dark:text-white text-gray-500">
                 [ {t("subway")} ]
               </p>
               <p className="mt-2 text-sm leading-relaxed dark:text-white text-gray-700">{t("subwayDesc")}</p>
             </div>
             <div className="border-b dark:border-white/10 border-gray-200 p-5 sm:border-b-0 sm:border-r sm:dark:border-white/10">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+              <p className="tkad-type-label dark:text-white text-gray-500">
                 [ {t("busTitle")} ]
               </p>
               <p className="mt-2 text-sm leading-relaxed dark:text-white text-gray-700">{t("busDesc")}</p>
             </div>
             <div className="p-5">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+              <p className="tkad-type-label dark:text-white text-gray-500">
                 [ {t("parkingTitle")} ]
               </p>
               <p className="mt-2 text-sm leading-relaxed dark:text-white text-gray-700">{t("parkingDesc")}</p>

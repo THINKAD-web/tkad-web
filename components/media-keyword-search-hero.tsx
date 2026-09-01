@@ -153,10 +153,10 @@ export function MediaKeywordSearchHero({
               "hover:-translate-y-0.5 hover:border-gold hover:bg-gold/15 hover:dark:text-white text-gray-900 hover:shadow-lg hover:shadow-gold/25 motion-reduce:hover:translate-y-0",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2",
               isFeaturedEmbed
-                ? "dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 text-[10px] dark:text-white text-gray-800 focus-visible:ring-offset-navy"
+                ? "dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 tkad-type-note dark:text-white text-gray-800 focus-visible:ring-offset-navy"
                 : variant === "embed"
-                  ? "border-white/25 dark:bg-white/10 bg-gray-100 text-[10px] dark:text-white focus-visible:ring-offset-navy"
-                  : "dark:border-white/18 border-gray-300 bg-white/[0.08] text-[10px] dark:text-white focus-visible:ring-offset-navy-dark",
+                  ? "border-white/25 dark:bg-white/10 bg-gray-100 tkad-type-note dark:text-white focus-visible:ring-offset-navy"
+                  : "dark:border-white/18 border-gray-300 bg-white/[0.08] tkad-type-note dark:text-white focus-visible:ring-offset-navy-dark",
             )}
           >
             {phrase}
@@ -189,7 +189,7 @@ export function MediaKeywordSearchHero({
         aria-hidden
       />
       <div className="relative mx-auto max-w-3xl text-center">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-gold-light backdrop-blur-sm sm:text-xs">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1 tkad-type-caption font-semibold uppercase tracking-wider text-gold-light backdrop-blur-sm sm:text-xs">
           <Sparkles className="size-3.5 text-gold" aria-hidden />
           {t("badge")}
         </div>

@@ -29,7 +29,7 @@ export function MediaTrustGradeBadges({
   if (!showVerified && !showPremium && !showInstant) return null;
 
   const chipClass = compact
-    ? "px-1.5 py-0.5 text-[10px] gap-0.5"
+    ? "px-1.5 py-0.5 tkad-type-note gap-0.5"
     : "px-2 py-0.5 text-xs gap-1";
 
   return (

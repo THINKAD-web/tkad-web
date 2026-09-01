@@ -112,7 +112,7 @@ export default function AdminPointsClient() {
           placeholder="이메일·이름 검색"
           className="min-w-[200px] flex-1 rounded-lg border bg-background px-3 py-2 text-sm"
         />
-        <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+        <button type="submit" className="rounded-lg bg-primary px-4 py-2 tkad-type-title text-primary-foreground">
           검색
         </button>
       </form>
@@ -150,7 +150,7 @@ export default function AdminPointsClient() {
             className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
             required
           />
-          <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+          <button type="submit" className="rounded-lg bg-primary px-4 py-2 tkad-type-title text-primary-foreground">
             적용
           </button>
         </form>
@@ -173,7 +173,7 @@ export default function AdminPointsClient() {
             className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
             required
           />
-          <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+          <button type="submit" className="rounded-lg bg-primary px-4 py-2 tkad-type-title text-primary-foreground">
             전 회원 지급
           </button>
         </form>

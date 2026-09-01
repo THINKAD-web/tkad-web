@@ -488,7 +488,7 @@ export default function AdminMediaDraggableMap({
         style={{ height: heightPx }}
         role="presentation"
       />
-      <p className="border-t border-navy/5 bg-slate-50 px-2 py-1.5 text-[10px] text-muted-foreground">
+      <p className="border-t border-navy/5 bg-slate-50 px-2 py-1.5 tkad-type-note text-muted-foreground">
         핀을 드래그해 정확한 설치 위치를 맞춥니다. 주소 검색 후에도 미세 조정할 수 있습니다.
       </p>
     </div>

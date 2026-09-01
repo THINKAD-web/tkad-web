@@ -68,7 +68,7 @@ export function AdvertiserSummaryCards({
           )}
         >
           <c.icon className={cn("h-7 w-7", ACCENT[i % ACCENT.length])} aria-hidden />
-          <p className="mt-4 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="mt-4 tkad-type-label text-muted-foreground">
             {c.label}
           </p>
           <p className="mt-2 text-3xl font-black tabular-nums tracking-tight text-foreground sm:text-[2rem]">

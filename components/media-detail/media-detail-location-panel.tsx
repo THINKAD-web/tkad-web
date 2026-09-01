@@ -339,7 +339,7 @@ export function MediaDetailLocationPanel({
             {t("locationRegionLabel")}: {regionDisplay}
           </p>
           {showMapPins ? (
-          <div className="mt-3 flex flex-wrap gap-3 text-xs font-semibold">
+          <div className="mt-3 flex flex-wrap gap-3 tkad-type-title">
             {useLeafletMap ? null : (
               <a
                 href={kakaoUrl}

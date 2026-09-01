@@ -91,7 +91,7 @@ export default function MediaSimilarCarousel({
     >
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="tkad-type-label text-muted-foreground">
             [ SIMILAR MEDIA ]
           </p>
           <h2
@@ -122,7 +122,7 @@ export default function MediaSimilarCarousel({
                   aria-pressed={sortBy === key}
                   onClick={() => setSortBy(key)}
                   className={cn(
-                    "rounded-[14px] px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
+                    "rounded-[14px] px-3 py-1.5 tkad-type-label transition-colors",
                     sortBy === key
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-foreground hover:bg-background/70",
@@ -196,7 +196,7 @@ export default function MediaSimilarCarousel({
               />
               <div className="flex flex-1 flex-col gap-1.5 p-3">
                 {typeLabel ? (
-                  <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                  <span className="tkad-type-label text-muted-foreground">
                     [ {typeLabel} ]
                   </span>
                 ) : null}
@@ -208,14 +208,14 @@ export default function MediaSimilarCarousel({
                 </p>
                 <MediaPriceExclNote isKo={isKo} />
                 {distanceKm != null && Number.isFinite(distanceKm) ? (
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="tkad-type-label text-muted-foreground">
                     {t("similarDistance", {
                       km: distanceKm < 1 ? distanceKm.toFixed(2) : distanceKm.toFixed(1),
                     })}
                   </p>
                 ) : null}
                 {m.recommendReason ? (
-                  <p className="line-clamp-1 text-[10px] font-semibold tracking-wide text-muted-foreground">
+                  <p className="line-clamp-1 tkad-type-note font-semibold tracking-wide text-muted-foreground">
                     {m.recommendReason}
                   </p>
                 ) : null}

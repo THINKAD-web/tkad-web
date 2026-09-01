@@ -42,7 +42,7 @@ function KpiCard({
   return (
     <div className={cn(plannerNeon.card, "p-5")} data-testid={testId}>
       <Icon className="h-5 w-5 text-[color:var(--qp-accent)]" aria-hidden />
-      <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <p className="mt-3 tkad-type-title uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
       <p className="mt-1 text-2xl font-black text-foreground dark:text-white">
@@ -224,7 +224,7 @@ export function IntegratedCampaignDashboard({
             ))}
           </ul>
           {mixKpis ? (
-            <p className="border-t dark:border-white/8 border-gray-100 px-5 py-3 text-[11px] text-muted-foreground sm:px-6">
+            <p className="border-t dark:border-white/8 border-gray-100 px-5 py-3 tkad-type-caption text-muted-foreground sm:px-6">
               {t("kpiDigitalMonthlyImpressions")}:{" "}
               {formatRange(
                 mixKpis.digitalMonthlyImpressionsMin,
@@ -233,7 +233,7 @@ export function IntegratedCampaignDashboard({
               )}
             </p>
           ) : null}
-          <p className="border-t dark:border-white/8 border-gray-100 px-5 py-3 text-[11px] text-muted-foreground sm:px-6">
+          <p className="border-t dark:border-white/8 border-gray-100 px-5 py-3 tkad-type-caption text-muted-foreground sm:px-6">
             {t("apiNote")}
           </p>
         </PlannerNeonCard>

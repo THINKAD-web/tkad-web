@@ -12,7 +12,7 @@ export function AiGenerationProgress({
   if (lines.length === 0 && !busy) return null;
   return (
     <div
-      className="rounded-xl border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/5 p-3 text-[11px]"
+      className="rounded-xl border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/5 p-3 tkad-type-caption"
       aria-live="polite"
     >
       <p className="mb-2 font-bold uppercase tracking-[0.18em] text-[color:var(--qp-accent)]/90">

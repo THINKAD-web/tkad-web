@@ -59,19 +59,19 @@ export function AdminBrokenImagesCard({ locale }: Props) {
   return (
     <section className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur">
       <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
-        <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        <h2 className="flex items-center gap-2 tkad-type-label text-muted-foreground">
           <ImageOff className="h-4 w-4 text-amber-400/80" aria-hidden />
           [ Media thumbnail health ]
         </h2>
         {checkedAt ? (
-          <span className="text-[10px] text-muted-foreground">
+          <span className="tkad-type-note text-muted-foreground">
             {new Date(checkedAt).toLocaleString("ko-KR")}
           </span>
         ) : null}
       </div>
 
       {!result && !error ? (
-        <p className="flex items-center justify-center gap-2 px-4 py-8 text-center font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+        <p className="flex items-center justify-center gap-2 px-4 py-8 text-center tkad-type-label text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
           썸네일 검사 중…
         </p>
@@ -81,12 +81,12 @@ export function AdminBrokenImagesCard({ locale }: Props) {
         </p>
       ) : (
         <>
-          <p className="border-b border-border/40 px-4 py-2 text-[11px] text-muted-foreground">
+          <p className="border-b border-border/40 px-4 py-2 tkad-type-caption text-muted-foreground">
             {`// scanned ${scanned} · broken ${broken.length}`}
           </p>
 
           {broken.length === 0 ? (
-            <p className="px-4 py-8 text-center font-display text-xs font-medium uppercase tracking-[0.16em] text-emerald-400/90">
+            <p className="px-4 py-8 text-center tkad-type-label text-emerald-400/90">
               모든 썸네일 URL 응답 정상
             </p>
           ) : (
@@ -99,10 +99,10 @@ export function AdminBrokenImagesCard({ locale }: Props) {
                   >
                     {row.name}
                   </Link>
-                  <p className="mt-1 truncate text-[10px] text-muted-foreground">
+                  <p className="mt-1 truncate tkad-type-note text-muted-foreground">
                     {row.thumbnailUrl}
                   </p>
-                  <p className="mt-1 text-[10px] text-amber-300">
+                  <p className="mt-1 tkad-type-note text-amber-300">
                     {row.status != null ? `HTTP ${row.status}` : "—"}
                     {row.error ? ` · ${row.error}` : ""}
                   </p>

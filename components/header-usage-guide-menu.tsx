@@ -9,7 +9,7 @@ import { headerChromeMenuItemClass } from "@/components/public-chrome/header-chr
 
 const usageStepLinkClass = cn(
   headerChromeMenuItemClass,
-  "gap-2 py-2 pl-3 pr-2 text-[13px] font-normal",
+  "gap-2 py-2 pl-3 pr-2 tkad-type-body font-normal",
 );
 
 type Props = {
@@ -37,7 +37,7 @@ export function HeaderUsageGuideMenuPanel({
         <ChevronLeft className="h-4 w-4 opacity-70" />
         {isKo ? "뒤로" : "Back"}
       </button>
-      <p className="px-3 pb-1 pt-0.5 font-display text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+      <p className="px-3 pb-1 pt-0.5 font-display tkad-type-note font-medium uppercase tracking-[0.2em] text-muted-foreground">
         {title}
       </p>
       <Link
@@ -45,7 +45,7 @@ export function HeaderUsageGuideMenuPanel({
         onClick={onClose}
         className={cn(usageStepLinkClass, "font-semibold text-foreground")}
       >
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent/15 text-[11px] font-bold text-accent">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent/15 tkad-type-caption font-bold text-accent">
           ★
         </span>
         <span className="min-w-0 flex-1">
@@ -62,7 +62,7 @@ export function HeaderUsageGuideMenuPanel({
           className={usageStepLinkClass}
         >
           <span
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-[10px] font-bold tabular-nums text-muted-foreground"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border bg-muted tkad-type-note font-bold tabular-nums text-muted-foreground"
             aria-hidden
           >
             {step.step}

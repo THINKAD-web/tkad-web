@@ -116,7 +116,7 @@ export function MediaNavHoverPanel({ links, className }: Props) {
                   />
                 ) : null}
                 <span>
-                  <span className="block text-sm font-semibold text-gray-900 dark:text-white">
+                  <span className="block tkad-type-title text-gray-900 dark:text-white">
                     {isKo ? link.labelKo : link.labelEn}
                   </span>
                   {link.descKo ? (
@@ -132,7 +132,7 @@ export function MediaNavHoverPanel({ links, className }: Props) {
       </ul>
 
       <div className="space-y-2 border-l border-gray-200 pl-4 dark:border-white/10">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/40">
+        <p className="tkad-type-note font-bold uppercase tracking-wider text-gray-400 dark:text-white/40">
           {isKo ? "인기 매체" : "Popular"}
         </p>
         {loading ? (

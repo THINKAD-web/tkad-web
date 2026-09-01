@@ -193,7 +193,7 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
                 {isKo ? "추천 업종: " : "Best for: "}
                 {industries.join(isKo ? ", " : ", ")}
               </p>
-              <p className="mt-2 text-sm font-semibold text-cyan-200/90">{budget}</p>
+              <p className="mt-2 tkad-type-title text-cyan-200/90">{budget}</p>
             </section>
 
             {filtered.length === 0 ? (
@@ -231,7 +231,7 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
             ) : null}
 
             <section className="tkad-media-links-footer border-t border-border/80 py-12">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              <p className="tkad-type-label text-muted-foreground">
                 {isKo ? "다른 유형" : "Other formats"}
               </p>
               <ul className="mt-4 flex flex-wrap gap-2">

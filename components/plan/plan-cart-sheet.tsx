@@ -54,7 +54,7 @@ export function PlanCartSheet({ open, onOpenChange, isKo = true }: Props) {
 
           {items.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
-              <p className="text-sm font-semibold text-foreground">
+              <p className="tkad-type-title text-foreground">
                 {isKo ? "아직 담은 매체가 없어요" : "No media in your plan yet"}
               </p>
               <p className="tkad-type-meta mt-1 text-tkad-muted">
@@ -65,7 +65,7 @@ export function PlanCartSheet({ open, onOpenChange, isKo = true }: Props) {
               <Link
                 href="/media"
                 onClick={() => onOpenChange(false)}
-                className="mt-5 inline-flex h-10 items-center justify-center rounded-xl border border-gray-200 px-4 text-sm font-semibold text-foreground dark:border-white/12"
+                className="mt-5 inline-flex h-10 items-center justify-center rounded-xl border border-gray-200 px-4 tkad-type-title text-foreground dark:border-white/12"
               >
                 {isKo ? "매체 검색하기" : "Browse media"}
               </Link>
@@ -94,13 +94,13 @@ export function PlanCartSheet({ open, onOpenChange, isKo = true }: Props) {
                             unoptimized={thumbUnoptimized}
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[10px] text-tkad-muted">
+                          <div className="flex h-full w-full items-center justify-center tkad-type-note text-tkad-muted">
                             {isKo ? "이미지" : "Img"}
                           </div>
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-foreground">
+                        <p className="truncate tkad-type-title text-foreground">
                           {item.mediaName}
                         </p>
                         <p className="tkad-type-meta mt-0.5 truncate text-tkad-muted">
@@ -135,7 +135,7 @@ export function PlanCartSheet({ open, onOpenChange, isKo = true }: Props) {
                     clear();
                     onOpenChange(false);
                   }}
-                  className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-gray-200 px-3 text-sm font-semibold text-gray-700 dark:border-white/12 dark:text-white/80"
+                  className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-gray-200 px-3 tkad-type-title text-gray-700 dark:border-white/12 dark:text-white/80"
                 >
                   <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
                   {isKo ? "전체 비우기" : "Clear all"}

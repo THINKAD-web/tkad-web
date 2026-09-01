@@ -33,7 +33,7 @@ export function CommunityMemberCard({ member, locale }: Props) {
             <RoleBadge role={member.role} locale={locale} />
           </div>
           {member.company ? (
-            <p className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
+            <p className="inline-flex items-center gap-1.5 tkad-type-label dark:text-white">
               <Building2 className="h-3.5 w-3.5" />
               {member.company}
             </p>
@@ -47,12 +47,12 @@ export function CommunityMemberCard({ member, locale }: Props) {
           {member.bio}
         </p>
       ) : (
-        <p className="mt-4 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
+        <p className="mt-4 tkad-type-label dark:text-white">
           {isKo ? "// 소개 준비 중" : "// bio coming soon"}
         </p>
       )}
 
-      <div className="mt-5 flex flex-wrap items-center gap-4 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
+      <div className="mt-5 flex flex-wrap items-center gap-4 tkad-type-label dark:text-white">
         <span className="inline-flex items-center gap-1.5">
           <Calendar className="h-3.5 w-3.5" />
           {isKo ? "가입" : "Joined"} · {fmtJoin(member.joinedAt, locale)}

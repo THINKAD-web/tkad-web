@@ -77,7 +77,7 @@ export function DarkCampaignMap({
         />
       </div>
       {showFooterCaption ? (
-        <p className="mt-2 text-center text-[11px] dark:text-white/45 text-gray-500">
+        <p className="mt-2 text-center tkad-type-caption dark:text-white/45 text-gray-500">
           {isKo
             ? "Carto 다크 타일 · Leaflet (공개 탐색 지도)"
             : "Carto dark tiles · Leaflet (public discovery map)"}

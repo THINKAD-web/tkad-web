@@ -279,7 +279,7 @@ function PrivacyContent({
 
               {/* Last Updated */}
               <div className="mt-16 border-t-2 border-border pt-8">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="tkad-type-label text-muted-foreground">
                   {isKo ? "최종 업데이트: 2026년 4월" : "Last Updated: April 2026"}
                 </p>
               </div>

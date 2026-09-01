@@ -22,7 +22,7 @@ export function AdminMediaReviewFlagBadge({
     return (
       <Badge
         variant="secondary"
-        className="border border-border text-[10px] font-semibold"
+        className="border border-border tkad-type-note font-semibold"
         title={reviewReasonLabelKo(reviewReason)}
       >
         검토완료
@@ -40,7 +40,7 @@ export function AdminMediaReviewFlagBadge({
         className="inline-flex"
         onClick={() => window.alert(label)}
       >
-        <Badge className="cursor-pointer border-amber-600/40 bg-amber-100 text-[10px] font-semibold text-amber-950 hover:bg-amber-200">
+        <Badge className="cursor-pointer border-amber-600/40 bg-amber-100 tkad-type-note font-semibold text-amber-950 hover:bg-amber-200">
           검토 필요
         </Badge>
       </button>
@@ -49,7 +49,7 @@ export function AdminMediaReviewFlagBadge({
           type="button"
           variant="outline"
           size="xs"
-          className="h-6 px-2 text-[10px]"
+          className="h-6 px-2 tkad-type-note"
           onClick={onMarkReviewed}
         >
           검토 통과 처리

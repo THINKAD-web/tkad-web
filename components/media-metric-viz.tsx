@@ -32,11 +32,11 @@ export function VisibilityGauge({
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       {showLabel && (
-        <div className="flex items-center justify-between text-[11px] font-medium">
+        <div className="flex items-center justify-between tkad-type-caption font-medium">
           <span className="text-muted-foreground">시인성</span>
           <span className={`font-bold tabular-nums ${tier.text}`}>
             {clamped}
-            <span className="ml-0.5 text-[9px] font-medium opacity-70">/ 100</span>
+            <span className="ml-0.5 tkad-type-note font-medium opacity-70">/ 100</span>
           </span>
         </div>
       )}
@@ -74,7 +74,7 @@ export function FootTrafficBadge({
 }) {
   if (daily == null || daily <= 0) {
     return (
-      <span className={`inline-flex items-center gap-1 text-[11px] text-muted-foreground ${className}`}>
+      <span className={`inline-flex items-center gap-1 tkad-type-caption text-muted-foreground ${className}`}>
         유동 정보 준비 중
       </span>
     );
@@ -94,12 +94,12 @@ export function FootTrafficBadge({
 
   return (
     <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
-      <span className="text-[11px] font-semibold text-navy tabular-nums">
+      <span className="tkad-type-caption font-semibold text-navy tabular-nums">
         일 유동 {num}명
       </span>
       {rank != null && (
         <span
-          className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-bold ${pill}`}
+          className={`inline-flex items-center rounded-full border px-1.5 py-0.5 tkad-type-note font-bold ${pill}`}
           title={`전국 검증 매체 대비 상위 ${rank}% 추정`}
         >
           상위 {rank}%
@@ -143,12 +143,12 @@ export function ImpressionsCompact({
       className={`inline-flex items-baseline gap-1 ${className}`}
       title={`${label} ${value.toLocaleString("ko-KR")}${suffix}`}
     >
-      <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+      <span className="tkad-type-note font-medium uppercase tracking-wider text-muted-foreground">
         {label}
       </span>
       <span className="text-sm font-bold tabular-nums text-navy">
         {formatCompactNumber(value)}
-        {suffix && <span className="ml-0.5 text-[10px] font-medium text-muted-foreground">{suffix}</span>}
+        {suffix && <span className="ml-0.5 tkad-type-note font-medium text-muted-foreground">{suffix}</span>}
       </span>
     </div>
   );
@@ -158,7 +158,7 @@ export function ImpressionsCompact({
 export function VerifiedBadge({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`group/vb relative inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ${className}`}
+      className={`group/vb relative inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 tkad-type-note font-bold text-emerald-700 ${className}`}
       title="운영팀이 매체 정보를 확인해 등록한 매체입니다. 지표는 이상값 검사를 거칩니다."
     >
       <svg
@@ -197,7 +197,7 @@ export function MediaTypeBadge({
   const style = styleByType[type] ?? "bg-slate-50 text-slate-700 border-slate-200";
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${style} ${className}`}
+      className={`inline-flex items-center rounded-full border px-2 py-0.5 tkad-type-note font-semibold uppercase tracking-wide ${style} ${className}`}
     >
       {label ?? type}
     </span>

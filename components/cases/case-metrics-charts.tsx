@@ -105,7 +105,7 @@ export function CaseMetricsCharts({ metrics }: Props) {
                 boxShadow: `0 0 24px ${BAR_COLORS[i % BAR_COLORS.length]}22`,
               }}
             >
-              <p className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
+              <p className="tkad-type-label dark:text-white text-gray-500">
                 {isKo ? m.labelKo : m.labelEn}
               </p>
               <p className="mt-2 text-xl font-black tabular-nums dark:text-white text-gray-900">

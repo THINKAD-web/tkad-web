@@ -130,7 +130,7 @@ export function CompositePreview({
           draggable={false}
         />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="absolute inset-0 flex items-center justify-center tkad-type-label text-muted-foreground">
           {`// `}{missingLabel}
         </div>
       )}
@@ -171,7 +171,7 @@ export function CompositePreview({
       ) : null}
 
       {badgeLabel ? (
-        <div className="pointer-events-none absolute left-0 top-0 border-b-2 border-r-2 border-border bg-primary px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary-foreground">
+        <div className="pointer-events-none absolute left-0 top-0 border-b-2 border-r-2 border-border bg-primary px-2.5 py-1 tkad-type-label text-primary-foreground">
           {badgeLabel}
         </div>
       ) : null}

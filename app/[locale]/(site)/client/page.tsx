@@ -137,7 +137,7 @@ export default function ClientPortalPage() {
                       </>
                     )}
                   </Button>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="tkad-type-caption text-muted-foreground">
                     ※ 실제 환경에서는 이메일로 일회용 코드가 발송되며,
                     본 화면은 데모용 간단 인증 방식입니다.
                   </p>
@@ -197,7 +197,7 @@ export default function ClientPortalPage() {
                       </>
                     )}
                   </Button>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="tkad-type-caption text-muted-foreground">
                     데모에서는 임의 코드 입력 시 로그인되며,
                     등록된 이메일에 따라 예시 프로젝트 정보가 노출됩니다.
                   </p>
@@ -211,7 +211,7 @@ export default function ClientPortalPage() {
                       <p className="text-xs font-medium text-muted-foreground">
                         로그인 계정
                       </p>
-                      <p className="text-sm font-semibold text-navy">
+                      <p className="tkad-type-title text-navy">
                         {client.company}
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -291,13 +291,13 @@ export default function ClientPortalPage() {
                               <p className="text-xs text-muted-foreground">
                                 {project.id}
                               </p>
-                              <h3 className="mt-1 text-sm font-semibold text-navy">
+                              <h3 className="mt-1 tkad-type-title text-navy">
                                 {project.title}
                               </h3>
                             </div>
                             <Badge
                               variant="secondary"
-                              className={`${status.className} border-0 text-[11px]`}
+                              className={`${status.className} border-0 tkad-type-caption`}
                             >
                               {status.labelKo}
                             </Badge>
@@ -305,13 +305,13 @@ export default function ClientPortalPage() {
                           <p className="text-xs leading-relaxed text-muted-foreground">
                             {project.summary}
                           </p>
-                          <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+                          <div className="mt-3 flex flex-wrap items-center gap-3 tkad-type-caption text-muted-foreground">
                             <span>접수일 {project.createdAt}</span>
                             <span className="h-1 w-1 rounded-full bg-slate-300" />
                             <span>마지막 업데이트 {project.updatedAt}</span>
                           </div>
                           <div className="mt-4 rounded-md bg-slate-50 p-3">
-                            <p className="text-[11px] font-medium text-muted-foreground">
+                            <p className="tkad-type-caption font-medium text-muted-foreground">
                               진행 상태 설명
                             </p>
                             <p className="mt-1 text-xs text-navy">
@@ -319,7 +319,7 @@ export default function ClientPortalPage() {
                             </p>
                           </div>
                           <div className="mt-4 border-t border-slate-100 pt-3">
-                            <p className="mb-1 text-[11px] font-medium text-muted-foreground">
+                            <p className="mb-1 tkad-type-caption font-medium text-muted-foreground">
                               담당자 연락처
                             </p>
                             <div className="flex flex-wrap items-center gap-2 text-xs text-navy">
@@ -353,10 +353,10 @@ export default function ClientPortalPage() {
 function StatusLegend() {
   return (
     <div className="rounded-2xl bg-slate-50 p-3">
-      <p className="mb-2 text-[11px] font-medium text-muted-foreground">
+      <p className="mb-2 tkad-type-caption font-medium text-muted-foreground">
         진행 상태 안내
       </p>
-      <div className="grid gap-2 text-[11px] md:grid-cols-4">
+      <div className="grid gap-2 tkad-type-caption md:grid-cols-4">
         <LegendItem label="접수" colorClass="bg-slate-100 text-slate-700">
           문의가 정상적으로 접수되어 순차적으로 확인 중입니다.
         </LegendItem>
@@ -386,11 +386,11 @@ function LegendItem({
   return (
     <div className="flex items-start gap-2 rounded-md bg-white p-2 shadow-sm">
       <span
-        className={`mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${colorClass}`}
+        className={`mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 tkad-type-note font-semibold ${colorClass}`}
       >
         {label}
       </span>
-      <p className="text-[11px] leading-relaxed text-muted-foreground">
+      <p className="tkad-type-caption leading-relaxed text-muted-foreground">
         {children}
       </p>
     </div>

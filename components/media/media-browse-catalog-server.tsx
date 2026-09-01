@@ -70,13 +70,13 @@ export async function MediaBrowseCatalogServer({
                         loading={index < 4 ? "eager" : "lazy"}
                       />
                     ) : (
-                      <span className="flex h-full items-center justify-center px-1 text-center text-[10px] text-muted-foreground">
+                      <span className="flex h-full items-center justify-center px-1 text-center tkad-type-note text-muted-foreground">
                         {tMedia("imagePreparing")}
                       </span>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    <p className="tkad-type-caption font-medium uppercase tracking-wide text-muted-foreground">
                       {typeLabel}
                     </p>
                     <p className="mt-0.5 line-clamp-2 text-sm font-bold text-foreground sm:text-base">

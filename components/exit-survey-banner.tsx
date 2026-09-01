@@ -110,7 +110,7 @@ export function ExitSurveyBanner({ surface }: { surface: Surface }) {
     >
       <div className="pointer-events-auto w-full max-w-xl rounded-2xl border border-violet-300/60 bg-white p-4 shadow-2xl shadow-violet-500/20 dark:border-violet-400/30 dark:bg-[#15131f] sm:p-5">
         {done ? (
-          <p className="py-2 text-center text-sm font-semibold text-violet-600 dark:text-violet-300">
+          <p className="py-2 text-center tkad-type-title text-violet-600 dark:text-violet-300">
             소중한 의견 감사합니다 🙏
           </p>
         ) : (
@@ -128,7 +128,7 @@ export function ExitSurveyBanner({ surface }: { surface: Surface }) {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="mt-0.5 text-[11px] text-gray-500 dark:text-white/50">
+            <p className="mt-0.5 tkad-type-caption text-gray-500 dark:text-white/50">
               한 번만 눌러주시면 끝이에요. (입력 없음)
             </p>
             <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -137,7 +137,7 @@ export function ExitSurveyBanner({ surface }: { surface: Surface }) {
                   key={a.key}
                   type="button"
                   onClick={() => answer(a.key)}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-xs font-semibold text-gray-800 transition hover:border-violet-400 hover:bg-violet-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-violet-400/50 dark:hover:bg-violet-500/10"
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 tkad-type-title text-gray-800 transition hover:border-violet-400 hover:bg-violet-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-violet-400/50 dark:hover:bg-violet-500/10"
                 >
                   <span aria-hidden>{a.emoji}</span>
                   <span>{a.label}</span>

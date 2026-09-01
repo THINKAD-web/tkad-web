@@ -71,12 +71,12 @@ export function AdminMediaCategoryFields({
   return (
     <div className="space-y-4 rounded-xl border border-border bg-muted/40 p-4">
       <div>
-        <p className="mb-2 text-xs font-semibold text-foreground">
+        <p className="mb-2 tkad-type-title text-foreground">
           공개 탐색 카테고리 (Browse)
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-1 block text-[11px] text-muted-foreground">
+            <span className="mb-1 block tkad-type-caption text-muted-foreground">
               대분류
             </span>
             <select
@@ -96,7 +96,7 @@ export function AdminMediaCategoryFields({
             </select>
           </label>
           <label className="block">
-            <span className="mb-1 block text-[11px] text-muted-foreground">
+            <span className="mb-1 block tkad-type-caption text-muted-foreground">
               소분류
             </span>
             <select
@@ -117,16 +117,16 @@ export function AdminMediaCategoryFields({
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold text-foreground">Browse 지역</p>
+        <p className="mb-2 tkad-type-title text-foreground">Browse 지역</p>
         {!isKorea ? (
-          <p className="mb-2 text-[10px] text-amber-800">
+          <p className="mb-2 tkad-type-note text-amber-800">
             해외 매체 — 「해외」로 분류됩니다. 한국 시·도 taxonomy는 사용하지
             않습니다.
           </p>
         ) : null}
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-1 block text-[11px] text-muted-foreground">
+            <span className="mb-1 block tkad-type-caption text-muted-foreground">
               시·도
             </span>
             <select
@@ -147,7 +147,7 @@ export function AdminMediaCategoryFields({
             </select>
           </label>
           <label className="block">
-            <span className="mb-1 block text-[11px] text-muted-foreground">
+            <span className="mb-1 block tkad-type-caption text-muted-foreground">
               세부 지역
             </span>
             <select
@@ -173,12 +173,12 @@ export function AdminMediaCategoryFields({
         onToggle={(e) => setLegacyOpen(e.currentTarget.open)}
         className="rounded-lg border border-dashed border-border bg-card/50 p-3"
       >
-        <summary className="cursor-pointer text-xs font-semibold text-muted-foreground">
+        <summary className="cursor-pointer tkad-type-title text-muted-foreground">
           SEO 카테고리 (legacy, 선택)
         </summary>
         <div className="mt-3 space-y-3">
           <div>
-            <label className="mb-1 block text-[11px] text-muted-foreground">
+            <label className="mb-1 block tkad-type-caption text-muted-foreground">
               SEO 대분류
             </label>
             <select
@@ -216,7 +216,7 @@ export function AdminMediaCategoryFields({
       ) : null}
 
       <div>
-        <p className="mb-2 text-xs font-semibold text-foreground">
+        <p className="mb-2 tkad-type-title text-foreground">
           적합 캠페인 타겟
         </p>
         <div className="flex flex-wrap gap-2">

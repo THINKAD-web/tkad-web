@@ -88,7 +88,7 @@ export function WeatherEventPanel({
         [ {isKo ? "날씨·이벤트" : "Weather & events"} ]
       </p>
       {sensitivity ? (
-        <p className="mt-3 text-sm font-semibold">
+        <p className="mt-3 tkad-type-title">
           {isKo ? "날씨 민감도" : "Weather sensitivity"}: {sensLabel}
           {report.weatherSensitivity === "low" && isKo ? " (실내 매체)" : ""}
         </p>

@@ -33,7 +33,7 @@ export function SupportChatMenu({ open, onClose, hours, onOpenAi }: Props) {
       <div className="relative p-4">
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-gray-400 dark:text-white/40">
+            <p className="tkad-type-label text-gray-400 dark:text-white/40">
               {t("brandEyebrow")}
             </p>
             <p className="mt-1 text-base font-semibold tracking-tight text-gray-900 dark:text-white">
@@ -119,7 +119,7 @@ export function SupportChatMenu({ open, onClose, hours, onOpenAi }: Props) {
             <a
               href={PHONE_HREF}
               onClick={onClose}
-              className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-100 px-3 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-200 dark:border-white/12 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+              className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-100 px-3 py-3 tkad-type-title text-gray-700 transition hover:bg-gray-200 dark:border-white/12 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
             >
               <Phone className="h-5 w-5 shrink-0 text-cyan-600 dark:text-cyan-400" aria-hidden />
               {t("phoneCta")}

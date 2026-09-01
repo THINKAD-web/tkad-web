@@ -52,7 +52,7 @@ export function IntegratedProBlindSection({
             <p className="mb-4 text-sm leading-relaxed text-white/60">{body}</p>
             <Link
               href="/pricing"
-              className="tkad-qp-cta inline-flex items-center gap-2 rounded-[var(--qp-radius-md)] bg-[color:var(--qp-accent)] px-5 py-2.5 text-sm font-semibold text-white"
+              className="tkad-qp-cta inline-flex items-center gap-2 rounded-[var(--qp-radius-md)] bg-[color:var(--qp-accent)] px-5 py-2.5 tkad-type-title text-white"
             >
               {isKo ? "PRO 14일 무료 체험 →" : "Start 14-day PRO trial →"}
             </Link>

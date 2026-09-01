@@ -488,7 +488,7 @@ function AdminMediaHubPage() {
   return (
     <div className="space-y-6 text-foreground">
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ MEDIA HUB ]
         </p>
         <h2 className="mt-2 text-lg font-bold tracking-tight">매체 허브 (DB)</h2>
@@ -498,7 +498,7 @@ function AdminMediaHubPage() {
         </p>
         <Link
           href="/admin/medias/quick-add"
-          className="mt-2 inline-flex items-center gap-1.5 border-b-2 border-border pb-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
+          className="mt-2 inline-flex items-center gap-1.5 border-b-2 border-border pb-0.5 tkad-type-label text-foreground transition-colors hover:text-primary hover:border-primary"
         >
           <Code2 className="h-4 w-4" />
           JSON 간편 등록 (DB)
@@ -590,7 +590,7 @@ function AdminMediaHubPage() {
           </CardHeader>
           <CardContent className="max-h-[520px] space-y-2 overflow-y-auto text-sm">
             {deepMediaId ? (
-              <p className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
+              <p className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 tkad-type-caption text-amber-900">
                 견적 딥링크 매체 필터 중
                 {highlightQuoteId
                   ? ` · 홀드 하이라이트 #${highlightQuoteId.slice(-8)}`
@@ -622,7 +622,7 @@ function AdminMediaHubPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold text-foreground">{m.name}</p>
                     {m.availability ? (
-                      <Badge variant="secondary" className="text-[10px]">
+                      <Badge variant="secondary" className="tkad-type-note">
                         {AVAIL_LABEL[m.availability]}
                       </Badge>
                     ) : null}
@@ -654,7 +654,7 @@ function AdminMediaHubPage() {
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-sm font-semibold text-foreground">
+                  <span className="tkad-type-title text-foreground">
                     가용 상태
                   </span>
                   <select
@@ -675,7 +675,7 @@ function AdminMediaHubPage() {
                 </div>
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
+                  <h3 className="mb-2 flex items-center gap-1 tkad-type-title">
                     <CloudUpload className="h-4 w-4" />
                     Bunny 업로드
                   </h3>
@@ -695,7 +695,7 @@ function AdminMediaHubPage() {
                 </div>
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
+                  <h3 className="mb-2 flex items-center gap-1 tkad-type-title">
                     <Tag className="h-4 w-4" />
                     가격 히스토리 (월별 스냅샷)
                   </h3>
@@ -716,7 +716,7 @@ function AdminMediaHubPage() {
                               height: `${Math.max(4, (val / maxMonthPrice) * 48)}px`,
                             }}
                           />
-                          <span className="text-[9px] text-muted-foreground">
+                          <span className="tkad-type-note text-muted-foreground">
                             {key.slice(2)}
                           </span>
                         </div>
@@ -756,7 +756,7 @@ function AdminMediaHubPage() {
 
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <h3 className="flex items-center gap-1 text-sm font-semibold">
+                    <h3 className="flex items-center gap-1 tkad-type-title">
                       <CalendarDays className="h-4 w-4" />
                       예약 현황 (월)
                     </h3>
@@ -800,12 +800,12 @@ function AdminMediaHubPage() {
                       </Button>
                     </div>
                   </div>
-                  <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] text-muted-foreground">
+                  <div className="grid grid-cols-7 gap-0.5 text-center tkad-type-note text-muted-foreground">
                     {["월", "화", "수", "목", "금", "토", "일"].map((d) => (
                       <div key={d}>{d}</div>
                     ))}
                   </div>
-                  <div className="mt-1 grid grid-cols-7 gap-0.5 text-center text-[10px]">
+                  <div className="mt-1 grid grid-cols-7 gap-0.5 text-center tkad-type-note">
                     {calendarCells.map((cell, idx) => {
                       if (!cell) {
                         return <div key={idx} className="h-7" />;
@@ -858,7 +858,7 @@ function AdminMediaHubPage() {
                     })}
                   </div>
                   {/* status 색상 범례 */}
-                  <div className="mt-2 flex flex-wrap gap-2 text-[10px]">
+                  <div className="mt-2 flex flex-wrap gap-2 tkad-type-note">
                     <span className="inline-flex items-center gap-1">
                       <span className="inline-block h-3 w-3 rounded bg-emerald-200" />
                       확정 (confirmed)
@@ -873,7 +873,7 @@ function AdminMediaHubPage() {
                     </span>
                   </div>
 
-                  <h4 className="mb-2 mt-4 text-xs font-semibold text-foreground">
+                  <h4 className="mb-2 mt-4 tkad-type-title text-foreground">
                     슬롯 추가
                   </h4>
                   <div className="grid gap-2 sm:grid-cols-2">
@@ -929,7 +929,7 @@ function AdminMediaHubPage() {
                           <li key={c.id}>{c.summary}</li>
                         ))}
                       </ul>
-                      <p className="mt-2 text-[11px] text-rose-700">
+                      <p className="mt-2 tkad-type-caption text-rose-700">
                         그래도 등록하려면 &quot;강제 등록&quot;을 누르세요. (확정 예약과 겹치면 매체사·광고주에게 운영 사고가 될 수 있습니다)
                       </p>
                     </div>
@@ -991,7 +991,7 @@ function AdminMediaHubPage() {
                             <p className="font-medium">
                               {b.title}
                               {isHighlighted ? (
-                                <span className="ml-1.5 text-[10px] font-semibold text-amber-800">
+                                <span className="ml-1.5 tkad-type-note font-semibold text-amber-800">
                                   ← 견적 홀드
                                 </span>
                               ) : null}
@@ -1001,7 +1001,7 @@ function AdminMediaHubPage() {
                                 {b.startsAt.replace("T", " ")} ~ {b.endsAt.replace("T", " ")}
                               </span>
                               <span
-                                className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${ statusColor[b.status] ?? "bg-slate-100" }`}
+                                className={`rounded px-1.5 py-0.5 tkad-type-note font-semibold ${ statusColor[b.status] ?? "bg-slate-100" }`}
                               >
                                 {statusLabel[b.status] ?? b.status}
                               </span>
@@ -1023,7 +1023,7 @@ function AdminMediaHubPage() {
                 </div>
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
+                  <h3 className="mb-2 flex items-center gap-1 tkad-type-title">
                     <Users className="h-4 w-4" />
                     광고주 집행 이력
                   </h3>

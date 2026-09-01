@@ -74,8 +74,8 @@ export function AdminTrustMetricsClient() {
           return (
             <div key={f.key} className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold">{f.label}</p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="tkad-type-title">{f.label}</p>
+                <p className="tkad-type-caption text-muted-foreground">
                   자동 집계: {auto.toLocaleString()}
                   {isOverridden ? " · (수동값 사용 중)" : " · (자동 사용 중)"}
                 </p>

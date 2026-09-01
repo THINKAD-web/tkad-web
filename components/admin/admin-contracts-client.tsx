@@ -215,7 +215,7 @@ export default function AdminContractsClient() {
           </p>
           <Link
             href="/admin/contracts/new"
-            className="inline-flex items-center rounded-full border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] px-3 py-1 text-xs font-semibold text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent-soft)] dark:border-[color:var(--qp-accent)]/40 dark:bg-[color:var(--qp-accent)]/10 dark:text-[color:var(--qp-accent)]"
+            className="inline-flex items-center rounded-full border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] px-3 py-1 tkad-type-title text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent-soft)] dark:border-[color:var(--qp-accent)]/40 dark:bg-[color:var(--qp-accent)]/10 dark:text-[color:var(--qp-accent)]"
           >
             {t("newContract")}
           </Link>
@@ -244,7 +244,7 @@ export default function AdminContractsClient() {
           ].map((item) => (
             <Card key={item.label} className={adminQuoteSectionCard}>
               <CardContent className="px-5 py-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <p className="tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
                   {item.label}
                 </p>
                 <p className="mt-1 font-display text-xl font-bold tabular-nums text-foreground">
@@ -265,7 +265,7 @@ export default function AdminContractsClient() {
             </div>
             <div className="flex flex-wrap items-end gap-3">
               <label className="space-y-1">
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className="tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
                   {t("filterStatus")}
                 </span>
                 <select
@@ -279,7 +279,7 @@ export default function AdminContractsClient() {
                 </select>
               </label>
               <label className="space-y-1">
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className="tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
                   {t("filterDateFrom")}
                 </span>
                 <Input
@@ -290,7 +290,7 @@ export default function AdminContractsClient() {
                 />
               </label>
               <label className="space-y-1">
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className="tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
                   {t("filterDateTo")}
                 </span>
                 <Input
@@ -301,7 +301,7 @@ export default function AdminContractsClient() {
                 />
               </label>
               <label className="min-w-[200px] flex-1 space-y-1">
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className="tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
                   {t("filterSearch")}
                 </span>
                 <div className="flex gap-2">
@@ -358,10 +358,10 @@ export default function AdminContractsClient() {
                       className="w-full text-left"
                       onClick={() => openRow(row.quoteId)}
                     >
-                      <p className="font-mono text-xs font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
+                      <p className="font-mono tkad-type-title text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                         {row.contractId.slice(-8).toUpperCase()}
                       </p>
-                      <p className="mt-1 text-sm font-semibold text-foreground">
+                      <p className="mt-1 tkad-type-title text-foreground">
                         {row.clientName}
                       </p>
                       {row.clientCompany ? (
@@ -374,14 +374,14 @@ export default function AdminContractsClient() {
                         <span className="text-sm font-bold tabular-nums text-foreground">
                           {formatOohQuoteTotalKrw(row.totalAmount)}
                         </span>
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                        <span className="rounded-full bg-muted px-2 py-0.5 tkad-type-note font-medium uppercase tracking-wide">
                           {contractStatusLabel(row.contractStatus)}
                         </span>
                       </div>
-                      <p className="mt-1 text-[10px] text-muted-foreground">
+                      <p className="mt-1 tkad-type-note text-muted-foreground">
                         {t("colSignedAt")}: {formatDate(row.signedAt)}
                       </p>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="tkad-type-note text-muted-foreground">
                         {formatPeriod(row)}
                       </p>
                     </button>
@@ -423,7 +423,7 @@ export default function AdminContractsClient() {
               </AdminMobileList>
               <div className={adminDesktopTableWrapClass}>
               <table className="w-full min-w-[960px] text-left text-sm">
-                <thead className="border-b border-border/60 bg-muted/30 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <thead className="border-b border-border/60 bg-muted/30 tkad-type-note font-semibold uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3">{t("colContractId")}</th>
                     <th className="px-4 py-3">{t("colClient")}</th>
@@ -442,7 +442,7 @@ export default function AdminContractsClient() {
                       className="cursor-pointer border-b border-border/40 transition-colors hover:bg-[color:var(--qp-accent-soft)] dark:hover:bg-[color:var(--qp-accent)]/5"
                       onClick={() => openRow(row.quoteId)}
                     >
-                      <td className="px-4 py-3 font-mono text-xs font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
+                      <td className="px-4 py-3 font-mono tkad-type-title text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                         {row.contractId.slice(-8).toUpperCase()}
                       </td>
                       <td className="px-4 py-3">
@@ -456,7 +456,7 @@ export default function AdminContractsClient() {
                         {formatOohQuoteTotalKrw(row.totalAmount)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                        <span className="rounded-full bg-muted px-2 py-0.5 tkad-type-note font-medium uppercase tracking-wide">
                           {contractStatusLabel(row.contractStatus)}
                         </span>
                       </td>
@@ -470,7 +470,7 @@ export default function AdminContractsClient() {
                             href={`/api/quote/${row.quoteId}/contract/preview`}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[10px] font-semibold hover:bg-muted"
+                            className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 tkad-type-note font-semibold hover:bg-muted"
                             title={t("previewPdf")}
                           >
                             <FileText className="h-3 w-3" />
@@ -481,7 +481,7 @@ export default function AdminContractsClient() {
                               href={`/api/quote/${row.quoteId}/contract/signed`}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 rounded-md border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] px-2 py-1 text-[10px] font-semibold text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent-soft)] dark:border-[color:var(--qp-accent)]/40 dark:bg-[color:var(--qp-accent)]/10 dark:text-[color:var(--qp-accent)]"
+                              className="inline-flex items-center gap-1 rounded-md border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] px-2 py-1 tkad-type-note font-semibold text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent-soft)] dark:border-[color:var(--qp-accent)]/40 dark:bg-[color:var(--qp-accent)]/10 dark:text-[color:var(--qp-accent)]"
                               title={t("signedPdf")}
                             >
                               <Download className="h-3 w-3" />
@@ -529,7 +529,7 @@ export default function AdminContractsClient() {
               <div className="flex flex-wrap gap-2 pt-2">
                 <Link
                   href={`/admin/quotes?tab=booking&highlight=${selectedRow.quoteId}`}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
+                  className="inline-flex items-center gap-1 tkad-type-title text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
                 >
                   <ExternalLink className="h-3 w-3" />
                   {t("openInPipeline")}
@@ -539,7 +539,7 @@ export default function AdminContractsClient() {
                     href={`/api/quote/${selectedRow.quoteId}/contract/signed`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
+                    className="inline-flex items-center gap-1 tkad-type-title text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
                   >
                     <Download className="h-3 w-3" />
                     {t("signedPdf")}

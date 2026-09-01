@@ -78,7 +78,7 @@ export function PricingPageClient({
               className={`rounded-[var(--qp-radius-md)] border p-6 backdrop-blur sm:p-8 ${highlighted ? "tkad-qp-pricing-card tkad-qp-accent-soft-surface border-[color:var(--qp-accent)]/45" : "tkad-qp-pricing-card dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50"}`}
             >
               {highlighted ? (
-                <p className="mb-3 inline-flex items-center gap-1 rounded-full border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-wider text-[color:var(--qp-accent)]">
+                <p className="mb-3 inline-flex items-center gap-1 rounded-full border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-2.5 py-0.5 tkad-type-label text-[color:var(--qp-accent)]">
                   <Sparkles className="h-3 w-3" aria-hidden />
                   {isKo ? "인기" : "Popular"}
                 </p>
@@ -108,14 +108,14 @@ export function PricingPageClient({
                 </p>
               )}
               {key === "pro" && showTrial && !isPro ? (
-                <p className="mt-2 text-xs font-semibold text-[color:var(--qp-accent)]">
+                <p className="mt-2 tkad-type-title text-[color:var(--qp-accent)]">
                   {isKo
                     ? `첫 가입 ${PRO_TRIAL_DAYS}일 PRO 무료 체험`
                     : `${PRO_TRIAL_DAYS}-day PRO trial for new signups`}
                 </p>
               ) : null}
               {key === "pro" && isPro && !planLoading ? (
-                <p className="mt-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                <p className="mt-2 tkad-type-title text-emerald-700 dark:text-emerald-300">
                   {isKo ? "현재 PRO 이용 중" : "PRO active"}
                 </p>
               ) : null}
@@ -134,7 +134,7 @@ export function PricingPageClient({
                       <span className="min-w-0 flex-1">
                         {f.text}
                         {f.comingSoon ? (
-                          <span className="ml-1.5 inline-flex rounded-full border border-amber-400/50 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+                          <span className="ml-1.5 inline-flex rounded-full border border-amber-400/50 bg-amber-500/10 px-1.5 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-amber-800 dark:text-amber-200">
                             {isKo ? "준비 중" : "Coming soon"}
                           </span>
                         ) : null}

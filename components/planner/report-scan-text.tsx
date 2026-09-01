@@ -42,7 +42,7 @@ export function ReportScanLine({ text, className }: ReportScanLineProps) {
     const body = text.slice(dot + 3);
     return (
       <li className={cn("space-y-1.5", className)}>
-        <span className="inline-block rounded-md bg-[color:var(--qp-accent)]/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
+        <span className="inline-block rounded-md bg-[color:var(--qp-accent)]/10 px-2 py-0.5 tkad-type-caption font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
           {label}
         </span>
         <p className="text-sm leading-relaxed text-gray-700">

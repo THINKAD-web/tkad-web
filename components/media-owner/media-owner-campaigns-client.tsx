@@ -225,7 +225,7 @@ function OwnerActualsForm({
 
   return (
     <div className="mt-3 border-t dark:border-white/10 border-gray-200 pt-3">
-      <p className="text-xs font-semibold dark:text-white text-gray-700">
+      <p className="tkad-type-title dark:text-white text-gray-700">
         {isKo ? "집행 실적 입력" : "Enter actuals"}
         <span className="ml-1 font-normal dark:text-white/50 text-gray-400">
           {isKo ? "(집행 종료 후 · 광고주에게 예측 대비 표시)" : "(after flight · shown vs prediction)"}
@@ -233,7 +233,7 @@ function OwnerActualsForm({
       </p>
       <div className="mt-2 flex flex-wrap items-end gap-2">
         <label className="flex flex-col">
-          <span className="text-[10px] dark:text-white/55 text-gray-400">
+          <span className="tkad-type-note dark:text-white/55 text-gray-400">
             {isKo ? "실제 노출수" : "Impressions"}
           </span>
           <input
@@ -245,7 +245,7 @@ function OwnerActualsForm({
           />
         </label>
         <label className="flex flex-col">
-          <span className="text-[10px] dark:text-white/55 text-gray-400">
+          <span className="tkad-type-note dark:text-white/55 text-gray-400">
             {isKo ? "실제 도달수" : "Reach"}
           </span>
           <input

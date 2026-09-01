@@ -47,7 +47,7 @@ function FilterChip({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-ui",
+        "rounded-full border px-3 py-1.5 tkad-type-label transition-ui",
         active
           ? "border-[var(--qp-accent)]/50 bg-[var(--qp-accent)]/15 text-[var(--qp-accent)] shadow-[0_0_20px_rgba(34,211,238,0.15)]"
           : "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:border-white/25 hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900",
@@ -73,7 +73,7 @@ function FilterGroup<T extends string>({
 }) {
   return (
     <div>
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
+      <p className="tkad-type-label text-[var(--qp-accent)]">
         [ {title} ]
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
@@ -203,7 +203,7 @@ export function CasesFilterHub({
           aria-label={t("searchPlaceholder")}
         />
         <div className="flex items-center gap-3">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-400">
+          <p className="tkad-type-label dark:text-white text-gray-400">
             {`// `}
             {t("resultsCount", { count: resultCount })}
           </p>

@@ -80,7 +80,7 @@ export function ActionSheet({
                 aria-hidden
               />
               {title ? (
-                <p className="border-b border-gray-200 px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:border-white/10 dark:text-white/50">
+                <p className="border-b border-gray-200 px-4 py-3 text-center tkad-type-title text-gray-500 dark:border-white/10 dark:text-white/50">
                   {title}
                 </p>
               ) : null}
@@ -91,7 +91,7 @@ export function ActionSheet({
                       type="button"
                       role="menuitem"
                       className={cn(
-                        "flex w-full items-center justify-center gap-2 px-4 py-3.5 text-[15px] font-medium transition-colors active:bg-gray-100 dark:active:bg-white/5",
+                        "flex w-full items-center justify-center gap-2 px-4 py-3.5 text-base font-medium transition-colors active:bg-gray-100 dark:active:bg-white/5",
                         item.destructive
                           ? "text-red-500"
                           : "text-gray-900 dark:text-white",
@@ -113,7 +113,7 @@ export function ActionSheet({
             <motion.button
               type="button"
               role="menuitem"
-              className="mt-2 w-full rounded-2xl bg-white px-4 py-3.5 text-[15px] font-semibold text-gray-900 transition-colors active:bg-gray-100 dark:bg-gray-900 dark:text-white dark:active:bg-white/5"
+              className="mt-2 w-full rounded-2xl bg-white px-4 py-3.5 text-base font-semibold text-gray-900 transition-colors active:bg-gray-100 dark:bg-gray-900 dark:text-white dark:active:bg-white/5"
               initial={{ y: 24, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 24, opacity: 0 }}

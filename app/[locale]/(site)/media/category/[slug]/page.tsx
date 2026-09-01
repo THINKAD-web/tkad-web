@@ -191,7 +191,7 @@ export default async function MediaCategoryLandingPage({ params }: Props) {
 
           <section className="border-t border-border/80 py-10">
             <div className="ui-container">
-              <p className="text-xs font-semibold text-muted-foreground">
+              <p className="tkad-type-title text-muted-foreground">
                 {isKo ? "다른 카테고리" : "Other categories"}
               </p>
               <ul className="mt-4 flex flex-wrap gap-2">

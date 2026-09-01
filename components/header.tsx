@@ -144,7 +144,7 @@ function DesktopNavItem({
             >
               <div className="font-medium">{leaf.label}</div>
               {leaf.desc && (
-                <div className="mt-0.5 text-[11px] text-muted-foreground">
+                <div className="mt-0.5 tkad-type-caption text-muted-foreground">
                   {leaf.desc}
                 </div>
               )}
@@ -206,7 +206,7 @@ export default function Header() {
               AD
             </span>
           </span>
-          <span className="hidden text-[11px] font-medium tracking-wider text-muted-foreground uppercase sm:inline">
+          <span className="hidden tkad-type-caption font-medium tracking-wider text-muted-foreground uppercase sm:inline">
             싱커드
           </span>
         </Link>
@@ -298,7 +298,7 @@ export default function Header() {
                                 <Icon className="h-4 w-4" />
                               </span>
                             )}
-                            <span className="text-sm font-semibold">{leaf.label}</span>
+                            <span className="tkad-type-title">{leaf.label}</span>
                           </Link>
                         );
                       })}
@@ -312,7 +312,7 @@ export default function Header() {
                         key={`g-${gi}`}
                         className="rounded-2xl border border-border/60 bg-card/50 p-2"
                       >
-                        <h3 className="px-3 pt-2 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        <h3 className="px-3 pt-2 pb-1.5 tkad-type-note font-bold uppercase tracking-wider text-muted-foreground">
                           {group.label}
                         </h3>
                         <div className="space-y-0.5">
@@ -343,14 +343,14 @@ export default function Header() {
                                 )}
                                 <div className="min-w-0">
                                   <div
-                                    className={`text-sm font-semibold ${
+                                    className={`tkad-type-title ${
                                       active ? "text-primary" : "text-foreground"
                                     }`}
                                   >
                                     {leaf.label}
                                   </div>
                                   {leaf.desc && (
-                                    <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                                    <div className="mt-0.5 tkad-type-caption leading-snug text-muted-foreground">
                                       {leaf.desc}
                                     </div>
                                   )}
@@ -367,7 +367,7 @@ export default function Header() {
                   <Link href="/contact" onClick={() => setOpen(false)} className="block">
                     <Button
                       variant="cta"
-                      className="btn-gold h-11 w-full rounded-full text-sm font-semibold shadow-md shadow-cta/25"
+                      className="btn-gold h-11 w-full rounded-full tkad-type-title shadow-md shadow-cta/25"
                     >
                       {t("nav.contact")}
                     </Button>

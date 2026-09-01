@@ -64,7 +64,7 @@ function ResetPasswordForm() {
         <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
           <div className={authCardClass}>
             <div className="mb-6 text-center">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
+              <p className="tkad-type-label dark:text-white text-gray-600">
                 [ RESET PASSWORD ]
               </p>
               <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
@@ -74,7 +74,7 @@ function ResetPasswordForm() {
 
             {done ? (
               <>
-                <p className="text-[12px] text-emerald-200">
+                <p className="tkad-type-meta text-emerald-200">
                   비밀번호가 변경되었습니다. 새 비밀번호로 로그인해 주세요.
                 </p>
                 <BtnBlock href="/login" variant="accent" size="lg" className="mt-6 w-full">
@@ -86,7 +86,7 @@ function ResetPasswordForm() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600"
+                    className="mb-2 block tkad-type-label dark:text-white text-gray-600"
                   >
                     [ 새 비밀번호 ]
                   </label>
@@ -104,7 +104,7 @@ function ResetPasswordForm() {
                 <div>
                   <label
                     htmlFor="confirm"
-                    className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600"
+                    className="mb-2 block tkad-type-label dark:text-white text-gray-600"
                   >
                     [ 비밀번호 확인 ]
                   </label>

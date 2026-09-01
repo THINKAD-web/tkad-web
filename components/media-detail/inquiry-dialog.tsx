@@ -45,7 +45,7 @@ export function MediaInquiryDialog({
         onClick={() => setOpen(true)}
         className={cn(
           compact
-            ? "inline-flex h-9 max-w-full items-center justify-center gap-1 whitespace-normal rounded-xl border px-2.5 text-xs font-semibold transition active:scale-95"
+            ? "inline-flex h-9 max-w-full items-center justify-center gap-1 whitespace-normal rounded-xl border px-2.5 tkad-type-title transition active:scale-95"
             : "tkad-media-detail-cta-secondary inline-flex h-12 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-6 font-display text-xs font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-ui hover:-translate-y-0.5 hover:bg-white/12",
           className,
         )}

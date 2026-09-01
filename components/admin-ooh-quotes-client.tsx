@@ -382,7 +382,7 @@ export default function AdminOohQuotesClient() {
 
   const revisionBadge = (row: OohRow) =>
     row.revisionMessage ? (
-      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900 dark:bg-amber-500/20 dark:text-amber-100">
+      <span className="rounded-full bg-amber-100 px-2 py-0.5 tkad-type-note font-semibold uppercase tracking-wide text-amber-900 dark:bg-amber-500/20 dark:text-amber-100">
         {t("revisionRequestBadge")}
       </span>
     ) : null;
@@ -390,7 +390,7 @@ export default function AdminOohQuotesClient() {
   const revisionMessageBlock = (row: OohRow) =>
     row.revisionMessage ? (
       <div className="mt-3 rounded-lg border border-amber-200/80 bg-amber-50/80 p-3 text-sm dark:border-amber-500/30 dark:bg-amber-500/10">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+        <p className="tkad-type-note font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
           {t("revisionRequestMessageLabel")}
           {row.revisionRequestedAt
             ? ` · ${row.revisionRequestedAt.slice(0, 16).replace("T", " ")}`
@@ -727,7 +727,7 @@ export default function AdminOohQuotesClient() {
                           className={`w-full text-left ${adminQuoteEmphasisTextClass}`}
                           onClick={() => toggleExpand(row.id)}
                         >
-                          <span className="inline-flex items-center gap-1 text-sm font-semibold">
+                          <span className="inline-flex items-center gap-1 tkad-type-title">
                             {expanded ? (
                               <ChevronUp className="h-4 w-4 shrink-0" />
                             ) : (
@@ -737,7 +737,7 @@ export default function AdminOohQuotesClient() {
                           </span>
                         </button>
                         {row.sourceAdminQuoteId && row.sourceAdminQuoteNumber ? (
-                          <p className="text-[11px] leading-snug text-muted-foreground">
+                          <p className="tkad-type-caption leading-snug text-muted-foreground">
                             {t("sourceFromAdminQuote", {
                               number: row.sourceAdminQuoteNumber,
                             })}{" "}
@@ -757,12 +757,12 @@ export default function AdminOohQuotesClient() {
                         </div>
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-foreground">
+                            <span className="rounded-full bg-muted px-2 py-0.5 tkad-type-note font-medium uppercase tracking-wide text-foreground">
                               {statusLabel(row.status)}
                             </span>
                             {revisionBadge(row)}
                           </div>
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="tkad-type-note text-muted-foreground">
                             {row.updatedAt.slice(0, 10)}
                           </span>
                         </div>
@@ -873,7 +873,7 @@ export default function AdminOohQuotesClient() {
                           {row.clientName}
                         </button>
                         {row.sourceAdminQuoteId && row.sourceAdminQuoteNumber ? (
-                          <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                          <p className="mt-1 tkad-type-caption leading-snug text-muted-foreground">
                             {t("sourceFromAdminQuote", {
                               number: row.sourceAdminQuoteNumber,
                             })}{" "}
@@ -1001,7 +1001,7 @@ export default function AdminOohQuotesClient() {
                                   {t("awaitingSignature")}
                                 </Link>
                               </Button>
-                              <p className="max-w-[12rem] text-[10px] leading-snug text-amber-800 dark:text-amber-200">
+                              <p className="max-w-[12rem] tkad-type-note leading-snug text-amber-800 dark:text-amber-200">
                                 {t("awaitingSignatureHint")}
                               </p>
                             </div>

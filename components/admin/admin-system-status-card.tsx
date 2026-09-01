@@ -83,7 +83,7 @@ export function AdminSystemStatusCard() {
       }
     >
       <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        <h2 className="flex items-center gap-2 tkad-type-label text-muted-foreground">
           <Activity className="h-4 w-4 text-[color:var(--qp-accent)]/80" aria-hidden />
           [ 시스템 상태 ]
         </h2>
@@ -91,7 +91,7 @@ export function AdminSystemStatusCard() {
           type="button"
           onClick={() => void runNow()}
           disabled={running}
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/60 px-2.5 text-[11px] font-semibold transition hover:bg-muted/40 disabled:opacity-60"
+          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/60 px-2.5 tkad-type-caption font-semibold transition hover:bg-muted/40 disabled:opacity-60"
         >
           <RefreshCw className={"h-3.5 w-3.5 " + (running ? "animate-spin" : "")} />
           지금 점검
@@ -125,7 +125,7 @@ export function AdminSystemStatusCard() {
                   {result.pass}/{result.total} 통과
                 </span>
               </p>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="tkad-type-caption text-muted-foreground">
                 {timeAgo(result.ranAt)} · {result.base.replace(/^https?:\/\//, "")}
               </p>
             </div>
@@ -138,7 +138,7 @@ export function AdminSystemStatusCard() {
                   key={`${r.kind}-${r.url}`}
                   className="flex items-start justify-between gap-2 rounded-lg border border-red-400/30 bg-red-950/10 px-3 py-1.5 text-xs"
                 >
-                  <span className="min-w-0 truncate font-mono text-[11px]">{r.url}</span>
+                  <span className="min-w-0 truncate font-mono tkad-type-caption">{r.url}</span>
                   <span className="shrink-0 font-semibold text-red-500">
                     {r.issue ?? `HTTP ${r.status}`}
                   </span>

@@ -236,7 +236,7 @@ export default function PlannerMediaPickStep({
                         aria-hidden
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="line-clamp-2 text-sm font-semibold text-navy">
+                        <p className="line-clamp-2 tkad-type-title text-navy">
                           {isKo ? m.name : (m.nameEn || m.name) || m.name}
                         </p>
                         <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
@@ -299,7 +299,7 @@ export default function PlannerMediaPickStep({
                   basketItems.map((item) => item.price || 0),
                   isKo ? "ko" : "en",
                 )}
-                <span className="ml-1 text-xs font-semibold text-navy/60">
+                <span className="ml-1 tkad-type-title text-navy/60">
                   /{isKo ? "월" : "mo"}
                 </span>
               </span>
@@ -355,7 +355,7 @@ export default function PlannerMediaPickStep({
                         aria-hidden
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="line-clamp-2 text-sm font-semibold text-navy">
+                        <p className="line-clamp-2 tkad-type-title text-navy">
                           {isKo ? m.name : (m.nameEn || m.name) || m.name}
                         </p>
                         <p className="mt-0.5 text-xs text-muted-foreground">

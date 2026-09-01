@@ -70,7 +70,7 @@ export function MediaOwnerRevenueCalculator({
       <div className={shell}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-400">
+            <p className="inline-flex items-center gap-2 tkad-type-label text-violet-400">
               <Calculator className="h-3.5 w-3.5" />
               {isKo ? "수익 시뮬레이터" : "Revenue simulator"}
             </p>
@@ -85,7 +85,7 @@ export function MediaOwnerRevenueCalculator({
                 : "Estimates based on THINKAD regional execution benchmarks. Actual results vary by season and pricing."}
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+          <div className="flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 tkad-type-title text-emerald-700 dark:text-emerald-300">
             <TrendingUp className="h-3.5 w-3.5" />
             {isKo ? "실시간 계산" : "Live estimate"}
           </div>
@@ -94,7 +94,7 @@ export function MediaOwnerRevenueCalculator({
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div className="space-y-5">
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide dark:text-white/60 text-gray-500">
+              <span className="tkad-type-title uppercase tracking-wide dark:text-white/60 text-gray-500">
                 {isKo ? "매체 위치" : "Region"}
               </span>
               <select
@@ -113,7 +113,7 @@ export function MediaOwnerRevenueCalculator({
             </label>
 
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide dark:text-white/60 text-gray-500">
+              <span className="tkad-type-title uppercase tracking-wide dark:text-white/60 text-gray-500">
                 {isKo ? "매체 유형" : "Media type"}
               </span>
               <select
@@ -133,7 +133,7 @@ export function MediaOwnerRevenueCalculator({
 
             <div>
               <div className="flex items-end justify-between gap-3">
-                <span className="text-xs font-semibold uppercase tracking-wide dark:text-white/60 text-gray-500">
+                <span className="tkad-type-title uppercase tracking-wide dark:text-white/60 text-gray-500">
                   {isKo ? "월 희망 단가" : "Target monthly rate"}
                 </span>
                 <span className="font-display text-sm font-bold tabular-nums dark:text-white text-gray-900">
@@ -150,7 +150,7 @@ export function MediaOwnerRevenueCalculator({
                 onChange={(e) => setMonthlyPriceWon(Number(e.target.value))}
                 className="mt-3 w-full accent-violet-500"
               />
-              <div className="mt-1 flex justify-between text-[10px] dark:text-white/40 text-gray-400">
+              <div className="mt-1 flex justify-between tkad-type-note dark:text-white/40 text-gray-400">
                 <span>{isKo ? "50만" : "₩0.5M"}</span>
                 <span>
                   {isKo ? "지역·유형 평균" : "Regional avg"}{" "}
@@ -164,7 +164,7 @@ export function MediaOwnerRevenueCalculator({
           <div className="rounded-2xl border dark:border-violet-400/25 border-violet-200 bg-[linear-gradient(135deg,rgba(139,92,246,0.12),rgba(34,211,238,0.08))] p-5 sm:p-6">
             <dl className="space-y-4">
               <div>
-                <dt className="text-xs font-semibold dark:text-white/60 text-gray-600">
+                <dt className="tkad-type-title dark:text-white/60 text-gray-600">
                   {isKo ? "연간 예상 수익" : "Estimated annual gross"}
                 </dt>
                 <dd className="mt-1 text-2xl font-black tabular-nums dark:text-white text-gray-900 sm:text-3xl">
@@ -198,7 +198,7 @@ export function MediaOwnerRevenueCalculator({
               </div>
 
               <div className="rounded-xl border dark:border-emerald-400/30 border-emerald-200 bg-emerald-500/10 px-4 py-3">
-                <dt className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">
+                <dt className="tkad-type-title text-emerald-800 dark:text-emerald-200">
                   {isKo ? "순 수익 (수수료 제외)" : "Net revenue (after fee)"}
                 </dt>
                 <dd className="mt-1 text-xl font-black tabular-nums text-emerald-900 dark:text-emerald-100">
@@ -207,7 +207,7 @@ export function MediaOwnerRevenueCalculator({
               </div>
             </dl>
 
-            <p className="mt-5 text-sm font-semibold dark:text-white text-gray-800">
+            <p className="mt-5 tkad-type-title dark:text-white text-gray-800">
               {isKo
                 ? "지금 등록하면 이 수익을 시작할 수 있어요"
                 : "Register now to start earning on THINKAD"}

@@ -31,7 +31,7 @@ export function NeonSectionHead({
           ) : null}
         </span>
         {meta ? (
-          <span className="min-w-0 max-w-full font-display text-xs font-medium uppercase tracking-[0.22em] text-gray-500 dark:text-white/55 sm:truncate">
+          <span className="min-w-0 max-w-full tkad-type-label text-gray-500 dark:text-white/55 sm:truncate">
             {"// "}
             {meta}
           </span>

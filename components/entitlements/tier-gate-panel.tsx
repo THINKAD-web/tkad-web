@@ -28,7 +28,7 @@ export function TierGatePanel({ message, className, compact = false }: Props) {
         className="mx-auto h-8 w-8 text-[color:var(--qp-accent)]"
         aria-hidden
       />
-      <p className="mt-3 font-display text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--qp-accent)]">
+      <p className="mt-3 font-display tkad-type-note font-bold uppercase tracking-[0.22em] text-[color:var(--qp-accent)]">
         {message.eyebrow}
       </p>
       <h3
@@ -136,7 +136,7 @@ export function TierGateInlineNotice({
       )}
       role="status"
     >
-      <p className="text-sm font-semibold text-gray-900 dark:text-white">
+      <p className="tkad-type-title text-gray-900 dark:text-white">
         {message.title}
       </p>
       <p className="mt-1 text-xs leading-relaxed text-gray-600 dark:text-white/75">

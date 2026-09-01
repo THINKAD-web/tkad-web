@@ -162,10 +162,10 @@ export function FieldSurveyPanel({
                   className="mt-1"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold dark:text-white text-gray-900">
+                  <p className="truncate tkad-type-title dark:text-white text-gray-900">
                     {it.name}
                   </p>
-                  <p className="text-[10px] dark:text-white text-gray-400">
+                  <p className="tkad-type-note dark:text-white text-gray-400">
                     {(km * 1000).toFixed(0)}m · {it.type}
                   </p>
                   {checkedIds.has(it.id) ? (

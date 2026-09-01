@@ -61,7 +61,7 @@ function AdminInstantBookingsPage() {
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <header>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           Operations
         </p>
         <h1 className="text-2xl font-black tracking-tight">즉시 예약 (소액 DOOH)</h1>
@@ -80,7 +80,7 @@ function AdminInstantBookingsPage() {
       ) : (
         <div className="overflow-x-auto rounded-[16px] border border-border">
           <table className="w-full min-w-[900px] text-left text-sm">
-            <thead className="border-b border-border bg-muted/40 font-display text-xs font-medium uppercase tracking-[0.18em]">
+            <thead className="border-b border-border bg-muted/40 tkad-type-label">
               <tr>
                 <th className="px-3 py-2">매체</th>
                 <th className="px-3 py-2">기간</th>
@@ -114,7 +114,7 @@ function AdminInstantBookingsPage() {
                       {row.status}
                     </span>
                     {row.lastPayment ? (
-                      <p className="mt-1 text-[10px] text-muted-foreground">
+                      <p className="mt-1 tkad-type-note text-muted-foreground">
                         {row.lastPayment.provider} / {row.lastPayment.status}
                       </p>
                     ) : null}

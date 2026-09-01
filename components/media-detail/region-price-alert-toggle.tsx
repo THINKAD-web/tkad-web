@@ -83,7 +83,7 @@ export function RegionPriceAlertToggle({
       type="button"
       onClick={() => void toggle()}
       disabled={pending}
-      className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border/80 bg-background/60 px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-muted/50 disabled:opacity-50"
+      className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border/80 bg-background/60 px-3 py-2 tkad-type-title text-foreground transition hover:bg-muted/50 disabled:opacity-50"
     >
       {pending ? (
         <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />

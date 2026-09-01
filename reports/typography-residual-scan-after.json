@@ -1,0 +1,52 @@
+{
+  "scannedAt": "2026-08-31T08:56:38.745Z",
+  "total": 96,
+  "fileCount": 10,
+  "byZone": {
+    "brutalist": 20,
+    "document": 22,
+    "pdf-export": 54
+  },
+  "topFiles": [
+    {
+      "file": "components/quote-pdf-preview.tsx",
+      "count": 25
+    },
+    {
+      "file": "components/brutalist/nav.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/quote/quote-premium.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/document/quote-media-line-card.tsx",
+      "count": 14
+    },
+    {
+      "file": "components/quote/quote-formal-preview.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/document/media-detail-card.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/brutalist/footer.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/brutalist/btn-block.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/document/document-layout.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/proposal/proposal-pdf-content.tsx",
+      "count": 1
+    }
+  ]
+}

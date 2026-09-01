@@ -53,7 +53,7 @@ function KakaoIcon({ className }: { className?: string }) {
 }
 
 const colTitleClass =
-  "font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-900 dark:text-white";
+  "font-display tkad-type-caption font-semibold uppercase tracking-[0.16em] text-gray-900 dark:text-white";
 
 const colLinkClass =
   "block text-xs text-gray-600 transition hover:text-[color:var(--qp-accent)] dark:text-white/65 dark:hover:text-[color:var(--qp-accent)]";
@@ -126,7 +126,7 @@ export function FooterBrutal() {
   ] as const;
 
   const legalMeta = (
-    <div className="space-y-0.5 text-[11px] leading-relaxed text-gray-500 dark:text-white/45">
+    <div className="space-y-0.5 tkad-type-caption leading-relaxed text-gray-500 dark:text-white/45">
       <p className="font-medium text-gray-700 dark:text-white/70">{t("footer.companyName")}</p>
       <p>{t("footer.ceo")}</p>
       <p>{t("footer.bizNumber")}</p>
@@ -176,7 +176,7 @@ export function FooterBrutal() {
   const brandMark = (
     <Link
       href="/"
-      className="inline-block font-display text-[11px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+      className="inline-block font-display tkad-type-caption font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
     >
       THINK
       <span className="text-[color:var(--qp-accent)]">AD</span>
@@ -265,7 +265,7 @@ export function FooterBrutal() {
               {socialRow}
               <Link
                 href="/guide/how-to-use"
-                className="text-xs font-semibold text-[color:var(--qp-accent)] underline-offset-2 hover:underline"
+                className="tkad-type-title text-[color:var(--qp-accent)] underline-offset-2 hover:underline"
               >
                 {t("footer.usageGuideLink")}
               </Link>
@@ -308,7 +308,7 @@ export function FooterBrutal() {
 
       <div className="relative border-t border-gray-200 bg-white/90 px-4 py-3 dark:border-white/10 dark:bg-black/50 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 sm:flex-row sm:flex-wrap">
-          <span className="text-[11px] text-gray-500 dark:text-white/45">
+          <span className="tkad-type-caption text-gray-500 dark:text-white/45">
             {t("footer.copyrightShort", { year })}
           </span>
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
@@ -320,7 +320,7 @@ export function FooterBrutal() {
             <button
               type="button"
               onClick={() => setSitemapOpen(true)}
-              className="rounded-md border border-gray-200 px-2 py-0.5 text-[11px] text-gray-500 transition hover:border-[color:var(--qp-accent)]/40 hover:text-[color:var(--qp-accent)] dark:border-white/10 dark:text-white/40"
+              className="rounded-md border border-gray-200 px-2 py-0.5 tkad-type-caption text-gray-500 transition hover:border-[color:var(--qp-accent)]/40 hover:text-[color:var(--qp-accent)] dark:border-white/10 dark:text-white/40"
             >
               ⊞ {t("footer.sitemap")}
             </button>

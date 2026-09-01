@@ -119,7 +119,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
                   <p className="font-semibold">{c.title}</p>
                   <p className="mt-0.5 text-[#444]">{c.summary}</p>
                   {c.result ? (
-                    <p className="mt-1 text-xs font-semibold text-[color:var(--qp-accent)]">
+                    <p className="mt-1 tkad-type-title text-[color:var(--qp-accent)]">
                       {isKo ? "성과" : "Result"}: {c.result}
                     </p>
                   ) : null}
@@ -155,7 +155,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
                       {isKo ? "전환" : "Conv."} <b className="tabular-nums">{num(r.conversions, isKo)}</b>
                     </p>
                   ) : null}
-                  {r.note ? <p className="mt-1 text-[10px] text-[#888]">{r.note}</p> : null}
+                  {r.note ? <p className="mt-1 tkad-type-note text-[#888]">{r.note}</p> : null}
                 </div>
               ))}
             </div>
@@ -247,7 +247,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
 
       {sections.map(renderSection)}
 
-      <footer className="mt-10 border-t border-[#ccc] pt-4 text-[10px] text-[#666]">
+      <footer className="mt-10 border-t border-[#ccc] pt-4 tkad-type-note text-[#666]">
         THINKAD (싱커드) · sales@tkad.co.kr · 02-515-2772
       </footer>
     </div>

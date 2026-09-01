@@ -40,7 +40,7 @@ export function DiscoveryPageHeader({
       )}
     >
       {eyebrow ? (
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+        <p className="tkad-type-label text-hermes">
           {eyebrow}
         </p>
       ) : null}

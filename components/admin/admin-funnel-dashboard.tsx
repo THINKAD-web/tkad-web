@@ -48,7 +48,7 @@ export function AdminFunnelDashboard({
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border bg-card p-4">
-          <h2 className="text-sm font-semibold">UTM 소스 (상위)</h2>
+          <h2 className="tkad-type-title">UTM 소스 (상위)</h2>
           <ul className="mt-3 space-y-2">
             {stats.byUtmSource.length === 0 ? (
               <li className="text-sm text-muted-foreground">데이터 없음</li>
@@ -67,7 +67,7 @@ export function AdminFunnelDashboard({
         </section>
 
         <section className="rounded-xl border bg-card p-4">
-          <h2 className="text-sm font-semibold">이벤트 스텝</h2>
+          <h2 className="tkad-type-title">이벤트 스텝</h2>
           <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto">
             {stats.stepCounts.map((row) => (
               <li key={row.step} className="flex justify-between text-sm">
@@ -81,7 +81,7 @@ export function AdminFunnelDashboard({
 
       {stats.daily.length > 0 ? (
         <section className="rounded-xl border bg-card p-4">
-          <h2 className="text-sm font-semibold">일별 세션 · 견적</h2>
+          <h2 className="tkad-type-title">일별 세션 · 견적</h2>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>

@@ -19,7 +19,7 @@ export function MediaPriceExclNote({
     return (
       <span
         className={cn(
-          "text-[10px] font-normal text-gray-400 dark:text-white/45",
+          "tkad-type-note font-normal text-gray-400 dark:text-white/45",
           className,
         )}
       >
@@ -30,7 +30,7 @@ export function MediaPriceExclNote({
   return (
     <span
       className={cn(
-        "block text-[10px] leading-tight text-gray-400 dark:text-white/45",
+        "block tkad-type-note leading-tight text-gray-400 dark:text-white/45",
         className,
       )}
     >

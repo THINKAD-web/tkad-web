@@ -86,11 +86,11 @@ export function NetworkRecommendations({ isKo, networks }: Props) {
                 </p>
                 <p className="font-display text-lg font-black tabular-nums text-violet-600 dark:text-violet-300">
                   {formatNetworkPriceWon(n.pricePerUnit, isKo)}
-                  <span className="ml-1 text-xs font-semibold text-gray-400 dark:text-white/40">
+                  <span className="ml-1 tkad-type-title text-gray-400 dark:text-white/40">
                     {isKo ? "/월·면" : "/mo·unit"}
                   </span>
                 </p>
-                <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-cyan-600 opacity-0 transition group-hover:opacity-100 dark:text-cyan-400">
+                <span className="mt-auto inline-flex items-center gap-1 tkad-type-title text-cyan-600 opacity-0 transition group-hover:opacity-100 dark:text-cyan-400">
                   {isKo ? "상세 보기" : "View details"}
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                 </span>

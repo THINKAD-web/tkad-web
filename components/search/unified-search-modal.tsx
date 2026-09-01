@@ -62,11 +62,11 @@ function HitRow({
       onClick={onPick}
       className="flex min-w-0 flex-col gap-0.5 rounded-lg px-3 py-2 transition-colors hover:bg-accent/10 dark:hover:dark:bg-white/8 bg-gray-100"
     >
-      <span className="truncate text-sm font-semibold text-foreground dark:text-white text-gray-900">
+      <span className="truncate tkad-type-title text-foreground dark:text-white text-gray-900">
         {hit.title}
       </span>
       {hit.subtitle ? (
-        <span className="truncate text-[11px] text-muted-foreground dark:text-white text-gray-400">
+        <span className="truncate tkad-type-caption text-muted-foreground dark:text-white text-gray-400">
           {hit.subtitle}
         </span>
       ) : null}
@@ -197,7 +197,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
           <div className="space-y-4 px-2 py-2">
             {recent.length > 0 ? (
               <div>
-                <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                <p className="mb-2 tkad-type-label text-muted-foreground">
                   {t("recent")}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -206,7 +206,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
                       key={r}
                       type="button"
                       onClick={() => goFullSearch(r)}
-                      className="rounded-full border border-border px-3 py-1 text-[11px] hover:bg-muted dark:border-white/12 border-gray-200 dark:hover:dark:bg-white/8 bg-gray-100"
+                      className="rounded-full border border-border px-3 py-1 tkad-type-caption hover:bg-muted dark:border-white/12 border-gray-200 dark:hover:dark:bg-white/8 bg-gray-100"
                     >
                       {r}
                     </button>
@@ -215,7 +215,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
               </div>
             ) : null}
             <div>
-              <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              <p className="mb-2 tkad-type-label text-muted-foreground">
                 {t("popular")}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -224,7 +224,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
                     key={p}
                     type="button"
                     onClick={() => goFullSearch(p)}
-                    className="rounded-full border border-accent/30 bg-accent/8 px-3 py-1 text-[11px] text-accent dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-200"
+                    className="rounded-full border border-accent/30 bg-accent/8 px-3 py-1 tkad-type-caption text-accent dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-200"
                   >
                     {p}
                   </button>
@@ -233,7 +233,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
             </div>
             {suggestions.length > 0 ? (
               <div>
-                <p className="mb-1 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                <p className="mb-1 tkad-type-label text-muted-foreground">
                   {t("mediaSuggest")}
                 </p>
                 {suggestions.map((h) => (
@@ -254,7 +254,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
               const meta = SECTION_META[key];
               return (
                 <section key={key}>
-                  <p className="mb-1 flex items-center gap-2 px-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="mb-1 flex items-center gap-2 px-2 tkad-type-label text-muted-foreground">
                     <span aria-hidden>{meta.emoji}</span>
                     {t(meta.labelKey)}
                   </p>
@@ -270,7 +270,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
               <button
                 type="button"
                 onClick={() => goFullSearch(query)}
-                className="mt-2 w-full rounded-xl border border-border py-2.5 text-center text-sm font-semibold text-accent hover:bg-accent/10 dark:border-white/12 border-gray-200"
+                className="mt-2 w-full rounded-xl border border-border py-2.5 text-center tkad-type-title text-accent hover:bg-accent/10 dark:border-white/12 border-gray-200"
               >
                 {t("viewAll", { count: results.totalCount })}
               </button>

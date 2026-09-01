@@ -129,11 +129,11 @@ export function AdminInquiryAutoProposalClient() {
   return (
     <div className="space-y-6 text-foreground">
       <header className="space-y-2">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ INQUIRY AUTO PROPOSAL ]
         </p>
         <h1 className="text-xl font-bold tracking-tight">문의 자동 매칭 dry-run</h1>
-        <p className="text-[11px] tracking-tight text-muted-foreground">
+        <p className="tkad-type-caption tracking-tight text-muted-foreground">
           {`// `}인바운드 메일은 아직 없음. 본문 → 매체 id → Step 3와 동일 스냅샷.
           발송은 @tkad.co.kr 등 테스트 주소만.
         </p>
@@ -153,7 +153,7 @@ export function AdminInquiryAutoProposalClient() {
           type="button"
           onClick={() => void runDry()}
           disabled={busy !== null}
-          className="inline-flex h-11 items-center gap-2 border-2 border-border bg-foreground px-4 font-display text-xs font-medium uppercase tracking-[0.18em] text-background disabled:opacity-50"
+          className="inline-flex h-11 items-center gap-2 border-2 border-border bg-foreground px-4 tkad-type-label text-background disabled:opacity-50"
         >
           {busy === "dry" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           dry-run 실행
@@ -189,7 +189,7 @@ export function AdminInquiryAutoProposalClient() {
             ))}
           </section>
           {result.parsed.budgetAssumed ? (
-            <p className="text-[11px] text-amber-800">
+            <p className="tkad-type-caption text-amber-800">
               예산이 본문에서 확실하지 않아 3,000만원으로 가정했습니다.
             </p>
           ) : null}
@@ -257,7 +257,7 @@ export function AdminInquiryAutoProposalClient() {
               ) : null}
             </ul>
             {result.bodyTotalWon != null ? (
-              <p className="text-[11px] text-muted-foreground">
+              <p className="tkad-type-caption text-muted-foreground">
                 본문 합계 {won(result.bodyTotalWon)} / 예산 {won(result.parsed.budgetWon)}
               </p>
             ) : null}
@@ -378,7 +378,7 @@ export function AdminInquiryAutoProposalClient() {
                 type="button"
                 onClick={() => void sendTest()}
                 disabled={busy !== null || !result.snapshot}
-                className="inline-flex h-11 items-center justify-center gap-2 border-2 border-border px-4 font-display text-xs font-medium uppercase tracking-[0.18em] disabled:opacity-50"
+                className="inline-flex h-11 items-center justify-center gap-2 border-2 border-border px-4 tkad-type-label disabled:opacity-50"
               >
                 {busy === "send" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -386,7 +386,7 @@ export function AdminInquiryAutoProposalClient() {
                 테스트 발송
               </button>
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="tkad-type-caption text-muted-foreground">
               고객 도메인(gmail 등)은 거부합니다. 추가 주소는
               INQUIRY_AUTO_PROPOSAL_TEST_TO.
             </p>

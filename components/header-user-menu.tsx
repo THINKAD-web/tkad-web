@@ -54,7 +54,7 @@ export function HeaderUserMenu({
         {session ? (
           <>
             <div className="space-y-3 px-5 py-4">
-              <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+              <p className="truncate tkad-type-title text-gray-900 dark:text-white">
                 {session.name}
               </p>
               <MyPlanStatusBadge

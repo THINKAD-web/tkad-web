@@ -147,7 +147,7 @@ export default function UsersAdminClient() {
                     <td className="px-4 py-3">
                       <div className="text-slate-700 truncate max-w-[200px]">{u.email}</div>
                       {!u.emailVerifiedAt && (
-                        <span className="text-[10px] text-amber-600 font-medium">미인증</span>
+                        <span className="tkad-type-note text-amber-600 font-medium">미인증</span>
                       )}
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell text-foreground/90">{u.company ?? "-"}</td>

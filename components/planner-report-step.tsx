@@ -184,7 +184,7 @@ export function PlannerMediaRationaleBlock({
   if (scored.length === 0) return null;
   return (
     <div className="rounded-2xl border-2 border-border bg-card p-5">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
+      <p className="tkad-type-label text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
         [ {isKo ? "왜 이 매체?" : "Why this media?"} ]
       </p>
       <ul className="mt-4 space-y-4">
@@ -201,7 +201,7 @@ export function PlannerMediaRationaleBlock({
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-sm font-bold text-foreground">{name}</p>
-                <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="tkad-type-label text-muted-foreground">
                   {isKo ? "적합도" : "Fit"} {Math.round(row.score * 100)}
                 </span>
               </div>

@@ -23,7 +23,7 @@ export function PageHero({
       <p className="mb-2 flex flex-wrap items-center gap-2 text-xs tracking-widest uppercase text-[color:var(--qp-fg-muted)]">
         <span>{eyebrow}</span>
         {showBeta ? (
-          <span className="inline-flex items-center rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-[color:var(--qp-accent)] normal-case">
+          <span className="inline-flex items-center rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-2 py-0.5 tkad-type-note font-semibold tracking-[0.14em] text-[color:var(--qp-accent)] normal-case">
             Beta
           </span>
         ) : null}

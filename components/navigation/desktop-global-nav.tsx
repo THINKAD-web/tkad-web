@@ -43,7 +43,7 @@ function isMobileDetailPath(pathname: string): boolean {
 
 function navItemClass(active: boolean, open: boolean) {
   return cn(
-    "inline-flex min-h-8 items-center gap-0.5 rounded-[var(--qp-radius-md)] px-3 py-1.5 text-[13px] font-semibold leading-none transition-colors",
+    "inline-flex min-h-8 items-center gap-0.5 rounded-[var(--qp-radius-md)] px-3 py-1.5 tkad-type-body font-semibold leading-none transition-colors",
     active || open
       ? "tkad-qp-cta bg-[color:var(--qp-accent)]"
       : "text-gray-600 hover:bg-gray-100 dark:text-white/70 dark:hover:bg-white/8",
@@ -161,16 +161,16 @@ function NavGroupPanel({
                     className={cn(
                       "block text-gray-800 dark:text-white/90",
                       item.id === "ai-recommend"
-                        ? "text-[13px] font-medium text-gray-600 dark:text-white/65"
+                        ? "tkad-type-body font-medium text-gray-600 dark:text-white/65"
                         : item.secondary
-                          ? "text-[13px] font-semibold"
-                          : "text-sm font-semibold",
+                          ? "tkad-type-body font-semibold"
+                          : "tkad-type-title",
                     )}
                   >
                     {item.label}
                   </span>
                   {item.badge ? (
-                    <span className="rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
+                    <span className="rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-1.5 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
                       {item.badge}
                     </span>
                   ) : null}

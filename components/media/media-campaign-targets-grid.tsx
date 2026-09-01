@@ -35,7 +35,7 @@ export function MediaCampaignTargetsGrid({ previews, isKo }: Props) {
     <div className="pb-10">
       <div className="px-4 pb-6 pt-1 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <p className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="mb-3 tkad-type-label text-accent">
             [ {isKo ? "왜 광고해?" : "Campaign goal"} ]
           </p>
           <div className="flex flex-wrap gap-2">
@@ -145,7 +145,7 @@ export function MediaCampaignTargetsGrid({ previews, isKo }: Props) {
                   {card.recommendation}
                 </p>
                 {count > 0 ? (
-                  <p className="mt-2 font-display text-[11px] font-medium uppercase tracking-[0.14em] text-accent">
+                  <p className="mt-2 font-display tkad-type-caption font-medium uppercase tracking-[0.14em] text-accent">
                     {isKo
                       ? `매칭 ${count.toLocaleString("ko-KR")}건`
                       : `${count.toLocaleString("en-US")} matches`}

@@ -188,7 +188,7 @@ export default function MediaLightbox({
                   href={src}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 inline-block text-sm font-semibold text-gold underline-offset-4 hover:underline"
+                  className="mt-4 inline-block tkad-type-title text-gold underline-offset-4 hover:underline"
                 >
                   새 탭에서 열기
                 </a>

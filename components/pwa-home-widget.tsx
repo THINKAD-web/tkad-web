@@ -70,12 +70,12 @@ export function PwaHomeWidget() {
         "tkad-glass-surface mx-auto mb-8 max-w-6xl rounded-2xl p-4",
       )}
     >
-      <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-cyan-300/90">
+      <p className="tkad-type-label text-cyan-300/90">
         {isKo ? "앱 홈" : "App home"}
       </p>
       <div className="mt-4 grid gap-4 md:grid-cols-3">
         <div>
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold dark:text-white text-gray-700">
+          <p className="mb-2 flex items-center gap-1.5 tkad-type-title dark:text-white text-gray-700">
             <MapPin className="h-3.5 w-3.5" />
             {isKo ? "최근 본 매체" : "Recent media"}
           </p>
@@ -97,7 +97,7 @@ export function PwaHomeWidget() {
           )}
         </div>
         <div>
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold dark:text-white text-gray-700">
+          <p className="mb-2 flex items-center gap-1.5 tkad-type-title dark:text-white text-gray-700">
             <Megaphone className="h-3.5 w-3.5" />
             {isKo ? "진행 중 캠페인" : "Active campaigns"}
           </p>

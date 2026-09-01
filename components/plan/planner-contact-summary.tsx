@@ -27,7 +27,7 @@ export function PlannerContactSummary({ plan }: Props) {
 
   return (
     <div className="mb-4 rounded-xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-4 dark:border-[color:var(--qp-accent)]/30 dark:bg-[color:var(--qp-accent)]/10">
-      <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-white">
+      <p className="mb-2 tkad-type-title text-gray-900 dark:text-white">
         {title}
       </p>
       {plan.mediaNames.map((name, i) => (

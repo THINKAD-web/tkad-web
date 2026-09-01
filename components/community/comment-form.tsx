@@ -96,7 +96,7 @@ export function CommunityCommentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+      <p className="tkad-type-label dark:text-white text-gray-500">
         [ 댓글 작성 ]
       </p>
 
@@ -104,7 +104,7 @@ export function CommunityCommentForm({
         <span className="font-bold dark:text-white text-gray-900">{currentUser.name}</span>
         <RoleBadge role={memberRole} locale={locale} />
         {currentUser.company ? (
-          <span className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
+          <span className="tkad-type-label dark:text-white">
             {currentUser.company}
           </span>
         ) : null}
@@ -120,13 +120,13 @@ export function CommunityCommentForm({
           maxLength={COMMUNITY_LIMITS.COMMENT_BODY_MAX}
           required
         />
-        <p className="mt-1 text-right text-[10px] tabular-nums dark:text-white">
+        <p className="mt-1 text-right tkad-type-note tabular-nums dark:text-white">
           {body.length} / {COMMUNITY_LIMITS.COMMENT_BODY_MAX}
         </p>
       </label>
 
       {error ? (
-        <p className="rounded-2xl border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-3 py-2 text-[11px] tracking-tight text-rose-200">
+        <p className="rounded-2xl border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-3 py-2 tkad-type-caption tracking-tight text-rose-200">
           {`// `}
           {error}
         </p>
@@ -135,7 +135,7 @@ export function CommunityCommentForm({
       <button
         type="submit"
         disabled={!canSubmit}
-        className="inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes/15 px-6 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:bg-hermes/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes/15 px-6 py-3 tkad-type-label dark:text-white text-gray-900 transition-colors hover:bg-hermes/20 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {busy ? "전송 중…" : "댓글 등록"}
       </button>

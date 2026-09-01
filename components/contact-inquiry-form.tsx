@@ -777,7 +777,7 @@ function ContactInquiryForm() {
   const btnPrimary =
     "tkad-qp-cta inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[160px] sm:w-auto";
   const btnSecondary =
-    "inline-flex h-12 items-center justify-center rounded-xl border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 px-6 text-sm font-semibold dark:text-white text-gray-900 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex h-12 items-center justify-center rounded-xl border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 px-6 tkad-type-title dark:text-white text-gray-900 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50";
   const chipActive =
     "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent)] text-white shadow-sm";
   const chipIdle =
@@ -962,7 +962,7 @@ function ContactInquiryForm() {
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]">
           <CheckCircle className="h-8 w-8" aria-hidden />
         </div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
+        <p className="tkad-type-label text-[color:var(--qp-accent)]/90">
           [ SUCCESS ]
         </p>
         <p className="text-lg font-bold tracking-tight dark:text-white text-gray-900">
@@ -973,7 +973,7 @@ function ContactInquiryForm() {
         </p>
 
         <div className="mt-4 w-full max-w-sm rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur">
-          <div className="flex items-center justify-center gap-2 text-sm font-semibold dark:text-white text-gray-800">
+          <div className="flex items-center justify-center gap-2 tkad-type-title dark:text-white text-gray-800">
             <MessageCircle className="h-4 w-4 text-[color:var(--qp-accent)]" aria-hidden />
             {tForm("kakaoLead")}
           </div>
@@ -1010,7 +1010,7 @@ function ContactInquiryForm() {
           className="rounded-2xl border-2 border-amber-500/40 bg-amber-500/10 px-5 py-4"
           role="status"
         >
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+          <p className="tkad-type-label text-amber-700 dark:text-amber-300">
             [ {tRecommend("integratedNotice.title")} ]
           </p>
           <p className="mt-2 text-sm font-bold text-foreground">
@@ -1019,7 +1019,7 @@ function ContactInquiryForm() {
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href="/planner/integrated"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-4 text-sm font-semibold text-white transition hover:opacity-90"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-4 tkad-type-title text-white transition hover:opacity-90"
             >
               {tRecommend("integratedNotice.ctaPlanner")}
             </Link>
@@ -1033,7 +1033,7 @@ function ContactInquiryForm() {
         <PlannerContactSummary plan={planTransfer} />
       ) : packageRef ? (
         <div className="rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-4 text-sm dark:text-white text-gray-800">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
+          <p className="tkad-type-label text-[color:var(--qp-accent)]/90">
             [ PACKAGE REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("packageRefBanner")}</p>
@@ -1042,14 +1042,14 @@ function ContactInquiryForm() {
           </p>
           <Link
             href="/media/packages"
-            className="mt-3 inline-flex text-sm font-semibold text-[color:var(--qp-accent)] transition hover:opacity-90"
+            className="mt-3 inline-flex tkad-type-title text-[color:var(--qp-accent)] transition hover:opacity-90"
           >
             {t("packageRefViewPackages")} →
           </Link>
         </div>
       ) : plannerPlanRef ? (
         <div className="rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-4 text-sm dark:text-white text-gray-800">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
+          <p className="tkad-type-label text-[color:var(--qp-accent)]/90">
             [ PLANNER REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("plannerRefBanner")}</p>
@@ -1058,14 +1058,14 @@ function ContactInquiryForm() {
           </p>
           <Link
             href="/planner"
-            className="mt-3 inline-flex text-sm font-semibold text-[color:var(--qp-accent)] transition hover:opacity-90"
+            className="mt-3 inline-flex tkad-type-title text-[color:var(--qp-accent)] transition hover:opacity-90"
           >
             {t("plannerRefViewPlanner")} →
           </Link>
         </div>
       ) : publishedCaseRef ? (
         <div className="rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-4 text-sm dark:text-white text-gray-800">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
+          <p className="tkad-type-label text-[color:var(--qp-accent)]/90">
             [ CASE REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("caseRefBanner")}</p>
@@ -1077,20 +1077,20 @@ function ContactInquiryForm() {
           </p>
           <Link
             href={`/cases/${publishedCaseRef.id}`}
-            className="mt-3 inline-flex text-sm font-semibold text-[color:var(--qp-accent)] transition hover:opacity-90"
+            className="mt-3 inline-flex tkad-type-title text-[color:var(--qp-accent)] transition hover:opacity-90"
           >
             {t("caseRefViewCase")} →
           </Link>
         </div>
       ) : academyTopic ? (
         <div className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-4 text-sm dark:text-white text-gray-800 backdrop-blur">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
+          <p className="tkad-type-label text-[color:var(--qp-accent)]/90">
             [ ACADEMY REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("academyRefBanner")}</p>
           <Link
             href="/academy"
-            className="mt-3 inline-flex text-sm font-semibold text-[color:var(--qp-accent)] transition hover:opacity-90"
+            className="mt-3 inline-flex tkad-type-title text-[color:var(--qp-accent)] transition hover:opacity-90"
           >
             {t("academyRefBack")} →
           </Link>
@@ -1128,7 +1128,7 @@ function ContactInquiryForm() {
                   })
                 }
                 className={cn(
-                  "rounded-xl border px-3 py-3 text-sm font-semibold transition-ui",
+                  "rounded-xl border px-3 py-3 tkad-type-title transition-ui",
                   inquiryType === tab.value ? chipActive : chipIdle,
                 )}
               >
@@ -1271,7 +1271,7 @@ function ContactInquiryForm() {
                     type="button"
                     onClick={() => toggleGoal(g)}
                     className={cn(
-                      "rounded-xl border px-3 py-2 text-xs font-semibold transition-ui",
+                      "rounded-xl border px-3 py-2 tkad-type-title transition-ui",
                       on ? chipActive : chipIdle,
                     )}
                   >
@@ -1299,7 +1299,7 @@ function ContactInquiryForm() {
                     type="button"
                     onClick={() => toggleRegion(r)}
                     className={cn(
-                      "rounded-xl border px-3 py-2 text-xs font-semibold transition-ui",
+                      "rounded-xl border px-3 py-2 tkad-type-title transition-ui",
                       on ? chipActive : chipIdle,
                     )}
                   >

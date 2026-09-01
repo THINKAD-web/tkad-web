@@ -28,7 +28,7 @@ export function CategoryButtonGrid({
   return (
     <div className={className}>
       {title ? (
-        <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-white/80">
+        <h3 className="mb-3 tkad-type-title text-gray-700 dark:text-white/80">
           {title}
         </h3>
       ) : null}

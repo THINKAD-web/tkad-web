@@ -48,7 +48,7 @@ export const STICKY_ACTION_BAR_ROW =
   "mx-auto flex w-full max-w-lg items-center gap-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
 
 export const STICKY_ACTION_BAR_BTN =
-  "inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-lg border px-2 text-[11px] font-semibold leading-none transition active:scale-95";
+  "inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-lg border px-2 tkad-type-caption font-semibold leading-none transition active:scale-95";
 
 /**
  * 보조 액션(플랜/비우기/해제) — 짧은 라벨 + 다크 idle 면 강화

@@ -87,7 +87,7 @@ export function MobileMediaBrowseBar({
                 type="button"
                 onClick={() => onSortChange(tab.value)}
                 className={cn(
-                  "whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors",
+                  "whitespace-nowrap rounded-full px-3.5 py-1.5 tkad-type-title transition-colors",
                   active
                     ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
                     : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",

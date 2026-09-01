@@ -64,7 +64,7 @@ const chipSelected =
   "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent-soft)] tkad-qp-text-primary";
 
 const btnSecondary =
-  "tkad-qp-auth-btn inline-flex h-12 w-full items-center justify-center border dark:border-white/15 border-gray-300 dark:bg-white/5 bg-white/70 px-6 text-sm font-semibold tkad-qp-text-primary transition-colors hover:dark:bg-white/10 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50";
+  "tkad-qp-auth-btn inline-flex h-12 w-full items-center justify-center border dark:border-white/15 border-gray-300 dark:bg-white/5 bg-white/70 px-6 tkad-type-title tkad-qp-text-primary transition-colors hover:dark:bg-white/10 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50";
 
 type Props = {
   initialCompleted: boolean;
@@ -233,14 +233,14 @@ export function OnboardingWizard({ initialCompleted, initialPreference }: Props)
               type="button"
               onClick={() => void handleSkip()}
               disabled={saving}
-              className="shrink-0 rounded-[var(--qp-radius-md)] border dark:border-white/12 border-gray-200 px-3 py-1.5 font-display text-[10px] font-semibold uppercase tracking-[0.16em] tkad-qp-text-muted transition-colors hover:border-[color:var(--qp-accent)]/35 disabled:opacity-50"
+              className="shrink-0 rounded-[var(--qp-radius-md)] border dark:border-white/12 border-gray-200 px-3 py-1.5 font-display tkad-type-note font-semibold uppercase tracking-[0.16em] tkad-qp-text-muted transition-colors hover:border-[color:var(--qp-accent)]/35 disabled:opacity-50"
             >
               {t("skip")}
             </button>
           </header>
 
           <div className="mb-8">
-            <div className="mb-2 flex justify-between font-display text-[10px] font-medium uppercase tracking-[0.18em] tkad-qp-text-muted">
+            <div className="mb-2 flex justify-between font-display tkad-type-note font-medium uppercase tracking-[0.18em] tkad-qp-text-muted">
               <span>
                 {t("stepLabel", { current: displayStep, total: totalSteps })}
               </span>
@@ -292,7 +292,7 @@ export function OnboardingWizard({ initialCompleted, initialPreference }: Props)
                           <span className="block text-sm font-bold tracking-tight">
                             {opt.label}
                           </span>
-                          <span className="tkad-qp-text-muted mt-1 block text-[11px]">
+                          <span className="tkad-qp-text-muted mt-1 block tkad-type-caption">
                             {opt.desc}
                           </span>
                         </button>
@@ -301,13 +301,13 @@ export function OnboardingWizard({ initialCompleted, initialPreference }: Props)
                   </ul>
                 ) : role ? (
                   <div className="mt-6 flex items-center justify-between gap-3 rounded-[var(--qp-radius-md)] border dark:border-white/12 border-gray-200 px-4 py-3">
-                    <p className="text-sm font-semibold tkad-qp-text-primary">
+                    <p className="tkad-type-title tkad-qp-text-primary">
                       {isKo ? "시작 역할" : "Your role"}: {roleLabel}
                     </p>
                     <button
                       type="button"
                       onClick={() => setShowRolePicker(true)}
-                      className="text-xs font-semibold text-[color:var(--qp-accent)] underline"
+                      className="tkad-type-title text-[color:var(--qp-accent)] underline"
                     >
                       {isKo ? "변경" : "Change"}
                     </button>
@@ -328,7 +328,7 @@ export function OnboardingWizard({ initialCompleted, initialPreference }: Props)
                             type="button"
                             onClick={() => toggleIndustry(opt.value)}
                             className={cn(
-                              "inline-flex items-center gap-1.5 rounded-[var(--qp-radius-md)] border px-4 py-2 text-sm font-semibold transition-ui",
+                              "inline-flex items-center gap-1.5 rounded-[var(--qp-radius-md)] border px-4 py-2 tkad-type-title transition-ui",
                               selected ? chipSelected : chipIdle,
                             )}
                           >
@@ -354,7 +354,7 @@ export function OnboardingWizard({ initialCompleted, initialPreference }: Props)
                               budgetRange === opt.value ? "true" : "false"
                             }
                             className={cn(
-                              "tkad-qp-auth-role w-full border px-4 py-3 text-left text-sm font-semibold transition-colors",
+                              "tkad-qp-auth-role w-full border px-4 py-3 text-left tkad-type-title transition-colors",
                               budgetRange === opt.value
                                 ? "border-[color:var(--qp-accent)]/45"
                                 : roleOptionIdle,
@@ -462,7 +462,7 @@ export function OnboardingWizard({ initialCompleted, initialPreference }: Props)
                   <button
                     type="button"
                     onClick={() => setPhase("prefs")}
-                    className="mt-4 w-full text-center font-display text-[10px] font-medium uppercase tracking-[0.18em] tkad-qp-text-muted transition-colors hover:opacity-80"
+                    className="mt-4 w-full text-center font-display tkad-type-note font-medium uppercase tracking-[0.18em] tkad-qp-text-muted transition-colors hover:opacity-80"
                   >
                     {t("back")}
                   </button>

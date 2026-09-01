@@ -126,7 +126,7 @@ export function ProUpgradePanel({
         id="pro-upgrade"
         className="scroll-mt-24 tkad-qp-pricing-card tkad-qp-accent-soft-surface border border-[color:var(--qp-accent)]/35 p-6 text-center sm:p-8"
       >
-        <p className="text-sm font-semibold">
+        <p className="tkad-type-title">
           {isKo
             ? "포인트 또는 카드로 PRO를 시작하려면 로그인해 주세요."
             : "Sign in to upgrade to PRO with points or card."}
@@ -158,7 +158,7 @@ export function ProUpgradePanel({
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.2em] text-[color:var(--qp-accent)]">
+          <p className="inline-flex items-center gap-1.5 tkad-type-label text-[color:var(--qp-accent)]">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {isKo ? "PRO 업그레이드" : "Upgrade to PRO"}
           </p>
@@ -178,7 +178,7 @@ export function ProUpgradePanel({
           </p>
         </div>
         <div className="rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 text-right dark:border-white/12 dark:bg-white/5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-white/45">
+          <p className="tkad-type-note font-semibold uppercase tracking-wider text-gray-500 dark:text-white/45">
             {isKo ? "내 포인트" : "Your points"}
           </p>
           {loadingBalance ? (
@@ -190,7 +190,7 @@ export function ProUpgradePanel({
           )}
           <Link
             href="/points"
-            className="mt-1 inline-block text-xs font-semibold text-[color:var(--qp-accent)] underline"
+            className="mt-1 inline-block tkad-type-title text-[color:var(--qp-accent)] underline"
           >
             {isKo ? "포인트 더 모으기 →" : "Earn more points →"}
           </Link>
@@ -249,7 +249,7 @@ export function ProUpgradePanel({
                       </p>
                     </div>
                     {(isKo ? badgeKo : badgeEn) ? (
-                      <span className="shrink-0 rounded-full bg-[color:var(--qp-accent-soft)] px-2 py-0.5 text-[10px] font-bold text-[color:var(--qp-accent)]">
+                      <span className="shrink-0 rounded-full bg-[color:var(--qp-accent-soft)] px-2 py-0.5 tkad-type-note font-bold text-[color:var(--qp-accent)]">
                         {isKo ? badgeKo : badgeEn}
                       </span>
                     ) : null}
@@ -309,7 +309,7 @@ export function ProUpgradePanel({
         id="lite-upgrade"
         className="scroll-mt-24 mt-6 tkad-qp-pricing-card border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
       >
-        <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-white/50">
+        <p className="tkad-type-label text-gray-500 dark:text-white/50">
           LITE
         </p>
         <h3 className="mt-2 text-lg font-black dark:text-white text-gray-900">
@@ -337,7 +337,7 @@ export function ProUpgradePanel({
         id="agency-upgrade"
         className="scroll-mt-24 mt-6 tkad-qp-pricing-card border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
       >
-        <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-white/50">
+        <p className="tkad-type-label text-gray-500 dark:text-white/50">
           AGENCY
         </p>
         <h3 className="mt-2 text-lg font-black dark:text-white text-gray-900">

@@ -112,7 +112,7 @@ export function MediaOwnerMatchDetailClient({ bidId }: { bidId: string }) {
       </div>
 
       <div className={ownerGlassCard}>
-        <p className="text-sm font-semibold dark:text-white text-gray-900">{bid.openBid.summaryKo}</p>
+        <p className="tkad-type-title dark:text-white text-gray-900">{bid.openBid.summaryKo}</p>
         <ul className="mt-3 space-y-1 text-xs dark:text-white text-gray-500">
           {bid.openBid.industryAnonymized ? (
             <li>
@@ -192,7 +192,7 @@ export function MediaOwnerMatchDetailClient({ bidId }: { bidId: string }) {
               disabled={isClosed || bid.status === "SELECTED"}
             />
           </label>
-          <p className="text-[10px] dark:text-white">
+          <p className="tkad-type-note dark:text-white">
             {isKo
               ? "* 제출 후 THINKAD 검토를 거쳐 광고주에게 전달됩니다."
               : "* Submitted quotes are reviewed before reaching the advertiser."}

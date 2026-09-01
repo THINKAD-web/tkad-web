@@ -32,7 +32,7 @@ export function PlanCartContactSummary() {
 
   return (
     <div className="rounded-xl border border-hermes/30 bg-hermes/5 p-4 text-sm dark:text-white text-gray-800">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes/90">
+      <p className="tkad-type-label text-hermes/90">
         {isKo ? "📋 선택하신 플랜" : "📋 Your plan"}
       </p>
       <ol className="mt-3 space-y-1.5 text-sm font-medium leading-relaxed">

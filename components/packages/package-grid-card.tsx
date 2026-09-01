@@ -67,7 +67,7 @@ export function PackageGridCard({
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
         {pkg.badgeText ? (
-          <span className="absolute left-3 top-3 rounded-md border border-white/25 bg-black/35 px-2 py-0.5 font-display text-[10px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
+          <span className="absolute left-3 top-3 rounded-md border border-white/25 bg-black/35 px-2 py-0.5 font-display tkad-type-note font-bold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
             {pkg.badgeText}
           </span>
         ) : null}
@@ -81,7 +81,7 @@ export function PackageGridCard({
         <div className="mt-auto flex flex-wrap items-end justify-between gap-2 pt-2">
           <div className="min-w-0 space-y-0.5">
             {count > 0 ? (
-              <p className="font-display text-xs font-medium uppercase tracking-[0.14em] text-accent">
+              <p className="tkad-type-label text-accent">
                 {matchLabel(count)}
               </p>
             ) : null}

@@ -95,7 +95,7 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
 
   const cardCtaClass = cn(
     "mt-auto inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md px-4 py-2.5",
-    "text-sm font-semibold transition-colors",
+    "tkad-type-title transition-colors",
   );
 
   return (
@@ -128,7 +128,7 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
           </p>
           <div className="grid gap-4 md:grid-cols-2">
             <article className={cardClass}>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+              <p className="tkad-type-title uppercase tracking-[0.14em] text-hermes">
                 {t("ecosystemIntegratedBadge")}
               </p>
               <h3 className="mt-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white">
@@ -150,7 +150,7 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
             </article>
 
             <article className={cardClass}>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+              <p className="tkad-type-title uppercase tracking-[0.14em] text-hermes">
                 {t("ecosystemDigitalBadge")}
               </p>
               <h3 className="mt-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white">
@@ -193,7 +193,7 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
             <dl className="space-y-4">
               {companyLeft.map(([label, value]) => (
                 <div key={label}>
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-white/45">
+                  <dt className="tkad-type-title uppercase tracking-wide text-gray-500 dark:text-white/45">
                     {label}
                   </dt>
                   <dd className="mt-1 whitespace-pre-line text-sm leading-relaxed text-gray-800 dark:text-white/80">
@@ -205,7 +205,7 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
             <dl className="space-y-4">
               {companyRight.map(([label, value]) => (
                 <div key={label}>
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-white/45">
+                  <dt className="tkad-type-title uppercase tracking-wide text-gray-500 dark:text-white/45">
                     {label}
                   </dt>
                   <dd className="mt-1 whitespace-pre-line text-sm leading-relaxed text-gray-800 dark:text-white/80">

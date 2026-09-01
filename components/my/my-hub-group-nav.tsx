@@ -77,7 +77,7 @@ function PrimaryNavCard({
       <span className="min-w-0 flex-1 pt-0.5">
         <span
           className={cn(
-            "block text-[15px] font-bold leading-tight tracking-tight",
+            "block text-base font-bold leading-tight tracking-tight",
             active
               ? "text-gray-950 dark:text-white"
               : "text-gray-900 dark:text-white",
@@ -86,7 +86,7 @@ function PrimaryNavCard({
           {label}
         </span>
         {desc ? (
-          <span className="mt-0.5 block text-[11px] leading-snug text-gray-500 dark:text-white/45">
+          <span className="mt-0.5 block tkad-type-caption leading-snug text-gray-500 dark:text-white/45">
             {desc}
           </span>
         ) : null}
@@ -144,7 +144,7 @@ function AccountLink({
     <Link
       href={navItemHref(item)}
       className={cn(
-        "rounded-md px-1 py-0.5 text-[11px] font-medium transition-colors",
+        "rounded-md px-1 py-0.5 tkad-type-caption font-medium transition-colors",
         active
           ? "text-[color:var(--qp-accent)] underline decoration-[color:var(--qp-accent)]/60 underline-offset-2"
           : "text-gray-500 hover:text-gray-800 dark:text-white/45 dark:hover:text-white/75",
@@ -172,7 +172,7 @@ function SecondaryListLink({
     <Link
       href={navItemHref(item)}
       className={cn(
-        "flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] transition-colors",
+        "flex items-center gap-2 rounded-lg px-2 py-2 tkad-type-body transition-colors",
         active
           ? "bg-[color:var(--qp-accent)]/12 font-semibold text-[color:var(--qp-accent)]"
           : "text-gray-600 hover:bg-gray-100 dark:text-white/65 dark:hover:bg-white/5",
@@ -221,7 +221,7 @@ function CollapsibleSection({
         className="flex w-full items-center justify-between gap-2 rounded-lg px-1 py-1.5 text-left transition-colors hover:bg-gray-100/80 dark:hover:bg-white/5"
         aria-expanded={open}
       >
-        <span className="font-display text-[11px] font-bold uppercase tracking-[0.16em] text-gray-700 dark:text-white/70">
+        <span className="font-display tkad-type-caption font-bold uppercase tracking-[0.16em] text-gray-700 dark:text-white/70">
           {title}
         </span>
         <ChevronDown
@@ -284,7 +284,7 @@ export function MyHubGroupNav({ className, variant = "sidebar" }: Props) {
       )}
       aria-label={isKo ? "마이페이지 메뉴" : "My page menu"}
     >
-      <p className="mb-2.5 px-0.5 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-gray-800 dark:text-white/80">
+      <p className="mb-2.5 px-0.5 font-display tkad-type-caption font-bold uppercase tracking-[0.18em] text-gray-800 dark:text-white/80">
         {isKo ? "자주 쓰는 메뉴" : "Quick access"}
       </p>
 
@@ -310,7 +310,7 @@ export function MyHubGroupNav({ className, variant = "sidebar" }: Props) {
           type="button"
           onClick={() => setMoreOpen((v) => !v)}
           className={cn(
-            "flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold transition-colors",
+            "flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left tkad-type-title transition-colors",
             moreOpen
               ? "border-gray-200 bg-gray-50 text-gray-700 dark:border-white/12 dark:bg-white/5 dark:text-white/75"
               : "border-dashed border-gray-300/80 text-gray-500 hover:border-gray-400 hover:bg-gray-50 dark:border-white/15 dark:text-white/50 dark:hover:bg-white/5",
@@ -372,7 +372,7 @@ export function MyHubGroupNav({ className, variant = "sidebar" }: Props) {
                         <span key={item.id} className="inline-flex items-center">
                           {idx > 0 ? (
                             <span
-                              className="mx-1 text-[10px] text-gray-300 dark:text-white/20"
+                              className="mx-1 tkad-type-note text-gray-300 dark:text-white/20"
                               aria-hidden
                             >
                               ·

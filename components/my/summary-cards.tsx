@@ -39,7 +39,7 @@ export function SummaryCards({ favorites, inProgress, totalQuotes }: Props) {
             className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 transition-colors hover:bg-muted"
           >
             <div className="mb-3 flex items-center justify-between">
-              <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+              <span className="tkad-type-label text-accent">
                 [ {c.label} ]
               </span>
               <span className="flex h-8 w-8 items-center justify-center border-2 border-border bg-accent text-accent-foreground">

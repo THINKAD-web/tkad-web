@@ -190,7 +190,7 @@ export function MyApiKeysPageClient() {
         ) : null}
 
         <form onSubmit={createKey} className={cn(glassCard, "mb-6")}>
-          <h2 className="text-sm font-semibold dark:text-white text-gray-900">
+          <h2 className="tkad-type-title dark:text-white text-gray-900">
             {isKo ? "새 API 키 발급" : "Create API key"}
           </h2>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row">

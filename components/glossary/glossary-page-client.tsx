@@ -112,7 +112,7 @@ export function GlossaryPageClient() {
             type="button"
             onClick={() => setActiveCategory("all")}
             className={cn(
-              "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+              "rounded-full px-3 py-1.5 tkad-type-title transition-colors",
               activeCategory === "all"
                 ? "bg-violet-500 text-white"
                 : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
@@ -130,7 +130,7 @@ export function GlossaryPageClient() {
                 type="button"
                 onClick={() => setActiveCategory(cat)}
                 className={cn(
-                  "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                  "rounded-full px-3 py-1.5 tkad-type-title transition-colors",
                   activeCategory === cat
                     ? "bg-violet-500 text-white"
                     : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",

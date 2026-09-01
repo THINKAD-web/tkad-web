@@ -204,7 +204,7 @@ function KeywordFilterEmptyState({
               type="button"
               onClick={() => onPickPopularKeyword(phrase)}
               className={cn(
-                "rounded-full border border-navy/12 bg-card px-4 py-2 text-xs font-semibold text-navy shadow-sm",
+                "rounded-full border border-navy/12 bg-card px-4 py-2 tkad-type-title text-navy shadow-sm",
                 "transition-ui hover:border-gold/45 hover:bg-gold/10 hover:shadow-md",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2",
               )}
@@ -213,7 +213,7 @@ function KeywordFilterEmptyState({
             </button>
           ))}
         </div>
-        <p className="mt-3 text-center text-[11px] leading-snug text-muted-foreground">
+        <p className="mt-3 text-center tkad-type-caption leading-snug text-muted-foreground">
           선택 시 검색창에 반영되고, 적용 중이던 필터와 정렬은 초기화돼요.
         </p>
       </div>
@@ -359,7 +359,7 @@ export function MediaKeywordFilterClient({
       <div className="sticky top-0 z-20 border-b border-border/60 bg-page/95 px-4 py-3 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
-            <span className="shrink-0 text-xs font-semibold tabular-nums text-navy/70">
+            <span className="shrink-0 tkad-type-title tabular-nums text-navy/70">
               {sorted.length}
               <span className="font-normal text-muted-foreground">
                 {" "}
@@ -419,7 +419,7 @@ export function MediaKeywordFilterClient({
           <div className="flex shrink-0 flex-col gap-1 sm:items-end">
             <span
               id={`${sortSelectId}-caption`}
-              className="whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.12em] text-navy/45 sm:text-right"
+              className="whitespace-nowrap tkad-type-note font-bold uppercase tracking-[0.12em] text-navy/45 sm:text-right"
             >
               정렬 기준
             </span>
@@ -483,7 +483,7 @@ export function MediaKeywordFilterClient({
                 {activeFilterCount > 0 && (
                   <Badge
                     variant="secondary"
-                    className="ml-1 rounded-full px-1.5 text-[10px]"
+                    className="ml-1 rounded-full px-1.5 tkad-type-note"
                   >
                     {activeFilterCount}
                   </Badge>
@@ -541,7 +541,7 @@ export function MediaKeywordFilterClient({
                             <Badge
                               key={`${m.id}-${t}`}
                               variant="secondary"
-                              className="font-normal text-[11px] text-muted-foreground"
+                              className="font-normal tkad-type-caption text-muted-foreground"
                             >
                               {t}
                             </Badge>
@@ -557,7 +557,7 @@ export function MediaKeywordFilterClient({
                         <a
                           href="#"
                           className={cn(
-                            "inline-flex w-full min-w-0 flex-1 items-center justify-center rounded-lg border border-navy/20 bg-card px-3 py-2.5 text-center text-xs font-semibold text-navy transition-colors sm:min-w-[6.5rem]",
+                            "inline-flex w-full min-w-0 flex-1 items-center justify-center rounded-lg border border-navy/20 bg-card px-3 py-2.5 text-center tkad-type-title text-navy transition-colors sm:min-w-[6.5rem]",
                             "hover:border-navy/40 hover:bg-navy/[0.04]",
                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/25",
                           )}
@@ -570,7 +570,7 @@ export function MediaKeywordFilterClient({
                             window.alert(`${m.title} 견적 문의`);
                           }}
                           className={cn(
-                            "inline-flex w-full min-w-0 flex-1 items-center justify-center rounded-lg bg-navy px-3 py-2.5 text-center text-xs font-semibold dark:text-white text-gray-900 shadow-sm transition-colors sm:min-w-[6.5rem]",
+                            "inline-flex w-full min-w-0 flex-1 items-center justify-center rounded-lg bg-navy px-3 py-2.5 text-center tkad-type-title dark:text-white text-gray-900 shadow-sm transition-colors sm:min-w-[6.5rem]",
                             "hover:bg-navy-light",
                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2",
                           )}
@@ -601,7 +601,7 @@ export function MediaKeywordFilterClient({
                     }}
                   >
                     더 보기
-                    <span className="ml-1.5 tabular-nums text-xs font-semibold text-muted-foreground">
+                    <span className="ml-1.5 tabular-nums tkad-type-title text-muted-foreground">
                       ({remainingCount}건 남음)
                     </span>
                   </Button>

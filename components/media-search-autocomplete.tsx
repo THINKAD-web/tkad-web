@@ -190,7 +190,7 @@ export default function MediaSearchAutocomplete({
           <button
             type="button"
             onClick={submitTextSearch}
-            className="tkad-planner-wizard-btn-accent shrink-0 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-navy/90"
+            className="tkad-planner-wizard-btn-accent shrink-0 rounded-lg bg-navy px-4 py-2.5 tkad-type-title text-white transition-colors hover:bg-navy/90"
           >
             {btnLabel}
           </button>
@@ -222,7 +222,7 @@ export default function MediaSearchAutocomplete({
                 </div>
               </div>
               <div className="shrink-0 text-right">
-                <span className="text-[11px] font-semibold leading-tight text-gold-dark">
+                <span className="tkad-type-caption font-semibold leading-tight text-gold-dark">
                   {formatMediaDisplayPrice(media, isKo ? "ko-KR" : "en-US")}
                 </span>
                 <MediaPriceExclNote isKo={isKo} className="mt-0.5" />

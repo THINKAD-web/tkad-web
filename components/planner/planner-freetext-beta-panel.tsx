@@ -125,7 +125,7 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
           <PlannerNeonLabel className="!text-[color:var(--qp-accent)] dark:!text-[color:var(--qp-accent)]">
             {isKo ? "AI 자연어 입력" : "AI natural language"}
           </PlannerNeonLabel>
-          <span className="rounded-md border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[color:var(--qp-fg-muted)] dark:text-[color:var(--qp-fg-muted)]">
+          <span className="rounded-md border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] px-2 py-0.5 tkad-type-note font-bold uppercase tracking-wider text-[color:var(--qp-fg-muted)] dark:text-[color:var(--qp-fg-muted)]">
             {isKo ? "무료 · 규칙" : "Free · Rules"}
           </span>
         </div>
@@ -186,7 +186,7 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
 
         {parseResult && summarySentence ? (
           <div className="space-y-4 border-t dark:border-white/10 border-gray-100 pt-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <p className="tkad-type-title uppercase tracking-wider text-muted-foreground">
               {isKo ? "AI 분석 결과" : "Analysis result"}
             </p>
 
@@ -197,7 +197,7 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
                 "dark:border-[color:var(--qp-accent)]/20 dark:bg-[color:var(--qp-accent)]/10",
               )}
             >
-              <p className="text-sm font-semibold leading-relaxed text-foreground sm:text-base">
+              <p className="tkad-type-title leading-relaxed text-foreground sm:text-base">
                 {summarySentence}
               </p>
 

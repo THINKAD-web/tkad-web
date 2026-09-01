@@ -148,13 +148,13 @@ export function DiscoveryMediaCardCompactRow({
                 nameEn: item.name,
               }}
               gridInline
-              className="!h-[1.125rem] !px-1.5 !text-[8px]"
+              className="!h-[1.125rem] !px-1.5 !tkad-type-note"
             />
             <PlanCartToggleButton
               item={planCartItemFromCatalog(item, "search")}
               addedFrom="search"
               gridInline
-              className="!h-[1.125rem] !px-1.5 !text-[8px]"
+              className="!h-[1.125rem] !px-1.5 !tkad-type-note"
             />
           </>
         )}
@@ -301,13 +301,13 @@ export function DiscoveryMediaCardCompactGrid({
                   nameEn: item.name,
                 }}
                 gridInline
-                className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
+                className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !tkad-type-note"
               />
               <PlanCartToggleButton
                 item={planCartItemFromCatalog(item, planAddedFrom)}
                 addedFrom={planAddedFrom}
                 gridInline
-                className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
+                className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !tkad-type-note"
               />
             </div>
           ) : null}
@@ -322,7 +322,7 @@ export function DiscoveryMediaCardCompactGrid({
           )}
         >
           {recommendRationaleProminent ? (
-            <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-hermes">
+            <p className="mb-1 flex items-center gap-1 tkad-type-note font-bold uppercase tracking-wide text-hermes">
               <Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden />
               {isKo ? "추천 이유" : "Why recommended"}
             </p>
@@ -331,8 +331,8 @@ export function DiscoveryMediaCardCompactGrid({
             className={cn(
               "leading-snug",
               recommendRationaleProminent
-                ? "line-clamp-2 text-[13px] font-medium text-foreground"
-                : "line-clamp-1 text-[11px] text-tkad-accent",
+                ? "line-clamp-2 tkad-type-body font-medium text-foreground"
+                : "line-clamp-1 tkad-type-caption text-tkad-accent",
             )}
           >
             {recommendReason}
@@ -342,8 +342,8 @@ export function DiscoveryMediaCardCompactGrid({
               className={cn(
                 "mt-0.5 line-clamp-1 leading-snug",
                 recommendRationaleProminent
-                  ? "text-[12px] text-muted-foreground"
-                  : "text-[10px] text-muted-foreground",
+                  ? "tkad-type-meta text-muted-foreground"
+                  : "tkad-type-note text-muted-foreground",
               )}
             >
               {inlineSecondLine}
@@ -358,7 +358,7 @@ export function DiscoveryMediaCardCompactGrid({
                   e.stopPropagation();
                   setRationaleOpen((v) => !v);
                 }}
-                className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground hover:text-foreground"
+                className="inline-flex items-center gap-0.5 tkad-type-note font-medium text-muted-foreground hover:text-foreground"
                 aria-expanded={rationaleOpen}
               >
                 <ChevronDown
@@ -371,7 +371,7 @@ export function DiscoveryMediaCardCompactGrid({
                 {isKo ? "추천 근거" : "Why"}
               </button>
               {rationaleOpen ? (
-                <ul className="mt-1 space-y-0.5 text-[10px] leading-snug text-muted-foreground">
+                <ul className="mt-1 space-y-0.5 tkad-type-note leading-snug text-muted-foreground">
                   {extraBullets.slice(0, 3).map((line) => (
                     <li key={line} className="line-clamp-2">
                       · {line}
@@ -381,7 +381,7 @@ export function DiscoveryMediaCardCompactGrid({
               ) : null}
             </div>
           ) : visibleBullets.length > 0 ? (
-            <ul className="mt-0.5 space-y-0.5 text-[10px] leading-snug text-muted-foreground">
+            <ul className="mt-0.5 space-y-0.5 tkad-type-note leading-snug text-muted-foreground">
               {visibleBullets.map((line) => (
                 <li key={line} className="line-clamp-2">
                   · {line}

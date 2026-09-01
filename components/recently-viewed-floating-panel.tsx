@@ -64,7 +64,7 @@ export function RecentlyViewedFloatingPanel({
           data-screenshot="recently-viewed-expanded"
         >
           <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-white/10">
-            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+            <p className="tkad-type-title text-gray-900 dark:text-white">
               {isKo ? "최근 본 매체" : "Recently viewed"}
             </p>
             <button
@@ -94,7 +94,7 @@ export function RecentlyViewedFloatingPanel({
                         sizes="40px"
                       />
                     ) : (
-                      <span className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
+                      <span className="flex h-full w-full items-center justify-center tkad-type-note text-gray-400">
                         OOH
                       </span>
                     )}

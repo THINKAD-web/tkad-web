@@ -80,7 +80,7 @@ export function PlanCartGradeSelectionsEditor({
       <p
         className={cn(
           "font-medium uppercase tracking-wide text-muted-foreground",
-          compact ? "text-[9px]" : "text-[10px]",
+          compact ? "tkad-type-note" : "tkad-type-note",
         )}
       >
         {isGradeMode
@@ -106,7 +106,7 @@ export function PlanCartGradeSelectionsEditor({
             )}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-semibold text-hermes">
+              <span className="tkad-type-caption font-semibold text-hermes">
                 {isGradeMode
                   ? isKo
                     ? `등급 ${rowIndex + 1}`
@@ -116,7 +116,7 @@ export function PlanCartGradeSelectionsEditor({
                     : `Option ${rowIndex + 1}`}
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold tabular-nums text-foreground">
+                <span className="tkad-type-caption font-bold tabular-nums text-foreground">
                   {formatCatalogPriceFieldWon(rowTotal, locale)}
                   {isKo ? "/월" : "/mo"}
                 </span>
@@ -174,7 +174,7 @@ export function PlanCartGradeSelectionsEditor({
             onClick={addRow}
             className={cn(
               "inline-flex items-center gap-1 rounded-lg border border-dashed border-hermes/30 font-semibold text-hermes transition hover:bg-hermes/10",
-              compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs",
+              compact ? "px-2.5 py-1 tkad-type-caption" : "px-3 py-1.5 text-xs",
             )}
           >
             <Plus className="h-3.5 w-3.5" />

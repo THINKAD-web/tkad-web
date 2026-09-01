@@ -48,7 +48,7 @@ export default async function AdminInquiryDetailPage({ params }: Props) {
       </Link>
 
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           [ INQUIRY DETAIL ]
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">
@@ -76,7 +76,7 @@ export default async function AdminInquiryDetailPage({ params }: Props) {
           note={parsed.adminNote}
         />
         <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="tkad-type-label text-muted-foreground">
             문의 내용
           </p>
           <pre className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">

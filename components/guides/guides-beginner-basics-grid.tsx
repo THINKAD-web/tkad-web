@@ -43,7 +43,7 @@ function CardShell({
       className={`rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 backdrop-blur border-gray-200 dark:border-white/12 sm:p-8 ${ card.wide ? "md:col-span-2 lg:col-span-3" : "" }`}
     >
       <div className="mb-4 flex items-center justify-between">
-        <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <span className="tkad-type-label dark:text-white text-gray-500">
           [{String(index + 1).padStart(2, "0")}]
         </span>
         <Icon className="h-6 w-6 text-[color:var(--qp-accent)]/90" aria-hidden />
@@ -76,7 +76,7 @@ function BulletList({ items }: { items: string[] }) {
 
 function SubLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--qp-accent)]/80">
+    <p className="mt-5 tkad-type-label text-[color:var(--qp-accent)]/80">
       [ {children} ]
     </p>
   );
@@ -127,7 +127,7 @@ function WhatIsOohDetail({ isKo }: { isKo: boolean }) {
         {campaigns.map((c) => (
           <span
             key={c}
-            className="rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/8 bg-gray-100 px-2.5 py-1 text-xs font-semibold dark:text-white text-gray-700"
+            className="rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/8 bg-gray-100 px-2.5 py-1 tkad-type-title dark:text-white text-gray-700"
           >
             {c}
           </span>
@@ -154,7 +154,7 @@ function MediaTypesDetail({ isKo }: { isKo: boolean }) {
           <BulletList items={isKo ? m.traitsKo : m.traitsEn} />
           <p className="mt-2 text-xs dark:text-white">{isKo ? m.formatsKo : m.formatsEn}</p>
           <p className="mt-1 text-xs dark:text-white">{isKo ? m.suitableKo : m.suitableEn}</p>
-          <p className="mt-2 text-xs font-semibold text-[color:var(--qp-accent)]/90">
+          <p className="mt-2 tkad-type-title text-[color:var(--qp-accent)]/90">
             {isKo ? m.priceKo : m.priceEn}
           </p>
         </div>

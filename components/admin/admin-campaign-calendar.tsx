@@ -84,7 +84,7 @@ export function AdminCampaignCalendar() {
         </div>
         <a
           href={icalUrl}
-          className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-muted"
+          className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 tkad-type-title hover:bg-muted"
         >
           <Download className="h-4 w-4" />
           iCal보내기

@@ -37,12 +37,12 @@ export default async function InstantBookPage({ params, searchParams }: Props) {
     <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <Link
         href={mediaItemDetailPath(media)}
-        className="mb-6 inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+        className="mb-6 inline-flex items-center gap-2 tkad-type-label text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         {t("backToMedia")}
       </Link>
-      <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-primary">
+      <p className="tkad-type-label text-primary">
         {t("eyebrow")}
       </p>
       <h1 className="mt-2 text-2xl font-black tracking-tight">{t("title")}</h1>

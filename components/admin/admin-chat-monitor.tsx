@@ -103,7 +103,7 @@ export function AdminChatMonitor() {
           <div className="space-y-3">
             {detail.map((m) => (
               <div key={m.id} className="rounded-2xl bg-muted/40 p-2 text-sm">
-                <p className="text-[10px] font-display uppercase text-muted-foreground">
+                <p className="tkad-type-note font-display uppercase text-muted-foreground">
                   {m.displayLabel} · {m.senderRole}
                   {m.sender ? ` · ${m.sender.email}` : ""}
                 </p>

@@ -198,7 +198,7 @@ export function MediaReviewsSection({
         {canReview ? (
           <Link
             href={`/media/${mediaId}/review`}
-            className="inline-flex rounded-xl border-2 border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+            className="inline-flex rounded-xl border-2 border-border bg-card px-4 py-2 tkad-type-title text-foreground transition-colors hover:bg-muted"
           >
             {isKo ? "리뷰 작성" : "Write a review"}
           </Link>
@@ -276,7 +276,7 @@ export function MediaReviewsSection({
                   className="rounded-2xl border border-border/80 bg-card/40 p-5"
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-foreground">
+                    <span className="tkad-type-title text-foreground">
                       {review.authorLabel}
                     </span>
                     {review.isVerified ? (

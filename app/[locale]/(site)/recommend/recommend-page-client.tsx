@@ -906,7 +906,7 @@ export default function RecommendPageClient({
   if (catalog.length === 0) {
     return (
       <div className="border-t-2 border-border bg-card">
-        <div className="mx-auto max-w-2xl px-4 py-20 text-center font-display text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="mx-auto max-w-2xl px-4 py-20 text-center font-display tkad-type-meta uppercase tracking-[0.18em] text-muted-foreground">
           {`// `}
           {t("media.ai.emptyCatalog")}
         </div>
@@ -932,7 +932,7 @@ export default function RecommendPageClient({
         <section className="tkad-media-browse-main border-t border-border/60 bg-card py-16 sm:py-20">
           <div className="ui-container">
           {similarBanner ? (
-            <p className="mb-6 rounded-2xl border border-[#22d3ee]/30 bg-[#22d3ee]/10 px-4 py-3 text-center text-sm font-semibold text-[#0e7490] dark:text-[#22d3ee]">
+            <p className="mb-6 rounded-2xl border border-[#22d3ee]/30 bg-[#22d3ee]/10 px-4 py-3 text-center tkad-type-title text-[#0e7490] dark:text-[#22d3ee]">
               {similarBanner}
             </p>
           ) : null}
@@ -943,7 +943,7 @@ export default function RecommendPageClient({
               className="mb-8 rounded-2xl border-2 border-amber-500/40 bg-amber-500/10 px-5 py-4"
               role="status"
             >
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+              <p className="tkad-type-label text-amber-700 dark:text-amber-300">
                 [ {tr("integratedNotice.title")} ]
               </p>
               <p className="mt-2 text-sm font-bold text-foreground">
@@ -969,7 +969,7 @@ export default function RecommendPageClient({
           ) : null}
           {autoFromUrl === "1" && phase === "dashboard" && top3.length > 0 ? (
             <div className="mb-8 rounded-2xl border-2 border-accent/40 bg-muted/50 px-5 py-4">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+              <p className="tkad-type-label text-accent">
                 [ {isKo ? "홈에서 선택한 조건" : "From home widget"} ]
               </p>
               <p className="mt-2 text-sm font-bold text-foreground">
@@ -1039,7 +1039,7 @@ export default function RecommendPageClient({
                 >
                   <Sparkles className="h-4 w-4 text-[color:var(--qp-accent)]" />
                   {isKo ? "AI 자연어 입력" : "AI natural language"}
-                  <span className="rounded border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-1 text-[9px] font-bold uppercase text-[color:var(--qp-accent)]">
+                  <span className="rounded border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-1 tkad-type-note font-bold uppercase text-[color:var(--qp-accent)]">
                     {isKo ? "무료" : "Free"}
                   </span>
                 </button>
@@ -1052,7 +1052,7 @@ export default function RecommendPageClient({
                     onConfirm={handleAiConfirm}
                   />
                   {/* v1 안내: 일반 매체 기준 추천(네트워크 매체 추후 추가) */}
-                  <p className="rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2 text-[11px] leading-relaxed text-gray-700 dark:border-white/12 dark:bg-white/5 dark:text-white/75">
+                  <p className="rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2 tkad-type-caption leading-relaxed text-gray-700 dark:border-white/12 dark:bg-white/5 dark:text-white/75">
                     {isKo
                       ? "현재 일반 매체 기준으로 추천됩니다. 네트워크 매체는 추후 추가될 예정입니다."
                       : "Recommendations currently cover standard media only. Network media will be added soon."}
@@ -1117,7 +1117,7 @@ export default function RecommendPageClient({
             <div className="mt-10 space-y-4 rounded-[24px] border-2 border-border bg-muted/40 p-5 sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                  <p className="tkad-type-label text-muted-foreground">
                     [ {isKo ? "매체 추가" : "ADD MEDIA"} ]
                   </p>
                   <h3 className="mt-1 text-lg font-bold text-foreground">
@@ -1148,7 +1148,7 @@ export default function RecommendPageClient({
 
           {phase === "noResults" && (
             <div className="mx-auto max-w-lg border-2 border-border bg-muted p-8 text-center">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes">
+              <p className="tkad-type-label text-hermes">
                 [ NO RESULTS ]
               </p>
               <p className="mt-4 text-sm font-medium leading-relaxed text-foreground">
@@ -1174,7 +1174,7 @@ export default function RecommendPageClient({
             <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                  <p className="tkad-type-label text-muted-foreground">
                     [ FULL LIST ]
                   </p>
                   <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -1213,7 +1213,7 @@ export default function RecommendPageClient({
 
               {top3.length > 0 && (
                 <div className="rounded-[24px] border-2 border-accent bg-muted/60 px-5 py-4 shadow-sm backdrop-blur">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+                  <p className="tkad-type-label text-accent">
                     [ TOP 3 PICKS ]
                   </p>
                   <p className="mt-1 text-sm font-bold tracking-tight text-foreground">
@@ -1328,12 +1328,12 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
           </div>
 
           <div className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2">
-            <div className="rounded-2xl border border-white/16 dark:bg-black bg-white/30 px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-800 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur">
+            <div className="rounded-2xl border border-white/16 dark:bg-black bg-white/30 px-3 py-1 font-display tkad-type-note font-black uppercase tracking-[0.22em] dark:text-white text-gray-800 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur">
               TKAD BOT
             </div>
           </div>
         </div>
-        <p className="mt-6 text-center font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
+        <p className="mt-6 text-center tkad-type-label dark:text-white text-gray-700">
           [ {isKo ? "EXPLORING MEDIA UNIVERSE" : "EXPLORING MEDIA UNIVERSE"} ]
         </p>
         <p className="text-center text-sm font-bold leading-snug tracking-tight dark:text-white text-gray-900">
@@ -1354,7 +1354,7 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
           <div className="h-3 w-3/5 rounded-full dark:bg-white/10 bg-gray-100" />
         </div>
       </div>
-      <p className="text-center text-[11px] leading-relaxed tracking-tight dark:text-white text-gray-600">
+      <p className="text-center tkad-type-caption leading-relaxed tracking-tight dark:text-white text-gray-600">
         {`// `}{messages[step]}
       </p>
     </div>

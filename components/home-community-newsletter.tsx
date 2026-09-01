@@ -50,7 +50,7 @@ export function HomeCommunityNewsletter({ isKo, className }: Props) {
         className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_top_right,rgba(255,98,0,0.12),transparent_55%)]"
       />
       <div className="relative">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
+        <p className="tkad-type-label dark:text-white text-gray-600">
           {isKo ? "Newsletter" : "Newsletter"}
         </p>
         <h3 className="mt-2 font-sans text-lg font-bold tracking-tight dark:text-white text-gray-900 sm:text-xl">
@@ -84,12 +84,12 @@ export function HomeCommunityNewsletter({ isKo, className }: Props) {
             disabled={status === "loading" || status === "success"}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={isKo ? "work@company.com" : "work@company.com"}
-            className="h-11 min-w-0 flex-1 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-4 text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-colors focus:border-white/22 focus:ring-2 focus:ring-[color:var(--qp-accent)]/30 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-11 min-w-0 flex-1 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-4 tkad-type-title dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-colors focus:border-white/22 focus:ring-2 focus:ring-[color:var(--qp-accent)]/30 disabled:cursor-not-allowed disabled:opacity-60"
           />
           <button
             type="submit"
             disabled={status === "loading" || status === "success"}
-            className="h-11 shrink-0 rounded-full border border-hermes/30 bg-hermes px-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-11 shrink-0 rounded-full border border-hermes/30 bg-hermes px-5 tkad-type-label text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {status === "loading"
               ? isKo
@@ -102,12 +102,12 @@ export function HomeCommunityNewsletter({ isKo, className }: Props) {
         </form>
 
         {status === "success" ? (
-          <p className="mt-3 font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-300">
+          <p className="mt-3 font-display tkad-type-caption font-semibold uppercase tracking-[0.16em] text-emerald-300">
             {isKo ? "구독 신청이 접수되었습니다." : "Thanks — you’re on the list."}
           </p>
         ) : null}
         {status === "error" ? (
-          <p className="mt-3 font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-rose-300">
+          <p className="mt-3 font-display tkad-type-caption font-semibold uppercase tracking-[0.16em] text-rose-300">
             {isKo
               ? "전송에 실패했습니다. 잠시 후 다시 시도해 주세요."
               : "Could not submit. Please try again."}

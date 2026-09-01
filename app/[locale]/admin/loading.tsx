@@ -6,7 +6,7 @@ export default function AdminLoading() {
   return (
     <div className="space-y-6 p-6">
       <div className="tkad-glass-surface relative overflow-hidden rounded-[22px] p-5">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="tkad-type-label text-muted-foreground">
           {`// LOADING…`}
         </p>
         <div className="skeleton-shimmer mt-3 h-7 w-40" />

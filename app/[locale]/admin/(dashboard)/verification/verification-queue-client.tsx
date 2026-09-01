@@ -39,7 +39,7 @@ function formatKRW(v: number): string {
 
 function ScoreBadge({ score }: { score: number }) {
   const base =
-    "rounded-full border border-border/70 bg-card/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] shadow-sm backdrop-blur";
+    "rounded-full border border-border/70 bg-card/80 px-2.5 py-1 tkad-type-note font-black uppercase tracking-[0.18em] shadow-sm backdrop-blur";
   if (score >= 4)
     return (
       <Badge className={`${base} text-emerald-600 dark:text-emerald-400`}>
@@ -122,7 +122,7 @@ export default function VerificationQueueClient() {
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-ui ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 tkad-type-title transition-ui ${
                 active
                   ? "bg-[color:var(--qp-accent-soft)] text-foreground shadow-sm ring-1 ring-[color:var(--qp-accent)]/25"
                   : "text-muted-foreground hover:text-foreground"
@@ -174,7 +174,7 @@ export default function VerificationQueueClient() {
                         </p>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs text-muted-foreground">{m.type}</span>
-                          <span className="text-sm font-semibold text-primary tabular-nums">
+                          <span className="tkad-type-title text-primary tabular-nums">
                             {formatKRW(m.price)}
                           </span>
                         </div>

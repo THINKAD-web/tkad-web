@@ -120,7 +120,7 @@ export function PlanCartToggleButton({
                 : "border-white/20 bg-white/10 text-white hover:bg-white/20",
             )
           : feedLabeled
-            ? mediaActionBlockClass(inCart, "cart", "h-8 flex-1 px-2 text-[11px]")
+            ? mediaActionBlockClass(inCart, "cart", "h-8 flex-1 px-2 tkad-type-caption")
             : mediaActionPillClass(inCart, "cart"),
         className,
       )}

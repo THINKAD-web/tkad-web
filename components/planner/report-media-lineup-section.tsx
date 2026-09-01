@@ -125,7 +125,7 @@ function RawFootfallHint({
       aria-label={copy.full}
       title={copy.full}
       className={cn(
-        "pointer-events-auto hidden h-4 w-4 items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold leading-none text-white sm:inline-flex",
+        "pointer-events-auto hidden h-4 w-4 items-center justify-center rounded-full bg-black/55 tkad-type-note font-semibold leading-none text-white sm:inline-flex",
         className,
       )}
     >
@@ -148,7 +148,7 @@ function RawFootfallMobileNote({
   return (
     <p
       className={cn(
-        "sm:hidden text-[10px] leading-snug text-muted-foreground",
+        "sm:hidden tkad-type-note leading-snug text-muted-foreground",
         className,
       )}
     >
@@ -418,7 +418,7 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
               </h4>
               {group.categories.map((cat) => (
                 <div key={`${group.regionLabel}-${cat.categoryLabel}`} className="space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--qp-accent)]">
+                  <p className="tkad-type-title uppercase tracking-[0.14em] text-[color:var(--qp-accent)]">
                     {cat.categoryLabel}
                   </p>
                   <ul className={listClass}>
@@ -463,7 +463,7 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
 
       {p.portfolio.length > 0 && p.budgetHonesty?.mixVsBudgetFootnote ? (
         <p
-          className="text-[12px] font-medium text-destructive"
+          className="tkad-type-meta font-medium text-destructive"
           data-testid="report-mix-vs-budget"
         >
           {p.budgetHonesty.mixVsBudgetFootnote}
@@ -472,7 +472,7 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
 
       {p.portfolio.length > 0 && p.partialRateNotice ? (
         <p
-          className="text-[11px] leading-snug text-amber-700"
+          className="tkad-type-caption leading-snug text-amber-700"
           data-testid="report-partial-rate-notice"
         >
           {p.partialRateNotice}
@@ -481,7 +481,7 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
 
       {p.portfolio.length > 0 && p.unpricedMediaNotice ? (
         <p
-          className="text-[11px] leading-snug text-amber-800 dark:text-amber-300"
+          className="tkad-type-caption leading-snug text-amber-800 dark:text-amber-300"
           data-testid="report-unpriced-media-notice-lineup"
         >
           {p.unpricedMediaNotice}
@@ -489,7 +489,7 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
       ) : null}
 
       {p.portfolio.length > 0 ? (
-        <p className="text-[11px] leading-snug text-gray-400">
+        <p className="tkad-type-caption leading-snug text-gray-400">
           {viewMode === "feed"
             ? isKo
               ? "피드 보기는 화면 전용입니다. PDF·PPT는 상세 카드 형식으로 내려받습니다."

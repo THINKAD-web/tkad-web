@@ -280,7 +280,7 @@ export function MyHubPageClient() {
                   type="button"
                   onClick={() => setCampaignFilter(key)}
                   className={cn(
-                    "rounded-full border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.14em] transition-colors",
+                    "rounded-full border px-3 py-1.5 tkad-type-label transition-colors",
                     myHubFilterPill(campaignFilter === key),
                   )}
                 >
@@ -336,7 +336,7 @@ export function MyHubPageClient() {
       {tab === "favorites" && (
         <section aria-labelledby="my-favorites-heading">
           <div className="relative mb-6 overflow-hidden rounded-[28px] border border-border bg-card px-5 py-6 sm:px-8 sm:py-10">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-[color:var(--qp-fg-muted)]">
+            <p className="tkad-type-label text-[color:var(--qp-fg-muted)]">
               {`// ${tFav("label")}`}
             </p>
             <h2
@@ -447,7 +447,7 @@ export function MyHubPageClient() {
             <div className="space-y-8">
               {proposals.length > 0 ? (
                 <div>
-                  <h3 className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                  <h3 className="mb-3 tkad-type-label text-primary">
                     {t("planner.proposalsSection")}
                   </h3>
                   <ul className="space-y-3">
@@ -484,7 +484,7 @@ export function MyHubPageClient() {
               ) : null}
               {plannerPlans.length > 0 ? (
                 <div>
-                  <h3 className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+                  <h3 className="mb-3 tkad-type-label text-primary">
                     {t("planner.plansSection")}
                   </h3>
                   <ul className="space-y-3">
@@ -495,7 +495,7 @@ export function MyHubPageClient() {
                             <p className="truncate text-base font-bold text-foreground">
                               {plan.title}
                             </p>
-                            <p className="mt-1 text-[11px] text-muted-foreground">
+                            <p className="mt-1 tkad-type-caption text-muted-foreground">
                               {isKo
                                 ? `매체 ${plan.mediaCount}개 · 위저드에서 저장`
                                 : `${plan.mediaCount} media · saved from wizard`}

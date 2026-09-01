@@ -17,7 +17,7 @@ export function PlannerReportInfoCard({ isKo, className }: Props) {
       )}
       data-screenshot="planner-report-info-card"
     >
-      <p className="text-sm font-semibold text-gray-900 dark:text-white">
+      <p className="tkad-type-title text-gray-900 dark:text-white">
         {isKo ? "💡 이 보고서는 화면 요약본입니다" : "💡 This report is an on-screen summary"}
       </p>
       <ul className="mt-2 space-y-1 text-sm text-gray-600 dark:text-white/70">

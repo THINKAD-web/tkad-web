@@ -65,10 +65,10 @@ export function PointsHistoryTab() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        <h2 className="tkad-type-label text-muted-foreground">
           {t("historyTitle")}
         </h2>
-        <Link href="/points" className="text-sm font-semibold text-primary hover:underline">
+        <Link href="/points" className="tkad-type-title text-primary hover:underline">
           {t("shopLink")}
         </Link>
       </div>
@@ -80,7 +80,7 @@ export function PointsHistoryTab() {
             <div key={row.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
               <div>
                 <p className="font-medium">{row.description}</p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="tkad-type-note text-muted-foreground">
                   {new Date(row.createdAt).toLocaleString()}
                 </p>
               </div>
@@ -95,7 +95,7 @@ export function PointsHistoryTab() {
                   {row.amount.toLocaleString()}P
                 </p>
                 {row.balanceAfter != null ? (
-                  <p className="text-[10px] text-muted-foreground tabular-nums">
+                  <p className="tkad-type-note text-muted-foreground tabular-nums">
                     {row.balanceAfter.toLocaleString()}P
                   </p>
                 ) : null}

@@ -75,7 +75,7 @@ export default function PlannerCampaignStep1({
           >
             <div className="tkad-planner-step1-preview-frame aspect-[2.35/1] w-full bg-gray-100 dark:bg-[#020202]/80">
               <div className="flex h-full flex-col items-center justify-center gap-2 px-4 py-6 sm:py-8">
-                <div className="rounded-[var(--qp-radius-md)] bg-[color:var(--qp-accent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                <div className="rounded-[var(--qp-radius-md)] bg-[color:var(--qp-accent)] px-2 py-0.5 tkad-type-note font-bold uppercase tracking-widest text-white">
                   OOH
                 </div>
                 <p className="text-center text-sm font-bold text-foreground sm:text-base">

@@ -277,7 +277,7 @@ export function MediaDetailExecutionPanel({
                     <details className="group/stores mt-2">
                       <summary
                         className={cn(
-                          "cursor-pointer list-none text-xs font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/90",
+                          "cursor-pointer list-none tkad-type-title text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/90",
                           "[&::-webkit-details-marker]:hidden",
                         )}
                       >

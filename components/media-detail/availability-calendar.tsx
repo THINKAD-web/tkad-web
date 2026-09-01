@@ -305,7 +305,7 @@ export function MediaAvailabilityCalendar({
             {t("desc")}
           </p>
           {!loading && !error ? (
-            <p className="mt-2 text-sm font-semibold text-foreground">
+            <p className="mt-2 tkad-type-title text-foreground">
               {t("monthAvailabilityPct", {
                 month: monthLabel,
                 pct: viewMonthStats.availabilityPct,
@@ -556,7 +556,7 @@ export function MediaAvailabilityCalendar({
                   </p>
                   {rangeComplete && rangeStart && rangeEnd ? (
                     <>
-                      <p className="mt-1 text-sm font-semibold text-foreground">
+                      <p className="mt-1 tkad-type-title text-foreground">
                         {t("rangeSelected", {
                           start: formatRangeDate(rangeStart, locale),
                           end: formatRangeDate(rangeEnd, locale),

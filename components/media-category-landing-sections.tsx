@@ -113,7 +113,7 @@ export function TargetLandingGuide({
             {node.popularTagsKo.map((tag) => (
               <span
                 key={tag}
-                className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-700 dark:text-violet-200"
+                className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 tkad-type-title text-violet-700 dark:text-violet-200"
               >
                 {tag}
               </span>

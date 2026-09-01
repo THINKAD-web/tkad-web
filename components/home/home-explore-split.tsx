@@ -54,7 +54,7 @@ export function HomeExploreSplit() {
 
           <Link
             href="/media"
-            className="mt-3 text-center text-sm font-semibold text-hermes underline-offset-2 hover:underline"
+            className="mt-3 text-center tkad-type-title text-hermes underline-offset-2 hover:underline"
           >
             {isKo ? "전체 매체 목록 보기 →" : "View all media →"}
           </Link>
