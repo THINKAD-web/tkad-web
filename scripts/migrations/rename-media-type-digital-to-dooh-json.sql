@@ -29,7 +29,7 @@ SET plan_json = jsonb_set(
   '{categories}',
   (
     SELECT jsonb_agg(
-      CASE WHEN val = '"digital"' THEN '"dooh"'::jsonb ELSE to_jsonb(val #>> '{}') END
+      CASE WHEN val = 'digital' THEN '"dooh"'::jsonb ELSE to_jsonb(val) END
     )
     FROM jsonb_array_elements_text(plan_json::jsonb->'categories') AS val
   )
