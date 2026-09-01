@@ -169,7 +169,7 @@ test("mediaBrowseUsesDbPaginationOnly: price sort needs merge path", () => {
     false,
   );
   assert.equal(
-    mediaBrowseUsesDbPaginationOnly({ sort: "newest", mainCategory: "digital" }),
+    mediaBrowseUsesDbPaginationOnly({ sort: "newest", mainCategory: "search" }),
     true,
   );
 });

@@ -54,7 +54,9 @@ WHERE media_main_category IN (
 );
 
 UPDATE media SET catalog_channel = 'online'
-WHERE media_main_category IN ('digital', 'online');
+WHERE media_main_category IN (
+  'search', 'display', 'video', 'sns', 'message', 'local'
+);
 
 DO $$
 DECLARE

@@ -4,6 +4,8 @@
  * Separates offline OOH catalog from online ads (PR1b). PR1a: all rows `offline`.
  */
 
+import { isOnlineBrowseMain } from "@/lib/online-browse-mains";
+
 export const CATALOG_CHANNEL_OFFLINE = "offline" as const;
 export const CATALOG_CHANNEL_ONLINE = "online" as const;
 
@@ -35,9 +37,6 @@ export function canonicalCatalogChannel(
 ): CatalogChannel {
   return normalizeCatalogChannel(raw) ?? fallback;
 }
-
-/** Browse mains that map to online catalog (PR1b); mirrors forward SQL map. */
-const ONLINE_BROWSE_MAINS = new Set(["digital", "online"]);
 
 /**
  * NULL-main → offline fallback hits since process start.
@@ -81,8 +80,8 @@ export function resolveCatalogChannelForMediaWrite(input: {
 }): CatalogChannel {
   const explicit = normalizeCatalogChannel(input.catalogChannel);
   if (explicit) return explicit;
-  const main = input.mediaMainCategory?.trim().toLowerCase();
-  if (main && ONLINE_BROWSE_MAINS.has(main)) return CATALOG_CHANNEL_ONLINE;
+  if (isOnlineBrowseMain(input.mediaMainCategory)) return CATALOG_CHANNEL_ONLINE;
+  const main = input.mediaMainCategory?.trim();
   if (!main) {
     recordNullMainCatalogChannelFallback(input);
   }

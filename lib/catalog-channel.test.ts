@@ -39,7 +39,7 @@ test("resolveCatalogChannelForMediaWrite", () => {
     CATALOG_CHANNEL_OFFLINE,
   );
   assert.equal(
-    resolveCatalogChannelForMediaWrite({ mediaMainCategory: "digital" }),
+    resolveCatalogChannelForMediaWrite({ mediaMainCategory: "search" }),
     CATALOG_CHANNEL_ONLINE,
   );
   assert.equal(

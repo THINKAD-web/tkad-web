@@ -3,10 +3,7 @@
  * Not hardcoded: top-N updates when catalog distribution changes.
  */
 import { unstable_cache } from "next/cache";
-import {
-  MEDIA_CATEGORIES,
-  browseCategoryLabel,
-} from "@/lib/media-browse-categories";
+import { ONLINE_BROWSE_MAIN_SET } from "@/lib/online-browse-mains";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { fetchDigitalCatalogInternal } from "@/lib/planner/digital-catalog-fetch";
 import type { DigitalCatalogItem } from "@/lib/planner/digital-catalog-types";
@@ -37,9 +34,11 @@ export type HomeLandingDigitalTile = {
   href: string;
 };
 
-/** Browse mains that are OOH inventory (exclude online "digital" taxonomy). */
+/** Browse mains that are OOH inventory (exclude online taxonomy mains). */
 const OOH_BROWSE_MAIN_IDS = new Set(
-  MEDIA_CATEGORIES.filter((m) => m.id !== "digital").map((m) => m.id),
+  MEDIA_CATEGORIES.filter((m) => !ONLINE_BROWSE_MAIN_SET.has(m.id)).map(
+    (m) => m.id,
+  ),
 );
 
 const SUB_TO_MAIN = new Map<string, string>();
