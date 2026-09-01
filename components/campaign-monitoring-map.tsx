@@ -10,6 +10,7 @@ import {
 } from "react";
 import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import type { CampaignMapPin, CampaignMapMediaType } from "@/lib/campaign-monitoring-mock";
 
 type MapProvider = "google" | "fallback";
@@ -24,7 +25,8 @@ export function getCampaignMonitoringMapProvider(): MapProvider {
 function mediaLabel(type: CampaignMapMediaType, isKo: boolean): string {
   const m: Record<CampaignMapMediaType, [string, string]> = {
     billboard: ["빌보드", "Billboard"],
-    digital: ["디지털", "Digital"],
+    dooh: [DISPLAY_MODE_LABELS.dooh.ko, DISPLAY_MODE_LABELS.dooh.en],
+    digital: [DISPLAY_MODE_LABELS.dooh.ko, DISPLAY_MODE_LABELS.dooh.en],
     transport: ["교통", "Transit"],
     special: ["특수", "Special"],
   };

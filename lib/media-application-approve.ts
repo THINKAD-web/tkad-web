@@ -10,6 +10,7 @@ import {
   type QuickAddMediaJson,
 } from "@/lib/media-quick-add";
 import { validateMappedMediaMetrics } from "@/lib/media-metrics-write";
+import { resolveCatalogChannelForMediaWrite } from "@/lib/catalog-channel";
 import { onMediaApplicationApproved } from "@/lib/media-owner-incentives";
 import { notifyMediaOwnerApplicationApproved } from "@/lib/media-owner-notify";
 
@@ -185,6 +186,7 @@ export async function approveMediaApplication(
         isActive: true,
         availability: "available",
         ownerUserId,
+        catalogChannel: resolveCatalogChannelForMediaWrite({}),
       },
     });
     await tx.mediaPriceSnapshot.create({

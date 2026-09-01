@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { ChevronDown, FileDown, Loader2, Lock, Sparkles } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import type { ScoredMedia, AiRecommendInput } from "@/lib/ai-media-recommend";
 import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
 import {
@@ -165,7 +166,13 @@ export function RecommendReportSection({
       return inferRecommendCategoriesText(portfolio, isKo);
     }
     const map: Record<string, string> = isKo
-      ? { digital: "디지털", static: "고정형", mobile: "이동형", network: "네트워크" }
+      ? {
+          dooh: DISPLAY_MODE_LABELS.dooh.ko,
+          digital: DISPLAY_MODE_LABELS.dooh.ko,
+          static: DISPLAY_MODE_LABELS.static.ko,
+          mobile: DISPLAY_MODE_LABELS.mobile.ko,
+          network: "네트워크",
+        }
       : { digital: "Digital", static: "Static", mobile: "Mobile", network: "Network" };
     return map[input.type] ?? input.type;
   }, [input.type, portfolio, isKo]);

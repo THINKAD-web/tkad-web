@@ -1,5 +1,6 @@
 // Shared types/constants for media networks (safe for client components)
 
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import type { MediaItem } from "@/lib/media-data";
 import {
   CATALOG_MEDIA_TYPES,
@@ -30,7 +31,7 @@ export const NETWORK_CATALOG_TYPE_LABELS: Record<
   NetworkCatalogType,
   { ko: string; en: string }
 > = {
-  dooh: { ko: "디지털", en: "Digital" },
+  dooh: DISPLAY_MODE_LABELS.dooh,
   static: { ko: "고정형", en: "Static" },
   mobile: { ko: "이동형", en: "Mobile" },
 };
@@ -172,7 +173,7 @@ export const NETWORK_TYPE_LABELS: Record<string, { ko: string; en: string }> = {
 /** `/media?features=network` 목록 필터 — 일반 `/media` 와 동일 3분류 */
 export const NETWORK_BROWSE_TYPE_CHIPS = [
   { value: "", labelKo: "전체", labelEn: "All", icon: "Network" },
-  { value: "dooh", labelKo: "디지털", labelEn: "Digital", icon: "Monitor" },
+  { value: "dooh", labelKo: DISPLAY_MODE_LABELS.dooh.ko, labelEn: DISPLAY_MODE_LABELS.dooh.en, icon: "Monitor" },
   { value: "static", labelKo: "고정형", labelEn: "Static", icon: "MapPin" },
   { value: "mobile", labelKo: "이동형", labelEn: "Mobile", icon: "Train" },
 ] as const;

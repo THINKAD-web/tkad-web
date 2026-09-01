@@ -1,5 +1,6 @@
 /** 지도 핀 SVG data URL — Leaflet 비의존 (테스트·범례 공용) */
 
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import {
   visibilityPinTierDefForScore,
   visibilityPinTierForScore,
@@ -64,8 +65,8 @@ export const MEDIA_TYPE_PIN_LEGEND_ENTRIES: readonly MediaTypePinLegendEntry[] =
     {
       letter: "D",
       sampleType: "digital",
-      labelKo: "디지털",
-      labelEn: "Digital",
+      labelKo: DISPLAY_MODE_LABELS.dooh.ko,
+      labelEn: DISPLAY_MODE_LABELS.dooh.en,
     },
     {
       letter: "S",

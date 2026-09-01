@@ -243,7 +243,7 @@ export function MediaRegisterForm() {
               <option key={t} value={t} className="bg-[#0a0a0f] dark:text-white text-gray-900">
                 {t === "dooh"
                   ? isKo
-                    ? "디지털"
+                    ? "디지털 표출"
                     : "Digital"
                   : t === "static"
                     ? isKo

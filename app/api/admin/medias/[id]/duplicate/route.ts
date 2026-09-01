@@ -15,6 +15,7 @@ import {
   attachInstallLocationsById,
   readMediaInstallLocationsByIds,
 } from "@/lib/read-media-install-locations";
+import { resolveCatalogChannelForMediaWrite } from "@/lib/catalog-channel";
 
 export const dynamic = "force-dynamic";
 
@@ -93,6 +94,10 @@ export async function POST(request: NextRequest, { params }: Params) {
           source.trafficPattern === null
             ? Prisma.JsonNull
             : (source.trafficPattern as Prisma.InputJsonValue),
+        catalogChannel: resolveCatalogChannelForMediaWrite({
+          catalogChannel: source.catalogChannel,
+          mediaMainCategory: source.mediaMainCategory,
+        }),
       },
     });
 

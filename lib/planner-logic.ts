@@ -1,5 +1,6 @@
 import { getMainCategory } from "@/lib/media-browse-categories";
 import type { MediaItem } from "@/lib/media-data";
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import { isQuoteOnlyMedia } from "@/lib/media-pricing-mode";
 import {
   catalogPriceFieldToPriceMan,
@@ -138,6 +139,14 @@ export type PlannerMediaKindInput = Pick<
  * 1순위: 매체 등록 시 선택한 `type` (admin: 디지털·고정형·이동형 3종).
  * 2순위: type 미입력 레거시만 서브카테고리·이름 휴리스틱.
  * Browse `transit` 등 메인카테고리는 보고서 유형을 바꾸지 않음.
+ */
+/**
+ * Planner display kind — derived from `Media.type` (+ legacy heuristics).
+ *
+ * `Media.type = 'dooh'` is catalog fact (physical screen category).
+ * `PlannerCategory 'dooh'` is the user's filter intent snapshot in saved JSON;
+ * hydrate via `normalizePlannerCategories`, runtime filter via this function.
+ * Browse `mediaMainCategory` does NOT change planner kind (see comment below).
  */
 export function resolvePlannerMediaKind(
   item: PlannerMediaKindInput,
@@ -855,9 +864,18 @@ const TYPE_META: Record<
   string,
   { labelKo: string; labelEn: string }
 > = {
-  dooh: { labelKo: "디지털", labelEn: "Digital" },
-  static: { labelKo: "고정형", labelEn: "Static" },
-  mobile: { labelKo: "이동형", labelEn: "Mobile" },
+  dooh: {
+    labelKo: DISPLAY_MODE_LABELS.dooh.ko,
+    labelEn: DISPLAY_MODE_LABELS.dooh.en,
+  },
+  static: {
+    labelKo: DISPLAY_MODE_LABELS.static.ko,
+    labelEn: DISPLAY_MODE_LABELS.static.en,
+  },
+  mobile: {
+    labelKo: DISPLAY_MODE_LABELS.mobile.ko,
+    labelEn: DISPLAY_MODE_LABELS.mobile.en,
+  },
   network: { labelKo: "네트워크", labelEn: "Network" },
   other: { labelKo: "기타", labelEn: "Other" },
 };

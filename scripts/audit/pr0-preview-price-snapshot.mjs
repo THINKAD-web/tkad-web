@@ -12,6 +12,7 @@ import { fileURLToPath } from "url";
 const __dir = dirname(fileURLToPath(import.meta.url));
 const root = join(__dir, "../..");
 
+const envFlag = process.argv.includes("--prod") ? "prod" : "preview";
 const label = process.argv.includes("--label")
   ? process.argv[process.argv.indexOf("--label") + 1]
   : "pre";
@@ -22,18 +23,30 @@ if (!url) {
   process.exit(1);
 }
 
-const SAMPLE_FILE = join(root, "reports/pr0-preview-sample-ids.json");
+const SAMPLE_FILE = join(root, `reports/pr0-${envFlag}-sample-ids.json`);
 
 async function loadSampleIds(client) {
+  const subway =
+    envFlag === "prod"
+      ? await client.query(`
+    SELECT id FROM media WHERE type IN ('digital','dooh')
+      AND media_sub_category = 'subway_station'
+    ORDER BY random() LIMIT 8
+  `)
+      : { rows: [] };
+
+  const digitalLimit = envFlag === "prod" ? 8 : 12;
+  const digitalPlainLimit = envFlag === "prod" ? 6 : 8;
+
   const digital = await client.query(`
     SELECT id FROM media WHERE type IN ('digital','dooh')
       AND (partial_period_rates IS NOT NULL OR price_options IS NOT NULL)
-    ORDER BY random() LIMIT 12
+    ORDER BY random() LIMIT ${digitalLimit}
   `);
   const digitalPlain = await client.query(`
     SELECT id FROM media WHERE type IN ('digital','dooh')
       AND partial_period_rates IS NULL AND (price_options IS NULL OR price_options::text = 'null')
-    ORDER BY random() LIMIT 8
+    ORDER BY random() LIMIT ${digitalPlainLimit}
   `);
   const staticRows = await client.query(`
     SELECT id FROM media WHERE type = 'static' ORDER BY random() LIMIT 5
@@ -42,6 +55,7 @@ async function loadSampleIds(client) {
     SELECT id FROM media WHERE type = 'mobile' ORDER BY random() LIMIT 5
   `);
   const ids = [
+    ...subway.rows.map((r) => r.id),
     ...digital.rows.map((r) => r.id),
     ...digitalPlain.rows.map((r) => r.id),
     ...staticRows.rows.map((r) => r.id),
@@ -135,13 +149,14 @@ try {
     }
   }
 
-  const outPath = join(root, `reports/pr0-preview-price-${label}.json`);
+  const outPath = join(root, `reports/pr0-${envFlag}-price-${label}.json`);
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(
     outPath,
     JSON.stringify(
       {
         label,
+        env: envFlag,
         at: new Date().toISOString(),
         sampleCount: sampleIds.length,
         sampleIds,

@@ -1,3 +1,4 @@
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import { browseRegionLabel } from "@/lib/media-browse-regions";
 import {
   PLANNER_DEFAULT_CATEGORIES,
@@ -221,7 +222,11 @@ function categoryPhrase(
 ): string {
   const isKo = locale.startsWith("ko");
   const labels: Record<PlannerCategory, string> = isKo
-    ? { dooh: "디지털", static: "고정형", mobile: "이동" }
+    ? {
+        dooh: DISPLAY_MODE_LABELS.dooh.ko,
+        static: DISPLAY_MODE_LABELS.static.ko,
+        mobile: DISPLAY_MODE_LABELS.mobile.ko,
+      }
     : { dooh: "Digital", static: "Static", mobile: "Mobile" };
   return (["dooh", "static", "mobile"] as const)
     .filter((c) => mix[c] > 0)
@@ -276,16 +281,16 @@ function buildScenario(
     .sort((a, b) => categoryMixPct[b] - categoryMixPct[a])[0];
   const topCatKo =
     topCategory === "dooh"
-      ? "디지털"
+      ? DISPLAY_MODE_LABELS.dooh.ko
       : topCategory === "static"
-        ? "고정형"
-        : "이동";
+        ? DISPLAY_MODE_LABELS.static.ko
+        : DISPLAY_MODE_LABELS.mobile.ko;
   const topCatEn =
     topCategory === "dooh"
-      ? "Digital"
+      ? DISPLAY_MODE_LABELS.dooh.en
       : topCategory === "static"
-        ? "Static"
-        : "Mobile";
+        ? DISPLAY_MODE_LABELS.static.en
+        : DISPLAY_MODE_LABELS.mobile.en;
 
   const labelKo = `${placePart} ${topCatKo} 집중 — ${industryLabel} ${goalLabel}`;
   const labelEn = `${placePart} ${topCatEn} focus — ${industryLabel} ${goalLabel}`;

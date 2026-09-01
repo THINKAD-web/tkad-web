@@ -2461,7 +2461,7 @@ export default function AdminMediasClient({
           <div className="flex min-w-0 flex-wrap gap-1">
             {[
               { value: "all", label: "전체" },
-              { value: "dooh", label: "디지털" },
+              { value: "dooh", label: "디지털 표출" },
               { value: "static", label: "고정형" },
               { value: "mobile", label: "이동형" },
             ].map((opt) => (

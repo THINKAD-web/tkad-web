@@ -20,6 +20,7 @@ import {
   metricsWriteErrorBody,
   validateMappedMediaMetrics,
 } from "@/lib/media-metrics-write";
+import { resolveCatalogChannelForMediaWrite } from "@/lib/catalog-channel";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -212,6 +213,7 @@ export async function POST(request: NextRequest) {
             priceOptions: prismaFields.priceOptions ?? Prisma.JsonNull,
             addressVerified,
             autoPopulatedAt,
+            catalogChannel: resolveCatalogChannelForMediaWrite({}),
           },
         });
         if (installLocations !== undefined) {

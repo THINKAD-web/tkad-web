@@ -23,6 +23,7 @@ import { logLockdownAttempt } from "@/lib/media/audit-log";
 import { stripLockedFields } from "@/lib/media/locked-fields";
 import { maybeAutoRecomputeMediaMetrics } from "@/lib/media/engine/auto-recompute";
 import { revalidateMediaCachesBulk } from "@/lib/media-cache-revalidate";
+import { resolveCatalogChannelForMediaWrite } from "@/lib/catalog-channel";
 
 export const dynamic = "force-dynamic";
 
@@ -153,6 +154,7 @@ export async function POST(request: NextRequest) {
             priceOptions: prismaFields.priceOptions ?? Prisma.JsonNull,
             addressVerified: geoVerified,
             autoPopulatedAt: autoNear?.autoPopulatedAt ?? null,
+            catalogChannel: resolveCatalogChannelForMediaWrite({}),
           },
         });
         if (installLocations !== undefined) {

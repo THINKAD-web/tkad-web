@@ -6,6 +6,7 @@
  */
 
 import type { MediaItem } from "@/lib/media-data";
+import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import type {
   CampaignPlanMixEntry,
   CampaignPlanSnapshot,
@@ -253,9 +254,12 @@ function inferBriefCategoriesText(
   const keys = new Set<string>();
   for (const m of portfolio) {
     const key = plannerReportCategoryKey(m);
-    if (key === "digital") keys.add(isKo ? "디지털" : "Digital");
-    else if (key === "static") keys.add(isKo ? "고정형" : "Static");
-    else if (key === "mobile") keys.add(isKo ? "이동형" : "Mobile");
+    if (key === "dooh" || key === "digital")
+      keys.add(isKo ? DISPLAY_MODE_LABELS.dooh.ko : DISPLAY_MODE_LABELS.dooh.en);
+    else if (key === "static")
+      keys.add(isKo ? DISPLAY_MODE_LABELS.static.ko : DISPLAY_MODE_LABELS.static.en);
+    else if (key === "mobile")
+      keys.add(isKo ? DISPLAY_MODE_LABELS.mobile.ko : DISPLAY_MODE_LABELS.mobile.en);
   }
   return [...keys].join(", ") || (isKo ? "혼합" : "Mixed");
 }
