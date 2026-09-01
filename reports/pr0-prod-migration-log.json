@@ -1,0 +1,68 @@
+{
+  "neonBackup": {
+    "branch": "pr0-pre-migrate-20260901",
+    "branchId": "br-hidden-resonance-auxt7n2v",
+    "projectId": "nameless-shadow-36255941",
+    "createdAt": "2026-09-01T09:18:05Z"
+  },
+  "events": [
+    {
+      "type": "PRE_COUNTS",
+      "at": "2026-09-01T09:18:53.646Z",
+      "pre": {
+        "media_digital": 641,
+        "media_dooh": 0,
+        "json_cart_digital_rows": 11,
+        "json_cart_dooh_rows": 0,
+        "json_plan_digital_rows": 7,
+        "json_plan_dooh_rows": 0,
+        "json_cart_users": 322,
+        "json_plan_rows": 7
+      }
+    },
+    {
+      "type": "MIGRATE",
+      "at": "2026-09-01T09:19:10.915Z"
+    },
+    {
+      "type": "POST_COUNTS",
+      "at": "2026-09-01T09:19:11.113Z",
+      "post": {
+        "media_digital": 0,
+        "media_dooh": 641,
+        "json_cart_digital_rows": 0,
+        "json_cart_dooh_rows": 11,
+        "json_plan_digital_rows": 0,
+        "json_plan_dooh_rows": 7,
+        "json_cart_users": 322,
+        "json_plan_rows": 7
+      }
+    }
+  ],
+  "pre": {
+    "at": "2026-09-01T09:18:53.646Z",
+    "media_digital": 641,
+    "media_dooh": 0,
+    "json_cart_digital_rows": 11,
+    "json_cart_dooh_rows": 0,
+    "json_plan_digital_rows": 7,
+    "json_plan_dooh_rows": 0,
+    "json_cart_users": 322,
+    "json_plan_rows": 7
+  },
+  "migration": {
+    "at": "2026-09-01T09:19:10.915Z",
+    "psqlOutput": "BEGIN\nDO\nUPDATE 641\nUPDATE 11\nUPDATE 7\nDO\nCOMMIT\n"
+  },
+  "post": {
+    "at": "2026-09-01T09:19:11.113Z",
+    "media_digital": 0,
+    "media_dooh": 641,
+    "json_cart_digital_rows": 0,
+    "json_cart_dooh_rows": 11,
+    "json_plan_digital_rows": 0,
+    "json_plan_dooh_rows": 7,
+    "json_cart_users": 322,
+    "json_plan_rows": 7
+  }
+}

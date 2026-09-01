@@ -3,9 +3,10 @@ import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
+const envFlag = process.argv.includes("--prod") ? "prod" : "preview";
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-const pre = JSON.parse(readFileSync(join(root, "reports/pr0-preview-price-pre.json"), "utf8"));
-const post = JSON.parse(readFileSync(join(root, "reports/pr0-preview-price-post.json"), "utf8"));
+const pre = JSON.parse(readFileSync(join(root, `reports/pr0-${envFlag}-price-pre.json`), "utf8"));
+const post = JSON.parse(readFileSync(join(root, `reports/pr0-${envFlag}-price-post.json`), "utf8"));
 
 const key = (r) => `${r.mediaId}|${r.scenario}`;
 const preMap = new Map(pre.results.map((r) => [key(r), r]));
@@ -41,7 +42,7 @@ const out = {
   mismatched: diffs.length,
   diffs,
 };
-const outPath = join(root, "reports/pr0-preview-price-diff.json");
+const outPath = join(root, `reports/pr0-${envFlag}-price-diff.json`);
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, JSON.stringify(out, null, 2));
 console.log(JSON.stringify({ matched: match, mismatched: diffs.length, outPath }, null, 2));
