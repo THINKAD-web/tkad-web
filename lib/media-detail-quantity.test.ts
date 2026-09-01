@@ -27,7 +27,7 @@ const fixedBillboard: MediaItem = {
   ...mobileBus,
   id: "bb-1",
   name: "빌보드",
-  type: "digital",
+  type: "dooh",
 };
 
 test("shouldShowMediaDetailQuantityControl — mobile yes, fixed no", () => {

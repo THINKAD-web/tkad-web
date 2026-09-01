@@ -328,7 +328,7 @@ export function inferBrowseCategoryFromMedia(input: {
     if (re.test(hay)) return pair;
   }
 
-  if (input.type === "digital") return { main: "ooh", sub: "digital_signage" };
+  if (input.type === "dooh") return { main: "ooh", sub: "digital_signage" };
   if (input.type === "static") return { main: "ooh", sub: "billboard" };
   if (input.type === "mobile") return { main: "transit", sub: "vehicle_wrap" };
 

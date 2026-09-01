@@ -61,7 +61,7 @@ export type RegionCheckboxCode =
 type AgeBand = "teens" | "twenties" | "thirties" | "forties";
 type PeriodWeeks = 1 | 2 | 4 | 12;
 
-type MediaTypeFilter = "all" | "digital" | "static" | "mobile" | "network";
+type MediaTypeFilter = "all" | "dooh" | "static" | "mobile" | "network";
 
 function recommendGoalToPlanner(goal: CampaignGoal): PlannerCampaignGoal {
   switch (goal) {
@@ -439,7 +439,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const mediaTypeOptions: { value: MediaTypeFilter; label: string }[] = useMemo(
     () => [
       { value: "all", label: tr("form.mediaTypeAll") },
-      { value: "digital", label: tr("form.mediaTypeDigital") },
+      { value: "dooh", label: tr("form.mediaTypeDigital") },
       { value: "static", label: tr("form.mediaTypeStatic") },
       { value: "mobile", label: tr("form.mediaTypeMobile") },
       { value: "network", label: tr("form.mediaTypeNetwork") },
@@ -847,7 +847,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                       const Icon =
                         o.value === "all"
                           ? Sparkles
-                          : o.value === "digital"
+                          : o.value === "dooh"
                             ? Monitor
                             : o.value === "static"
                               ? PanelTop

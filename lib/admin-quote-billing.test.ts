@@ -21,7 +21,7 @@ const ktMedia = {
   nameEn: "Gwanghwamun KT Square",
   location: "서울",
   region: "서울",
-  type: "digital",
+  type: "dooh",
   price: 120_000_000,
   priceOptions: [
     { label: "영상(15초)", price: 120_000_000, period: "month" },

@@ -32,7 +32,7 @@ export function MediaRegisterForm() {
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [mediaName, setMediaName] = useState("");
-  const [mediaType, setMediaType] = useState<string>("digital");
+  const [mediaType, setMediaType] = useState<string>("dooh");
   const [address, setAddress] = useState("");
   const [addressDetail, setAddressDetail] = useState("");
   const [zonecode, setZonecode] = useState("");
@@ -236,12 +236,12 @@ export function MediaRegisterForm() {
             value={mediaType}
             onChange={(e) => {
               setMediaType(e.target.value);
-              setIsDigital(e.target.value === "digital");
+              setIsDigital(e.target.value === "dooh");
             }}
           >
             {MEDIA_APPLICATION_MEDIA_TYPES.map((t) => (
               <option key={t} value={t} className="bg-[#0a0a0f] dark:text-white text-gray-900">
-                {t === "digital"
+                {t === "dooh"
                   ? isKo
                     ? "디지털"
                     : "Digital"

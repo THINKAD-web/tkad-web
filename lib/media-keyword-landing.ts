@@ -9,7 +9,7 @@
  */
 
 export type RegionSlug = "seoul" | "busan" | "jeju" | "national" | string;
-export type TypeSlug = "digital" | "static" | "mobile" | "network" | string;
+export type TypeSlug = "dooh" | "static" | "mobile" | "network" | string;
 
 const REGION_LABELS: Record<string, { ko: string; en: string }> = {
   seoul: { ko: "서울", en: "Seoul" },
@@ -19,6 +19,8 @@ const REGION_LABELS: Record<string, { ko: string; en: string }> = {
 };
 
 const TYPE_LABELS: Record<string, { ko: string; en: string }> = {
+  dooh: { ko: "디지털 사이니지", en: "Digital signage" },
+  /** @deprecated URL alias — `/media/type/digital` redirects to `dooh` (PR0) */
   digital: { ko: "디지털 사이니지", en: "Digital signage" },
   static: { ko: "고정형 빌보드", en: "Static billboard" },
   mobile: { ko: "이동형 매체", en: "Transit media" },

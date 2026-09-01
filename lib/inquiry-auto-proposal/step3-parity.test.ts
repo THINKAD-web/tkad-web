@@ -22,7 +22,7 @@ function plannerMedia(over: Partial<MediaItem> & { id: string; name: string }): 
     locationEn: "Incheon Airport",
     region: "incheon",
     regionMain: "incheon",
-    type: "digital",
+    type: "dooh",
     subCategory: "led_screen",
     mediaSubCategory: "airport",
     mediaMainCategory: "transport",

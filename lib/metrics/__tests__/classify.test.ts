@@ -28,14 +28,14 @@ test("DOOH 는 화면 면적으로 대형·중형이 갈린다", () => {
   const large = classifyMedia({
     mainCategory: "ooh",
     subCategory: "digital_signage",
-    type: "digital",
+    type: "dooh",
     widthM: 20,
     heightM: 8, // 160㎡
   });
   const mid = classifyMedia({
     mainCategory: "ooh",
     subCategory: "digital_signage",
-    type: "digital",
+    type: "dooh",
     widthM: 5,
     heightM: 3, // 15㎡
   });
@@ -45,7 +45,7 @@ test("DOOH 는 화면 면적으로 대형·중형이 갈린다", () => {
 
 test("면적 미상 DOOH 는 과대 추정을 피해 중형으로 본다", () => {
   assert.equal(
-    classifyMedia({ mainCategory: "ooh", subCategory: "digital_signage", type: "digital" }),
+    classifyMedia({ mainCategory: "ooh", subCategory: "digital_signage", type: "dooh" }),
     "dooh_mid",
   );
 });
@@ -66,8 +66,8 @@ test("정적 매체 판정 — SOV 1.0 대상", () => {
   assert.equal(isStaticMedia({ subCategory: "billboard" }), true);
   assert.equal(isStaticMedia({ subCategory: "bus_exterior" }), true);
   assert.equal(isStaticMedia({ subCategory: "wall_mural" }), true);
-  assert.equal(isStaticMedia({ subCategory: "digital_signage", type: "digital" }), false);
-  assert.equal(isStaticMedia({ subCategory: "elevator", type: "digital" }), false);
+  assert.equal(isStaticMedia({ subCategory: "digital_signage", type: "dooh" }), false);
+  assert.equal(isStaticMedia({ subCategory: "elevator", type: "dooh" }), false);
 });
 
 test("모든 분류에 CPM 범위와 가시율 기본값이 정의되어 있다", () => {

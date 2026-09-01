@@ -12,7 +12,7 @@ const DarkMapView = dynamic(
 );
 
 function campaignTypeToMarkerType(type: CampaignMapMediaType): string {
-  if (type === "digital") return "digital";
+  if (type === "dooh") return "dooh";
   if (type === "billboard") return "static";
   if (type === "transport") return "mobile";
   return "network";

@@ -24,7 +24,7 @@ function media(
     location: "서울",
     region: "seoul",
     regionMain: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 0,
     lat: 37.5,
     lng: 127,

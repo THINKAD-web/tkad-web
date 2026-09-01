@@ -148,7 +148,7 @@ export function inferMarketingTypeSlug(
 ): MarketingMediaTypeSlug | null {
   const h = haystack(m);
   if (
-    m.type === "digital" ||
+    m.type === "dooh" ||
     /dooh|디지털|전광|사이니지|led|미디어월|스크린/.test(h)
   ) {
     return "dooh";
@@ -174,7 +174,7 @@ export function matchesMarketingMediaType(
 ): boolean {
   const inferred = inferMarketingTypeSlug(m);
   if (inferred === slug) return true;
-  if (slug === "dooh" && m.type === "digital") return true;
+  if (slug === "dooh" && m.type === "dooh") return true;
   if (slug === "subway" && m.type === "mobile") return true;
   if (slug === "billboard" && m.type === "static") return true;
   return false;

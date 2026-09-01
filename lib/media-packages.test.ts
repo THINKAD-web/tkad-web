@@ -10,7 +10,7 @@ const dayMedia = {
   name: "일 단가 매체",
   price: 22_000_000,
   pricePeriod: "day",
-  type: "digital",
+  type: "dooh",
   region: "seoul",
 } as MediaItem;
 
@@ -19,7 +19,7 @@ const monthMedia = {
   name: "월 단가 매체",
   price: 50_000_000,
   pricePeriod: "month",
-  type: "digital",
+  type: "dooh",
   region: "seoul",
 } as MediaItem;
 
@@ -32,7 +32,7 @@ const multiOpt = {
     { label: "일", price: 22_000_000, period: "day" },
     { label: "월", price: 110_000_000, period: "month" },
   ],
-  type: "digital",
+  type: "dooh",
   region: "seoul",
 } as MediaItem;
 

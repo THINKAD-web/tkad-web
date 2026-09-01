@@ -11,7 +11,7 @@ const airportOk = {
   name: "인천공항 국제선 T1 키로뷰 광고",
   isActive: true,
   reviewStatus: "clean",
-  type: "digital",
+  type: "dooh",
   mediaSubCategory: "airport",
   price: 12_000_000,
   impressions: 2_200_000,

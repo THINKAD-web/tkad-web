@@ -45,7 +45,7 @@ test("matchesBrowseRegion — seoul_coex haystack fallback", () => {
     name: "코엑스 LED 전광판",
     location: "삼성동 코엑스몰",
     regionMain: "seoul",
-    type: "digital",
+    type: "dooh",
   });
   assert.equal(
     matchesBrowseRegion(coex, "seoul", "seoul_coex", ""),

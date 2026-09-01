@@ -308,7 +308,7 @@ function goalRawPoints(goal: CampaignGoal, m: MediaItem): number {
   if (goal === "awareness") {
     let pts = Math.min(55, Math.round(m.dailyFootTraffic / 35000));
     if (
-      m.type === "digital" ||
+      m.type === "dooh" ||
       m.type === "static" ||
       m.type === "network" ||
       m.type === "billboard"
@@ -321,14 +321,14 @@ function goalRawPoints(goal: CampaignGoal, m: MediaItem): number {
     if (
       m.type === "mobile" ||
       m.type === "subway" ||
-      m.type === "digital"
+      m.type === "dooh"
     ) {
       return 82;
     }
     return 48;
   }
   if (goal === "launch") {
-    if (m.type === "digital" || m.dailyFootTraffic >= 300000) return 88;
+    if (m.type === "dooh" || m.dailyFootTraffic >= 300000) return 88;
     return 52;
   }
   if (goal === "conversion") {
@@ -418,7 +418,7 @@ function typeMatchesMedia(m: MediaItem, filter: string | undefined): boolean {
   const norm = (x: string): string => {
     if (x === "billboard") return "static";
     if (x === "subway" || x === "bus" || x === "transport") return "mobile";
-    if (x === "network") return "digital";
+    if (x === "network") return "dooh";
     return x;
   };
 

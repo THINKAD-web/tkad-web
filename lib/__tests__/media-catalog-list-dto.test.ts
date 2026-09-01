@@ -19,7 +19,7 @@ function fixtureMediaItem(overrides: Partial<MediaItem> = {}): MediaItem {
     region: "seoul",
     city: "서울",
     district: "강남구",
-    type: "digital",
+    type: "dooh",
     price: 500,
     pricePeriod: "month",
     lat: 37.5,

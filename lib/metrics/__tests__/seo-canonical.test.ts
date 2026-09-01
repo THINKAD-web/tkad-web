@@ -97,7 +97,7 @@ test("⑥ isLocationBoundMedia 판정", () => {
     false,
   );
   assert.equal(
-    isLocationBoundMedia({ type: "digital", subCategory: "digital_signage" }),
+    isLocationBoundMedia({ type: "dooh", subCategory: "digital_signage" }),
     true,
   );
   assert.equal(isLocationBoundMedia({ type: "static", subCategory: undefined }), true);

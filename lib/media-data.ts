@@ -489,17 +489,17 @@ function mediaTypeToMapType(type: string): CampaignMapMediaType {
   if (type === "static") return "billboard";
   if (type === "mobile") return "transport";
   if (type === "network") return "special";
-  if (type === "digital") return "digital";
+  if (type === "dooh") return "dooh";
   if (type === "billboard" || type === "highway") return "billboard";
   if (
     type === "premium" ||
     type === "indoor" ||
     type === "apartment"
   ) {
-    return "digital";
+    return "dooh";
   }
   if (type === "bus" || type === "subway") return "transport";
-  return "digital";
+  return "dooh";
 }
 
 export function mediaItemsToCampaignPins(
@@ -573,7 +573,7 @@ const rawMediaCatalog: MediaItem[] = [
     location: "서울 강남구 영동대로 513 코엑스",
     locationEn: "COEX, 513 Yeongdong-daero, Gangnam-gu, Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 5000,
     lat: 37.5112,
     lng: 127.0595,
@@ -619,7 +619,7 @@ const rawMediaCatalog: MediaItem[] = [
     location: "강남역-신논현역 760m 구간",
     locationEn: "760m section between Gangnam Stn – Sinnonhyeon Stn",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 4000,
     pricePeriod: "week",
     lat: 37.4979,
@@ -660,7 +660,7 @@ const rawMediaCatalog: MediaItem[] = [
     location: "강남대로 신논현역 사거리",
     locationEn: "Sinnonhyeon Stn intersection, Gangnam-daero",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 2800,
     lat: 37.5044,
     lng: 127.0254,
@@ -692,7 +692,7 @@ const rawMediaCatalog: MediaItem[] = [
     location: "서울 강남구 학동사거리",
     locationEn: "Hakdong intersection, Gangnam-gu, Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 3200,
     lat: 37.5169,
     lng: 127.0397,
@@ -796,7 +796,7 @@ const rawMediaCatalog: MediaItem[] = [
     location: "삼성역 코엑스",
     locationEn: "COEX, Samsung Station, Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 3500,
     lat: 37.5085,
     lng: 127.0635,
@@ -840,7 +840,7 @@ const rawMediaCatalog: MediaItem[] = [
     location: "부산 부산진구",
     locationEn: "Busanjin-gu, Busan",
     region: "busan",
-    type: "digital",
+    type: "dooh",
     price: 1500,
     lat: 35.1579,
     lng: 129.0593,
@@ -892,7 +892,7 @@ const rawMediaCatalog: MediaItem[] = [
     location: "제주시",
     locationEn: "Jeju City",
     region: "jeju",
-    type: "digital",
+    type: "dooh",
     price: 2200,
     lat: 33.506,
     lng: 126.493,
@@ -1008,7 +1008,7 @@ function enrichMediaCatalogItem(m: MediaItem): MediaItem {
   const tags =
     m.tags ??
     [
-      m.type === "digital"
+      m.type === "dooh"
         ? "디지털"
         : m.type === "static"
           ? "고정"
@@ -1023,7 +1023,7 @@ function enrichMediaCatalogItem(m: MediaItem): MediaItem {
     ];
   const subCategory =
     m.subCategory ??
-    (m.type === "digital"
+    (m.type === "dooh"
       ? "디지털 전광"
       : m.type === "static"
         ? "빌보드·외벽"
@@ -1051,6 +1051,8 @@ function enrichMediaCatalogItem(m: MediaItem): MediaItem {
 export const mediaData: MediaItem[] = rawMediaCatalog.map(enrichMediaCatalogItem);
 
 export const typeLabels: Record<string, { ko: string; en: string }> = {
+  dooh: { ko: "DOOH", en: "DOOH" },
+  /** @deprecated legacy Media.type — PR0 */
   digital: { ko: "DOOH", en: "DOOH" },
   static: { ko: "고정형", en: "Static" },
   fixed: { ko: "고정형", en: "Static" },

@@ -83,7 +83,7 @@ test("planner 2w period total matches quote wizard partial rate", () => {
     location: "Seoul",
     locationEn: "Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 10_000_000,
     pricePeriod: "month",
     lat: 0,

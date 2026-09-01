@@ -27,7 +27,7 @@ function baseItem(overrides: Partial<MediaItem> = {}): MediaItem {
     location: "Seoul",
     locationEn: "Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 5_000_000,
     lat: 37.5,
     lng: 127,

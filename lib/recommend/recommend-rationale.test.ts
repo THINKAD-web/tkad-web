@@ -115,7 +115,7 @@ test("generic brief fallback when breakdown is weak", () => {
     id: "t3",
     name: "전국 디지털 네트워크",
     location: "전국",
-    type: "digital",
+    type: "dooh",
     mediaMainCategory: "digital",
   });
   const breakdown: ScoreBreakdown = {

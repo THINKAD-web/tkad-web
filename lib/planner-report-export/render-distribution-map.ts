@@ -96,7 +96,7 @@ function escapeXml(s: string): string {
 
 function normalizeMediaTypeKey(type: string): string {
   const t = type.toLowerCase();
-  if (t.includes("digital")) return "digital";
+  if (t.includes("digital")) return "dooh";
   if (t.includes("mobile") || t.includes("transport")) return "mobile";
   if (t.includes("network")) return "network";
   if (t.includes("static") || t.includes("billboard")) return "static";
@@ -159,16 +159,17 @@ function buildSvg(pins: PlannerExportMapPin[], isKo: boolean): string {
     });
   }
 
-  const legendTypes = ["static", "digital", "mobile", "network"] as const;
+  const legendTypes = ["static", "dooh", "mobile", "network"] as const;
   const legendLabelsKo: Record<string, string> = {
     static: "고정형",
-    digital: "디지털",
+    dooh: "디지털",
     mobile: "이동형",
     network: "네트워크",
   };
   const legendLabelsEn: Record<string, string> = {
     static: "Static",
     digital: "Digital",
+    dooh: "Digital",
     mobile: "Mobile",
     network: "Network",
   };

@@ -12,7 +12,7 @@ function media(
     location: "Seoul",
     locationEn: "Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     lat: 0,
     lng: 0,
     dailyFootTraffic: 1000,

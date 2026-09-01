@@ -8,7 +8,7 @@ test("v1-impressions: ensquare footfall + factSheet SOV → monthly impressions"
   const input = buildEngineInput({
     id: "test-ensquare",
     name: "지하철 2호선 강남역 엔스퀘어 광고",
-    type: "digital",
+    type: "dooh",
     subCategory: "subway_station",
     mediaMainCategory: "transit",
     mediaSubCategory: "subway_station",

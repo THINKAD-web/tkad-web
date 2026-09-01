@@ -82,7 +82,7 @@ function plannerAirport(id: string, name: string, price: number): MediaItem {
     locationEn: "Incheon Airport",
     region: "incheon",
     regionMain: "incheon",
-    type: "digital",
+    type: "dooh",
     subCategory: "led_screen",
     mediaSubCategory: "airport",
     mediaMainCategory: "transport",

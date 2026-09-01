@@ -26,7 +26,7 @@ export const PLANNER_INDUSTRY_KEYS = [
 export type PlannerIndustryKey = (typeof PLANNER_INDUSTRY_KEYS)[number];
 
 export const PLANNER_DEFAULT_CATEGORIES: PlannerCategory[] = [
-  "digital",
+  "dooh",
   "static",
   "mobile",
 ];
@@ -93,15 +93,17 @@ export function plannerIndustryLabel(
 }
 
 export function isPlannerCategory(v: unknown): v is PlannerCategory {
-  return v === "digital" || v === "static" || v === "mobile";
+  return v === "dooh" || v === "static" || v === "mobile";
 }
 
-/** 레거시 카테고리 키(`billboard`, `bus`, `subway`) → 현재 키 변환 */
+/** 레거시 카테고리 키(`billboard`, `bus`, `subway`, `digital`) → 현재 키 변환 */
 export function normalizePlannerCategories(raw: unknown): PlannerCategory[] {
   const legacy: Record<string, PlannerCategory> = {
     billboard: "static",
     bus: "mobile",
     subway: "mobile",
+    /** @deprecated Remove after 2027-03-01 — PR0 Media.type rename */
+    digital: "dooh",
   };
   if (!Array.isArray(raw)) return [...PLANNER_DEFAULT_CATEGORIES];
   const seen = new Set<PlannerCategory>();

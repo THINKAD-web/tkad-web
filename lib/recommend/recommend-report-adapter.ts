@@ -78,7 +78,7 @@ export function recommendTargetToAgeKeys(
 export function recommendTypeToPlannerCategories(
   type: string | undefined,
 ): PlannerCategory[] {
-  if (type === "digital" || type === "static" || type === "mobile") {
+  if (type === "dooh" || type === "static" || type === "mobile") {
     return [type];
   }
   return [];

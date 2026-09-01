@@ -244,7 +244,7 @@ function formatBunnyUploadError(
 
 function typeBadgeLabel(type: string): string {
   const s = type.toLowerCase();
-  if (s === "digital") return "디지털";
+  if (s === "dooh" || s === "digital") return "디지털";
   if (s === "static") return "고정형";
   if (s === "mobile") return "이동형";
   if (s === "network" || /네트워크/.test(s)) return "네트워크";
@@ -270,8 +270,10 @@ function matchesCategoryFilter(type: string, filter: string): boolean {
         s === "static" ||
         /billboard|빌보드|외벽|highway|고속|현수막/.test(s)
       );
+    case "dooh":
     case "digital":
       return (
+        s === "dooh" ||
         s === "digital" ||
         /디지털|전광|led|사이니지|signage|미디어폴|screen|premium|indoor|apartment/.test(
           s,
@@ -381,7 +383,7 @@ const emptyForm: AdminMediaForm = {
   city: "",
   district: "",
   region: "seoul",
-  type: "digital",
+  type: "dooh",
   price: 0,
   latitude: "",
   longitude: "",
@@ -2459,7 +2461,7 @@ export default function AdminMediasClient({
           <div className="flex min-w-0 flex-wrap gap-1">
             {[
               { value: "all", label: "전체" },
-              { value: "digital", label: "디지털" },
+              { value: "dooh", label: "디지털" },
               { value: "static", label: "고정형" },
               { value: "mobile", label: "이동형" },
             ].map((opt) => (

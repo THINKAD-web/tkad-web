@@ -24,7 +24,7 @@ function media(o: Partial<MediaItem> & Pick<MediaItem, "id">): MediaItem {
     location: "서울특별시",
     locationEn: "Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 0,
     lat: 37.5,
     lng: 127,
@@ -43,7 +43,7 @@ const M1 = media({
   district: "관악구",
   regionMain: "seoul",
   regionSub: "seoul_gangnam",
-  type: "digital",
+  type: "dooh",
 });
 const M2 = media({
   id: "m2",
@@ -235,7 +235,7 @@ test("override 경로에서는 기준 충돌 경고를 내지 않는다", () => 
     id: "c",
     dailyFootTraffic: 165_000,
     impressions: 9_000_000,
-    type: "digital",
+    type: "dooh",
   });
 
   const withOverride = calculatePlan({

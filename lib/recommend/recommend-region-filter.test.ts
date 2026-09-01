@@ -300,7 +300,7 @@ test("integration: 강남 택시 브랜딩 — mobile + gangnam region", async (
   } as MediaItem;
   const delivery = {
     ...mockMedia("del1", "seoul", "강남 택배차량 LED"),
-    type: "digital",
+    type: "dooh",
     name: "택배차량 LED",
   } as MediaItem;
   const matching = aiInputToMatching(input!, 0);

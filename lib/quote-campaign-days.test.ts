@@ -78,7 +78,7 @@ test("buildQuoteWizardLineContext uses campaignDaysOverride for monthly media", 
   const monthly: MediaItem = {
     ...bus,
     id: "bb-1",
-    type: "digital",
+    type: "dooh",
     price: 30_000_000,
     priceOptions: [],
     pricePeriod: "month",

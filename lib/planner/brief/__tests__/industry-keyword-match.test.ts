@@ -24,7 +24,7 @@ function fixture(
     regionMain: "seoul",
     city: "서울",
     district: "강남구",
-    type: "digital",
+    type: "dooh",
     subCategory: "led",
     mediaCategory: ["ooh"],
     price: 5_000_000,

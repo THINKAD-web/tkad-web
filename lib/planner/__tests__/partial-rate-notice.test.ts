@@ -15,7 +15,7 @@ import { mediaMinSellableDaysAbove } from "@/lib/metrics/media-price-adapter";
 function media(o: Partial<MediaItem> & Pick<MediaItem, "id">): MediaItem {
   return {
     name: o.id, nameEn: o.id, location: "서울", locationEn: "Seoul",
-    region: "seoul", regionMain: "seoul", type: "digital", price: 0,
+    region: "seoul", regionMain: "seoul", type: "dooh", price: 0,
     lat: 37.5, lng: 127, dailyFootTraffic: 10_000, sampleImages: [],
     pricePeriod: "month",
     ...o,

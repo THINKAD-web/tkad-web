@@ -31,7 +31,7 @@ export function buildMediaHeroSpecBadges(
   }
 
   const resolution = media.resolution?.trim();
-  if (resolution && (media.type === "digital" || media.type === "static")) {
+  if (resolution && (media.type === "dooh" || media.type === "static")) {
     badges.push({
       key: "resolution",
       label: labels.resolution,

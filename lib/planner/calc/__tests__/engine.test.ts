@@ -11,7 +11,7 @@ function media(overrides: Partial<MediaItem> & Pick<MediaItem, "id">): MediaItem
     location: "서울특별시",
     locationEn: "Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 0,
     lat: 37.5,
     lng: 127,
@@ -35,7 +35,7 @@ const KOREA_CAMPAIGN = [
     district: "관악구",
     city: "서울",
     regionZone: "gwanak",
-    type: "digital",
+    type: "dooh",
   }),
   media({
     id: "m2",
@@ -201,7 +201,7 @@ test("도달은 포트폴리오 전체 단위에서만 산출된다", () => {
 test("유형별 집계가 카탈로그 3종으로 나뉜다", () => {
   const plan = koreaCampaignPlan();
   const keys = plan.breakdown.byCategory.map((r) => r.key).sort();
-  assert.deepEqual(keys, ["digital", "mobile", "static"]);
+  assert.deepEqual(keys, ["dooh", "mobile", "static"]);
   for (const row of plan.breakdown.byCategory) {
     assert.equal(row.mediaCount, 1);
   }
@@ -242,7 +242,7 @@ test("impressions 와 일 유동인구 환산값이 어긋나면 경고하되 �
     dailyFootTraffic: 165_000,
     // 165,000 × 30 = 4,950,000 이어야 하나 저장값이 다르다
     impressions: 9_000_000,
-    type: "digital",
+    type: "dooh",
   });
 
   const plan = calculatePlan({

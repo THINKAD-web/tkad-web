@@ -25,7 +25,7 @@ function media(o: Partial<MediaItem> & Pick<MediaItem, "id">): MediaItem {
     location: "서울특별시",
     locationEn: "Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 1_000_000,
     lat: 37.5,
     lng: 127,

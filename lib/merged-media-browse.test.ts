@@ -29,7 +29,7 @@ function stubMedia(
     location: "서울",
     locationEn: "Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: partial.price,
     pricePeriod: partial.pricePeriod ?? "month",
     lat: 0,

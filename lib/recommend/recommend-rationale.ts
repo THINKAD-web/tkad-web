@@ -165,7 +165,7 @@ function mediaCategoryPhrase(m: MediaItem, isKo: boolean): string {
   if (type === "mobile" || m.mediaMainCategory === "mobile") {
     return isKo ? "이동형 매체" : "mobile OOH";
   }
-  if (type === "digital" || m.mediaMainCategory === "digital") {
+  if (type === "dooh" || m.mediaMainCategory === "digital") {
     return isKo ? "디지털 사이니지" : "digital signage";
   }
   if (type === "static" || m.mediaMainCategory === "static") {
@@ -180,11 +180,13 @@ function requestedCategories(
 ): PlannerCategory[] {
   const cats = new Set<PlannerCategory>();
   for (const c of display?.plannerCategories ?? []) {
-    if (c === "digital" || c === "static" || c === "mobile") cats.add(c);
+    if (c === "dooh" || c === "static" || c === "mobile") cats.add(c);
+    if (c === "digital") cats.add("dooh");
   }
   for (const c of input.categories ?? []) {
     const lc = c.trim().toLowerCase();
-    if (lc === "digital" || lc === "static" || lc === "mobile") cats.add(lc);
+    if (lc === "dooh" || lc === "static" || lc === "mobile") cats.add(lc as PlannerCategory);
+    if (lc === "digital") cats.add("dooh");
   }
   return [...cats];
 }
@@ -193,7 +195,7 @@ function categoryRequestLabel(cats: PlannerCategory[], isKo: boolean): string | 
   if (cats.length === 0) return null;
   const labels = cats.map((c) => {
     if (c === "mobile") return isKo ? "이동형" : "mobile";
-    if (c === "digital") return isKo ? "디지털" : "digital";
+    if (c === "dooh" || c === "digital") return isKo ? "디지털" : "digital";
     return isKo ? "고정형" : "static";
   });
   return labels.join(isKo ? "·" : "/");
@@ -224,7 +226,7 @@ function durationFitKind(
     type === "mobile" ||
     /지하철|버스|subway|bus|쉘터|brt|역\s|호선|transit/i.test(hay);
   const isFixed =
-    type === "static" || type === "digital" || /전광|빌보|billboard|led/i.test(hay);
+    type === "static" || type === "dooh" || /전광|빌보|billboard|led/i.test(hay);
 
   if (days != null && days > 0 && days <= 14) {
     return isTransit ? "shortTransit" : null;

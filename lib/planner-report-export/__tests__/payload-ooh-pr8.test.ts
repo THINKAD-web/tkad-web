@@ -12,7 +12,7 @@ const stubMedia: MediaItem = {
   id: "m-test-1",
   name: "테스트 매체",
   nameEn: "Test Media",
-  type: "digital",
+  type: "dooh",
   location: "서울",
   locationEn: "Seoul",
   region: "seoul",

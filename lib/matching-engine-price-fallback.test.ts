@@ -19,7 +19,7 @@ import type { MediaItem } from "./media-data.ts";
 const airBusanSample = {
   id: "cmrlzvqhh000a04kwnaxrsv22",
   name: "에어부산 기내 샘플 증정",
-  type: "digital",
+  type: "dooh",
   region: "busan",
   price: 0,
   pricePeriod: "month",

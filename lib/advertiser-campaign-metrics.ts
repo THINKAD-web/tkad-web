@@ -92,7 +92,7 @@ export function mediaTypeToMapType(
   type: string | null | undefined,
 ): "billboard" | "digital" | "transport" | "special" {
   const t = (type ?? "").toLowerCase();
-  if (t === "digital") return "digital";
+  if (t === "digital") return "dooh";
   if (t === "transport" || t === "mobile") return "transport";
   if (t === "billboard" || t === "static") return "billboard";
   return "special";

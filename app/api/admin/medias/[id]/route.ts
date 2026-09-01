@@ -12,7 +12,7 @@ import { maybeAutoFillNearbyMediaFields } from "@/lib/media-nearby-facilities";
 import { getPrisma } from "@/lib/prisma";
 import {
   CATALOG_MEDIA_TYPES,
-  isValidCatalogMediaType,
+  normalizeCatalogMediaType,
 } from "@/lib/media-auto-categorize";
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
 import { normalizePartialPeriodRatesForPrisma } from "@/lib/admin-partial-period-rates";
@@ -134,11 +134,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     else data.regionZone = String(body.regionZone).trim() || null;
   }
   if (body.type != null) {
-    const nextType = String(body.type).trim();
-    if (!isValidCatalogMediaType(nextType)) {
+    const nextType = normalizeCatalogMediaType(String(body.type).trim());
+    if (!nextType) {
       return json(
         {
-          error: `type must be one of: ${CATALOG_MEDIA_TYPES.join(", ")}`,
+          error: `type must be one of: ${CATALOG_MEDIA_TYPES.join(", ")} (legacy alias: digital → dooh)`,
         },
         400,
       );

@@ -112,7 +112,7 @@ function classifyBatch(row) {
   const { id, name, current_sub, proposed_sub, type } = row;
   const isPackage = /(네트워크|패키지)/i.test(name);
   const tier1Digital =
-    /전광판/i.test(name) && current_sub === "billboard" && type === "digital";
+    /전광판/i.test(name) && current_sub === "billboard" && type === "dooh";
   const tier1Wall =
     /(외벽|아트월)/i.test(name) && current_sub === "billboard";
   const auto49Subway =

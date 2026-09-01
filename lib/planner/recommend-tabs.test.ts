@@ -19,7 +19,7 @@ function mockMedia(
     id,
     name: `Media ${id}`,
     nameEn: `Media ${id}`,
-    type: "digital",
+    type: "dooh",
     region: "seoul",
     location: "강남",
     price: 5_000_000,

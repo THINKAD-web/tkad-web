@@ -44,7 +44,7 @@ function fixtureMedia(over: Partial<MediaItem> = {}): MediaItem {
     regionMain: "seoul",
     city: "서울",
     district: "강남구",
-    type: "digital",
+    type: "dooh",
     subCategory: "led_screen",
     mediaCategory: ["ooh"],
     price: 30_000_000,
@@ -122,7 +122,7 @@ test("정적 매체 SOV 는 1.0 이고 근거는 derived (가정 아님)", () =>
 
 test("SOV 스펙 없는 loop 매체는 기본값 + basis=default", () => {
   const r = resolveSovShareWithBasis({
-    type: "digital",
+    type: "dooh",
     subCategory: "led_screen",
     mainCategory: "ooh",
   });
@@ -134,7 +134,7 @@ test("SOV 스펙 없는 loop 매체는 기본값 + basis=default", () => {
 
 test("SOV 스펙이 있으면 계산값 + basis=derived", () => {
   const r = resolveSovShareWithBasis({
-    type: "digital",
+    type: "dooh",
     subCategory: "led_screen",
     spotDuration: 15,
     loopDuration: 300,
@@ -167,12 +167,12 @@ test("forceLoopSov + spot/loop spec — 값은 spec, basis=override", () => {
 });
 
 test("contactRate 실측 없으면 default, 있으면 measured", () => {
-  const d = resolveContactRateWithBasis({ type: "digital", subCategory: "led_screen" });
+  const d = resolveContactRateWithBasis({ type: "dooh", subCategory: "led_screen" });
   assert.equal(d.basis, "default");
   assert.ok(d.value > 0 && d.value <= 1);
 
   const m = resolveContactRateWithBasis({
-    type: "digital",
+    type: "dooh",
     subCategory: "led_screen",
     contactRate: 0.42,
   });
@@ -493,7 +493,7 @@ test("[fixture] 업종 축 — F&B 키워드 매체가 retail 대비 높은 indu
   });
   const techMedia = fixtureMedia({
     id: "tech-dooh",
-    type: "digital",
+    type: "dooh",
     subCategory: "office",
     location: "판교 테크밸리",
     tags: ["it", "saas"],

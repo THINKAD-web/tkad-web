@@ -19,19 +19,19 @@ import { buildBriefReportPayload } from "@/lib/planner/brief/brief-report-adapte
 function media(o: Partial<MediaItem> & Pick<MediaItem, "id">): MediaItem {
   return {
     name: o.id, nameEn: o.id, location: "서울", locationEn: "Seoul",
-    region: "seoul", type: "digital", price: 0, lat: 37.5, lng: 127,
+    region: "seoul", type: "dooh", price: 0, lat: 37.5, lng: 127,
     dailyFootTraffic: 0, sampleImages: [], ...o,
   } as MediaItem;
 }
 
 const CATALOG: MediaItem[] = [
   media({
-    id: "m1", name: "서울대입구역 맥스비전", type: "digital",
+    id: "m1", name: "서울대입구역 맥스비전", type: "dooh",
     price: 4_000_000, dailyFootTraffic: 165_000,
     city: "서울", district: "관악구", regionZone: "gwanak", regionMain: "seoul",
   }),
   media({
-    id: "m2", name: "이마트24 네트워크", type: "digital",
+    id: "m2", name: "이마트24 네트워크", type: "dooh",
     price: 2_000_000, dailyFootTraffic: 35_000,
     city: "서울", district: "구로구", regionZone: "gangseo",
     regionMain: "seoul", regionSub: "seoul_guro",

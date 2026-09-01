@@ -9,7 +9,7 @@ const MCITY = {
   name: "M-CITY",
   location: "서울",
   region: "서울",
-  type: "digital",
+  type: "dooh",
   price: 70_000_000,
   pricePeriod: "day",
   priceOptions: [
