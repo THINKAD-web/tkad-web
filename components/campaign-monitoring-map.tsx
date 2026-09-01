@@ -31,15 +31,15 @@ function mediaLabel(type: CampaignMapMediaType, isKo: boolean): string {
   return isKo ? m[type][0] : m[type][1];
 }
 
-function pinToneForMediaType(type: CampaignMapMediaType): "digital" | "static" | "mobile" | "network" {
+function pinToneForMediaType(type: CampaignMapMediaType): "dooh" | "static" | "mobile" | "network" {
   // Map campaign-only categories onto our public media pin palette.
-  if (type === "digital") return "digital";
+  if (type === "dooh") return "dooh";
   if (type === "billboard") return "static";
   if (type === "transport") return "mobile";
   return "network";
 }
 
-function pinColorForType(type: "digital" | "static" | "mobile" | "network"): {
+function pinColorForType(type: "dooh" | "static" | "mobile" | "network"): {
   fill: string;
   stroke: string;
   text: string;
@@ -83,9 +83,9 @@ function pinColorForType(type: "digital" | "static" | "mobile" | "network"): {
   }
 }
 
-function pinDataUrl(type: "digital" | "static" | "mobile" | "network", selected: boolean): string {
+function pinDataUrl(type: "dooh" | "static" | "mobile" | "network", selected: boolean): string {
   const { fill, stroke, text, glow, ink } = pinColorForType(type);
-  const label = type === "digital" ? "D" : type === "static" ? "S" : type === "mobile" ? "M" : "N";
+  const label = type === "dooh" ? "D" : type === "static" ? "S" : type === "mobile" ? "M" : "N";
   const w = 44;
   const h = 52;
   const svg = `

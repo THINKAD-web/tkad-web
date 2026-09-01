@@ -25,7 +25,7 @@ function formatWon(n: number, isKo: boolean): string {
 
 const baseMedia = {
   region: "서울",
-  type: "digital",
+  type: "dooh",
   priceOptions: [] as AdminMediaDto["priceOptions"],
   partialPeriodRates: null,
   image: null,

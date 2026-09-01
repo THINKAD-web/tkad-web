@@ -14,7 +14,7 @@ test("legacy calculateQuote without selections unchanged", () => {
         id: "billboard-1",
         name: "강남 빌보드",
         location: "서울",
-        type: "digital",
+        type: "dooh",
         price: 5_000_000,
       },
     ],

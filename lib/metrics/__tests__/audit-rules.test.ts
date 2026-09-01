@@ -222,7 +222,7 @@ test("R-04: loop 매체에 SOV 근거가 없으면 잡힌다 (D-01)", () => {
   const fired = rulesFired(
     row({
       name: "M-CITY",
-      type: "digital",
+      type: "dooh",
       mediaMainCategory: "ooh",
       mediaSubCategory: "digital_signage",
     }),
@@ -233,7 +233,7 @@ test("R-04: loop 매체에 SOV 근거가 없으면 잡힌다 (D-01)", () => {
 test("R-04: SOV 근거가 있으면 잡히지 않는다", () => {
   const fired = rulesFired(
     row({
-      type: "digital",
+      type: "dooh",
       mediaSubCategory: "digital_signage",
       priceNote: "15초 소재 / 300초 loop 기준",
     }),
@@ -375,7 +375,7 @@ test("topCpmOutliers — 이탈 배수 내림차순, 정상 매체는 제외", (
 
 test("auditAll 은 순수 — 같은 입력이면 같은 리포트", () => {
   const rows = [
-    row({ id: "a", slug: "a-slug", type: "digital", mediaSubCategory: "digital_signage" }),
+    row({ id: "a", slug: "a-slug", type: "dooh", mediaSubCategory: "digital_signage" }),
     row({ id: "b", dailyFootfall: 9_400_000, impressions: 38_000_000 }),
   ];
   const first = auditAll(rows);
@@ -385,7 +385,7 @@ test("auditAll 은 순수 — 같은 입력이면 같은 리포트", () => {
 });
 
 test("모든 규칙에 severity 와 라벨이 정의되어 있다", () => {
-  const acc = auditAll([row({ slug: "s", type: "digital", mediaSubCategory: "digital_signage" })]);
+  const acc = auditAll([row({ slug: "s", type: "dooh", mediaSubCategory: "digital_signage" })]);
   for (const v of acc.violations) {
     assert.ok(["P0", "P1", "P2"].includes(v.severity), v.rule);
     assert.ok(v.message.length > 0, v.rule);
@@ -410,7 +410,7 @@ test('R-05b: "1개월" 라벨 + period="day" — 30배 오라벨 감지 (M-CITY 
   auditRow(
     row({
       name: "M-CITY",
-      type: "digital",
+      type: "dooh",
       mediaSubCategory: "digital_signage",
       price: 70_000_000,
       pricePeriod: "day",

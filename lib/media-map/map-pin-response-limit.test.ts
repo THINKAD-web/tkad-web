@@ -11,7 +11,7 @@ function pin(id: string, lat: number, lng: number): MediaItem {
     id,
     slug: id,
     name: id,
-    type: "digital",
+    type: "dooh",
     location: "Seoul",
     region: "seoul",
     price: 1_000_000,

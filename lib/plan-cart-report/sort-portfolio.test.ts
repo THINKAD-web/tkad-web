@@ -17,7 +17,7 @@ function media(id: string, name: string, region = "seoul"): MediaItem {
     location: "",
     locationEn: "",
     region,
-    type: "digital",
+    type: "dooh",
     price: 1_000_000,
     lat: 0,
     lng: 0,

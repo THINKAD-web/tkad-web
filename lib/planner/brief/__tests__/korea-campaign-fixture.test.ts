@@ -25,7 +25,7 @@ function media(o: Partial<MediaItem> & Pick<MediaItem, "id">): MediaItem {
     location: "서울",
     locationEn: "Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 0,
     lat: 37.5,
     lng: 127,
@@ -47,7 +47,7 @@ const CATALOG: MediaItem[] = [
   media({
     id: "m1",
     name: "서울대입구역 맥스비전",
-    type: "digital",
+    type: "dooh",
     price: 4_000_000,
     dailyFootTraffic: 165_000,
     city: "서울",
@@ -60,7 +60,7 @@ const CATALOG: MediaItem[] = [
     name: "이마트24 네트워크",
     // 수량 효과의 전제 — 네트워크 카탈로그 항목이어야 units 가 노출에 반영된다.
     catalogSource: "network",
-    type: "digital",
+    type: "dooh",
     // 실제 편의점 네트워크는 DB 저장 시 `networkSubtype` 이 채워진다
     // (`media-network-public.ts` — `networkSubtype: n.type`). A-1b Wave 4 전
     // 픽스처는 이 분류를 빠뜨려, 수량 접미사가 "대" 로 폴백하는 상태를 고정했다.

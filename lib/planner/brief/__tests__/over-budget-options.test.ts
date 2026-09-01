@@ -18,7 +18,7 @@ function fixtureMedia(over: Partial<MediaItem> = {}): MediaItem {
     locationEn: "Gangnam, Seoul",
     region: "seoul",
     regionMain: "seoul",
-    type: "digital",
+    type: "dooh",
     subCategory: "led_screen",
     price: 10_000_000,
     pricePeriod: "month",

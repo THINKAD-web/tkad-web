@@ -464,7 +464,7 @@ export function inferMediaCategoriesFromText(input: {
     out.add("transit");
     out.add("subway");
   }
-  if (input.type === "digital") out.add("dooh");
+  if (input.type === "dooh") out.add("dooh");
   if (input.type === "static" || input.type === "billboard") out.add("billboard");
 
   if (out.size === 0) out.add("billboard");

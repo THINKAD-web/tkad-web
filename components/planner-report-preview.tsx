@@ -101,12 +101,14 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
   const typeLabel = (m: MediaItem) => {
     const ty = m.type;
     if (
+      ty === "dooh" ||
       ty === "digital" ||
       ty === "static" ||
       ty === "mobile" ||
       ty === "network"
     ) {
-      return tm(`types.${ty}`);
+      const key = ty === "digital" ? "dooh" : ty;
+      return tm(`types.${key}`);
     }
     return ty;
   };

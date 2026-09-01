@@ -7,6 +7,8 @@
  * 모든 필드는 옵션. 빈 값은 URL 에서 제거.
  */
 
+import { normalizeCatalogMediaType } from "@/lib/catalog-media-type";
+
 export type MediaMapView = {
   lat?: number;
   lng?: number;
@@ -104,10 +106,17 @@ export function parseMediaMapUrlState(
     if (raw == null || raw === "") continue;
     out[key] = raw.slice(0, 80);
   }
-  // legacy `type` → category
+  // legacy `type` → category (digital alias → dooh)
   if (!out.category) {
     const legacyType = searchParams.get("type");
-    if (legacyType?.trim()) out.category = legacyType.trim().slice(0, 80);
+    if (legacyType?.trim()) {
+      const normalized =
+        normalizeCatalogMediaType(legacyType.trim()) ?? legacyType.trim();
+      out.category = normalized.slice(0, 80);
+    }
+  } else {
+    const normalized = normalizeCatalogMediaType(out.category);
+    if (normalized) out.category = normalized;
   }
   return out;
 }

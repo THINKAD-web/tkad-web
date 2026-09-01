@@ -31,7 +31,7 @@ const packageMedia: MediaItem = {
   location: "서울",
   locationEn: "Seoul",
   region: "seoul",
-  type: "digital",
+  type: "dooh",
   price: 5_000_000,
   lat: 0,
   lng: 0,

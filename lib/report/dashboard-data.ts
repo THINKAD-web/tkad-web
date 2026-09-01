@@ -33,7 +33,7 @@ export type HotMediaRow = {
 };
 
 export type IndustrySplitRow = {
-  /** 매체 type — DB MediaType 그대로 ("digital" | "static" | "mobile" | "network" 등) */
+  /** 매체 type — DB MediaType 그대로 ("dooh" | "static" | "mobile" | "network" 등) */
   key: string;
   label: string;
   count: number;

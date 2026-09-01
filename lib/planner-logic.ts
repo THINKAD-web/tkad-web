@@ -94,10 +94,10 @@ import { mediaMatchesGyeonggiZones } from "@/lib/planner/gyeonggi-zones";
 import type { PlannerIncheonZoneKey } from "@/lib/planner/incheon-zones";
 import { mediaMatchesIncheonZones } from "@/lib/planner/incheon-zones";
 
-export type PlannerCategory = "digital" | "static" | "mobile";
+export type PlannerCategory = "dooh" | "static" | "mobile";
 
 /** DB `Media.type` · 레거시 값 → 플래너 유형 (매칭용) */
-export type PlannerMediaKind = "digital" | "static" | "mobile" | "network";
+export type PlannerMediaKind = "dooh" | "static" | "mobile" | "network";
 
 /** 차량·차내·기내 등 실제로 움직이는 매체 (등록 type 미기입 레거시용) */
 const TRULY_MOBILE_SUBCATEGORIES = new Set([
@@ -150,7 +150,7 @@ export function resolvePlannerMediaKind(
     .toLowerCase();
 
   if (sub && TRULY_MOBILE_SUBCATEGORIES.has(sub)) return "mobile";
-  if (sub && FIXED_SITE_SUBCATEGORIES.has(sub)) return "digital";
+  if (sub && FIXED_SITE_SUBCATEGORIES.has(sub)) return "dooh";
 
   const hay = [item.name, item.nameEn, ...(item.tags ?? [])]
     .filter(Boolean)
@@ -182,7 +182,7 @@ export function normalizeMediaTypeForPlanner(
     t === "electronic" ||
     t === "screen"
   ) {
-    return "digital";
+    return "dooh";
   }
   if (
     t === "static" ||
@@ -208,7 +208,7 @@ export function normalizeMediaTypeForPlanner(
   if (/고정|빌보드|billboard|wallscape|포스터/.test(t) && !/digital|dooh|디지털/.test(t)) {
     return "static";
   }
-  if (/디지털|dooh|ooh|사이니지|signage|led|전광/.test(t)) return "digital";
+  if (/디지털|dooh|ooh|사이니지|signage|led|전광/.test(t)) return "dooh";
   if (/이동|버스|택시|랩핑|vehicle|차내|기내|inflight|비행/.test(t)) return "mobile";
   return null;
 }
@@ -235,8 +235,7 @@ export function matchesPlannerCategory(
   cat: PlannerCategory,
 ): boolean {
   const norm = resolvePlannerMediaKind(item);
-  if (cat === "digital")
-    return norm === "digital" || norm === "network";
+  if (cat === "dooh") return norm === "dooh" || norm === "network";
   if (cat === "static") return norm === "static";
   if (cat === "mobile") return norm === "mobile";
   return false;
@@ -856,7 +855,7 @@ const TYPE_META: Record<
   string,
   { labelKo: string; labelEn: string }
 > = {
-  digital: { labelKo: "디지털", labelEn: "Digital" },
+  dooh: { labelKo: "디지털", labelEn: "Digital" },
   static: { labelKo: "고정형", labelEn: "Static" },
   mobile: { labelKo: "이동형", labelEn: "Mobile" },
   network: { labelKo: "네트워크", labelEn: "Network" },
@@ -866,7 +865,7 @@ const TYPE_META: Record<
 /** 보고서·성과 요약 차트용 — network→digital 등 유형 통합 키 */
 export function plannerReportCategoryKey(m: MediaItem): string {
   const norm = resolvePlannerMediaKind(m);
-  if (norm === "network" || norm === "digital") return "digital";
+  if (norm === "network" || norm === "dooh") return "dooh";
   if (norm === "static") return "static";
   if (norm === "mobile") return "mobile";
   return "other";
@@ -1501,7 +1500,7 @@ export function computePlannerMetrics(
     : Math.round(estimatedMonthlyImpressions * months);
 
   const mixBonus =
-    (media.some((m) => m.type === "digital" || m.type === "network")
+    (media.some((m) => m.type === "dooh" || m.type === "network")
       ? 0.25
       : 0) +
     (media.some((m) => m.type === "static") ? 0.15 : 0) +

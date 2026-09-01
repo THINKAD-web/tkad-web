@@ -160,7 +160,7 @@ test("Package keyword + 18.5M impressions warns (dooh under 20M cap)", () => {
     { impressions: 18_500_000 },
     {
       name: "잠실 롯데월드몰 Full Package",
-      type: "digital",
+      type: "dooh",
       subCategory: "led_screen",
       widthM: 20,
       heightM: 10,
@@ -184,7 +184,7 @@ test("CSV exposure uses same dailyFootfall cap", () => {
 test("CSV Package name + high footfall warns", () => {
   const r = validateCsvDailyFootfall(400_000, {
     name: "9호선 Turn-Key 4역 통합",
-    type: "digital",
+    type: "dooh",
   });
   assert.equal(r.ok, true);
   assert.equal(
@@ -204,7 +204,7 @@ test("gate requires ack for warnings, errors never ack-able", () => {
     { impressions: 18_500_000 },
     {
       name: "Full Package LED",
-      type: "digital",
+      type: "dooh",
       subCategory: "led_screen",
       widthM: 20,
       heightM: 10,
@@ -244,7 +244,7 @@ test("CSV/batch gate does not require ack for non-PKG warnings", () => {
 test("CSV/bulk rejects Package+oversize instead of silently saving", () => {
   const r = validateCsvDailyFootfall(1_600_000, {
     name: "지하철 5678호선 CM보드 Full Package 광고",
-    type: "digital",
+    type: "dooh",
     subCategory: "subway_station",
   });
   assert.equal(r.ok, true);
@@ -269,7 +269,7 @@ test("CC Full Package catalog rows are not MediaNetwork 5M-capped", () => {
     { impressions: 4_500_000, dailyFootfall: 350_000, cpm: 4_444 },
     {
       name: "인천국제공항 키로뷰 Full Package 광고",
-      type: "digital",
+      type: "dooh",
       subCategory: "airport",
       price: 20_000_000,
     },

@@ -14,7 +14,7 @@ function mockMedia(overrides: Partial<MediaItem> = {}): MediaItem {
     name: "테스트 LED",
     location: "서울",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 5_000_000,
     lat: 37.5,
     lng: 127.0,

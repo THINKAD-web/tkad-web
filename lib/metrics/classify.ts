@@ -63,7 +63,7 @@ export type ClassifyInput = {
   mainCategory?: string | null;
   /** `Media.mediaSubCategory` */
   subCategory?: string | null;
-  /** `Media.type` — "digital" | "static" | "mobile" | "network" */
+  /** `Media.type` — "dooh" | "static" | "mobile" | "network" */
   type?: string | null;
   name?: string | null;
   /** 화면 실물 크기 (㎡ 계산용) */
@@ -109,7 +109,7 @@ export function classifyMedia(input: ClassifyInput): MediaMetricClass {
     sub === "led_screen" ||
     sub === "media_pole" ||
     sub === "popup_display" ||
-    (input.type === "digital" && input.mainCategory === "ooh");
+    (input.type === "dooh" && input.mainCategory === "ooh");
 
   if (isDigitalSignage) {
     const area = screenAreaM2(input);
@@ -122,7 +122,7 @@ export function classifyMedia(input: ClassifyInput): MediaMetricClass {
   if (byName) return byName;
 
   // 옥내 사이니지 계열(디지털)은 엘리베이터 TV 와 노출 성격이 같다.
-  if (input.type === "digital") return "dooh_mid";
+  if (input.type === "dooh") return "dooh_mid";
   return "static_other";
 }
 

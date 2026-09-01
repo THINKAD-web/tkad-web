@@ -147,7 +147,7 @@ export default function MediaNetworkDetailClient({
         location: l.address ?? "",
         locationEn: l.address ?? "",
         region: "seoul",
-        type: "digital",
+        type: "dooh",
         price: basePricePerLocation > 0 ? basePricePerLocation : 0,
         lat: l.lat!,
         lng: l.lng!,

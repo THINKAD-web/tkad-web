@@ -412,7 +412,7 @@ function tkadPinMarkerImage(
   });
 }
 
-type MediaPinBase = "digital" | "static" | "mobile" | "network" | "office" | "default";
+type MediaPinBase = "dooh" | "static" | "mobile" | "network" | "office" | "default";
 
 const pinImageCache = new Map<string, unknown>();
 
@@ -420,7 +420,7 @@ function mediaPinBaseType(type: string): MediaPinBase {
   const t = (type || "").toLowerCase();
   if (t.includes("office") || t.includes("thinkad")) return "office";
   if (t.includes("network")) return "network";
-  if (t.includes("digital")) return "digital";
+  if (t.includes("digital")) return "dooh";
   if (t.includes("static")) return "static";
   if (t.includes("mobile")) return "mobile";
   return "default";
@@ -437,7 +437,7 @@ function mediaPinVariant(base: MediaPinBase, highlighted: boolean): TkadPinVaria
   }
   if (base === "office") return "office";
   if (base === "network") return "network";
-  if (base === "digital") return "digital";
+  if (base === "digital") return "dooh";
   if (base === "static") return "static";
   if (base === "mobile") return "mobile";
   return "default";

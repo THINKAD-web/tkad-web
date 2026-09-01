@@ -76,7 +76,7 @@ test("buildInquiryAppendixMediaSpecs lists all designated with status notes", ()
           name: "T1",
           isActive: true,
           reviewStatus: "clean",
-          type: "digital",
+          type: "dooh",
           mediaSubCategory: "airport",
           price: 12_000_000,
           impressions: 2_000_000,

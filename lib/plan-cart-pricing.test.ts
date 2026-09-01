@@ -99,7 +99,7 @@ const monthlyMedia: MediaItem = {
   location: "서울",
   locationEn: "Seoul",
   region: "seoul",
-  type: "digital",
+  type: "dooh",
   price: 10_000_000,
   pricePeriod: "month",
   lat: 0,

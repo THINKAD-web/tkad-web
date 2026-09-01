@@ -26,7 +26,7 @@ function makeMedia(o: {
     name: o.id ?? "m",
     location: "서울",
     region: "서울",
-    type: "digital",
+    type: "dooh",
     price: o.price,
     pricePeriod: o.pricePeriod,
     priceOptions: o.priceOptions,

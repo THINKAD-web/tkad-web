@@ -28,7 +28,7 @@ export function SpecialHotspotMap({ hotspots, isKo, className }: Props) {
         lat: h.lat,
         lng: h.lng,
         price: 0,
-        type: "digital",
+        type: "dooh",
       })),
     [hotspots, isKo],
   );

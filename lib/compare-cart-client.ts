@@ -76,7 +76,7 @@ export function minimalMediaFromCompareEntry(e: CompareCartEntry): MediaItem {
     location: "",
     locationEn: "",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 0,
     lat: 0,
     lng: 0,

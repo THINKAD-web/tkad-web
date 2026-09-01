@@ -13,7 +13,7 @@ const shinsegaeDay: HomeCatalogMediaItem = {
   name: "신세계백화점 본점 신세계 스퀘어 전광판 광고",
   price: 22_000_000,
   pricePeriod: "day",
-  type: "digital",
+  type: "dooh",
   region: "서울",
 };
 
@@ -23,7 +23,7 @@ const gwanghwamunLumi: HomeCatalogMediaItem = {
   name: "광화문 루미 미디어 전광판 광고",
   price: 50_000_000,
   pricePeriod: "month",
-  type: "digital",
+  type: "dooh",
   region: "서울",
 };
 

@@ -23,7 +23,7 @@ const gangnamLed: MediaItem = {
   ...kumho,
   id: "led-1",
   name: "강남 전광판",
-  type: "digital",
+  type: "dooh",
   region: "seoul",
   regionMain: "seoul",
   lat: 37.501,

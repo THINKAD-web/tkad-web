@@ -118,7 +118,7 @@ test("mapQuickAddToDb without installLocations leaves field undefined", () => {
 test("mediaDbRowToQuickAddJson + alias round-trip includes installs", () => {
   const quick = mediaDbRowToQuickAddJson({
     name: "매체",
-    type: "digital",
+    type: "dooh",
     description: null,
     subCategory: null,
     tags: [],

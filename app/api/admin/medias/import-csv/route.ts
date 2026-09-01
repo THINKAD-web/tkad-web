@@ -7,7 +7,7 @@ import {
   type MediaCsvRowError,
 } from "@/lib/admin-media-csv";
 import { enrichNewMediaLocationFromKakao } from "@/lib/media-location-enrich";
-import { isValidCatalogMediaType } from "@/lib/media-auto-categorize";
+import { normalizeCatalogMediaType } from "@/lib/media-auto-categorize";
 import {
   gateMediaMetricsWrite,
   metricsWriteErrorBody,
@@ -128,13 +128,14 @@ export async function createMediaFromCsvRow(
   db: ReturnType<typeof getPrisma>,
   row: MediaCsvRow,
 ): Promise<string> {
-  if (!isValidCatalogMediaType(row.type)) {
+  const catalogType = normalizeCatalogMediaType(row.type);
+  if (!catalogType) {
     throw new Error("invalid type");
   }
 
   const footfall = validateCsvDailyFootfall(row.exposure, {
     name: row.name,
-    type: row.type,
+    type: catalogType,
   });
   const gate = gateMediaMetricsWrite(footfall, {
     requireAckForWarnings: false,
@@ -157,7 +158,7 @@ export async function createMediaFromCsvRow(
       name: row.name,
       location: row.location,
       region: row.region,
-      type: row.type,
+      type: catalogType,
       price: row.price,
       description: row.description || null,
       width: row.width,

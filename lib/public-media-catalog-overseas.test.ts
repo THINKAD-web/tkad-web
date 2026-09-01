@@ -13,7 +13,7 @@ function baseMedia(overrides: Partial<Media> = {}): Media {
     country: "JP",
     region: "jp",
     regionZone: null,
-    type: "digital",
+    type: "dooh",
     price: 1000,
     pricePeriod: "month",
     priceOptions: null,

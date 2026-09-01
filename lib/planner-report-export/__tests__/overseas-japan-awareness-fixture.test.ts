@@ -47,7 +47,7 @@ function jpMedia(
 ): MediaItem {
   return {
     nameEn: o.name,
-    type: "digital",
+    type: "dooh",
     location: "Tokyo Shibuya",
     locationEn: "Shibuya, Tokyo",
     region: "overseas",

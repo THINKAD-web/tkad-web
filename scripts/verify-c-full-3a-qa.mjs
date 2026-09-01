@@ -201,7 +201,7 @@ const HANSEO = {
   pricingMode: "quote_only", lat: 37.54, lng: 127.05, dailyFootTraffic: 48000, sampleImages: [],
 } as MediaItem;
 const PRICED = {
-  id: "qa-priced", name: "테스트 전광판", type: "digital", location: "서울 강남",
+  id: "qa-priced", name: "테스트 전광판", type: "dooh", location: "서울 강남",
   region: "seoul", regionMain: "seoul", district: "강남구", country: "KR",
   price: 1500, pricePeriod: "month", pricingMode: "fixed", lat: 37.5, lng: 127.0,
   dailyFootTraffic: 100000, sampleImages: [],

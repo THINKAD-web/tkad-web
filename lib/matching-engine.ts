@@ -184,7 +184,7 @@ const INDUSTRY_DEFS: Record<
 > = {
   beauty: {
     keywords: /미디어폴|스크린도어|dooh|뷰티|코스메|청담|가로수|패션/i,
-    mediaTypes: ["digital", "static", "network"],
+    mediaTypes: ["dooh", "static", "network"],
   },
   fnb: {
     keywords: /버스|쉘터|정류|지역|상권|f&b|식음|카페|레스토랑|fb/i,
@@ -192,23 +192,23 @@ const INDUSTRY_DEFS: Record<
   },
   it: {
     keywords: /지하철|subway|강남|빌보드|테크|it|앱|saas|판교|여의도/i,
-    mediaTypes: ["digital", "mobile", "subway"],
+    mediaTypes: ["dooh", "mobile", "subway"],
   },
   tech: {
     keywords: /지하철|subway|강남|빌보드|테크|it|앱|saas|판교|여의도/i,
-    mediaTypes: ["digital", "mobile", "subway"],
+    mediaTypes: ["dooh", "mobile", "subway"],
   },
   fashion: {
     keywords: /홍대|성수|사이니지|dooh|패션|스트리트|연남|가로수/i,
-    mediaTypes: ["digital", "static"],
+    mediaTypes: ["dooh", "static"],
   },
   retail: {
     keywords: /백화|쇼핑|몰|마트|retail|상권|유동/i,
-    mediaTypes: ["digital", "static", "mobile"],
+    mediaTypes: ["dooh", "static", "mobile"],
   },
   fmcg: {
     keywords: /역|지하철|상권|유동|마트|편의|fb|카페/i,
-    mediaTypes: ["mobile", "subway", "digital"],
+    mediaTypes: ["mobile", "subway", "dooh"],
   },
   auto: {
     keywords: /고속|휴게|highway|강남대로|자동차|간선|billboard/i,
@@ -216,15 +216,15 @@ const INDUSTRY_DEFS: Record<
   },
   fintech: {
     keywords: /테헤란|판교|여의도|강남|금융|fintech|it|비즈/i,
-    mediaTypes: ["digital", "static"],
+    mediaTypes: ["dooh", "static"],
   },
   entertainment: {
     keywords: /k-pop|홍대|강남|공연|엔터|디지털|지하철|coex/i,
-    mediaTypes: ["digital", "mobile"],
+    mediaTypes: ["dooh", "mobile"],
   },
   finance: {
     keywords: /여의도|테헤란|판교|금융|은행|증권/i,
-    mediaTypes: ["digital", "static"],
+    mediaTypes: ["dooh", "static"],
   },
   other: { keywords: /./, mediaTypes: [] },
 };
@@ -385,21 +385,25 @@ function scoreTarget(
 
 function isPlannerCategorySlug(
   c: string,
-): c is "digital" | "static" | "mobile" {
-  return c === "digital" || c === "static" || c === "mobile";
+): c is "dooh" | "static" | "mobile" {
+  return c === "dooh" || c === "digital" || c === "static" || c === "mobile";
+}
+
+function normalizeMatchingCategory(c: string): string {
+  return c === "digital" ? "dooh" : c;
 }
 
 function matchesMatchingInputCategory(m: MediaItem, category: string): boolean {
-  const c = category.trim().toLowerCase();
+  const c = normalizeMatchingCategory(category.trim().toLowerCase());
   if (!c) return true;
   if (isPlannerCategorySlug(c)) {
     if (c === "mobile") return mediaMatchesPlannerMobileIntent(m);
-    return matchesPlannerCategory(m, c);
+    return matchesPlannerCategory(m, c === "digital" ? "dooh" : c);
   }
   const t = (m.type ?? "").toLowerCase();
   if (t === c) return true;
   if (
-    c === "digital" &&
+    c === "dooh" &&
     (t === "network" || m.catalogSource === "network")
   ) {
     return true;
@@ -420,10 +424,12 @@ function scoreCategory(
   const targetCats = m.targetCategory ?? [];
   let best = inputCats.length === 0 ? 6 : 0;
 
-  for (const c of inputCats) {
-    if (mediaCats.includes(c)) best = Math.max(best, 15);
+  for (const raw of inputCats) {
+    const c = normalizeMatchingCategory(raw);
+    if (mediaCats.includes(c) || (c === "dooh" && mediaCats.includes("digital")))
+      best = Math.max(best, 15);
     if (
-      c === "digital" &&
+      c === "dooh" &&
       (m.catalogSource === "network" || m.type === "network")
     ) {
       best = Math.max(best, 12);
@@ -562,7 +568,7 @@ function scoreDuration(m: MediaItem, input: MatchingInput): number {
     type === "mobile" ||
     /지하철|버스|subway|bus|쉘터|brt|역\s|호선|transit/i.test(hay);
   const isFixed =
-    type === "static" || type === "digital" || /전광|빌보|billboard|led/i.test(hay);
+    type === "static" || type === "dooh" || /전광|빌보|billboard|led/i.test(hay);
 
   if (days != null && days > 0 && days <= 14) {
     return isTransit ? 2 : 0;
@@ -757,7 +763,7 @@ export function scoreMediaForRanking(
 function mediaTypeBucket(m: MediaItem): string {
   const t = (m.type ?? "other").toLowerCase();
   if (/subway|bus|mobile|transport/.test(t)) return "transit";
-  if (/digital|network|dooh/.test(t)) return "digital";
+  if (/digital|network|dooh/.test(t)) return "dooh";
   if (/static|billboard/.test(t)) return "static";
   return t || "other";
 }

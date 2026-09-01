@@ -23,12 +23,12 @@ function applicationToQuickAdd(
     app.heightCm != null && app.heightCm > 0 ? app.heightCm / 100 : null;
 
   const catalogType =
-    app.mediaType === "digital"
-      ? "digital"
+    app.mediaType === "dooh"
+      ? "dooh"
       : app.mediaType === "static"
         ? "static"
         : app.isDigital
-          ? "digital"
+          ? "dooh"
           : "static";
 
   const imgs = [

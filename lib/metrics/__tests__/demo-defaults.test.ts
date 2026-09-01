@@ -23,7 +23,7 @@ test("targetAgeToAgeSplit: 전연령 → null", () => {
 
 test("resolveDemoGenderSplit: default는 클래스별 차별화", () => {
   const psd = resolveDemoGenderSplitWithBasis({
-    type: "digital",
+    type: "dooh",
     subCategory: "subway_station",
   });
   const bus = resolveDemoGenderSplitWithBasis({
@@ -36,7 +36,7 @@ test("resolveDemoGenderSplit: default는 클래스별 차별화", () => {
 
 test("resolveDemoAgeSplit: targetAge parsed 우선", () => {
   const res = resolveDemoAgeSplitWithBasis({
-    type: "digital",
+    type: "dooh",
     subCategory: "subway_station",
     targetAge: "20-39세",
   });
@@ -46,7 +46,7 @@ test("resolveDemoAgeSplit: targetAge parsed 우선", () => {
 
 test("resolveDemoAgeSplit: 파싱 실패 시 class default", () => {
   const res = resolveDemoAgeSplitWithBasis({
-    type: "digital",
+    type: "dooh",
     subCategory: "subway_station",
     targetAge: "강남 상권 소비자",
   });

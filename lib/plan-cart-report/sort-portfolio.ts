@@ -10,14 +10,14 @@ import {
   planReportRegionSortOrder,
 } from "@/lib/plan-cart-report/regional-breakdown";
 
-const REPORT_CATEGORY_ORDER = ["digital", "static", "mobile", "other"] as const;
+const REPORT_CATEGORY_ORDER = ["dooh", "static", "mobile", "other"] as const;
 export type PlanCartReportCategoryKey = (typeof REPORT_CATEGORY_ORDER)[number];
 
 const CATEGORY_LABELS: Record<
   PlanCartReportCategoryKey,
   { ko: string; en: string }
 > = {
-  digital: { ko: "디지털", en: "Digital" },
+  dooh: { ko: "디지털", en: "Digital" },
   static: { ko: "고정형", en: "Static" },
   mobile: { ko: "이동형", en: "Mobile" },
   other: { ko: "기타", en: "Other" },
@@ -32,11 +32,11 @@ export type ReportPortfolioOrderOpts = {
 
 function normalizeReportCategoryKey(m: MediaItem): PlanCartReportCategoryKey {
   const key = plannerReportCategoryKey(m);
-  if (key === "digital" || key === "network") return "digital";
+  if (key === "dooh" || key === "network") return "dooh";
   if (key === "static") return "static";
   if (key === "mobile") return "mobile";
   const norm = resolvePlannerMediaKind(m);
-  if (norm === "digital" || norm === "network") return "digital";
+  if (norm === "dooh" || norm === "network") return "dooh";
   if (norm === "static") return "static";
   if (norm === "mobile") return "mobile";
   return "other";

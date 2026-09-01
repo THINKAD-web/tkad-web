@@ -2,21 +2,30 @@
  * 매체 유형 자동 분류 (DB `Media.type` 문자열)
  * — 퀵 등록·일괄 재분류·sub_category-only 힌트에 공통 사용
  *
- * 공개 카탈로그 유형은 `digital` | `static` | `mobile` 세 가지.
+ * 공개 카탈로그 유형은 `dooh` | `static` | `mobile` 세 가지.
  */
+
+import {
+  CATALOG_MEDIA_TYPE_DOOH,
+  CATALOG_MEDIA_TYPE_MOBILE,
+  CATALOG_MEDIA_TYPE_STATIC,
+  CATALOG_MEDIA_TYPES,
+  type CatalogMediaType,
+  canonicalCatalogMediaType,
+  isValidCatalogMediaType,
+  normalizeCatalogMediaType,
+} from "@/lib/catalog-media-type";
+
+export {
+  CATALOG_MEDIA_TYPES,
+  type CatalogMediaType,
+  isValidCatalogMediaType,
+  normalizeCatalogMediaType,
+  canonicalCatalogMediaType,
+};
 
 function norm(s: string): string {
   return s.replace(/\s+/g, " ").trim();
-}
-
-export const CATALOG_MEDIA_TYPES = ["digital", "static", "mobile"] as const;
-
-export type CatalogMediaType = (typeof CATALOG_MEDIA_TYPES)[number];
-
-const TYPE_SET = new Set<string>(CATALOG_MEDIA_TYPES);
-
-export function isValidCatalogMediaType(v: string): v is CatalogMediaType {
-  return TYPE_SET.has(v.trim().toLowerCase());
 }
 
 export type MediaTypeInferenceInput = {
@@ -47,11 +56,11 @@ function blobFrom(input: MediaTypeInferenceInput): string {
 
 /**
  * 텍스트 시그널로 유형 추론. 앞쪽 규칙이 우선(더 구체적).
- * 결과는 항상 `digital` | `static` | `mobile`.
+ * 결과는 항상 `dooh` | `static` | `mobile`.
  */
 export function inferCatalogTypeFromMediaContent(
   input: MediaTypeInferenceInput,
-): string {
+): CatalogMediaType {
   const b = blobFrom(input);
 
   if (
@@ -60,7 +69,9 @@ export function inferCatalogTypeFromMediaContent(
     ) ||
     (/버스|정류장|쉘터/.test(b) && /네트워크|패키지|전국|광역/.test(b))
   ) {
-    return /버스|정류|쉘터|bus|shelter/.test(b) ? "mobile" : "digital";
+    return /버스|정류|쉘터|bus|shelter/.test(b)
+      ? CATALOG_MEDIA_TYPE_MOBILE
+      : CATALOG_MEDIA_TYPE_DOOH;
   }
 
   if (
@@ -68,7 +79,7 @@ export function inferCatalogTypeFromMediaContent(
       b,
     )
   ) {
-    return "static";
+    return CATALOG_MEDIA_TYPE_STATIC;
   }
 
   if (
@@ -78,7 +89,7 @@ export function inferCatalogTypeFromMediaContent(
     b.includes("현수막") ||
     /인쇄\s*광고|게첨|대형\s*패널/.test(b)
   ) {
-    return "static";
+    return CATALOG_MEDIA_TYPE_STATIC;
   }
 
   if (
@@ -93,7 +104,7 @@ export function inferCatalogTypeFromMediaContent(
     b.includes("환승") ||
     b.includes("전철")
   ) {
-    return "mobile";
+    return CATALOG_MEDIA_TYPE_MOBILE;
   }
 
   if (
@@ -107,7 +118,7 @@ export function inferCatalogTypeFromMediaContent(
     b.includes("랩핑") ||
     b.includes("wrapping")
   ) {
-    return "mobile";
+    return CATALOG_MEDIA_TYPE_MOBILE;
   }
 
   if (
@@ -124,7 +135,7 @@ export function inferCatalogTypeFromMediaContent(
     ) ||
     /골프|golf|호텔|hotel|리조트|resort|아파트|단지내|단지\s*내/.test(b)
   ) {
-    return "digital";
+    return CATALOG_MEDIA_TYPE_DOOH;
   }
 
   if (
@@ -133,10 +144,10 @@ export function inferCatalogTypeFromMediaContent(
     b.includes("건물") ||
     b.includes("외벽")
   ) {
-    return "static";
+    return CATALOG_MEDIA_TYPE_STATIC;
   }
 
-  return "digital";
+  return CATALOG_MEDIA_TYPE_DOOH;
 }
 
 /** DB 행 재분류용 */
@@ -149,7 +160,7 @@ export function inferCatalogTypeFromDbMedia(m: {
   nearbyFacilities: string | null;
   nearbyStations: string | null;
   nearbyLandmarks: string | null;
-}): string {
+}): CatalogMediaType {
   return inferCatalogTypeFromMediaContent({
     subCategory: m.subCategory ?? "",
     name: m.name,

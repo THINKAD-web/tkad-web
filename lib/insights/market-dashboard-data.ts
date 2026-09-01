@@ -358,7 +358,7 @@ export async function buildMarketDashboardData(opts: {
       industries: ["F&B", "IT·테크", "리테일"],
     },
     {
-      type: "digital",
+      type: "dooh",
       extraLabel: isKo ? "유연성" : "Flexibility",
       extraDefault: 88,
       industries: ["IT·테크", "뷰티·패션", "엔터"],

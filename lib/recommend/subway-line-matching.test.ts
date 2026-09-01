@@ -18,7 +18,7 @@ function mockMedia(
     nameEn: name,
     region: "seoul",
     regionMain: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 300,
     location: name,
     ...extra,

@@ -36,7 +36,7 @@ function media(o: Partial<MediaItem> & Pick<MediaItem, "id">): MediaItem {
     locationEn: "Seoul",
     region: "seoul",
     regionMain: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 0,
     lat: 37.5,
     lng: 127,
@@ -54,12 +54,12 @@ const BUDGET_WON = 30_000_000;
 
 const CATALOG: MediaItem[] = [
   media({
-    id: "n1", name: "우남빌딩 전광판", type: "digital",
+    id: "n1", name: "우남빌딩 전광판", type: "dooh",
     price: 5_000_000, dailyFootTraffic: 221_286,
     district: "강남구", regionSub: "seoul_gangnam",
   }),
   media({
-    id: "n2", name: "맥스비전", type: "digital",
+    id: "n2", name: "맥스비전", type: "dooh",
     price: 5_000_000, dailyFootTraffic: 165_000,
     district: "관악구", regionSub: "seoul_gwanak",
   }),
@@ -74,7 +74,7 @@ const CATALOG: MediaItem[] = [
     district: "중구", regionSub: "seoul_myeongdong",
   }),
   media({
-    id: "n5", name: "보조매체 B", type: "digital",
+    id: "n5", name: "보조매체 B", type: "dooh",
     price: 500_000, dailyFootTraffic: 25_000,
     district: "송파구", regionSub: "seoul_jamsil",
   }),
@@ -129,7 +129,7 @@ test("픽스처 5개 매체가 모두 살아 있다", () => {
 
 test("디지털·고정형이 모두 포함된다 (유형 편중 방지)", () => {
   const types = CATALOG.map((m) => m.type);
-  assert.ok(types.includes("digital"));
+  assert.ok(types.includes("dooh"));
   assert.ok(types.includes("static"));
 });
 

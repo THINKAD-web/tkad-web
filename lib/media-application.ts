@@ -1,7 +1,8 @@
 import type { MediaApplicationStatus } from "@prisma/client";
+import { normalizeCatalogMediaType } from "@/lib/catalog-media-type";
 
 export const MEDIA_APPLICATION_MEDIA_TYPES = [
-  "digital",
+  "dooh",
   "static",
   "other",
 ] as const;
@@ -95,11 +96,13 @@ export function parseMediaApplicationSubmit(
   };
 
   const mediaTypeRaw = str("mediaType").toLowerCase();
-  const mediaType = MEDIA_APPLICATION_MEDIA_TYPES.includes(
-    mediaTypeRaw as MediaApplicationMediaType,
-  )
-    ? (mediaTypeRaw as MediaApplicationMediaType)
-    : null;
+  const normalizedType = normalizeCatalogMediaType(mediaTypeRaw);
+  const mediaType =
+    normalizedType === "dooh" || normalizedType === "static"
+      ? normalizedType
+      : mediaTypeRaw === "other"
+        ? ("other" as const)
+        : null;
 
   const fields: string[] = [];
   if (!str("companyName")) fields.push("companyName");

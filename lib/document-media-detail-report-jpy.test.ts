@@ -19,7 +19,7 @@ function jpMedia(price: number): MediaItem {
   return {
     id: "jp-shibuya",
     name: "渋谷スクランブル交差点",
-    type: "digital",
+    type: "dooh",
     location: "Tokyo Shibuya",
     region: "overseas",
     country: "JP",
@@ -35,7 +35,7 @@ function krMedia(price: number): MediaItem {
   return {
     id: "kr-gangnam",
     name: "강남 테스트",
-    type: "digital",
+    type: "dooh",
     location: "서울 강남",
     region: "seoul",
     country: "KR",

@@ -12,7 +12,7 @@ function sampleCsvRow(overrides: Partial<MediaCsvRow> = {}): MediaCsvRow {
   return {
     rowIndex: 2,
     name: "테스트 CSV 매체",
-    type: "digital",
+    type: "dooh",
     location: "서울 강남구 강남대로 396",
     price: 3_500_000,
     spec: "12x4m",

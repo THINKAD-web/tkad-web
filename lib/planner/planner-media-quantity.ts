@@ -339,7 +339,7 @@ export function formatPlannerQuantityLabel(
   if (isMobileSingleMedia(m)) {
     return isKo ? `${units}대` : `${units} units`;
   }
-  if (m.type?.trim().toLowerCase() === "digital") {
+  if (m.type?.trim().toLowerCase() === "dooh" || m.type?.trim().toLowerCase() === "digital") {
     return isKo ? `${units}기` : `${units} units`;
   }
   // 고정형 등 — 유형별 전용 단위가 없다. 「면」처럼 매체마다 갈리는 용어를

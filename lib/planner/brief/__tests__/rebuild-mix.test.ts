@@ -20,7 +20,7 @@ function fixtureMedia(over: Partial<MediaItem> = {}): MediaItem {
     regionMain: "seoul",
     city: "서울",
     district: "강남구",
-    type: "digital",
+    type: "dooh",
     subCategory: "led_screen",
     mediaCategory: ["ooh"],
     price: 10_000_000,
@@ -42,7 +42,7 @@ const fnbMedia = fixtureMedia({
 
 const techMedia = fixtureMedia({
   id: "tech-dooh",
-  type: "digital",
+  type: "dooh",
   subCategory: "office",
   location: "판교 테크밸리",
   tags: ["it", "saas"],

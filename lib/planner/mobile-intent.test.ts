@@ -20,7 +20,7 @@ function mockMedia(
     nameEn: name,
     region: "seoul",
     regionMain: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 500,
     location: "서울",
     ...extra,
@@ -43,7 +43,7 @@ test("mediaMatchesPlannerMobileIntent: taxi wrap network", () => {
 
 test("mediaMatchesPlannerMobileIntent: taxi shelter included", () => {
   const shelter = mockMedia("s1", "디지털 택시쉘터 광고 (강남)", {
-    type: "digital",
+    type: "dooh",
     mediaSubCategory: "digital_signage",
   });
   assert.equal(mediaMatchesPlannerMobileIntent(shelter), true);
@@ -51,7 +51,7 @@ test("mediaMatchesPlannerMobileIntent: taxi shelter included", () => {
 
 test("mediaMatchesPlannerMobileIntent: excludes signage despite bus in tags", () => {
   const signage = mockMedia("sig1", "강남 센트럴시티 보이드 디지털사이니지 광고", {
-    type: "digital",
+    type: "dooh",
     mediaSubCategory: "digital_signage",
     subCategory: "디지털 사이니지",
     tags: [
@@ -62,13 +62,13 @@ test("mediaMatchesPlannerMobileIntent: excludes signage despite bus in tags", ()
       "DOOH",
     ],
   });
-  assert.equal(resolvePlannerMediaKind(signage), "digital");
+  assert.equal(resolvePlannerMediaKind(signage), "dooh");
   assert.equal(mediaMatchesPlannerMobileIntent(signage), false);
 });
 
 test("mediaMatchesPlannerMobileIntent: excludes subway station canvas", () => {
   const subway = mockMedia("sub1", "지하철 9호선 고속터미널역 캔버스9 광고", {
-    type: "digital",
+    type: "dooh",
     mediaSubCategory: "subway",
   });
   assert.equal(mediaMatchesPlannerMobileIntent(subway), false);
@@ -83,20 +83,20 @@ test("mediaMatchesPlannerMobileIntent: limousine bus", () => {
 
 test("mediaMatchesPlannerMobileIntent: generic shelter without taxi excluded", () => {
   const shelter = mockMedia("g1", "강남 버스쉘터 디지털 광고", {
-    type: "digital",
+    type: "dooh",
   });
   assert.equal(mediaMatchesPlannerMobileIntent(shelter), false);
 });
 
 test("mediaMatchesPlannerSubwayIntent: station CM board", () => {
   const subway = mockMedia("sub1", "영등포구청역 지하철 5호선 CM보드 영상 광고", {
-    type: "digital",
+    type: "dooh",
     mediaSubCategory: "subway",
   });
   assert.equal(mediaMatchesPlannerSubwayIntent(subway), true);
 
   const mall = mockMedia("mall1", "스타필드 시티 운정점 E.V홀 스크린 광고", {
-    type: "digital",
+    type: "dooh",
   });
   assert.equal(mediaMatchesPlannerSubwayIntent(mall), false);
 
@@ -107,7 +107,7 @@ test("mediaMatchesPlannerSubwayIntent: station CM board", () => {
   assert.equal(mediaMatchesPlannerBusWrapIntent(busWrap), true);
 
   const terminalLed = mockMedia("led1", "강변 동서울터미널 LED 전광판 광고", {
-    type: "digital",
+    type: "dooh",
   });
   assert.equal(mediaMatchesPlannerBusWrapIntent(terminalLed), false);
 });

@@ -18,7 +18,7 @@ test("mediaMatchesBillboardIntent distinguishes wrap vs board", () => {
     mediaMatchesBillboardIntent({
       id: "a",
       name: "신촌 31 전광판 광고",
-      type: "digital",
+      type: "dooh",
       subCategory: "전광판",
       mediaSubCategory: "digital_signage",
     } as MediaItem),
@@ -28,7 +28,7 @@ test("mediaMatchesBillboardIntent distinguishes wrap vs board", () => {
     mediaMatchesBillboardIntent({
       id: "b",
       name: "지하철 2호선 홍대입구역 아트래핑 광고",
-      type: "digital",
+      type: "dooh",
       subCategory: "지하철",
       mediaSubCategory: "subway_station",
     } as MediaItem),

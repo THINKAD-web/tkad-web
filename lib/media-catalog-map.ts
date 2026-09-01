@@ -159,7 +159,7 @@ export function catalogToMediaItem(item: HomeCatalogMediaItem): MediaItem {
     location: item.location ?? item.region ?? "",
     locationEn: item.location ?? item.region ?? "",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: catalogPrice,
     pricePeriod: item.catalogPricePeriod ?? item.pricePeriod,
     lat: 0,

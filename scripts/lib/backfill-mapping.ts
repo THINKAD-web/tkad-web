@@ -139,7 +139,7 @@ export function inferMediaSubtype(row: MediaRow): string {
   if (type === "mobile" && (sub.includes("subway") || hay.includes("지하철")))
     return "subway_train_interior";
   if (sub.includes("subway") || hay.includes("지하철")) return "subway_platform";
-  if (type === "digital") return "dooh";
+  if (type === "dooh") return "dooh";
   if (type === "static") {
     if (hay.includes("wrap") || hay.includes("래핑")) return "building_wrap";
     return "billboard";

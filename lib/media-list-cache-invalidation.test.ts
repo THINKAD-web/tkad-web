@@ -6,7 +6,7 @@ const base = {
   name: "강남역 LED",
   nameEn: "Gangnam LED",
   slug: "gangnam-led",
-  type: "digital",
+  type: "dooh",
   region: "seoul",
   district: "gangnam",
   location: "강남역",

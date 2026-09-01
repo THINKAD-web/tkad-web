@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
@@ -97,6 +98,10 @@ export default async function TypeLandingPage({ params }: Props) {
   setRequestLocale(locale);
 
   const decodedType = decodeURIComponent(type);
+  /** PR0: legacy bookmark/SEO slug → canonical `dooh` */
+  if (decodedType === "digital") {
+    redirect(`/${locale}/media/type/dooh`);
+  }
   const isKo = locale === "ko";
 
   let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];

@@ -189,7 +189,7 @@ model Media {
   region             String
   /// 서울 권역·수도권·지방 세부 코드 (`lib/media-regions.ts`)
   regionZone         String?          @map("region_zone")
-  /// Catalog code: `digital` | `static` | `mobile` (OOH 유형)
+  /// Catalog code: `dooh` | `static` | `mobile` (OOH 유형; PR0: legacy `digital` retired)
   type               String
   price              Int
   pricePeriod        MediaPricePeriod @default(month) @map("price_period")

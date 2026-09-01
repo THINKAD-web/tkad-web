@@ -34,7 +34,7 @@ function minimalMedia(
     country: "KR",
     region: "seoul",
     regionZone: null,
-    type: "digital",
+    type: "dooh",
     price: 1000,
     pricePeriod: "month",
     priceOptions: null,

@@ -298,7 +298,9 @@ export function resolveNetworkCatalogTypeFromRow(
   row: Pick<NetworkTaxonomyRow, "type" | "tags" | "venueType">,
 ): NetworkCatalogType {
   const t = row.type.trim().toLowerCase();
-  if (t === "digital" || t === "static" || t === "mobile") return t;
+  if (t === "dooh" || t === "digital" || t === "static" || t === "mobile") {
+    return t === "digital" ? "dooh" : t;
+  }
   const venue = resolveNetworkVenueCodeFromRow(row);
   if (venue) return resolveNetworkCatalogType(venue);
   return resolveNetworkCatalogType(row.type);

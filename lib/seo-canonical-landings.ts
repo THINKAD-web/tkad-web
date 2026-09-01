@@ -32,6 +32,8 @@ export const TECHNICAL_TYPE_CANONICAL_TO_TYPE: Readonly<
   Partial<Record<string, MarketingLandingSlug>>
 > = {
   static: "billboard",
+  dooh: "dooh",
+  /** @deprecated PR0 redirect alias */
   digital: "dooh",
   mobile: "subway",
 };

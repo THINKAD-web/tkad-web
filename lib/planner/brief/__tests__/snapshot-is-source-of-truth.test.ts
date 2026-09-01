@@ -27,7 +27,7 @@ function media(o: Partial<MediaItem> & Pick<MediaItem, "id">): MediaItem {
     location: "서울",
     locationEn: "Seoul",
     region: "seoul",
-    type: "digital",
+    type: "dooh",
     price: 0,
     lat: 37.5,
     lng: 127,
@@ -43,7 +43,7 @@ const CATALOG: MediaItem[] = [
   media({
     id: "m1",
     name: "맥스비전",
-    type: "digital",
+    type: "dooh",
     price: 4_000_000,
     dailyFootTraffic: 165_000,
     city: "서울",

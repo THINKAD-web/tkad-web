@@ -31,7 +31,7 @@ export function MediaOwnerRevenueCalculator({
 }: Props) {
   const isKo = locale === "ko";
   const [region, setRegion] = useState<RevenueCalcRegion>("seoul_gangnam");
-  const [mediaType, setMediaType] = useState<RevenueCalcMediaType>("digital");
+  const [mediaType, setMediaType] = useState<RevenueCalcMediaType>("dooh");
   const [monthlyPriceWon, setMonthlyPriceWon] = useState(() =>
     defaultMonthlyPriceWon("seoul_gangnam", "digital"),
   );

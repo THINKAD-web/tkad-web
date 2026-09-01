@@ -41,9 +41,9 @@ const AGE_CATEGORY_BIAS: Record<
   Partial<Record<PlannerCategory, number>>
 > = {
   ageAll: {},
-  age20s: { digital: 1.2, mobile: 1.15 },
-  age30s: { digital: 1.1, static: 1.05 },
-  age40s: { static: 1.1, digital: 1.05 },
+  age20s: { dooh: 1.2, mobile: 1.15 },
+  age30s: { dooh: 1.1, static: 1.05 },
+  age40s: { static: 1.1, dooh: 1.05 },
   age50plus: { static: 1.15, mobile: 0.95 },
 };
 
@@ -56,7 +56,7 @@ function normalizeMix(
   categories: PlannerCategory[],
 ): Record<PlannerCategory, number> {
   const out: Record<PlannerCategory, number> = {
-    digital: 0,
+    dooh: 0,
     static: 0,
     mobile: 0,
   };
@@ -88,9 +88,9 @@ function variantCategories(
   if (variant === "efficiency") {
     set.add("mobile");
     set.add("static");
-    set.delete("digital");
+    set.delete("dooh");
   } else if (variant === "premium") {
-    set.add("digital");
+    set.add("dooh");
     set.add("static");
   }
   if (set.size === 0) return [...PLANNER_DEFAULT_CATEGORIES];
@@ -109,9 +109,9 @@ function categoryWeights(
   if (variant === "efficiency") {
     weights.mobile = 1.35;
     weights.static = 1.2;
-    weights.digital = 0.75;
+    weights.dooh = 0.75;
   } else if (variant === "premium") {
-    weights.digital = 1.45;
+    weights.dooh = 1.45;
     weights.static = 1.15;
     weights.mobile = 0.85;
   }
@@ -221,9 +221,9 @@ function categoryPhrase(
 ): string {
   const isKo = locale.startsWith("ko");
   const labels: Record<PlannerCategory, string> = isKo
-    ? { digital: "디지털", static: "고정형", mobile: "이동" }
-    : { digital: "Digital", static: "Static", mobile: "Mobile" };
-  return (["digital", "static", "mobile"] as const)
+    ? { dooh: "디지털", static: "고정형", mobile: "이동" }
+    : { dooh: "Digital", static: "Static", mobile: "Mobile" };
+  return (["dooh", "static", "mobile"] as const)
     .filter((c) => mix[c] > 0)
     .map((c) => `${labels[c]} ${mix[c]}%`)
     .join(isKo ? " · " : " · ");
@@ -271,17 +271,17 @@ function buildScenario(
         ? "Premium"
         : "Balanced";
 
-  const topCategory = (["digital", "static", "mobile"] as const)
+  const topCategory = (["dooh", "static", "mobile"] as const)
     .filter((c) => categoryMixPct[c] > 0)
     .sort((a, b) => categoryMixPct[b] - categoryMixPct[a])[0];
   const topCatKo =
-    topCategory === "digital"
+    topCategory === "dooh"
       ? "디지털"
       : topCategory === "static"
         ? "고정형"
         : "이동";
   const topCatEn =
-    topCategory === "digital"
+    topCategory === "dooh"
       ? "Digital"
       : topCategory === "static"
         ? "Static"

@@ -5,7 +5,7 @@ import { buildMediaHeroSpecBadges } from "./media-detail-hero-specs.ts";
 const baseMedia = {
   id: "m1",
   name: "Test",
-  type: "digital",
+  type: "dooh",
   size: "10 × 5 m",
   resolution: "1920×1080",
   brightness: "5,000 nits",

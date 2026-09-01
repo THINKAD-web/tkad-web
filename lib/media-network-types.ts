@@ -30,7 +30,7 @@ export const NETWORK_CATALOG_TYPE_LABELS: Record<
   NetworkCatalogType,
   { ko: string; en: string }
 > = {
-  digital: { ko: "디지털", en: "Digital" },
+  dooh: { ko: "디지털", en: "Digital" },
   static: { ko: "고정형", en: "Static" },
   mobile: { ko: "이동형", en: "Mobile" },
 };
@@ -60,18 +60,18 @@ const NETWORK_VENUE_CATALOG_MAP: Record<NetworkTypeCode, NetworkCatalogType> = {
   bus_shelter: "mobile",
   apartment: "static",
   subway_pillar: "mobile",
-  convenience_store: "digital",
+  convenience_store: "dooh",
   golf_course: "static",
   highway_rest: "static",
-  campus_kiosk: "digital",
+  campus_kiosk: "dooh",
   subway_station: "mobile",
-  elevator: "digital",
-  shopping_mall: "digital",
-  bookstore: "digital",
-  office: "digital",
-  hospital: "digital",
-  pharmacy: "digital",
-  gym: "digital",
+  elevator: "dooh",
+  shopping_mall: "dooh",
+  bookstore: "dooh",
+  office: "dooh",
+  hospital: "dooh",
+  pharmacy: "dooh",
+  gym: "dooh",
 };
 
 const VENUE_CODE_SET = new Set<string>(NETWORK_TYPE_CODES as unknown as string[]);
@@ -87,7 +87,7 @@ export function resolveNetworkCatalogType(
   const t = (rawType ?? "").trim().toLowerCase();
   if (isValidCatalogMediaType(t)) return t;
   if (isNetworkVenueCode(t)) return NETWORK_VENUE_CATALOG_MAP[t];
-  return "digital";
+  return "dooh";
 }
 
 /** 목록 필터 — 카탈로그 유형에 해당하는 DB type 값들 */
@@ -172,7 +172,7 @@ export const NETWORK_TYPE_LABELS: Record<string, { ko: string; en: string }> = {
 /** `/media?features=network` 목록 필터 — 일반 `/media` 와 동일 3분류 */
 export const NETWORK_BROWSE_TYPE_CHIPS = [
   { value: "", labelKo: "전체", labelEn: "All", icon: "Network" },
-  { value: "digital", labelKo: "디지털", labelEn: "Digital", icon: "Monitor" },
+  { value: "dooh", labelKo: "디지털", labelEn: "Digital", icon: "Monitor" },
   { value: "static", labelKo: "고정형", labelEn: "Static", icon: "MapPin" },
   { value: "mobile", labelKo: "이동형", labelEn: "Mobile", icon: "Train" },
 ] as const;

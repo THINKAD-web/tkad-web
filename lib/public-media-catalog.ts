@@ -732,7 +732,7 @@ export async function fetchHomeInstantBookingMedia(
     const db = getPrisma();
     const rows = await db.media.findMany({
       where: publicActiveMediaWhere({
-        type: "digital",
+        type: "dooh",
         availability: "available",
       }),
       orderBy: [{ popularityScore: "desc" }, { price: "asc" }],

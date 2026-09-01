@@ -59,7 +59,7 @@ function inferTypeFromMediaLabels(media: string[]): string {
   const joined = media.join(" ");
   if (/빌보드|고정|초대형\s*포스터/i.test(joined)) return "static";
   if (/이동|버스|택시|트럭/i.test(joined)) return "mobile";
-  return "digital";
+  return "dooh";
 }
 
 function approximateLatLng(regions: string[]): { lat: number; lng: number } {
