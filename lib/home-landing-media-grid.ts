@@ -3,6 +3,7 @@
  * Not hardcoded: top-N updates when catalog distribution changes.
  */
 import { unstable_cache } from "next/cache";
+import { browseCategoryLabel, MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import { ONLINE_BROWSE_MAIN_SET } from "@/lib/online-browse-mains";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { fetchDigitalCatalogInternal } from "@/lib/planner/digital-catalog-fetch";
