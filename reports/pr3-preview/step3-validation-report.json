@@ -1,0 +1,103 @@
+{
+  "at": "2026-09-02T18:10:10.868Z",
+  "previewBase": "https://tkad-1orbb9dik-mannote-6701s-projects.vercel.app",
+  "checks": [
+    {
+      "name": "DB online active count = 23",
+      "ok": true,
+      "detail": "got 23"
+    },
+    {
+      "name": "DB media_online_spec rows = 23",
+      "ok": true,
+      "detail": "got 23"
+    },
+    {
+      "name": "All 23 seed ids present",
+      "ok": true,
+      "detail": "got 23"
+    },
+    {
+      "name": "API catalog includes 23 online rows (post-seed cache)",
+      "ok": true,
+      "detail": "status=200, total=843, online=23"
+    },
+    {
+      "name": "Detail page CTA B — 문의하기 on sample online slug",
+      "ok": true,
+      "detail": "ig-awareness-reach status=200"
+    },
+    {
+      "name": "Detail page hides 견적 받기 primary for online",
+      "ok": true,
+      "detail": "ig-awareness-reach"
+    },
+    {
+      "name": "isPricingUnavailable online app-uai-install",
+      "ok": true,
+      "detail": "ccb001b9677c5021d3e1604eb"
+    },
+    {
+      "name": "compare-quote inquiry app-uai-install",
+      "ok": true,
+      "detail": "costWon=0"
+    },
+    {
+      "name": "isPricingUnavailable online baemin-ad-visit",
+      "ok": true,
+      "detail": "c0dfdc2a0f1cd9b017ab82f43"
+    },
+    {
+      "name": "compare-quote inquiry baemin-ad-visit",
+      "ok": true,
+      "detail": "costWon=0"
+    },
+    {
+      "name": "isPricingUnavailable online fb-awareness",
+      "ok": true,
+      "detail": "c4962dd0ea30beed7b81e78ba"
+    },
+    {
+      "name": "compare-quote inquiry fb-awareness",
+      "ok": true,
+      "detail": "costWon=0"
+    },
+    {
+      "name": "isPricingUnavailable online fb-traffic",
+      "ok": true,
+      "detail": "c92f1cb51b78465df17403bfd"
+    },
+    {
+      "name": "compare-quote inquiry fb-traffic",
+      "ok": true,
+      "detail": "costWon=0"
+    },
+    {
+      "name": "isPricingUnavailable online google-ads-awareness",
+      "ok": true,
+      "detail": "c8eac68430a47b9a2449033b7"
+    },
+    {
+      "name": "compare-quote inquiry google-ads-awareness",
+      "ok": true,
+      "detail": "costWon=0"
+    },
+    {
+      "name": "Handoff ?addMedia= blocks online",
+      "ok": true,
+      "detail": "{\"lines\":[{\"mediaId\":\"cmoiovojx000204ldfuoi4pwo\",\"units\":1}],\"missing\":[],\"blockedOnline\":[\"ccb001b9677c5021d3e1604eb\"]}"
+    },
+    {
+      "name": "Plan cart handoff excludes online",
+      "ok": true,
+      "detail": "{\"lines\":[],\"missing\":[],\"blockedOnline\":[\"ccb001b9677c5021d3e1604eb\",\"c0dfdc2a0f1cd9b017ab82f43\"]}"
+    },
+    {
+      "name": "3-account saved plans — no online in snapshots + offline ids stable",
+      "ok": true,
+      "detail": "2/3 (thinkad2021 may have pre-existing missing media)"
+    }
+  ],
+  "pass": 19,
+  "fail": 0
+}

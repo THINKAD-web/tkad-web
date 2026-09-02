@@ -18,9 +18,16 @@ import { normalizePgDatabaseUrl } from "../../lib/normalize-pg-database-url.ts";
 import { revalidateMediaCachesBulk } from "../../lib/media-cache-revalidate.ts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "../..");
-const usePreview = process.argv.includes("--preview") || process.argv.includes("--execute");
+const usePreview = process.argv.includes("--preview") || (process.argv.includes("--execute") && !process.argv.includes("--prod"));
 config({
-  path: resolve(root, usePreview ? ".env.preview.local" : ".env.local"),
+  path: resolve(
+    root,
+    process.argv.includes("--prod")
+      ? ".env.vercel.production"
+      : usePreview
+        ? ".env.preview.local"
+        : ".env.local",
+  ),
   override: true,
 });
 config({ path: resolve(root, ".env.local"), override: false });
@@ -64,6 +71,7 @@ function parseArgs() {
   return {
     execute: process.argv.includes("--execute"),
     rollback: process.argv.includes("--rollback"),
+    prod: process.argv.includes("--prod"),
   };
 }
 
