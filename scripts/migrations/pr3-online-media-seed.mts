@@ -18,7 +18,12 @@ import { normalizePgDatabaseUrl } from "../../lib/normalize-pg-database-url.ts";
 import { revalidateMediaCachesBulk } from "../../lib/media-cache-revalidate.ts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "../..");
-config({ path: resolve(root, ".env.local"), override: true });
+const usePreview = process.argv.includes("--preview") || process.argv.includes("--execute");
+config({
+  path: resolve(root, usePreview ? ".env.preview.local" : ".env.local"),
+  override: true,
+});
+config({ path: resolve(root, ".env.local"), override: false });
 
 type SeedRow = {
   id: string;
@@ -122,46 +127,50 @@ async function main() {
     process.exit(1);
   }
 
-  await db.$transaction(async (tx) => {
-    for (const row of seed.rows) {
-      await tx.media.create({
-        data: {
-          id: row.id,
-          slug: row.slug,
-          name: row.name,
-          nameEn: row.nameEn ?? row.name,
-          description: row.description,
-          descriptionEn: row.descriptionEn,
-          location: row.location,
-          locationEn: row.locationEn ?? row.location,
-          region: row.region,
-          regionMain: "online",
-          catalogChannel: row.catalogChannel,
-          mediaMainCategory: row.mediaMainCategory,
-          mediaSubCategory: row.mediaSubCategory,
-          type: row.type,
-          price: row.price,
-          isActive: true,
-          reviewStatus: "clean",
-          onlineSpec: {
-            create: {
-              id: row.onlineSpec.id,
-              platform: row.onlineSpec.platform,
-              minBudget: row.onlineSpec.minBudget,
-              cpcMin: row.onlineSpec.cpcMin ?? null,
-              cpcMax: row.onlineSpec.cpcMax ?? null,
-              cpmMin: row.onlineSpec.cpmMin ?? null,
-              cpmMax: row.onlineSpec.cpmMax ?? null,
-              targetingOptions: row.onlineSpec.targetingOptions ?? [],
-              strengths: row.onlineSpec.strengths ?? [],
-              kpiHints: row.onlineSpec.kpiHints ?? [],
-              bestFor: row.onlineSpec.bestFor ?? [],
-            },
+  await db.$transaction(
+    async (tx) => {
+      for (const row of seed.rows) {
+        await tx.media.create({
+          data: {
+            id: row.id,
+            slug: row.slug,
+            name: row.name,
+            nameEn: row.nameEn ?? row.name,
+            description: row.description,
+            descriptionEn: row.descriptionEn,
+            location: row.location,
+            locationEn: row.locationEn ?? row.location,
+            region: row.region,
+            regionMain: "online",
+            catalogChannel: row.catalogChannel,
+            mediaMainCategory: row.mediaMainCategory,
+            mediaSubCategory: row.mediaSubCategory,
+            type: row.type,
+            price: row.price,
+            isActive: true,
+            reviewStatus: "clean",
           },
-        },
-      });
-    }
-  });
+        });
+        await tx.mediaOnlineSpec.create({
+          data: {
+            id: row.onlineSpec.id,
+            mediaId: row.id,
+            platform: row.onlineSpec.platform,
+            minBudget: row.onlineSpec.minBudget,
+            cpcMin: row.onlineSpec.cpcMin ?? null,
+            cpcMax: row.onlineSpec.cpcMax ?? null,
+            cpmMin: row.onlineSpec.cpmMin ?? null,
+            cpmMax: row.onlineSpec.cpmMax ?? null,
+            targetingOptions: row.onlineSpec.targetingOptions ?? [],
+            strengths: row.onlineSpec.strengths ?? [],
+            kpiHints: row.onlineSpec.kpiHints ?? [],
+            bestFor: row.onlineSpec.bestFor ?? [],
+          },
+        });
+      }
+    },
+    { timeout: 120_000 },
+  );
 
   revalidateMediaCachesBulk(seed.rows.map((r) => ({ id: r.id, slug: r.slug })));
   console.log(`Seed complete — inserted ${seed.rows.length} online media rows.`);
