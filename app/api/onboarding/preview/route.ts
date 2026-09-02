@@ -5,8 +5,8 @@ import { recommendMediaForPreference } from "@/lib/onboarding-recommend";
 import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import {
   getPrimaryMediaImageUrl,
-  typeLabels,
 } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
@@ -37,7 +37,7 @@ export async function GET(req: Request) {
     items: items.map((m) => {
       const name = isKo ? m.name : m.nameEn || m.name;
       const location = isKo ? m.location : m.locationEn || m.location;
-      const typeLabel = typeLabels[m.type]?.[isKo ? "ko" : "en"] ?? m.type;
+      const typeLabel = resolveMediaDisplayPill(m, isKo ? "ko" : "en");
       return {
         id: m.id,
         href: mediaItemDetailPath(m),

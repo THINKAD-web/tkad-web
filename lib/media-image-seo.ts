@@ -1,4 +1,5 @@
-import { typeLabels, type MediaItem } from "@/lib/media-data";
+import type { MediaItem } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { marketingTypeLabel } from "@/lib/marketing-media-types";
 
 /**
@@ -7,7 +8,7 @@ import { marketingTypeLabel } from "@/lib/marketing-media-types";
 export function buildMediaImageAlt(
   media: Pick<
     MediaItem,
-    "name" | "nameEn" | "location" | "locationEn" | "district" | "city" | "region" | "type" | "subCategory"
+    "name" | "nameEn" | "location" | "locationEn" | "district" | "city" | "region" | "type" | "subCategory" | "catalogChannel" | "mediaMainCategory" | "mediaSubCategory" | "catalogSource"
   >,
   locale: string,
 ): string {
@@ -20,10 +21,10 @@ export function buildMediaImageAlt(
     (isKo ? media.location : media.locationEn || media.location) ||
     (isKo ? "서울" : "Seoul");
   const marketing = marketingTypeLabel(media, locale);
-  const catalogType = typeLabels[media.type];
   const typePart =
     marketing ||
-    (catalogType ? (isKo ? catalogType.ko : catalogType.en) : media.type);
+    resolveMediaDisplayPill(media, isKo ? "ko" : "en") ||
+    (isKo ? "옥외광고" : "OOH");
   const suffix = isKo ? "옥외광고" : "OOH advertising";
   return `${name} — ${region} ${typePart} ${suffix}`.replace(/\s+/g, " ").trim();
 }

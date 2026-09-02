@@ -265,9 +265,11 @@ export async function buildMarketDashboardData(opts: {
     if (manwon > 0) arr.push(manwon);
     industryBudget.set(ind, arr);
     const tm = industryTypes.get(ind) ?? new Map<string, number>();
-    const t = e.media?.type ?? "digital";
-    tm.set(t, (tm.get(t) ?? 0) + 1);
-    industryTypes.set(ind, tm);
+    const t = e.media?.type?.trim();
+    if (t) {
+      tm.set(t, (tm.get(t) ?? 0) + 1);
+      industryTypes.set(ind, tm);
+    }
   }
 
   if (industryMap.size === 0) {

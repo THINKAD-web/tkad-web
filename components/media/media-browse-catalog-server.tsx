@@ -2,8 +2,8 @@ import { Link } from "@/i18n/navigation";
 import {
   getPrimaryMediaImageUrl,
   type MediaItem,
-  typeLabels,
 } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatMediaDisplayPrice } from "@/lib/media-price-format";
@@ -48,8 +48,10 @@ export async function MediaBrowseCatalogServer({
             const location = isKo
               ? media.location
               : media.locationEn || media.location;
-            const typeLabel =
-              typeLabels[media.type]?.[isKo ? "ko" : "en"] ?? media.type;
+            const typeLabel = resolveMediaDisplayPill(
+              media,
+              isKo ? "ko" : "en",
+            );
             const price = formatMediaDisplayPrice(media, locale);
             const href = mediaItemDetailPath(media);
             const imageSrc = getPrimaryMediaImageUrl(media);

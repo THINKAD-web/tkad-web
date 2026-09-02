@@ -23,6 +23,7 @@ import {
   formatMediaPriceCompactWon,
   formatPricePeriodShortLabel,
   inferMediaPricePeriodFromPriceOption,
+  mediaPriceOnInquiryLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 
@@ -101,7 +102,67 @@ export type QuoteWizardLineContext = {
   prorationLabel: string | null;
   /** 매체·옵션에 설정된 부분기간 요율이 적용됨 */
   usesMediaPartialRate: boolean;
+  /** type/price null 또는 단가 ≤0 — 숫자 라인·합계에서 제외, 「가격 문의」 표시 */
+  priceOnInquiry: boolean;
 };
+
+/** 견적 위저드 — billable numeric line 가능 여부 (PR1b-2 safety net). */
+export function isQuoteWizardPriceOnInquiry(
+  media: MediaItem,
+  opts?: {
+    priceOptionIndex?: number;
+    mobileUnits?: number;
+    networkUnits?: number;
+  },
+): boolean {
+  if (!media.type?.trim()) {
+    return true;
+  }
+  if (media.price == null) {
+    return true;
+  }
+  const isNw = media.catalogSource === "network";
+  const poIdx = opts?.priceOptionIndex ?? 0;
+  const resolvedWon = isNw
+    ? catalogPriceFieldToWon(
+        computeNetworkMonthlyFromMediaItem(
+          media,
+          opts?.networkUnits ?? media.networkMinUnits ?? 1,
+        ),
+      )
+    : catalogPriceFieldToWon(
+        resolveCatalogLineMonthlyPriceWon(media, {
+          priceOptionIndex: poIdx,
+          units: opts.mobileUnits,
+        }),
+      );
+  return resolvedWon <= 0;
+}
+
+export function sumQuoteWizardBillableMan(
+  lines: readonly QuoteWizardLineContext[],
+): {
+  unitSumMan: number;
+  totalMan: number;
+  inquiryCount: number;
+} {
+  let unitSumMan = 0;
+  let totalMan = 0;
+  let inquiryCount = 0;
+  for (const line of lines) {
+    if (line.priceOnInquiry) {
+      inquiryCount += 1;
+      continue;
+    }
+    unitSumMan += line.unitPriceMan;
+    totalMan += line.lineTotalMan;
+  }
+  return { unitSumMan, totalMan, inquiryCount };
+}
+
+export function formatQuoteWizardInquiryLabel(isKo: boolean): string {
+  return mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
+}
 
 export function resolveQuoteMediaPricePeriod(
   media: MediaItem,
@@ -266,6 +327,34 @@ export function buildQuoteWizardLineContext(
   const poIdx = opts.priceOptionIndex;
   const priceOpt = !isNw ? media.priceOptions?.[poIdx] : undefined;
   const units = isNw ? opts.networkUnits ?? media.networkMinUnits ?? 1 : 0;
+  const locale = opts.isKo ? "ko" : "en";
+
+  if (
+    isQuoteWizardPriceOnInquiry(media, {
+      priceOptionIndex: poIdx,
+      mobileUnits: opts.mobileUnits,
+      networkUnits: units,
+    })
+  ) {
+    const pricePeriod = resolveQuoteMediaPricePeriod(media, poIdx, isNw);
+    const globalCampaignDays =
+      opts.campaignDaysOverride != null && opts.campaignDaysOverride > 0
+        ? Math.round(opts.campaignDaysOverride)
+        : quoteCampaignDaysFromPeriodKey(opts.campaignPeriod);
+    return {
+      unitPriceMan: 0,
+      pricePeriod,
+      campaignUnits: 0,
+      lineTotalMan: 0,
+      unitPeriodLabel: formatPricePeriodShortLabel(pricePeriod, locale),
+      executionPeriodLabel: opts.campaignPeriodLabel,
+      bundleDays: null,
+      campaignDays: globalCampaignDays,
+      prorationLabel: null,
+      usesMediaPartialRate: false,
+      priceOnInquiry: true,
+    };
+  }
 
   const unitPriceMan = isNw
     ? catalogPriceFieldToPriceMan(computeNetworkMonthlyFromMediaItem(media, units))
@@ -353,7 +442,6 @@ export function buildQuoteWizardLineContext(
     lineTotalMan = quoteLineTotalMan(unitPriceMan, campaignUnits);
   }
 
-  const locale = opts.isKo ? "ko" : "en";
   const unitPeriodLabel = formatPricePeriodShortLabel(pricePeriod, locale);
   const lineTotalWon = Math.round(lineTotalMan * 10_000);
   const unitPriceWon = isNw
@@ -407,6 +495,7 @@ export function buildQuoteWizardLineContext(
     campaignDays,
     prorationLabel,
     usesMediaPartialRate,
+    priceOnInquiry: false,
   };
 }
 
@@ -419,6 +508,15 @@ export function quoteCatalogDisplayPriceMan(
     networkUnits?: number;
   },
 ): number {
+  if (
+    isQuoteWizardPriceOnInquiry(media, {
+      priceOptionIndex: opts.priceOptionIndex,
+      mobileUnits: opts.mobileUnits,
+      networkUnits: opts.networkUnits,
+    })
+  ) {
+    return 0;
+  }
   const isNw = media.catalogSource === "network";
   if (isNw) {
     const units = opts.networkUnits ?? media.networkMinUnits ?? 1;

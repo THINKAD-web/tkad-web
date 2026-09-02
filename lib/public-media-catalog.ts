@@ -17,6 +17,7 @@ import {
   optimizeHeroMarqueeUrl,
 } from "@/lib/optimized-image-url";
 import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
+import { canonicalCatalogChannel } from "@/lib/catalog-channel";
 import { keywordFilterItemToMediaItem } from "@/lib/keyword-filter-media-detail";
 import {
   catalogListItemsToMediaItems,
@@ -298,6 +299,9 @@ export function prismaMediaToMediaItem(
     mediaCategory: m.mediaCategory?.length ? [...m.mediaCategory] : undefined,
     mediaMainCategory: m.mediaMainCategory?.trim() || undefined,
     mediaSubCategory: m.mediaSubCategory?.trim() || undefined,
+    catalogChannel: canonicalCatalogChannel(
+      (m as Media & { catalogChannel?: string | null }).catalogChannel,
+    ),
     regionMain: m.regionMain?.trim() || undefined,
     regionSub: m.regionSub?.trim() || undefined,
     targetCategory: m.targetCategory?.length ? [...m.targetCategory] : undefined,

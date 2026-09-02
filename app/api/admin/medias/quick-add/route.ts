@@ -154,7 +154,9 @@ export async function POST(request: NextRequest) {
             priceOptions: prismaFields.priceOptions ?? Prisma.JsonNull,
             addressVerified: geoVerified,
             autoPopulatedAt: autoNear?.autoPopulatedAt ?? null,
-            catalogChannel: resolveCatalogChannelForMediaWrite({}),
+            catalogChannel: resolveCatalogChannelForMediaWrite({
+              type: prismaFields.type,
+            }),
           },
         });
         if (installLocations !== undefined) {

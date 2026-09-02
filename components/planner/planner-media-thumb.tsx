@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { getPrimaryMediaImageUrl, type MediaItem, typeLabels } from "@/lib/media-data";
+import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 import { cn } from "@/lib/utils";
@@ -29,8 +30,7 @@ export function PlannerMediaThumb({
   isKo = true,
 }: Props) {
   const thumb = catalogThumbnailImageProps(getPrimaryMediaImageUrl(media));
-  const typeLabel =
-    typeLabels[media.type]?.[isKo ? "ko" : "en"] ?? media.type;
+  const typeLabel = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
 
   return (
     <div

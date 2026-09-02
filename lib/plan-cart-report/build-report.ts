@@ -68,11 +68,11 @@ function resolveOverlayMediaType(
     tags: catalog.tags,
   });
   if (kind) return kind;
-  for (const raw of [cartType.trim(), catalog.type.trim()].filter(Boolean)) {
+  for (const raw of [cartType.trim(), catalog.type?.trim()].filter(Boolean)) {
     const norm = normalizeMediaTypeForPlanner(raw);
     if (norm) return norm;
   }
-  return catalog.type.trim() || cartType.trim() || "dooh";
+  return catalog.type?.trim() || cartType.trim() || "dooh";
 }
 
 function stubMediaFromCartItem(item: PlanCartItem): MediaItem {

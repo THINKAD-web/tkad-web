@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { jsPDF } from "jspdf";
 import type { MediaItem } from "@/lib/media-data";
-import { typeLabels } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import {
   catalogPriceFieldToWon,
   mediaDetailPricePeriodTranslationKey,
@@ -333,8 +333,7 @@ export async function generateMediaProposalPdf(
     month: "long",
     day: "numeric",
   });
-  const typeLabel =
-    typeLabels[media.type as keyof typeof typeLabels]?.ko ?? media.type;
+  const typeLabel = resolveMediaDisplayPill(media, "ko");
   const categoryLabel = [media.mediaMainCategory, media.mediaSubCategory]
     .filter(Boolean)
     .join(" · ") || typeLabel;

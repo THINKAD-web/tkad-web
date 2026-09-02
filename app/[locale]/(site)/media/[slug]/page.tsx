@@ -7,8 +7,8 @@ import {
   getMediaDetailGalleryUrls,
   buildSimilarSortCatalog,
   getSimilarMediaFromCatalog,
-  typeLabels,
 } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { mediaItemToRecentlyViewedRecord } from "@/lib/recently-viewed";
 import { buildMediaMetaKeywordsList } from "@/lib/media-seo";
 import { attachRecommendReason } from "@/lib/media-recommend-reasons";
@@ -266,8 +266,7 @@ export default async function MediaDetailPage({ params }: Props) {
   const galleryImages = getMediaDetailGalleryUrls(media);
   const heroImage = galleryImages[0] ?? "";
   const caseStudyItems = buildCaseStudyGalleryItems(media);
-  const typeLabel =
-    (isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en) ?? "";
+  const typeLabel = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
   const featuresText = isKo ? media.features : media.featuresEn;
   const performanceMetrics = resolvePerformanceMetrics(media);
 

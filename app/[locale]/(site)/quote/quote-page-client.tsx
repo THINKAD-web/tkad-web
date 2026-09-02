@@ -36,9 +36,9 @@ import {
   dedupeImageUrls,
   getPrimaryMediaImageUrl,
   matchesMediaTextQuery,
-  typeLabels,
   type MediaItem,
 } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { mediaToDocumentDetail } from "@/lib/document-media-detail";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
@@ -78,11 +78,14 @@ import { buildQuoteMediaSelectionSnapshot } from "@/lib/quote-snapshot-build";
 import {
   buildQuoteWizardLineContext,
   formatQuoteCampaignPeriodWithDays,
+  formatQuoteWizardInquiryLabel,
   inferQuoteCampaignPeriodFromMedia,
   isQuoteCampaignPeriodKey,
+  isQuoteWizardPriceOnInquiry,
   quoteCampaignDaysFromPeriodKey,
   quoteCatalogDisplayPriceMan,
   resolveQuoteMediaPricePeriod,
+  sumQuoteWizardBillableMan,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
 import { QuoteMediaQuantityFields } from "@/components/quote/quote-media-quantity-fields";
@@ -691,22 +694,29 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     return t("quote.periodMixedSummary", { period: periodLabel });
   }, [quoteLineContexts, period, periodLabel, campaignDaysOverride, t]);
 
-  const unitPriceSumMan = useMemo(
-    () => quoteLineContexts.reduce((sum, line) => sum + line.unitPriceMan, 0),
+  const billableQuoteTotals = useMemo(
+    () => sumQuoteWizardBillableMan(quoteLineContexts),
     [quoteLineContexts],
   );
+
+  const unitPriceSumMan = billableQuoteTotals.unitSumMan;
 
   const hasProrationLine = useMemo(
     () =>
       quoteLineContexts.some(
-        (line) => line.prorationLabel != null || line.usesMediaPartialRate,
+        (line) =>
+          !line.priceOnInquiry &&
+          (line.prorationLabel != null || line.usesMediaPartialRate),
       ),
     [quoteLineContexts],
   );
 
-  const totalCost = useMemo(
-    () => quoteLineContexts.reduce((sum, line) => sum + line.lineTotalMan, 0),
-    [quoteLineContexts],
+  const totalCost = billableQuoteTotals.totalMan;
+
+  const priceOnInquiryMedia = useMemo(
+    () =>
+      selectedMedia.filter((m, idx) => quoteLineContexts[idx]?.priceOnInquiry),
+    [selectedMedia, quoteLineContexts],
   );
 
   const estimateLineBreakdowns = useMemo(
@@ -802,9 +812,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
               : "Regions: all"
             : opt.regionScope
           : (isKo ? m.location : (m.locationEn || m.location)) || m.location;
+      const inquiryLabel = formatQuoteWizardInquiryLabel(isKo);
       const detail = mediaToDocumentDetail(m, {
         isKo,
-        lineTotalWon: Math.round(line.lineTotalMan * 10_000),
+        lineTotalWon: line.priceOnInquiry
+          ? 0
+          : Math.round(line.lineTotalMan * 10_000),
         priceOptionIndex: poIdx,
       });
       return {
@@ -812,8 +825,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         thumbUrl: detail.thumbUrl ?? getPrimaryMediaImageUrl(m),
         name,
         location,
-        unitPriceWon: Math.round(line.unitPriceMan * 10_000),
-        lineTotalWon: Math.round(line.lineTotalMan * 10_000),
+        unitPriceWon: line.priceOnInquiry
+          ? 0
+          : Math.round(line.unitPriceMan * 10_000),
+        lineTotalWon: line.priceOnInquiry
+          ? 0
+          : Math.round(line.lineTotalMan * 10_000),
+        priceOnInquiry: line.priceOnInquiry,
+        inquiryLabel: line.priceOnInquiry ? inquiryLabel : undefined,
         unitPeriodLabel: line.unitPeriodLabel,
         executionPeriodLabel: line.executionPeriodLabel,
         size: detail.size,
@@ -1639,6 +1658,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             mobileUnits: mediaQuantities[media.id],
                             networkUnits: nwOpt?.units,
                           });
+                          const priceOnInquiry = isQuoteWizardPriceOnInquiry(media, {
+                            priceOptionIndex: poIdx,
+                            mobileUnits: mediaQuantities[media.id],
+                            networkUnits: nwOpt?.units,
+                          });
                           return (
                             <div key={media.id} className="space-y-2">
                               <QuoteMediaSelectCard
@@ -1646,6 +1670,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 isKo={isKo}
                                 selected={checked}
                                 priceMan={displayPrice}
+                                priceOnInquiry={priceOnInquiry}
                                 pricePeriod={resolveQuoteMediaPricePeriod(
                                   media,
                                   poIdx,
@@ -1662,7 +1687,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         <div className={MEDIA_CATALOG_COMPACT_GRID_CLASS}>
                           {pagedCatalog.map((media) => {
                             const checked = selectedIds.has(media.id);
-                            const typeLabel = typeLabels[media.type];
+                            const typeLabel = resolveMediaDisplayPill(
+                              media,
+                              isKo ? "ko" : "en",
+                            );
                             const quoteThumb =
                               dedupeImageUrls(media.sampleImages ?? [])[0]?.trim() ||
                               null;
@@ -1674,13 +1702,19 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               mobileUnits: mediaQuantities[media.id],
                               networkUnits: nwOpt?.units,
                             });
+                            const priceOnInquiry = isQuoteWizardPriceOnInquiry(media, {
+                              priceOptionIndex: poIdxC,
+                              mobileUnits: mediaQuantities[media.id],
+                              networkUnits: nwOpt?.units,
+                            });
                             const pricePeriod = resolveQuoteMediaPricePeriod(
                               media,
                               poIdxC,
                               isNw,
                             );
-                            const priceLabel =
-                              displayPrice > 0
+                            const priceLabel = priceOnInquiry
+                              ? formatQuoteWizardInquiryLabel(isKo)
+                              : displayPrice > 0
                                 ? formatMediaPriceWithPeriodSuffix(
                                     displayPrice * 10_000,
                                     pricePeriod,
@@ -1725,9 +1759,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 overflow-hidden sm:gap-1.5">
                                       <div className="flex min-w-0 flex-wrap items-center gap-1 sm:gap-1.5">
                                         <span className="max-w-full shrink border-2 border-border bg-card px-1.5 py-0 tkad-type-label text-foreground sm:tkad-type-note">
-                                          {isKo
-                                            ? (typeLabel?.ko ?? media.type)
-                                            : (typeLabel?.en ?? media.type)}
+                                          {typeLabel}
                                         </span>
                                         {popularIds.has(media.id) ? (
                                           <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-accent bg-accent px-1.5 py-0 tkad-type-label text-white">
@@ -2476,14 +2508,35 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         ))}
                       </ul>
                     ) : null}
+                    {billableQuoteTotals.inquiryCount > 0 &&
+                    billableQuoteTotals.inquiryCount < selectedMedia.length ? (
+                      <div className="space-y-2 rounded-xl border border-sky-500/35 bg-sky-500/10 p-3.5">
+                        <p className="text-xs leading-relaxed text-sky-950 dark:text-sky-100 sm:text-sm">
+                          {t("quote.partialTotalNotice", {
+                            count: billableQuoteTotals.inquiryCount,
+                          })}
+                        </p>
+                        <ul className="space-y-1 text-xs text-sky-900/90 dark:text-sky-100/90">
+                          {priceOnInquiryMedia.map((m) => (
+                            <li key={m.id}>
+                              · {(isKo ? m.name : m.nameEn || m.name) || m.name}{" "}
+                              — {formatQuoteWizardInquiryLabel(isKo)}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
                     <div>
                       <p className="tkad-type-label text-muted-foreground sm:text-xs">
                         [ {t(hasProrationLine ? "quote.packagePriceSum" : "quote.unitPriceSum")} ]
                       </p>
                       <p className="mt-2 font-sans text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
-                        {isKo
-                          ? `${Math.round(unitPriceSumMan).toLocaleString()}만원`
-                          : `₩${Math.round(unitPriceSumMan * 10_000).toLocaleString()}`}
+                        {billableQuoteTotals.inquiryCount === selectedMedia.length &&
+                        selectedMedia.length > 0
+                          ? formatQuoteWizardInquiryLabel(isKo)
+                          : isKo
+                            ? `${Math.round(unitPriceSumMan).toLocaleString()}만원`
+                            : `₩${Math.round(unitPriceSumMan * 10_000).toLocaleString()}`}
                       </p>
                     </div>
                     <div className="border-t dark:border-white/10 border-gray-200 pt-4">
@@ -2492,9 +2545,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           [ {t("quote.total")} ]
                         </span>
                         <span className="tkad-home-accent-text font-sans text-3xl font-bold tabular-nums sm:text-4xl">
-                          {isKo
-                            ? `${Math.round(totalCost).toLocaleString()}만원`
-                            : `₩${Math.round(totalCost * 10_000).toLocaleString()}`}
+                          {billableQuoteTotals.inquiryCount === selectedMedia.length &&
+                          selectedMedia.length > 0
+                            ? formatQuoteWizardInquiryLabel(isKo)
+                            : isKo
+                              ? `${Math.round(totalCost).toLocaleString()}만원`
+                              : `₩${Math.round(totalCost * 10_000).toLocaleString()}`}
                         </span>
                       </div>
                     </div>

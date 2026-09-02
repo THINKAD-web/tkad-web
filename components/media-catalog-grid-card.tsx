@@ -8,7 +8,7 @@ import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
-import { typeLabels } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   catalogPriceFieldToWon,
@@ -83,7 +83,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
     props.pricePeriod ?? cheapest?.period ?? media.pricePeriod;
   const showPricePeriod =
     props.showPricePeriod ?? (!!cheapest || props.pricePeriod != null);
-  const tl = typeLabels[media.type];
+  const typeLabel = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
 
   const thumbnailOverlays = (
     <>
@@ -167,7 +167,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
               denseMobile ? "text-[10px] sm:text-sm" : "text-xs sm:text-sm",
             )}
           >
-            {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)}
+            {typeLabel}
           </span>
         </div>
         <h3

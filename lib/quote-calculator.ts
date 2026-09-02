@@ -33,11 +33,28 @@ import {
 
 export const QUOTE_VALIDITY_DAYS = 14;
 
+/** Thrown when quote pricing requires OOH display type but `type` is null/empty (PR1b-2). */
+export const QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE =
+  "QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE";
+
+export function assertQuoteCalculatorDisplayType(
+  m: Pick<QuoteCalculatorMedia, "id" | "type" | "catalogChannel">,
+): string {
+  const type = m.type?.trim();
+  if (!type) {
+    throw new Error(
+      `${QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE}: mediaId=${m.id} catalogChannel=${m.catalogChannel ?? "unknown"}`,
+    );
+  }
+  return type;
+}
+
 export type QuoteCalculatorMedia = {
   id: string;
   name: string;
   location: string;
   type?: string | null;
+  catalogChannel?: string | null;
   price: number;
   pricePeriod?: MediaPricePeriodKey | string | null;
   priceOptions?: MediaPriceOption[] | null;
@@ -121,6 +138,7 @@ function campaignDaysFromPeriodKey(key: QuoteCampaignPeriodKey): number {
 }
 
 function toMediaItemForQuote(m: QuoteCalculatorMedia): MediaItem {
+  const type = assertQuoteCalculatorDisplayType(m);
   return {
     id: m.id,
     name: m.name,
@@ -128,7 +146,7 @@ function toMediaItemForQuote(m: QuoteCalculatorMedia): MediaItem {
     location: m.location,
     locationEn: m.location,
     region: "",
-    type: (m.type?.trim() || "dooh") as MediaItem["type"],
+    type: type as MediaItem["type"],
     price: m.price,
     pricePeriod: m.pricePeriod,
     priceOptions: m.priceOptions ?? undefined,
@@ -166,6 +184,7 @@ function lineImpressions(
   m: QuoteCalculatorMedia,
   campaignDays: number,
 ): number {
+  const displayType = assertQuoteCalculatorDisplayType(m);
   const monthly =
     m.impressions ??
     (m.dailyFootfall != null && m.dailyFootfall > 0
@@ -177,7 +196,7 @@ function lineImpressions(
           location: m.location,
           locationEn: m.location,
           region: "",
-          type: "dooh",
+          type: displayType as MediaItem["type"],
           price: m.price,
           lat: m.latitude ?? 0,
           lng: m.longitude ?? 0,
@@ -202,6 +221,7 @@ export async function calculateQuoteFromMediaIds(
       name: true,
       location: true,
       type: true,
+      catalogChannel: true,
       price: true,
       pricePeriod: true,
       priceOptions: true,
@@ -220,6 +240,7 @@ export async function calculateQuoteFromMediaIds(
       name: m.name,
       location: m.location,
       type: m.type,
+      catalogChannel: m.catalogChannel,
       price: m.price,
       pricePeriod: m.pricePeriod,
       priceOptions: parsePriceOptions(m.priceOptions),

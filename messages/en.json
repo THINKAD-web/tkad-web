@@ -1379,6 +1379,7 @@
     "periodBundleMismatch": "Package {optionLabel} ({bundleDays} days) differs from the campaign period ({campaignDays} days); cost is prorated by duration.",
     "alignCampaignPeriod": "Align campaign to {periodWithDays}",
     "total": "Total Estimated Cost",
+    "partialTotalNotice": "{count} media marked price on request are excluded from the total below.",
     "company": "Company",
     "companyPlaceholder": "Enter company name",
     "name": "Contact Person",

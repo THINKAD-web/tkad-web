@@ -3,8 +3,8 @@ import type { MediaItem, MediaPricePeriodKey } from "@/lib/media-data";
 import {
   getPrimaryMediaImageUrl,
   matchesMediaTextQuery,
-  typeLabels,
 } from "@/lib/media-data";
+import { mediaDisplayLabelHaystack } from "@/lib/media-display-labels";
 import { CATALOG_MEDIA_TYPES } from "@/lib/media-auto-categorize";
 import {
   matchesPlannerCategory,
@@ -69,8 +69,7 @@ function searchBlob(m: MediaItem): string {
     m.nearbyFacilities,
     m.nearbyLandmarks,
     m.subCategory,
-    typeLabels[m.type]?.ko,
-    typeLabels[m.type]?.en,
+    ...mediaDisplayLabelHaystack(m),
     ...(m.tags ?? []),
   ];
   return parts.filter(Boolean).join(" ").toLowerCase();

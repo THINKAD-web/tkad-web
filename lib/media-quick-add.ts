@@ -618,7 +618,7 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
     nearbyLandmarks: row.nearby_landmarks,
   });
   const type =
-    row.type && isValidCatalogMediaType(row.type)
+    row.type?.trim() && isValidCatalogMediaType(row.type)
       ? row.type.trim().toLowerCase()
       : inferredType;
 

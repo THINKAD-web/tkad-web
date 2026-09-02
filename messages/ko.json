@@ -1380,6 +1380,7 @@
     "periodBundleMismatch": "선택한 {optionLabel} 패키지({bundleDays}일)와 캠페인 기간({campaignDays}일)이 달라 기간 비례로 계산됩니다.",
     "alignCampaignPeriod": "캠페인 기간을 {periodWithDays}로 맞추기",
     "total": "총 예상 비용",
+    "partialTotalNotice": "가격 문의 매체 {count}건은 합계에서 제외되었습니다. 아래 금액은 단가가 확인된 매체만 반영합니다.",
     "company": "회사명",
     "companyPlaceholder": "회사명을 입력하세요",
     "name": "담당자",

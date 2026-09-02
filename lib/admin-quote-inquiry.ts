@@ -29,17 +29,18 @@ export function formatAdminQuoteLineCell(
     priceOnInquiry?: boolean;
     unitPriceWon?: number;
     lineTotalWon?: number;
+    inquiryLabel?: string;
   },
 ): string {
   if (opts?.priceOnInquiry === true) {
-    return adminQuoteOnInquiryLabel(isKo);
+    return opts.inquiryLabel ?? adminQuoteOnInquiryLabel(isKo);
   }
   if (
     opts?.unitPriceWon != null &&
     opts?.lineTotalWon != null &&
     isAdminQuoteLineOnInquiry(opts.unitPriceWon, opts.lineTotalWon)
   ) {
-    return adminQuoteOnInquiryLabel(isKo);
+    return opts.inquiryLabel ?? adminQuoteOnInquiryLabel(isKo);
   }
   return formatWon(cellWon, isKo);
 }

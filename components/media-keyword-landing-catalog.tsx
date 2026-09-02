@@ -12,7 +12,8 @@ import {
 } from "@/lib/compare-cart-client";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import { regionLabel } from "@/lib/media-keyword-landing";
-import { type MediaItem, typeLabels } from "@/lib/media-data";
+import { type MediaItem } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
@@ -84,8 +85,7 @@ export function MediaKeywordLandingCatalog({ items, locale }: Props) {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3">
         {items.map((m, index) => {
           const name = isKo ? m.name : m.nameEn || m.name;
-          const typeLabel =
-            typeLabels[m.type]?.[isKo ? "ko" : "en"] ?? m.type;
+          const typeLabel = resolveMediaDisplayPill(m, isKo ? "ko" : "en");
           const metaLine = [regionLabel(m.region, locale), typeLabel]
             .filter(Boolean)
             .join(" · ");

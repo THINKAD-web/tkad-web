@@ -1,3 +1,4 @@
+import { canonicalCatalogChannel } from "@/lib/catalog-channel";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import type { MediaItem } from "@/lib/media-data";
 import { resolvePlanCartItemRegionKey } from "@/lib/plan-cart-report/regional-breakdown";
@@ -38,6 +39,7 @@ export function planCartItemFromMediaItem(
     | "regionZone"
     | "price"
     | "sampleImages"
+    | "catalogChannel"
   >,
   addedFrom: PlanCartAddedFrom,
 ): Omit<PlanCartItem, "addedAt"> {
@@ -46,6 +48,7 @@ export function planCartItemFromMediaItem(
     mediaId: item.id,
     mediaName: item.name,
     mediaType: item.type ?? "",
+    catalogChannel: canonicalCatalogChannel(item.catalogChannel),
     region: regionKey,
     price: item.price ?? 0,
     thumbnailUrl: item.sampleImages?.[0],

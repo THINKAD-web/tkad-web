@@ -1,3 +1,4 @@
+import type { CatalogChannel } from "@/lib/catalog-channel";
 import {
   getPrimaryMediaImageUrl,
   type MediaItem,
@@ -44,6 +45,7 @@ export type MediaCatalogListItem = {
   regionSub?: string;
   mediaMainCategory?: string;
   mediaSubCategory?: string;
+  catalogChannel?: CatalogChannel;
   mediaCategory?: string[];
   targetCategory?: string[];
   operatingHours?: string;
@@ -167,6 +169,7 @@ export function mediaItemToCatalogListItem(item: MediaItem): MediaCatalogListIte
     regionSub: item.regionSub,
     mediaMainCategory: item.mediaMainCategory,
     mediaSubCategory: item.mediaSubCategory,
+    catalogChannel: item.catalogChannel,
     mediaCategory: item.mediaCategory?.length ? item.mediaCategory : undefined,
     targetCategory: item.targetCategory?.length ? item.targetCategory : undefined,
     operatingHours: item.operatingHours,
@@ -241,6 +244,7 @@ export function catalogListItemToMediaItem(
     regionSub: item.regionSub,
     mediaMainCategory: item.mediaMainCategory,
     mediaSubCategory: item.mediaSubCategory,
+    catalogChannel: item.catalogChannel,
     mediaCategory: item.mediaCategory,
     targetCategory: item.targetCategory,
     operatingHours: item.operatingHours,

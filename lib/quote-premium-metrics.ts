@@ -4,6 +4,8 @@ export type QuotePremiumMediaInput = {
   location: string;
   thumbUrl: string | null;
   lineTotalWon: number;
+  priceOnInquiry?: boolean;
+  inquiryLabel?: string;
   dailyFootTraffic?: number | null;
   impressions?: number | null;
   /** 공식 견적서 — 규격 */
@@ -75,7 +77,7 @@ export function computeQuotePremiumMetrics(opts: {
       id: m.id,
       name: m.name,
       impressions,
-      costWon: m.lineTotalWon,
+      costWon: m.priceOnInquiry ? 0 : m.lineTotalWon,
     };
   });
 

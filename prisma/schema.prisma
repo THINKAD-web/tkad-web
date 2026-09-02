@@ -190,8 +190,8 @@ model Media {
   /// 서울 권역·수도권·지방 세부 코드 (`lib/media-regions.ts`)
   regionZone         String?          @map("region_zone")
   /// Catalog code: `dooh` | `static` | `mobile` (OOH 유형; PR0: legacy `digital` retired)
-  type               String
-  price              Int
+  type               String?
+  price              Int?
   pricePeriod        MediaPricePeriod @default(month) @map("price_period")
   /// fixed(기본) | quote_only(건별 견적 — 외벽 등)
   pricingMode        MediaPricingMode @default(fixed) @map("pricing_mode")

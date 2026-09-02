@@ -1,4 +1,5 @@
-import { typeLabels, type MediaItem } from "@/lib/media-data";
+import type { MediaItem } from "@/lib/media-data";
+import { mediaDisplayLabelHaystack } from "@/lib/media-display-labels";
 import type { MediaCatalogFiltersState } from "@/lib/use-media-catalog-filters";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 
@@ -47,8 +48,7 @@ function mediaHaystack(m: MediaItem): string {
     m.nearbyFacilities,
     m.description,
     m.features,
-    typeLabels[m.type]?.ko,
-    typeLabels[m.type]?.en,
+    ...mediaDisplayLabelHaystack(m),
     m.type,
     ...(m.tags ?? []),
   ];
