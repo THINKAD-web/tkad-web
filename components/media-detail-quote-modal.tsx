@@ -23,6 +23,7 @@ import {
 } from "@/lib/media-detail-quantity";
 import { resolveMediaQuantity } from "@/lib/media-quantity";
 import { resolveQuoteUnitsForPriceOption } from "@/lib/quote-entry-quantity";
+import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
 import { cn } from "@/lib/utils";
 
 function MediaDetailQuoteModalBody({
@@ -74,6 +75,8 @@ function MediaDetailQuoteModalBody({
   }, [media.id, hasOpts, effectivePoIdx]);
 
   const selected = hasOpts ? opts[effectivePoIdx] : undefined;
+
+  const isOnline = isOnlineCatalogMedia(media);
 
   const btnBlockBase =
     "inline-flex w-full items-center justify-center gap-2 border-2 font-display font-bold uppercase tracking-[0.18em] transition-colors duration-150";
@@ -253,30 +256,43 @@ function MediaDetailQuoteModalBody({
 
       <div className="relative z-10 shrink-0 border-t dark:border-white/10 border-gray-200 bg-black/40 px-4 py-3 backdrop-blur-md dark:bg-black/55 sm:px-6 sm:py-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="flex flex-col gap-2 sm:gap-2.5">
-          <Link
-            href={quoteHref}
-            onClick={onClose}
-            className={primaryLinkClass}
-          >
-            <Calculator className="h-5 w-5 shrink-0" aria-hidden />
-            {t("quoteModalPrimary")}
-          </Link>
-          <Link
-            href={plannerHref}
-            onClick={onClose}
-            className={secondaryLinkClass}
-          >
-            <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
-            {isKo ? "AI 플래너로" : "Open in planner"}
-          </Link>
-          <Link
-            href={contactHref}
-            onClick={onClose}
-            className={secondaryLinkClass}
-          >
-            <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
-            {t("quoteModalContact")}
-          </Link>
+          {isOnline ? (
+            <Link
+              href={contactHref}
+              onClick={onClose}
+              className={primaryLinkClass}
+            >
+              <MessageCircle className="h-5 w-5 shrink-0" aria-hidden />
+              {isKo ? "문의하기" : "Contact us"}
+            </Link>
+          ) : (
+            <>
+              <Link
+                href={quoteHref}
+                onClick={onClose}
+                className={primaryLinkClass}
+              >
+                <Calculator className="h-5 w-5 shrink-0" aria-hidden />
+                {t("quoteModalPrimary")}
+              </Link>
+              <Link
+                href={plannerHref}
+                onClick={onClose}
+                className={secondaryLinkClass}
+              >
+                <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+                {isKo ? "AI 플래너로" : "Open in planner"}
+              </Link>
+              <Link
+                href={contactHref}
+                onClick={onClose}
+                className={secondaryLinkClass}
+              >
+                <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
+                {t("quoteModalContact")}
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

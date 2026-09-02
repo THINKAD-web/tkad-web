@@ -49,6 +49,7 @@ export function mapMediaItemToHomeCatalog(item: MediaItem): HomeCatalogMediaItem
   return {
     id: item.id,
     slug: item.slug,
+    catalogChannel: item.catalogChannel,
     name: item.name,
     country: item.country,
     type: typeLabel,

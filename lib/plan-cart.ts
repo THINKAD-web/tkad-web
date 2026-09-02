@@ -1,6 +1,7 @@
 /** 플랜 장바구니 — localStorage `tkad_plan_cart` */
 
 import { trackPlanCartUsage } from "@/lib/ga-events";
+import { canAddMediaToPlanCart } from "@/lib/pricing-unavailable";
 import { planCartMonthlyTotalWon } from "@/lib/plan-cart-pricing";
 import {
   PLAN_CART_MAX_ITEMS,
@@ -81,7 +82,7 @@ export interface PlanCart {
 export type AddToPlanCartResult =
   | { ok: true; added: true }
   | { ok: true; added: false; reason: "duplicate" }
-  | { ok: false; reason: "max_reached" };
+  | { ok: false; reason: "max_reached" | "online_blocked" };
 
 export type BulkAddToPlanCartResult = {
   added: number;
@@ -366,6 +367,12 @@ export function addToPlanCart(
   item: Omit<PlanCartItem, "addedAt">,
   maxItems: number = PLAN_CART_MAX_ITEMS_FREE,
 ): AddToPlanCartResult {
+  if (
+    item.catalogChannel &&
+    !canAddMediaToPlanCart({ catalogChannel: item.catalogChannel })
+  ) {
+    return { ok: false, reason: "online_blocked" };
+  }
   return runPlanCartMutation((cart) => {
     if (cart.items.some((i) => i.mediaId === item.mediaId)) {
       return {

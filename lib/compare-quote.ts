@@ -3,8 +3,10 @@ import {
   catalogPriceFieldToWon,
   getCheapestMediaPriceOption,
   inferMediaPricePeriodFromPriceOption,
+  mediaPriceOnInquiryLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
+import { isPricingUnavailable } from "@/lib/pricing-unavailable";
 import {
   resolveCpmWon,
   resolveMonthlyImpressions,
@@ -59,6 +61,8 @@ export type MediaQuoteLine = {
   costWon: number;
   impressions: number;
   cpm: number | null;
+  /** PR3 — exclude from compare totals; show 「가격 문의」 */
+  pricingUnavailable?: boolean;
 };
 
 /** 패키지 총액 × (캠페인 일수 ÷ 번들 일수) — 스티키 패널·마법사 공용 */
@@ -109,18 +113,23 @@ function quoteLineFromCostWon(
   costWon: number,
   durationDays: number,
 ): MediaQuoteLine {
+  const unavailable = isPricingUnavailable(media);
   const days = Math.max(1, Math.round(durationDays));
   const monthlyImp = resolveMonthlyImpressions(media);
   const impressions = Math.round(monthlyImp * (days / 30));
+  const effectiveCost = unavailable ? 0 : costWon;
   const cpm =
-    impressions > 0 ? Math.round(costWon / (impressions / 1000)) : null;
+    !unavailable && impressions > 0
+      ? Math.round(effectiveCost / (impressions / 1000))
+      : null;
 
   return {
     mediaId: media.id,
     name: media.name,
-    costWon,
-    impressions,
+    costWon: effectiveCost,
+    impressions: unavailable ? 0 : impressions,
     cpm,
+    pricingUnavailable: unavailable,
   };
 }
 
@@ -130,6 +139,9 @@ function quoteLineFromUnitPrice(
   durationDays: number,
   bundleDays: number,
 ): MediaQuoteLine {
+  if (isPricingUnavailable(media)) {
+    return quoteLineFromCostWon(media, 0, durationDays);
+  }
   const costWon = quoteBundleProrationWon(
     unitPriceWon,
     durationDays,
@@ -246,6 +258,9 @@ export function calculateMediaQuoteByDays(
   media: MediaItem,
   durationDays: number,
 ): MediaQuoteLine {
+  if (isPricingUnavailable(media)) {
+    return quoteLineFromCostWon(media, 0, durationDays);
+  }
   const days = Math.max(1, Math.round(durationDays));
   const unitPriceWon = catalogPriceFieldToWon(media.price);
 
@@ -405,10 +420,11 @@ export type CompareQuoteTotals = {
 };
 
 export function aggregateQuoteLines(lines: MediaQuoteLine[]): CompareQuoteTotals {
-  const subtotalWon = lines.reduce((s, l) => s + l.costWon, 0);
+  const billable = lines.filter((l) => !l.pricingUnavailable);
+  const subtotalWon = billable.reduce((s, l) => s + l.costWon, 0);
   const vatWon = Math.round(subtotalWon * 0.1);
   const totalWithVatWon = subtotalWon + vatWon;
-  const totalImpressions = lines.reduce((s, l) => s + l.impressions, 0);
+  const totalImpressions = billable.reduce((s, l) => s + l.impressions, 0);
   const avgCpm =
     totalImpressions > 0
       ? Math.round(subtotalWon / (totalImpressions / 1000))
@@ -524,6 +540,16 @@ export function buildCompareRadarData(items: MediaItem[]): CompareRadarPoint[] {
     accessibility: accScores[i] ?? 0,
     availability: availScores[i] ?? 0,
   }));
+}
+
+export function formatCompareQuoteLineCost(
+  line: MediaQuoteLine,
+  locale: string,
+): string {
+  if (line.pricingUnavailable) {
+    return mediaPriceOnInquiryLabel(locale.startsWith("ko") ? "ko" : "en");
+  }
+  return formatWonShort(line.costWon, locale);
 }
 
 export function formatWonShort(won: number, locale: string): string {

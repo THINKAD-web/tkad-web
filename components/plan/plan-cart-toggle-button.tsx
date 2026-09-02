@@ -65,6 +65,14 @@ export function PlanCartToggleButton({
       toast.warning(isKo ? "이미 담은 매체에 있습니다" : "Already in your plan");
       return;
     }
+    if (!result.ok && result.reason === "online_blocked") {
+      toast.warning(
+        isKo
+          ? "온라인 매체는 아직 플래너에 담을 수 없습니다. 문의해 주세요."
+          : "Online media cannot be added to the planner yet. Please contact us.",
+      );
+      return;
+    }
     toast.show({
       variant: "warning",
       title: isKo ? "담은 매체 한도" : "Plan cart limit",

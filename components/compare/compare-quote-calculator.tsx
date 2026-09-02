@@ -13,6 +13,7 @@ import {
   calculateMediaQuoteFromOption,
   durationToDays,
   findCheapestPriceOptionIndex,
+  formatCompareQuoteLineCost,
   formatWonShort,
   type QuoteDurationUnit,
 } from "@/lib/compare-quote";
@@ -301,7 +302,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
                   {line.name}
                 </span>
                 <span className="shrink-0 tkad-type-meta font-bold tabular-nums">
-                  {formatWonShort(line.costWon, locale)}
+                  {formatCompareQuoteLineCost(line, locale)}
                 </span>
               </li>
             ))}

@@ -205,6 +205,14 @@ export function BriefFlowClient({
     ) => {
       store.startFromHandoff({ patch: result.patch, lines: result.mix.lines });
       noticeMissing(result.mix.missing);
+      if (result.mix.blockedOnline.length > 0) {
+        toast(
+          "warning",
+          isKo
+            ? `온라인 매체 ${result.mix.blockedOnline.length}개는 플래너에서 제외했습니다.`
+            : `${result.mix.blockedOnline.length} online media were excluded from the planner.`,
+        );
+      }
       if (result.mix.lines.length > 0) {
         setWizardStep(2);
         toast("success", okMessage(result.mix.lines.length));
@@ -218,12 +226,20 @@ export function BriefFlowClient({
     void (async () => {
       switch (pendingHandoff.kind) {
         case "media": {
-          const { lines, missing } = resolveHandoffMix({
+          const { lines, missing, blockedOnline } = resolveHandoffMix({
             catalog,
             mediaIds: pendingHandoff.mediaIds,
             units: pendingHandoff.units,
           });
           noticeMissing(missing);
+          if (blockedOnline.length > 0) {
+            toast(
+              "warning",
+              isKo
+                ? `온라인 매체 ${blockedOnline.length}개는 아직 플래너에 담을 수 없습니다.`
+                : `${blockedOnline.length} online media cannot be added to the planner yet.`,
+            );
+          }
           if (lines.length === 0) {
             toast(
               "error",

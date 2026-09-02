@@ -1,0 +1,1105 @@
+{
+  "version": 1,
+  "label": "pr3-online-media-from-dmpilot-seed",
+  "at": "2026-09-02T17:23:46.417Z",
+  "source": "dmpilot-1/prisma/seed-digital-products.ts",
+  "count": 23,
+  "rows": [
+    {
+      "id": "ca9a554ad046b0180e73eea6d",
+      "slug": "ig-awareness-reach",
+      "name": "인스타그램 인지도·도달 캠페인",
+      "nameEn": "Instagram Awareness Reach",
+      "description": "브랜드 노출·도달 중심. 릴스/피드 믹스로 20~30대 타겟 인지도 상승.",
+      "descriptionEn": "Reach-first IG campaigns with Reels/Feed mix.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "sns",
+      "mediaSubCategory": "social_media",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c496218708df86d663665258f",
+        "platform": "Meta Instagram",
+        "minBudget": 800000,
+        "cpcMin": 200,
+        "cpcMax": 600,
+        "cpmMin": 4000,
+        "cpmMax": 8000,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:BEAUTY",
+          "industry:FNB",
+          "industry:LOCAL",
+          "goal:AWARENESS",
+          "age:18-24",
+          "age:25-34",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "릴스 도달",
+          "시각 브랜딩"
+        ],
+        "kpiHints": [
+          "예상 CPM 4,000~8,000원",
+          "주간 도달 8만~25만"
+        ],
+        "bestFor": [
+          "릴스 도달",
+          "시각 브랜딩"
+        ]
+      },
+      "dmpilotMediaType": "SNS",
+      "sortOrder": 10
+    },
+    {
+      "id": "c80fb8d37d1d7e822938d2517",
+      "slug": "ig-lead-gen",
+      "name": "인스타그램 리드 수집",
+      "nameEn": "Instagram Lead Gen",
+      "description": "즉시 폼 리드 수집. CRM 연동·퀄리티 필터링 포함.",
+      "descriptionEn": "Instant form leads with quality filtering.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "sns",
+      "mediaSubCategory": "social_media",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "cb130fd7871bfb66daac256ec",
+        "platform": "Meta Instagram",
+        "minBudget": 1000000,
+        "cpcMin": 300,
+        "cpcMax": 900,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:EDU",
+          "industry:MEDICAL",
+          "industry:REALESTATE",
+          "industry:B2B",
+          "goal:LEAD",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "즉시 폼",
+          "모바일 전환"
+        ],
+        "kpiHints": [
+          "예상 CPL 8,000~25,000원"
+        ],
+        "bestFor": [
+          "즉시 폼",
+          "모바일 전환"
+        ]
+      },
+      "dmpilotMediaType": "SNS",
+      "sortOrder": 11
+    },
+    {
+      "id": "c50339369b42c920e7fbb12a4",
+      "slug": "ig-conversion-shop",
+      "name": "인스타그램 전환·쇼핑",
+      "nameEn": "Instagram Conversion",
+      "description": "카탈로그/전환 이벤트 기반 구매·신청 최적화.",
+      "descriptionEn": "Catalog/conversion event optimization.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "sns",
+      "mediaSubCategory": "social_media",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c3101b46c76850e5754206f68",
+        "platform": "Meta Instagram",
+        "minBudget": 1500000,
+        "cpcMin": 250,
+        "cpcMax": 800,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:BEAUTY",
+          "industry:FNB",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "카탈로그",
+          "리타겟팅"
+        ],
+        "kpiHints": [
+          "예상 ROAS 2~4x (업종 편차)"
+        ],
+        "bestFor": [
+          "카탈로그",
+          "리타겟팅"
+        ]
+      },
+      "dmpilotMediaType": "SNS",
+      "sortOrder": 12
+    },
+    {
+      "id": "c92f1cb51b78465df17403bfd",
+      "slug": "fb-traffic",
+      "name": "페이스북 트래픽·유입",
+      "nameEn": "Facebook Traffic",
+      "description": "랜딩 유입·콘텐츠 소비 목적의 메타 트래픽 캠페인.",
+      "descriptionEn": "Meta traffic for landing visits.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "sns",
+      "mediaSubCategory": "social_media",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c650ecb74aee9c3c67a7a36f2",
+        "platform": "Meta Facebook",
+        "minBudget": 700000,
+        "cpcMin": 200,
+        "cpcMax": 600,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:LOCAL",
+          "goal:TRAFFIC",
+          "goal:VISIT",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "광역 유입"
+        ],
+        "kpiHints": [
+          "예상 CPC 200~600원"
+        ],
+        "bestFor": [
+          "광역 유입"
+        ]
+      },
+      "dmpilotMediaType": "SNS",
+      "sortOrder": 20
+    },
+    {
+      "id": "c4962dd0ea30beed7b81e78ba",
+      "slug": "fb-awareness",
+      "name": "페이스북 브랜드 인지도",
+      "nameEn": "Facebook Awareness",
+      "description": "광역 도달·동영상 조회 중심 인지도 캠페인.",
+      "descriptionEn": "Broad reach / video view awareness.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "sns",
+      "mediaSubCategory": "social_media",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "cac6c8875c7a39151e80d36f7",
+        "platform": "Meta Facebook",
+        "minBudget": 800000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": 3000,
+        "cpmMax": 7000,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:LOCAL",
+          "goal:AWARENESS",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "광역 도달"
+        ],
+        "kpiHints": [
+          "예상 ThruPlay 단가 업종별 상이"
+        ],
+        "bestFor": [
+          "광역 도달"
+        ]
+      },
+      "dmpilotMediaType": "SNS",
+      "sortOrder": 21
+    },
+    {
+      "id": "c8abec08f7599f8754c7e569f",
+      "slug": "yt-awareness",
+      "name": "유튜브 인지도·뷰",
+      "nameEn": "YouTube Awareness",
+      "description": "인스트림·숏츠 믹스로 브랜드 영상 인지도 확대.",
+      "descriptionEn": "In-stream + Shorts awareness.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "video",
+      "mediaSubCategory": "video",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c8b3c5e3e09d01ad7631bb5bb",
+        "platform": "YouTube",
+        "minBudget": 1200000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": 2000,
+        "cpmMax": 6000,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:APP",
+          "industry:ENTER",
+          "industry:EDU",
+          "goal:AWARENESS",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "영상 스토리",
+          "뷰 도달"
+        ],
+        "kpiHints": [
+          "예상 CPV 30~80원"
+        ],
+        "bestFor": [
+          "영상 스토리",
+          "뷰 도달"
+        ]
+      },
+      "dmpilotMediaType": "VIDEO",
+      "sortOrder": 30
+    },
+    {
+      "id": "cb857e784640345506c31dfc2",
+      "slug": "kakao-traffic",
+      "name": "카카오 모먼트 트래픽",
+      "nameEn": "Kakao Moment Traffic",
+      "description": "카카오톡·다음 네트워크 유입. 국내 모바일 도달 강점.",
+      "descriptionEn": "Kakao/Daum network traffic.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "sns",
+      "mediaSubCategory": "social_media",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c8834673b721ee49420f2f375",
+        "platform": "Kakao Moment",
+        "minBudget": 600000,
+        "cpcMin": 150,
+        "cpcMax": 450,
+        "cpmMin": 2500,
+        "cpmMax": 5500,
+        "targetingOptions": [
+          "industry:LOCAL",
+          "industry:FNB",
+          "industry:ECOMMERCE",
+          "industry:REALESTATE",
+          "goal:TRAFFIC",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "국내 모바일",
+          "카카오톡 접점"
+        ],
+        "kpiHints": [
+          "예상 CPC 150~450원"
+        ],
+        "bestFor": [
+          "국내 모바일",
+          "카카오톡 접점"
+        ]
+      },
+      "dmpilotMediaType": "SNS",
+      "sortOrder": 40
+    },
+    {
+      "id": "c5890bc554fcd5156da5a581c",
+      "slug": "naver-sa-brand",
+      "name": "네이버 검색광고·브랜드",
+      "nameEn": "Naver SA Brand",
+      "description": "브랜드·카테고리 키워드 점유로 검색 인지도 확보.",
+      "descriptionEn": "Brand/category keyword presence.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "search",
+      "mediaSubCategory": "search_ad",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "cfb5970d2b1969d5efbb4c48c",
+        "platform": "Naver Search Ads",
+        "minBudget": 500000,
+        "cpcMin": 200,
+        "cpcMax": 1500,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:MEDICAL",
+          "industry:EDU",
+          "industry:B2B",
+          "goal:AWARENESS",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "검색 점유",
+          "브랜드 방어"
+        ],
+        "kpiHints": [
+          "브랜드 키워드 점유 목표 설정"
+        ],
+        "bestFor": [
+          "검색 점유",
+          "브랜드 방어"
+        ]
+      },
+      "dmpilotMediaType": "SA",
+      "sortOrder": 50
+    },
+    {
+      "id": "cc638f0d559e02fd5f47931c5",
+      "slug": "naver-sa-conversion",
+      "name": "네이버 검색광고·전환",
+      "nameEn": "Naver SA Conversion",
+      "description": "고의도 키워드·쇼핑검색 연동으로 전환 극대화.",
+      "descriptionEn": "High-intent keywords + shopping search.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "search",
+      "mediaSubCategory": "search_ad",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c380503137a0aec4c979b911e",
+        "platform": "Naver Search Ads",
+        "minBudget": 1000000,
+        "cpcMin": 400,
+        "cpcMax": 2500,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:LOCAL",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "고의도 검색",
+          "쇼핑 연동"
+        ],
+        "kpiHints": [
+          "예상 CPA 업종 벤치마크 대비 관리"
+        ],
+        "bestFor": [
+          "고의도 검색",
+          "쇼핑 연동"
+        ]
+      },
+      "dmpilotMediaType": "SA",
+      "sortOrder": 51
+    },
+    {
+      "id": "ce3fc80964e3b91eda754a353",
+      "slug": "naver-sa-traffic",
+      "name": "네이버 검색·사이트유입",
+      "nameEn": "Naver SA Traffic",
+      "description": "정보성·비교 키워드로 사이트 유입 확대.",
+      "descriptionEn": "Informational keywords for site traffic.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "search",
+      "mediaSubCategory": "search_ad",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "cb7dc03e682d4e6259eebc2ac",
+        "platform": "Naver Search Ads",
+        "minBudget": 700000,
+        "cpcMin": 400,
+        "cpcMax": 1200,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:LOCAL",
+          "goal:TRAFFIC",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "비교·정보 키워드"
+        ],
+        "kpiHints": [
+          "예상 CPC 400~1,200원"
+        ],
+        "bestFor": [
+          "비교·정보 키워드"
+        ]
+      },
+      "dmpilotMediaType": "SA",
+      "sortOrder": 52
+    },
+    {
+      "id": "c5956192e40f2dbbe71cab81a",
+      "slug": "google-ads-search",
+      "name": "구글 검색광고·전환",
+      "nameEn": "Google Ads Search Conversion",
+      "description": "구글 검색·PMax 일부 조합으로 전환·리드 확보.",
+      "descriptionEn": "Search (+ light PMax) for conversions.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "search",
+      "mediaSubCategory": "search_ad",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "cf51a4ae03f3841d21ba51eb5",
+        "platform": "Google Ads Search",
+        "minBudget": 1200000,
+        "cpcMin": 500,
+        "cpcMax": 3000,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:B2B",
+          "industry:APP",
+          "industry:EDU",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "글로벌 검색",
+          "스마트입찰"
+        ],
+        "kpiHints": [
+          "예상 CPA/ROAS 목표 합의 후 운영"
+        ],
+        "bestFor": [
+          "글로벌 검색",
+          "스마트입찰"
+        ]
+      },
+      "dmpilotMediaType": "SA",
+      "sortOrder": 60
+    },
+    {
+      "id": "c8eac68430a47b9a2449033b7",
+      "slug": "google-ads-awareness",
+      "name": "구글 디스플레이·인지도",
+      "nameEn": "Google Display Awareness",
+      "description": "GDN·유튜브 연동 인지도. 신규 브랜드 런칭에 적합.",
+      "descriptionEn": "GDN/YouTube-linked awareness.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "display",
+      "mediaSubCategory": "display_ad",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c0ef491a276c25bbf06a23b4a",
+        "platform": "Google Display Network",
+        "minBudget": 800000,
+        "cpcMin": 100,
+        "cpcMax": 400,
+        "cpmMin": 2000,
+        "cpmMax": 6000,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:LOCAL",
+          "goal:AWARENESS",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "GDN 도달",
+          "리마케팅"
+        ],
+        "kpiHints": [
+          "예상 CPM 2,000~6,000원"
+        ],
+        "bestFor": [
+          "GDN 도달",
+          "리마케팅"
+        ]
+      },
+      "dmpilotMediaType": "DA",
+      "sortOrder": 61
+    },
+    {
+      "id": "c177179faa0ab581118cf7db4",
+      "slug": "google-ads-lead",
+      "name": "구글 리드 폼·전환",
+      "nameEn": "Google Lead Form",
+      "description": "리드 폼·랜딩 전환 믹스. B2B·상담 업종에 적합.",
+      "descriptionEn": "Lead form + landing mix for consultative offers.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "search",
+      "mediaSubCategory": "search_ad",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c19562ca327b316985e70abf0",
+        "platform": "Google Ads",
+        "minBudget": 1000000,
+        "cpcMin": 600,
+        "cpcMax": 3500,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:B2B",
+          "industry:EDU",
+          "industry:MEDICAL",
+          "industry:REALESTATE",
+          "goal:LEAD",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "리드 폼",
+          "B2B"
+        ],
+        "kpiHints": [
+          "예상 CPL 10,000~40,000원"
+        ],
+        "bestFor": [
+          "리드 폼",
+          "B2B"
+        ]
+      },
+      "dmpilotMediaType": "SA",
+      "sortOrder": 62
+    },
+    {
+      "id": "ce780f45bfe2f8cdebdd7ac81",
+      "slug": "meta-advantage-plus",
+      "name": "메타 Advantage+ 쇼핑",
+      "nameEn": "Meta Advantage+ Shopping",
+      "description": "메타 Advantage+ 쇼핑 캠페인. 카탈로그 기반 구매 최적화. 단가 편차 큼 — 상세는 문의.",
+      "descriptionEn": "Meta Advantage+ shopping; rates vary — inquire.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "sns",
+      "mediaSubCategory": "social_media",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c765288316467752fa92bd338",
+        "platform": "Meta Advantage+",
+        "minBudget": 1500000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:BEAUTY",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "자동 입찰",
+          "카탈로그"
+        ],
+        "kpiHints": [
+          "ROAS 목표 합의 후 운영"
+        ],
+        "bestFor": [
+          "자동 입찰",
+          "카탈로그"
+        ]
+      },
+      "dmpilotMediaType": "SNS",
+      "sortOrder": 13
+    },
+    {
+      "id": "c373dafafa977abdeb506f01a",
+      "slug": "naver-gfa-traffic",
+      "name": "네이버 GFA 트래픽",
+      "nameEn": "Naver GFA Traffic",
+      "description": "네이버 성과형 디스플레이(GFA). 메인·서비스 네트워크 유입. CPC/CPM 문의.",
+      "descriptionEn": "Naver GFA display traffic; CPC/CPM on inquire.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "display",
+      "mediaSubCategory": "display_ad",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c765d2107964e2d250cace298",
+        "platform": "Naver GFA",
+        "minBudget": 800000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:LOCAL",
+          "goal:TRAFFIC",
+          "goal:AWARENESS",
+          "goal:VISIT",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "네이버 지면",
+          "국내 도달"
+        ],
+        "kpiHints": [
+          "단가 문의"
+        ],
+        "bestFor": [
+          "네이버 지면",
+          "국내 도달"
+        ]
+      },
+      "dmpilotMediaType": "DA",
+      "sortOrder": 53
+    },
+    {
+      "id": "c006c4fbdb7b05a2bc83fe51b",
+      "slug": "kakao-moment-message",
+      "name": "카카오 모먼트 메시지",
+      "nameEn": "Kakao Moment Message",
+      "description": "카카오톡 채널 메시지·친구 타겟 전환. 단가는 문의.",
+      "descriptionEn": "KakaoTalk message ads; rates on inquire.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "message",
+      "mediaSubCategory": "message",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c53c2883c7c02ef183fd4aaee",
+        "platform": "Kakao Moment",
+        "minBudget": 700000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:FNB",
+          "industry:LOCAL",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "카톡 메시지",
+          "리텐션"
+        ],
+        "kpiHints": [
+          "단가 문의"
+        ],
+        "bestFor": [
+          "카톡 메시지",
+          "리텐션"
+        ]
+      },
+      "dmpilotMediaType": "MESSAGE",
+      "sortOrder": 41
+    },
+    {
+      "id": "cee3a4936878b3ed4e4393166",
+      "slug": "youtube-action",
+      "name": "유튜브 액션·전환",
+      "nameEn": "YouTube Action",
+      "description": "유튜브 액션 캠페인(웹 전환). CPV/CPA 범위는 소재·업종별 문의.",
+      "descriptionEn": "YouTube action for web conversions; inquire for rates.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "video",
+      "mediaSubCategory": "video",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c872f2fd8991db9abcae0bd01",
+        "platform": "YouTube",
+        "minBudget": 1500000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:LOCAL",
+          "goal:CONVERSION",
+          "goal:TRAFFIC",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "영상 전환"
+        ],
+        "kpiHints": [
+          "CPV/CPA 문의"
+        ],
+        "bestFor": [
+          "영상 전환"
+        ]
+      },
+      "dmpilotMediaType": "VIDEO",
+      "sortOrder": 31
+    },
+    {
+      "id": "c508c3a76121b0dfd968ca5e7",
+      "slug": "google-pmax-conversion",
+      "name": "구글 Performance Max",
+      "nameEn": "Google Performance Max",
+      "description": "PMax 전 지면 자동 최적화. 단가·ROAS는 업종별 편차 — 문의.",
+      "descriptionEn": "Performance Max; ROAS varies — inquire.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "display",
+      "mediaSubCategory": "display_ad",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "ca59532186cf78e1bc9fc3af5",
+        "platform": "Google Performance Max",
+        "minBudget": 2000000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:APP",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "전 지면",
+          "자동화"
+        ],
+        "kpiHints": [
+          "ROAS 목표 합의"
+        ],
+        "bestFor": [
+          "전 지면",
+          "자동화"
+        ]
+      },
+      "dmpilotMediaType": "DA",
+      "sortOrder": 63
+    },
+    {
+      "id": "ca93a3fc09ca6fc848ca2115b",
+      "slug": "karrot-local-traffic",
+      "name": "당근 지역 트래픽",
+      "nameEn": "Karrot Local Traffic",
+      "description": "당근 비즈프로필·광고로 동네 유입. (채널 매핑: RFP FACEBOOK 패밀리) CPC 문의.",
+      "descriptionEn": "Karrot local traffic; CPC on inquire.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "local",
+      "mediaSubCategory": "local",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c1af8246634b7c4b25ec6e9de",
+        "platform": "Karrot (당근)",
+        "minBudget": 500000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:LOCAL",
+          "industry:FNB",
+          "industry:REALESTATE",
+          "goal:TRAFFIC",
+          "goal:VISIT",
+          "goal:AWARENESS",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "하이퍼로컬"
+        ],
+        "kpiHints": [
+          "단가 문의"
+        ],
+        "bestFor": [
+          "하이퍼로컬"
+        ]
+      },
+      "dmpilotMediaType": "RETAIL",
+      "sortOrder": 70
+    },
+    {
+      "id": "c0dfdc2a0f1cd9b017ab82f43",
+      "slug": "baemin-ad-visit",
+      "name": "배민 광고·방문/주문",
+      "nameEn": "Baemin Ads Visit",
+      "description": "배달의민족 광고 상품(가게 노출·주문). 단가 체계는 문의.",
+      "descriptionEn": "Baemin store ads; pricing on inquire.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "local",
+      "mediaSubCategory": "local",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c35af2cd54ad020ddc4ddf090",
+        "platform": "Baemin",
+        "minBudget": 600000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:FNB",
+          "industry:LOCAL",
+          "goal:VISIT",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "푸드 앱 접점"
+        ],
+        "kpiHints": [
+          "단가 문의"
+        ],
+        "bestFor": [
+          "푸드 앱 접점"
+        ]
+      },
+      "dmpilotMediaType": "RETAIL",
+      "sortOrder": 71
+    },
+    {
+      "id": "c87008b84948ce9803f5c89bb",
+      "slug": "tiktok-spark-awareness",
+      "name": "틱톡 스파크·인지도",
+      "nameEn": "TikTok Spark Awareness",
+      "description": "틱톡 Spark Ads 인지도. (RFP 채널 매핑: INSTAGRAM SNS군) CPM 공개 범위 한정.",
+      "descriptionEn": "TikTok Spark awareness; mapped to IG SNS family for RFP.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "sns",
+      "mediaSubCategory": "social_media",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c96c2e240ca3192e89a142a1b",
+        "platform": "TikTok",
+        "minBudget": 1000000,
+        "cpcMin": 150,
+        "cpcMax": 500,
+        "cpmMin": 3000,
+        "cpmMax": 9000,
+        "targetingOptions": [
+          "industry:BEAUTY",
+          "industry:ECOMMERCE",
+          "industry:APP",
+          "industry:ENTER",
+          "goal:AWARENESS",
+          "age:18-24",
+          "age:25-34",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "숏폼",
+          "Z세대"
+        ],
+        "kpiHints": [
+          "예상 CPM 3,000~9,000원 (편차 큼)"
+        ],
+        "bestFor": [
+          "숏폼",
+          "Z세대"
+        ]
+      },
+      "dmpilotMediaType": "VERTICAL",
+      "sortOrder": 14
+    },
+    {
+      "id": "ccb001b9677c5021d3e1604eb",
+      "slug": "app-uai-install",
+      "name": "앱 유저 획득(메타)",
+      "nameEn": "App Install Meta",
+      "description": "앱 설치·실행 최적화. CPI는 MMP·국가별 편차 — 문의.",
+      "descriptionEn": "App install optimization; CPI on inquire.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "sns",
+      "mediaSubCategory": "social_media",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c2b694e131106978dc6348000",
+        "platform": "Meta App Ads",
+        "minBudget": 1500000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:APP",
+          "industry:ECOMMERCE",
+          "industry:ENTER",
+          "goal:APP_INSTALL",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "앱 설치"
+        ],
+        "kpiHints": [
+          "CPI 문의"
+        ],
+        "bestFor": [
+          "앱 설치"
+        ]
+      },
+      "dmpilotMediaType": "SNS",
+      "sortOrder": 22
+    },
+    {
+      "id": "cf94a6d1bd9dfcdc4777bb854",
+      "slug": "native-taboola-traffic",
+      "name": "네이티브(탭oola류) 트래픽",
+      "nameEn": "Native Traffic",
+      "description": "콘텐츠 추천형 네이티브 유입. CPC는 매체·지면별 문의.",
+      "descriptionEn": "Native content traffic; CPC on inquire.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "display",
+      "mediaSubCategory": "display_ad",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c424d41bb33e627f1d5784f5e",
+        "platform": "Native Network",
+        "minBudget": 800000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:LOCAL",
+          "goal:TRAFFIC",
+          "goal:AWARENESS",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "콘텐츠 유입"
+        ],
+        "kpiHints": [
+          "단가 문의"
+        ],
+        "bestFor": [
+          "콘텐츠 유입"
+        ]
+      },
+      "dmpilotMediaType": "NATIVE",
+      "sortOrder": 64
+    }
+  ]
+}

@@ -39,6 +39,7 @@ import {
   resolveMediaQuantity,
 } from "@/lib/media-quantity";
 import { resolveQuoteUnitsForPriceOption } from "@/lib/quote-entry-quantity";
+import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -176,6 +177,9 @@ export function MediaDetailStickyQuotePanel({
     [media.id, units],
   );
 
+  const contactHref = `/contact?media=${encodeURIComponent(media.id)}`;
+  const isOnline = isOnlineCatalogMedia(media);
+
   const inputCls =
     "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-[color:var(--qp-accent)]/50 focus:ring-2 focus:ring-[color:var(--qp-accent)]/20";
 
@@ -292,6 +296,7 @@ export function MediaDetailStickyQuotePanel({
                 quote.costWon,
                 media.country,
                 locale,
+                media,
               )}
             </span>
           </p>
@@ -315,47 +320,57 @@ export function MediaDetailStickyQuotePanel({
         </div>
 
         <div className="space-y-3">
-          <Link
-            href={quoteHref}
-            data-accent-keep="true"
-            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-3 text-center text-sm font-bold text-white"
-          >
-            {isKo ? "견적 받기" : "Get quote"}
-          </Link>
+          {isOnline ? (
+            <Link
+              href={contactHref}
+              data-accent-keep="true"
+              className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-3 text-center text-sm font-bold text-white"
+            >
+              {isKo ? "문의하기" : "Contact us"}
+            </Link>
+          ) : (
+            <>
+              <Link
+                href={quoteHref}
+                data-accent-keep="true"
+                className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-3 text-center text-sm font-bold text-white"
+              >
+                {isKo ? "견적 받기" : "Get quote"}
+              </Link>
 
-          <details className="group rounded-xl border border-gray-100 dark:border-white/10">
-            <summary className="cursor-pointer list-none px-3 py-2 text-center text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/65 [&::-webkit-details-marker]:hidden">
-              <span className="inline-flex items-center gap-1">
-                {isKo ? "담기 · 플래너 · 공유" : "Save · Planner · Share"}
-                <span className="transition group-open:rotate-180">▾</span>
-              </span>
-            </summary>
-            <div className="space-y-2 border-t border-gray-100 px-2 pb-3 pt-2 dark:border-white/10">
-              <PlanCartAddButton
-                item={planCartItemFromMediaItem(media, "search")}
-                addedFrom="search"
-                compact
-                mediaDetailLabel
-                className="w-full"
-              />
-              <div className="flex flex-wrap items-center gap-1.5">
-                <Link
-                  href={plannerHref}
-                  className="inline-flex h-8 flex-1 min-w-[4.5rem] items-center justify-center gap-1 rounded-lg border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/8 px-2 tkad-type-note font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
-                >
-                  <Sparkles className="h-3 w-3 shrink-0" aria-hidden />
-                  {isKo ? "플래너" : "Planner"}
-                </Link>
-                <MediaDetailProposalCard
-                  media={media}
-                  isKo={isKo}
-                  locale={pageLocale}
-                  variant="inline"
-                  compactSecondary
-                  className="min-w-0 flex-1"
-                />
-                <button
-                  type="button"
+              <details className="group rounded-xl border border-gray-100 dark:border-white/10">
+                <summary className="cursor-pointer list-none px-3 py-2 text-center text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/65 [&::-webkit-details-marker]:hidden">
+                  <span className="inline-flex items-center gap-1">
+                    {isKo ? "담기 · 플래너 · 공유" : "Save · Planner · Share"}
+                    <span className="transition group-open:rotate-180">▾</span>
+                  </span>
+                </summary>
+                <div className="space-y-2 border-t border-gray-100 px-2 pb-3 pt-2 dark:border-white/10">
+                  <PlanCartAddButton
+                    item={planCartItemFromMediaItem(media, "search")}
+                    addedFrom="search"
+                    compact
+                    mediaDetailLabel
+                    className="w-full"
+                  />
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Link
+                      href={plannerHref}
+                      className="inline-flex h-8 flex-1 min-w-[4.5rem] items-center justify-center gap-1 rounded-lg border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/8 px-2 tkad-type-note font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
+                    >
+                      <Sparkles className="h-3 w-3 shrink-0" aria-hidden />
+                      {isKo ? "플래너" : "Planner"}
+                    </Link>
+                    <MediaDetailProposalCard
+                      media={media}
+                      isKo={isKo}
+                      locale={pageLocale}
+                      variant="inline"
+                      compactSecondary
+                      className="min-w-0 flex-1"
+                    />
+                    <button
+                      type="button"
                   onClick={() => {
                     if (typeof navigator !== "undefined" && navigator.share) {
                       void navigator.share({
@@ -381,6 +396,8 @@ export function MediaDetailStickyQuotePanel({
               </div>
             </div>
           </details>
+            </>
+          )}
         </div>
       </div>
     </aside>

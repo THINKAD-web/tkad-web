@@ -1,9 +1,12 @@
+import type { CatalogChannel } from "@/lib/catalog-channel";
 import type { MediaPricePeriodKey } from "@/lib/media-data";
 
 export type HomeCatalogMediaItem = {
   id: string;
   slug?: string;
   name: string;
+  /** PR3 — browse plan-cart online gate (`lib/pricing-unavailable.ts`) */
+  catalogChannel?: CatalogChannel;
   type?: string;
   region?: string;
   location?: string;

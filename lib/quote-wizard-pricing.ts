@@ -26,6 +26,7 @@ import {
   mediaPriceOnInquiryLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
+import { isPricingUnavailable } from "@/lib/pricing-unavailable";
 
 /** 견적 캠페인 기간 = 운영 부분기간 요율 키 (1/3/5/7/15/30일) */
 export type QuoteCampaignPeriodKey = PartialPeriodRateAdminKey;
@@ -115,28 +116,7 @@ export function isQuoteWizardPriceOnInquiry(
     networkUnits?: number;
   },
 ): boolean {
-  if (!media.type?.trim()) {
-    return true;
-  }
-  if (media.price == null) {
-    return true;
-  }
-  const isNw = media.catalogSource === "network";
-  const poIdx = opts?.priceOptionIndex ?? 0;
-  const resolvedWon = isNw
-    ? catalogPriceFieldToWon(
-        computeNetworkMonthlyFromMediaItem(
-          media,
-          opts?.networkUnits ?? media.networkMinUnits ?? 1,
-        ),
-      )
-    : catalogPriceFieldToWon(
-        resolveCatalogLineMonthlyPriceWon(media, {
-          priceOptionIndex: poIdx,
-          units: opts.mobileUnits,
-        }),
-      );
-  return resolvedWon <= 0;
+  return isPricingUnavailable(media, opts);
 }
 
 export function sumQuoteWizardBillableMan(
