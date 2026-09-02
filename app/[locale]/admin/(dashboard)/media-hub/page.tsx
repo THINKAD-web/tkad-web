@@ -18,6 +18,10 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { AdminBookingRequestsReviewPanel } from "@/components/admin/booking-requests-review-panel";
+import {
+  formatAdminListPrice,
+  formatAdminListTypeSummary,
+} from "@/lib/admin-media-dto";
 import { cn } from "@/lib/utils";
 
 type MediaAvailability = "available" | "reserved" | "maintenance";
@@ -26,8 +30,10 @@ type MediaRow = {
   id: string;
   name: string;
   region: string;
-  type: string;
-  price: number;
+  type: string | null;
+  price: number | null;
+  catalogChannel?: string | null;
+  mediaMainCategory?: string | null;
   image: string | null;
   availability?: MediaAvailability;
 };
@@ -628,10 +634,15 @@ function AdminMediaHubPage() {
                     ) : null}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {m.region} · {m.type}
+                    {m.region} ·{" "}
+                    {formatAdminListTypeSummary({
+                      type: m.type,
+                      catalogChannel: m.catalogChannel,
+                      mediaMainCategory: m.mediaMainCategory,
+                    })}
                   </p>
                   <p className="text-xs">
-                    {m.price.toLocaleString()}원
+                    {formatAdminListPrice(m.price)}
                     {m.image ? (
                       <span className="ml-2 text-emerald-600">이미지 있음</span>
                     ) : null}
