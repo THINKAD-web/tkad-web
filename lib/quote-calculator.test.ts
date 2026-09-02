@@ -1,11 +1,63 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { calculateQuote } from "@/lib/quote-calculator";
+import { calculateQuote, QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE } from "@/lib/quote-calculator";
 import { parseQuoteMediaSelections } from "@/lib/quote-media-selections";
 import { computeNetworkMonthlyPrice } from "@/lib/media-network-public";
 
 const start = new Date("2025-06-01T12:00:00");
 const end = new Date("2025-06-30T12:00:00");
+
+test("calculateQuote throws when display type is missing (online/null guard)", () => {
+  assert.throws(
+    () =>
+      calculateQuote({
+        media: [
+          {
+            id: "online-search-1",
+            name: "검색광고 샘플",
+            location: "서울",
+            type: null,
+            catalogChannel: "online",
+            price: 0,
+          },
+        ],
+        startDate: start,
+        endDate: end,
+      }),
+    (err: unknown) => {
+      assert.ok(err instanceof Error);
+      assert.match(err.message, new RegExp(QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE));
+      assert.match(err.message, /mediaId=online-search-1/);
+      assert.match(err.message, /catalogChannel=online/);
+      return true;
+    },
+  );
+});
+
+test("calculateQuote throws when display type is empty string", () => {
+  assert.throws(
+    () =>
+      calculateQuote({
+        media: [
+          {
+            id: "m-empty-type",
+            name: "타입 없음",
+            location: "서울",
+            type: "   ",
+            price: 1_000_000,
+          },
+        ],
+        startDate: start,
+        endDate: end,
+      }),
+    (err: unknown) => {
+      assert.ok(err instanceof Error);
+      assert.match(err.message, /mediaId=m-empty-type/);
+      assert.match(err.message, /catalogChannel=unknown/);
+      return true;
+    },
+  );
+});
 
 test("legacy calculateQuote without selections unchanged", () => {
   const before = calculateQuote({
