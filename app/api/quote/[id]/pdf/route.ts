@@ -7,6 +7,10 @@ import { buildKoreanQuotePdf } from "@/lib/build-korean-quote-pdf";
 import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
+import {
+  budgetPricingExportNextResponse,
+  isBudgetPricingNotImplementedError,
+} from "@/lib/quote-export/budget-pricing-export-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +76,11 @@ export async function GET(
         },
       });
     } catch (newErr) {
-      // 신규 빌더 실패 시 레거시 빌더로 폴백 (클라이언트 대면 문서 500 방지)
+      if (isBudgetPricingNotImplementedError(newErr)) {
+        const isKo = !row.locale || row.locale.toLowerCase().startsWith("ko");
+        return budgetPricingExportNextResponse(isKo);
+      }
+      // 신규 빌더 실패 시 레거시 빌더로 폴백 (BudgetPricing 제외 — 잘못된 금액 PDF 방지)
       console.error("[quote pdf GET] new builder failed, fallback to legacy", newErr);
     }
 

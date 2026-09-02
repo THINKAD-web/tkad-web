@@ -20,7 +20,11 @@ PR1b-2 alone is not enough: PR3 seeds make online media choosable in the wizard 
 
 1. **Quote wizard catalog filter** — exclude `catalog_channel = online` (and any row without billable display type) from selectable catalog until BudgetPricing.
 2. **Planner** — keep blocked until PR5 (already decided).
-3. **ISR / cache after seed** — `fetchPublicMediaCatalogList` uses `revalidate = 86400` + list cache tag. After seeding 23 online rows:
+3. **Media compare & media detail quote panels** — `lib/compare-quote.ts` (`calculateMediaQuoteByDays`, `calculateMediaQuoteFromOption`) and `lib/media-detail-quantity.ts` **do not call** `calculateQuote` / `BudgetPricing`. PR3 must verify behavior when an online row appears on:
+   - `/compare` (`components/compare/compare-quote-calculator.tsx`)
+   - 매체 상세 스티키 견적 (`components/media-detail/media-detail-sticky-quote-panel.tsx`, `media-quote-calculator.tsx`)
+   - Expected until PR5: **no numeric ₩0** — either block selection, show 「가격 문의」 / inquiry label, or exclude from compare set (same failure class as pre-PR1b-2 wizard ₩0).
+4. **ISR / cache after seed** — `fetchPublicMediaCatalogList` uses `revalidate = 86400` + list cache tag. After seeding 23 online rows:
    - Call `revalidateMediaCachesBulk()` (or equivalent) **immediately after seed**
    - Verification order: seed → **cache invalidate** → hit `/api/public/media-catalog` → confirm count → UI — do not conclude “seed failed” when the row is only cache-stale (Preview smoke missed catalog for this reason).
 

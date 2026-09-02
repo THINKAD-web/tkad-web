@@ -1,0 +1,18 @@
+[
+  {
+    "id": "cmtd4wpic000004ic5oeqzdxq",
+    "name": "서울 지하철 1~4호선 사각기둥 조명광고",
+    "location": "서울",
+    "type": "static",
+    "catalogChannel": "offline",
+    "price": 2000000,
+    "pricePeriod": "month",
+    "priceOptions": null,
+    "partialPeriodRates": null,
+    "dailyFootfall": null,
+    "impressions": null,
+    "latitude": null,
+    "longitude": null,
+    "_note": "Prod-only row (absent on preview). Fixture fields match prod DB at PR1a price-check; totalWon=1026666 verified."
+  }
+]
