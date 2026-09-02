@@ -170,57 +170,86 @@ test("PR2 Phase1 baseline — tier / interpolation / 0원 boundary rows", () => 
   }
 });
 
-test("PR2 Phase1 baseline — online stub / null type / null channel", () => {
+test("throw: catalogChannel=online → BUDGET_PRICING_NOT_IMPLEMENTED", () => {
   const baseline = loadBaseline();
-  assert.equal(baseline.throws.length, 3);
-  for (const row of baseline.throws) {
-    assert.equal(row.actualCode, row.expectedCode, row.id);
-  }
+  const row = baseline.throws.find((t) => t.id === "online_budget_stub");
+  assert.ok(row);
+  assert.equal(row.expectedCode, BUDGET_PRICING_NOT_IMPLEMENTED);
+  assert.equal(row.actualCode, BUDGET_PRICING_NOT_IMPLEMENTED);
 
-  const online = (): void => {
-    calculateQuote({
-      media: [
-        {
-          id: "synthetic-online",
-          name: "synthetic online",
-          location: "",
-          type: null,
-          catalogChannel: "online",
-          price: 0,
-        },
-      ],
-      startDate: ISSUED_AT,
-      endDate: new Date("2026-03-14T00:00:00.000Z"),
-      issuedAt: ISSUED_AT,
-    });
-  };
-  assert.throws(online, (e: unknown) => {
-    return (
-      e instanceof Error && e.message.startsWith(BUDGET_PRICING_NOT_IMPLEMENTED)
-    );
-  });
+  assert.throws(
+    () =>
+      calculateQuote({
+        media: [
+          {
+            id: "synthetic-online",
+            name: "synthetic online",
+            location: "",
+            type: null,
+            catalogChannel: "online",
+            price: 0,
+          },
+        ],
+        startDate: ISSUED_AT,
+        endDate: new Date("2026-03-14T00:00:00.000Z"),
+        issuedAt: ISSUED_AT,
+      }),
+    (e: unknown) =>
+      e instanceof Error && e.message.startsWith(BUDGET_PRICING_NOT_IMPLEMENTED),
+  );
+});
 
-  const nullType = (): void => {
-    calculateQuote({
-      media: [
-        {
-          id: "synthetic-offline-null-type",
-          name: "synthetic null type",
-          location: "",
-          type: null,
-          catalogChannel: "offline",
-          price: 10_000_000,
-        },
-      ],
-      startDate: ISSUED_AT,
-      endDate: new Date("2026-03-14T00:00:00.000Z"),
-      issuedAt: ISSUED_AT,
-    });
-  };
-  assert.throws(nullType, (e: unknown) => {
-    return (
+test("throw: offline + type null → QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE", () => {
+  const baseline = loadBaseline();
+  const row = baseline.throws.find((t) => t.id === "offline_null_type");
+  assert.ok(row);
+  assert.equal(row.expectedCode, QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE);
+  assert.equal(row.actualCode, QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE);
+
+  assert.throws(
+    () =>
+      calculateQuote({
+        media: [
+          {
+            id: "synthetic-offline-null-type",
+            name: "synthetic null type",
+            location: "",
+            type: null,
+            catalogChannel: "offline",
+            price: 10_000_000,
+          },
+        ],
+        startDate: ISSUED_AT,
+        endDate: new Date("2026-03-14T00:00:00.000Z"),
+        issuedAt: ISSUED_AT,
+      }),
+    (e: unknown) =>
       e instanceof Error &&
-      e.message.startsWith(QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE)
-    );
-  });
+      e.message.startsWith(QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE),
+  );
+});
+
+test("no throw: catalogChannel null → FixedPeriodPricing", () => {
+  const baseline = loadBaseline();
+  const row = baseline.throws.find((t) => t.id === "null_channel_uses_fixed");
+  assert.ok(row);
+  assert.equal(row.expectedCode, "NO_THROW");
+  assert.equal(row.actualCode, "NO_THROW");
+
+  const fixtures = JSON.parse(readFileSync(mediaPath, "utf8")) as {
+    media: QuoteCalculatorMedia[];
+  };
+  const anchor = fixtures.media.find(
+    (m) => m.id === "cmox1l6tx000204kysagmp1v8",
+  );
+  assert.ok(anchor);
+
+  assert.doesNotThrow(() =>
+    calculateQuote({
+      media: [{ ...anchor, catalogChannel: null }],
+      startDate: ISSUED_AT,
+      endDate: new Date("2026-03-14T00:00:00.000Z"),
+      issuedAt: ISSUED_AT,
+    }),
+  );
 });
