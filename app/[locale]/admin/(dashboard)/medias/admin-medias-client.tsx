@@ -242,7 +242,15 @@ function formatBunnyUploadError(
   return extras.length > 0 ? `${base} [${extras.join(" | ")}]` : base;
 }
 
-function typeBadgeLabel(type: string): string {
+function typeBadgeLabel(
+  type: string | null,
+  media?: Pick<AdminMediaDto, "catalogChannel" | "mediaMainCategory">,
+): string {
+  if (!type?.trim()) {
+    if (media?.catalogChannel === "online") return "온라인";
+    if (media?.mediaMainCategory?.trim()) return media.mediaMainCategory;
+    return "—";
+  }
   const s = type.toLowerCase();
   if (s === "dooh" || s === "digital") return "디지털";
   if (s === "static") return "고정형";
@@ -261,8 +269,14 @@ const ADMIN_MEDIA_AVAILABILITY_LABEL: Record<MediaAvailability, string> = {
   maintenance: "점검중",
 };
 
-function matchesCategoryFilter(type: string, filter: string): boolean {
+function formatAdminListPrice(price: number | null): string {
+  if (price == null || !Number.isFinite(price)) return "가격 문의";
+  return `₩${price.toLocaleString()}`;
+}
+
+function matchesCategoryFilter(type: string | null, filter: string): boolean {
   if (filter === "all") return true;
+  if (!type?.trim()) return false;
   const s = type.toLowerCase();
   switch (filter) {
     case "static":
@@ -579,8 +593,8 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     city: m.city ?? "",
     district: m.district ?? "",
     region: overseasDefaults?.region ?? m.region,
-    type: m.type,
-    price: m.price,
+    type: m.type ?? "",
+    price: m.price ?? 0,
     ...(() => {
       const installLocations = installRowsFromDto(m);
       return {
@@ -802,7 +816,7 @@ function mediaQualityScore(m: AdminMediaDto): number {
     impressions: m.impressions,
     dailyFootfall: m.dailyFootfall,
     description: m.description,
-    price: m.price,
+    price: m.price ?? undefined,
     name: m.name,
     location: m.location,
   }).score;
@@ -2909,14 +2923,14 @@ export default function AdminMediasClient({
                                 variant="secondary"
                                 className="border border-border bg-card text-[10px] font-display font-bold uppercase tracking-[0.1em] text-foreground"
                               >
-                                {typeBadgeLabel(media.type)}
+                                {typeBadgeLabel(media.type, media)}
                               </Badge>
                               <MediaQualityScoreBadge
                                 score={mediaQualityScore(media)}
                               />
                               <MediaLayerBadges badges={media.layerBadges} />
                               <span className="text-xs font-semibold tabular-nums text-foreground">
-                                ₩{media.price.toLocaleString()}
+                                {formatAdminListPrice(media.price)}
                               </span>
                             </div>
                           </div>
@@ -3031,9 +3045,9 @@ export default function AdminMediasClient({
                               <Badge
                                 variant="secondary"
                                 className="max-w-full truncate border border-border bg-card px-2 py-0.5 text-[11px] font-display font-bold uppercase tracking-[0.06em] text-foreground"
-                                title={typeBadgeLabel(media.type)}
+                                title={typeBadgeLabel(media.type, media)}
                               >
-                                {typeBadgeLabel(media.type)}
+                                {typeBadgeLabel(media.type, media)}
                               </Badge>
                             </td>
                             <td className="px-2 py-2.5 text-center align-middle">
@@ -3044,9 +3058,9 @@ export default function AdminMediasClient({
                             <td className="px-2 py-2.5 align-middle font-semibold text-foreground">
                               <div
                                 className="truncate text-sm tabular-nums"
-                                title={`₩${media.price.toLocaleString()}`}
+                                title={formatAdminListPrice(media.price)}
                               >
-                                ₩{media.price.toLocaleString()}
+                                {formatAdminListPrice(media.price)}
                               </div>
                             </td>
                           </tr>
