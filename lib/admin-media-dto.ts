@@ -47,8 +47,9 @@ export type AdminMediaDto = {
   country: string;
   region: string;
   regionZone: string | null;
-  type: string;
-  price: number;
+  type: string | null;
+  price: number | null;
+  catalogChannel?: string | null;
   image: string | null;
   width: string | null;
   height: string | null;
@@ -460,6 +461,7 @@ export function prismaMediaToAdminDto(
     regionZone: m.regionZone,
     type: m.type,
     price: m.price,
+    catalogChannel: (m as Media & { catalogChannel?: string | null }).catalogChannel ?? null,
     image: m.image,
     width: m.width,
     height: m.height,
