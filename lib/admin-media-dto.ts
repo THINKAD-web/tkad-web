@@ -541,3 +541,21 @@ export function prismaMediaToAdminDto(
     layerBadges,
   };
 }
+
+/** Admin list/card — null price (online inquiry rows) → 「가격 문의」 (PR525/PR5 hotfix SSOT). */
+export function formatAdminListPrice(price: number | null | undefined): string {
+  if (price == null || !Number.isFinite(price)) return "가격 문의";
+  return `₩${price.toLocaleString("ko-KR")}`;
+}
+
+/** Admin list subtitle — null type (online) → 「온라인」 (PR525 pattern). */
+export function formatAdminListTypeSummary(
+  media: Pick<AdminMediaDto, "type" | "catalogChannel" | "mediaMainCategory">,
+): string {
+  if (!media.type?.trim()) {
+    if (media.catalogChannel === "online") return "온라인";
+    if (media.mediaMainCategory?.trim()) return media.mediaMainCategory;
+    return "—";
+  }
+  return media.type;
+}

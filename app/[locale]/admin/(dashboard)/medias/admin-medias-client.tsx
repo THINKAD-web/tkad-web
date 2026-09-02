@@ -81,6 +81,7 @@ import type { MediaEngagementMap } from "@/lib/admin-media-engagement";
 import {
   normalizeAdminMediaRow,
   parseAdminMediaListFromApiJson,
+  formatAdminListPrice,
 } from "@/lib/admin-media-dto";
 import { adminFetchJson, readAdminResponseJson } from "@/lib/admin-client-fetch";
 import { MetricsWriteWarningsModal } from "@/components/admin/metrics-write-warnings-modal";
@@ -268,11 +269,6 @@ const ADMIN_MEDIA_AVAILABILITY_LABEL: Record<MediaAvailability, string> = {
   reserved: "예약중",
   maintenance: "점검중",
 };
-
-function formatAdminListPrice(price: number | null): string {
-  if (price == null || !Number.isFinite(price)) return "가격 문의";
-  return `₩${price.toLocaleString()}`;
-}
 
 function matchesCategoryFilter(type: string | null, filter: string): boolean {
   if (filter === "all") return true;
