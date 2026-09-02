@@ -53,11 +53,12 @@ function useLgUp() {
   );
 }
 import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
-import {
-  formatMediaPriceWithPeriodSuffix,
-  normalizeMediaPricePeriod,
-} from "@/lib/media-price-format";
+import { formatBrowseCardPriceLabel } from "@/lib/media-card-display";
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
+import {
+  sanitizeBrowseMainForChannel,
+  type BrowseChannelRoute,
+} from "@/lib/browse-catalog-channel";
 import {
   filterMediaByDiscoveryChips,
   discoveryFeaturesIncludeNetwork,
@@ -120,8 +121,11 @@ function readBrowseFilterStateFromSearchParams(
     initialCategory?: string;
     initialTarget?: string;
     initialNetworkType?: string;
+    browseChannel?: BrowseChannelRoute;
   },
 ): BrowseFilterUrlState {
+  const browseChannel = opts.browseChannel ?? "offline";
+  const isOnlineBrowse = browseChannel === "online";
   const legacyCat = searchParams.get("category") ?? opts.initialCategory ?? "";
   const resolved = resolveBrowseCategoryParams({
     mainCategory: searchParams.get("mainCategory"),
@@ -129,20 +133,36 @@ function readBrowseFilterStateFromSearchParams(
     category: legacyCat,
   });
   const sortParam = searchParams.get("sort");
+  const mainCategory = sanitizeBrowseMainForChannel(
+    browseChannel,
+    resolved.mainCategory ?? "",
+  );
   return {
     query: searchParams.get("q") ?? "",
-    mainCategory: resolved.mainCategory ?? "",
-    subCategory: resolved.subCategory ?? "",
-    target: searchParams.get("target") ?? opts.initialTarget ?? "",
-    regionMain: searchParams.get("regionMain") ?? "",
-    regionSub: searchParams.get("regionSub") ?? "",
-    priceMin: searchParams.get("priceMin") ?? "",
-    priceMax: searchParams.get("priceMax") ?? "",
-    features: searchParams.get("features") ?? "",
+    mainCategory,
+    subCategory: isOnlineBrowse ? "" : resolved.subCategory ?? "",
+    target: isOnlineBrowse
+      ? ""
+      : searchParams.get("target") ?? opts.initialTarget ?? "",
+    regionMain: isOnlineBrowse ? "" : searchParams.get("regionMain") ?? "",
+    regionSub: isOnlineBrowse ? "" : searchParams.get("regionSub") ?? "",
+    priceMin: isOnlineBrowse ? "" : searchParams.get("priceMin") ?? "",
+    priceMax: isOnlineBrowse ? "" : searchParams.get("priceMax") ?? "",
+    features: isOnlineBrowse ? "" : searchParams.get("features") ?? "",
     sort: sortParam ?? "popular",
     catalogVariant: opts.catalogVariant ?? "media",
     networkType: searchParams.get("networkType") ?? opts.initialNetworkType ?? "",
   };
+}
+
+function appendBrowseChannelApiParams(
+  params: URLSearchParams,
+  browseChannel: BrowseChannelRoute,
+) {
+  params.set("browseChannel", browseChannel);
+  if (browseChannel === "online") {
+    params.set("catalogChannel", "online");
+  }
 }
 
 function applyBrowseFilterUrlState(
@@ -176,6 +196,7 @@ function applyBrowseFilterUrlState(
 
 /** `fetchMedia` URL 파라미터 직렬화 — SSR skip 비교용 */
 function buildMediaBrowseFetchKey(input: {
+  browseChannel: BrowseChannelRoute;
   query: string;
   networkBrowse: boolean;
   networkType: string;
@@ -192,6 +213,7 @@ function buildMediaBrowseFetchKey(input: {
   limit?: number;
 }): string {
   const params = new URLSearchParams();
+  appendBrowseChannelApiParams(params, input.browseChannel);
   if (input.query) params.set("q", input.query);
   if (input.networkBrowse) {
     params.set("features", input.features.trim() || "network");
@@ -213,16 +235,10 @@ function buildMediaBrowseFetchKey(input: {
 }
 
 function formatPriceLabel(
-  price?: number,
-  period?: string,
+  item: HomeCatalogMediaItem,
   locale = "ko-KR",
 ) {
-  if (!price) return null;
-  return formatMediaPriceWithPeriodSuffix(
-    price,
-    normalizeMediaPricePeriod(period),
-    locale,
-  );
+  return formatBrowseCardPriceLabel(item, locale);
 }
 
 function formatFeedFootTraffic(value?: number) {
@@ -253,6 +269,8 @@ interface Props {
   initialNetworkType?: string;
   /** `/media` 전용 — 고정 앱 셸(히어로/푸터 제거, 내부 스크롤). 이 라우트에서만 true */
   appShell?: boolean;
+  /** PR4 — `/media` vs `/media/online` catalog channel (default offline). */
+  browseChannel?: BrowseChannelRoute;
   /** 플래너 Step 4 임베드 — 동일 카드 + 플랜 담기 */
   plannerMode?: boolean;
   embedded?: boolean;
@@ -271,6 +289,7 @@ function MediaSearchPageInner({
   catalogVariant = "media",
   initialNetworkType,
   appShell: appShellEnabled = false,
+  browseChannel = "offline",
   plannerMode = false,
   embedded = false,
   plannerSelectedIds = [],
@@ -285,6 +304,8 @@ function MediaSearchPageInner({
   const toast = useAppToast();
   const { count: planCount } = usePlanCart();
 
+  const isOnlineBrowse = browseChannel === "online";
+
   const initialFromUrl = useMemo(
     () =>
       readBrowseFilterStateFromSearchParams(searchParams, {
@@ -292,6 +313,7 @@ function MediaSearchPageInner({
         initialCategory,
         initialTarget,
         initialNetworkType,
+        browseChannel,
       }),
     [
       searchParams,
@@ -299,6 +321,7 @@ function MediaSearchPageInner({
       initialCategory,
       initialTarget,
       initialNetworkType,
+      browseChannel,
     ],
   );
 
@@ -306,13 +329,14 @@ function MediaSearchPageInner({
   const mountSsrFetchKey = useMemo(
     () =>
       buildMediaBrowseFetchKey({
+        browseChannel,
         ...initialFromUrl,
         networkBrowse:
           discoveryFeaturesIncludeNetwork(initialFromUrl.features) ||
           catalogVariant === "network",
         page: 1,
       }),
-    [initialFromUrl, catalogVariant],
+    [initialFromUrl, catalogVariant, browseChannel],
   );
 
   const [query, setQuery] = useState(initialFromUrl.query);
@@ -419,6 +443,7 @@ function MediaSearchPageInner({
         initialCategory,
         initialTarget,
         initialNetworkType,
+        browseChannel,
       });
       applyBrowseFilterUrlState(next, browseFilterSettersRef.current);
       lastPushedBrowseQueryRef.current = buildMediaBrowseQueryString({
@@ -594,20 +619,27 @@ function MediaSearchPageInner({
         }
 
         const params = new URLSearchParams();
+        appendBrowseChannelApiParams(params, browseChannel);
         if (query) params.set("q", query);
-        if (networkBrowse) {
+        if (networkBrowse && !isOnlineBrowse) {
           params.set("features", features.trim() || "network");
           if (networkType) params.set("networkType", networkType);
         } else {
           if (mainCategory) params.set("mainCategory", mainCategory);
           if (subCategory) params.set("subCategory", subCategory);
-          if (target) params.set("target", target);
-          if (features.trim()) params.set("features", features.trim());
+          if (!isOnlineBrowse && target) params.set("target", target);
+          if (!isOnlineBrowse && features.trim()) {
+            params.set("features", features.trim());
+          }
         }
-        if (regionMain) params.set("regionMain", regionMain);
-        if (regionSub) params.set("regionSub", regionSub);
-        if (priceMin.trim()) params.set("priceMin", priceMin.trim());
-        if (priceMax.trim()) params.set("priceMax", priceMax.trim());
+        if (!isOnlineBrowse && regionMain) params.set("regionMain", regionMain);
+        if (!isOnlineBrowse && regionSub) params.set("regionSub", regionSub);
+        if (!isOnlineBrowse && priceMin.trim()) {
+          params.set("priceMin", priceMin.trim());
+        }
+        if (!isOnlineBrowse && priceMax.trim()) {
+          params.set("priceMax", priceMax.trim());
+        }
         params.set("sort", sort);
         params.set("page", String(opts.page));
         params.set("limit", String(PAGE_SIZE));
@@ -661,6 +693,8 @@ function MediaSearchPageInner({
       plannerMode,
       initialCatalogItems,
       embedded,
+      browseChannel,
+      isOnlineBrowse,
     ],
   );
 
@@ -788,6 +822,7 @@ function MediaSearchPageInner({
 
       if (generation === 1 && !plannerMode) {
         const currentKey = buildMediaBrowseFetchKey({
+          browseChannel,
           query,
           networkBrowse,
           networkType,
@@ -808,7 +843,7 @@ function MediaSearchPageInner({
       void fetchMedia({ page: 1, append: false }, generation);
     }, debounceMs);
     return () => clearTimeout(timer);
-  }, [fetchMedia, mountSsrFetchKey, plannerMode, query, networkBrowse, networkType, mainCategory, subCategory, target, regionMain, regionSub, priceMin, priceMax, features, sort]);
+  }, [fetchMedia, mountSsrFetchKey, plannerMode, browseChannel, query, networkBrowse, networkType, mainCategory, subCategory, target, regionMain, regionSub, priceMin, priceMax, features, sort]);
 
   const handleLoadMore = () => {
     if (loading || loadingMore || !hasMore) return;
@@ -818,7 +853,7 @@ function MediaSearchPageInner({
 
   const priceLocale = locale.startsWith("ko") ? "ko-KR" : "en-US";
   const renderPrice = (item: HomeCatalogMediaItem) =>
-    formatPriceLabel(item.price, item.pricePeriod, priceLocale);
+    formatPriceLabel(item, priceLocale);
 
   const getMediaHref = (item: HomeCatalogMediaItem) => mediaItemDetailPath(item);
 
@@ -933,7 +968,8 @@ function MediaSearchPageInner({
   const filtersBar = (
     <DiscoveryFilterBar
       isKo={isKo}
-      variant={networkBrowse ? "network" : "media"}
+      browseChannel={browseChannel}
+      variant={networkBrowse && !isOnlineBrowse ? "network" : "media"}
       networkType={networkType}
       onNetworkTypeChange={setNetworkType}
       query={query}
@@ -965,10 +1001,12 @@ function MediaSearchPageInner({
       mobileBottomBar={false}
       mobileStickyToolbar={appShell}
       listPageLayout={appShell}
-      onNavigateToMap={navigateToMap}
+      onNavigateToMap={isOnlineBrowse ? undefined : navigateToMap}
       mobileViewSegment={mobileViewSegment}
-      onMobileViewSegmentChange={handleMobileViewSegmentChange}
-      showHotspotRegions={appShell && !networkBrowse}
+      onMobileViewSegmentChange={
+        isOnlineBrowse ? undefined : handleMobileViewSegmentChange
+      }
+      showHotspotRegions={appShell && !networkBrowse && !isOnlineBrowse}
       onHotspotRegionSelect={handleHotspotRegionSelect}
       compareCount={plannerMode ? 0 : compareEntries.length}
       onCompareSummaryClick={plannerMode ? undefined : openCompareSummary}

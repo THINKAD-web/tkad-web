@@ -42,6 +42,8 @@ import {
   MEDIA_TARGET_CHIPS,
 } from "@/lib/media-discovery-filter-chips";
 import { MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
+import { ONLINE_BROWSE_MAIN_SET } from "@/lib/online-browse-mains";
+import type { BrowseChannelRoute } from "@/lib/browse-catalog-channel";
 import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
 import { NETWORK_BROWSE_TYPE_CHIPS } from "@/lib/media-network-types";
 import { MediaMapActiveFiltersBar } from "@/components/media-map/media-map-active-filters-bar";
@@ -231,6 +233,8 @@ export type MediaManualBrowseFiltersProps = {
   showHotspotRegions?: boolean;
   /** 지도: flyTo 전용(자동 bounds 검색 생략). 미지정 시 목록과 동일하게 region 필터만 적용 */
   onHotspotRegionSelect?: (regionMain: string, regionSub: string) => void;
+  /** PR4 — `/media` vs `/media/online` facet set */
+  browseChannel?: BrowseChannelRoute;
 };
 
 export function MediaManualBrowseFilters({
@@ -288,7 +292,9 @@ export function MediaManualBrowseFilters({
   onNetworkTypeChange,
   showHotspotRegions = false,
   onHotspotRegionSelect,
+  browseChannel = "offline",
 }: MediaManualBrowseFiltersProps) {
+  const isOnlineBrowse = browseChannel === "online";
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [regionPanelOpen, setRegionPanelOpen] = useState(false);
   /** 모바일 필터 바텀시트 (vaul) */
@@ -327,6 +333,7 @@ export function MediaManualBrowseFilters({
     useBrowseFilterOptionCounts({
       enabled: optionCountsEnabled,
       loadRequested: optionCountsLoadRequested,
+      browseChannel,
     });
 
   const requestOptionCountsPrefetch = useCallback(() => {
@@ -352,7 +359,11 @@ export function MediaManualBrowseFilters({
   const activeRegion = MEDIA_BROWSE_REGIONS.find((r) => r.id === regionMain);
 
   // 네트워크 매체는 `features=network` 로 전용 유형 칩 표시 — 일반 유형 목록의 network id 는 제외
-  const mediaTypeCategories = MEDIA_CATEGORIES.filter((m) => m.id !== "network");
+  const mediaTypeCategories = MEDIA_CATEGORIES.filter((m) => {
+    if (m.id === "network") return false;
+    if (isOnlineBrowse) return ONLINE_BROWSE_MAIN_SET.has(m.id);
+    return !ONLINE_BROWSE_MAIN_SET.has(m.id);
+  });
 
   /** 모바일 바텀시트 — 전체 축 카운트 (PR #207) */
   const activeFilterCount = [
@@ -1075,6 +1086,8 @@ export function MediaManualBrowseFilters({
   };
 
   const renderCollapsedAxes = (wrap: boolean, flatAdvanced = false) => {
+    if (isOnlineBrowse) return null;
+
     const chipRow = wrap ? chipRowWrap : chipRowScroll;
     const useUnifiedRegion =
       showHotspotRegions || filterIaListPage;

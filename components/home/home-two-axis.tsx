@@ -1,12 +1,10 @@
 import {
-  ExternalLink,
   Layers,
   MonitorSmartphone,
   PanelsTopLeft,
 } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 import { cn } from "@/lib/utils";
 
 /**
@@ -95,20 +93,16 @@ export async function HomeTwoAxis() {
             <p className="mt-3 flex-1 text-base text-gray-600 dark:text-white/65">
               {t("digitalDesc")}
             </p>
-            <a
-              href={THINKAD_DIGITAL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/media/online"
               className={cn(
                 ctaClass,
                 "border border-gray-300 bg-white text-gray-900 hover:bg-gray-50",
                 "dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5",
               )}
-              aria-label={t("digitalCtaExternal")}
             >
               {t("digitalCta")}
-              <ExternalLink className="h-3.5 w-3.5 opacity-60" aria-hidden />
-            </a>
+            </Link>
           </article>
 
           <article className={cardClass}>

@@ -9,6 +9,7 @@ import {
   LineChart,
   ListVideo,
   MapPin,
+  MonitorSmartphone,
   Palette,
   Search,
   Target,
@@ -25,6 +26,7 @@ export type PublicNavGroupId =
 
 export type PublicNavItemId =
   | "media-search"
+  | "online-media-search"
   | "map-search"
   | "campaign-targets"
   | "media-planner"
@@ -78,6 +80,7 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     icon: Compass,
     items: [
       { id: "media-search", href: "/media", icon: Search },
+      { id: "online-media-search", href: "/media/online", icon: MonitorSmartphone },
       { id: "map-search", href: "/media/map", icon: MapPin },
       { id: "campaign-targets", href: "/media/targets", icon: Target },
     ],

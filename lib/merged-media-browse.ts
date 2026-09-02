@@ -13,6 +13,10 @@ import type {
   PublicMediaQueryParams,
   PublicMediaSort,
 } from "@/lib/public-media-query";
+import {
+  resolveBrowseCatalogChannelFilter,
+  mediaItemMatchesBrowseCatalogChannel,
+} from "@/lib/browse-catalog-channel";
 
 export type MergedBrowseQuery = Pick<
   PublicMediaQueryParams,
@@ -35,6 +39,8 @@ export type MergedBrowseQuery = Pick<
   | "sort"
   | "page"
   | "limit"
+  | "browseChannel"
+  | "catalogChannel"
 >;
 
 export function publicMediaParamsToChipFilter(
@@ -147,8 +153,21 @@ export function filterMergedBrowseCatalog(
   catalog: MediaItem[],
   params: MergedBrowseQuery,
 ): MediaItem[] {
+  const channelFilter = resolveBrowseCatalogChannelFilter({
+    browseChannel: params.browseChannel ?? "offline",
+    mainCategory: params.mainCategory,
+    subCategory: params.subCategory,
+    category: params.category,
+    catalogChannel: params.catalogChannel,
+  });
+  const channelScoped =
+    channelFilter == null
+      ? catalog
+      : catalog.filter((m) =>
+          mediaItemMatchesBrowseCatalogChannel(m, channelFilter),
+        );
   const chipFiltered = filterMediaByDiscoveryChips(
-    catalog,
+    channelScoped,
     publicMediaParamsToChipFilter(params),
   );
   return applyMergedBrowseExtraFilters(chipFiltered, params);
