@@ -1,11 +1,8 @@
 import type { PartialPeriodRatesMap } from "@/lib/media-partial-period-rates";
 import type { CampaignMapMediaType, CampaignMapPin } from "@/lib/campaign-monitoring-mock";
+import type { CatalogChannel } from "@/lib/catalog-channel";
 import { getDataDrivenSimilarMedia } from "@/lib/media-similar";
-import {
-  filterDisplayableMediaImageUrls,
-  resolvePublicMediaImageUrl,
-  getPreferredMediaImageUrl,
-} from "@/lib/optimized-image-url";
+import { mediaDisplayLabelHaystack } from "@/lib/media-display-labels";
 
 export type MediaCaseStudyPhoto = {
   url: string;
@@ -78,6 +75,8 @@ export interface MediaItem {
   mediaMainCategory?: string;
   /** Browse 소분류 */
   mediaSubCategory?: string;
+  /** Catalog channel: offline OOH vs online ads (DB `catalog_channel`) */
+  catalogChannel?: CatalogChannel;
   /** Browse 시도 */
   regionMain?: string;
   /** Browse 세부 지역 */
@@ -1195,8 +1194,7 @@ export function matchesMediaTextQuery(m: MediaItem, lower: string): boolean {
     m.featuresEn,
     m.targetAge,
     m.networkSubtype,
-    typeLabels[m.type]?.ko,
-    typeLabels[m.type]?.en,
+    ...mediaDisplayLabelHaystack(m),
     normalizeRegionCode(m.region),
   ];
   const kf = m.keywordFilter;

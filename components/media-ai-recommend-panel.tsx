@@ -22,10 +22,10 @@ import {
 } from "lucide-react";
 import {
   type MediaItem,
-  typeLabels,
   getPrimaryMediaImageUrl,
   matchesMediaTextQuery,
 } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import {
   recommendMedia,
   filterCatalogByRegionCodes,
@@ -455,7 +455,7 @@ function AiResultCard({
   quoteLabel: string;
 }) {
   const m = scored.item;
-  const tl = typeLabels[m.type];
+  const typeLabel = resolveMediaDisplayPill(m, isKo ? "ko" : "en");
   const primaryUrl = getPrimaryMediaImageUrl(m);
   const [imgFailed, setImgFailed] = useState(false);
   const showPlaceholder = !primaryUrl || imgFailed;
@@ -520,7 +520,7 @@ function AiResultCard({
             compact ? "mx-auto" : "w-fit",
           )}
         >
-          {isKo ? tl.ko : tl.en}
+          {typeLabel}
         </Badge>
         <CardTitle
           className={cn(

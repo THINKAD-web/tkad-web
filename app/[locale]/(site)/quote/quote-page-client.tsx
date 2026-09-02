@@ -1,4 +1,5 @@
-"use client";
+ㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏ
+, "use client";
 
 import { useLocale, useTranslations } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
@@ -36,9 +37,9 @@ import {
   dedupeImageUrls,
   getPrimaryMediaImageUrl,
   matchesMediaTextQuery,
-  typeLabels,
   type MediaItem,
 } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { mediaToDocumentDetail } from "@/lib/document-media-detail";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
@@ -1662,7 +1663,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         <div className={MEDIA_CATALOG_COMPACT_GRID_CLASS}>
                           {pagedCatalog.map((media) => {
                             const checked = selectedIds.has(media.id);
-                            const typeLabel = typeLabels[media.type];
+                            const typeLabel = resolveMediaDisplayPill(
+                              media,
+                              isKo ? "ko" : "en",
+                            );
                             const quoteThumb =
                               dedupeImageUrls(media.sampleImages ?? [])[0]?.trim() ||
                               null;
@@ -1725,9 +1729,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 overflow-hidden sm:gap-1.5">
                                       <div className="flex min-w-0 flex-wrap items-center gap-1 sm:gap-1.5">
                                         <span className="max-w-full shrink border-2 border-border bg-card px-1.5 py-0 tkad-type-label text-foreground sm:tkad-type-note">
-                                          {isKo
-                                            ? (typeLabel?.ko ?? media.type)
-                                            : (typeLabel?.en ?? media.type)}
+                                          {typeLabel}
                                         </span>
                                         {popularIds.has(media.id) ? (
                                           <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-accent bg-accent px-1.5 py-0 tkad-type-label text-white">

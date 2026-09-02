@@ -4,7 +4,8 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Flame } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
-import { dedupeImageUrls, typeLabels, type MediaItem } from "@/lib/media-data";
+import { dedupeImageUrls, type MediaItem } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   formatMediaPriceWonWithSymbol,
@@ -87,9 +88,7 @@ export function MediaCatalogCompactLinkRow({
       <div className="relative z-[1] flex min-w-0 flex-1 flex-col items-start justify-center gap-1 text-card-foreground">
         <div className="flex min-w-0 flex-wrap items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
           <span className="text-card-foreground">
-            [ {isKo
-              ? (typeLabels[media.type]?.ko ?? media.type)
-              : (typeLabels[media.type]?.en ?? media.type)} ]
+            [ {resolveMediaDisplayPill(media, isKo ? "ko" : "en")} ]
           </span>
           {popularIds?.has(media.id) ? (
             <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-accent bg-accent px-1.5 py-[2px] text-[9px] font-bold tracking-[0.18em] text-accent-foreground">

@@ -6,7 +6,8 @@ import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaTrustGradeBadges } from "@/components/media/media-trust-grade-badges";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
-import { dedupeImageUrls, typeLabels } from "@/lib/media-data";
+import { dedupeImageUrls } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   formatMediaPriceWonWithSymbol,
@@ -43,9 +44,7 @@ export function MediaCatalogListCard({
   const primaryThumb =
     dedupeImageUrls(media.sampleImages ?? [])[0]?.trim() || null;
 
-  const typeLabel = isKo
-    ? (typeLabels[media.type]?.ko ?? media.type)
-    : (typeLabels[media.type]?.en ?? media.type);
+  const typeLabel = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
 
   const isNetwork = media.catalogSource === "network";
   const networkSites = media.networkTotalLocations ?? 0;

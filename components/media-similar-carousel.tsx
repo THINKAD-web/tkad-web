@@ -12,8 +12,7 @@ import {
   getSimilarMediaFromCatalog,
   haversineKm,
   type SimilarSortKey,
-  typeLabels,
-} from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 
@@ -167,8 +166,7 @@ export default function MediaSimilarCarousel({
         )}
       >
         {displayItems.map((m) => {
-          const typeLabel =
-            (isKo ? typeLabels[m.type]?.ko : typeLabels[m.type]?.en) ?? "";
+          const typeLabel = resolveMediaDisplayPill(m, isKo ? "ko" : "en");
           const distanceKm =
             sortable && sortBy === "distance"
               ? haversineKm(sortable.currentMedia, m)

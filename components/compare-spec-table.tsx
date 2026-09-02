@@ -5,7 +5,7 @@ import { Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import type { MediaItem } from "@/lib/media-data";
-import { typeLabels } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import {
   resolveCpmWon,
   resolveMonthlyImpressions,
@@ -204,7 +204,7 @@ export function CompareSpecTable({
                 </p>
               </th>
               {items.map((m, idx) => {
-                const typeLabel = typeLabels[m.type];
+                const typeLabel = resolveMediaDisplayPill(m, isKo ? "ko" : "en");
                 const stripe = COLUMN_STRIPES[idx % COLUMN_STRIPES.length];
                 return (
                   <th
@@ -226,7 +226,7 @@ export function CompareSpecTable({
                       />
                       <div className="min-w-0 flex-1">
                         <p className="tkad-type-label text-muted-foreground">
-                          {isKo ? (typeLabel?.ko ?? m.type) : (typeLabel?.en ?? m.type)}
+                          {typeLabel}
                         </p>
                         <Link
                           href={mediaItemDetailPath(m)}

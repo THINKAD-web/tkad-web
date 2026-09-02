@@ -1,5 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
-import { typeLabels } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { categoryLabel } from "@/lib/media-categories";
 import {
   catalogPriceFieldToWon,
@@ -57,8 +57,7 @@ export function collectMediaSeoKeywordStrings(
   pushMany(media.tags);
   if (media.subCategory) push(media.subCategory);
 
-  const tl = typeLabels[media.type];
-  if (tl) push(isKo ? tl.ko : tl.en);
+  push(resolveMediaDisplayPill(media, isKo ? "ko" : "en"));
 
   if (media.keywordFilter) {
     pushMany(media.keywordFilter.searchKeywords);
@@ -123,9 +122,9 @@ function resolveMediaSeoTypeLabel(media: MediaItem, locale: string): string {
     if (label && label !== catSlug) return label;
   }
   if (media.subCategory?.trim()) return media.subCategory.trim();
-  const tl = typeLabels[media.type];
-  if (tl) return isKo ? tl.ko : tl.en;
-  return media.type || (isKo ? "옥외광고" : "OOH");
+  const pill = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
+  if (pill) return pill;
+  return isKo ? "옥외광고" : "OOH";
 }
 
 function resolveMediaSeoDistrict(media: MediaItem, locale: string): string {

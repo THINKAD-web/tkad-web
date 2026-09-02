@@ -1,5 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
-import { typeLabels } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import {
   buildMediaPageTitle,
   formatMediaSeoMonthlyPriceLabel,
@@ -51,8 +51,7 @@ export function buildMediaOgTitle(media: MediaItem, locale: string): string {
 export function buildMediaOgDescription(media: MediaItem, locale: string): string {
   const isKo = locale === "ko" || locale.startsWith("ko");
   const region = media.region || media.city || "";
-  const tl = typeLabels[media.type];
-  const typeStr = tl ? (isKo ? tl.ko : tl.en) : media.type || "";
+  const typeStr = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
   const address = isKo
     ? media.location
     : media.locationEn || media.location || "";
@@ -72,7 +71,6 @@ export function buildMediaOgShortDescription(
 ): string {
   const isKo = locale === "ko" || locale.startsWith("ko");
   const region = media.region || media.city || "";
-  const tl = typeLabels[media.type];
-  const typeStr = tl ? (isKo ? tl.ko : tl.en) : media.type || "";
+  const typeStr = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
   return `${region} ${typeStr} ${isKo ? "광고 매체" : "OOH media"}`.trim();
 }

@@ -12,7 +12,7 @@ import type { PublishedReportListRow } from "@/lib/report-queries";
 import { listPublishedReports } from "@/lib/report-queries";
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
 import { matchesTextQuery, normalizeSearchQuery } from "@/lib/search-text";
-import { typeLabels } from "@/lib/media-data";
+import { mediaDisplayLabelHaystack } from "@/lib/media-display-labels";
 import {
   flattenMediaCategories,
   TARGET_CATEGORIES,
@@ -112,13 +112,13 @@ function searchMedia(
     .filter((m) => matchesMediaTextQuery(m, lower))
     .slice(0, limit)
     .map((m) => {
-      const typeLabel = typeLabels[m.type];
+      const [pillKo, pillEn] = mediaDisplayLabelHaystack(m);
       return {
         kind: "media" as const,
         id: m.id,
         title: isKo ? m.name : m.nameEn || m.name,
         subtitle: [
-          isKo ? typeLabel?.ko : typeLabel?.en,
+          isKo ? pillKo : pillEn,
           m.district || m.region,
         ]
           .filter(Boolean)

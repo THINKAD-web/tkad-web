@@ -32,6 +32,7 @@ test("buildBrowseFilterOptionCounts returns keys for taxonomy options", () => {
     }),
   ];
   const counts = buildBrowseFilterOptionCounts(items);
+  assert.ok(counts.mainCategory.ooh >= 1);
   assert.ok(counts.subCategory["ooh/billboard"] >= 1);
   assert.ok(counts.regionSub["seoul/seoul_gangnam"] >= 1);
   assert.equal(counts.networkFeature, 1);
@@ -40,6 +41,7 @@ test("buildBrowseFilterOptionCounts returns keys for taxonomy options", () => {
 test("buildBrowseFilterOptionCounts empty catalog yields zero networkFeature", () => {
   const counts = buildBrowseFilterOptionCounts([]);
   assert.equal(counts.networkFeature, 0);
+  assert.equal(counts.mainCategory.search ?? 0, 0);
   assert.equal(Object.keys(counts.subCategory).length > 0, true);
   assert.equal(Object.keys(counts.regionSub).length > 0, true);
 });

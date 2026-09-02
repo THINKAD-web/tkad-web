@@ -10,7 +10,7 @@ import {
 } from "@/lib/media-catalog-map";
 import type { MediaItem } from "@/lib/media-data";
 import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
-import { typeLabels } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { cn } from "@/lib/utils";
 
@@ -34,8 +34,7 @@ export function QuoteMediaSelectCard({
 }: Props) {
   const catalog = mapMediaItemToHomeCatalog(media);
   const thumb = catalogThumbnailImageProps(catalog.thumbnailUrl);
-  const typeLabel =
-    typeLabels[media.type]?.[isKo ? "ko" : "en"] ?? media.type;
+  const typeLabel = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
   const metaLine = [catalog.region, typeLabel].filter(Boolean).join(" · ");
   const locale = isKo ? "ko-KR" : "en-US";
   const priceLabel =

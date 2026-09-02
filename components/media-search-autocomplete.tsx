@@ -5,9 +5,9 @@ import { Search, X } from "lucide-react";
 import { useCompositionControlledInput } from "@/hooks/use-composition-controlled-input";
 import {
   matchesMediaTextQuery,
-  typeLabels,
   type MediaItem,
 } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatMediaDisplayPrice } from "@/lib/media-price-format";
@@ -218,7 +218,7 @@ export default function MediaSearchAutocomplete({
                 </div>
                 <div className="text-xs text-muted-foreground truncate">
                   {formatMediaLocationShort(media, isKo)} ·{" "}
-                  {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
+                  {resolveMediaDisplayPill(media, isKo ? "ko" : "en")}
                 </div>
               </div>
               <div className="shrink-0 text-right">

@@ -2,8 +2,8 @@ import {
   dedupeImageUrls,
   getPrimaryMediaImageUrl,
   type MediaItem,
-  typeLabels,
 } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import {
   NETWORK_CATALOG_TYPE_LABELS,
   resolveNetworkCatalogType,
@@ -41,7 +41,7 @@ export function mapMediaItemToHomeCatalog(item: MediaItem): HomeCatalogMediaItem
           }
           return catalogLb.ko;
         })()
-      : (typeLabels[item.type]?.ko ?? item.type);
+      : resolveMediaDisplayPill(item, "ko");
   const display = resolveMediaDisplayPrice(item);
   // 표시가·CPM 분자 공통 기준 — 30일 등록 상품가 (선형 환산 아님)
   const product = resolveMediaPriceForDisplay(item, 30);

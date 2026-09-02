@@ -17,7 +17,7 @@ import {
   subscribeRecentlyViewedChanged,
 } from "@/lib/recently-viewed";
 import { type MediaItem } from "@/lib/media-data";
-import { typeLabels } from "@/lib/media-data";
+import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 
 const DISPLAY_MAX = RECENTLY_VIEWED_MAX;
 
@@ -107,8 +107,7 @@ export default function RecentlyViewedMedia({ locale }: Props) {
         aria-label={tMedia("recentlyViewed")}
       >
         {items.slice(0, DISPLAY_MAX).map((m) => {
-          const typeLabel =
-            (isKo ? typeLabels[m.type]?.ko : typeLabels[m.type]?.en) ?? m.type;
+          const typeLabel = resolveMediaDisplayPill(m, isKo ? "ko" : "en");
           return (
             <Link
               key={m.id}
