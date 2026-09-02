@@ -2,6 +2,11 @@ import type { PartialPeriodRatesMap } from "@/lib/media-partial-period-rates";
 import type { CampaignMapMediaType, CampaignMapPin } from "@/lib/campaign-monitoring-mock";
 import type { CatalogChannel } from "@/lib/catalog-channel";
 import { getDataDrivenSimilarMedia } from "@/lib/media-similar";
+import {
+  filterDisplayableMediaImageUrls,
+  resolvePublicMediaImageUrl,
+  getPreferredMediaImageUrl,
+} from "@/lib/optimized-image-url";
 import { mediaDisplayLabelHaystack } from "@/lib/media-display-labels";
 
 export type MediaCaseStudyPhoto = {
@@ -93,8 +98,8 @@ export interface MediaItem {
   nearbyLandmarks?: string;
   /** ISO 3166-1 alpha-2 — JJ-1 JP ¥ 표시 */
   country?: string;
-  type: string;
-  price: number;
+  type: string | null;
+  price: number | null;
   /** fixed | quote_only — 건별 견적(외벽 등) */
   pricingMode?: import("@/lib/media-pricing-mode").MediaPricingMode;
   /** 집행 단가 기준: 월·2주·주·일 */

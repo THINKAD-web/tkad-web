@@ -171,7 +171,7 @@ export async function createMediaFromCsvRow(
       district: filled.district,
       addressVerified: filled.addressVerified,
       isActive: false,
-      catalogChannel: resolveCatalogChannelForMediaWrite({}),
+      catalogChannel: resolveCatalogChannelForMediaWrite({ type: catalogType }),
     },
   });
 

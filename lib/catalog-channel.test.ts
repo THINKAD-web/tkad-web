@@ -4,10 +4,11 @@ import {
   canonicalCatalogChannel,
   CATALOG_CHANNEL_OFFLINE,
   CATALOG_CHANNEL_ONLINE,
+  inferOfflineFromDisplayType,
   isValidCatalogChannel,
   normalizeCatalogChannel,
-  getNullMainCatalogChannelFallbackHitCount,
   resolveCatalogChannelForMediaWrite,
+  getNullMainCatalogChannelFallbackHitCount,
 } from "./catalog-channel.ts";
 
 test("catalog channel SSOT", () => {
@@ -48,5 +49,19 @@ test("resolveCatalogChannelForMediaWrite", () => {
       mediaMainCategory: "ooh",
     }),
     CATALOG_CHANNEL_ONLINE,
+  );
+});
+
+test("inferOfflineFromDisplayType", () => {
+  assert.equal(inferOfflineFromDisplayType("dooh"), CATALOG_CHANNEL_OFFLINE);
+  assert.equal(inferOfflineFromDisplayType("mobile"), CATALOG_CHANNEL_OFFLINE);
+  assert.equal(inferOfflineFromDisplayType(null), null);
+  assert.equal(inferOfflineFromDisplayType("search"), null);
+});
+
+test("resolveCatalogChannelForMediaWrite infers offline from type", () => {
+  assert.equal(
+    resolveCatalogChannelForMediaWrite({ type: "static" }),
+    CATALOG_CHANNEL_OFFLINE,
   );
 });

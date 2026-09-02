@@ -186,7 +186,9 @@ export async function approveMediaApplication(
         isActive: true,
         availability: "available",
         ownerUserId,
-        catalogChannel: resolveCatalogChannelForMediaWrite({}),
+        catalogChannel: resolveCatalogChannelForMediaWrite({
+          type: base.type,
+        }),
       },
     });
     await tx.mediaPriceSnapshot.create({

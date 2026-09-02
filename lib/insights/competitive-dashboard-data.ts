@@ -125,7 +125,7 @@ async function loadRawEvents(since: Date): Promise<RawEvent[]> {
     events.push({
       industry: industryFromText(text),
       region: e.media.region?.trim() || "기타",
-      mediaType: e.media.type ?? "digital",
+      mediaType: e.media.type?.trim() || "unknown",
       month: (e.periodStart ?? e.createdAt).getMonth() + 1,
       durationDays: d,
     });
@@ -148,7 +148,7 @@ async function loadRawEvents(since: Date): Promise<RawEvent[]> {
     events.push({
       industry: industryFromText(b.requesterName ?? ""),
       region: b.media.region?.trim() || "기타",
-      mediaType: b.media.type ?? "digital",
+      mediaType: b.media.type?.trim() || "unknown",
       month: b.startsAt.getMonth() + 1,
       durationDays: d,
     });

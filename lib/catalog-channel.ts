@@ -38,6 +38,20 @@ export function canonicalCatalogChannel(
   return normalizeCatalogChannel(raw) ?? fallback;
 }
 
+const OFFLINE_DISPLAY_TYPES = new Set(["dooh", "static", "mobile"]);
+
+/**
+ * NULL-main bulk OOH paths: infer offline from display mode when type is set.
+ * Does NOT detect online intent — explicit channel or browse main required.
+ */
+export function inferOfflineFromDisplayType(
+  type: string | null | undefined,
+): CatalogChannel | null {
+  const t = type?.trim().toLowerCase();
+  if (!t) return null;
+  return OFFLINE_DISPLAY_TYPES.has(t) ? CATALOG_CHANNEL_OFFLINE : null;
+}
+
 /**
  * NULL-main → offline fallback hits since process start.
  * PR0 `getLegacyCatalogMediaTypeAliasHitCount()` 패턴 — 운영에서 이 경로 빈도 관측용.
@@ -77,10 +91,13 @@ function recordNullMainCatalogChannelFallback(input: {
 export function resolveCatalogChannelForMediaWrite(input: {
   catalogChannel?: string | null;
   mediaMainCategory?: string | null;
+  type?: string | null;
 }): CatalogChannel {
   const explicit = normalizeCatalogChannel(input.catalogChannel);
   if (explicit) return explicit;
   if (isOnlineBrowseMain(input.mediaMainCategory)) return CATALOG_CHANNEL_ONLINE;
+  const fromType = inferOfflineFromDisplayType(input.type);
+  if (fromType) return fromType;
   const main = input.mediaMainCategory?.trim();
   if (!main) {
     recordNullMainCatalogChannelFallback(input);

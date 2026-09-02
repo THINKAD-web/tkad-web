@@ -12,6 +12,7 @@ import {
   normalizeCatalogMediaType,
 } from "@/lib/media-auto-categorize";
 import { resolveCatalogChannelForMediaWrite } from "@/lib/catalog-channel";
+import { resolveMediaCatalogWriteShape } from "@/lib/media-catalog-invariants";
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
 import { normalizePartialPeriodRatesForPrisma } from "@/lib/admin-partial-period-rates";
 import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverage-codes";
@@ -177,19 +178,27 @@ export async function POST(request: NextRequest) {
   const location = String(body.location ?? "").trim();
   const region = String(body.region ?? "").trim();
   const typeRaw = String(body.type ?? "").trim();
-  const type = normalizeCatalogMediaType(typeRaw);
-  const price = Number(body.price ?? 0);
-  if (!name || !location || !region || !typeRaw) {
-    return json({ error: "name, location, region, type required" }, 400);
+  const mediaMainCategoryEarly = optStr(body.mediaMainCategory);
+
+  if (!name || !location || !region) {
+    return json({ error: "name, location, region required" }, 400);
   }
-  if (!type) {
-    return json(
-      {
-        error: `type must be one of: ${CATALOG_MEDIA_TYPES.join(", ")} (legacy alias: digital → dooh)`,
-      },
-      400,
-    );
+
+  const catalogChannelResolved = resolveCatalogChannelForMediaWrite({
+    catalogChannel: optStr(body.catalogChannel),
+    mediaMainCategory: mediaMainCategoryEarly,
+    type: typeRaw || null,
+  });
+  const writeShape = resolveMediaCatalogWriteShape({
+    catalogChannel: catalogChannelResolved,
+    typeRaw,
+    priceRaw: body.price,
+  });
+  if (!writeShape.ok) {
+    return json({ error: writeShape.error }, 400);
   }
+  const type = writeShape.data.type;
+  const price = writeShape.data.price;
 
   const covRaw =
     type === "mobile"
@@ -215,8 +224,8 @@ export async function POST(request: NextRequest) {
     nameEn: String(body.nameEn ?? "").trim() || null,
     location,
     region,
-    type,
-    price: Number.isFinite(price) ? Math.round(price) : 0,
+    type: type,
+    price: price,
     image: String(body.image ?? "").trim() || null,
     width: String(body.width ?? "").trim() || null,
     height: String(body.height ?? "").trim() || null,
@@ -467,10 +476,7 @@ export async function POST(request: NextRequest) {
     if (locNorm.district) data.district = locNorm.district;
     }
 
-    data.catalogChannel = resolveCatalogChannelForMediaWrite({
-      catalogChannel: optStr(body.catalogChannel),
-      mediaMainCategory: data.mediaMainCategory as string | null | undefined,
-    });
+    data.catalogChannel = catalogChannelResolved;
 
     const db = getPrisma();
     if (!data.slug) {
@@ -491,13 +497,15 @@ export async function POST(request: NextRequest) {
     const [withCov] = await attachCoverageDistrictCodesById(db, [media]);
     const [mediaForClient] = await attachInstallLocationsById(db, [withCov]);
 
-    await db.mediaPriceSnapshot.create({
-      data: {
-        mediaId: media.id,
-        price: media.price,
-        note: "initial",
-      },
-    });
+    if (media.price != null) {
+      await db.mediaPriceSnapshot.create({
+        data: {
+          mediaId: media.id,
+          price: media.price,
+          note: "initial",
+        },
+      });
+    }
 
     if (isAdminAuthDebugEnabled()) {
       console.log("[admin-api] media POST persisted", {

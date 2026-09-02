@@ -29,6 +29,8 @@ export interface PlanCartItem {
   mediaId: string;
   mediaName: string;
   mediaType: string;
+  /** A7 — snapshot at add time; existing rows implicit offline */
+  catalogChannel?: string;
   region: string;
   price: number;
   /** 수량(대·기 등) — 미지정 시 카탈로그 기본값 */
@@ -161,6 +163,10 @@ function normalizeItem(raw: unknown): PlanCartItem | null {
     mediaId: o.mediaId,
     mediaName: o.mediaName,
     mediaType: typeof o.mediaType === "string" ? o.mediaType : "",
+    catalogChannel:
+      typeof o.catalogChannel === "string" && o.catalogChannel.trim()
+        ? o.catalogChannel.trim()
+        : undefined,
     region: typeof o.region === "string" ? o.region : "",
     price: typeof o.price === "number" && Number.isFinite(o.price) ? o.price : 0,
     quantity:

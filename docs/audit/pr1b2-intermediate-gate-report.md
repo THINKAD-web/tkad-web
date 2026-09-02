@@ -140,7 +140,7 @@ node --import tsx --test lib/media-display-labels.test.ts lib/catalog-channel.te
 
 1. **Hotfix main**: `home-landing-media-grid.ts` import → restore prod Ready
 2. **2-1** `quote-calculator.ts:131` — separate commit, explicit error not dooh fallback
-3. **2-3** type nullable → **2-4** price → **2-5** write path → **2-6** invariants → **2-7** A7
+3. **2-3** type nullable → **2-4** price → **2-6** invariants → **2-5** write path → **2-7** A7
 4. Dry-run report → Preview → rollback → validation → merge → prod
 
 **Do not seed 23 online rows** (PR3).

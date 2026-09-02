@@ -97,6 +97,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         catalogChannel: resolveCatalogChannelForMediaWrite({
           catalogChannel: source.catalogChannel,
           mediaMainCategory: source.mediaMainCategory,
+          type: source.type,
         }),
       },
     });

@@ -12,6 +12,7 @@ import {
   getSimilarMediaFromCatalog,
   haversineKm,
   type SimilarSortKey,
+} from "@/lib/media-data";
 import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatMediaDisplayPrice } from "@/lib/media-price-format";
