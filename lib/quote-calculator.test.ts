@@ -4,44 +4,122 @@ import {
   calculateQuote,
   QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE,
 } from "@/lib/quote-calculator";
-import { BUDGET_PRICING_NOT_IMPLEMENTED } from "@/lib/pricing/budget-pricing";
+import {
+  BUDGET_PRICING_BELOW_MIN,
+  BUDGET_PRICING_BUDGET_REQUIRED,
+} from "@/lib/pricing/budget-pricing";
 import { parseQuoteMediaSelections } from "@/lib/quote-media-selections";
 import { computeNetworkMonthlyPrice } from "@/lib/media-network-public";
 
 const start = new Date("2025-06-01T12:00:00");
 const end = new Date("2025-06-30T12:00:00");
 
-test("calculateQuote throws BudgetPricing not-implemented for online catalog", () => {
+const onlineCalculableMedia = {
+  id: "online-search-1",
+  name: "검색광고 샘플",
+  location: "서울",
+  type: null,
+  catalogChannel: "online",
+  price: 0,
+  onlineSpec: {
+    platform: "naver",
+    minBudget: 500_000,
+    cpcMin: 100,
+    cpcMax: 500,
+    cpmMin: null,
+    cpmMax: null,
+  },
+};
+
+test("calculateQuote — online calculable requires lineTotalWon in selections", () => {
   assert.throws(
     () =>
       calculateQuote({
-        media: [
-          {
-            id: "online-search-1",
-            name: "검색광고 샘플",
-            location: "서울",
-            type: null,
-            catalogChannel: "online",
-            price: 0,
-            onlineSpec: {
-              platform: "naver",
-              minBudget: 500_000,
-              cpcMin: 100,
-              cpcMax: 500,
-              cpmMin: null,
-              cpmMax: null,
-            },
-          },
-        ],
+        media: [onlineCalculableMedia],
         startDate: start,
         endDate: end,
       }),
     (err: unknown) => {
       assert.ok(err instanceof Error);
-      assert.match(err.message, new RegExp(BUDGET_PRICING_NOT_IMPLEMENTED));
-      assert.match(err.message, /mediaId=online-search-1/);
-      assert.match(err.message, /PR2 미구현/);
-      assert.match(err.message, /platform=naver/);
+      assert.match(err.message, new RegExp(BUDGET_PRICING_BUDGET_REQUIRED));
+      return true;
+    },
+  );
+});
+
+test("calculateQuote — online calculable with budget via lineTotalWon (A-plan)", () => {
+  const budgetWon = 1_000_000;
+  const result = calculateQuote({
+    media: [onlineCalculableMedia],
+    startDate: start,
+    endDate: end,
+    mediaSelections: [
+      {
+        mediaId: "online-search-1",
+        priceOptionIndex: 0,
+        optionLabel: null,
+        optionPriceWon: budgetWon,
+        lineTotalWon: budgetWon,
+      },
+    ],
+  });
+  assert.equal(result.lines[0]!.lineSupplyWon, budgetWon);
+  assert.equal(result.supplyWon, budgetWon);
+  assert.ok(result.lines[0]!.impressions > 0);
+});
+
+test("calculateQuote — online inquiry-only returns zero line", () => {
+  const result = calculateQuote({
+    media: [
+      {
+        ...onlineCalculableMedia,
+        id: "online-inquiry-1",
+        onlineSpec: {
+          platform: "Meta",
+          minBudget: 1_000_000,
+          cpcMin: null,
+          cpcMax: null,
+          cpmMin: null,
+          cpmMax: null,
+        },
+      },
+    ],
+    startDate: start,
+    endDate: end,
+    mediaSelections: [
+      {
+        mediaId: "online-inquiry-1",
+        priceOptionIndex: 0,
+        optionLabel: null,
+        optionPriceWon: 0,
+        lineTotalWon: 0,
+      },
+    ],
+  });
+  assert.equal(result.lines[0]!.lineSupplyWon, 0);
+  assert.equal(result.totalWon, 0);
+});
+
+test("calculateQuote — online budget below minBudget throws", () => {
+  assert.throws(
+    () =>
+      calculateQuote({
+        media: [onlineCalculableMedia],
+        startDate: start,
+        endDate: end,
+        mediaSelections: [
+          {
+            mediaId: "online-search-1",
+            priceOptionIndex: 0,
+            optionLabel: null,
+            optionPriceWon: 100_000,
+            lineTotalWon: 100_000,
+          },
+        ],
+      }),
+    (err: unknown) => {
+      assert.ok(err instanceof Error);
+      assert.match(err.message, new RegExp(BUDGET_PRICING_BELOW_MIN));
       return true;
     },
   );

@@ -40,6 +40,7 @@ import {
 } from "@/lib/media-quantity";
 import { resolveQuoteUnitsForPriceOption } from "@/lib/quote-entry-quantity";
 import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
+import { OnlineMediaStickyQuoteSection } from "@/components/media-detail/online-media-sticky-quote-section";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -183,6 +184,25 @@ export function MediaDetailStickyQuotePanel({
   const inputCls =
     "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-[color:var(--qp-accent)]/50 focus:ring-2 focus:ring-[color:var(--qp-accent)]/20";
 
+  if (isOnline) {
+    return (
+      <aside
+        className={cn(
+          "w-full max-h-[calc(100dvh-5.5rem)] overflow-y-auto overscroll-contain rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-5 shadow-lg",
+          className,
+        )}
+      >
+        <OnlineMediaStickyQuoteSection
+          media={media}
+          isKo={isKo}
+          displayName={displayName}
+          contactHref={contactHref}
+          inputCls={inputCls}
+        />
+      </aside>
+    );
+  }
+
   return (
     <aside
       className={cn(
@@ -320,16 +340,7 @@ export function MediaDetailStickyQuotePanel({
         </div>
 
         <div className="space-y-3">
-          {isOnline ? (
-            <Link
-              href={contactHref}
-              data-accent-keep="true"
-              className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-3 text-center text-sm font-bold text-white"
-            >
-              {isKo ? "문의하기" : "Contact us"}
-            </Link>
-          ) : (
-            <>
+          <>
               <Link
                 href={quoteHref}
                 data-accent-keep="true"
@@ -396,8 +407,7 @@ export function MediaDetailStickyQuotePanel({
               </div>
             </div>
           </details>
-            </>
-          )}
+          </>
         </div>
       </div>
     </aside>
