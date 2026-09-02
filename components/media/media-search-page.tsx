@@ -235,16 +235,10 @@ function buildMediaBrowseFetchKey(input: {
 }
 
 function formatPriceLabel(
-  price?: number,
-  period?: string,
+  item: HomeCatalogMediaItem,
   locale = "ko-KR",
 ) {
-  if (!price) return null;
-  return formatMediaPriceWithPeriodSuffix(
-    price,
-    normalizeMediaPricePeriod(period),
-    locale,
-  );
+  return formatBrowseCardPriceLabel(item, locale);
 }
 
 function formatFeedFootTraffic(value?: number) {
@@ -859,7 +853,7 @@ function MediaSearchPageInner({
 
   const priceLocale = locale.startsWith("ko") ? "ko-KR" : "en-US";
   const renderPrice = (item: HomeCatalogMediaItem) =>
-    formatPriceLabel(item.price, item.pricePeriod, priceLocale);
+    formatPriceLabel(item, priceLocale);
 
   const getMediaHref = (item: HomeCatalogMediaItem) => mediaItemDetailPath(item);
 
