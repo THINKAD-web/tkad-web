@@ -7,7 +7,7 @@ import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
 export function planCartItemFromCatalog(
   item: Pick<
     HomeCatalogMediaItem,
-    "id" | "name" | "type" | "region" | "price" | "thumbnailUrl"
+    "id" | "name" | "type" | "region" | "price" | "thumbnailUrl" | "catalogChannel"
   >,
   addedFrom: PlanCartAddedFrom,
 ): Omit<PlanCartItem, "addedAt"> {
@@ -15,6 +15,7 @@ export function planCartItemFromCatalog(
     mediaId: item.id,
     mediaName: item.name,
     mediaType: item.type ?? "",
+    catalogChannel: canonicalCatalogChannel(item.catalogChannel),
     region: item.region ?? "",
     price: item.price ?? 0,
     thumbnailUrl: item.thumbnailUrl,

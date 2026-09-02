@@ -107,6 +107,23 @@ test("units 는 단일 매체일 때만 적용한다 (구 동작 유지)", () =>
   ]);
 });
 
+test("온라인 매체는 handoff mix 에서 제외한다 (PR3)", () => {
+  const online = {
+    ...media("online-1"),
+    catalogChannel: "online",
+    type: null,
+    price: null,
+  } as unknown as MediaItem;
+  const catalog = [media("a"), online];
+  const r = resolveHandoffMix({
+    catalog,
+    mediaIds: ["a", "online-1"],
+    units: null,
+  });
+  assert.deepEqual(r.lines, [{ mediaId: "a", units: 1 }]);
+  assert.deepEqual(r.blockedOnline, ["online-1"]);
+});
+
 test("중복 매체 id 는 한 번만 담는다", () => {
   const r = resolveHandoffMix({
     catalog: CATALOG,

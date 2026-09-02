@@ -2,6 +2,7 @@
  * JJ-1 — 해외 매체 가격 **표시** 전용 (저장·견적·결제는 KRW SSOT 유지).
  */
 import { normalizeMediaCountry, type MediaCountryCode } from "@/lib/media-country";
+import { isPricingUnavailable } from "@/lib/pricing-unavailable";
 import {
   catalogPriceFieldToWon,
   formatCpmKrw,
@@ -155,8 +156,12 @@ export function formatMediaCostEstimateShort(
   won: number,
   country: string | null | undefined,
   locale: string,
+  media?: { catalogChannel?: string | null; type?: string | null; price?: number | null },
 ): string {
   const isKo = locale.startsWith("ko");
+  if (media && isPricingUnavailable(media)) {
+    return mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
+  }
   if (isJapanDisplayCountry(country)) {
     const yen = formatMediaPriceForDisplay(won, country, locale);
     return isKo ? `약 ${yen}` : `~${yen}`;

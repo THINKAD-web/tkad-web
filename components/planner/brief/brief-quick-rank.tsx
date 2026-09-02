@@ -22,6 +22,7 @@ import {
   briefRankingBasisLabel,
 } from "@/lib/planner/brief/scoring";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
+import { isQuoteWizardSelectableMedia } from "@/lib/pricing-unavailable";
 import { BriefMediaCard } from "@/components/planner/brief/brief-media-card";
 import { partitionScoredByBudget } from "@/lib/planner/brief/budget-ranking";
 import { BudgetFilterBar } from "@/components/planner/brief/budget-filter-bar";
@@ -39,9 +40,14 @@ export function BriefQuickRankPanel({
   const store = useBriefStore();
   const ready = briefQuickRequiredStatus(store);
 
+  const selectableCatalog = useMemo(
+    () => catalog.filter(isQuoteWizardSelectableMedia),
+    [catalog],
+  );
+
   const candidates = useMemo(
-    () => filterBriefCatalogByRegion(catalog, store.regionCodes),
-    [catalog, store.regionCodes],
+    () => filterBriefCatalogByRegion(selectableCatalog, store.regionCodes),
+    [selectableCatalog, store.regionCodes],
   );
 
   const scored = useMemo(

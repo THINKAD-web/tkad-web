@@ -10,6 +10,7 @@
 
 import type { MediaItem } from "@/lib/media-data";
 import type { PlanCart } from "@/lib/plan-cart";
+import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
 import { planCartToCampaignQuantities } from "@/lib/plan-cart-pricing";
 import {
   isPlannerCampaignGoalKey,
@@ -114,6 +115,8 @@ export type HandoffMixResult = {
   lines: HandoffMixLine[];
   /** 카탈로그에 없어 버려진 id — 사용자에게 알린다 */
   missing: string[];
+  /** PR3 — online 매체는 PR5까지 플래너 믹스에 담지 않는다 */
+  blockedOnline: string[];
 };
 
 /**
@@ -126,14 +129,21 @@ export function resolveHandoffMix(params: {
   units: number | null;
 }): HandoffMixResult {
   const { catalog, mediaIds, units } = params;
+  const byId = new Map(catalog.map((m) => [m.id, m]));
   const known = new Set(catalog.map((m) => m.id));
   const lines: HandoffMixLine[] = [];
   const missing: string[] = [];
+  const blockedOnline: string[] = [];
   const seen = new Set<string>();
 
   for (const id of mediaIds) {
     if (!known.has(id)) {
       if (!missing.includes(id)) missing.push(id);
+      continue;
+    }
+    const row = byId.get(id);
+    if (row && isOnlineCatalogMedia(row)) {
+      if (!blockedOnline.includes(id)) blockedOnline.push(id);
       continue;
     }
     if (seen.has(id)) continue;
@@ -145,7 +155,7 @@ export function resolveHandoffMix(params: {
     lines[0]!.units = units;
   }
 
-  return { lines, missing };
+  return { lines, missing, blockedOnline };
 }
 
 /** `tkad_plan_cart` → 브리프 입력 + 믹스 */
@@ -176,12 +186,19 @@ export function planCartToBriefHandoff(
   if (industry) patch.industry = industry;
 
   const quantities = planCartToCampaignQuantities(cart);
+  const byId = new Map(catalog.map((m) => [m.id, m]));
   const known = new Set(catalog.map((m) => m.id));
   const lines: HandoffMixLine[] = [];
   const missing: string[] = [];
+  const blockedOnline: string[] = [];
   for (const item of cart.items) {
     if (!known.has(item.mediaId)) {
       if (!missing.includes(item.mediaId)) missing.push(item.mediaId);
+      continue;
+    }
+    const row = byId.get(item.mediaId);
+    if (row && isOnlineCatalogMedia(row)) {
+      if (!blockedOnline.includes(item.mediaId)) blockedOnline.push(item.mediaId);
       continue;
     }
     const raw = quantities[item.mediaId] ?? item.quantity ?? 1;
@@ -189,7 +206,7 @@ export function planCartToBriefHandoff(
     lines.push({ mediaId: item.mediaId, units });
   }
 
-  return { patch, mix: { lines, missing } };
+  return { patch, mix: { lines, missing, blockedOnline } };
 }
 
 const INDUSTRY_BY_PLANNER_KEY: Record<string, BriefIndustry> = {
@@ -287,12 +304,19 @@ export function savedPlannerPlanToBriefHandoff(
   if (industry) patch.industry = industry;
 
   const known = new Set(catalog.map((m) => m.id));
+  const byId = new Map(catalog.map((m) => [m.id, m]));
   const quantities = plan.campaignMediaQuantities ?? {};
   const lines: HandoffMixLine[] = [];
   const missing: string[] = [];
+  const blockedOnline: string[] = [];
   for (const id of plan.campaignMediaIds ?? []) {
     if (!known.has(id)) {
       if (!missing.includes(id)) missing.push(id);
+      continue;
+    }
+    const row = byId.get(id);
+    if (row && isOnlineCatalogMedia(row)) {
+      if (!blockedOnline.includes(id)) blockedOnline.push(id);
       continue;
     }
     const raw = quantities[id] ?? 1;
@@ -300,5 +324,5 @@ export function savedPlannerPlanToBriefHandoff(
     lines.push({ mediaId: id, units });
   }
 
-  return { patch, mix: { lines, missing } };
+  return { patch, mix: { lines, missing, blockedOnline } };
 }
