@@ -39,7 +39,7 @@ function revalidateDetailMediaPaths(detailRefs: Set<string>): void {
  * 단일 매체 등록/수정/삭제 시 영향받는 캐시만 정밀 무효화.
  *
  * List tag (`public-media-catalog-list`) — browse/landing ISR only.
- * Detail tag (`public-media-catalog-detail`) — detail ISR + companion catalog.
+ * Detail tag (`public-media-catalog-detail`) — per-slug detail Data Cache.
  */
 export function revalidateMediaCaches(
   ref: { id: string; slug?: string | null },
