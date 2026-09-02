@@ -1,0 +1,20 @@
+name: PR2 golden regression
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  pr2-golden:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: Golden baseline (102 core + 12 boundary + 3 condition/error asserts)
+        run: npm run test:pr2-golden
