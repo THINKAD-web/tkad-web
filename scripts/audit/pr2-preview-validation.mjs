@@ -51,6 +51,10 @@ async function main() {
   const { calculateQuote, calculateQuoteFromMediaIds, BUDGET_PRICING_NOT_IMPLEMENTED } =
     await import("../../lib/quote-calculator.ts");
   const { buildQuoteExportPayload } = await import("../../lib/quote-export/build-payload.ts");
+  const {
+    budgetPricingExportUserMessage,
+    isBudgetPricingNotImplementedError,
+  } = await import("../../lib/quote-export/budget-pricing-export-guard.ts");
   const { PrismaClient } = await import("@prisma/client");
   const { PrismaPg } = await import("@prisma/adapter-pg");
   const { Pool } = await import("pg");
@@ -144,16 +148,41 @@ async function main() {
   };
   report.phases.apiUserFacing = {
     wizardExportPost: {
-      httpStatus: exportErr ? 500 : 200,
-      body: exportErr ? "Failed" : "pdf bytes",
+      httpStatus: exportErr && isBudgetPricingNotImplementedError(new Error(exportErr)) ? 422 : exportErr ? 500 : 200,
+      body:
+        exportErr && isBudgetPricingNotImplementedError(new Error(exportErr))
+          ? budgetPricingExportUserMessage(true)
+          : exportErr
+            ? "Failed"
+            : "pdf bytes",
+      code:
+        exportErr && isBudgetPricingNotImplementedError(new Error(exportErr))
+          ? BUDGET_PRICING_NOT_IMPLEMENTED
+          : null,
       rawErrorInResponseBody: false,
+      legacyPdfFallbackOnBudgetPricing: false,
     },
     oohQuotePdfGet: {
       newBuilderFails: Boolean(exportErr),
-      userSees: exportErr
-        ? "legacy PDF fallback (200) — NOT BUDGET_PRICING string in response"
-        : "new builder PDF",
+      userSees:
+        exportErr && isBudgetPricingNotImplementedError(new Error(exportErr))
+          ? `422 JSON — ${budgetPricingExportUserMessage(true)}`
+          : exportErr
+            ? "legacy PDF fallback only for non-BudgetPricing errors"
+            : "new builder PDF",
       rawErrorExposedToUser: false,
+      legacyPdfFallbackOnBudgetPricing: false,
+    },
+    oohQuotePptxGet: {
+      httpStatus:
+        exportErr && isBudgetPricingNotImplementedError(new Error(exportErr)) ? 422 : exportErr ? 500 : 200,
+      body:
+        exportErr && isBudgetPricingNotImplementedError(new Error(exportErr))
+          ? budgetPricingExportUserMessage(true)
+          : exportErr
+            ? "Failed"
+            : "pptx bytes",
+      legacyFallbackOnBudgetPricing: false,
     },
     adminDraftPdfPost: {
       callsCalculateQuote: false,
@@ -174,7 +203,10 @@ async function main() {
   report.pass =
     report.phases.calculateQuote.isBudgetPricing &&
     report.phases.calculateQuoteFromMediaIds.isBudgetPricing &&
-    report.phases.buildQuoteExportPayload.isBudgetPricing;
+    report.phases.buildQuoteExportPayload.isBudgetPricing &&
+    report.phases.apiUserFacing.wizardExportPost.httpStatus === 422 &&
+    report.phases.apiUserFacing.oohQuotePdfGet.legacyPdfFallbackOnBudgetPricing === false &&
+    report.phases.apiUserFacing.oohQuotePptxGet.legacyFallbackOnBudgetPricing === false;
 
   const outDir = join(root, "reports/pr2-preview");
   mkdirSync(outDir, { recursive: true });

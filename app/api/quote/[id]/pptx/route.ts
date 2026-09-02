@@ -6,6 +6,10 @@ import { buildQuoteExportPayload } from "@/lib/quote-export/build-payload";
 import { buildQuotePptx } from "@/lib/quote-export/build-pptx";
 import { quoteExportFileBase } from "@/lib/quote-export/types";
 import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
+import {
+  budgetPricingExportNextResponse,
+  isBudgetPricingNotImplementedError,
+} from "@/lib/quote-export/budget-pricing-export-guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,10 +50,12 @@ export async function GET(
       ? "premium"
       : "basic";
 
+  let quoteLocale: string | null = null;
   try {
     const db = getPrisma();
     const row = await db.ooHQuote.findUnique({ where: { id } });
     if (!row) return new NextResponse("Not found", { status: 404 });
+    quoteLocale = row.locale;
 
     const payload = await buildQuoteExportPayload(db, row, template);
     const bytes = await buildQuotePptx(payload);
@@ -66,6 +72,10 @@ export async function GET(
       },
     });
   } catch (e) {
+    if (isBudgetPricingNotImplementedError(e)) {
+      const isKo = !quoteLocale || quoteLocale.toLowerCase().startsWith("ko");
+      return budgetPricingExportNextResponse(isKo);
+    }
     console.error("[quote pptx GET]", e);
     return new NextResponse("Failed", { status: 500 });
   }

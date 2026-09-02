@@ -13,6 +13,10 @@ import {
 } from "@/lib/quote-export/types";
 import { OOH_PERIOD_MONTHS } from "@/lib/ooh-quote";
 import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
+import {
+  budgetPricingExportNextResponse,
+  isBudgetPricingNotImplementedError,
+} from "@/lib/quote-export/budget-pricing-export-guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -142,6 +146,9 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (e) {
+    if (isBudgetPricingNotImplementedError(e)) {
+      return budgetPricingExportNextResponse(localeStr !== "en");
+    }
     console.error("[quote export POST]", e);
     return new NextResponse("Failed", { status: 500 });
   }

@@ -1,6 +1,6 @@
 # PR2 Step 3 — Preview validation 보고
 
-**작성일**: 2026-09-03  
+**작성일**: 2026-09-03 (PDF export 가드 반영)  
 **브랜치**: `feat/pr2-pricing-strategy`
 
 ---
@@ -11,6 +11,7 @@
 |-------|--------|
 | Golden 102 rows | **pass** |
 | `quote-calculator.test.ts` | **8/8 pass** |
+| `budget-pricing-export-guard.test.ts` | **pass** |
 | `npm run build` (Step 2) | **pass** |
 | BudgetPricing smoke | **pass** — `reports/pr2-preview/validation-report.json` |
 
@@ -21,34 +22,36 @@
 
 ---
 
-## 2. PDF / Admin — 사용자 노출 (코드 경로 분석 + smoke)
+## 2. PDF / Export — BudgetPricing 가드 (3-2)
 
-### `calculateQuoteFromMediaIds`를 **직접** 호출하는 PDF 경로
+`lib/quote-export/budget-pricing-export-guard.ts` — `BUDGET_PRICING_NOT_IMPLEMENTED` 가로채기, **레거시 PDF 폴백 금지**.
 
-| 경로 | 에러 처리 | 사용자에게 보이는 것 |
-|------|-----------|---------------------|
-| **`POST /api/quote/export`** (위저드 Step 4 PDF) | `catch → 500`, body **`"Failed"`** | 원시 에러 문자열 **미노출** |
-| **`GET /api/quote/[id]/pdf`** (저장 OoHQuote) | new builder 실패 시 **`catch → legacy PDF fallback`** | **200 PDF** (레거시 빌더) 또는 최외곽 500 `"Failed"` — **`BUDGET_PRICING…` 미노출** |
-| **`GET /api/quote/[id]/pptx`** | 동일 패턴 (`buildQuoteExportPayload`) | export route와 유사 |
+| 경로 | BudgetPricing 시 동작 | 사용자 메시지 |
+|------|----------------------|---------------|
+| **`POST /api/quote/export`** (위저드 Step 4 PDF/PPTX) | **422 JSON** | 「온라인 매체는 아직 견적서에 포함할 수 없습니다. 가격 문의로 안내해 주세요.」 |
+| **`GET /api/quote/[id]/pdf`** (저장 OoHQuote) | **422 JSON** — **legacy fallback 차단** | 동일 (locale ko/en) |
+| **`GET /api/quote/[id]/pptx`** | **422 JSON** | 동일 |
+| 기타 builder 오류 (offline) | 기존과 동일 — PDF는 legacy fallback, export는 500 `"Failed"` | 원시 스택/에러코드 **미노출** |
 
 ### Admin 견적 PDF
 
 | 경로 | `calculateQuote` 호출 | BudgetPricing 영향 |
 |------|----------------------|---------------------|
-| **`POST /api/admin/quotes/pdf`** (draft) | **없음** — 클라이언트가 넘긴 `unitPriceWon`/`lineTotalWon` 사용 | **없음** (admin UI가 recalc 안 하면) |
+| **`POST /api/admin/quotes/pdf`** (draft) | **없음** — 클라이언트가 넘긴 `unitPriceWon`/`lineTotalWon` 사용 | **없음** |
 | **`GET /api/admin/quotes/[id]/pdf`** (saved) | **없음** — DB `QuoteItem` 금액 사용 | **없음** |
 
 ### 위저드 UI (클라이언트)
 
 - `buildQuoteWizardLineContext` → online/`type=null` 시 **`priceOnInquiry: true`** → 「가격 문의」
 - `calculateQuote` **미호출** — PR1b-2 안전망 유지
+- export 422 시 위저드는 기존 `quote.pdfError` 토스트 (generic) — 서버는 명확 JSON body
 
 ---
 
 ## 3. 리스크 메모 (PR3 전)
 
-1. **위저드 PDF export (`POST /api/quote/export`)** — online ID가 `mediaIds`에 들어가면 **500 Failed** (스택/에러코드 미노출). PR3 정문 차단으로 online 선택 자체를 막을 예정.
-2. **OoHQuote PDF** — online이 `mediaIds`에 있으면 **레거시 PDF로 fallback** (잘못된 금액 PDF 가능). PR3에서 online 견적 저장/내보내기 차단 필요.
+1. **위저드 PDF export** — online ID가 `mediaIds`에 들어가면 **422 + 명확 메시지** (잘못된 PDF 방지). PR3 정문에서 online 선택 자체를 추가 차단 예정.
+2. **OoHQuote PDF** — online 포함 시 **더 이상 legacy PDF로 fallback 하지 않음** (잘못된 금액 PDF 차단).
 3. **Admin** — catalog line 추가 시 서버 recalc 경로가 붙으면 BudgetPricing 영향 가능; 현재 draft PDF는 precomputed rows.
 
 ---
@@ -56,8 +59,9 @@
 ## 4. 수동 UI spot-check (Preview 배포 후)
 
 - [ ] 위저드: offline-only cart 금액 · 「가격 문의」 mixed cart (PR1b-2 회귀)
-- [ ] 플랜카트: 저장 플랜 렌더링
-- [ ] PDF: offline 견적 export 정상
+- [ ] 플랜카트: 저장 플랜 렌더링 (3계정 legacy plan cart)
+- [ ] PDF: **offline** 견적 export 정상 (422 가드가 offline 경로 회귀 없음)
+- [ ] (선택) online ID를 export body에 넣으면 422 — 잘못된 PDF 미생성
 
 ---
 
