@@ -174,6 +174,10 @@
         "label": "매체 검색",
         "desc": "전국 OOH 매체 카탈로그"
       },
+      "online-media-search": {
+        "label": "온라인 광고",
+        "desc": "검색·디스플레이·SNS·영상 매체 탐색"
+      },
       "map-search": {
         "label": "지도에서 찾기",
         "desc": "위치·반경 기반 탐색"

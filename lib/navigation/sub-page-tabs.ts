@@ -4,6 +4,7 @@ import {
   FileText,
   GraduationCap,
   Map,
+  MonitorSmartphone,
   Network,
   Palette,
   RefreshCw,
@@ -24,10 +25,17 @@ export const DISCOVERY_TABS: SubTab[] = [
     match: (p) =>
       p === "/media" ||
       (p.startsWith("/media") &&
+        !p.startsWith("/media/online") &&
         !p.startsWith("/media/map") &&
         !p.startsWith("/media/packages") &&
         !p.startsWith("/media/network") &&
         !p.startsWith("/media/targets")),
+  },
+  {
+    label: "온라인 광고",
+    href: "/media/online",
+    icon: MonitorSmartphone,
+    match: (p) => p === "/media/online" || p.startsWith("/media/online/"),
   },
   { label: "지도에서 찾기", href: "/media/map", icon: Map },
   { label: "네트워크 매체", href: "/media?features=network", icon: Network,

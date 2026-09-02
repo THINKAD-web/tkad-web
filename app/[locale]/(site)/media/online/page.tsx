@@ -11,16 +11,15 @@ type Props = {
 };
 
 /**
- * `/media` — static app shell (ISR 1h).
+ * `/media/online` — online ads catalog browse (PR4).
  * Filtered catalog loads client-side via `/api/public/media` (see `media-search-page.tsx`).
- * JSON-LD + metadata remain in `media/layout.tsx` / `generateMetadata`.
  */
-export default async function MediaPage({ params }: Props) {
+export default async function MediaOnlinePage({ params }: Props) {
   await resolveLocaleParam(params);
 
   return (
     <Suspense fallback={<MediaBrowsePageSkeleton />}>
-      <MediaSearchPage appShell browseChannel="offline" />
+      <MediaSearchPage appShell browseChannel="online" />
     </Suspense>
   );
 }

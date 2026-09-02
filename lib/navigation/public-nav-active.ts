@@ -29,8 +29,13 @@ function isNetworkBrowsePath(path: string, features: Set<string>): boolean {
   return false;
 }
 
+function isOnlineMediaBrowsePath(path: string): boolean {
+  return path === "/media/online" || path.startsWith("/media/online/");
+}
+
 function isMediaSearchBrowsePath(path: string, features: Set<string>): boolean {
   if (!path.startsWith("/media")) return false;
+  if (isOnlineMediaBrowsePath(path)) return false;
   if (isMapBrowsePath(path)) return false;
   if (isCampaignTargetsPath(path)) return false;
   if (isNetworkBrowsePath(path, features)) return false;
@@ -60,6 +65,8 @@ export function isPublicNavItemActive(
   switch (itemId) {
     case "media-search":
       return isMediaSearchBrowsePath(path, features);
+    case "online-media-search":
+      return isOnlineMediaBrowsePath(path);
     case "map-search":
       return isMapBrowsePath(path);
     case "campaign-targets":

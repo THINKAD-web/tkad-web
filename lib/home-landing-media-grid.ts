@@ -162,7 +162,7 @@ function digitalTileFor(
     count,
     labelKo: ch?.nameKo ?? platformId,
     labelEn: ch?.nameEn ?? platformId,
-    href: THINKAD_DIGITAL_URL.replace(/\/$/, "") + "/media",
+    href: "/media/online",
   };
 }
 

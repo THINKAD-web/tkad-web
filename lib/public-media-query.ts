@@ -1,4 +1,10 @@
 import type { Prisma } from "@prisma/client";
+import {
+  resolveBrowseCatalogChannelFilter,
+  mediaItemMatchesBrowseCatalogChannel,
+  type BrowseChannelRoute,
+} from "@/lib/browse-catalog-channel";
+import { normalizeCatalogChannel } from "@/lib/catalog-channel";
 import { publicNotFlaggedMediaWhere } from "@/lib/media-review-status";
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
 import { expandBrowseRegionSub } from "@/lib/media-browse-regions";
@@ -33,6 +39,9 @@ export type PublicMediaQueryParams = {
   sort?: PublicMediaSort | null;
   page?: number;
   limit?: number;
+  /** PR4 — route channel or legacy cross-channel exception (see resolveBrowseCatalogChannelFilter). */
+  browseChannel?: BrowseChannelRoute | null;
+  catalogChannel?: string | null;
 };
 
 function parseFeatures(featuresRaw: string | null | undefined): string[] {
@@ -62,6 +71,17 @@ export function buildPublicMediaWhere(
   }
   if (resolved.subCategory) {
     and.push({ mediaSubCategory: resolved.subCategory });
+  }
+
+  const channelFilter = resolveBrowseCatalogChannelFilter({
+    browseChannel: params.browseChannel ?? "offline",
+    mainCategory: params.mainCategory,
+    subCategory: params.subCategory,
+    category: params.category,
+    catalogChannel: params.catalogChannel,
+  });
+  if (channelFilter) {
+    and.push({ catalogChannel: channelFilter });
   }
 
   if (
@@ -251,5 +271,25 @@ export function parsePublicMediaQuery(
     sort,
     page: Math.max(1, parseNum(sp.get("page")) ?? 1),
     limit: Math.min(100, Math.max(1, parseNum(sp.get("limit")) ?? 24)),
+    browseChannel:
+      sp.get("browseChannel") === "online"
+        ? "online"
+        : sp.get("browseChannel") === "offline"
+          ? "offline"
+          : null,
+    catalogChannel: sp.get("catalogChannel"),
+  };
+}
+
+/** Client/API helper — derive query params from browse route channel. */
+export function buildBrowseChannelQueryParams(input: {
+  browseChannel: BrowseChannelRoute;
+}): Pick<PublicMediaQueryParams, "browseChannel" | "catalogChannel"> {
+  return {
+    browseChannel: input.browseChannel,
+    catalogChannel:
+      input.browseChannel === "online"
+        ? normalizeCatalogChannel("online")
+        : undefined,
   };
 }
