@@ -5,7 +5,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   buildCaseStudyGalleryItems,
   getMediaDetailGalleryUrls,
-  buildSimilarSortCatalog,
   getSimilarMediaFromCatalog,
 } from "@/lib/media-data";
 import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
@@ -40,10 +39,10 @@ import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import { RelatedCases } from "@/components/media-detail/related-cases";
 import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import {
-  fetchPublicMediaCatalogListForDetail,
   getMediaSlugsForStaticBuild,
   resolveMediaForDetail,
 } from "@/lib/public-media-catalog";
+import { fetchSimilarMediaPeers } from "@/lib/media-similar-peers";
 import { enrichMediaWithTrust } from "@/lib/media-trust-catalog";
 import {
   attachReviewStatsToMediaItems,
@@ -168,6 +167,14 @@ export default async function MediaDetailPage({ params }: Props) {
   if (shouldRedirectMediaIdToSlug(slugParam, media)) {
     permanentRedirect(`/${locale}${mediaItemDetailPath(media)}`);
   }
+  const mediaId = media.id;
+  const similarPeersPromise = media.keywordFilter
+    ? Promise.resolve([])
+    : fetchSimilarMediaPeers(media, { limit: 64 }).catch((e) => {
+        console.error("[media-detail] similar peers failed", mediaId, e);
+        return [];
+      });
+
   try {
     [media] = await attachReviewStatsToMediaItems([media]);
   } catch (e) {
@@ -179,26 +186,20 @@ export default async function MediaDetailPage({ params }: Props) {
     console.error("[media-detail] trust enrich failed", media.id, e);
   }
 
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogListForDetail>> =
-    [];
-  try {
-    catalog = await fetchPublicMediaCatalogListForDetail();
-  } catch (e) {
-    console.error("[media-detail] catalog fetch failed", media.id, e);
-  }
+  const similarPeers = await similarPeersPromise;
 
   let analyticsReport: MediaAnalyticsReport;
   try {
     analyticsReport = await buildMediaAnalyticsReportFused(
       media,
-      catalog,
+      similarPeers,
       media.trafficPattern ?? null,
     );
   } catch (e) {
     console.error("[media-detail] fused analytics failed", media.id, e);
     analyticsReport = buildMediaAnalyticsReport(
       media,
-      catalog,
+      similarPeers,
       media.trafficPattern ?? null,
     );
   }
@@ -258,11 +259,9 @@ export default async function MediaDetailPage({ params }: Props) {
 
   const similarRaw = media.keywordFilter
     ? getSimilarKeywordFilterMediaItems(media.id, 4)
-    : getSimilarMediaFromCatalog(catalog, media, 4);
+    : getSimilarMediaFromCatalog(similarPeers, media, 4);
   const similar = attachRecommendReason(similarRaw, "similar_profile", locale);
-  const similarSortCatalog = media.keywordFilter
-    ? undefined
-    : buildSimilarSortCatalog(catalog, media);
+  const similarSortCatalog = media.keywordFilter ? undefined : similarPeers;
   const galleryImages = getMediaDetailGalleryUrls(media);
   const heroImage = galleryImages[0] ?? "";
   const caseStudyItems = buildCaseStudyGalleryItems(media);

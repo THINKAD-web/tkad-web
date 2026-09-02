@@ -2,7 +2,7 @@
 export const PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG = "public-media-catalog-list";
 
 /**
- * Detail ISR companion data (similar-media catalog slice, cached detail rows).
+ * Per-slug media detail Data Cache (`public-media-detail-v1`).
  * Invalidated on media save; does NOT share the list tag so list-only ISR pages
  * are not regen'd when detail-only fields change.
  */

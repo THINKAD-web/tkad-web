@@ -539,47 +539,6 @@ const getCrossRequestPublicMediaCatalogList = unstable_cache(
   },
 );
 
-/** Detail ISR only — same slim rows as list but separate tag (no list-page cascade). */
-const getCrossRequestPublicMediaCatalogDetailCompanion = unstable_cache(
-  loadPublicMediaCatalogListFromDb,
-  ["public-media-catalog-detail-companion-v1"],
-  {
-    revalidate: PUBLIC_MEDIA_CATALOG_DETAIL_REVALIDATE_SECONDS,
-    tags: [PUBLIC_MEDIA_CATALOG_DETAIL_CACHE_TAG],
-  },
-);
-
-/**
- * Detail page companion catalog (similar media, analytics fusion).
- * Uses the detail cache tag so list-only admin edits do not regen detail ISR pages.
- */
-export const fetchPublicMediaCatalogListForDetail = cache(
-  async function fetchPublicMediaCatalogListForDetail(): Promise<MediaItem[]> {
-    const forceMockOnly =
-      process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "1" ||
-      process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "true";
-
-    if (!isDatabaseConfigured() || forceMockOnly) {
-      return catalogListItemsToMediaItems(
-        await appendNetworkListItems(
-          mediaItemsToCatalogListItems(getMediaBrowseMockCatalog()),
-        ),
-      );
-    }
-
-    try {
-      const slim = await getCrossRequestPublicMediaCatalogDetailCompanion();
-      return catalogListItemsToMediaItems(slim);
-    } catch (e) {
-      console.error(
-        "[fetchPublicMediaCatalogListForDetail] DB query failed — returning empty catalog",
-        e instanceof Error ? `${e.name}: ${e.message}` : e,
-      );
-      return [];
-    }
-  },
-);
-
 /** Browse/list/filter catalog — slim DTO cached under 2MB Data Cache limit. */
 export const fetchPublicMediaCatalogList = cache(
   async function fetchPublicMediaCatalogList(): Promise<MediaItem[]> {
