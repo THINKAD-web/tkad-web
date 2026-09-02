@@ -27,6 +27,7 @@ import {
   syncBillingEndDate,
   type AdminQuoteBillingMode,
 } from "@/lib/admin-quote-billing";
+import { isQuoteWizardSelectableMedia } from "@/lib/pricing-unavailable";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
 import { QuotePdfPreview } from "@/components/quote-pdf-preview";
 import { QuoteFormalPreview } from "@/components/quote/quote-formal-preview";
@@ -312,18 +313,24 @@ export default function AdminQuoteNewClient({
     };
   }, [quoteId, editHydrated, listLoading, medias, t]);
 
+  /** PR5 hotfix — online rows excluded from new-line picker (₩0 silent quote risk). */
+  const quotePickerMedias = useMemo(
+    () => medias.filter((m) => isQuoteWizardSelectableMedia(m)),
+    [medias],
+  );
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return medias;
-    return medias.filter(
+    if (!q) return quotePickerMedias;
+    return quotePickerMedias.filter(
       (m) =>
         m.name.toLowerCase().includes(q) ||
         (m.nameEn?.toLowerCase().includes(q) ?? false) ||
         m.location.toLowerCase().includes(q) ||
         m.region.toLowerCase().includes(q) ||
-        m.type.toLowerCase().includes(q),
+        (m.type?.toLowerCase().includes(q) ?? false),
     );
-  }, [medias, search]);
+  }, [quotePickerMedias, search]);
 
   // 개월·일 프리셋 모드에서는 종료일을 모드에 맞게 동기화
   useEffect(() => {
