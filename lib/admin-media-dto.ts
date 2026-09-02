@@ -13,6 +13,7 @@ import {
   parseMediaInstallLocations,
   type MediaInstallLocation,
 } from "@/lib/media-install-locations";
+import { normalizeCatalogChannel } from "@/lib/catalog-channel";
 
 export type MediaAvailability = "available" | "reserved" | "maintenance";
 
@@ -266,7 +267,15 @@ function pickLayerBadges(r: Record<string, unknown>): AdminMediaLayerBadges | nu
   };
 }
 
-/** API/Prisma JSON 한 건 → DTO (snake_case·누락 필드 방어) */
+/**
+ * API/Prisma JSON 한 건 → DTO (snake_case·누락 필드 방어).
+ *
+ * SSOT: field set must stay aligned with `prismaMediaToAdminDto` — admin clients
+ * that parse list JSON through here (quote-new, medias refresh, contracts) never
+ * see raw API rows. Dropping a column silently breaks gates (PR5-b: catalogChannel).
+ *
+ * Known drift vs prismaMediaToAdminDto: type null→"", price null→0 — see inline note on price.
+ */
 export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
     return null;
@@ -280,6 +289,9 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
   const regionZone = pickStr(r, "regionZone", "region_zone");
   const type = typeof r.type === "string" ? r.type : "";
   const priceRaw = r.price;
+  // PR5-b P0 note: null price → 0 (not null like prismaMediaToAdminDto). Online inquiry
+  // rows (price null) would show ₩0 on any screen that lists this DTO without a gate;
+  // re-review when online is exposed via parseAdminMediaListFromApiJson paths (PR5-b/c).
   const price =
     typeof priceRaw === "number" && Number.isFinite(priceRaw)
       ? Math.round(priceRaw)
@@ -393,6 +405,11 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     proposalUrl: pickStr(r, "proposalUrl", "proposal_url"),
     proposalFileName: pickStr(r, "proposalFileName", "proposal_file_name"),
     hasProposal: pickBool(r, "hasProposal", "has_proposal", false),
+    catalogChannel: (() => {
+      const rawChannel = pickStr(r, "catalogChannel", "catalog_channel");
+      if (!rawChannel?.trim()) return null;
+      return normalizeCatalogChannel(rawChannel);
+    })(),
     mediaMainCategory: pickStr(r, "mediaMainCategory", "media_main_category"),
     mediaSubCategory: pickStr(r, "mediaSubCategory", "media_sub_category"),
     pricingMode: (() => {
