@@ -4,6 +4,7 @@ import {
   buildCatalogItemMetricLine,
   buildCatalogItemMetricLineCompact,
 } from "@/lib/media-card-metrics";
+import { isOnlineCatalogMedia, isPricingUnavailable } from "@/lib/pricing-unavailable";
 import {
   formatCatalogPriceFieldWon,
   formatMediaPriceWithPeriodSuffix,
@@ -55,6 +56,49 @@ export function priceLabelIncludesPeriodSuffix(
   return price.includes(`/${period}`);
 }
 
+type BrowseCardPriceItem = Pick<
+  HomeCatalogMediaItem,
+  | "price"
+  | "pricePeriod"
+  | "catalogChannel"
+  | "type"
+  | "catalogSource"
+  | "networkMinUnits"
+  | "priceOptions"
+  | "country"
+>;
+
+/**
+ * Browse list/card price — SSOT via `isPricingUnavailable` (online + offline inquiry).
+ * Pre-existing gap: browse used `price` falsy only; offline negotiated rows could show ₩0.
+ */
+export function formatBrowseCardPriceLabel(
+  item: BrowseCardPriceItem,
+  locale = "ko-KR",
+): string | null {
+  const isKo = locale.startsWith("ko");
+  if (isOnlineCatalogMedia({ catalogChannel: item.catalogChannel })) {
+    return mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
+  }
+  if (!item.type?.trim() || item.price == null || item.price <= 0) {
+    return mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
+  }
+  if (
+    item.catalogSource != null &&
+    isPricingUnavailable({
+      catalogChannel: item.catalogChannel,
+      type: item.type,
+      price: item.price,
+      catalogSource: item.catalogSource,
+      networkMinUnits: item.networkMinUnits,
+      priceOptions: item.priceOptions,
+    })
+  ) {
+    return mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
+  }
+  return formatCatalogPriceFieldWon(item.price, locale, item.country);
+}
+
 export function catalogItemToDisplayModel(
   item: HomeCatalogMediaItem,
   opts: {
@@ -65,12 +109,14 @@ export function catalogItemToDisplayModel(
   },
 ): MediaCardDisplayModel {
   const locale = opts.isKo ? "ko-KR" : "en-US";
+  const parentLabel = opts.priceLabel?.trim() || null;
+  const ssotLabel = parentLabel ?? formatBrowseCardPriceLabel(item, locale);
   const formattedNumericPrice =
-    item.price && item.price > 0
+    ssotLabel ??
+    (item.price && item.price > 0
       ? formatCatalogPriceFieldWon(item.price, locale, item.country)
-      : null;
-  const displayPrice =
-    opts.priceLabel?.trim() || formattedNumericPrice || null;
+      : null);
+  const displayPrice = formattedNumericPrice;
   const periodLabel = formatPricePeriodShortLabel(
     item.pricePeriod,
     opts.isKo ? "ko" : "en",

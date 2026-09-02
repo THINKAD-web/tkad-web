@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   catalogItemToDisplayModel,
+  formatBrowseCardPriceLabel,
   priceLabelIncludesPeriodSuffix,
 } from "./media-card-display.ts";
 import { formatMediaPriceWithPeriodSuffix } from "./media-price-format.ts";
@@ -15,6 +16,7 @@ const shinsegaeDay: HomeCatalogMediaItem = {
   pricePeriod: "day",
   type: "dooh",
   region: "서울",
+  catalogChannel: "offline",
 };
 
 /** 광화문 루미형 — 월 단가 등록 */
@@ -25,6 +27,7 @@ const gwanghwamunLumi: HomeCatalogMediaItem = {
   pricePeriod: "month",
   type: "dooh",
   region: "서울",
+  catalogChannel: "offline",
 };
 
 test("priceLabelIncludesPeriodSuffix detects embedded /일·/월", () => {
@@ -80,4 +83,33 @@ test("catalog tile model: parent label with /일 does not double the suffix", ()
   });
   assert.equal(model.priceLabel, "₩2,200만/일");
   assert.equal(model.showPeriodSuffix, false);
+});
+
+test("formatBrowseCardPriceLabel — online catalog always inquiry", () => {
+  assert.equal(
+    formatBrowseCardPriceLabel(
+      {
+        catalogChannel: "online",
+        type: null,
+        price: null,
+      },
+      "ko-KR",
+    ),
+    "가격 문의",
+  );
+});
+
+test("formatBrowseCardPriceLabel — offline zero price is inquiry (pre-existing bug fix)", () => {
+  assert.equal(
+    formatBrowseCardPriceLabel(
+      {
+        catalogChannel: "offline",
+        type: "dooh",
+        price: 0,
+        pricePeriod: "month",
+      },
+      "ko-KR",
+    ),
+    "가격 문의",
+  );
 });

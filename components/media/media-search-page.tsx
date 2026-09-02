@@ -53,10 +53,7 @@ function useLgUp() {
   );
 }
 import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
-import {
-  formatMediaPriceWithPeriodSuffix,
-  normalizeMediaPricePeriod,
-} from "@/lib/media-price-format";
+import { formatBrowseCardPriceLabel } from "@/lib/media-card-display";
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
 import {
   sanitizeBrowseMainForChannel,
@@ -238,10 +235,16 @@ function buildMediaBrowseFetchKey(input: {
 }
 
 function formatPriceLabel(
-  item: HomeCatalogMediaItem,
+  price?: number,
+  period?: string,
   locale = "ko-KR",
 ) {
-  return formatBrowseCardPriceLabel(item, locale);
+  if (!price) return null;
+  return formatMediaPriceWithPeriodSuffix(
+    price,
+    normalizeMediaPricePeriod(period),
+    locale,
+  );
 }
 
 function formatFeedFootTraffic(value?: number) {
@@ -856,7 +859,7 @@ function MediaSearchPageInner({
 
   const priceLocale = locale.startsWith("ko") ? "ko-KR" : "en-US";
   const renderPrice = (item: HomeCatalogMediaItem) =>
-    formatPriceLabel(item, priceLocale);
+    formatPriceLabel(item.price, item.pricePeriod, priceLocale);
 
   const getMediaHref = (item: HomeCatalogMediaItem) => mediaItemDetailPath(item);
 
