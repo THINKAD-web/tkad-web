@@ -9,7 +9,7 @@ import {
   catalogThumbnailImageProps,
 } from "@/lib/media-catalog-map";
 import type { MediaItem } from "@/lib/media-data";
-import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
+import { formatMediaPriceWithPeriodSuffix, mediaPriceOnInquiryLabel } from "@/lib/media-price-format";
 import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ type Props = {
   isKo: boolean;
   selected: boolean;
   priceMan: number;
+  priceOnInquiry?: boolean;
   pricePeriod?: MediaItem["pricePeriod"];
   onToggle: () => void;
 };
@@ -29,6 +30,7 @@ export function QuoteMediaSelectCard({
   isKo,
   selected,
   priceMan,
+  priceOnInquiry = false,
   pricePeriod,
   onToggle,
 }: Props) {
@@ -37,8 +39,9 @@ export function QuoteMediaSelectCard({
   const typeLabel = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
   const metaLine = [catalog.region, typeLabel].filter(Boolean).join(" · ");
   const locale = isKo ? "ko-KR" : "en-US";
-  const priceLabel =
-    priceMan > 0
+  const priceLabel = priceOnInquiry
+    ? mediaPriceOnInquiryLabel(locale)
+    : priceMan > 0
       ? formatMediaPriceWithPeriodSuffix(
           priceMan * 10_000,
           pricePeriod ?? "month",

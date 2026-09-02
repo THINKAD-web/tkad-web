@@ -433,6 +433,10 @@ function QuotePremiumOfficialPage({
           ) : (
             <ul className="space-y-4">
               {mediaItems.map((row) => {
+                const inquiryLabel =
+                  row.priceOnInquiry && row.inquiryLabel
+                    ? row.inquiryLabel
+                    : null;
                 const unitWon =
                   row.unitPriceWon && row.unitPriceWon > 0
                     ? row.unitPriceWon
@@ -447,8 +451,8 @@ function QuotePremiumOfficialPage({
                   operatingHours: row.operatingHours ?? undefined,
                   dailyTraffic: row.dailyFootTraffic ?? undefined,
                   broadcastLabel: row.broadcastLabel ?? undefined,
-                  monthlyPriceLabel: formatManWon(unitWon, isKo),
-                  lineTotalLabel: formatManWon(row.lineTotalWon, isKo),
+                  monthlyPriceLabel: inquiryLabel ?? formatManWon(unitWon, isKo),
+                  lineTotalLabel: inquiryLabel ?? formatManWon(row.lineTotalWon, isKo),
                 };
                 return (
                   <li key={row.id}>
@@ -979,6 +983,8 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
                 </p>
               ) : (
                 mediaItems.map((m) => {
+                  const inquiryLabel =
+                    m.priceOnInquiry && m.inquiryLabel ? m.inquiryLabel : null;
                   const detail: DocumentMediaDetail = {
                     id: m.id,
                     name: m.name,
@@ -989,10 +995,12 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
                     operatingHours: m.operatingHours ?? undefined,
                     dailyTraffic: m.dailyFootTraffic ?? undefined,
                     broadcastLabel: m.broadcastLabel ?? undefined,
-                    monthlyPriceLabel: m.unitPriceWon
-                      ? formatManWon(m.unitPriceWon, isKo)
-                      : undefined,
-                    lineTotalLabel: formatManWon(m.lineTotalWon, isKo),
+                    monthlyPriceLabel: inquiryLabel
+                      ? inquiryLabel
+                      : m.unitPriceWon
+                        ? formatManWon(m.unitPriceWon, isKo)
+                        : undefined,
+                    lineTotalLabel: inquiryLabel ?? formatManWon(m.lineTotalWon, isKo),
                     recommendReason:
                       m.recommendReason ??
                       (isKo

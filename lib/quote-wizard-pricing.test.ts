@@ -3,8 +3,10 @@ import test from "node:test";
 import type { MediaItem } from "@/lib/media-data";
 import {
   buildQuoteWizardLineContext,
+  formatQuoteWizardInquiryLabel,
   quoteCatalogDisplayPriceMan,
   quoteCampaignUnits,
+  sumQuoteWizardBillableMan,
 } from "@/lib/quote-wizard-pricing";
 import { calculateMediaQuoteFromOption } from "@/lib/compare-quote";
 
@@ -167,6 +169,54 @@ test("partial period rate — no override keeps 50% for 15days monthly", () => {
   assert.equal(line.usesMediaPartialRate, false);
   assert.equal(line.campaignUnits, quoteCampaignUnits("15days", "month"));
   assert.equal(line.lineTotalMan, 500);
+});
+
+test("online type=null — price on inquiry, excluded from billable sum", () => {
+  const online: MediaItem = {
+    id: "__smoke_online__",
+    name: "Preview Smoke (search)",
+    nameEn: "Preview Smoke",
+    location: "서울",
+    locationEn: "Seoul",
+    region: "seoul",
+    type: null,
+    catalogChannel: "online",
+    price: null as unknown as number,
+    lat: 37.5,
+    lng: 127,
+    dailyFootTraffic: 0,
+    sampleImages: [],
+  };
+  const offline = busItem({ id: "bus-billable", price: 800_000 });
+
+  const inquiryLine = buildQuoteWizardLineContext(online, {
+    isKo: true,
+    campaignPeriod: "30days",
+    campaignPeriodLabel: "30일",
+    priceOptionIndex: 0,
+  });
+  const billableLine = buildQuoteWizardLineContext(offline, {
+    isKo: true,
+    campaignPeriod: "30days",
+    campaignPeriodLabel: "30일",
+    priceOptionIndex: 0,
+  });
+
+  assert.equal(inquiryLine.priceOnInquiry, true);
+  assert.equal(inquiryLine.lineTotalMan, 0);
+  assert.equal(billableLine.priceOnInquiry, false);
+  assert.equal(billableLine.lineTotalMan, 80);
+
+  const { totalMan, inquiryCount } = sumQuoteWizardBillableMan([
+    inquiryLine,
+    billableLine,
+  ]);
+  assert.equal(inquiryCount, 1);
+  assert.equal(totalMan, 80);
+  assert.equal(
+    formatQuoteWizardInquiryLabel(true),
+    "가격 문의",
+  );
 });
 
 test("compare calculateMediaQuoteFromOption applies option partial rate at 15 days", () => {

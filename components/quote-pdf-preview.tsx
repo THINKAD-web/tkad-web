@@ -299,8 +299,10 @@ export type QuotePdfPreviewRow = {
   unitPriceWon: number;
   /** 라인 합계 (원). */
   lineTotalWon: number;
-  /** 카탈로그 단가 ≤0 · override 없음 → 「별도 문의」 */
+  /** 카탈로그 단가 ≤0 · override 없음 → 「별도 문의」/「가격 문의」 */
   priceOnInquiry?: boolean;
+  /** 공개 견적 위저드 — priceOnInquiry 시 표시 라벨 (기본: admin 「별도 문의」) */
+  inquiryLabel?: string;
   /** 단가 기간 라벨 (예: 2주, 월) */
   unitPeriodLabel?: string;
   /** 집행 기간 라벨 (행별) */
@@ -575,6 +577,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                     priceOnInquiry: row.priceOnInquiry,
                     unitPriceWon: row.unitPriceWon,
                     lineTotalWon: row.lineTotalWon,
+                    inquiryLabel: row.inquiryLabel,
                   };
                   const unitFormatted = formatAdminQuoteLineCell(
                     row.unitPriceWon,
