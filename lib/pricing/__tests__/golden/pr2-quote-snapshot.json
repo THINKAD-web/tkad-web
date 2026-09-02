@@ -1,0 +1,1816 @@
+{
+  "version": 1,
+  "label": "pr2-golden-from-pr0-pr1a-prod-baseline",
+  "at": "2026-09-02T15:19:46.020Z",
+  "sampleCount": 34,
+  "calcRows": 102,
+  "typeCounts": {
+    "dooh": 23,
+    "static": 6,
+    "mobile": 5
+  },
+  "sampleIds": [
+    "cmox1l6tx000204kysagmp1v8",
+    "cmox1ngef000204l7whv03uj2",
+    "cmp0geb4p000i04ibjncqsfya",
+    "cmqsuwnmd00020akqsftkqat9",
+    "cms725rov00030aj213mgy6q5",
+    "cmqsvnjwc00000aja5g41bt7c",
+    "cmp0eza7s000204jim80t8ymo",
+    "cmofozazn000004jxwwapnyz9",
+    "cmp7y6sqa000004jrsqzhazmu",
+    "cmox0cnpe000004joeh8b7ic2",
+    "cmqa6k2lz000304jvk9ikbnl3",
+    "cmrtb86im000204l4h9dockxe",
+    "cmrt1x0nv000y04i6lqj7v8lu",
+    "cmr3iki4p000009j7v4hfu8pn",
+    "cmp8naebb000004jsvad492fc",
+    "cms8anrz3000j04ied2ork84a",
+    "cmofp8byj000004jrqctglqs7",
+    "cmqhzzg6c000704l2809gq0xe",
+    "cmofpfkgk000004l5b0uvgv6t",
+    "cmo3l99l7000004l7t4rv9oqt",
+    "cmqi6xjgq000604jj5krliihl",
+    "cmqt1otrs00000ajfv6siozwr",
+    "cmq3wd9aw000504l5lfq1lha8",
+    "cmrtbq0mb000504lawvihn7eq",
+    "cmqqtssxl000204jy0p8pkyo8",
+    "cmrm0xl6k000204jy1un9gwrw",
+    "cmp3vb0q9000204kzu575iq32",
+    "cmracbp47000804l40z3wcrqa",
+    "cmqz91a0e000104js4dd8i780",
+    "cmqjbizs5000504if1dyoe7oj",
+    "cmr9xedzi000a04layhba2ulc",
+    "cmrap3eo4000004jv8b2tt90v",
+    "cmrn711g8000404ib3hct4qpy",
+    "cmtd4wpic000004ic5oeqzdxq"
+  ],
+  "startDate": "2026-03-01",
+  "endDate": "2026-03-14",
+  "scenarios": [
+    {
+      "name": "calendar_14d"
+    },
+    {
+      "name": "wizard_14days",
+      "periodKey": "14days"
+    },
+    {
+      "name": "wizard_1month",
+      "periodKey": "1month"
+    }
+  ],
+  "media": [
+    {
+      "id": "cmox1l6tx000204kysagmp1v8",
+      "name": "성수역 디지털 성수15 2호선 지하철 광고",
+      "location": "서울특별시 성동구 아차산로 100 (SEONGSU15)",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 15000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "15초 200회/일",
+          "price": 15000000,
+          "period": "month",
+          "description": "15초 200회/일, 15면, 1개월, 15,000,000원 (VAT 별도)"
+        },
+        {
+          "label": "20초 150회/일",
+          "price": 15000000,
+          "period": "month",
+          "description": "20초 150회/일, 15면, 1개월, 15,000,000원 (VAT 별도)"
+        },
+        {
+          "label": "30초 100회/일",
+          "price": 15000000,
+          "period": "month",
+          "description": "30초 100회/일, 15면, 1개월, 15,000,000원 (VAT 별도)"
+        },
+        {
+          "label": "성수15 + 강남Art + 홍대Art",
+          "price": 27000000,
+          "period": "month",
+          "description": "성수15 + 강남Art + 홍대Art 패키지, 1개월, 27,000,000원 (VAT 별도)"
+        },
+        {
+          "label": "성수15 + 강남싱크",
+          "price": 31000000,
+          "period": "month",
+          "description": "성수15 + 강남싱크 패키지, 1개월, 31,000,000원 (VAT 별도)"
+        },
+        {
+          "label": "성수15 + 강남싱크 + 홍대싱크",
+          "price": 40000000,
+          "period": "month",
+          "description": "성수15 + 강남싱크 + 홍대싱크 패키지, 1개월, 40,000,000원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 180000,
+      "impressions": 2400000,
+      "latitude": 37.5445023983984,
+      "longitude": 127.056090471223
+    },
+    {
+      "id": "cmox1ngef000204l7whv03uj2",
+      "name": "성수역 엔스퀘어 광고",
+      "location": "서울특별시 성동구 아차산로 100",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 10000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "영상(15초)",
+          "price": 10000000,
+          "period": "month",
+          "description": "15초 영상, 120회/일, 1개월, 1,000만원 (VAT 별도, 협의 가능)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 85000,
+      "impressions": 2400000,
+      "latitude": 37.5445023983984,
+      "longitude": 127.056090471223
+    },
+    {
+      "id": "cmp0geb4p000i04ibjncqsfya",
+      "name": "인천지하철 1호선 부평구청역 디지털사이니지 (디지털포스터) 광고",
+      "location": "인천광역시 부평구 부평구청역",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 1900000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "10초 스틸 (8기)",
+          "price": 1700000,
+          "period": "month",
+          "description": "월 1,700,000원 (VAT 별도) / 일 380회 이상"
+        },
+        {
+          "label": "20초 동영상 (8기)",
+          "price": 1900000,
+          "period": "month",
+          "description": "월 1,900,000원 (VAT 별도) / 일 380회 이상"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 32000,
+      "impressions": 1800000,
+      "latitude": 37.508225459146,
+      "longitude": 126.720514883354
+    },
+    {
+      "id": "cmqsuwnmd00020akqsftkqat9",
+      "name": "강남구청역 지하철 7호선 CM보드 영상 광고 (디지털)",
+      "location": "서울 강남구 학동로 402 강남구청역 대합실",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 28000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "조명면 - 1기 / 2면 (A 등급)",
+          "price": 2000000,
+          "period": "month",
+          "description": "월 2,000,000원 + 제작비 160,000원 (VAT 별도)"
+        },
+        {
+          "label": "영상면 - 1기 / 2면",
+          "price": 700000,
+          "period": "month",
+          "description": "월 700,000원 (VAT 별도)"
+        },
+        {
+          "label": "강남구청역 풀패키지 (조명 4기 + 영상 4기)",
+          "price": 10800000,
+          "period": "month",
+          "description": "조명 4기 + 영상 4기 전체 / 월 10,800,000원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 48000,
+      "impressions": 1650000,
+      "latitude": 37.5171892352971,
+      "longitude": 127.04130142966
+    },
+    {
+      "id": "cms725rov00030aj213mgy6q5",
+      "name": "지하철 맥스비전 전체역사 턴키 광고",
+      "location": "서울 1~4호선 핵심 25개 역사 (시청, 신촌, 홍대입구, 신도림, 대림, 구로디지털단지, 신림, 서울대입구, 사당, 강남, 역삼, 선릉, 삼성, 잠실, 건대입구, 왕십리, 을지로3가, 을지로입구, 압구정, 신사, 고속터미널, 교대, 수서, 동대문역사문화공원, 혜화)",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 30000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "FULL PKG (전체 25역사)",
+          "price": 30000000,
+          "period": "month",
+          "description": "25개 전 역사 57set 98면, 20초 기준 일 120회 이상, 30,000,000원 (VAT 별도)"
+        },
+        {
+          "label": "HALF PKG (전체 25역사)",
+          "price": 20000000,
+          "period": "month",
+          "description": "25개 전 역사 57set 98면, 20초 기준 일 60회 이상, 20,000,000원 (VAT 별도)"
+        },
+        {
+          "label": "A PKG (6개 역사 선택)",
+          "price": 10000000,
+          "period": "month",
+          "description": "SA등급 포함 6개 역사 선택 (SA 2 + A 2 + B 2), 20초 기준 일 120회 이상, 10,000,000원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 130000,
+      "impressions": 18500000,
+      "latitude": 37.521696,
+      "longitude": 126.99694799999999
+    },
+    {
+      "id": "cmqsvnjwc00000aja5g41bt7c",
+      "name": "강동역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "location": "서울 강동구 천호대로 1097 강동역 대합실",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 28000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "조명면 - 1기 / 2면 (A 등급)",
+          "price": 2000000,
+          "period": "month",
+          "description": "월 2,000,000원 + 제작비 160,000원 (VAT 별도)"
+        },
+        {
+          "label": "영상면 - 1기 / 2면",
+          "price": 700000,
+          "period": "month",
+          "description": "월 700,000원 (VAT 별도)"
+        },
+        {
+          "label": "강동역 풀패키지 (조명 4기 + 영상 4기)",
+          "price": 10800000,
+          "period": "month",
+          "description": "조명 4기 + 영상 4기 전체 / 월 10,800,000원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 34000,
+      "impressions": 1650000,
+      "latitude": 37.5357793773303,
+      "longitude": 127.132720388453
+    },
+    {
+      "id": "cmp0eza7s000204jim80t8ymo",
+      "name": "지하철 9호선 고속터미널역 캔버스9 광고",
+      "location": "서울 서초구 반포동 고속터미널역 (9호선)",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 40000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "고속터미널역 캔버스9 (30초)",
+          "price": 4000000,
+          "period": "month",
+          "description": "월 4,000,000원 (VAT 별도) / 3기 12면"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 122001,
+      "impressions": 3660041,
+      "latitude": 37.505986,
+      "longitude": 127.004213
+    },
+    {
+      "id": "cmofozazn000004jxwwapnyz9",
+      "name": "2호선 건대입구역 디지털포스터 지하철 광고",
+      "location": "서울 광진구 아차산로 243",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 2500000,
+      "pricePeriod": "month",
+      "priceOptions": null,
+      "partialPeriodRates": null,
+      "dailyFootfall": 31477,
+      "impressions": 850000,
+      "latitude": 37.5404188872176,
+      "longitude": 127.069173281554
+    },
+    {
+      "id": "cmp7y6sqa000004jrsqzhazmu",
+      "name": "강남 글로리강남 전광판 광고",
+      "location": "서울특별시 서초구 서초대로74길 3",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 120000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "20초",
+          "price": 12000000,
+          "period": "month",
+          "description": "20초(1일 100회) 기준 12,000,000원/월 (VAT 별도)"
+        },
+        {
+          "label": "30초",
+          "price": 15000000,
+          "period": "month",
+          "description": "30초(1일 100회) 기준 15,000,000원/월 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 550000,
+      "impressions": 5500000,
+      "latitude": 37.4972246665738,
+      "longitude": 127.026200990619
+    },
+    {
+      "id": "cmox0cnpe000004joeh8b7ic2",
+      "name": "광화문 구세군회관 전광판 광고",
+      "location": "서울 종로구 새문안로 69 구세군회관",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 12000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "영상(20초) 2기 2면",
+          "price": 12000000,
+          "period": "month",
+          "description": "20초 영상, 2기 2면, 1개월, 12,000,000 KRW (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 110286,
+      "impressions": 1450000,
+      "latitude": 37.5704065800176,
+      "longitude": 126.97224400392
+    },
+    {
+      "id": "cmqa6k2lz000304jvk9ikbnl3",
+      "name": "인천 구월로데오광장 전광판 광고",
+      "location": "인천광역시 남동구 성말로 12 구월로데오광장",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 35000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "20초 1개월",
+          "price": 3500000,
+          "period": "month",
+          "description": "20초 영상, 1일 100회, 1개월, 3,500,000원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 85000,
+      "impressions": 2800000,
+      "latitude": 37.4451706512216,
+      "longitude": 126.701891616342
+    },
+    {
+      "id": "cmrtb86im000204l4h9dockxe",
+      "name": "인천공항 T1 탑승동 미디어 광고",
+      "location": "인천광역시 중구 공항로 272 인천국제공항 탑승동 1층 이동통로",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 80000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "탑승동 미디어 1구좌",
+          "price": 8000000,
+          "period": "month",
+          "description": "월 8,000,000원 (VAT 별도) / 1일 273회 노출 (15초 소재 기준)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 120000,
+      "impressions": 2500000,
+      "latitude": 37.4602,
+      "longitude": 126.4407
+    },
+    {
+      "id": "cmrt1x0nv000y04i6lqj7v8lu",
+      "name": "김포공항 국내선 1층 도착장 일반 대합실 사각기둥 PKG 광고",
+      "location": "서울 강서구 하늘길 112 김포국제공항 국내선 1층 도착장 일반 대합실",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 100000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "사각기둥 PKG (12면)",
+          "price": 10000000,
+          "period": "month",
+          "description": "월 10,000,000원 (VAT 별도) / 15초 영상 / 일 150회 / 개별 판매 불가"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 165000,
+      "impressions": 3600000,
+      "latitude": 37.558958766307,
+      "longitude": 126.803085626211
+    },
+    {
+      "id": "cmr3iki4p000009j7v4hfu8pn",
+      "name": "고속터미널 시내 디지털 쉘터 (22-020) 75인치 LCD",
+      "location": "서울 서초구 고속터미널 중앙차로 버스쉘터 시내 방향 (22-020)",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 15000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "고속터미널 시내 디지털 쉘터 (14패널)",
+          "price": 15000000,
+          "period": "month",
+          "description": "월 15,000,000원 (VAT 별도) / 1구좌 30초, 1일 138회 이상 송출"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 95000,
+      "impressions": 2850000,
+      "latitude": 37.50636,
+      "longitude": 127.005259
+    },
+    {
+      "id": "cmp8naebb000004jsvad492fc",
+      "name": "천안 남부오거리 전광판 광고",
+      "location": "충남 천안시 동남구 대흥로 80",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 40000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "1개월",
+          "price": 4000000,
+          "period": "month",
+          "description": "20초 기준 1일 100회, 4,000,000원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 180000,
+      "impressions": 4200000,
+      "latitude": 36.7988211420241,
+      "longitude": 127.153419337762
+    },
+    {
+      "id": "cms8anrz3000j04ied2ork84a",
+      "name": "지하철 2호선 잠실역 맥스비전 광고",
+      "location": "서울 송파구 올림픽로 지하 265 (잠실역 환승통로변 및 1번출구 기둥, 벽면)",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 42000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "영상(20초) 3기 4면",
+          "price": 4200000,
+          "period": "month",
+          "description": "영상(20초), 3기 4면, 120회 이상/일, 4,200,000원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 156858,
+      "impressions": 4705740,
+      "latitude": 37.5133,
+      "longitude": 127.1001
+    },
+    {
+      "id": "cmofp8byj000004jrqctglqs7",
+      "name": "2호선 잠실역 디지털포스터 지하철 광고",
+      "location": "서울 송파구 올림픽로 지하 265",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 25000000,
+      "pricePeriod": "month",
+      "priceOptions": null,
+      "partialPeriodRates": null,
+      "dailyFootfall": 158368,
+      "impressions": 3200000,
+      "latitude": 37.513859279255,
+      "longitude": 127.101857941447
+    },
+    {
+      "id": "cmqhzzg6c000704l2809gq0xe",
+      "name": "대전 으능정이 스카이로드",
+      "location": "대전광역시 중구 은행동 중앙로 164번길",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 50000000,
+      "pricePeriod": "month",
+      "priceOptions": null,
+      "partialPeriodRates": null,
+      "dailyFootfall": 85000,
+      "impressions": 3200000,
+      "latitude": 36.3282453295925,
+      "longitude": 127.428308582462
+    },
+    {
+      "id": "cmofpfkgk000004l5b0uvgv6t",
+      "name": "2호선 사당역 디지털포스터 지하철 광고",
+      "location": "서울 동작구 남부순환로 지하 2089",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 25000000,
+      "pricePeriod": "month",
+      "priceOptions": null,
+      "partialPeriodRates": null,
+      "dailyFootfall": 51224,
+      "impressions": 1150000,
+      "latitude": 37.4765228347619,
+      "longitude": 126.981408909449
+    },
+    {
+      "id": "cmo3l99l7000004l7t4rv9oqt",
+      "name": "홍대 스타 피카소빌딩 전광판 광고",
+      "location": "서울 마포구 양화로 176",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 12000000,
+      "pricePeriod": "month",
+      "priceOptions": null,
+      "partialPeriodRates": null,
+      "dailyFootfall": 52000,
+      "impressions": 850000,
+      "latitude": 37.5572467836494,
+      "longitude": 126.924986220455
+    },
+    {
+      "id": "cmqi6xjgq000604jj5krliihl",
+      "name": "광주 유스퀘어 기둥 전광판 광고",
+      "location": "광주광역시 서구 무진대로 904 유스퀘어",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 5000000,
+      "pricePeriod": "month",
+      "priceOptions": null,
+      "partialPeriodRates": null,
+      "dailyFootfall": 120000,
+      "impressions": 18000000,
+      "latitude": 35.1605756425809,
+      "longitude": 126.879873116288
+    },
+    {
+      "id": "cmqt1otrs00000ajfv6siozwr",
+      "name": "종로 북촌 57갤러리 카페 외벽",
+      "location": "서울 종로구 율곡로3길 17 57갤러리 카페 외벽",
+      "type": "static",
+      "catalogChannel": "offline",
+      "price": 75000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "57갤러리 카페 외벽 (정면 + 후면 / 2면)",
+          "price": 40000000,
+          "period": "2주",
+          "description": "광고 단가 40,000,000원 + 제작비 13,000,000원 (VAT 별도)"
+        },
+        {
+          "label": "4주 연장 집행",
+          "price": 75000000,
+          "period": "4주",
+          "description": "4주 연속 집행 시 75,000,000원 + 제작비 13,000,000원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 150000,
+      "impressions": 4200000,
+      "latitude": 37.579,
+      "longitude": 126.984
+    },
+    {
+      "id": "cmq3wd9aw000504l5lfq1lha8",
+      "name": "성수동 한서빌딩 외벽광고",
+      "location": "서울특별시 성동구 성수동2가 연무장7길 16 한서빌딩",
+      "type": "static",
+      "catalogChannel": "offline",
+      "price": 0,
+      "pricePeriod": "month",
+      "priceOptions": null,
+      "partialPeriodRates": null,
+      "dailyFootfall": 48000,
+      "impressions": 2900000,
+      "latitude": 37.5439484804889,
+      "longitude": 127.055098696853
+    },
+    {
+      "id": "cmrtbq0mb000504lawvihn7eq",
+      "name": "인천공항 T2 프로모션 광고",
+      "location": "인천광역시 중구 공항로 272 인천국제공항 제2여객터미널 3층 면세구역",
+      "type": "static",
+      "catalogChannel": "offline",
+      "price": 50000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "프로모션 동편 (PP-25-01)",
+          "price": 50000000,
+          "period": "month",
+          "description": "월 50,000,000원 (VAT 별도) / 255.2㎡"
+        },
+        {
+          "label": "프로모션 서편 (PP-25-02)",
+          "price": 30000000,
+          "period": "month",
+          "description": "월 30,000,000원 (VAT 별도) / 135.9㎡"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 130000,
+      "impressions": 4000000,
+      "latitude": 37.4692488244219,
+      "longitude": 126.43320918812
+    },
+    {
+      "id": "cmqqtssxl000204jy0p8pkyo8",
+      "name": "공항철도 홍대입구역 3번 출구 랩핑 패키지 광고",
+      "location": "서울 마포구 양화로 지하 188 홍대입구역 3번 출구 (연트럴파크·연남동 방향)",
+      "type": "static",
+      "catalogChannel": "offline",
+      "price": 32000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "Full Package (캐노피 6면 + 에스컬레이터 2면 + 계단 2면 / 총 10면)",
+          "price": 32000000,
+          "period": "month",
+          "description": "광고 단가 월 32,000,000원 (VAT 별도) + 제작비 11,200,000원"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 48000,
+      "impressions": 2200000,
+      "latitude": 37.557883,
+      "longitude": 126.926209
+    },
+    {
+      "id": "cmrm0xl6k000204jy1un9gwrw",
+      "name": "에어부산 기내 트레이 테이블 광고",
+      "location": "에어부산 전 항공기 기내 트레이 테이블",
+      "type": "static",
+      "catalogChannel": "offline",
+      "price": 7500000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "1개월 1대 (앞면)",
+          "price": 7500000,
+          "period": "month",
+          "description": "월 7,500,000원 + 제작비 580만원 (VAT 별도)"
+        },
+        {
+          "label": "1개월 1대 (뒷면)",
+          "price": 7500000,
+          "period": "month",
+          "description": "월 7,500,000원 + 제작비 500만원 (VAT 별도)"
+        },
+        {
+          "label": "1개월 1대 (양면)",
+          "price": 7500000,
+          "period": "month",
+          "description": "월 7,500,000원 + 제작비 860만원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 14400,
+      "impressions": 432000,
+      "latitude": 37.4476713343149,
+      "longitude": 126.452171924945
+    },
+    {
+      "id": "cmp3vb0q9000204kzu575iq32",
+      "name": "(광역) 경기 버스 내부 파노라마 광고",
+      "location": "경기도 광역버스 노선",
+      "type": "mobile",
+      "catalogChannel": "offline",
+      "price": 100000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "1대 8면",
+          "price": 100000,
+          "period": "month",
+          "description": "파노라마, 1대 8면, 1개월, 100,000원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 42000,
+      "impressions": 189000,
+      "latitude": 37.497048,
+      "longitude": 127.029271
+    },
+    {
+      "id": "cmracbp47000804l40z3wcrqa",
+      "name": "세종 버스 외부 광고",
+      "location": "세종특별자치시 전역 버스 노선",
+      "type": "mobile",
+      "catalogChannel": "offline",
+      "price": 520000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "측면 1대 2면 (차도면 + 인도면)",
+          "price": 520000,
+          "period": "month",
+          "description": "차도면 360×90cm + 인도면 280×43cm, 매체단가 520,000원 (VAT 별도), 제작비 60,000원 별도. 노선 선택 가능, 게재까지 7~10일 소요."
+        },
+        {
+          "label": "후면 단독",
+          "price": 180000,
+          "period": "month",
+          "description": "후면 190×30cm, 매체단가 180,000원 (VAT 별도), 제작비 30,000원 별도. 노선 선택 가능, 게재까지 7~10일 소요."
+        },
+        {
+          "label": "승차면 단독",
+          "price": 180000,
+          "period": "month",
+          "description": "승차면 140×95cm, 매체단가 180,000원 (VAT 별도), 제작비 40,000원 별도. 노선 선택 가능, 게재까지 7~10일 소요."
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 42000,
+      "impressions": 189000,
+      "latitude": 36.4800649113757,
+      "longitude": 127.289195324698
+    },
+    {
+      "id": "cmqz91a0e000104js4dd8i780",
+      "name": "도심공항 리무진버스 윈도우스티커 광고",
+      "location": "인천국제공항 ↔ 서울 도심 공항리무진 창문",
+      "type": "mobile",
+      "catalogChannel": "offline",
+      "price": 100000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "강남 리무진 (대당)",
+          "price": 100000,
+          "period": "month",
+          "description": "매체비 100,000원 (20장) + 제작비 120,000원 (VAT 별도)"
+        },
+        {
+          "label": "강북 리무진 (대당)",
+          "price": 70000,
+          "period": "month",
+          "description": "매체비 70,000원 (12장) + 제작비 20,000원 (VAT 별도)"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 42000,
+      "impressions": 189000,
+      "latitude": 37.46,
+      "longitude": 126.44
+    },
+    {
+      "id": "cmqjbizs5000504if1dyoe7oj",
+      "name": "광주 시내버스 내부 영상 광고",
+      "location": "광주광역시 전역 시내버스 노선 (1,044대 운영)",
+      "type": "mobile",
+      "catalogChannel": "offline",
+      "price": 80000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "버스 1대 (모니터 2개)",
+          "price": 80000,
+          "period": "month",
+          "description": "광고료 80,000원 (VAT 별도) / 15~20초 영상 스팟 / 월 운영"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 421,
+      "impressions": 1890,
+      "latitude": 35.1595,
+      "longitude": 126.8526
+    },
+    {
+      "id": "cmr9xedzi000a04layhba2ulc",
+      "name": "택배카보드 차량 광고",
+      "location": "서울 전역 택배 배송 트럭 (대당 3면 보드)",
+      "type": "mobile",
+      "catalogChannel": "offline",
+      "price": 300000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "택배카보드 광고 (1대)",
+          "price": 300000,
+          "period": "month",
+          "description": "대당 월 300,000원 (VAT 별도) / 차도면·인도면·후면 3면 포함 / 최소 1대부터 가능"
+        },
+        {
+          "label": "택배카보드 광고 (10대 이상)",
+          "price": 270000,
+          "period": "month",
+          "description": "대당 월 270,000원 (VAT 별도) / 10대 이상 계약 시 적용 / 차도면·인도면·후면 3면 포함"
+        },
+        {
+          "label": "택배카보드 광고 (6개월 이상 장기계약)",
+          "price": 250000,
+          "period": "6개월",
+          "description": "대당 월 250,000원 (VAT 별도) / 6개월 이상 계약 시 적용 / 제작비 지원 혜택 제공"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 98000,
+      "impressions": 2940000,
+      "latitude": 37.5665,
+      "longitude": 126.978
+    },
+    {
+      "id": "cmrap3eo4000004jv8b2tt90v",
+      "name": "신사 BK빌딩 LED 전광판",
+      "location": "서울특별시 강남구 도산대로 106 (신사 BK빌딩 외벽)",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 100000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "영상(15초)",
+          "price": 10000000,
+          "period": "month",
+          "description": "15초 영상, 1면, 1일 100회 이상 노출, VAT 별도"
+        },
+        {
+          "label": "영상(120초)_SOV 쿼터",
+          "price": 10000000,
+          "period": "month",
+          "description": "120초 영상 SOV 쿼터, 1면, 1일 800회 이상 노출, VAT 별도"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 456143,
+      "impressions": null,
+      "latitude": 37.5165,
+      "longitude": 127.0208
+    },
+    {
+      "id": "cmrn711g8000404ib3hct4qpy",
+      "name": "성신여대입구역 강북미디어빌딩 전광판 광고",
+      "location": "서울 성북구 동소문로 83-1 강북미디어빌딩",
+      "type": "dooh",
+      "catalogChannel": "offline",
+      "price": 70000000,
+      "pricePeriod": "month",
+      "priceOptions": [
+        {
+          "label": "20초 영상 (일 100회)",
+          "price": 7000000,
+          "period": "month",
+          "description": "월 7,000,000원 (VAT 별도) / 1개월 이상 10% 할인 적용 가능"
+        }
+      ],
+      "partialPeriodRates": null,
+      "dailyFootfall": 40000,
+      "impressions": 2400000,
+      "latitude": 37.592,
+      "longitude": 127.016
+    },
+    {
+      "id": "cmtd4wpic000004ic5oeqzdxq",
+      "name": "서울 지하철 1~4호선 사각기둥 조명광고",
+      "location": "서울",
+      "type": "static",
+      "catalogChannel": "offline",
+      "price": 2000000,
+      "pricePeriod": "month",
+      "priceOptions": null,
+      "partialPeriodRates": null,
+      "dailyFootfall": null,
+      "impressions": null,
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "expected": [
+    {
+      "mediaId": "cmox1l6tx000204kysagmp1v8",
+      "scenario": "calendar_14d",
+      "totalWon": 7700000,
+      "lineSupplyWon": 7000000,
+      "unitPriceWon": 15000000,
+      "impressions": 1120000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmox1l6tx000204kysagmp1v8",
+      "scenario": "wizard_14days",
+      "totalWon": 7700000,
+      "lineSupplyWon": 7000000,
+      "unitPriceWon": 15000000,
+      "impressions": 1120000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmox1l6tx000204kysagmp1v8",
+      "scenario": "wizard_1month",
+      "totalWon": 7700000,
+      "lineSupplyWon": 7000000,
+      "unitPriceWon": 15000000,
+      "impressions": 1120000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmox1ngef000204l7whv03uj2",
+      "scenario": "calendar_14d",
+      "totalWon": 5133334,
+      "lineSupplyWon": 4666667,
+      "unitPriceWon": 10000000,
+      "impressions": 1120000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmox1ngef000204l7whv03uj2",
+      "scenario": "wizard_14days",
+      "totalWon": 5133334,
+      "lineSupplyWon": 4666667,
+      "unitPriceWon": 10000000,
+      "impressions": 1120000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmox1ngef000204l7whv03uj2",
+      "scenario": "wizard_1month",
+      "totalWon": 5133334,
+      "lineSupplyWon": 4666667,
+      "unitPriceWon": 10000000,
+      "impressions": 1120000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp0geb4p000i04ibjncqsfya",
+      "scenario": "calendar_14d",
+      "totalWon": 975334,
+      "lineSupplyWon": 886667,
+      "unitPriceWon": 1900000,
+      "impressions": 179354,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp0geb4p000i04ibjncqsfya",
+      "scenario": "wizard_14days",
+      "totalWon": 975334,
+      "lineSupplyWon": 886667,
+      "unitPriceWon": 1900000,
+      "impressions": 179354,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp0geb4p000i04ibjncqsfya",
+      "scenario": "wizard_1month",
+      "totalWon": 975334,
+      "lineSupplyWon": 886667,
+      "unitPriceWon": 1900000,
+      "impressions": 179354,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqsuwnmd00020akqsftkqat9",
+      "scenario": "calendar_14d",
+      "totalWon": 14373334,
+      "lineSupplyWon": 13066667,
+      "unitPriceWon": 28000000,
+      "impressions": 770000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqsuwnmd00020akqsftkqat9",
+      "scenario": "wizard_14days",
+      "totalWon": 14373334,
+      "lineSupplyWon": 13066667,
+      "unitPriceWon": 28000000,
+      "impressions": 770000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqsuwnmd00020akqsftkqat9",
+      "scenario": "wizard_1month",
+      "totalWon": 14373334,
+      "lineSupplyWon": 13066667,
+      "unitPriceWon": 28000000,
+      "impressions": 770000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cms725rov00030aj213mgy6q5",
+      "scenario": "calendar_14d",
+      "totalWon": 15400000,
+      "lineSupplyWon": 14000000,
+      "unitPriceWon": 30000000,
+      "impressions": 1820000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cms725rov00030aj213mgy6q5",
+      "scenario": "wizard_14days",
+      "totalWon": 15400000,
+      "lineSupplyWon": 14000000,
+      "unitPriceWon": 30000000,
+      "impressions": 1820000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cms725rov00030aj213mgy6q5",
+      "scenario": "wizard_1month",
+      "totalWon": 15400000,
+      "lineSupplyWon": 14000000,
+      "unitPriceWon": 30000000,
+      "impressions": 1820000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqsvnjwc00000aja5g41bt7c",
+      "scenario": "calendar_14d",
+      "totalWon": 14373334,
+      "lineSupplyWon": 13066667,
+      "unitPriceWon": 28000000,
+      "impressions": 770000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqsvnjwc00000aja5g41bt7c",
+      "scenario": "wizard_14days",
+      "totalWon": 14373334,
+      "lineSupplyWon": 13066667,
+      "unitPriceWon": 28000000,
+      "impressions": 770000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqsvnjwc00000aja5g41bt7c",
+      "scenario": "wizard_1month",
+      "totalWon": 14373334,
+      "lineSupplyWon": 13066667,
+      "unitPriceWon": 28000000,
+      "impressions": 770000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp0eza7s000204jim80t8ymo",
+      "scenario": "calendar_14d",
+      "totalWon": 20533334,
+      "lineSupplyWon": 18666667,
+      "unitPriceWon": 40000000,
+      "impressions": 1708019,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp0eza7s000204jim80t8ymo",
+      "scenario": "wizard_14days",
+      "totalWon": 20533334,
+      "lineSupplyWon": 18666667,
+      "unitPriceWon": 40000000,
+      "impressions": 1708019,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp0eza7s000204jim80t8ymo",
+      "scenario": "wizard_1month",
+      "totalWon": 20533334,
+      "lineSupplyWon": 18666667,
+      "unitPriceWon": 40000000,
+      "impressions": 1708019,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmofozazn000004jxwwapnyz9",
+      "scenario": "calendar_14d",
+      "totalWon": 1283334,
+      "lineSupplyWon": 1166667,
+      "unitPriceWon": 2500000,
+      "impressions": 396667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmofozazn000004jxwwapnyz9",
+      "scenario": "wizard_14days",
+      "totalWon": 1283334,
+      "lineSupplyWon": 1166667,
+      "unitPriceWon": 2500000,
+      "impressions": 396667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmofozazn000004jxwwapnyz9",
+      "scenario": "wizard_1month",
+      "totalWon": 1283334,
+      "lineSupplyWon": 1166667,
+      "unitPriceWon": 2500000,
+      "impressions": 396667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp7y6sqa000004jrsqzhazmu",
+      "scenario": "calendar_14d",
+      "totalWon": 61600000,
+      "lineSupplyWon": 56000000,
+      "unitPriceWon": 120000000,
+      "impressions": 2566667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp7y6sqa000004jrsqzhazmu",
+      "scenario": "wizard_14days",
+      "totalWon": 61600000,
+      "lineSupplyWon": 56000000,
+      "unitPriceWon": 120000000,
+      "impressions": 2566667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp7y6sqa000004jrsqzhazmu",
+      "scenario": "wizard_1month",
+      "totalWon": 61600000,
+      "lineSupplyWon": 56000000,
+      "unitPriceWon": 120000000,
+      "impressions": 2566667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmox0cnpe000004joeh8b7ic2",
+      "scenario": "calendar_14d",
+      "totalWon": 6160000,
+      "lineSupplyWon": 5600000,
+      "unitPriceWon": 12000000,
+      "impressions": 676667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmox0cnpe000004joeh8b7ic2",
+      "scenario": "wizard_14days",
+      "totalWon": 6160000,
+      "lineSupplyWon": 5600000,
+      "unitPriceWon": 12000000,
+      "impressions": 676667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmox0cnpe000004joeh8b7ic2",
+      "scenario": "wizard_1month",
+      "totalWon": 6160000,
+      "lineSupplyWon": 5600000,
+      "unitPriceWon": 12000000,
+      "impressions": 676667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqa6k2lz000304jvk9ikbnl3",
+      "scenario": "calendar_14d",
+      "totalWon": 17966666,
+      "lineSupplyWon": 16333333,
+      "unitPriceWon": 35000000,
+      "impressions": 1306667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqa6k2lz000304jvk9ikbnl3",
+      "scenario": "wizard_14days",
+      "totalWon": 17966666,
+      "lineSupplyWon": 16333333,
+      "unitPriceWon": 35000000,
+      "impressions": 1306667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqa6k2lz000304jvk9ikbnl3",
+      "scenario": "wizard_1month",
+      "totalWon": 17966666,
+      "lineSupplyWon": 16333333,
+      "unitPriceWon": 35000000,
+      "impressions": 1306667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrtb86im000204l4h9dockxe",
+      "scenario": "calendar_14d",
+      "totalWon": 41066666,
+      "lineSupplyWon": 37333333,
+      "unitPriceWon": 80000000,
+      "impressions": 1166667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrtb86im000204l4h9dockxe",
+      "scenario": "wizard_14days",
+      "totalWon": 41066666,
+      "lineSupplyWon": 37333333,
+      "unitPriceWon": 80000000,
+      "impressions": 1166667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrtb86im000204l4h9dockxe",
+      "scenario": "wizard_1month",
+      "totalWon": 41066666,
+      "lineSupplyWon": 37333333,
+      "unitPriceWon": 80000000,
+      "impressions": 1166667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrt1x0nv000y04i6lqj7v8lu",
+      "scenario": "calendar_14d",
+      "totalWon": 51333334,
+      "lineSupplyWon": 46666667,
+      "unitPriceWon": 100000000,
+      "impressions": 1680000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrt1x0nv000y04i6lqj7v8lu",
+      "scenario": "wizard_14days",
+      "totalWon": 51333334,
+      "lineSupplyWon": 46666667,
+      "unitPriceWon": 100000000,
+      "impressions": 1680000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrt1x0nv000y04i6lqj7v8lu",
+      "scenario": "wizard_1month",
+      "totalWon": 51333334,
+      "lineSupplyWon": 46666667,
+      "unitPriceWon": 100000000,
+      "impressions": 1680000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmr3iki4p000009j7v4hfu8pn",
+      "scenario": "calendar_14d",
+      "totalWon": 7700000,
+      "lineSupplyWon": 7000000,
+      "unitPriceWon": 15000000,
+      "impressions": 1330000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmr3iki4p000009j7v4hfu8pn",
+      "scenario": "wizard_14days",
+      "totalWon": 7700000,
+      "lineSupplyWon": 7000000,
+      "unitPriceWon": 15000000,
+      "impressions": 1330000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmr3iki4p000009j7v4hfu8pn",
+      "scenario": "wizard_1month",
+      "totalWon": 7700000,
+      "lineSupplyWon": 7000000,
+      "unitPriceWon": 15000000,
+      "impressions": 1330000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp8naebb000004jsvad492fc",
+      "scenario": "calendar_14d",
+      "totalWon": 20533334,
+      "lineSupplyWon": 18666667,
+      "unitPriceWon": 40000000,
+      "impressions": 1960000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp8naebb000004jsvad492fc",
+      "scenario": "wizard_14days",
+      "totalWon": 20533334,
+      "lineSupplyWon": 18666667,
+      "unitPriceWon": 40000000,
+      "impressions": 1960000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp8naebb000004jsvad492fc",
+      "scenario": "wizard_1month",
+      "totalWon": 20533334,
+      "lineSupplyWon": 18666667,
+      "unitPriceWon": 40000000,
+      "impressions": 1960000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cms8anrz3000j04ied2ork84a",
+      "scenario": "calendar_14d",
+      "totalWon": 21560000,
+      "lineSupplyWon": 19600000,
+      "unitPriceWon": 42000000,
+      "impressions": 2196012,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cms8anrz3000j04ied2ork84a",
+      "scenario": "wizard_14days",
+      "totalWon": 21560000,
+      "lineSupplyWon": 19600000,
+      "unitPriceWon": 42000000,
+      "impressions": 2196012,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cms8anrz3000j04ied2ork84a",
+      "scenario": "wizard_1month",
+      "totalWon": 21560000,
+      "lineSupplyWon": 19600000,
+      "unitPriceWon": 42000000,
+      "impressions": 2196012,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmofp8byj000004jrqctglqs7",
+      "scenario": "calendar_14d",
+      "totalWon": 12833334,
+      "lineSupplyWon": 11666667,
+      "unitPriceWon": 25000000,
+      "impressions": 1493333,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmofp8byj000004jrqctglqs7",
+      "scenario": "wizard_14days",
+      "totalWon": 12833334,
+      "lineSupplyWon": 11666667,
+      "unitPriceWon": 25000000,
+      "impressions": 1493333,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmofp8byj000004jrqctglqs7",
+      "scenario": "wizard_1month",
+      "totalWon": 12833334,
+      "lineSupplyWon": 11666667,
+      "unitPriceWon": 25000000,
+      "impressions": 1493333,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqhzzg6c000704l2809gq0xe",
+      "scenario": "calendar_14d",
+      "totalWon": 25666666,
+      "lineSupplyWon": 23333333,
+      "unitPriceWon": 50000000,
+      "impressions": 1493333,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqhzzg6c000704l2809gq0xe",
+      "scenario": "wizard_14days",
+      "totalWon": 25666666,
+      "lineSupplyWon": 23333333,
+      "unitPriceWon": 50000000,
+      "impressions": 1493333,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqhzzg6c000704l2809gq0xe",
+      "scenario": "wizard_1month",
+      "totalWon": 25666666,
+      "lineSupplyWon": 23333333,
+      "unitPriceWon": 50000000,
+      "impressions": 1493333,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmofpfkgk000004l5b0uvgv6t",
+      "scenario": "calendar_14d",
+      "totalWon": 12833334,
+      "lineSupplyWon": 11666667,
+      "unitPriceWon": 25000000,
+      "impressions": 536667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmofpfkgk000004l5b0uvgv6t",
+      "scenario": "wizard_14days",
+      "totalWon": 12833334,
+      "lineSupplyWon": 11666667,
+      "unitPriceWon": 25000000,
+      "impressions": 536667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmofpfkgk000004l5b0uvgv6t",
+      "scenario": "wizard_1month",
+      "totalWon": 12833334,
+      "lineSupplyWon": 11666667,
+      "unitPriceWon": 25000000,
+      "impressions": 536667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmo3l99l7000004l7t4rv9oqt",
+      "scenario": "calendar_14d",
+      "totalWon": 6160000,
+      "lineSupplyWon": 5600000,
+      "unitPriceWon": 12000000,
+      "impressions": 396667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmo3l99l7000004l7t4rv9oqt",
+      "scenario": "wizard_14days",
+      "totalWon": 6160000,
+      "lineSupplyWon": 5600000,
+      "unitPriceWon": 12000000,
+      "impressions": 396667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmo3l99l7000004l7t4rv9oqt",
+      "scenario": "wizard_1month",
+      "totalWon": 6160000,
+      "lineSupplyWon": 5600000,
+      "unitPriceWon": 12000000,
+      "impressions": 396667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqi6xjgq000604jj5krliihl",
+      "scenario": "calendar_14d",
+      "totalWon": 2566666,
+      "lineSupplyWon": 2333333,
+      "unitPriceWon": 5000000,
+      "impressions": 8400000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqi6xjgq000604jj5krliihl",
+      "scenario": "wizard_14days",
+      "totalWon": 2566666,
+      "lineSupplyWon": 2333333,
+      "unitPriceWon": 5000000,
+      "impressions": 8400000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqi6xjgq000604jj5krliihl",
+      "scenario": "wizard_1month",
+      "totalWon": 2566666,
+      "lineSupplyWon": 2333333,
+      "unitPriceWon": 5000000,
+      "impressions": 8400000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqt1otrs00000ajfv6siozwr",
+      "scenario": "calendar_14d",
+      "totalWon": 38500000,
+      "lineSupplyWon": 35000000,
+      "unitPriceWon": 75000000,
+      "impressions": 1960000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqt1otrs00000ajfv6siozwr",
+      "scenario": "wizard_14days",
+      "totalWon": 38500000,
+      "lineSupplyWon": 35000000,
+      "unitPriceWon": 75000000,
+      "impressions": 1960000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqt1otrs00000ajfv6siozwr",
+      "scenario": "wizard_1month",
+      "totalWon": 38500000,
+      "lineSupplyWon": 35000000,
+      "unitPriceWon": 75000000,
+      "impressions": 1960000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmq3wd9aw000504l5lfq1lha8",
+      "scenario": "calendar_14d",
+      "totalWon": 0,
+      "lineSupplyWon": 0,
+      "unitPriceWon": 0,
+      "impressions": 1353333,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmq3wd9aw000504l5lfq1lha8",
+      "scenario": "wizard_14days",
+      "totalWon": 0,
+      "lineSupplyWon": 0,
+      "unitPriceWon": 0,
+      "impressions": 1353333,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmq3wd9aw000504l5lfq1lha8",
+      "scenario": "wizard_1month",
+      "totalWon": 0,
+      "lineSupplyWon": 0,
+      "unitPriceWon": 0,
+      "impressions": 1353333,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrtbq0mb000504lawvihn7eq",
+      "scenario": "calendar_14d",
+      "totalWon": 25666666,
+      "lineSupplyWon": 23333333,
+      "unitPriceWon": 50000000,
+      "impressions": 1866667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrtbq0mb000504lawvihn7eq",
+      "scenario": "wizard_14days",
+      "totalWon": 25666666,
+      "lineSupplyWon": 23333333,
+      "unitPriceWon": 50000000,
+      "impressions": 1866667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrtbq0mb000504lawvihn7eq",
+      "scenario": "wizard_1month",
+      "totalWon": 25666666,
+      "lineSupplyWon": 23333333,
+      "unitPriceWon": 50000000,
+      "impressions": 1866667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqqtssxl000204jy0p8pkyo8",
+      "scenario": "calendar_14d",
+      "totalWon": 16426666,
+      "lineSupplyWon": 14933333,
+      "unitPriceWon": 32000000,
+      "impressions": 1026667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqqtssxl000204jy0p8pkyo8",
+      "scenario": "wizard_14days",
+      "totalWon": 16426666,
+      "lineSupplyWon": 14933333,
+      "unitPriceWon": 32000000,
+      "impressions": 1026667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqqtssxl000204jy0p8pkyo8",
+      "scenario": "wizard_1month",
+      "totalWon": 16426666,
+      "lineSupplyWon": 14933333,
+      "unitPriceWon": 32000000,
+      "impressions": 1026667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrm0xl6k000204jy1un9gwrw",
+      "scenario": "calendar_14d",
+      "totalWon": 3850000,
+      "lineSupplyWon": 3500000,
+      "unitPriceWon": 7500000,
+      "impressions": 201600,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrm0xl6k000204jy1un9gwrw",
+      "scenario": "wizard_14days",
+      "totalWon": 3850000,
+      "lineSupplyWon": 3500000,
+      "unitPriceWon": 7500000,
+      "impressions": 201600,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmrm0xl6k000204jy1un9gwrw",
+      "scenario": "wizard_1month",
+      "totalWon": 3850000,
+      "lineSupplyWon": 3500000,
+      "unitPriceWon": 7500000,
+      "impressions": 201600,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp3vb0q9000204kzu575iq32",
+      "scenario": "calendar_14d",
+      "totalWon": 51334,
+      "lineSupplyWon": 46667,
+      "unitPriceWon": 100000,
+      "impressions": 2706667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp3vb0q9000204kzu575iq32",
+      "scenario": "wizard_14days",
+      "totalWon": 51334,
+      "lineSupplyWon": 46667,
+      "unitPriceWon": 100000,
+      "impressions": 2706667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmp3vb0q9000204kzu575iq32",
+      "scenario": "wizard_1month",
+      "totalWon": 51334,
+      "lineSupplyWon": 46667,
+      "unitPriceWon": 100000,
+      "impressions": 2706667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmracbp47000804l40z3wcrqa",
+      "scenario": "calendar_14d",
+      "totalWon": 266934,
+      "lineSupplyWon": 242667,
+      "unitPriceWon": 520000,
+      "impressions": 3966667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmracbp47000804l40z3wcrqa",
+      "scenario": "wizard_14days",
+      "totalWon": 266934,
+      "lineSupplyWon": 242667,
+      "unitPriceWon": 520000,
+      "impressions": 3966667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmracbp47000804l40z3wcrqa",
+      "scenario": "wizard_1month",
+      "totalWon": 266934,
+      "lineSupplyWon": 242667,
+      "unitPriceWon": 520000,
+      "impressions": 3966667,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqz91a0e000104js4dd8i780",
+      "scenario": "calendar_14d",
+      "totalWon": 51334,
+      "lineSupplyWon": 46667,
+      "unitPriceWon": 100000,
+      "impressions": 840000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqz91a0e000104js4dd8i780",
+      "scenario": "wizard_14days",
+      "totalWon": 51334,
+      "lineSupplyWon": 46667,
+      "unitPriceWon": 100000,
+      "impressions": 840000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqz91a0e000104js4dd8i780",
+      "scenario": "wizard_1month",
+      "totalWon": 51334,
+      "lineSupplyWon": 46667,
+      "unitPriceWon": 100000,
+      "impressions": 840000,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqjbizs5000504if1dyoe7oj",
+      "scenario": "calendar_14d",
+      "totalWon": 41066,
+      "lineSupplyWon": 37333,
+      "unitPriceWon": 80000,
+      "impressions": 5157600,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqjbizs5000504if1dyoe7oj",
+      "scenario": "wizard_14days",
+      "totalWon": 41066,
+      "lineSupplyWon": 37333,
+      "unitPriceWon": 80000,
+      "impressions": 5157600,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmqjbizs5000504if1dyoe7oj",
+      "scenario": "wizard_1month",
+      "totalWon": 41066,
+      "lineSupplyWon": 37333,
+      "unitPriceWon": 80000,
+      "impressions": 5157600,
+      "periodDays": 14
+    },
+    {
+      "mediaId": "cmr9xedzi000a04layhba2ulc",
+      "scenario": "calendar_14d",
+      "totalWon": 154000,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmr9xedzi000a04layhba2ulc",
+      "scenario": "wizard_14days",
+      "totalWon": 154000,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmr9xedzi000a04layhba2ulc",
+      "scenario": "wizard_1month",
+      "totalWon": 154000,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmrap3eo4000004jv8b2tt90v",
+      "scenario": "calendar_14d",
+      "totalWon": 51333334,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmrap3eo4000004jv8b2tt90v",
+      "scenario": "wizard_14days",
+      "totalWon": 51333334,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmrap3eo4000004jv8b2tt90v",
+      "scenario": "wizard_1month",
+      "totalWon": 51333334,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmrn711g8000404ib3hct4qpy",
+      "scenario": "calendar_14d",
+      "totalWon": 35933334,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmrn711g8000404ib3hct4qpy",
+      "scenario": "wizard_14days",
+      "totalWon": 35933334,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmrn711g8000404ib3hct4qpy",
+      "scenario": "wizard_1month",
+      "totalWon": 35933334,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmtd4wpic000004ic5oeqzdxq",
+      "scenario": "calendar_14d",
+      "totalWon": 1026666,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmtd4wpic000004ic5oeqzdxq",
+      "scenario": "wizard_14days",
+      "totalWon": 1026666,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    },
+    {
+      "mediaId": "cmtd4wpic000004ic5oeqzdxq",
+      "scenario": "wizard_1month",
+      "totalWon": 1026666,
+      "lineSupplyWon": null,
+      "unitPriceWon": null,
+      "impressions": null,
+      "periodDays": null
+    }
+  ],
+  "_fixtureNote": "media.price = prod baseline unitPriceWon (pr0 post). DB enriches options/impressions only."
+}

@@ -1,13 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { calculateQuote, QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE } from "@/lib/quote-calculator";
+import {
+  calculateQuote,
+  QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE,
+} from "@/lib/quote-calculator";
+import { BUDGET_PRICING_NOT_IMPLEMENTED } from "@/lib/pricing/budget-pricing";
 import { parseQuoteMediaSelections } from "@/lib/quote-media-selections";
 import { computeNetworkMonthlyPrice } from "@/lib/media-network-public";
 
 const start = new Date("2025-06-01T12:00:00");
 const end = new Date("2025-06-30T12:00:00");
 
-test("calculateQuote throws when display type is missing (online/null guard)", () => {
+test("calculateQuote throws BudgetPricing not-implemented for online catalog", () => {
   assert.throws(
     () =>
       calculateQuote({
@@ -19,6 +23,14 @@ test("calculateQuote throws when display type is missing (online/null guard)", (
             type: null,
             catalogChannel: "online",
             price: 0,
+            onlineSpec: {
+              platform: "naver",
+              minBudget: 500_000,
+              cpcMin: 100,
+              cpcMax: 500,
+              cpmMin: null,
+              cpmMax: null,
+            },
           },
         ],
         startDate: start,
@@ -26,9 +38,10 @@ test("calculateQuote throws when display type is missing (online/null guard)", (
       }),
     (err: unknown) => {
       assert.ok(err instanceof Error);
-      assert.match(err.message, new RegExp(QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE));
+      assert.match(err.message, new RegExp(BUDGET_PRICING_NOT_IMPLEMENTED));
       assert.match(err.message, /mediaId=online-search-1/);
-      assert.match(err.message, /catalogChannel=online/);
+      assert.match(err.message, /PR2 미구현/);
+      assert.match(err.message, /platform=naver/);
       return true;
     },
   );

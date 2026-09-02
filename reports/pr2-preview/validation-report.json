@@ -1,0 +1,41 @@
+{
+  "at": "2026-09-02T15:45:42.654Z",
+  "smokeId": "__pr2_preview_smoke_online__",
+  "phases": {
+    "calculateQuote": {
+      "throws": true,
+      "message": "Error: BUDGET_PRICING_NOT_IMPLEMENTED: mediaId=__pr2_preview_smoke_online__ catalogChannel=online — PR2 미구현, PR5 예정",
+      "isBudgetPricing": true
+    },
+    "calculateQuoteFromMediaIds": {
+      "throws": true,
+      "message": "Error: BUDGET_PRICING_NOT_IMPLEMENTED: mediaId=__pr2_preview_smoke_online__ catalogChannel=online — PR2 미구현, PR5 예정 platform=naver_search",
+      "isBudgetPricing": true
+    },
+    "buildQuoteExportPayload": {
+      "throws": true,
+      "message": "Error: BUDGET_PRICING_NOT_IMPLEMENTED: mediaId=__pr2_preview_smoke_online__ catalogChannel=online — PR2 미구현, PR5 예정 platform=naver_search",
+      "isBudgetPricing": true
+    },
+    "apiUserFacing": {
+      "wizardExportPost": {
+        "httpStatus": 500,
+        "body": "Failed",
+        "rawErrorInResponseBody": false
+      },
+      "oohQuotePdfGet": {
+        "newBuilderFails": true,
+        "userSees": "legacy PDF fallback (200) — NOT BUDGET_PRICING string in response",
+        "rawErrorExposedToUser": false
+      },
+      "adminDraftPdfPost": {
+        "callsCalculateQuote": false,
+        "note": "Uses precomputed rows from admin UI"
+      }
+    },
+    "cleanup": {
+      "onlineCount": 0
+    }
+  },
+  "pass": true
+}

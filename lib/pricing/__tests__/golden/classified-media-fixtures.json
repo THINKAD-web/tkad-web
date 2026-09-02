@@ -1,0 +1,12 @@
+[
+  {
+    "id": "cmrap3eo4000004jv8b2tt90v",
+    "price": 100000000,
+    "_note": "Prod baseline unitPriceWon — preview DB price field is 10× smaller (manwon vs won encoding drift on classified rows)."
+  },
+  {
+    "id": "cmrn711g8000404ib3hct4qpy",
+    "price": 70000000,
+    "_note": "Prod baseline unitPriceWon — same 10× preview drift as cmrap3eo."
+  }
+]
