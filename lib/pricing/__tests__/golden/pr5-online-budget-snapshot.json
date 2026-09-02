@@ -1,0 +1,633 @@
+{
+  "generatedAt": "2026-09-02T19:53:10.123Z",
+  "sampleCount": 14,
+  "calcRows": 42,
+  "startDate": "2025-06-01T12:00:00.000Z",
+  "endDate": "2025-06-30T12:00:00.000Z",
+  "largeBudgetWon": 10000000,
+  "scenarios": [
+    "at_min",
+    "2x_min",
+    "large"
+  ],
+  "media": [
+    {
+      "id": "ca9a554ad046b0180e73eea6d",
+      "slug": "ig-awareness-reach",
+      "name": "인스타그램 인지도·도달 캠페인",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Meta Instagram",
+        "minBudget": 800000,
+        "cpcMin": 200,
+        "cpcMax": 600,
+        "cpmMin": 4000,
+        "cpmMax": 8000
+      }
+    },
+    {
+      "id": "c80fb8d37d1d7e822938d2517",
+      "slug": "ig-lead-gen",
+      "name": "인스타그램 리드 수집",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Meta Instagram",
+        "minBudget": 1000000,
+        "cpcMin": 300,
+        "cpcMax": 900,
+        "cpmMin": null,
+        "cpmMax": null
+      }
+    },
+    {
+      "id": "c50339369b42c920e7fbb12a4",
+      "slug": "ig-conversion-shop",
+      "name": "인스타그램 전환·쇼핑",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Meta Instagram",
+        "minBudget": 1500000,
+        "cpcMin": 250,
+        "cpcMax": 800,
+        "cpmMin": null,
+        "cpmMax": null
+      }
+    },
+    {
+      "id": "c92f1cb51b78465df17403bfd",
+      "slug": "fb-traffic",
+      "name": "페이스북 트래픽·유입",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Meta Facebook",
+        "minBudget": 700000,
+        "cpcMin": 200,
+        "cpcMax": 600,
+        "cpmMin": null,
+        "cpmMax": null
+      }
+    },
+    {
+      "id": "c4962dd0ea30beed7b81e78ba",
+      "slug": "fb-awareness",
+      "name": "페이스북 브랜드 인지도",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Meta Facebook",
+        "minBudget": 800000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": 3000,
+        "cpmMax": 7000
+      }
+    },
+    {
+      "id": "c8abec08f7599f8754c7e569f",
+      "slug": "yt-awareness",
+      "name": "유튜브 인지도·뷰",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "YouTube",
+        "minBudget": 1200000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": 2000,
+        "cpmMax": 6000
+      }
+    },
+    {
+      "id": "cb857e784640345506c31dfc2",
+      "slug": "kakao-traffic",
+      "name": "카카오 모먼트 트래픽",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Kakao Moment",
+        "minBudget": 600000,
+        "cpcMin": 150,
+        "cpcMax": 450,
+        "cpmMin": 2500,
+        "cpmMax": 5500
+      }
+    },
+    {
+      "id": "c5890bc554fcd5156da5a581c",
+      "slug": "naver-sa-brand",
+      "name": "네이버 검색광고·브랜드",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Naver Search Ads",
+        "minBudget": 500000,
+        "cpcMin": 200,
+        "cpcMax": 1500,
+        "cpmMin": null,
+        "cpmMax": null
+      }
+    },
+    {
+      "id": "cc638f0d559e02fd5f47931c5",
+      "slug": "naver-sa-conversion",
+      "name": "네이버 검색광고·전환",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Naver Search Ads",
+        "minBudget": 1000000,
+        "cpcMin": 400,
+        "cpcMax": 2500,
+        "cpmMin": null,
+        "cpmMax": null
+      }
+    },
+    {
+      "id": "ce3fc80964e3b91eda754a353",
+      "slug": "naver-sa-traffic",
+      "name": "네이버 검색·사이트유입",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Naver Search Ads",
+        "minBudget": 700000,
+        "cpcMin": 400,
+        "cpcMax": 1200,
+        "cpmMin": null,
+        "cpmMax": null
+      }
+    },
+    {
+      "id": "c5956192e40f2dbbe71cab81a",
+      "slug": "google-ads-search",
+      "name": "구글 검색광고·전환",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Google Ads Search",
+        "minBudget": 1200000,
+        "cpcMin": 500,
+        "cpcMax": 3000,
+        "cpmMin": null,
+        "cpmMax": null
+      }
+    },
+    {
+      "id": "c8eac68430a47b9a2449033b7",
+      "slug": "google-ads-awareness",
+      "name": "구글 디스플레이·인지도",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Google Display Network",
+        "minBudget": 800000,
+        "cpcMin": 100,
+        "cpcMax": 400,
+        "cpmMin": 2000,
+        "cpmMax": 6000
+      }
+    },
+    {
+      "id": "c177179faa0ab581118cf7db4",
+      "slug": "google-ads-lead",
+      "name": "구글 리드 폼·전환",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "Google Ads",
+        "minBudget": 1000000,
+        "cpcMin": 600,
+        "cpcMax": 3500,
+        "cpmMin": null,
+        "cpmMax": null
+      }
+    },
+    {
+      "id": "c87008b84948ce9803f5c89bb",
+      "slug": "tiktok-spark-awareness",
+      "name": "틱톡 스파크·인지도",
+      "location": "온라인",
+      "type": null,
+      "catalogChannel": "online",
+      "price": 0,
+      "onlineSpec": {
+        "platform": "TikTok",
+        "minBudget": 1000000,
+        "cpcMin": 150,
+        "cpcMax": 500,
+        "cpmMin": 3000,
+        "cpmMax": 9000
+      }
+    }
+  ],
+  "expected": [
+    {
+      "slug": "ig-awareness-reach",
+      "mediaId": "ca9a554ad046b0180e73eea6d",
+      "scenario": "at_min",
+      "budgetWon": 800000,
+      "totalWon": 880000,
+      "lineSupplyWon": 800000,
+      "impressions": 150000
+    },
+    {
+      "slug": "ig-awareness-reach",
+      "mediaId": "ca9a554ad046b0180e73eea6d",
+      "scenario": "2x_min",
+      "budgetWon": 1600000,
+      "totalWon": 1760000,
+      "lineSupplyWon": 1600000,
+      "impressions": 300000
+    },
+    {
+      "slug": "ig-awareness-reach",
+      "mediaId": "ca9a554ad046b0180e73eea6d",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 1875000
+    },
+    {
+      "slug": "ig-lead-gen",
+      "mediaId": "c80fb8d37d1d7e822938d2517",
+      "scenario": "at_min",
+      "budgetWon": 1000000,
+      "totalWon": 1100000,
+      "lineSupplyWon": 1000000,
+      "impressions": 2222
+    },
+    {
+      "slug": "ig-lead-gen",
+      "mediaId": "c80fb8d37d1d7e822938d2517",
+      "scenario": "2x_min",
+      "budgetWon": 2000000,
+      "totalWon": 2200000,
+      "lineSupplyWon": 2000000,
+      "impressions": 4444
+    },
+    {
+      "slug": "ig-lead-gen",
+      "mediaId": "c80fb8d37d1d7e822938d2517",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 22222
+    },
+    {
+      "slug": "ig-conversion-shop",
+      "mediaId": "c50339369b42c920e7fbb12a4",
+      "scenario": "at_min",
+      "budgetWon": 1500000,
+      "totalWon": 1650000,
+      "lineSupplyWon": 1500000,
+      "impressions": 3938
+    },
+    {
+      "slug": "ig-conversion-shop",
+      "mediaId": "c50339369b42c920e7fbb12a4",
+      "scenario": "2x_min",
+      "budgetWon": 3000000,
+      "totalWon": 3300000,
+      "lineSupplyWon": 3000000,
+      "impressions": 7875
+    },
+    {
+      "slug": "ig-conversion-shop",
+      "mediaId": "c50339369b42c920e7fbb12a4",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 26250
+    },
+    {
+      "slug": "fb-traffic",
+      "mediaId": "c92f1cb51b78465df17403bfd",
+      "scenario": "at_min",
+      "budgetWon": 700000,
+      "totalWon": 770000,
+      "lineSupplyWon": 700000,
+      "impressions": 2333
+    },
+    {
+      "slug": "fb-traffic",
+      "mediaId": "c92f1cb51b78465df17403bfd",
+      "scenario": "2x_min",
+      "budgetWon": 1400000,
+      "totalWon": 1540000,
+      "lineSupplyWon": 1400000,
+      "impressions": 4667
+    },
+    {
+      "slug": "fb-traffic",
+      "mediaId": "c92f1cb51b78465df17403bfd",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 33333
+    },
+    {
+      "slug": "fb-awareness",
+      "mediaId": "c4962dd0ea30beed7b81e78ba",
+      "scenario": "at_min",
+      "budgetWon": 800000,
+      "totalWon": 880000,
+      "lineSupplyWon": 800000,
+      "impressions": 190476
+    },
+    {
+      "slug": "fb-awareness",
+      "mediaId": "c4962dd0ea30beed7b81e78ba",
+      "scenario": "2x_min",
+      "budgetWon": 1600000,
+      "totalWon": 1760000,
+      "lineSupplyWon": 1600000,
+      "impressions": 380952
+    },
+    {
+      "slug": "fb-awareness",
+      "mediaId": "c4962dd0ea30beed7b81e78ba",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 2380952
+    },
+    {
+      "slug": "yt-awareness",
+      "mediaId": "c8abec08f7599f8754c7e569f",
+      "scenario": "at_min",
+      "budgetWon": 1200000,
+      "totalWon": 1320000,
+      "lineSupplyWon": 1200000,
+      "impressions": 400000
+    },
+    {
+      "slug": "yt-awareness",
+      "mediaId": "c8abec08f7599f8754c7e569f",
+      "scenario": "2x_min",
+      "budgetWon": 2400000,
+      "totalWon": 2640000,
+      "lineSupplyWon": 2400000,
+      "impressions": 800000
+    },
+    {
+      "slug": "yt-awareness",
+      "mediaId": "c8abec08f7599f8754c7e569f",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 3333333
+    },
+    {
+      "slug": "kakao-traffic",
+      "mediaId": "cb857e784640345506c31dfc2",
+      "scenario": "at_min",
+      "budgetWon": 600000,
+      "totalWon": 660000,
+      "lineSupplyWon": 600000,
+      "impressions": 174545
+    },
+    {
+      "slug": "kakao-traffic",
+      "mediaId": "cb857e784640345506c31dfc2",
+      "scenario": "2x_min",
+      "budgetWon": 1200000,
+      "totalWon": 1320000,
+      "lineSupplyWon": 1200000,
+      "impressions": 349091
+    },
+    {
+      "slug": "kakao-traffic",
+      "mediaId": "cb857e784640345506c31dfc2",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 2909091
+    },
+    {
+      "slug": "naver-sa-brand",
+      "mediaId": "c5890bc554fcd5156da5a581c",
+      "scenario": "at_min",
+      "budgetWon": 500000,
+      "totalWon": 550000,
+      "lineSupplyWon": 500000,
+      "impressions": 1417
+    },
+    {
+      "slug": "naver-sa-brand",
+      "mediaId": "c5890bc554fcd5156da5a581c",
+      "scenario": "2x_min",
+      "budgetWon": 1000000,
+      "totalWon": 1100000,
+      "lineSupplyWon": 1000000,
+      "impressions": 2833
+    },
+    {
+      "slug": "naver-sa-brand",
+      "mediaId": "c5890bc554fcd5156da5a581c",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 28333
+    },
+    {
+      "slug": "naver-sa-conversion",
+      "mediaId": "cc638f0d559e02fd5f47931c5",
+      "scenario": "at_min",
+      "budgetWon": 1000000,
+      "totalWon": 1100000,
+      "lineSupplyWon": 1000000,
+      "impressions": 1450
+    },
+    {
+      "slug": "naver-sa-conversion",
+      "mediaId": "cc638f0d559e02fd5f47931c5",
+      "scenario": "2x_min",
+      "budgetWon": 2000000,
+      "totalWon": 2200000,
+      "lineSupplyWon": 2000000,
+      "impressions": 2900
+    },
+    {
+      "slug": "naver-sa-conversion",
+      "mediaId": "cc638f0d559e02fd5f47931c5",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 14500
+    },
+    {
+      "slug": "naver-sa-traffic",
+      "mediaId": "ce3fc80964e3b91eda754a353",
+      "scenario": "at_min",
+      "budgetWon": 700000,
+      "totalWon": 770000,
+      "lineSupplyWon": 700000,
+      "impressions": 1167
+    },
+    {
+      "slug": "naver-sa-traffic",
+      "mediaId": "ce3fc80964e3b91eda754a353",
+      "scenario": "2x_min",
+      "budgetWon": 1400000,
+      "totalWon": 1540000,
+      "lineSupplyWon": 1400000,
+      "impressions": 2333
+    },
+    {
+      "slug": "naver-sa-traffic",
+      "mediaId": "ce3fc80964e3b91eda754a353",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 16667
+    },
+    {
+      "slug": "google-ads-search",
+      "mediaId": "c5956192e40f2dbbe71cab81a",
+      "scenario": "at_min",
+      "budgetWon": 1200000,
+      "totalWon": 1320000,
+      "lineSupplyWon": 1200000,
+      "impressions": 1400
+    },
+    {
+      "slug": "google-ads-search",
+      "mediaId": "c5956192e40f2dbbe71cab81a",
+      "scenario": "2x_min",
+      "budgetWon": 2400000,
+      "totalWon": 2640000,
+      "lineSupplyWon": 2400000,
+      "impressions": 2800
+    },
+    {
+      "slug": "google-ads-search",
+      "mediaId": "c5956192e40f2dbbe71cab81a",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 11667
+    },
+    {
+      "slug": "google-ads-awareness",
+      "mediaId": "c8eac68430a47b9a2449033b7",
+      "scenario": "at_min",
+      "budgetWon": 800000,
+      "totalWon": 880000,
+      "lineSupplyWon": 800000,
+      "impressions": 266667
+    },
+    {
+      "slug": "google-ads-awareness",
+      "mediaId": "c8eac68430a47b9a2449033b7",
+      "scenario": "2x_min",
+      "budgetWon": 1600000,
+      "totalWon": 1760000,
+      "lineSupplyWon": 1600000,
+      "impressions": 533333
+    },
+    {
+      "slug": "google-ads-awareness",
+      "mediaId": "c8eac68430a47b9a2449033b7",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 3333333
+    },
+    {
+      "slug": "google-ads-lead",
+      "mediaId": "c177179faa0ab581118cf7db4",
+      "scenario": "at_min",
+      "budgetWon": 1000000,
+      "totalWon": 1100000,
+      "lineSupplyWon": 1000000,
+      "impressions": 976
+    },
+    {
+      "slug": "google-ads-lead",
+      "mediaId": "c177179faa0ab581118cf7db4",
+      "scenario": "2x_min",
+      "budgetWon": 2000000,
+      "totalWon": 2200000,
+      "lineSupplyWon": 2000000,
+      "impressions": 1952
+    },
+    {
+      "slug": "google-ads-lead",
+      "mediaId": "c177179faa0ab581118cf7db4",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 9762
+    },
+    {
+      "slug": "tiktok-spark-awareness",
+      "mediaId": "c87008b84948ce9803f5c89bb",
+      "scenario": "at_min",
+      "budgetWon": 1000000,
+      "totalWon": 1100000,
+      "lineSupplyWon": 1000000,
+      "impressions": 222222
+    },
+    {
+      "slug": "tiktok-spark-awareness",
+      "mediaId": "c87008b84948ce9803f5c89bb",
+      "scenario": "2x_min",
+      "budgetWon": 2000000,
+      "totalWon": 2200000,
+      "lineSupplyWon": 2000000,
+      "impressions": 444444
+    },
+    {
+      "slug": "tiktok-spark-awareness",
+      "mediaId": "c87008b84948ce9803f5c89bb",
+      "scenario": "large",
+      "budgetWon": 10000000,
+      "totalWon": 11000000,
+      "lineSupplyWon": 10000000,
+      "impressions": 2222222
+    }
+  ]
+}

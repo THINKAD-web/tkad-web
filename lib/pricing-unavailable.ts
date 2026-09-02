@@ -1,8 +1,11 @@
 /**
- * PR3 — SSOT: billable numeric quote/pricing is unavailable for this media row.
+ * PR3/PR5-a — SSOT: billable numeric quote/pricing is unavailable for this media row.
  *
  * All client money surfaces (wizard, compare-quote, planner, detail sticky)
  * must call `isPricingUnavailable()` — not ad-hoc catalog_channel checks.
+ *
+ * PR5-a: online rows with CPC/CPM on `onlineSpec` are billable on detail only;
+ * list/compare payloads omit `onlineSpec` → still inquiry until PR5-b.
  */
 
 import {
@@ -16,7 +19,8 @@ import {
 import {
   catalogPriceFieldToWon,
 } from "@/lib/media-price-format";
-import type { MediaItem } from "@/lib/media-data";
+import type { MediaItem, MediaOnlineSpecView } from "@/lib/media-data";
+import { hasOnlinePricingSpec as hasRatesOnSpec } from "@/lib/pricing/online-performance-estimate";
 
 export type PricingUnavailableMedia = Pick<
   MediaItem,
@@ -27,7 +31,17 @@ export type PricingUnavailableMedia = Pick<
   | "networkMinUnits"
   | "priceOptions"
   | "pricePeriod"
->;
+> & {
+  onlineSpec?: MediaOnlineSpecView | null;
+};
+
+/** Online row with seeded CPC/CPM ranges — detail + BudgetPricing calculable. */
+export function hasOnlinePricingSpec(
+  media: Pick<PricingUnavailableMedia, "catalogChannel" | "onlineSpec">,
+): boolean {
+  if (!isOnlineCatalogMedia(media)) return false;
+  return hasRatesOnSpec(media.onlineSpec);
+}
 
 export function isOnlineCatalogMedia(
   media: Pick<PricingUnavailableMedia, "catalogChannel">,
@@ -79,7 +93,7 @@ export function isOfflineUnpriceableMedia(
 }
 
 /**
- * True when UI must not show billable ₩ amounts (online seed or offline inquiry).
+ * True when UI must not show billable ₩ amounts (online inquiry or offline unpriceable).
  */
 export function isPricingUnavailable(
   media: PricingUnavailableMedia,
@@ -89,6 +103,8 @@ export function isPricingUnavailable(
     networkUnits?: number;
   },
 ): boolean {
-  if (isOnlineCatalogMedia(media)) return true;
+  if (isOnlineCatalogMedia(media)) {
+    return !hasOnlinePricingSpec(media);
+  }
   return isOfflineUnpriceableMedia(media, opts);
 }

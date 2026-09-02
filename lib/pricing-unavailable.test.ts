@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  hasOnlinePricingSpec,
   isOfflineUnpriceableMedia,
   isOnlineCatalogMedia,
   isPricingUnavailable,
 } from "@/lib/pricing-unavailable";
-import type { MediaItem } from "@/lib/media-data";
 
 const offlineDooh = {
   id: "offline-dooh-test",
@@ -16,11 +16,9 @@ const offlineDooh = {
   networkMinUnits: undefined,
   priceOptions: undefined,
   pricePeriod: "month" as const,
-} satisfies PricingUnavailableMedia & { id: string };
+};
 
-type PricingUnavailableMedia = Parameters<typeof isPricingUnavailable>[0];
-
-const onlineRow = {
+const onlineInquiry = {
   catalogChannel: "online",
   type: null,
   price: null,
@@ -28,15 +26,36 @@ const onlineRow = {
   networkMinUnits: undefined,
   priceOptions: undefined,
   pricePeriod: undefined,
-} satisfies PricingUnavailableMedia;
+};
+
+const onlineCalculable = {
+  ...onlineInquiry,
+  onlineSpec: {
+    platform: "Meta Instagram",
+    minBudget: 500_000,
+    cpcMin: null,
+    cpcMax: null,
+    cpmMin: 4_000,
+    cpmMax: 12_000,
+  },
+};
 
 test("isOnlineCatalogMedia detects online channel", () => {
-  assert.equal(isOnlineCatalogMedia(onlineRow), true);
+  assert.equal(isOnlineCatalogMedia(onlineInquiry), true);
   assert.equal(isOnlineCatalogMedia(offlineDooh), false);
 });
 
-test("isPricingUnavailable — online always unavailable", () => {
-  assert.equal(isPricingUnavailable(onlineRow), true);
+test("hasOnlinePricingSpec — online with CPC/CPM", () => {
+  assert.equal(hasOnlinePricingSpec(onlineInquiry), false);
+  assert.equal(hasOnlinePricingSpec(onlineCalculable), true);
+});
+
+test("isPricingUnavailable — online without onlineSpec stays unavailable", () => {
+  assert.equal(isPricingUnavailable(onlineInquiry), true);
+});
+
+test("isPricingUnavailable — online with rates + onlineSpec is available", () => {
+  assert.equal(isPricingUnavailable(onlineCalculable), false);
 });
 
 test("isPricingUnavailable — offline billable is available", () => {
@@ -51,5 +70,5 @@ test("isPricingUnavailable — offline null type is unavailable", () => {
 });
 
 test("isOfflineUnpriceableMedia ignores online rows", () => {
-  assert.equal(isOfflineUnpriceableMedia(onlineRow), false);
+  assert.equal(isOfflineUnpriceableMedia(onlineInquiry), false);
 });

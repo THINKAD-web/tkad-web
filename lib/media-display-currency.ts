@@ -156,7 +156,12 @@ export function formatMediaCostEstimateShort(
   won: number,
   country: string | null | undefined,
   locale: string,
-  media?: { catalogChannel?: string | null; type?: string | null; price?: number | null },
+  media?: {
+    catalogChannel?: string | null;
+    type?: string | null;
+    price?: number | null;
+    onlineSpec?: import("@/lib/media-data").MediaOnlineSpecView | null;
+  },
 ): string {
   const isKo = locale.startsWith("ko");
   if (media && isPricingUnavailable(media)) {

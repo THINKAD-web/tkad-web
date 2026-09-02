@@ -9,6 +9,7 @@ import {
   getMediaById,
   mediaData,
   type MediaItem,
+  type MediaOnlineSpecView,
   type MediaPriceOption,
   type MediaPricePeriodKey,
 } from "@/lib/media-data";
@@ -61,6 +62,14 @@ export type MediaWithAdvertiserExecutions = Media & {
     spotDurationSec: number | null;
     loopDurationSec: number | null;
     playsPerHour: number | null;
+  } | null;
+  onlineSpec?: {
+    platform: string;
+    minBudget: number;
+    cpcMin: number | null;
+    cpcMax: number | null;
+    cpmMin: number | null;
+    cpmMax: number | null;
   } | null;
 };
 
@@ -134,6 +143,30 @@ const koToEnNameMap: Record<string, string> = {
 function resolveNameEn(koreanName: string, dbNameEn: string | null | undefined): string {
   if (dbNameEn?.trim()) return dbNameEn;
   return koToEnNameMap[koreanName] ?? koreanName;
+}
+
+export const PUBLIC_MEDIA_ONLINE_SPEC_SELECT = {
+  platform: true,
+  minBudget: true,
+  cpcMin: true,
+  cpcMax: true,
+  cpmMin: true,
+  cpmMax: true,
+} as const;
+
+function mapPrismaOnlineSpec(
+  m: Pick<MediaWithAdvertiserExecutions, "onlineSpec">,
+): MediaOnlineSpecView | undefined {
+  const spec = m.onlineSpec;
+  if (!spec) return undefined;
+  return {
+    platform: spec.platform,
+    minBudget: spec.minBudget,
+    cpcMin: spec.cpcMin,
+    cpcMax: spec.cpcMax,
+    cpmMin: spec.cpmMin,
+    cpmMax: spec.cpmMax,
+  };
 }
 
 /** Map Prisma row → public `MediaItem` (list/detail/compare). */
@@ -400,6 +433,10 @@ export function prismaMediaToMediaItem(
     spotDurationSec,
     loopDurationSec,
     playsPerHour,
+    ...((): { onlineSpec?: MediaOnlineSpecView } => {
+      const onlineSpec = mapPrismaOnlineSpec(m);
+      return onlineSpec ? { onlineSpec } : {};
+    })(),
   };
 }
 
@@ -920,7 +957,10 @@ async function loadMediaDetailRowFromDb(
     where: publicActiveMediaWhere({
       OR: [{ id: slugOrId }, { slug: slugOrId }],
     }),
-    include: PUBLIC_MEDIA_CATALOG_INCLUDE,
+    include: {
+      ...PUBLIC_MEDIA_CATALOG_INCLUDE,
+      onlineSpec: { select: PUBLIC_MEDIA_ONLINE_SPEC_SELECT },
+    },
   });
   if (!row) return null;
   const [rowWithCoverage] = await attachPublicMediaCatalogExtras(db, [row], {
@@ -935,7 +975,7 @@ const getCrossRequestMediaDetail = unstable_cache(
     logMediaCacheMiss("public-media-detail", { slug: slugOrId });
     return loadMediaDetailRowFromDb(slugOrId);
   },
-  ["public-media-detail-v1"],
+  ["public-media-detail-v2"],
   {
     revalidate: PUBLIC_MEDIA_CATALOG_DETAIL_REVALIDATE_SECONDS,
     tags: [PUBLIC_MEDIA_CATALOG_DETAIL_CACHE_TAG],

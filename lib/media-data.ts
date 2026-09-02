@@ -37,6 +37,16 @@ export type MediaPriceOption = {
   partialPeriodRates?: PartialPeriodRatesMap;
 };
 
+/** PR5-a — online catalog pricing spec (detail page only until PR5-b). */
+export type MediaOnlineSpecView = {
+  platform?: string;
+  minBudget: number;
+  cpcMin: number | null;
+  cpcMax: number | null;
+  cpmMin: number | null;
+  cpmMax: number | null;
+};
+
 /** `data/media-items-keyword-filter.json`에서 합성 상세에만 쓰는 메타 */
 export type KeywordFilterDetailMeta = {
   specialFeature: string[];
@@ -82,6 +92,8 @@ export interface MediaItem {
   mediaSubCategory?: string;
   /** Catalog channel: offline OOH vs online ads (DB `catalog_channel`) */
   catalogChannel?: CatalogChannel;
+  /** Online CPC/CPM spec — loaded on detail only (PR5-a). */
+  onlineSpec?: MediaOnlineSpecView | null;
   /** Browse 시도 */
   regionMain?: string;
   /** Browse 세부 지역 */
