@@ -314,12 +314,24 @@ export function BriefDigitalPanel({
       <div>
         <p className="mb-2 text-xs text-muted-foreground">
           {isKo
-            ? `선택 ${selectedIds.length}개 · 카탈로그: ${digitalCatalogMeta?.source === "live" ? "실측 단가" : "정적 벤치마크"}`
-            : `${selectedIds.length} selected · catalog: ${digitalCatalogMeta?.source === "live" ? "live rates" : "static benchmark"}`}
+            ? `선택 ${selectedIds.length}개 · 카탈로그: ${
+                digitalCatalogMeta?.source === "live"
+                  ? "실측 단가"
+                  : digitalCatalogMeta?.source === "unavailable"
+                    ? "카탈로그 없음"
+                    : "정적 벤치마크"
+              }`
+            : `${selectedIds.length} selected · catalog: ${
+                digitalCatalogMeta?.source === "live"
+                  ? "live rates"
+                  : digitalCatalogMeta?.source === "unavailable"
+                    ? "catalog unavailable"
+                    : "static benchmark"
+              }`}
         </p>
         <div
           data-testid="brief-digital-channel-grid"
-          data-catalog-source={digitalCatalogMeta?.source ?? "static"}
+          data-catalog-source={digitalCatalogMeta?.source ?? "unavailable"}
           className="grid grid-cols-2 gap-2 sm:grid-cols-3"
         >
           {digitalChannels.map((channel) => (

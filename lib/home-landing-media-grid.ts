@@ -56,13 +56,6 @@ export const FALLBACK_OOH_SUB_IDS = [
   "airport",
 ] as const;
 
-/** Fallback when Digital catalog fetch fails — Meta / Google / Naver by volume. */
-export const FALLBACK_DIGITAL_PLATFORM_IDS: DigitalChannelId[] = [
-  "meta",
-  "google",
-  "naver",
-];
-
 export function findBrowseMainForSub(subId: string): string | undefined {
   return SUB_TO_MAIN.get(subId);
 }
@@ -209,11 +202,12 @@ async function loadOohTilesUncached(): Promise<HomeLandingOohTile[]> {
 async function loadDigitalTilesUncached(): Promise<HomeLandingDigitalTile[]> {
   const resolved = await resolveDigitalCatalogItems();
   if (resolved.items.length === 0) {
-    return FALLBACK_DIGITAL_PLATFORM_IDS.map((id) => digitalTileFor(id, 0));
+    console.warn("[home-landing-media-grid] local digital catalog empty");
+    return [];
   }
   const picked = pickTopDigitalPlatformsFromItems(resolved.items, 3);
   if (picked.length === 0) {
-    return FALLBACK_DIGITAL_PLATFORM_IDS.map((id) => digitalTileFor(id, 0));
+    return [];
   }
   return picked.map(({ platformId, count }) =>
     digitalTileFor(platformId, count),

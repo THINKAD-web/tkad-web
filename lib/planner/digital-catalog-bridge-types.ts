@@ -5,7 +5,7 @@ import type {
 
 /** Client-safe bridge metadata — no server catalog fetch imports. */
 export type DigitalCatalogBridgeMeta = {
-  source: "live" | "static";
+  source: "live" | "unavailable";
   catalogCount: number | null;
   fetchedAt: string | null;
   fallbackBucketIds: DigitalChannelId[];

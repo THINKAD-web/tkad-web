@@ -1,7 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import {
-  DIGITAL_CHANNELS,
   OOH_DIGITAL_SYNERGY_LIFT,
   type DigitalChannel,
   type DigitalChannelId,
@@ -142,7 +141,7 @@ export function recommendDigitalChannels(opts: {
   budgetMan: number;
   digitalBudgetPct: number;
   selectedChannelIds: DigitalChannelId[];
-  /** Live catalog pricing from digital-catalog-bridge (6a). Defaults to static DIGITAL_CHANNELS. */
+  /** Live catalog pricing from digital-catalog-bridge (local DB). */
   channels?: DigitalChannel[];
 }): DigitalRecommendResult {
   const {
@@ -154,8 +153,7 @@ export function recommendDigitalChannels(opts: {
     selectedChannelIds,
     channels: channelSource,
   } = opts;
-  const channelPool =
-    channelSource && channelSource.length > 0 ? channelSource : DIGITAL_CHANNELS;
+  const channelPool = channelSource ?? [];
   const primaryRegion = regions[0] ?? "seoul";
   const regionKo = regionLabelKo(primaryRegion, portfolio);
   const regionEn = regionLabelEn(primaryRegion, portfolio);

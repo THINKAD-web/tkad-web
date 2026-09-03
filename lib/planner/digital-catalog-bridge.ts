@@ -141,31 +141,25 @@ export function buildDigitalChannelsFromCatalogItems(
 async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<DigitalCatalogBridgeResult> {
   const resolved = await resolveDigitalCatalogItems();
   if (resolved.items.length === 0) {
-    console.error("[digital-catalog-bridge] using static channels", {
+    console.error("[digital-catalog-bridge] local catalog unavailable", {
       source: resolved.source,
       localOk: resolved.localOk,
-      remoteOk: resolved.remoteOk,
       forceLocal: resolved.forceLocal,
-      usedDmpilotFallback: resolved.usedDmpilotFallback,
     });
     return {
-      channels: DIGITAL_CHANNELS,
+      channels: [],
       meta: {
-        source: "static",
+        source: "unavailable",
         catalogCount: null,
         fetchedAt: null,
-        fallbackBucketIds: DIGITAL_PLATFORM_IDS,
+        fallbackBucketIds: [],
         unmappedProductCount: 0,
-        upstreamError: "local, dmpilot, and static fallback chain exhausted",
+        upstreamError: "local online catalog unavailable",
       },
     };
   }
 
-  if (resolved.usedDmpilotFallback) {
-    console.warn("[digital-catalog-bridge] dmpilot fallback catalog", {
-      count: resolved.count,
-    });
-  } else if (resolved.source === "local") {
+  if (resolved.source === "local") {
     console.info("[digital-catalog-bridge] local catalog", {
       count: resolved.count,
       forceLocal: resolved.forceLocal,
@@ -179,7 +173,7 @@ async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<Digita
 }
 
 /**
- * SSR entry — fetch Digital internal catalog or fall back to static channels.
+ * SSR entry — build platform channels from local online catalog.
  * Cached 1h to match integrated planner page ISR (B1a).
  */
 export const loadDigitalChannelsForIntegratedPlanner = unstable_cache(
