@@ -207,7 +207,7 @@ async function loadOohTilesUncached(): Promise<HomeLandingOohTile[]> {
 }
 
 async function loadDigitalTilesUncached(): Promise<HomeLandingDigitalTile[]> {
-  const resolved = await resolveDigitalCatalogItems({ preferLocal: true });
+  const resolved = await resolveDigitalCatalogItems();
   if (resolved.items.length === 0) {
     return FALLBACK_DIGITAL_PLATFORM_IDS.map((id) => digitalTileFor(id, 0));
   }
@@ -228,7 +228,7 @@ export const getHomeLandingOohTiles = unstable_cache(
 
 export const getHomeLandingDigitalTiles = unstable_cache(
   loadDigitalTilesUncached,
-  ["home-landing-digital-tiles-v1"],
+  ["home-landing-digital-tiles-v2"],
   { revalidate: 3600, tags: ["home-landing-media-grid"] },
 );
 

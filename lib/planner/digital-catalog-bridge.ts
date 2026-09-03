@@ -153,6 +153,7 @@ async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<Digita
       localOk: resolved.localOk,
       remoteOk: resolved.remoteOk,
       forceLocal: resolved.forceLocal,
+      usedDmpilotFallback: resolved.usedDmpilotFallback,
     });
     return {
       channels: DIGITAL_CHANNELS,
@@ -162,17 +163,17 @@ async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<Digita
         fetchedAt: null,
         fallbackBucketIds: DIGITAL_PLATFORM_IDS,
         unmappedProductCount: 0,
-        upstreamError:
-          resolved.source === "local-fallback" && !resolved.localOk
-            ? "local and dmpilot catalog unavailable"
-            : undefined,
+        upstreamError: "local, dmpilot, and static fallback chain exhausted",
       },
     };
   }
 
-  if (resolved.source !== "dmpilot") {
-    console.info("[digital-catalog-bridge] catalog source", {
-      source: resolved.source,
+  if (resolved.usedDmpilotFallback) {
+    console.warn("[digital-catalog-bridge] dmpilot fallback catalog", {
+      count: resolved.count,
+    });
+  } else if (resolved.source === "local") {
+    console.info("[digital-catalog-bridge] local catalog", {
       count: resolved.count,
       forceLocal: resolved.forceLocal,
     });
@@ -190,7 +191,7 @@ async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<Digita
  */
 export const loadDigitalChannelsForIntegratedPlanner = unstable_cache(
   loadDigitalChannelsForIntegratedPlannerUncached,
-  ["digital-catalog-bridge-integrated"],
+  ["digital-catalog-bridge-integrated-v2"],
   { revalidate: 3600, tags: [DIGITAL_CATALOG_BRIDGE_CACHE_TAG] },
 );
 
