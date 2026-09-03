@@ -5,6 +5,7 @@ import {
   isOfflineUnpriceableMedia,
   isOnlineCatalogMedia,
   isPricingUnavailable,
+  isPublicQuoteWizardSelectableMedia,
   isQuoteWizardSelectableMedia,
   isQuoteWizardVisibleMedia,
   quoteWizardSelectBlockedMessage,
@@ -83,9 +84,11 @@ test("PR5-b commit 1 — visible vs selectable gates diverge for online", () => 
   assert.equal(isQuoteWizardSelectableMedia(onlineInquiry), false);
   assert.equal(isQuoteWizardSelectableMedia(onlineCalculable), false);
   assert.equal(isQuoteWizardSelectableMedia(offlineDooh), true);
+  assert.equal(isPublicQuoteWizardSelectableMedia(onlineInquiry), false);
+  assert.equal(isPublicQuoteWizardSelectableMedia(onlineCalculable), true);
+  assert.equal(isPublicQuoteWizardSelectableMedia(offlineDooh), true);
 });
 
-test("quoteWizardSelectBlockedMessage distinguishes calculable vs inquiry online", () => {
-  assert.match(quoteWizardSelectBlockedMessage(onlineCalculable, true), /월 예산/);
+test("quoteWizardSelectBlockedMessage — inquiry online only", () => {
   assert.match(quoteWizardSelectBlockedMessage(onlineInquiry, true), /가격 문의/);
 });

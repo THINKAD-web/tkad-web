@@ -59,23 +59,31 @@ export function isQuoteWizardVisibleMedia(
   return true;
 }
 
-/** PR3 front gate — quote wizard add-to-cart until PR5-b commit 2 (calculable online). */
+/** PR3 — quote wizard catalog / planner add / admin picker (online excluded). */
 export function isQuoteWizardSelectableMedia(
   media: Pick<PricingUnavailableMedia, "catalogChannel">,
 ): boolean {
   return !isOnlineCatalogMedia(media);
 }
 
-/** Toast copy when Step 1 toggle blocked — distinguishes calculable vs inquiry online. */
+/**
+ * Public `/quote` wizard only — calculable online addable (PR5-b commit 2).
+ * Admin picker and brief planner keep `isQuoteWizardSelectableMedia`.
+ */
+export function isPublicQuoteWizardSelectableMedia(
+  media: Pick<PricingUnavailableMedia, "catalogChannel" | "onlineSpec">,
+): boolean {
+  if (isOnlineCatalogMedia(media)) {
+    return hasOnlinePricingSpec(media);
+  }
+  return true;
+}
+
+/** Toast copy when Step 1 toggle blocked (inquiry online only after commit 2). */
 export function quoteWizardSelectBlockedMessage(
   media: Pick<PricingUnavailableMedia, "catalogChannel" | "onlineSpec">,
   isKo: boolean,
 ): string {
-  if (isOnlineCatalogMedia(media) && hasOnlinePricingSpec(media)) {
-    return isKo
-      ? "온라인 매체(월 예산)는 아직 견적 위저드에 담을 수 없습니다. 곧 지원 예정입니다."
-      : "Online media (monthly budget) cannot be added to the quote wizard yet — coming soon.";
-  }
   if (isOnlineCatalogMedia(media)) {
     return isKo
       ? "가격 문의 온라인 매체는 견적 위저드에 담을 수 없습니다. 매체 상세에서 문의해 주세요."

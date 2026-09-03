@@ -77,6 +77,8 @@ import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
 import { buildQuoteMediaSelectionSnapshot } from "@/lib/quote-snapshot-build";
 import {
   buildQuoteWizardLineContext,
+  buildQuoteWizardOnlineLineContext,
+  defaultQuoteWizardOnlineBudgetWon,
   formatQuoteCampaignPeriodWithDays,
   formatQuoteWizardInquiryLabel,
   inferQuoteCampaignPeriodFromMedia,
@@ -85,14 +87,16 @@ import {
   quoteCampaignDaysFromPeriodKey,
   quoteCatalogDisplayPriceMan,
   resolveQuoteMediaPricePeriod,
+  shouldUseOnlineWizardBudgetLine,
   sumQuoteWizardBillableMan,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
 import {
-  isQuoteWizardSelectableMedia,
+  isPublicQuoteWizardSelectableMedia,
   isQuoteWizardVisibleMedia,
   quoteWizardSelectBlockedMessage,
 } from "@/lib/pricing-unavailable";
+import { OnlineMediaBudgetFields } from "@/components/media/online-media-budget-fields";
 import { QuoteMediaQuantityFields } from "@/components/quote/quote-media-quantity-fields";
 import {
   buildQuoteDeeplinkPath,
@@ -210,6 +214,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [usePackagePeriodByMediaId, setUsePackagePeriodByMediaId] = useState<
     Record<string, boolean>
   >({});
+  const [onlineBudgetWonByMediaId, setOnlineBudgetWonByMediaId] = useState<
+    Record<string, number>
+  >({});
   const mediaQueryApplied = useRef(false);
   /** Step 2·URL에서 사용자가 명시한 캠페인 기간 — true면 옵션 변경 시 자동 추종 안 함 */
   const periodDirtyRef = useRef(false);
@@ -234,7 +241,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       .filter(Boolean);
     const matchedIds = requestedIds.filter((id) => {
       const m = catalog.find((x) => x.id === id);
-      return m != null && isQuoteWizardSelectableMedia(m);
+      return m != null && isPublicQuoteWizardSelectableMedia(m);
     });
     const missingIds = requestedIds.filter(
       (id) => !catalog.some((m) => m.id === id),
@@ -453,6 +460,21 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     [catalog, selectedIds],
   );
 
+  const hasOohSelected = useMemo(
+    () => selectedMedia.some((m) => !shouldUseOnlineWizardBudgetLine(m)),
+    [selectedMedia],
+  );
+
+  const hasOnlineSelected = useMemo(
+    () => selectedMedia.some((m) => shouldUseOnlineWizardBudgetLine(m)),
+    [selectedMedia],
+  );
+
+  const onlineCalculableSelected = useMemo(
+    () => selectedMedia.filter((m) => shouldUseOnlineWizardBudgetLine(m)),
+    [selectedMedia],
+  );
+
   const handleMediaPriceOptionChange = useCallback(
     (media: MediaItem, rawIdx: number) => {
       const idx = Number.isFinite(rawIdx) && rawIdx >= 0 ? rawIdx : 0;
@@ -665,6 +687,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const quoteLineContexts = useMemo(
     () =>
       selectedMedia.map((m) => {
+        if (shouldUseOnlineWizardBudgetLine(m)) {
+          const budgetWon =
+            onlineBudgetWonByMediaId[m.id] ??
+            defaultQuoteWizardOnlineBudgetWon(m);
+          return buildQuoteWizardOnlineLineContext(m, budgetWon, {
+            isKo,
+            campaignPeriodLabel: periodLabel,
+            campaignDays:
+              campaignDaysOverride ?? quoteCampaignDaysFromPeriodKey(period),
+          });
+        }
         const isNw = m.catalogSource === "network";
         const opt = networkQuoteOptions[m.id];
         return buildQuoteWizardLineContext(m, {
@@ -680,6 +713,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       }),
     [
       selectedMedia,
+      onlineBudgetWonByMediaId,
       networkQuoteOptions,
       mediaPriceOptionIndex,
       mediaQuantities,
@@ -980,7 +1014,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   const toggleMedia = useCallback((id: string) => {
     const media = catalog.find((m) => m.id === id);
-    if (media && !isQuoteWizardSelectableMedia(media)) {
+    if (media && !isPublicQuoteWizardSelectableMedia(media)) {
       toast("warning", quoteWizardSelectBlockedMessage(media, isKo));
       return;
     }
@@ -990,6 +1024,16 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       else next.add(id);
       return next;
     });
+    if (
+      media &&
+      isPublicQuoteWizardSelectableMedia(media) &&
+      shouldUseOnlineWizardBudgetLine(media)
+    ) {
+      setOnlineBudgetWonByMediaId((prev) => ({
+        ...prev,
+        [id]: prev[id] ?? defaultQuoteWizardOnlineBudgetWon(media),
+      }));
+    }
   }, [catalog, isKo, toast]);
 
   const clearAllMediaSelection = useCallback(() => {
@@ -1209,12 +1253,18 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       const units = isNw
         ? (networkQuoteOptions[m.id]?.units ?? m.networkMinUnits ?? 1)
         : mediaQuantities[m.id];
+      const onlineBudget =
+        onlineBudgetWonByMediaId[m.id] ?? defaultQuoteWizardOnlineBudgetWon(m);
       return buildQuoteMediaSelectionSnapshot({
         media: m,
         isKo,
         priceOptionIndex: poIdx,
         units,
-        lineTotalWon: Math.round((line?.lineTotalMan ?? 0) * 10_000),
+        lineTotalWon: shouldUseOnlineWizardBudgetLine(m)
+          ? line?.priceOnInquiry
+            ? 0
+            : onlineBudget
+          : Math.round((line?.lineTotalMan ?? 0) * 10_000),
         ...(usePackagePeriodByMediaId[m.id]
           ? {
               usePackagePeriod: true as const,
@@ -1230,6 +1280,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     usePackagePeriodByMediaId,
     networkQuoteOptions,
     mediaQuantities,
+    onlineBudgetWonByMediaId,
     isKo,
   ]);
 
@@ -1675,7 +1726,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             mobileUnits: mediaQuantities[media.id],
                             networkUnits: nwOpt?.units,
                           });
-                          const wizardSelectable = isQuoteWizardSelectableMedia(media);
+                          const wizardSelectable = isPublicQuoteWizardSelectableMedia(media);
                           return (
                             <div key={media.id} className="space-y-2">
                               <QuoteMediaSelectCard
@@ -1740,7 +1791,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 <label
                                   className={cn(
                                     "block",
-                                    !isQuoteWizardSelectableMedia(media) &&
+                                    !isPublicQuoteWizardSelectableMedia(media) &&
                                       "cursor-not-allowed opacity-75",
                                   )}
                                 >
@@ -1832,41 +1883,91 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       <p className="tkad-type-label text-muted-foreground">
                         {`// `}{t("quote.periodBudgetPdfHint")}
                       </p>
-                      <div>
-                        <label className="mb-2 block tkad-type-label text-accent">
-                          [ {t("quote.period")} ]
-                        </label>
-                        <select
-                          value={period}
-                          onChange={(e) => {
-                            periodDirtyRef.current = true;
-                            setCampaignDaysOverride(null);
-                            setFlightStart(null);
-                            setFlightEnd(null);
-                            setPeriod(e.target.value as PeriodKey);
-                          }}
-                          className="h-12 w-full rounded-[18px] border-2 border-border bg-card px-4 text-base text-foreground focus:border-accent focus:outline-none sm:h-14"
-                          aria-label={t("quote.period")}
-                        >
-                          {QUOTE_WIZARD_PERIOD_KEYS.map((key) => (
-                            <option key={key} value={key}>
-                              {t(`quote.periods.${key}` as `quote.periods.${PeriodKey}`)}
-                            </option>
-                          ))}
-                        </select>
-                        {campaignDaysOverride != null &&
-                        campaignDaysOverride !==
-                          quoteCampaignDaysFromPeriodKey(period) ? (
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            {t("quote.customCampaignDaysFromDetail", {
-                              days: campaignDaysOverride,
-                              start: flightStart ?? "",
-                              end: flightEnd ?? "",
-                            })}
+                      {hasOohSelected && hasOnlineSelected ? (
+                        <p className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+                          {isKo
+                            ? "OOH 매체는 아래 집행 기간 기준, 온라인 매체는 라인별 월 예산으로 견적됩니다."
+                            : "OOH lines use the flight period below; online lines use per-media monthly budget."}
+                        </p>
+                      ) : null}
+                      {hasOohSelected ? (
+                        <div>
+                          <label className="mb-2 block tkad-type-label text-accent">
+                            [ {t("quote.period")} ]
+                          </label>
+                          <select
+                            value={period}
+                            onChange={(e) => {
+                              periodDirtyRef.current = true;
+                              setCampaignDaysOverride(null);
+                              setFlightStart(null);
+                              setFlightEnd(null);
+                              setPeriod(e.target.value as PeriodKey);
+                            }}
+                            className="h-12 w-full rounded-[18px] border-2 border-border bg-card px-4 text-base text-foreground focus:border-accent focus:outline-none sm:h-14"
+                            aria-label={t("quote.period")}
+                          >
+                            {QUOTE_WIZARD_PERIOD_KEYS.map((key) => (
+                              <option key={key} value={key}>
+                                {t(`quote.periods.${key}` as `quote.periods.${PeriodKey}`)}
+                              </option>
+                            ))}
+                          </select>
+                          {campaignDaysOverride != null &&
+                          campaignDaysOverride !==
+                            quoteCampaignDaysFromPeriodKey(period) ? (
+                            <p className="mt-2 text-sm text-muted-foreground">
+                              {t("quote.customCampaignDaysFromDetail", {
+                                days: campaignDaysOverride,
+                                start: flightStart ?? "",
+                                end: flightEnd ?? "",
+                              })}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : hasOnlineSelected ? (
+                        <p className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+                          {isKo
+                            ? "온라인 매체만 선택되었습니다. 월 예산 기준으로 견적됩니다."
+                            : "Online-only selection — quoted by monthly budget per line."}
+                        </p>
+                      ) : null}
+                      {onlineCalculableSelected.length > 0 ? (
+                        <div className="space-y-4">
+                          <p className="tkad-type-label text-accent">
+                            [ {isKo ? "온라인 월 예산" : "Online monthly budget"} ]
                           </p>
-                        ) : null}
-                      </div>
-                      {/* 예산 입력 제거 — 매체를 이미 선택했으므로 불필요 */}
+                          <ul className="space-y-3">
+                            {onlineCalculableSelected.map((m) => {
+                              const budgetWon =
+                                onlineBudgetWonByMediaId[m.id] ??
+                                defaultQuoteWizardOnlineBudgetWon(m);
+                              return (
+                                <li
+                                  key={m.id}
+                                  className="rounded-xl border border-border/60 bg-muted/20 px-4 py-3"
+                                >
+                                  <p className="mb-2 font-semibold text-foreground">
+                                    {isKo ? m.name : m.nameEn || m.name}
+                                  </p>
+                                  <OnlineMediaBudgetFields
+                                    media={m}
+                                    budgetWon={budgetWon}
+                                    onBudgetChange={(won) =>
+                                      setOnlineBudgetWonByMediaId((prev) => ({
+                                        ...prev,
+                                        [m.id]: won,
+                                      }))
+                                    }
+                                    isKo={isKo}
+                                    inputCls="h-12 w-full rounded-[18px] border-2 border-border bg-card px-4 text-base text-foreground focus:border-accent focus:outline-none"
+                                  />
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      ) : null}
                     </div>
                   )}
 
