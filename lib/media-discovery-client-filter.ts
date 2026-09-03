@@ -254,8 +254,8 @@ export function filterMediaByDiscoveryChips(
     ) {
       return false;
     }
-    if (minP != null && m.price < minP) return false;
-    if (maxP != null && m.price > maxP) return false;
+    if (minP != null && m.price != null && m.price < minP) return false;
+    if (maxP != null && m.price != null && m.price > maxP) return false;
     if (featureSet.has("instant_booking") && !m.instantBookingEnabled) {
       return false;
     }
