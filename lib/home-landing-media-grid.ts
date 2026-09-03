@@ -6,7 +6,7 @@ import { unstable_cache } from "next/cache";
 import { browseCategoryLabel, MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import { ONLINE_BROWSE_MAIN_SET } from "@/lib/online-browse-mains";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import { fetchDigitalCatalogInternal } from "@/lib/planner/digital-catalog-fetch";
+import { resolveDigitalCatalogItems } from "@/lib/digital/resolve-digital-catalog";
 import type { DigitalCatalogItem } from "@/lib/planner/digital-catalog-types";
 import { matchCatalogItemToPlatformId } from "@/lib/planner/digital-platform-map";
 import {
@@ -207,11 +207,11 @@ async function loadOohTilesUncached(): Promise<HomeLandingOohTile[]> {
 }
 
 async function loadDigitalTilesUncached(): Promise<HomeLandingDigitalTile[]> {
-  const fetched = await fetchDigitalCatalogInternal();
-  if (!fetched.ok) {
+  const resolved = await resolveDigitalCatalogItems({ preferLocal: true });
+  if (resolved.items.length === 0) {
     return FALLBACK_DIGITAL_PLATFORM_IDS.map((id) => digitalTileFor(id, 0));
   }
-  const picked = pickTopDigitalPlatformsFromItems(fetched.data.items, 3);
+  const picked = pickTopDigitalPlatformsFromItems(resolved.items, 3);
   if (picked.length === 0) {
     return FALLBACK_DIGITAL_PLATFORM_IDS.map((id) => digitalTileFor(id, 0));
   }

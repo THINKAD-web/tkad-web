@@ -5,7 +5,7 @@ import {
   type DigitalChannelId,
 } from "@/lib/planner/digital-channels";
 import { notifyDigitalBucketGap } from "@/lib/planner/digital-catalog-alerts";
-import { fetchDigitalCatalogInternal } from "@/lib/planner/digital-catalog-fetch";
+import { resolveDigitalCatalogItems } from "@/lib/digital/resolve-digital-catalog";
 import type { DigitalCatalogItem } from "@/lib/planner/digital-catalog-types";
 import {
   DIGITAL_PLATFORM_IDS,
@@ -146,11 +146,13 @@ export function buildDigitalChannelsFromCatalogItems(
 }
 
 async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<DigitalCatalogBridgeResult> {
-  const fetched = await fetchDigitalCatalogInternal();
-  if (!fetched.ok) {
+  const resolved = await resolveDigitalCatalogItems();
+  if (resolved.items.length === 0) {
     console.error("[digital-catalog-bridge] using static channels", {
-      error: fetched.error,
-      status: fetched.status,
+      source: resolved.source,
+      localOk: resolved.localOk,
+      remoteOk: resolved.remoteOk,
+      forceLocal: resolved.forceLocal,
     });
     return {
       channels: DIGITAL_CHANNELS,
@@ -160,14 +162,25 @@ async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<Digita
         fetchedAt: null,
         fallbackBucketIds: DIGITAL_PLATFORM_IDS,
         unmappedProductCount: 0,
-        upstreamError: fetched.error,
+        upstreamError:
+          resolved.source === "local-fallback" && !resolved.localOk
+            ? "local and dmpilot catalog unavailable"
+            : undefined,
       },
     };
   }
 
-  return buildDigitalChannelsFromCatalogItems(fetched.data.items, {
-    catalogCount: fetched.data.count,
-    fetchedAt: fetched.data.fetchedAt,
+  if (resolved.source !== "dmpilot") {
+    console.info("[digital-catalog-bridge] catalog source", {
+      source: resolved.source,
+      count: resolved.count,
+      forceLocal: resolved.forceLocal,
+    });
+  }
+
+  return buildDigitalChannelsFromCatalogItems(resolved.items, {
+    catalogCount: resolved.count,
+    fetchedAt: resolved.fetchedAt,
   });
 }
 
