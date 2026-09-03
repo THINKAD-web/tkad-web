@@ -98,3 +98,27 @@ test("catalogListItemToMediaItem round-trips list-card fields", () => {
   assert.deepEqual(media.sampleImages, [dto.thumbnailUrl]);
   assert.equal(media.priceOptions?.length, 2);
 });
+
+test("onlineSpec and catalogChannel survive list DTO round-trip", () => {
+  const spec = {
+    platform: "google",
+    minBudget: 500_000,
+    cpcMin: 100,
+    cpcMax: 300,
+    cpmMin: null,
+    cpmMax: null,
+  };
+  const dto = mediaItemToCatalogListItem(
+    fixtureMediaItem({
+      catalogChannel: "online",
+      type: "",
+      price: 0,
+      onlineSpec: spec,
+    }),
+  );
+  assert.equal(dto.catalogChannel, "online");
+  assert.deepEqual(dto.onlineSpec, spec);
+  const media = catalogListItemToMediaItem(dto);
+  assert.equal(media.catalogChannel, "online");
+  assert.deepEqual(media.onlineSpec, spec);
+});

@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { matchesBrowseRegion } from "./media-discovery-client-filter.ts";
+import {
+  filterMediaByDiscoveryChips,
+  matchesBrowseRegion,
+} from "./media-discovery-client-filter.ts";
+import {
+  defaultAdvancedFilterState,
+  passesMediaAdvancedFilters,
+  type CatalogBounds,
+} from "./media-filter-advanced.ts";
 import {
   aliasMatchesHaystackToken,
   aliasHaystackForeignSidoConflict,
@@ -154,5 +162,53 @@ test("matchesBrowseRegion — seoul_gangnam mobile with gangnam coverage", () =>
   assert.equal(
     matchesBrowseRegion(mobile, "seoul", "seoul_gangnam", ""),
     true,
+  );
+});
+
+test("filterMediaByDiscoveryChips — null price skips browse price chip (online budget)", () => {
+  const online = mockMedia({
+    name: "구글 검색광고·전환",
+    catalogChannel: "online",
+    price: null as unknown as number,
+    location: "온라인",
+  });
+  const offline = mockMedia({
+    name: "강남 빌보드",
+    price: 5_000_000,
+  });
+
+  const hits = filterMediaByDiscoveryChips([online, offline], {
+    priceMin: "1000000",
+    priceMax: "50000000",
+    query: "구글",
+  });
+
+  assert.equal(hits.length, 1);
+  assert.equal(hits[0]?.name, online.name);
+});
+
+test("passesMediaAdvancedFilters — null price skips advanced price range", () => {
+  const bounds: CatalogBounds = { minPrice: 1_000_000, maxPrice: 100_000_000 };
+  const filterState = {
+    ...defaultAdvancedFilterState(bounds),
+    priceMin: bounds.minPrice,
+    priceMax: bounds.maxPrice,
+  };
+  const online = mockMedia({
+    catalogChannel: "online",
+    price: null as unknown as number,
+  });
+
+  assert.equal(
+    passesMediaAdvancedFilters(online, filterState, bounds),
+    true,
+    "online null price must not fail when bounds minPrice > 0",
+  );
+
+  const priced = mockMedia({ price: 500_000 });
+  assert.equal(
+    passesMediaAdvancedFilters(priced, filterState, bounds),
+    false,
+    "priced media below min still filtered",
   );
 });

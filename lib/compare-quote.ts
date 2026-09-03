@@ -6,7 +6,12 @@ import {
   mediaPriceOnInquiryLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
-import { isPricingUnavailable } from "@/lib/pricing-unavailable";
+import { estimateImpressionsFromBudget } from "@/lib/pricing/online-performance-estimate";
+import {
+  hasOnlinePricingSpec,
+  isOnlineCatalogMedia,
+  isPricingUnavailable,
+} from "@/lib/pricing-unavailable";
 import {
   resolveCpmWon,
   resolveMonthlyImpressions,
@@ -64,6 +69,66 @@ export type MediaQuoteLine = {
   /** PR3 — exclude from compare totals; show 「가격 문의」 */
   pricingUnavailable?: boolean;
 };
+
+/** Default monthly budget for compare/wizard online lines — matches detail sticky. */
+export function defaultOnlineCompareBudgetWon(media: MediaItem): number {
+  return media.onlineSpec?.minBudget ?? 1_000_000;
+}
+
+export function isOnlineCompareBudgetBelowMin(
+  media: MediaItem,
+  budgetWon: number,
+): boolean {
+  const spec = media.onlineSpec;
+  if (!spec || !hasOnlinePricingSpec(media)) return false;
+  const minBudget = spec.minBudget ?? 0;
+  return minBudget > 0 && budgetWon > 0 && budgetWon < minBudget;
+}
+
+/** Online compare quote — monthly budget, not OOH duration proration. */
+export function calculateOnlineMediaQuoteByBudget(
+  media: MediaItem,
+  budgetWon: number,
+): MediaQuoteLine {
+  if (isPricingUnavailable(media)) {
+    return {
+      mediaId: media.id,
+      name: media.name,
+      costWon: 0,
+      impressions: 0,
+      cpm: null,
+      pricingUnavailable: true,
+    };
+  }
+  const spec = media.onlineSpec;
+  if (!spec || budgetWon <= 0 || isOnlineCompareBudgetBelowMin(media, budgetWon)) {
+    return {
+      mediaId: media.id,
+      name: media.name,
+      costWon: 0,
+      impressions: 0,
+      cpm: null,
+      pricingUnavailable: true,
+    };
+  }
+
+  const impressions = estimateImpressionsFromBudget(spec, budgetWon);
+  const cpm =
+    impressions > 0 ? Math.round(budgetWon / (impressions / 1000)) : null;
+
+  return {
+    mediaId: media.id,
+    name: media.name,
+    costWon: budgetWon,
+    impressions,
+    cpm,
+    pricingUnavailable: false,
+  };
+}
+
+export function shouldUseOnlineBudgetQuote(media: MediaItem): boolean {
+  return isOnlineCatalogMedia(media) && hasOnlinePricingSpec(media);
+}
 
 /** 패키지 총액 × (캠페인 일수 ÷ 번들 일수) — 스티키 패널·마법사 공용 */
 export function quoteBundleProrationWon(
@@ -258,6 +323,16 @@ export function calculateMediaQuoteByDays(
   media: MediaItem,
   durationDays: number,
 ): MediaQuoteLine {
+  if (shouldUseOnlineBudgetQuote(media)) {
+    return {
+      mediaId: media.id,
+      name: media.name,
+      costWon: 0,
+      impressions: 0,
+      cpm: null,
+      pricingUnavailable: true,
+    };
+  }
   if (isPricingUnavailable(media)) {
     return quoteLineFromCostWon(media, 0, durationDays);
   }

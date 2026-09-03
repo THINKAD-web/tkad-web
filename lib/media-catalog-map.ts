@@ -50,6 +50,7 @@ export function mapMediaItemToHomeCatalog(item: MediaItem): HomeCatalogMediaItem
     id: item.id,
     slug: item.slug,
     catalogChannel: item.catalogChannel,
+    onlineSpec: item.onlineSpec ?? undefined,
     name: item.name,
     country: item.country,
     type: typeLabel,
@@ -172,6 +173,8 @@ export function catalogToMediaItem(item: HomeCatalogMediaItem): MediaItem {
     visibilityScore: item.visibilityScore,
     sampleImages:
       item.galleryImages ?? (item.thumbnailUrl ? [item.thumbnailUrl] : []),
+    catalogChannel: item.catalogChannel,
+    onlineSpec: item.onlineSpec ?? undefined,
   };
 }
 

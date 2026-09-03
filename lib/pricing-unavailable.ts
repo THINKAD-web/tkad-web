@@ -49,17 +49,77 @@ export function isOnlineCatalogMedia(
   return canonicalCatalogChannel(media.catalogChannel) === CATALOG_CHANNEL_ONLINE;
 }
 
-/** PR3 front gate — quote wizard catalog / planner add until PR5 */
+/**
+ * Step 1 picker visibility — online catalog rows shown from PR5-b commit 1.
+ * Selectability remains `isQuoteWizardSelectableMedia` until commit 2.
+ */
+export function isQuoteWizardVisibleMedia(
+  _media: Pick<PricingUnavailableMedia, "catalogChannel">,
+): boolean {
+  return true;
+}
+
+/** PR3 — quote wizard catalog / planner add / admin picker (online excluded). */
 export function isQuoteWizardSelectableMedia(
   media: Pick<PricingUnavailableMedia, "catalogChannel">,
 ): boolean {
   return !isOnlineCatalogMedia(media);
 }
 
-export function canAddMediaToPlanCart(
-  media: Pick<PricingUnavailableMedia, "catalogChannel">,
+/**
+ * Public `/quote` wizard only — calculable online addable (PR5-b commit 2).
+ * Admin picker and brief planner keep `isQuoteWizardSelectableMedia`.
+ */
+export function isPublicQuoteWizardSelectableMedia(
+  media: Pick<PricingUnavailableMedia, "catalogChannel" | "onlineSpec">,
 ): boolean {
-  return !isOnlineCatalogMedia(media);
+  if (isOnlineCatalogMedia(media)) {
+    return hasOnlinePricingSpec(media);
+  }
+  return true;
+}
+
+/** Toast copy when Step 1 toggle blocked (inquiry online only after commit 2). */
+export function quoteWizardSelectBlockedMessage(
+  media: Pick<PricingUnavailableMedia, "catalogChannel" | "onlineSpec">,
+  isKo: boolean,
+): string {
+  if (isOnlineCatalogMedia(media)) {
+    return isKo
+      ? "가격 문의 온라인 매체는 견적 위저드에 담을 수 없습니다. 매체 상세에서 문의해 주세요."
+      : "Inquiry-only online media cannot be added to the quote wizard. Please contact us from the media page.";
+  }
+  return isKo
+    ? "이 매체는 견적 위저드에 담을 수 없습니다."
+    : "This media cannot be added to the quote wizard.";
+}
+
+export function canAddMediaToPlanCart(
+  media: Pick<PricingUnavailableMedia, "catalogChannel" | "onlineSpec"> & {
+    /** Cart payload — calculable online rows carry budget snapshot (commit 1). */
+    lineTotalWon?: number;
+  },
+): boolean {
+  if (!isOnlineCatalogMedia(media)) return true;
+  if (media.onlineSpec !== undefined) {
+    return hasOnlinePricingSpec(media);
+  }
+  return typeof media.lineTotalWon === "number" && media.lineTotalWon > 0;
+}
+
+/** Toast when plan cart add blocked (inquiry online vs legacy). */
+export function planCartAddBlockedMessage(
+  item: Pick<{ catalogChannel?: string; lineTotalWon?: number }, "catalogChannel" | "lineTotalWon">,
+  isKo: boolean,
+): string {
+  if (isOnlineCatalogMedia(item)) {
+    return isKo
+      ? "가격 문의 온라인 매체는 담은 매체에 담을 수 없습니다. 매체 상세에서 문의해 주세요."
+      : "Inquiry-only online media cannot be added to your plan. Please contact us from the media page.";
+  }
+  return isKo
+    ? "이 매체는 담은 매체에 담을 수 없습니다."
+    : "This media cannot be added to your plan.";
 }
 
 /** Offline unpriceable — null type/price or resolved unit ≤0 (PR1b-2). */

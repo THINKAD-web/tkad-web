@@ -32,6 +32,8 @@ export interface PlanCartItem {
   mediaType: string;
   /** A7 — snapshot at add time; existing rows implicit offline */
   catalogChannel?: string;
+  /** A7 — online calculable monthly budget (wizard/compare `lineTotalWon` parity) */
+  lineTotalWon?: number;
   region: string;
   price: number;
   /** 수량(대·기 등) — 미지정 시 카탈로그 기본값 */
@@ -88,6 +90,7 @@ export type BulkAddToPlanCartResult = {
   added: number;
   skippedDuplicate: number;
   skippedMax: number;
+  skippedOnlineBlocked: number;
 };
 
 import {
@@ -167,6 +170,12 @@ function normalizeItem(raw: unknown): PlanCartItem | null {
     catalogChannel:
       typeof o.catalogChannel === "string" && o.catalogChannel.trim()
         ? o.catalogChannel.trim()
+        : undefined,
+    lineTotalWon:
+      typeof o.lineTotalWon === "number" &&
+      Number.isFinite(o.lineTotalWon) &&
+      o.lineTotalWon > 0
+        ? Math.round(o.lineTotalWon)
         : undefined,
     region: typeof o.region === "string" ? o.region : "",
     price: typeof o.price === "number" && Number.isFinite(o.price) ? o.price : 0,
@@ -369,7 +378,10 @@ export function addToPlanCart(
 ): AddToPlanCartResult {
   if (
     item.catalogChannel &&
-    !canAddMediaToPlanCart({ catalogChannel: item.catalogChannel })
+    !canAddMediaToPlanCart({
+      catalogChannel: item.catalogChannel,
+      lineTotalWon: item.lineTotalWon,
+    })
   ) {
     return { ok: false, reason: "online_blocked" };
   }
@@ -406,6 +418,7 @@ export function addToPlanCart(
   });
 }
 
+/** PR5-b commit 2 — mirror `addToPlanCart` gate (recommend/legacy bulk path). */
 export function addManyToPlanCart(
   items: Omit<PlanCartItem, "addedAt">[],
   maxItems: number = PLAN_CART_MAX_ITEMS_FREE,
@@ -414,10 +427,21 @@ export function addManyToPlanCart(
     let added = 0;
     let skippedDuplicate = 0;
     let skippedMax = 0;
+    let skippedOnlineBlocked = 0;
     let nextItems = [...cart.items];
     const seen = new Set(nextItems.map((i) => i.mediaId));
 
     for (const item of items) {
+      if (
+        item.catalogChannel &&
+        !canAddMediaToPlanCart({
+          catalogChannel: item.catalogChannel,
+          lineTotalWon: item.lineTotalWon,
+        })
+      ) {
+        skippedOnlineBlocked += 1;
+        continue;
+      }
       if (seen.has(item.mediaId)) {
         skippedDuplicate += 1;
         continue;
@@ -442,7 +466,7 @@ export function addManyToPlanCart(
 
     return {
       cart: { ...cart, items: nextItems },
-      result: { added, skippedDuplicate, skippedMax },
+      result: { added, skippedDuplicate, skippedMax, skippedOnlineBlocked },
     };
   });
 }
@@ -479,6 +503,7 @@ export function updatePlanCartItem(
       | "addonLines"
       | "usePackagePeriod"
       | "lineCampaignDays"
+      | "lineTotalWon"
     >
   >,
 ): void {
@@ -547,6 +572,14 @@ export function updatePlanCartItem(
           next.lineCampaignDays = Math.round(days);
         } else {
           delete next.lineCampaignDays;
+        }
+      }
+      if ("lineTotalWon" in patch) {
+        const budget = patch.lineTotalWon;
+        if (budget != null && Number.isFinite(budget) && budget > 0) {
+          next.lineTotalWon = Math.round(budget);
+        } else {
+          delete next.lineTotalWon;
         }
       }
       return next;

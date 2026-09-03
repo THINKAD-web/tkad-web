@@ -32,7 +32,23 @@ export function PlanCartBulkAddButton({ items, label, size = "md", className }: 
     }
     const result = addMany(items);
     if (result.added > 0) {
-      toast.success(`${result.added}개 매체가 플랜에 추가됐어요 ✓`);
+      const filtered =
+        result.skippedOnlineBlocked > 0
+          ? isKo
+            ? ` (${result.skippedOnlineBlocked}개 문의 매체 제외)`
+            : ` (${result.skippedOnlineBlocked} inquiry skipped)`
+          : "";
+      toast.success(
+        isKo
+          ? `${result.added}개 매체가 플랜에 추가됐어요 ✓${filtered}`
+          : `${result.added} media added to plan ✓${filtered}`,
+      );
+    } else if (result.skippedOnlineBlocked === items.length) {
+      toast.warning(
+        isKo
+          ? "가격 문의 온라인 매체는 담은 매체에 담을 수 없습니다."
+          : "Inquiry-only online media cannot be added to your plan.",
+      );
     } else if (result.skippedDuplicate === items.length) {
       toast.warning("선택한 매체가 이미 모두 플랜에 있습니다");
     } else {

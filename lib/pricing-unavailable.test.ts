@@ -5,6 +5,10 @@ import {
   isOfflineUnpriceableMedia,
   isOnlineCatalogMedia,
   isPricingUnavailable,
+  isPublicQuoteWizardSelectableMedia,
+  isQuoteWizardSelectableMedia,
+  isQuoteWizardVisibleMedia,
+  quoteWizardSelectBlockedMessage,
 } from "@/lib/pricing-unavailable";
 
 const offlineDooh = {
@@ -71,4 +75,20 @@ test("isPricingUnavailable — offline null type is unavailable", () => {
 
 test("isOfflineUnpriceableMedia ignores online rows", () => {
   assert.equal(isOfflineUnpriceableMedia(onlineInquiry), false);
+});
+
+test("PR5-b commit 1 — visible vs selectable gates diverge for online", () => {
+  assert.equal(isQuoteWizardVisibleMedia(onlineInquiry), true);
+  assert.equal(isQuoteWizardVisibleMedia(onlineCalculable), true);
+  assert.equal(isQuoteWizardVisibleMedia(offlineDooh), true);
+  assert.equal(isQuoteWizardSelectableMedia(onlineInquiry), false);
+  assert.equal(isQuoteWizardSelectableMedia(onlineCalculable), false);
+  assert.equal(isQuoteWizardSelectableMedia(offlineDooh), true);
+  assert.equal(isPublicQuoteWizardSelectableMedia(onlineInquiry), false);
+  assert.equal(isPublicQuoteWizardSelectableMedia(onlineCalculable), true);
+  assert.equal(isPublicQuoteWizardSelectableMedia(offlineDooh), true);
+});
+
+test("quoteWizardSelectBlockedMessage — inquiry online only", () => {
+  assert.match(quoteWizardSelectBlockedMessage(onlineInquiry, true), /가격 문의/);
 });

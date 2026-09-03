@@ -418,6 +418,9 @@ export function MyPlanPageClient() {
                     onAddonLinesChange={(mediaId, lines) =>
                       updateItem(mediaId, { addonLines: lines })
                     }
+                    onLineTotalWonChange={(mediaId, lineTotalWon) =>
+                      updateItem(mediaId, { lineTotalWon })
+                    }
                     usePackagePeriod={item.usePackagePeriod === true}
                     onPackagePeriodToggle={(mediaId, checked) =>
                       togglePackagePeriod(

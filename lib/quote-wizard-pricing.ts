@@ -26,7 +26,7 @@ import {
   mediaPriceOnInquiryLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
-import { isPricingUnavailable } from "@/lib/pricing-unavailable";
+import { isPricingUnavailable, hasOnlinePricingSpec, isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
 
 /** 견적 캠페인 기간 = 운영 부분기간 요율 키 (1/3/5/7/15/30일) */
 export type QuoteCampaignPeriodKey = PartialPeriodRateAdminKey;
@@ -287,6 +287,82 @@ export function resolveQuoteCampaignPeriodSummaryLabel(opts: {
   return mixedLabel.replace("{period}", campaignPeriodLabel);
 }
 
+/** Online calculable rows — monthly budget line (not OOH period proration). */
+export function shouldUseOnlineWizardBudgetLine(
+  media: Pick<MediaItem, "catalogChannel" | "onlineSpec">,
+): boolean {
+  return isOnlineCatalogMedia(media) && hasOnlinePricingSpec(media);
+}
+
+export function defaultQuoteWizardOnlineBudgetWon(
+  media: Pick<MediaItem, "onlineSpec">,
+): number {
+  return media.onlineSpec?.minBudget ?? 1_000_000;
+}
+
+export function isQuoteWizardOnlineBudgetBelowMin(
+  media: Pick<MediaItem, "onlineSpec" | "catalogChannel">,
+  budgetWon: number,
+): boolean {
+  const spec = media.onlineSpec;
+  if (!spec || !hasOnlinePricingSpec(media)) return false;
+  const minBudget = spec.minBudget ?? 0;
+  return minBudget > 0 && budgetWon > 0 && budgetWon < minBudget;
+}
+
+/**
+ * Client-side online quote line — must stay aligned with BudgetPricing + calculateQuote.
+ * lineTotalMan × 10_000 === server lineSupplyWon for valid budgets.
+ */
+export function buildQuoteWizardOnlineLineContext(
+  media: MediaItem,
+  budgetWon: number,
+  opts: {
+    isKo: boolean;
+    campaignPeriodLabel: string;
+    campaignDays?: number;
+  },
+): QuoteWizardLineContext {
+  const locale = opts.isKo ? "ko" : "en";
+  const campaignDays = opts.campaignDays ?? 30;
+
+  if (
+    isQuoteWizardPriceOnInquiry(media) ||
+    !shouldUseOnlineWizardBudgetLine(media) ||
+    budgetWon <= 0 ||
+    isQuoteWizardOnlineBudgetBelowMin(media, budgetWon)
+  ) {
+    return {
+      unitPriceMan: 0,
+      pricePeriod: "month",
+      campaignUnits: 0,
+      lineTotalMan: 0,
+      unitPeriodLabel: formatPricePeriodShortLabel("month", locale),
+      executionPeriodLabel: opts.isKo ? "월 예산" : "Monthly budget",
+      bundleDays: null,
+      campaignDays,
+      prorationLabel: null,
+      usesMediaPartialRate: false,
+      priceOnInquiry: true,
+    };
+  }
+
+  const lineTotalMan = Math.round(budgetWon / 10_000);
+  return {
+    unitPriceMan: lineTotalMan,
+    pricePeriod: "month",
+    campaignUnits: 1,
+    lineTotalMan,
+    unitPeriodLabel: opts.isKo ? "월 예산" : "Monthly budget",
+    executionPeriodLabel: opts.isKo ? "월 예산 기준" : "Monthly budget basis",
+    bundleDays: null,
+    campaignDays,
+    prorationLabel: null,
+    usesMediaPartialRate: false,
+    priceOnInquiry: false,
+  };
+}
+
 export function buildQuoteWizardLineContext(
   media: MediaItem,
   opts: {
@@ -303,6 +379,16 @@ export function buildQuoteWizardLineContext(
     campaignDaysOverride?: number;
   },
 ): QuoteWizardLineContext {
+  if (shouldUseOnlineWizardBudgetLine(media)) {
+    return buildQuoteWizardOnlineLineContext(media, 0, {
+      isKo: opts.isKo,
+      campaignPeriodLabel: opts.campaignPeriodLabel,
+      campaignDays:
+        opts.campaignDaysOverride != null && opts.campaignDaysOverride > 0
+          ? Math.round(opts.campaignDaysOverride)
+          : quoteCampaignDaysFromPeriodKey(opts.campaignPeriod),
+    });
+  }
   const isNw = media.catalogSource === "network";
   const poIdx = opts.priceOptionIndex;
   const priceOpt = !isNw ? media.priceOptions?.[poIdx] : undefined;

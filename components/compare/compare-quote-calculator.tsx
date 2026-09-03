@@ -11,14 +11,24 @@ import {
   buildQuoteContactHref,
   calculateMediaQuoteByDays,
   calculateMediaQuoteFromOption,
+  calculateOnlineMediaQuoteByBudget,
+  defaultOnlineCompareBudgetWon,
   durationToDays,
   findCheapestPriceOptionIndex,
   formatCompareQuoteLineCost,
   formatWonShort,
+  shouldUseOnlineBudgetQuote,
   type QuoteDurationUnit,
 } from "@/lib/compare-quote";
+import {
+  OnlineMediaBudgetFields,
+} from "@/components/media/online-media-budget-fields";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import {
+  formatCatalogPriceFieldWon,
+  mediaPriceOnInquiryLabel,
+} from "@/lib/media-price-format";
+import { hasOnlinePricingSpec } from "@/lib/pricing-unavailable";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -45,6 +55,32 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
   const [useDateRange, setUseDateRange] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     () => new Set(items.map((m) => m.id)),
+  );
+  const [onlineBudgetWonByMediaId, setOnlineBudgetWonByMediaId] = useState<
+    Record<string, number>
+  >(() => {
+    const init: Record<string, number> = {};
+    for (const m of items) {
+      if (shouldUseOnlineBudgetQuote(m)) {
+        init[m.id] = defaultOnlineCompareBudgetWon(m);
+      }
+    }
+    return init;
+  });
+
+  const selectedItems = useMemo(
+    () => items.filter((m) => selectedIds.has(m.id)),
+    [items, selectedIds],
+  );
+
+  const hasOohSelected = useMemo(
+    () => selectedItems.some((m) => !shouldUseOnlineBudgetQuote(m)),
+    [selectedItems],
+  );
+
+  const hasOnlineSelected = useMemo(
+    () => selectedItems.some((m) => shouldUseOnlineBudgetQuote(m)),
+    [selectedItems],
   );
 
   const effectiveDuration = useMemo(() => {
@@ -77,13 +113,13 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
     isKo,
   ]);
 
-  const selectedItems = useMemo(
-    () => items.filter((m) => selectedIds.has(m.id)),
-    [items, selectedIds],
-  );
-
   const totals = useMemo(() => {
     const lines = selectedItems.map((m) => {
+      if (shouldUseOnlineBudgetQuote(m)) {
+        const budgetWon =
+          onlineBudgetWonByMediaId[m.id] ?? defaultOnlineCompareBudgetWon(m);
+        return calculateOnlineMediaQuoteByBudget(m, budgetWon);
+      }
       const opts = m.priceOptions ?? [];
       if (opts.length > 0) {
         const idx = findCheapestPriceOptionIndex(m);
@@ -96,7 +132,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
       return calculateMediaQuoteByDays(m, effectiveDuration.days);
     });
     return aggregateQuoteLines(lines);
-  }, [selectedItems, effectiveDuration.days]);
+  }, [selectedItems, effectiveDuration.days, onlineBudgetWonByMediaId]);
 
   function toggleMedia(id: string) {
     setSelectedIds((prev) => {
@@ -151,133 +187,186 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
 
       <div className="mt-5 grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold dark:border-white/12 border-gray-200">
-              <input
-                type="radio"
-                name="durationMode"
-                checked={!useDateRange}
-                onChange={() => setUseDateRange(false)}
-              />
-              {isKo ? "기간 단위" : "By unit"}
-            </label>
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold dark:border-white/12 border-gray-200">
-              <input
-                type="radio"
-                name="durationMode"
-                checked={useDateRange}
-                onChange={() => setUseDateRange(true)}
-              />
-              {isKo ? "날짜 선택" : "Date range"}
-            </label>
-          </div>
-
-          {!useDateRange ? (
+          {hasOohSelected ? (
             <>
               <div className="flex flex-wrap gap-2">
-                {DURATION_PRESETS.map((p) => (
-                  <button
-                    key={`${p.unit}-${p.value}`}
-                    type="button"
-                    onClick={() => {
-                      setDurationUnit(p.unit);
-                      setDurationValue(p.value);
-                    }}
-                    className={cn(
-                      "rounded-lg border px-3 py-1.5 tkad-type-label transition-colors",
-                      durationUnit === p.unit && durationValue === p.value
-                        ? "border-accent bg-accent/15 text-accent"
-                        : "border-border text-muted-foreground hover:border-accent/50",
-                    )}
-                  >
-                    {isKo ? p.labelKo : p.labelEn}
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-end gap-3">
-                <div>
-                  <label className="mb-1 block tkad-type-label text-muted-foreground">
-                    {isKo ? "기간" : "Duration"}
-                  </label>
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold dark:border-white/12 border-gray-200">
                   <input
-                    type="number"
-                    min={1}
-                    max={365}
-                    value={durationValue}
-                    onChange={(e) =>
-                      setDurationValue(Math.max(1, Number(e.target.value) || 1))
-                    }
-                    className={cn(inputCls, "w-24")}
+                    type="radio"
+                    name="durationMode"
+                    checked={!useDateRange}
+                    onChange={() => setUseDateRange(false)}
                   />
-                </div>
-                <div>
-                  <label className="mb-1 block tkad-type-label text-muted-foreground">
-                    {isKo ? "단위" : "Unit"}
-                  </label>
-                  <select
-                    value={durationUnit}
-                    onChange={(e) =>
-                      setDurationUnit(e.target.value as QuoteDurationUnit)
-                    }
-                    className={cn(inputCls, "min-w-[7rem]")}
-                  >
-                    <option value="day">{isKo ? "일" : "Days"}</option>
-                    <option value="week">{isKo ? "주" : "Weeks"}</option>
-                    <option value="month">{isKo ? "월" : "Months"}</option>
-                  </select>
-                </div>
+                  {isKo ? "기간 단위" : "By unit"}
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold dark:border-white/12 border-gray-200">
+                  <input
+                    type="radio"
+                    name="durationMode"
+                    checked={useDateRange}
+                    onChange={() => setUseDateRange(true)}
+                  />
+                  {isKo ? "날짜 선택" : "Date range"}
+                </label>
               </div>
+
+              {!useDateRange ? (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {DURATION_PRESETS.map((p) => (
+                      <button
+                        key={`${p.unit}-${p.value}`}
+                        type="button"
+                        onClick={() => {
+                          setDurationUnit(p.unit);
+                          setDurationValue(p.value);
+                        }}
+                        className={cn(
+                          "rounded-lg border px-3 py-1.5 tkad-type-label transition-colors",
+                          durationUnit === p.unit && durationValue === p.value
+                            ? "border-accent bg-accent/15 text-accent"
+                            : "border-border text-muted-foreground hover:border-accent/50",
+                        )}
+                      >
+                        {isKo ? p.labelKo : p.labelEn}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap items-end gap-3">
+                    <div>
+                      <label className="mb-1 block tkad-type-label text-muted-foreground">
+                        {isKo ? "기간" : "Duration"}
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={365}
+                        value={durationValue}
+                        onChange={(e) =>
+                          setDurationValue(Math.max(1, Number(e.target.value) || 1))
+                        }
+                        className={cn(inputCls, "w-24")}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block tkad-type-label text-muted-foreground">
+                        {isKo ? "단위" : "Unit"}
+                      </label>
+                      <select
+                        value={durationUnit}
+                        onChange={(e) =>
+                          setDurationUnit(e.target.value as QuoteDurationUnit)
+                        }
+                        className={cn(inputCls, "min-w-[7rem]")}
+                      >
+                        <option value="day">{isKo ? "일" : "Days"}</option>
+                        <option value="week">{isKo ? "주" : "Weeks"}</option>
+                        <option value="month">{isKo ? "월" : "Months"}</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-wrap gap-3">
+                  <div>
+                    <label className="mb-1 block tkad-type-label text-muted-foreground">
+                      {isKo ? "시작일" : "From"}
+                    </label>
+                    <input
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block tkad-type-label text-muted-foreground">
+                      {isKo ? "종료일" : "To"}
+                    </label>
+                    <input
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+              )}
             </>
-          ) : (
-            <div className="flex flex-wrap gap-3">
-              <div>
-                <label className="mb-1 block tkad-type-label text-muted-foreground">
-                  {isKo ? "시작일" : "From"}
-                </label>
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <label className="mb-1 block tkad-type-label text-muted-foreground">
-                  {isKo ? "종료일" : "To"}
-                </label>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className={inputCls}
-                />
-              </div>
-            </div>
-          )}
+          ) : hasOnlineSelected ? (
+            <p className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+              {isKo
+                ? "온라인 매체는 월 예산 기준으로 견적됩니다."
+                : "Online media are quoted by monthly budget."}
+            </p>
+          ) : null}
+
+          {hasOohSelected && hasOnlineSelected ? (
+            <p className="text-xs text-muted-foreground">
+              {isKo
+                ? "온라인 매체는 아래 월 예산으로, OOH 매체는 위 집행 기간으로 계산됩니다."
+                : "Online lines use monthly budget below; OOH lines use the flight duration above."}
+            </p>
+          ) : null}
 
           <div>
             <p className="mb-2 tkad-type-label text-muted-foreground">
               {isKo ? "포함 매체" : "Media included"}
             </p>
             <ul className="space-y-2">
-              {items.map((m) => (
-                <li key={m.id}>
-                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border/60 bg-muted/40 px-3 py-2.5 transition-colors hover:bg-muted/70 dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.has(m.id)}
-                      onChange={() => toggleMedia(m.id)}
-                      className="rounded border-border"
-                    />
-                    <span className="min-w-0 flex-1 tkad-type-title text-foreground">
-                      {isKo ? m.name : m.nameEn || m.name}
-                    </span>
-                    <span className="shrink-0 tkad-type-caption tabular-nums text-muted-foreground">
-                      {formatCatalogPriceFieldWon(m.price, localeTag)}
-                    </span>
-                  </label>
-                </li>
-              ))}
+              {items.map((m) => {
+                const isOnlineBudget = shouldUseOnlineBudgetQuote(m);
+                const isSelected = selectedIds.has(m.id);
+                const budgetWon =
+                  onlineBudgetWonByMediaId[m.id] ??
+                  defaultOnlineCompareBudgetWon(m);
+
+                return (
+                  <li key={m.id} className="space-y-2">
+                    <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border/60 bg-muted/40 px-3 py-2.5 transition-colors hover:bg-muted/70 dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleMedia(m.id)}
+                        className="rounded border-border"
+                      />
+                      <span className="min-w-0 flex-1 tkad-type-title text-foreground">
+                        {isKo ? m.name : m.nameEn || m.name}
+                      </span>
+                      <span className="shrink-0 tkad-type-caption tabular-nums text-muted-foreground">
+                        {isOnlineBudget
+                          ? isKo
+                            ? "월 예산"
+                            : "Monthly budget"
+                          : formatCatalogPriceFieldWon(m.price, localeTag)}
+                      </span>
+                    </label>
+                    {isSelected && isOnlineBudget ? (
+                      <OnlineMediaBudgetFields
+                        media={m}
+                        budgetWon={budgetWon}
+                        onBudgetChange={(won) =>
+                          setOnlineBudgetWonByMediaId((prev) => ({
+                            ...prev,
+                            [m.id]: won,
+                          }))
+                        }
+                        isKo={isKo}
+                        inputCls={inputCls}
+                        compact
+                        className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5 dark:border-white/10"
+                      />
+                    ) : null}
+                    {isSelected &&
+                    hasOnlinePricingSpec(m) === false &&
+                    m.catalogChannel === "online" ? (
+                      <p className="px-1 text-xs text-muted-foreground">
+                        {mediaPriceOnInquiryLabel(isKo ? "ko" : "en")}
+                      </p>
+                    ) : null}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
@@ -287,9 +376,15 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
             {isKo ? "견적 요약" : "Quote summary"}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {isKo ? "집행" : "Flight"}: {effectiveDuration.label} (
-            {effectiveDuration.days}
-            {isKo ? "일" : "d"})
+            {hasOohSelected ? (
+              <>
+                {isKo ? "집행" : "Flight"}: {effectiveDuration.label} (
+                {effectiveDuration.days}
+                {isKo ? "일" : "d"})
+              </>
+            ) : hasOnlineSelected ? (
+              isKo ? "온라인 월 예산 기준" : "Online monthly budget basis"
+            ) : null}
           </p>
 
           <ul className="mt-4 space-y-2 border-b border-border/50 pb-4">

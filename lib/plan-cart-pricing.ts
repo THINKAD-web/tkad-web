@@ -26,8 +26,24 @@ import {
   resolveQuoteCampaignPeriodForPricing,
 } from "@/lib/planner/planner-media-quantity";
 import type { QuoteCampaignPeriodKey } from "@/lib/quote-wizard-pricing";
-import { buildQuoteWizardLineContext } from "@/lib/quote-wizard-pricing";
+import {
+  buildQuoteWizardLineContext,
+  shouldUseOnlineWizardBudgetLine,
+} from "@/lib/quote-wizard-pricing";
 import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
+
+function planCartSnapshottedOnlineMonthlyWon(
+  item: PlanCartItem,
+  media?: MediaItem | null,
+): number | null {
+  const budget = item.lineTotalWon;
+  if (budget == null || budget <= 0) return null;
+  if (media) {
+    return shouldUseOnlineWizardBudgetLine(media) ? budget : null;
+  }
+  if (item.catalogChannel === "online") return budget;
+  return null;
+}
 
 export function planCartItemQuantity(
   item: Pick<PlanCartItem, "quantity">,
@@ -107,6 +123,9 @@ export function planCartLineMonthlyWon(
   item: PlanCartItem,
   media?: MediaItem | null,
 ): number {
+  const onlineMonthly = planCartSnapshottedOnlineMonthlyWon(item, media);
+  if (onlineMonthly != null) return onlineMonthly;
+
   const rows = planCartEffectiveOptionSelections(item, media);
   const usesExplicitRows =
     (item.optionSelections?.length ?? 0) > 0 ||
@@ -184,6 +203,11 @@ export function planCartItemQuoteLineFromPeriod(
   usePackagePeriod?: boolean;
   lineCampaignDays?: number;
 } {
+  const onlineMonthly = planCartSnapshottedOnlineMonthlyWon(item, media);
+  if (onlineMonthly != null) {
+    return { lineTotalWon: onlineMonthly };
+  }
+
   const rows = planCartEffectiveOptionSelections(item, media);
   const usesMulti =
     ((item.optionSelections?.length ?? 0) > 0 ||
