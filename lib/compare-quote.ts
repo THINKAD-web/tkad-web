@@ -6,7 +6,12 @@ import {
   mediaPriceOnInquiryLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
-import { isPricingUnavailable, isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
+import { estimateImpressionsFromBudget } from "@/lib/pricing/online-performance-estimate";
+import {
+  hasOnlinePricingSpec,
+  isOnlineCatalogMedia,
+  isPricingUnavailable,
+} from "@/lib/pricing-unavailable";
 import {
   resolveCpmWon,
   resolveMonthlyImpressions,
@@ -65,20 +70,64 @@ export type MediaQuoteLine = {
   pricingUnavailable?: boolean;
 };
 
-/**
- * PR5-b commit 1: list payload may carry `onlineSpec`, but compare billing stays
- * closed until the online budget path lands (commit 2). Explicit gate — do not
- * rely on absent spec or implicit defaults.
- */
-export function isCompareOnlineBillingHeld(
-  media: Pick<MediaItem, "catalogChannel">,
-): boolean {
-  return isOnlineCatalogMedia(media);
+/** Default monthly budget for compare/wizard online lines — matches detail sticky. */
+export function defaultOnlineCompareBudgetWon(media: MediaItem): number {
+  return media.onlineSpec?.minBudget ?? 1_000_000;
 }
 
-function isComparePricingUnavailable(media: MediaItem): boolean {
-  if (isCompareOnlineBillingHeld(media)) return true;
-  return isPricingUnavailable(media);
+export function isOnlineCompareBudgetBelowMin(
+  media: MediaItem,
+  budgetWon: number,
+): boolean {
+  const spec = media.onlineSpec;
+  if (!spec || !hasOnlinePricingSpec(media)) return false;
+  const minBudget = spec.minBudget ?? 0;
+  return minBudget > 0 && budgetWon > 0 && budgetWon < minBudget;
+}
+
+/** Online compare quote — monthly budget, not OOH duration proration. */
+export function calculateOnlineMediaQuoteByBudget(
+  media: MediaItem,
+  budgetWon: number,
+): MediaQuoteLine {
+  if (isPricingUnavailable(media)) {
+    return {
+      mediaId: media.id,
+      name: media.name,
+      costWon: 0,
+      impressions: 0,
+      cpm: null,
+      pricingUnavailable: true,
+    };
+  }
+  const spec = media.onlineSpec;
+  if (!spec || budgetWon <= 0 || isOnlineCompareBudgetBelowMin(media, budgetWon)) {
+    return {
+      mediaId: media.id,
+      name: media.name,
+      costWon: 0,
+      impressions: 0,
+      cpm: null,
+      pricingUnavailable: true,
+    };
+  }
+
+  const impressions = estimateImpressionsFromBudget(spec, budgetWon);
+  const cpm =
+    impressions > 0 ? Math.round(budgetWon / (impressions / 1000)) : null;
+
+  return {
+    mediaId: media.id,
+    name: media.name,
+    costWon: budgetWon,
+    impressions,
+    cpm,
+    pricingUnavailable: false,
+  };
+}
+
+export function shouldUseOnlineBudgetQuote(media: MediaItem): boolean {
+  return isOnlineCatalogMedia(media) && hasOnlinePricingSpec(media);
 }
 
 /** 패키지 총액 × (캠페인 일수 ÷ 번들 일수) — 스티키 패널·마법사 공용 */
@@ -129,7 +178,7 @@ function quoteLineFromCostWon(
   costWon: number,
   durationDays: number,
 ): MediaQuoteLine {
-  const unavailable = isComparePricingUnavailable(media);
+  const unavailable = isPricingUnavailable(media);
   const days = Math.max(1, Math.round(durationDays));
   const monthlyImp = resolveMonthlyImpressions(media);
   const impressions = Math.round(monthlyImp * (days / 30));
@@ -155,7 +204,7 @@ function quoteLineFromUnitPrice(
   durationDays: number,
   bundleDays: number,
 ): MediaQuoteLine {
-  if (isComparePricingUnavailable(media)) {
+  if (isPricingUnavailable(media)) {
     return quoteLineFromCostWon(media, 0, durationDays);
   }
   const costWon = quoteBundleProrationWon(
@@ -274,7 +323,17 @@ export function calculateMediaQuoteByDays(
   media: MediaItem,
   durationDays: number,
 ): MediaQuoteLine {
-  if (isComparePricingUnavailable(media)) {
+  if (shouldUseOnlineBudgetQuote(media)) {
+    return {
+      mediaId: media.id,
+      name: media.name,
+      costWon: 0,
+      impressions: 0,
+      cpm: null,
+      pricingUnavailable: true,
+    };
+  }
+  if (isPricingUnavailable(media)) {
     return quoteLineFromCostWon(media, 0, durationDays);
   }
   const days = Math.max(1, Math.round(durationDays));
