@@ -144,7 +144,6 @@ async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<Digita
     console.error("[digital-catalog-bridge] local catalog unavailable", {
       source: resolved.source,
       localOk: resolved.localOk,
-      forceLocal: resolved.forceLocal,
     });
     return {
       channels: [],
@@ -162,7 +161,6 @@ async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<Digita
   if (resolved.source === "local") {
     console.info("[digital-catalog-bridge] local catalog", {
       count: resolved.count,
-      forceLocal: resolved.forceLocal,
     });
   }
 

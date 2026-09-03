@@ -22,13 +22,6 @@ const localOk = {
   fetchedAt: "2026-09-03T00:00:00.000Z",
 };
 
-const remoteOk = {
-  ok: true,
-  items: [item],
-  count: 1,
-  fetchedAt: "2026-09-03T00:00:01.000Z",
-};
-
 const failed = {
   ok: false,
   items: [],
@@ -37,42 +30,16 @@ const failed = {
   error: "fail",
 };
 
-test("selectDigitalCatalogSource — default prefers local when both ok", () => {
-  const r = selectDigitalCatalogSource({
-    forceLocal: false,
-    local: localOk,
-    remote: remoteOk,
-  });
+test("selectDigitalCatalogSource — returns local when catalog ok", () => {
+  const r = selectDigitalCatalogSource(localOk);
   assert.equal(r.source, "local");
-  assert.equal(r.usedDmpilotFallback, false);
+  assert.equal(r.localOk, true);
+  assert.equal(r.items.length, 1);
 });
 
-test("selectDigitalCatalogSource — dmpilot fallback when local fails", () => {
-  const r = selectDigitalCatalogSource({
-    forceLocal: false,
-    local: failed,
-    remote: remoteOk,
-  });
-  assert.equal(r.source, "dmpilot");
-  assert.equal(r.usedDmpilotFallback, true);
-});
-
-test("selectDigitalCatalogSource — unavailable when both fail", () => {
-  const r = selectDigitalCatalogSource({
-    forceLocal: false,
-    local: failed,
-    remote: failed,
-  });
+test("selectDigitalCatalogSource — unavailable when local fails", () => {
+  const r = selectDigitalCatalogSource(failed);
   assert.equal(r.source, "unavailable");
+  assert.equal(r.localOk, false);
   assert.equal(r.items.length, 0);
-});
-
-test("selectDigitalCatalogSource — forceLocal skips dmpilot fallback", () => {
-  const r = selectDigitalCatalogSource({
-    forceLocal: true,
-    local: failed,
-    remote: remoteOk,
-  });
-  assert.equal(r.source, "unavailable");
-  assert.equal(r.remoteOk, false);
 });

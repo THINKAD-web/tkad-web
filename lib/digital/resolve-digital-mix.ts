@@ -1,5 +1,4 @@
 import "@/lib/digital/server-only";
-import { isDigitalForceLocal } from "@/lib/digital/force-local";
 import { fetchLocalDigitalCatalog } from "@/lib/digital/local-catalog-fetch";
 import { buildMediaMix } from "@/lib/digital/mix-engine";
 import { digitalMixPayloadToMixInput } from "@/lib/digital/mix-input-adapter";
@@ -46,13 +45,10 @@ export function buildLocalMixFromCatalogViews(
   };
 }
 
-/**
- * PR5-c commit 7 — local mix-engine only (dmpilot M2M removed).
- */
+/** PR5-c commit 7 — local mix-engine only. */
 export async function resolveDigitalMix(
   payload: DigitalMixPayload,
 ): Promise<ResolvedDigitalMix> {
-  const forceLocal = isDigitalForceLocal();
   const localBuilt = await buildLocalMixAsync(payload);
   const local = {
     ok: localBuilt.ok,
@@ -61,16 +57,11 @@ export async function resolveDigitalMix(
     error: localBuilt.ok ? undefined : localBuilt.error,
   };
 
-  const selected = selectDigitalMixSource({
-    forceLocal: true,
-    local,
-    remote: { ok: false, data: null, catalogSize: 0 },
-  });
+  const selected = selectDigitalMixSource(local);
 
   if (!selected.localOk) {
     console.warn("[resolveDigitalMix] local mix unavailable", {
       error: local.error,
-      forceLocal,
     });
   }
 

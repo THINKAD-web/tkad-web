@@ -95,12 +95,6 @@ export async function runIntegratedMix(
     };
   }
 
-  if (digitalResolved.usedDmpilotFallback) {
-    console.warn("[runIntegratedMix] dmpilot mix fallback", {
-      catalogSize: digitalResolved.catalogSize,
-    });
-  }
-
   const digitalMix = filterDigitalMixBySlugs(
     digitalResolved.data,
     request.selectedDigitalSlugs,

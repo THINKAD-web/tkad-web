@@ -1,5 +1,4 @@
 import "@/lib/digital/server-only";
-import { isDigitalForceLocal } from "@/lib/digital/force-local";
 import { fetchLocalDigitalCatalog } from "@/lib/digital/local-catalog-fetch";
 import {
   selectDigitalCatalogSource,
@@ -12,12 +11,8 @@ export type { ResolvedDigitalCatalogSource };
 
 export type ResolvedDigitalCatalog = SelectedDigitalCatalog;
 
-/**
- * PR5-c commit 7 — local online catalog only (dmpilot M2M removed).
- * `DIGITAL_FORCE_LOCAL=1` remains until commit 7 follow-up cleanup.
- */
+/** PR5-c commit 7 — local online catalog only. */
 export async function resolveDigitalCatalogItems(): Promise<ResolvedDigitalCatalog> {
-  const forceLocal = isDigitalForceLocal();
   const localFetched = await fetchLocalDigitalCatalog();
 
   const local = {
@@ -28,21 +23,11 @@ export async function resolveDigitalCatalogItems(): Promise<ResolvedDigitalCatal
     error: localFetched.ok ? undefined : localFetched.error,
   };
 
-  const selected = selectDigitalCatalogSource({
-    forceLocal: true,
-    local,
-    remote: {
-      ok: false,
-      items: [],
-      count: 0,
-      fetchedAt: "",
-    },
-  });
+  const selected = selectDigitalCatalogSource(local);
 
   if (!selected.localOk) {
     console.warn("[resolveDigitalCatalogItems] local catalog unavailable", {
       error: local.error,
-      forceLocal,
     });
   }
 

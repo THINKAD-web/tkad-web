@@ -38,22 +38,25 @@ const mixData = {
   },
 };
 
-test("selectDigitalMixSource — prefers local when both ok", () => {
+test("selectDigitalMixSource — returns local when mix ok", () => {
   const r = selectDigitalMixSource({
-    forceLocal: false,
-    local: { ok: true, data: mixData, catalogSize: 23 },
-    remote: { ok: true, data: mixData, catalogSize: 23 },
+    ok: true,
+    data: mixData,
+    catalogSize: 23,
   });
   assert.equal(r.source, "local");
-  assert.equal(r.usedDmpilotFallback, false);
+  assert.equal(r.localOk, true);
+  assert.ok(r.data);
 });
 
-test("selectDigitalMixSource — dmpilot fallback when local fails", () => {
+test("selectDigitalMixSource — unavailable when local fails", () => {
   const r = selectDigitalMixSource({
-    forceLocal: false,
-    local: { ok: false, data: null, catalogSize: 0, error: "db" },
-    remote: { ok: true, data: mixData, catalogSize: 23 },
+    ok: false,
+    data: null,
+    catalogSize: 0,
+    error: "db",
   });
-  assert.equal(r.source, "dmpilot");
-  assert.equal(r.usedDmpilotFallback, true);
+  assert.equal(r.source, "unavailable");
+  assert.equal(r.localOk, false);
+  assert.equal(r.data, null);
 });
