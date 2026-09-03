@@ -32,6 +32,8 @@ export interface PlanCartItem {
   mediaType: string;
   /** A7 — snapshot at add time; existing rows implicit offline */
   catalogChannel?: string;
+  /** A7 — online calculable monthly budget (wizard/compare `lineTotalWon` parity) */
+  lineTotalWon?: number;
   region: string;
   price: number;
   /** 수량(대·기 등) — 미지정 시 카탈로그 기본값 */
@@ -167,6 +169,12 @@ function normalizeItem(raw: unknown): PlanCartItem | null {
     catalogChannel:
       typeof o.catalogChannel === "string" && o.catalogChannel.trim()
         ? o.catalogChannel.trim()
+        : undefined,
+    lineTotalWon:
+      typeof o.lineTotalWon === "number" &&
+      Number.isFinite(o.lineTotalWon) &&
+      o.lineTotalWon > 0
+        ? Math.round(o.lineTotalWon)
         : undefined,
     region: typeof o.region === "string" ? o.region : "",
     price: typeof o.price === "number" && Number.isFinite(o.price) ? o.price : 0,
@@ -406,6 +414,7 @@ export function addToPlanCart(
   });
 }
 
+/** PR5-b commit 2 — mirror `addToPlanCart` gate (recommend/legacy bulk path). */
 export function addManyToPlanCart(
   items: Omit<PlanCartItem, "addedAt">[],
   maxItems: number = PLAN_CART_MAX_ITEMS_FREE,
@@ -479,6 +488,7 @@ export function updatePlanCartItem(
       | "addonLines"
       | "usePackagePeriod"
       | "lineCampaignDays"
+      | "lineTotalWon"
     >
   >,
 ): void {
@@ -547,6 +557,14 @@ export function updatePlanCartItem(
           next.lineCampaignDays = Math.round(days);
         } else {
           delete next.lineCampaignDays;
+        }
+      }
+      if ("lineTotalWon" in patch) {
+        const budget = patch.lineTotalWon;
+        if (budget != null && Number.isFinite(budget) && budget > 0) {
+          next.lineTotalWon = Math.round(budget);
+        } else {
+          delete next.lineTotalWon;
         }
       }
       return next;

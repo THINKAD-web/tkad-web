@@ -53,6 +53,16 @@ export function normalizePlanCartItemsForSave(raw: unknown): PlanCartItem[] {
       mediaId,
       mediaName,
       mediaType: typeof o.mediaType === "string" ? o.mediaType : "",
+      catalogChannel:
+        typeof o.catalogChannel === "string" && o.catalogChannel.trim()
+          ? o.catalogChannel.trim()
+          : undefined,
+      lineTotalWon:
+        typeof o.lineTotalWon === "number" &&
+        Number.isFinite(o.lineTotalWon) &&
+        o.lineTotalWon > 0
+          ? Math.round(o.lineTotalWon)
+          : undefined,
       region: typeof o.region === "string" ? o.region : "",
       price:
         typeof o.price === "number" && Number.isFinite(o.price) ? o.price : 0,

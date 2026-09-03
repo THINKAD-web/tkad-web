@@ -29,6 +29,8 @@ const PlanCartItemSchema = z.object({
   mediaId: z.string().min(1),
   mediaName: z.string(),
   mediaType: z.string(),
+  catalogChannel: z.string().optional(),
+  lineTotalWon: z.number().int().positive().optional(),
   region: z.string(),
   price: z.number(),
   quantity: z.number().int().positive().optional(),
@@ -52,6 +54,8 @@ const PlanCartItemSchema = z.object({
     .max(12)
     .optional(),
   addonLines: z.array(PlanCartAddonLineSchema).max(10).optional(),
+  usePackagePeriod: z.boolean().optional(),
+  lineCampaignDays: z.number().int().positive().optional(),
   thumbnailUrl: z.string().optional(),
   addedFrom: z.enum(["ai_recommend", "planner", "search", "map", "package"]),
   addedAt: z.string(),
