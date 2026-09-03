@@ -49,11 +49,41 @@ export function isOnlineCatalogMedia(
   return canonicalCatalogChannel(media.catalogChannel) === CATALOG_CHANNEL_ONLINE;
 }
 
-/** PR3 front gate — quote wizard catalog / planner add until PR5 */
+/**
+ * Step 1 picker visibility — online catalog rows shown from PR5-b commit 1.
+ * Selectability remains `isQuoteWizardSelectableMedia` until commit 2.
+ */
+export function isQuoteWizardVisibleMedia(
+  _media: Pick<PricingUnavailableMedia, "catalogChannel">,
+): boolean {
+  return true;
+}
+
+/** PR3 front gate — quote wizard add-to-cart until PR5-b commit 2 (calculable online). */
 export function isQuoteWizardSelectableMedia(
   media: Pick<PricingUnavailableMedia, "catalogChannel">,
 ): boolean {
   return !isOnlineCatalogMedia(media);
+}
+
+/** Toast copy when Step 1 toggle blocked — distinguishes calculable vs inquiry online. */
+export function quoteWizardSelectBlockedMessage(
+  media: Pick<PricingUnavailableMedia, "catalogChannel" | "onlineSpec">,
+  isKo: boolean,
+): string {
+  if (isOnlineCatalogMedia(media) && hasOnlinePricingSpec(media)) {
+    return isKo
+      ? "온라인 매체(월 예산)는 아직 견적 위저드에 담을 수 없습니다. 곧 지원 예정입니다."
+      : "Online media (monthly budget) cannot be added to the quote wizard yet — coming soon.";
+  }
+  if (isOnlineCatalogMedia(media)) {
+    return isKo
+      ? "가격 문의 온라인 매체는 견적 위저드에 담을 수 없습니다. 매체 상세에서 문의해 주세요."
+      : "Inquiry-only online media cannot be added to the quote wizard. Please contact us from the media page.";
+  }
+  return isKo
+    ? "이 매체는 견적 위저드에 담을 수 없습니다."
+    : "This media cannot be added to the quote wizard.";
 }
 
 export function canAddMediaToPlanCart(

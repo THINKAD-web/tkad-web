@@ -21,6 +21,8 @@ type Props = {
   priceMan: number;
   priceOnInquiry?: boolean;
   pricePeriod?: MediaItem["pricePeriod"];
+  /** false — visible in Step 1 but not addable (PR5-b online hold) */
+  selectable?: boolean;
   onToggle: () => void;
 };
 
@@ -32,6 +34,7 @@ export function QuoteMediaSelectCard({
   priceMan,
   priceOnInquiry = false,
   pricePeriod,
+  selectable = true,
   onToggle,
 }: Props) {
   const catalog = mapMediaItemToHomeCatalog(media);
@@ -59,12 +62,14 @@ export function QuoteMediaSelectCard({
       type="button"
       onClick={onToggle}
       className={cn(
-        "w-full overflow-hidden rounded-2xl border text-left shadow-sm transition-ui hover:shadow-md active:scale-[0.99]",
+        "w-full overflow-hidden rounded-2xl border text-left shadow-sm transition-ui",
+        selectable ? "hover:shadow-md active:scale-[0.99]" : "cursor-not-allowed opacity-75",
         selected
           ? "border-[color:var(--qp-accent)]/55 bg-[color:var(--qp-accent-soft)] ring-2 ring-[color:var(--qp-accent)]/25"
           : "border-gray-100 bg-white dark:border-white/10 dark:bg-white/5",
       )}
       aria-pressed={selected}
+      aria-disabled={!selectable}
       aria-label={isKo ? `${media.name} 선택` : `Select ${media.nameEn || media.name}`}
     >
       <div className="relative aspect-square w-full overflow-hidden bg-gray-100 dark:bg-gray-800">

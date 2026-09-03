@@ -88,7 +88,11 @@ import {
   sumQuoteWizardBillableMan,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
-import { isQuoteWizardSelectableMedia } from "@/lib/pricing-unavailable";
+import {
+  isQuoteWizardSelectableMedia,
+  isQuoteWizardVisibleMedia,
+  quoteWizardSelectBlockedMessage,
+} from "@/lib/pricing-unavailable";
 import { QuoteMediaQuantityFields } from "@/components/quote/quote-media-quantity-fields";
 import {
   buildQuoteDeeplinkPath,
@@ -587,7 +591,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     });
     const q = mediaTextFilter.trim().toLowerCase();
     return chipFiltered.filter((m) => {
-      if (!isQuoteWizardSelectableMedia(m)) return false;
+      if (!isQuoteWizardVisibleMedia(m)) return false;
       if (!passesMediaAdvancedFilters(m, filterState, bounds)) return false;
       if (q.length > 0 && !matchesMediaTextQuery(m, q)) return false;
       return true;
@@ -977,12 +981,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const toggleMedia = useCallback((id: string) => {
     const media = catalog.find((m) => m.id === id);
     if (media && !isQuoteWizardSelectableMedia(media)) {
-      toast(
-        "warning",
-        isKo
-          ? "온라인 매체는 아직 견적 위저드에 담을 수 없습니다. 매체 상세에서 문의해 주세요."
-          : "Online media cannot be added to the quote wizard yet. Please contact us from the media page.",
-      );
+      toast("warning", quoteWizardSelectBlockedMessage(media, isKo));
       return;
     }
     setSelectedIds((prev) => {
@@ -1676,12 +1675,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             mobileUnits: mediaQuantities[media.id],
                             networkUnits: nwOpt?.units,
                           });
+                          const wizardSelectable = isQuoteWizardSelectableMedia(media);
                           return (
                             <div key={media.id} className="space-y-2">
                               <QuoteMediaSelectCard
                                 media={media}
                                 isKo={isKo}
                                 selected={checked}
+                                selectable={wizardSelectable}
                                 priceMan={displayPrice}
                                 priceOnInquiry={priceOnInquiry}
                                 pricePeriod={resolveQuoteMediaPricePeriod(
@@ -1736,7 +1737,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 : null;
                             return (
                               <div key={media.id} className="space-y-2">
-                                <label className="block cursor-pointer">
+                                <label
+                                  className={cn(
+                                    "block",
+                                    !isQuoteWizardSelectableMedia(media) &&
+                                      "cursor-not-allowed opacity-75",
+                                  )}
+                                >
                                   <input
                                     type="checkbox"
                                     className="peer sr-only"
