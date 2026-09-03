@@ -4,7 +4,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { calculateQuote } from "@/lib/quote-calculator";
-import { BUDGET_PRICING_NOT_IMPLEMENTED } from "@/lib/pricing/budget-pricing";
+import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
 import { QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE } from "@/lib/pricing/fixed-period-pricing";
 import type { QuoteCalculatorMedia } from "@/lib/pricing/strategy-types";
 
@@ -58,6 +58,8 @@ type Baseline = {
     id: string;
     expectedCode: string;
     actualCode: string;
+    budgetWon?: number;
+    expectedSnap?: Snap;
   }>;
   vsExistingGoldenTotalWonMismatches: unknown[];
 };
@@ -73,6 +75,7 @@ function snapQuote(
     endDate: Date;
     periodKey?: string;
     mediaPriceOptionIndex?: Record<string, number>;
+    mediaSelections?: QuoteMediaSelectionSnapshot[];
   },
 ): Snap {
   const q = calculateQuote({
@@ -83,6 +86,7 @@ function snapQuote(
     issuedAt: ISSUED_AT,
     periodKey: opts.periodKey,
     mediaPriceOptionIndex: opts.mediaPriceOptionIndex,
+    mediaSelections: opts.mediaSelections,
   });
   const line = q.lines[0];
   return {
@@ -170,32 +174,58 @@ test("PR2 Phase1 baseline — tier / interpolation / 0원 boundary rows", () => 
   }
 });
 
-test("throw: catalogChannel=online → BUDGET_PRICING_NOT_IMPLEMENTED", () => {
+test("online budget: calculable with onlineSpec + lineTotalWon (PR5-a BudgetPricing)", () => {
   const baseline = loadBaseline();
   const row = baseline.throws.find((t) => t.id === "online_budget_stub");
   assert.ok(row);
-  assert.equal(row.expectedCode, BUDGET_PRICING_NOT_IMPLEMENTED);
-  assert.equal(row.actualCode, BUDGET_PRICING_NOT_IMPLEMENTED);
+  assert.equal(row.expectedCode, "NO_THROW");
+  assert.equal(row.actualCode, "NO_THROW");
 
-  assert.throws(
-    () =>
-      calculateQuote({
-        media: [
-          {
-            id: "synthetic-online",
-            name: "synthetic online",
-            location: "",
-            type: null,
-            catalogChannel: "online",
-            price: 0,
-          },
-        ],
-        startDate: ISSUED_AT,
-        endDate: new Date("2026-03-14T00:00:00.000Z"),
-        issuedAt: ISSUED_AT,
-      }),
-    (e: unknown) =>
-      e instanceof Error && e.message.startsWith(BUDGET_PRICING_NOT_IMPLEMENTED),
+  const budgetWon = row.budgetWon ?? 1_000_000;
+  const media: QuoteCalculatorMedia = {
+    id: "synthetic-online",
+    name: "synthetic online",
+    location: "",
+    type: null,
+    catalogChannel: "online",
+    price: 0,
+    onlineSpec: {
+      platform: "test",
+      minBudget: 500_000,
+      cpcMin: 100,
+      cpcMax: 300,
+      cpmMin: null,
+      cpmMax: null,
+    },
+  };
+
+  const actual = snapQuote([media], {
+    startDate: ISSUED_AT,
+    endDate: new Date("2026-03-14T00:00:00.000Z"),
+    mediaPriceOptionIndex: {},
+    mediaSelections: [
+      {
+        mediaId: media.id,
+        priceOptionIndex: 0,
+        optionLabel: null,
+        optionPriceWon: budgetWon,
+        lineTotalWon: budgetWon,
+      },
+    ],
+  });
+
+  assertSnapEqual(
+    actual,
+    {
+      totalWon: row.expectedSnap!.totalWon,
+      supplyWon: row.expectedSnap!.supplyWon,
+      vatWon: row.expectedSnap!.vatWon,
+      periodDays: row.expectedSnap!.periodDays,
+      lineSupplyWon: row.expectedSnap!.lineSupplyWon,
+      unitPriceWon: row.expectedSnap!.unitPriceWon,
+      linePeriodDays: row.expectedSnap!.linePeriodDays,
+    },
+    "online_budget_stub",
   );
 });
 

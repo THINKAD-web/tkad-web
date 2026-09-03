@@ -1737,12 +1737,22 @@
   "throws": [
     {
       "id": "online_budget_stub",
-      "note": "catalogChannel=online → BudgetPricing throw (PR3 seed 전 미사용)",
+      "note": "catalogChannel=online + onlineSpec + lineTotalWon → BudgetPricing (PR5-a)",
       "catalogChannel": "online",
       "type": null,
       "price": null,
-      "expectedCode": "BUDGET_PRICING_NOT_IMPLEMENTED",
-      "actualCode": "BUDGET_PRICING_NOT_IMPLEMENTED"
+      "budgetWon": 1000000,
+      "expectedCode": "NO_THROW",
+      "actualCode": "NO_THROW",
+      "expectedSnap": {
+        "totalWon": 1100000,
+        "supplyWon": 1000000,
+        "vatWon": 100000,
+        "periodDays": 14,
+        "lineSupplyWon": 1000000,
+        "unitPriceWon": 1000000,
+        "linePeriodDays": 14
+      }
     },
     {
       "id": "offline_null_type",
