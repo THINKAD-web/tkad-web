@@ -1,0 +1,78 @@
+[
+  {
+    "id": "awareness-beauty-5m",
+    "channelCount": 6,
+    "slugs": [
+      "fb-awareness",
+      "ig-awareness-reach",
+      "naver-gfa-traffic",
+      "naver-sa-brand",
+      "tiktok-spark-awareness",
+      "yt-awareness"
+    ],
+    "budgetTotal": 5000000
+  },
+  {
+    "id": "traffic-ecommerce-3m",
+    "channelCount": 6,
+    "slugs": [
+      "fb-traffic",
+      "kakao-traffic",
+      "native-taboola-traffic",
+      "naver-gfa-traffic",
+      "naver-sa-traffic",
+      "youtube-action"
+    ],
+    "budgetTotal": 3000000
+  },
+  {
+    "id": "conversion-retail-8m",
+    "channelCount": 6,
+    "slugs": [
+      "app-uai-install",
+      "ig-conversion-shop",
+      "kakao-moment-message",
+      "meta-advantage-plus",
+      "naver-sa-conversion",
+      "youtube-action"
+    ],
+    "budgetTotal": 8000000
+  },
+  {
+    "id": "lead-b2b-6m",
+    "channelCount": 6,
+    "slugs": [
+      "app-uai-install",
+      "google-ads-lead",
+      "google-ads-search",
+      "ig-conversion-shop",
+      "ig-lead-gen",
+      "meta-advantage-plus"
+    ],
+    "budgetTotal": 6000000
+  },
+  {
+    "id": "visit-local-4m",
+    "channelCount": 4,
+    "slugs": [
+      "baemin-ad-visit",
+      "fb-traffic",
+      "karrot-local-traffic",
+      "naver-gfa-traffic"
+    ],
+    "budgetTotal": 4000000
+  },
+  {
+    "id": "app-install-8m",
+    "channelCount": 6,
+    "slugs": [
+      "app-uai-install",
+      "fb-traffic",
+      "kakao-traffic",
+      "naver-gfa-traffic",
+      "naver-sa-traffic",
+      "youtube-action"
+    ],
+    "budgetTotal": 8000000
+  }
+]
