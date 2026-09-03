@@ -112,6 +112,7 @@ export function resolveOverBudgetChoice(params: {
     brief: params.brief,
     catalog: params.catalog,
     isKo: params.isKo,
+    preserveMixUnits: params.mixUnits,
   });
   const optionAUnits = mixUnitsFromLines(optionALines);
   const optionABuilt = buildMixLines(params.catalog, optionAUnits);

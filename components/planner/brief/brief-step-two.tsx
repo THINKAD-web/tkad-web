@@ -236,6 +236,7 @@ export function BriefStepTwo({
                   brief: store,
                   catalog,
                   isKo,
+                  preserveMixUnits: store.mixUnits,
                 }),
               )
             }

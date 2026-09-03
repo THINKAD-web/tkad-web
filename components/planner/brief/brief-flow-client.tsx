@@ -394,6 +394,7 @@ export function BriefFlowClient({
         brief: state,
         catalog,
         isKo,
+        preserveMixUnits: state.mixUnits,
       }),
     );
     setStaleOpen(false);

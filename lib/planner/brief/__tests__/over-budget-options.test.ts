@@ -7,7 +7,7 @@ import {
   buildPlannerOverBudgetAppendixSpecs,
   resolveOverBudgetChoice,
 } from "@/lib/planner/brief/over-budget-options";
-import { buildRecommendedMix, scoreMediaCandidates } from "@/lib/planner/brief/scoring";
+import { rebuildBriefRecommendedMix } from "@/lib/planner/brief/rebuild-mix";
 
 function fixtureMedia(over: Partial<MediaItem> = {}): MediaItem {
   return {
@@ -85,16 +85,11 @@ test("resolveOverBudgetChoice: Option A 는 예산 내, Option B 는 원 mix 유
   assert.equal(choice.optionA.overBudgetWon, 0);
   assert.ok(choice.optionA.totalCostWon <= choice.budgetWon);
 
-  const scored = scoreMediaCandidates({
-    candidates: catalog,
+  const expectedA = rebuildBriefRecommendedMix({
     brief,
-    days: 30,
+    catalog,
     isKo: true,
-  });
-  const expectedA = buildRecommendedMix({
-    scored,
-    days: 30,
-    budgetWon: 20_000_000,
+    preserveMixUnits: mixUnits,
   });
   assert.deepEqual(
     choice.optionA.mixLines.map((l) => l.mediaId).sort(),
