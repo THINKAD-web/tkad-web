@@ -10,7 +10,10 @@
 
 import type { MediaItem } from "@/lib/media-data";
 import type { PlanCart } from "@/lib/plan-cart";
-import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
+import {
+  isOnlineCatalogMedia,
+  isPublicQuoteWizardSelectableMedia,
+} from "@/lib/pricing-unavailable";
 import { planCartToCampaignQuantities } from "@/lib/plan-cart-pricing";
 import {
   isPlannerCampaignGoalKey,
@@ -115,9 +118,22 @@ export type HandoffMixResult = {
   lines: HandoffMixLine[];
   /** 카탈로그에 없어 버려진 id — 사용자에게 알린다 */
   missing: string[];
-  /** PR3 — online 매체는 PR5까지 플래너 믹스에 담지 않는다 */
+  /** Inquiry-only online — calculable online may pass (PR5-c commit 5). */
   blockedOnline: string[];
 };
+
+/** Skip handoff rows that fail public quote wizard select gate; track inquiry online. */
+function skipNonHandoffSelectableMedia(
+  row: MediaItem,
+  id: string,
+  blockedOnline: string[],
+): boolean {
+  if (isPublicQuoteWizardSelectableMedia(row)) return false;
+  if (isOnlineCatalogMedia(row) && !blockedOnline.includes(id)) {
+    blockedOnline.push(id);
+  }
+  return true;
+}
 
 /**
  * 요청 매체를 카탈로그로 검증해 믹스 라인으로 바꾼다.
@@ -142,10 +158,7 @@ export function resolveHandoffMix(params: {
       continue;
     }
     const row = byId.get(id);
-    if (row && isOnlineCatalogMedia(row)) {
-      if (!blockedOnline.includes(id)) blockedOnline.push(id);
-      continue;
-    }
+    if (row && skipNonHandoffSelectableMedia(row, id, blockedOnline)) continue;
     if (seen.has(id)) continue;
     seen.add(id);
     lines.push({ mediaId: id, units: 1 });
@@ -197,8 +210,10 @@ export function planCartToBriefHandoff(
       continue;
     }
     const row = byId.get(item.mediaId);
-    if (row && isOnlineCatalogMedia(row)) {
-      if (!blockedOnline.includes(item.mediaId)) blockedOnline.push(item.mediaId);
+    if (
+      row &&
+      skipNonHandoffSelectableMedia(row, item.mediaId, blockedOnline)
+    ) {
       continue;
     }
     const raw = quantities[item.mediaId] ?? item.quantity ?? 1;
@@ -315,10 +330,7 @@ export function savedPlannerPlanToBriefHandoff(
       continue;
     }
     const row = byId.get(id);
-    if (row && isOnlineCatalogMedia(row)) {
-      if (!blockedOnline.includes(id)) blockedOnline.push(id);
-      continue;
-    }
+    if (row && skipNonHandoffSelectableMedia(row, id, blockedOnline)) continue;
     const raw = quantities[id] ?? 1;
     const units = Number.isFinite(raw) ? Math.max(1, Math.floor(raw)) : 1;
     lines.push({ mediaId: id, units });

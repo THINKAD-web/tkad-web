@@ -38,7 +38,7 @@ import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import { BriefDigitalPanel } from "@/components/planner/brief/brief-digital-panel";
 import { BriefMediaCard } from "@/components/planner/brief/brief-media-card";
-import { isQuoteWizardSelectableMedia } from "@/lib/pricing-unavailable";
+import { isPublicQuoteWizardSelectableMedia } from "@/lib/pricing-unavailable";
 import { BriefCustomLineCard } from "@/components/planner/brief/brief-custom-line-card";
 import { BriefCustomLineForm } from "@/components/planner/brief/brief-custom-line-form";
 import { OverBudgetChoicePanel } from "@/components/planner/brief/over-budget-choice-panel";
@@ -73,7 +73,7 @@ export function BriefStepTwo({
   const hasMix = hasBriefMixContent(store.mixUnits, customLines);
 
   const selectableCatalog = useMemo(
-    () => catalog.filter(isQuoteWizardSelectableMedia),
+    () => catalog.filter(isPublicQuoteWizardSelectableMedia),
     [catalog],
   );
 

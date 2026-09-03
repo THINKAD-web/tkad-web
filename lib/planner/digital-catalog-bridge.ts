@@ -195,16 +195,7 @@ export const loadDigitalChannelsForIntegratedPlanner = unstable_cache(
   { revalidate: 3600, tags: [DIGITAL_CATALOG_BRIDGE_CACHE_TAG] },
 );
 
-export function resolveDigitalChannels(
-  liveChannels?: DigitalChannel[] | null,
-): DigitalChannel[] {
-  if (liveChannels?.length) return liveChannels;
-  return DIGITAL_CHANNELS;
-}
-
-export function getDigitalChannelFromList(
-  id: DigitalChannelId,
-  channels: DigitalChannel[],
-): DigitalChannel | undefined {
-  return channels.find((c) => c.id === id);
-}
+export {
+  getDigitalChannelFromList,
+  resolveDigitalChannels,
+} from "@/lib/planner/digital-channel-pool";
