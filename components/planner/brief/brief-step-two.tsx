@@ -13,7 +13,7 @@ import { useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import type { MediaItem } from "@/lib/media-data";
 import type { DigitalChannel } from "@/lib/planner/digital-channels";
-import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
+import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge-types";
 import { Button } from "@/components/ui/button";
 import { useBriefStore } from "@/lib/planner/brief/store";
 import {

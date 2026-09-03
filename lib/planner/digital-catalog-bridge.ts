@@ -1,3 +1,4 @@
+import "@/lib/digital/server-only";
 import { unstable_cache } from "next/cache";
 import {
   DIGITAL_CHANNELS,
@@ -11,22 +12,14 @@ import {
   DIGITAL_PLATFORM_IDS,
   matchCatalogItemToPlatformId,
 } from "@/lib/planner/digital-platform-map";
+import type { DigitalCatalogBridgeResult } from "@/lib/planner/digital-catalog-bridge-types";
+
+export type {
+  DigitalCatalogBridgeMeta,
+  DigitalCatalogBridgeResult,
+} from "@/lib/planner/digital-catalog-bridge-types";
 
 export const DIGITAL_CATALOG_BRIDGE_CACHE_TAG = "digital-catalog-bridge";
-
-export type DigitalCatalogBridgeMeta = {
-  source: "live" | "static";
-  catalogCount: number | null;
-  fetchedAt: string | null;
-  fallbackBucketIds: DigitalChannelId[];
-  unmappedProductCount: number;
-  upstreamError?: string;
-};
-
-export type DigitalCatalogBridgeResult = {
-  channels: DigitalChannel[];
-  meta: DigitalCatalogBridgeMeta;
-};
 
 function median(values: number[]): number | null {
   if (values.length === 0) return null;

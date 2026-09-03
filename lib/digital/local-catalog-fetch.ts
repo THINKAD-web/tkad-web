@@ -1,3 +1,4 @@
+import "@/lib/digital/server-only";
 import { CATALOG_CHANNEL_ONLINE } from "@/lib/catalog-channel";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { publicActiveMediaWhere } from "@/lib/media-review-status";

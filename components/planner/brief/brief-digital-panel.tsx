@@ -20,7 +20,7 @@ import {
 import {
   type DigitalChannel,
 } from "@/lib/planner/digital-channels";
-import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
+import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge-types";
 import { useBriefStore } from "@/lib/planner/brief/store";
 import {
   briefBudgetMan,

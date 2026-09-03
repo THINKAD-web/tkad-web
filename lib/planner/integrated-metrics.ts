@@ -13,7 +13,7 @@ import {
 import {
   getDigitalChannelFromList,
   resolveDigitalChannels,
-} from "@/lib/planner/digital-catalog-bridge";
+} from "@/lib/planner/digital-channel-pool";
 
 export type DigitalChannelMetrics = {
   id: DigitalChannelId;

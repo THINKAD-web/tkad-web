@@ -1,3 +1,4 @@
+import "@/lib/digital/server-only";
 import { isDigitalForceLocal } from "@/lib/digital/force-local";
 import { fetchLocalDigitalCatalog } from "@/lib/digital/local-catalog-fetch";
 import { buildMediaMix } from "@/lib/digital/mix-engine";

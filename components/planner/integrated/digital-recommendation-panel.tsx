@@ -16,7 +16,7 @@ import {
   type DigitalChannel,
   type DigitalChannelId,
 } from "@/lib/planner/digital-channels";
-import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
+import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge-types";
 import { mapMixToDigitalRecommendResult } from "@/lib/integrated/map-mix-to-ui";
 import {
   selectIntegratedBudgetNum,
