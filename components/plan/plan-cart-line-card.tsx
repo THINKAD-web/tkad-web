@@ -24,7 +24,12 @@ import {
   PlanCartAddonAddButton,
   PlanCartItemAddonEditor,
 } from "@/components/plan/plan-cart-item-addon-editor";
+import {
+  OnlineMediaBudgetFields,
+  defaultOnlineBudgetWon,
+} from "@/components/media/online-media-budget-fields";
 import { shouldShowPlannerQuantityControl } from "@/lib/planner/planner-media-quantity";
+import { shouldUseOnlineWizardBudgetLine } from "@/lib/quote-wizard-pricing";
 import { cn } from "@/lib/utils";
 import type { PackagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
 
@@ -49,6 +54,7 @@ type Props = {
     selections: PlanCartOptionSelection[],
   ) => void;
   onAddonLinesChange: (mediaId: string, lines: PlanCartAddonLine[]) => void;
+  onLineTotalWonChange?: (mediaId: string, lineTotalWon: number) => void;
   onGripDragStart: (mediaId: string) => void;
   onGripDragEnd: () => void;
   onDropOnItem: (targetMediaId: string) => void;
@@ -75,6 +81,7 @@ export function PlanCartLineCard({
   onGradeSelectionsChange,
   onOptionSelectionsChange,
   onAddonLinesChange,
+  onLineTotalWonChange,
   onGripDragStart,
   onGripDragEnd,
   onDropOnItem,
@@ -86,6 +93,11 @@ export function PlanCartLineCard({
   packagePeriodOnlyLabel = "",
 }: Props) {
   const locale = isKo ? "ko-KR" : "en-US";
+  const isOnlineBudgetLine =
+    media != null && shouldUseOnlineWizardBudgetLine(media);
+  const onlineBudgetWon =
+    item.lineTotalWon ??
+    (media && isOnlineBudgetLine ? defaultOnlineBudgetWon(media) : 0);
   const lineMonthlyWon = planCartLineMonthlyWon(item, media);
   const optionRows = media ? planCartEffectiveOptionSelections(item, media) : null;
   const usesMultiOptionEditor = media
@@ -226,9 +238,18 @@ export function PlanCartLineCard({
                 </p>
               ) : null}
               <p className="text-sm font-extrabold tabular-nums tkad-home-accent-text">
-                {formatCatalogPriceFieldWon(lineMonthlyWon, locale)}
+                {formatCatalogPriceFieldWon(
+                  isOnlineBudgetLine ? onlineBudgetWon : lineMonthlyWon,
+                  locale,
+                )}
                 <span className="ml-0.5 text-xs font-semibold text-gray-500 dark:text-white/50">
-                  {isKo ? "/월" : "/mo"}
+                  {isOnlineBudgetLine
+                    ? isKo
+                      ? " 월 예산"
+                      : " mo. budget"
+                    : isKo
+                      ? "/월"
+                      : "/mo"}
                 </span>
               </p>
               {itemAddonTotal > 0 ? (
@@ -265,6 +286,14 @@ export function PlanCartLineCard({
               onAddonLinesChange={(lines) =>
                 onAddonLinesChange(item.mediaId, lines)
               }
+            />
+          ) : isOnlineBudgetLine && media ? (
+            <OnlineMediaBudgetFields
+              media={media}
+              budgetWon={onlineBudgetWon}
+              onBudgetChange={(won) => onLineTotalWonChange?.(item.mediaId, won)}
+              isKo={isKo}
+              inputCls="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm dark:border-white/15 dark:bg-black/40"
             />
           ) : (
             <div className="space-y-3">

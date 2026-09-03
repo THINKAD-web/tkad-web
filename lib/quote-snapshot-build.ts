@@ -20,6 +20,7 @@ import {
 import { planCartLinePeriodTotalWon, planCartItemQuoteLineFromPeriod } from "@/lib/plan-cart-pricing";
 import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
 import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
+import { shouldUseOnlineWizardBudgetLine } from "@/lib/quote-wizard-pricing";
 
 export type BuildQuoteMediaSelectionInput = {
   media: MediaItem;
@@ -116,6 +117,24 @@ export function buildQuoteMediaSelectionSnapshotsFromCartItem(input: {
   const usesMulti =
     planCartUsesExplicitOptionRows(item) && (rows?.length ?? 0) > 1;
   const campaignPeriod = resolveQuoteCampaignPeriodForPricing(periodCtx);
+
+  if (
+    shouldUseOnlineWizardBudgetLine(m) &&
+    item.lineTotalWon != null &&
+    item.lineTotalWon > 0
+  ) {
+    const poIdx = rows?.[0]?.priceOptionIndex ?? item.priceOptionIndex ?? 0;
+    const units = rows?.[0]?.quantity ?? item.quantity;
+    return [
+      buildQuoteMediaSelectionSnapshot({
+        media: m,
+        isKo,
+        priceOptionIndex: poIdx,
+        units,
+        lineTotalWon: item.lineTotalWon,
+      }),
+    ];
+  }
 
   if (!rows?.length || !usesMulti) {
     const poIdx = rows?.[0]?.priceOptionIndex ?? item.priceOptionIndex ?? 0;

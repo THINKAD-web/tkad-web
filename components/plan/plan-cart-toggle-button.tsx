@@ -10,6 +10,7 @@ import { usePlanCart } from "@/hooks/use-plan-cart";
 import { useAppToast } from "@/lib/use-toast";
 import { buildPlanCartLimitMessage } from "@/lib/entitlements/gate-messages";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
+import { planCartAddBlockedMessage } from "@/lib/pricing-unavailable";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -66,11 +67,7 @@ export function PlanCartToggleButton({
       return;
     }
     if (!result.ok && result.reason === "online_blocked") {
-      toast.warning(
-        isKo
-          ? "온라인 매체는 아직 플래너에 담을 수 없습니다. 문의해 주세요."
-          : "Online media cannot be added to the planner yet. Please contact us.",
-      );
+      toast.warning(planCartAddBlockedMessage(item, isKo));
       return;
     }
     toast.show({

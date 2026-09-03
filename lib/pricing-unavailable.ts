@@ -95,9 +95,31 @@ export function quoteWizardSelectBlockedMessage(
 }
 
 export function canAddMediaToPlanCart(
-  media: Pick<PricingUnavailableMedia, "catalogChannel">,
+  media: Pick<PricingUnavailableMedia, "catalogChannel" | "onlineSpec"> & {
+    /** Cart payload — calculable online rows carry budget snapshot (commit 1). */
+    lineTotalWon?: number;
+  },
 ): boolean {
-  return !isOnlineCatalogMedia(media);
+  if (!isOnlineCatalogMedia(media)) return true;
+  if (media.onlineSpec !== undefined) {
+    return hasOnlinePricingSpec(media);
+  }
+  return typeof media.lineTotalWon === "number" && media.lineTotalWon > 0;
+}
+
+/** Toast when plan cart add blocked (inquiry online vs legacy). */
+export function planCartAddBlockedMessage(
+  item: Pick<{ catalogChannel?: string; lineTotalWon?: number }, "catalogChannel" | "lineTotalWon">,
+  isKo: boolean,
+): string {
+  if (isOnlineCatalogMedia(item)) {
+    return isKo
+      ? "가격 문의 온라인 매체는 담은 매체에 담을 수 없습니다. 매체 상세에서 문의해 주세요."
+      : "Inquiry-only online media cannot be added to your plan. Please contact us from the media page.";
+  }
+  return isKo
+    ? "이 매체는 담은 매체에 담을 수 없습니다."
+    : "This media cannot be added to your plan.";
 }
 
 /** Offline unpriceable — null type/price or resolved unit ≤0 (PR1b-2). */

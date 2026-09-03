@@ -90,6 +90,7 @@ export type BulkAddToPlanCartResult = {
   added: number;
   skippedDuplicate: number;
   skippedMax: number;
+  skippedOnlineBlocked: number;
 };
 
 import {
@@ -377,7 +378,10 @@ export function addToPlanCart(
 ): AddToPlanCartResult {
   if (
     item.catalogChannel &&
-    !canAddMediaToPlanCart({ catalogChannel: item.catalogChannel })
+    !canAddMediaToPlanCart({
+      catalogChannel: item.catalogChannel,
+      lineTotalWon: item.lineTotalWon,
+    })
   ) {
     return { ok: false, reason: "online_blocked" };
   }
@@ -423,10 +427,21 @@ export function addManyToPlanCart(
     let added = 0;
     let skippedDuplicate = 0;
     let skippedMax = 0;
+    let skippedOnlineBlocked = 0;
     let nextItems = [...cart.items];
     const seen = new Set(nextItems.map((i) => i.mediaId));
 
     for (const item of items) {
+      if (
+        item.catalogChannel &&
+        !canAddMediaToPlanCart({
+          catalogChannel: item.catalogChannel,
+          lineTotalWon: item.lineTotalWon,
+        })
+      ) {
+        skippedOnlineBlocked += 1;
+        continue;
+      }
       if (seen.has(item.mediaId)) {
         skippedDuplicate += 1;
         continue;
@@ -451,7 +466,7 @@ export function addManyToPlanCart(
 
     return {
       cart: { ...cart, items: nextItems },
-      result: { added, skippedDuplicate, skippedMax },
+      result: { added, skippedDuplicate, skippedMax, skippedOnlineBlocked },
     };
   });
 }

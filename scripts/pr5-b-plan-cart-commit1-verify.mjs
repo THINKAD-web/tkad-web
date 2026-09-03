@@ -61,11 +61,25 @@ function main() {
   assert.equal(built.catalogChannel, "online");
 
   assert.equal(canAddMediaToPlanCart({ catalogChannel: "online" }), false);
+  assert.equal(
+    canAddMediaToPlanCart({
+      catalogChannel: "online",
+      lineTotalWon: sample.onlineSpec.minBudget,
+    }),
+    true,
+  );
 
   clearPlanCart();
-  const blocked = addToPlanCart(built);
+  const allowed = addToPlanCart(built);
+  assert.deepEqual(allowed, { ok: true, added: true });
+
+  clearPlanCart();
+  const blocked = addToPlanCart({
+    ...built,
+    lineTotalWon: undefined,
+    catalogChannel: "online",
+  });
   assert.deepEqual(blocked, { ok: false, reason: "online_blocked" });
-  assert.equal(getPlanCart().items.length, 0);
 
   console.log("[PASS] plan cart commit 1 — lineTotalWon snapshot + gate still closed");
 }

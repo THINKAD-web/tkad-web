@@ -116,9 +116,9 @@ test("normalizeItem round-trip preserves catalogChannel and lineTotalWon", () =>
   assert.equal(stored.lineTotalWon, 2_000_000);
 });
 
-test("addToPlanCart — gate still blocks all online (commit 1)", () => {
+test("addToPlanCart — inquiry online still blocked (commit 2)", () => {
   clearPlanCart();
-  const built = planCartItemFromCatalog(calculableOnline, "search");
+  const built = planCartItemFromCatalog(inquiryOnline, "search");
   const result = addToPlanCart(built);
   assert.deepEqual(result, { ok: false, reason: "online_blocked" });
   assert.equal(getPlanCart().items.length, 0);
