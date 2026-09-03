@@ -454,6 +454,7 @@ export const PUBLIC_MEDIA_CATALOG_INCLUDE = {
     select: { advertiserName: true } as const,
     orderBy: { createdAt: "desc" as const },
   },
+  onlineSpec: { select: PUBLIC_MEDIA_ONLINE_SPEC_SELECT },
   computedMetric: {
     select: {
       demoGenderSplit: true,
@@ -569,7 +570,7 @@ async function loadPublicMediaCatalogListFromDb(): Promise<MediaCatalogListItem[
 
 const getCrossRequestPublicMediaCatalogList = unstable_cache(
   loadPublicMediaCatalogListFromDb,
-  ["public-media-catalog-list-v2"],
+  ["public-media-catalog-list-v3"],
   {
     revalidate: PUBLIC_MEDIA_CATALOG_REVALIDATE_SECONDS,
     tags: [PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG],

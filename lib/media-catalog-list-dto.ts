@@ -2,6 +2,7 @@ import type { CatalogChannel } from "@/lib/catalog-channel";
 import {
   getPrimaryMediaImageUrl,
   type MediaItem,
+  type MediaOnlineSpecView,
   type MediaPriceOption,
   type MediaPricePeriodKey,
 } from "@/lib/media-data";
@@ -46,6 +47,8 @@ export type MediaCatalogListItem = {
   mediaMainCategory?: string;
   mediaSubCategory?: string;
   catalogChannel?: CatalogChannel;
+  /** Online budget pricing seed — list/compare only (PR5-b). Omitted when absent. */
+  onlineSpec?: MediaOnlineSpecView | null;
   mediaCategory?: string[];
   targetCategory?: string[];
   operatingHours?: string;
@@ -96,6 +99,8 @@ export const MEDIA_CATALOG_LIST_ITEM_KEYS = [
   "regionSub",
   "mediaMainCategory",
   "mediaSubCategory",
+  "catalogChannel",
+  "onlineSpec",
   "mediaCategory",
   "targetCategory",
   "operatingHours",
@@ -170,6 +175,7 @@ export function mediaItemToCatalogListItem(item: MediaItem): MediaCatalogListIte
     mediaMainCategory: item.mediaMainCategory,
     mediaSubCategory: item.mediaSubCategory,
     catalogChannel: item.catalogChannel,
+    onlineSpec: item.onlineSpec ?? undefined,
     mediaCategory: item.mediaCategory?.length ? item.mediaCategory : undefined,
     targetCategory: item.targetCategory?.length ? item.targetCategory : undefined,
     operatingHours: item.operatingHours,
@@ -245,6 +251,7 @@ export function catalogListItemToMediaItem(
     mediaMainCategory: item.mediaMainCategory,
     mediaSubCategory: item.mediaSubCategory,
     catalogChannel: item.catalogChannel,
+    onlineSpec: item.onlineSpec ?? undefined,
     mediaCategory: item.mediaCategory,
     targetCategory: item.targetCategory,
     operatingHours: item.operatingHours,

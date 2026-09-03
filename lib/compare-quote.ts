@@ -6,7 +6,7 @@ import {
   mediaPriceOnInquiryLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
-import { isPricingUnavailable } from "@/lib/pricing-unavailable";
+import { isPricingUnavailable, isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
 import {
   resolveCpmWon,
   resolveMonthlyImpressions,
@@ -65,6 +65,22 @@ export type MediaQuoteLine = {
   pricingUnavailable?: boolean;
 };
 
+/**
+ * PR5-b commit 1: list payload may carry `onlineSpec`, but compare billing stays
+ * closed until the online budget path lands (commit 2). Explicit gate — do not
+ * rely on absent spec or implicit defaults.
+ */
+export function isCompareOnlineBillingHeld(
+  media: Pick<MediaItem, "catalogChannel">,
+): boolean {
+  return isOnlineCatalogMedia(media);
+}
+
+function isComparePricingUnavailable(media: MediaItem): boolean {
+  if (isCompareOnlineBillingHeld(media)) return true;
+  return isPricingUnavailable(media);
+}
+
 /** 패키지 총액 × (캠페인 일수 ÷ 번들 일수) — 스티키 패널·마법사 공용 */
 export function quoteBundleProrationWon(
   bundlePriceWon: number,
@@ -113,7 +129,7 @@ function quoteLineFromCostWon(
   costWon: number,
   durationDays: number,
 ): MediaQuoteLine {
-  const unavailable = isPricingUnavailable(media);
+  const unavailable = isComparePricingUnavailable(media);
   const days = Math.max(1, Math.round(durationDays));
   const monthlyImp = resolveMonthlyImpressions(media);
   const impressions = Math.round(monthlyImp * (days / 30));
@@ -139,7 +155,7 @@ function quoteLineFromUnitPrice(
   durationDays: number,
   bundleDays: number,
 ): MediaQuoteLine {
-  if (isPricingUnavailable(media)) {
+  if (isComparePricingUnavailable(media)) {
     return quoteLineFromCostWon(media, 0, durationDays);
   }
   const costWon = quoteBundleProrationWon(
@@ -258,7 +274,7 @@ export function calculateMediaQuoteByDays(
   media: MediaItem,
   durationDays: number,
 ): MediaQuoteLine {
-  if (isPricingUnavailable(media)) {
+  if (isComparePricingUnavailable(media)) {
     return quoteLineFromCostWon(media, 0, durationDays);
   }
   const days = Math.max(1, Math.round(durationDays));
