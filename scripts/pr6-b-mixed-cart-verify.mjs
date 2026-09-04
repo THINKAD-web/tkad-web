@@ -307,7 +307,10 @@ async function part3Analytics(catalog) {
   await page.evaluate(() => {
     window.__gaEvents = [];
     window.gtag = (...args) => {
-      if (args[0] === "event") window.__gaEvents.push({ name: args[1], params: args[2] });
+      if (args[0] === "event") {
+        window.__gaEvents.push({ name: args[1], params: args[2] });
+        sessionStorage.setItem("__ga_test_events", JSON.stringify(window.__gaEvents));
+      }
     };
   });
 
@@ -318,9 +321,22 @@ async function part3Analytics(catalog) {
   assert.ok(eventsAfterOpen.some((e) => e.name === "quote_modal_open"), "quote_modal_open fired");
   log.pass("quote_modal_open event");
 
-  await page.getByRole("link", { name: /문의하기|Contact/i }).first().click({ timeout: 15_000 }).catch(() => {});
-  await page.waitForTimeout(500);
-  const eventsAfterContact = await page.evaluate(() => window.__gaEvents ?? []);
+  const contactLink = page.locator('a[href*="/contact"]').filter({ hasText: /문의하기/ });
+  await contactLink.click({ noWaitAfter: true, force: true });
+  await page.waitForTimeout(200);
+  const eventsAfterContact = await page.evaluate(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem("__ga_test_events") ?? "[]");
+    } catch {
+      return window.__gaEvents ?? [];
+    }
+  });
+  if (!eventsAfterContact.some((e) => e.name === "online_modal_contact_click")) {
+    writeFileSync(
+      join(OUT, "analytics-debug.json"),
+      JSON.stringify({ eventsAfterOpen, eventsAfterContact, url: page.url() }, null, 2),
+    );
+  }
   assert.ok(
     eventsAfterContact.some((e) => e.name === "online_modal_contact_click"),
     "online_modal_contact_click fired",

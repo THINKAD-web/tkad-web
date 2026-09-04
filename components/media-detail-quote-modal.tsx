@@ -296,13 +296,14 @@ function MediaDetailQuoteModalBody({
             <Link
               href={contactHref}
               onClick={(e) => {
-                e.preventDefault();
                 trackGaEvent("online_modal_contact_click", {
                   media_id: media.id,
                   media_name: media.name,
                   source: "media_detail_quote_modal",
                 });
                 onClose();
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
                 window.location.assign(contactHref);
               }}
               className={primaryLinkClass}
