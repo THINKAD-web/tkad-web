@@ -271,8 +271,20 @@ async function part2Browser(catalog) {
     timeout: 120_000,
   });
   await page.evaluate(
-    ([key, value]) => localStorage.setItem(key, value),
-    [PLAN_CART_KEY, JSON.stringify(cart)],
+    ([cartKey, cartValue, plannerKey]) => {
+      localStorage.setItem(cartKey, cartValue);
+      const raw = localStorage.getItem(plannerKey);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed?.state) parsed.state.reportDocumentTitle = "";
+          localStorage.setItem(plannerKey, JSON.stringify(parsed));
+        } catch {
+          /* ignore */
+        }
+      }
+    },
+    [PLAN_CART_KEY, JSON.stringify(cart), "tkad-planner-plan-v2"],
   );
   await page.reload({ waitUntil: "domcontentloaded", timeout: 120_000 });
   await page
@@ -282,6 +294,10 @@ async function part2Browser(catalog) {
     .catch(() => page.waitForTimeout(5000));
 
   const body = await page.locator("body").innerText();
+  if (!(body.includes(MIXED_TITLE) || body.includes("통합 매체"))) {
+    await page.screenshot({ path: join(OUT, "mixed-report-debug.png"), fullPage: true });
+    writeFileSync(join(OUT, "mixed-report-debug-body.txt"), body.slice(0, 8000));
+  }
   assert.ok(body.includes(MIXED_TITLE) || body.includes("통합 매체"), "UI document title");
   assert.ok(body.includes(ooh.name.slice(0, 8)), "OOH media in report");
   assert.ok(body.includes("온라인") || body.includes(tiktok.name.slice(0, 4)), "online section");

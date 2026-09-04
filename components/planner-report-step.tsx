@@ -586,23 +586,28 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     ],
   );
 
-  const exportPayload = useMemo(
-    () => ({
+  const exportPayload = useMemo(() => {
+    const compositionTitle =
+      payload.reportComposition === "mixed" ||
+      payload.reportComposition === "onlyOnline"
+        ? payload.documentTitle
+        : undefined;
+    return {
       ...payload,
-      documentTitle: reportDocumentTitle.trim() || payload.documentTitle,
+      documentTitle:
+        compositionTitle ?? reportDocumentTitle.trim() || payload.documentTitle,
       clientName: reportClientName.trim() || undefined,
       // C-lite: creativeUploadedUrl(소재) → 표지 로고 임시 재사용. 전용 coverLogo 분리 예정.
       coverLogoUrl:
         (creativeUploadedUrl ?? props.logoUrl)?.trim() || undefined,
-    }),
-    [
-      payload,
-      reportDocumentTitle,
-      reportClientName,
-      creativeUploadedUrl,
-      props.logoUrl,
-    ],
-  );
+    };
+  }, [
+    payload,
+    reportDocumentTitle,
+    reportClientName,
+    creativeUploadedUrl,
+    props.logoUrl,
+  ]);
 
   const [internalSectionVisibility, setInternalSectionVisibility] =
     usePlannerReportSectionVisibility();
