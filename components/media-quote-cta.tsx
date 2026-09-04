@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Calculator } from "lucide-react";
 import MediaDetailQuoteModal from "@/components/media-detail-quote-modal";
+import { trackGaEvent } from "@/lib/ga-events";
+import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
 
@@ -29,10 +31,20 @@ export function MediaQuoteCtaButton({
   const label =
     variant === "sticky" ? t("stickyCtaQuoteSticky") : t("quoteCtaInline");
 
+  const openQuoteModal = () => {
+    trackGaEvent("quote_modal_open", {
+      media_id: media.id,
+      media_name: media.name,
+      catalog_channel: isOnlineCatalogMedia(media) ? "online" : "offline",
+      source: variant,
+    });
+    setOpen(true);
+  };
+
   const feedTrigger = (
     <button
       type="button"
-      onClick={() => setOpen(true)}
+      onClick={openQuoteModal}
       className={cn(
         "inline-flex h-9 min-h-0 min-w-[7rem] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-bold text-white tkad-neon-cta-clean shadow-[0_4px_16px_rgba(124,58,237,0.25)] transition-ui hover:brightness-110 active:scale-[0.98] sm:flex-none",
         className,
@@ -46,7 +58,7 @@ export function MediaQuoteCtaButton({
   const defaultTrigger = (
     <Button
       type="button"
-      onClick={() => setOpen(true)}
+      onClick={openQuoteModal}
       data-accent-keep={variant === "sticky" ? "true" : undefined}
       className={cn(
         variant === "sticky"

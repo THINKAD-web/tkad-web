@@ -21,7 +21,8 @@ import type {
 } from "@/lib/planner/types";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
-import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
+import { buildReportPayload } from "@/lib/planner-report-export/build-report-payload";
+import { splitPortfolioByCatalogChannel } from "@/lib/plan-cart-report/split-portfolio-by-channel";
 import {
   buildDefaultExecutiveSummaryLines,
   buildDefaultReportGreeting,
@@ -30,6 +31,8 @@ import {
   joinReportCopyLines,
   splitReportCopyParagraphs,
 } from "@/lib/planner-report-export/report-copy";
+import { buildOnlineReportCopyDraft } from "@/lib/planner-report-export/report-copy-online";
+import { hasOnlinePricingSpec } from "@/lib/pricing-unavailable";
 import { ReportCopyStaleBanner } from "@/components/planner/report-copy-stale-banner";
 import { ReportEmailSendDialog } from "@/components/planner/report-email-send-dialog";
 import {
@@ -471,6 +474,39 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     [reportExecutiveSummary],
   );
 
+  const channelSplit = useMemo(
+    () =>
+      splitPortfolioByCatalogChannel(
+        portfolioForExport,
+        props.planCartItems ?? [],
+      ),
+    [portfolioForExport, props.planCartItems],
+  );
+
+  const onlineCopyStrategyInput = useMemo(() => {
+    const portfolio = channelSplit.onlinePortfolio;
+    const calculableLineCount = portfolio.filter(hasOnlinePricingSpec).length;
+    return {
+      isKo: props.isKo,
+      campaignGoal: props.campaignGoal ?? null,
+      goalTitle: props.goalTitle,
+      industryKey:
+        props.industryKey ?? props.narrativeContext?.industryKey ?? null,
+      industryText: props.industryText,
+      onlineLineCount: portfolio.length,
+      calculableLineCount,
+      inquiryLineCount: portfolio.length - calculableLineCount,
+    };
+  }, [
+    channelSplit.onlinePortfolio,
+    props.isKo,
+    props.campaignGoal,
+    props.goalTitle,
+    props.industryKey,
+    props.industryText,
+    props.narrativeContext?.industryKey,
+  ]);
+
   const copyStrategyInput = useMemo(
     () => ({
       isKo: props.isKo,
@@ -492,6 +528,20 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   useEffect(() => {
     if (reportGreetingTouched || reportExecutiveSummaryTouched) return;
     if (portfolioForExport.length === 0) return;
+
+    if (channelSplit.composition === "onlyOnline") {
+      const draft = buildOnlineReportCopyDraft({
+        ...onlineCopyStrategyInput,
+        clientName: reportClientName.trim() || undefined,
+      });
+      applyReportCopyDraft({
+        greeting: draft.greeting,
+        executiveSummary: draft.executiveSummary,
+        fingerprint: copyFingerprintCurrent,
+      });
+      return;
+    }
+
     const greeting = buildDefaultReportGreeting(
       props.isKo,
       reportClientName.trim() || undefined,
@@ -508,6 +558,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     reportGreetingTouched,
     reportExecutiveSummaryTouched,
     portfolioForExport.length,
+    channelSplit.composition,
+    onlineCopyStrategyInput,
     copyFingerprintCurrent,
     copyStrategyInput,
     reportClientName,
@@ -523,6 +575,19 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   });
 
   const regenerateReportCopy = useCallback(() => {
+    if (channelSplit.composition === "onlyOnline") {
+      const draft = buildOnlineReportCopyDraft({
+        ...onlineCopyStrategyInput,
+        clientName: reportClientName.trim() || undefined,
+      });
+      applyReportCopyDraft({
+        greeting: draft.greeting,
+        executiveSummary: draft.executiveSummary,
+        fingerprint: copyFingerprintCurrent,
+      });
+      return;
+    }
+
     const greeting = buildDefaultReportGreeting(
       props.isKo,
       reportClientName.trim() || undefined,
@@ -536,6 +601,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       fingerprint: copyFingerprintCurrent,
     });
   }, [
+    channelSplit.composition,
+    onlineCopyStrategyInput,
     props.isKo,
     reportClientName,
     copyStrategyInput,
@@ -545,7 +612,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
 
   const payload = useMemo(
     () =>
-      buildOohReportPayload({
+      buildReportPayload({
         isKo: props.isKo,
         goalTitle: props.goalTitle,
         budgetMan: props.budgetNum,
@@ -586,23 +653,42 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     ],
   );
 
-  const exportPayload = useMemo(
-    () => ({
+  const exportPayload = useMemo(() => {
+    const compositionTitle =
+      payload.reportComposition === "mixed" ||
+      payload.reportComposition === "onlyOnline"
+        ? payload.documentTitle
+        : undefined;
+    const onlyOnlineCopy =
+      payload.reportComposition === "onlyOnline"
+        ? {
+            greetingText: reportGreeting.trim() || payload.greetingText,
+            executiveSummaryLines:
+              executiveSummaryLines.length > 0
+                ? executiveSummaryLines
+                : payload.executiveSummaryLines,
+          }
+        : {};
+    return {
       ...payload,
-      documentTitle: reportDocumentTitle.trim() || payload.documentTitle,
+      ...onlyOnlineCopy,
+      documentTitle:
+        compositionTitle ??
+        (reportDocumentTitle.trim() || payload.documentTitle),
       clientName: reportClientName.trim() || undefined,
       // C-lite: creativeUploadedUrl(소재) → 표지 로고 임시 재사용. 전용 coverLogo 분리 예정.
       coverLogoUrl:
         (creativeUploadedUrl ?? props.logoUrl)?.trim() || undefined,
-    }),
-    [
-      payload,
-      reportDocumentTitle,
-      reportClientName,
-      creativeUploadedUrl,
-      props.logoUrl,
-    ],
-  );
+    };
+  }, [
+    payload,
+    reportDocumentTitle,
+    reportClientName,
+    reportGreeting,
+    executiveSummaryLines,
+    creativeUploadedUrl,
+    props.logoUrl,
+  ]);
 
   const [internalSectionVisibility, setInternalSectionVisibility] =
     usePlannerReportSectionVisibility();
@@ -990,7 +1076,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
       if (downloading) return;
       setDownloading(format);
       try {
-        const payload = buildOohReportPayload({
+        const payload = buildReportPayload({
           isKo: props.isKo,
           goalTitle: props.goalTitle,
           budgetMan: props.budgetNum,

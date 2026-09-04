@@ -27,6 +27,7 @@ import { sectionVisible, filterExportSections } from "@/lib/planner-report-expor
 import type { PlannerReportSectionVisibility } from "@/lib/planner-report-export/section-visibility";
 import type { PlannerReportStyle } from "@/lib/planner-report-export/document-theme";
 import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
+import { reportCoverSubtitle } from "@/lib/planner-report-export/report-cover-copy";
 import type { MediaItem } from "@/lib/media-data";
 
 /**
@@ -293,15 +294,10 @@ export const PlannerReportDocument = forwardRef<
         reportStyle={reportStyle}
         badge="CAMPAIGN PLANNER"
         title={p.documentTitle}
-        subtitle={`${
-          p.kind === "integrated"
-            ? isKo
-              ? "OOH + 디지털 통합 제안"
-              : "OOH + Digital integrated"
-            : isKo
-              ? "OOH 미디어 플랜"
-              : "OOH media plan"
-        } · ${p.generatedAt}`}
+        subtitle={`${reportCoverSubtitle(isKo, {
+          kind: p.kind,
+          reportComposition: p.reportComposition,
+        })} · ${p.generatedAt}`}
         coverLogoUrl={p.coverLogoUrl}
         clientName={p.clientName}
         clientNameEditable={editableClientName}
@@ -742,6 +738,56 @@ export const PlannerReportDocument = forwardRef<
         ) : null}
 
         <ReportMediaLineupSection payload={p} />
+
+        {p.onlineSection && p.onlineSection.lines.length > 0 ? (
+          <section className="space-y-3">
+            <DocumentSectionHeading>{p.onlineSection.title}</DocumentSectionHeading>
+            <p className="text-sm text-gray-600">{p.onlineSection.estimationNotice}</p>
+            {p.onlineSection.consultationNotice ? (
+              <p className="text-sm font-semibold text-amber-800">
+                {p.onlineSection.consultationNotice}
+              </p>
+            ) : null}
+            <div className="min-w-0 overflow-x-auto rounded-xl border border-gray-200">
+              <table className="w-full min-w-[36rem] border-collapse text-sm">
+                <thead>
+                  <tr className="bg-[color:var(--qp-accent)] text-left text-xs font-semibold uppercase tracking-wide text-white">
+                    <th className="px-3 py-2.5">{isKo ? "매체" : "Media"}</th>
+                    <th className="px-3 py-2.5">{isKo ? "플랫폼" : "Platform"}</th>
+                    <th className="px-3 py-2.5">{isKo ? "과금" : "Pricing"}</th>
+                    <th className="px-3 py-2.5 text-right">{isKo ? "월 예산" : "Monthly budget"}</th>
+                    <th className="px-3 py-2.5 text-right">{isKo ? "예상 도달" : "Est. reach"}</th>
+                    <th className="px-3 py-2.5 text-right">{isKo ? "예상 클릭" : "Est. clicks"}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {p.onlineSection.lines.map((line, i) => (
+                    <tr
+                      key={line.mediaId}
+                      className={cn(
+                        "border-t border-gray-100",
+                        i % 2 ? "bg-gray-50/70" : "bg-white",
+                      )}
+                    >
+                      <td className="px-3 py-2.5 font-medium text-gray-900">{line.name}</td>
+                      <td className="px-3 py-2.5 text-gray-600">{line.platform ?? "—"}</td>
+                      <td className="px-3 py-2.5 text-gray-600">{line.pricingLabel}</td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-gray-900">
+                        ₩{line.budgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                      </td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-gray-600">
+                        {line.reachLabel ?? (isKo ? "별도 협의" : "Consultation")}
+                      </td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-gray-600">
+                        {line.clicksLabel ?? (isKo ? "별도 협의" : "Consultation")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
 
         {/* 디지털 예산 배분 */}
         {p.digital && p.digital.length ? (
