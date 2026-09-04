@@ -104,7 +104,7 @@ export default async function ServicesPage({ params }: Props) {
           {pillars.map((p, i) => {
             const Icon = p.icon;
             return (
-              <AnimatedCard key={p.title} delay={i * 80}>
+              <AnimatedCard key={p.title} delay={Math.min(i * 30, 300)}>
                 <article className="group relative h-full rounded-[28px] dark:bg-white/5 bg-gray-50 p-7 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)] transition-all hover:-translate-y-1 hover:dark:bg-white/6">
                   <div className="flex items-center justify-between">
                     <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
@@ -140,7 +140,7 @@ export default async function ServicesPage({ params }: Props) {
 
         <div className="grid gap-5 md:grid-cols-5">
           {steps.map((step, i) => (
-            <AnimatedCard key={step.label} delay={i * 60}>
+            <AnimatedCard key={step.label} delay={Math.min(i * 30, 300)}>
               <article className="h-full rounded-[26px] dark:bg-white/5 bg-gray-50 p-6 backdrop-blur tkad-neon-border shadow-[0_28px_110px_rgba(0,0,0,0.78)] transition-all hover:-translate-y-1 hover:dark:bg-white/6">
                 <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 text-sm font-black dark:text-white text-gray-900">
                   {step.label}
