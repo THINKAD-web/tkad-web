@@ -28,6 +28,10 @@ import {
   buildOnlineReportWhyLine,
   type OnlineReportStrategyInput,
 } from "@/lib/planner/report-strategy-online";
+import {
+  buildDefaultOnlineReportGreeting,
+  buildOnlineExecutiveSummaryLines,
+} from "@/lib/planner-report-export/report-copy-online";
 import type { PlannerIndustryKey } from "@/lib/planner/types";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
@@ -193,6 +197,17 @@ export function buildOnlineReportPayload(
 ): PlannerReportExportPayload {
   const isKo = args.isKo;
   const onlineSection = buildOnlineReportSection(args);
+  const strategyInput: OnlineReportStrategyInput = {
+    isKo: args.isKo,
+    campaignGoal: args.campaignGoal ?? null,
+    goalTitle: args.goalTitle,
+    industryKey: args.industryKey ?? null,
+    industryText: args.industryText,
+    onlineLineCount: onlineSection.lines.length,
+    calculableLineCount: onlineSection.calculableLineCount,
+    inquiryLineCount: onlineSection.inquiryLineCount,
+  };
+  const defaultExecutiveLines = buildOnlineExecutiveSummaryLines(strategyInput);
   const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
 
   const kpis: PlannerExportKpi[] = [
@@ -225,12 +240,8 @@ export function buildOnlineReportPayload(
     campaignName: args.goalTitle,
     clientName: args.clientName?.trim() || undefined,
     coverLogoUrl: args.coverLogoUrl?.trim() || undefined,
-    greetingText: args.reportGreeting?.trim() || undefined,
-    executiveSummaryLines:
-      args.reportExecutiveSummaryLines &&
-      args.reportExecutiveSummaryLines.length > 0
-        ? args.reportExecutiveSummaryLines
-        : onlineSection.strategyLines,
+    greetingText: buildDefaultOnlineReportGreeting(isKo, args.clientName),
+    executiveSummaryLines: defaultExecutiveLines,
     generatedAt: args.generatedAt,
     goalTitle: args.goalTitle,
     budgetMan: args.budgetMan,
@@ -242,19 +253,7 @@ export function buildOnlineReportPayload(
     kpis,
     portfolio,
     onlineSection,
-    sections: [
-      {
-        title: onlineSection.title,
-        lines: [
-          onlineSection.estimationNotice,
-          ...(onlineSection.consultationNotice
-            ? [onlineSection.consultationNotice]
-            : []),
-          onlineSection.whyLine,
-          ...onlineSection.strategyLines,
-        ],
-      },
-    ],
+    sections: [],
     pricingFootnote: plannerReportPricingFootnote(isKo),
     disclaimer: isKo
       ? "본 보고서의 온라인 예상 성과는 카탈로그 CPC·CPM 참고 범위 기반이며, 실제 집행·과금 조건에 따라 달라질 수 있습니다."

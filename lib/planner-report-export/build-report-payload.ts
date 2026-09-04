@@ -69,17 +69,6 @@ function buildMixedReportPayload(
         title: isKo ? "혼합 카트 안내" : "Mixed cart notice",
         lines: [mixedNotice],
       },
-      {
-        title: onlineSection.title,
-        lines: [
-          onlineSection.estimationNotice,
-          ...(onlineSection.consultationNotice
-            ? [onlineSection.consultationNotice]
-            : []),
-          onlineSection.whyLine,
-          ...onlineSection.strategyLines,
-        ],
-      },
     ],
   };
 }
@@ -97,10 +86,13 @@ export function buildReportPayload(
   );
 
   if (split.composition === "onlyOnline") {
+    const onlineArgs = toOnlineArgs(args);
     return buildOnlineReportPayload({
-      ...toOnlineArgs(args),
+      ...onlineArgs,
       portfolio: split.onlinePortfolio,
       planCartItems: split.onlineCartItems,
+      reportGreeting: undefined,
+      reportExecutiveSummaryLines: undefined,
     });
   }
 

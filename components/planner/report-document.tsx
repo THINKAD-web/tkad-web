@@ -27,6 +27,7 @@ import { sectionVisible, filterExportSections } from "@/lib/planner-report-expor
 import type { PlannerReportSectionVisibility } from "@/lib/planner-report-export/section-visibility";
 import type { PlannerReportStyle } from "@/lib/planner-report-export/document-theme";
 import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
+import { reportCoverSubtitle } from "@/lib/planner-report-export/report-cover-copy";
 import type { MediaItem } from "@/lib/media-data";
 
 /**
@@ -293,15 +294,10 @@ export const PlannerReportDocument = forwardRef<
         reportStyle={reportStyle}
         badge="CAMPAIGN PLANNER"
         title={p.documentTitle}
-        subtitle={`${
-          p.kind === "integrated"
-            ? isKo
-              ? "OOH + 디지털 통합 제안"
-              : "OOH + Digital integrated"
-            : isKo
-              ? "OOH 미디어 플랜"
-              : "OOH media plan"
-        } · ${p.generatedAt}`}
+        subtitle={`${reportCoverSubtitle(isKo, {
+          kind: p.kind,
+          reportComposition: p.reportComposition,
+        })} · ${p.generatedAt}`}
         coverLogoUrl={p.coverLogoUrl}
         clientName={p.clientName}
         clientNameEditable={editableClientName}

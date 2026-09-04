@@ -27,6 +27,7 @@ import {
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
 import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
+import { reportExportCoverSubtitle } from "@/lib/planner-report-export/report-cover-copy";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
@@ -324,9 +325,10 @@ export async function buildPlannerReportPptx(
   });
   cover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.0, w: 2.2, h: 0.06, fill: { color: ACCENT } });
   cover.addText(
-    p.kind === "integrated"
-      ? isKo ? "OOH + 디지털 통합 캠페인 제안" : "OOH + Digital integrated campaign"
-      : isKo ? "OOH 미디어 캠페인 플랜" : "OOH media campaign plan",
+    reportExportCoverSubtitle(isKo, {
+      kind: p.kind,
+      reportComposition: p.reportComposition,
+    }),
     { x: 0.7, y: 4.25, w: 12, h: 0.5, fontFace: face, fontSize: 17, color: coverMutedColor },
   );
   if (p.clientName) {

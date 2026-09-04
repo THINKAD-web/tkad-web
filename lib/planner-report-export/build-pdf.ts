@@ -28,6 +28,7 @@ import {
   sectionVisible,
 } from "@/lib/planner-report-export/section-visibility";
 import { splitReportCopyParagraphs } from "@/lib/planner-report-export/report-copy";
+import { reportExportCoverSubtitle } from "@/lib/planner-report-export/report-cover-copy";
 import {
   collectMediaCardSpecs,
   exportMediaLineMetaParts,
@@ -379,14 +380,10 @@ export async function buildPlannerReportPdf(
     y += 3;
   }
 
-  const subtitle =
-    p.kind === "integrated"
-      ? isKo
-        ? "OOH + 디지털 통합 캠페인 제안서"
-        : "OOH + Digital integrated campaign"
-      : isKo
-        ? "OOH 미디어 캠페인 플랜"
-        : "OOH media campaign plan";
+  const subtitle = reportExportCoverSubtitle(isKo, {
+    kind: p.kind,
+    reportComposition: p.reportComposition,
+  });
 
   const coverLogoData = p.coverLogoUrl?.trim()
     ? await loadExportImageForPdf(p.coverLogoUrl.trim(), {

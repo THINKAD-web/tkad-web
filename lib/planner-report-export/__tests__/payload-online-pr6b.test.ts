@@ -131,12 +131,72 @@ test("buildReportPayload — onlyOnline skips OOH impression KPI vocabulary", ()
     ...baseArgs,
     portfolio: [calculableOnline],
     planCartItems: cartItems,
+    reportGreeting:
+      "안녕하세요.\n\n아래와 같이 OOH 미디어 캠페인 제안을 드립니다.",
+    reportExecutiveSummaryLines: [
+      "왜 이 구성인가 · 동선 기반 노출 효율",
+      "다음 액션 · 디지털 리타게팅",
+    ],
   });
   assert.equal(payload.reportComposition, "onlyOnline");
   assert.ok(payload.onlineSection);
   assert.equal(payload.onlineSection!.lines.length, 1);
   assert.ok(payload.kpis.some((k) => k.label.includes("예상 도달")));
   assert.ok(!payload.kpis.some((k) => k.label.includes("유동")));
+
+  const oohVocabulary = /OOH|동선|노출 효율|유동|리타게팅/;
+  assert.match(payload.documentTitle, /온라인/);
+  assert.ok(payload.greetingText);
+  assert.ok(!oohVocabulary.test(payload.greetingText!));
+  assert.ok(payload.executiveSummaryLines?.length);
+  assert.ok(
+    payload.executiveSummaryLines!.some((line) => line.startsWith("왜 이 구성인가")),
+  );
+  for (const line of payload.executiveSummaryLines ?? []) {
+    assert.ok(!oohVocabulary.test(line));
+  }
+  assert.equal(payload.sections?.length ?? 0, 0);
+});
+
+test("buildReportPayload — mixed dedupes why-line (top executive only)", () => {
+  const payload = buildReportPayload({
+    ...baseArgs,
+    portfolio: [oohMedia, inquiryOnline],
+    planCartItems: [
+      {
+        mediaId: oohMedia.id,
+        mediaName: oohMedia.name,
+        mediaType: "dooh",
+        catalogChannel: "offline",
+        region: "seoul",
+        price: 500,
+        addedFrom: "search",
+        addedAt: 1,
+      },
+      {
+        mediaId: inquiryOnline.id,
+        mediaName: inquiryOnline.name,
+        mediaType: "online",
+        catalogChannel: "online",
+        region: "",
+        price: 0,
+        addedFrom: "search",
+        addedAt: 2,
+      },
+    ],
+  });
+  assert.equal(payload.reportComposition, "mixed");
+
+  const whyCount = [
+    ...(payload.executiveSummaryLines ?? []),
+    ...(payload.sections ?? []).flatMap((sec) => sec.lines),
+  ].filter((line) => line.startsWith("왜 이 구성인가")).length;
+  assert.equal(whyCount, 1);
+
+  const onlineSectionBlock = payload.sections?.find(
+    (sec) => sec.title === "온라인 채널" || sec.title === "Online channels",
+  );
+  assert.equal(onlineSectionBlock, undefined);
 });
 
 test("buildReportPayload — mixed attaches onlineSection + keeps OOH portfolio", () => {
