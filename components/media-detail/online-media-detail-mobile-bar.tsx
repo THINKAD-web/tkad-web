@@ -1,8 +1,8 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import {
   STICKY_ACTION_BAR_BTN,
@@ -18,7 +18,6 @@ import {
 } from "@/lib/pricing/online-performance-estimate";
 import { hasOnlinePricingSpec } from "@/lib/pricing-unavailable";
 import { cn } from "@/lib/utils";
-import { MessageCircle } from "lucide-react";
 
 type Props = {
   media: MediaItem;
@@ -33,7 +32,6 @@ export function OnlineMediaDetailMobileBar({ media, isKo, className }: Props) {
     calculable && spec
       ? onlinePricingLabel(spec)
       : mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
-  const contactHref = `/contact?media=${encodeURIComponent(media.id)}`;
 
   return (
     <StickyActionBar
@@ -72,18 +70,15 @@ export function OnlineMediaDetailMobileBar({ media, isKo, className }: Props) {
           mediaDetailLabel
           className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "!h-8 shrink-0")}
         />
-        <Link
-          href={contactHref}
-          data-accent-keep="true"
+        <MediaQuoteCtaButton
+          media={media}
+          variant="sticky"
           className={cn(
             STICKY_ACTION_BAR_BTN,
             STICKY_ACTION_BAR_BTN_VIOLET,
             "!h-8 !w-auto shrink-0 !rounded-lg !border-0 !px-2.5 !tkad-type-caption !font-semibold !shadow-sm !tracking-normal",
           )}
-        >
-          <MessageCircle className="mr-1 inline h-3.5 w-3.5" aria-hidden />
-          {isKo ? "문의" : "Contact"}
-        </Link>
+        />
       </div>
     </StickyActionBar>
   );
