@@ -19,8 +19,11 @@ import {
 } from "@/components/media/media-thumbnail-badge-stack";
 import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
+import { OnlineCatalogCardThumbnail } from "@/components/media/online-catalog-card-thumbnail";
+import { OnlineCardRecommendTags } from "@/components/media/online-card-recommend-tags";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
+import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
 import { MapTileThumbnailBadges } from "@/components/media-map/map-tile-thumbnail-badges";
 import { cn } from "@/lib/utils";
 import type {
@@ -68,16 +71,32 @@ export function DiscoveryMediaCardCompactRow({
         ) : null}
         {(() => {
           const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
-          return thumb ? (
-            <Image
-              src={thumb.src}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="56px"
-              unoptimized={thumb.unoptimized}
-            />
-          ) : (
+          if (thumb) {
+            return (
+              <Image
+                src={thumb.src}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="56px"
+                unoptimized={thumb.unoptimized}
+              />
+            );
+          }
+          if (
+            isOnlineCatalogMedia({ catalogChannel: item.catalogChannel }) &&
+            item.onlineSpec?.platform
+          ) {
+            return (
+              <OnlineCatalogCardThumbnail
+                item={item}
+                isKo={isKo}
+                size="compact"
+                sizes="56px"
+              />
+            );
+          }
+          return (
             <div className="tkad-type-note flex h-full w-full items-center justify-center text-tkad-muted">
               —
             </div>
@@ -209,9 +228,9 @@ export function DiscoveryMediaCardCompactGrid({
   className,
   planAddedFrom = "search",
 }: CompactGridProps) {
-  const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
   const model = catalogItemToDisplayModel(item, { href, isKo, priceLabel });
   const [rationaleOpen, setRationaleOpen] = useState(false);
+  const isOnlineCard = isOnlineCatalogMedia({ catalogChannel: item.catalogChannel });
   const extraBullets = recommendRationaleBullets?.filter(Boolean) ?? [];
   const showExpand =
     recommendRationaleExpandable && extraBullets.length > 0;
@@ -220,7 +239,9 @@ export function DiscoveryMediaCardCompactGrid({
   const inlineSecondLine =
     !showExpand && extraBullets.length > 0 ? extraBullets[0] : null;
   const showPrice =
-    Boolean(priceLabel?.trim()) || Boolean(item.price && item.price > 0);
+    Boolean(priceLabel?.trim()) ||
+    Boolean(item.price && item.price > 0) ||
+    isOnlineCard;
 
   const body = (
     <>
@@ -230,20 +251,13 @@ export function DiscoveryMediaCardCompactGrid({
             {rank}
           </span>
         ) : null}
-        {thumb ? (
-          <Image
-            src={thumb.src}
-            alt={item.name}
-            fill
-            className="rounded-t-2xl object-cover"
-            sizes="(max-width: 768px) 50vw, 25vw"
-            unoptimized={thumb.unoptimized}
-          />
-        ) : (
-          <div className="tkad-type-note flex h-full w-full items-center justify-center text-tkad-muted">
-            {isKo ? "준비중" : "No image"}
-          </div>
-        )}
+        <OnlineCatalogCardThumbnail
+          item={item}
+          isKo={isKo}
+          size="tile"
+          imageClassName="rounded-t-2xl"
+          sizes="(max-width: 768px) 50vw, 25vw"
+        />
         <MediaThumbnailTrustOverlay item={item} isKo={isKo} variant="card" />
       </div>
       <div className="flex min-h-0 flex-1 flex-col p-3">
@@ -257,7 +271,12 @@ export function DiscoveryMediaCardCompactGrid({
           {showPrice ? (
             <div>
               <div className="flex flex-wrap items-baseline gap-x-1.5">
-                <p className="tkad-type-price-accent tkad-home-accent-text">
+                <p
+                  className={cn(
+                    "tkad-type-price-accent tkad-home-accent-text tabular-nums",
+                    isOnlineCard && "line-clamp-2 text-xs leading-snug",
+                  )}
+                >
                   {model.priceLabel}
                 </p>
                 {model.showPeriodSuffix && model.periodLabel ? (
@@ -267,6 +286,10 @@ export function DiscoveryMediaCardCompactGrid({
                 ) : null}
               </div>
               <MediaPriceExclNote isKo={isKo} className="tkad-type-note mt-0.5" />
+              <OnlineCardRecommendTags
+                slug={item.slug}
+                catalogChannel={item.catalogChannel}
+              />
             </div>
           ) : null}
           {plannerMode && onTogglePlan ? (
@@ -479,27 +502,19 @@ export function DiscoveryMediaCardCatalogTile({
   className,
 }: CatalogTileProps) {
   const model = catalogItemToDisplayModel(item, { href, isKo, priceLabel });
-  const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
+  const isOnlineCard = isOnlineCatalogMedia({ catalogChannel: item.catalogChannel });
   const locationLine = item.region || item.location || "";
   const planItem = planCartItemFromCatalog(item, planAddedFrom);
   const thumbnailBadges = buildCatalogThumbnailBadges(item, isKo, { rank });
 
   const imageBlock = (
     <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-      {thumb ? (
-        <Image
-          src={thumb.src}
-          alt={item.name}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 50vw, 280px"
-          unoptimized={thumb.unoptimized}
-        />
-      ) : (
-        <div className="tkad-type-note flex h-full w-full items-center justify-center text-tkad-muted">
-          {isKo ? "준비중" : "No image"}
-        </div>
-      )}
+      <OnlineCatalogCardThumbnail
+        item={item}
+        isKo={isKo}
+        size="tile"
+        sizes="(max-width: 768px) 50vw, 280px"
+      />
 
       <MediaThumbnailBadgeStack badges={thumbnailBadges} />
 
@@ -537,7 +552,12 @@ export function DiscoveryMediaCardCatalogTile({
         />
       ) : null}
       <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
-        <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
+        <p
+          className={cn(
+            "tkad-type-price-accent tkad-home-accent-text tabular-nums",
+            isOnlineCard && "line-clamp-2 text-xs leading-snug sm:text-sm",
+          )}
+        >
           {model.priceLabel}
         </p>
         {model.showPeriodSuffix && model.periodLabel ? (
@@ -547,6 +567,8 @@ export function DiscoveryMediaCardCatalogTile({
         ) : null}
         <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
       </div>
+
+      <OnlineCardRecommendTags slug={item.slug} catalogChannel={item.catalogChannel} />
 
       {plannerMode && onTogglePlan ? (
         <div

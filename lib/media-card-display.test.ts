@@ -85,7 +85,7 @@ test("catalog tile model: parent label with /일 does not double the suffix", ()
   assert.equal(model.showPeriodSuffix, false);
 });
 
-test("formatBrowseCardPriceLabel — online catalog always inquiry", () => {
+test("formatBrowseCardPriceLabel — online inquiry rows stay 가격 문의", () => {
   assert.equal(
     formatBrowseCardPriceLabel(
       {
@@ -96,6 +96,66 @@ test("formatBrowseCardPriceLabel — online catalog always inquiry", () => {
       "ko-KR",
     ),
     "가격 문의",
+  );
+  assert.equal(
+    formatBrowseCardPriceLabel(
+      {
+        catalogChannel: "online",
+        type: null,
+        price: null,
+        onlineSpec: {
+          minBudget: 800_000,
+          cpcMin: null,
+          cpcMax: null,
+          cpmMin: null,
+          cpmMax: null,
+          platform: "Naver GFA",
+        },
+      },
+      "ko-KR",
+    ),
+    "가격 문의",
+  );
+});
+
+test("formatBrowseCardPriceLabel — online calculable shows seeded CPC/CPM range", () => {
+  assert.equal(
+    formatBrowseCardPriceLabel(
+      {
+        catalogChannel: "online",
+        type: null,
+        price: null,
+        onlineSpec: {
+          minBudget: 800_000,
+          cpcMin: 200,
+          cpcMax: 600,
+          cpmMin: 4000,
+          cpmMax: 8000,
+          platform: "Meta Instagram",
+        },
+      },
+      "ko-KR",
+    ),
+    "CPC 200~600원 · CPM 4,000~8,000원",
+  );
+  assert.equal(
+    formatBrowseCardPriceLabel(
+      {
+        catalogChannel: "online",
+        type: null,
+        price: null,
+        onlineSpec: {
+          minBudget: 800_000,
+          cpcMin: null,
+          cpcMax: null,
+          cpmMin: 3000,
+          cpmMax: 7000,
+          platform: "Meta Facebook",
+        },
+      },
+      "ko-KR",
+    ),
+    "CPM 3,000~7,000원",
   );
 });
 

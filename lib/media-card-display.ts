@@ -4,7 +4,12 @@ import {
   buildCatalogItemMetricLine,
   buildCatalogItemMetricLineCompact,
 } from "@/lib/media-card-metrics";
-import { isOnlineCatalogMedia, isPricingUnavailable } from "@/lib/pricing-unavailable";
+import {
+  hasOnlinePricingSpec,
+  isOnlineCatalogMedia,
+  isPricingUnavailable,
+} from "@/lib/pricing-unavailable";
+import { onlinePricingLabel } from "@/lib/pricing/online-performance-estimate";
 import {
   formatCatalogPriceFieldWon,
   formatMediaPriceWithPeriodSuffix,
@@ -61,6 +66,7 @@ type BrowseCardPriceItem = Pick<
   | "price"
   | "pricePeriod"
   | "catalogChannel"
+  | "onlineSpec"
   | "type"
   | "catalogSource"
   | "networkMinUnits"
@@ -78,6 +84,12 @@ export function formatBrowseCardPriceLabel(
 ): string | null {
   const isKo = locale.startsWith("ko");
   if (isOnlineCatalogMedia({ catalogChannel: item.catalogChannel })) {
+    if (
+      item.onlineSpec &&
+      hasOnlinePricingSpec({ catalogChannel: item.catalogChannel, onlineSpec: item.onlineSpec })
+    ) {
+      return onlinePricingLabel(item.onlineSpec);
+    }
     return mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
   }
   if (!item.type?.trim() || item.price == null || item.price <= 0) {
