@@ -321,14 +321,16 @@ async function part3Analytics(catalog) {
   assert.ok(eventsAfterOpen.some((e) => e.name === "quote_modal_open"), "quote_modal_open fired");
   log.pass("quote_modal_open event");
 
-  const contactLink = page.locator('a[href*="/contact"]').filter({ hasText: /문의하기/ });
+  const contactLink = page
+    .getByLabel(/견적·문의|quote/i)
+    .getByRole("link", { name: /문의하기|Contact us/i });
   await contactLink.click({ noWaitAfter: true, force: true });
-  await page.waitForTimeout(200);
+  await page.waitForURL(/\/contact/, { timeout: 10_000 }).catch(() => {});
   const eventsAfterContact = await page.evaluate(() => {
     try {
       return JSON.parse(sessionStorage.getItem("__ga_test_events") ?? "[]");
     } catch {
-      return window.__gaEvents ?? [];
+      return [];
     }
   });
   if (!eventsAfterContact.some((e) => e.name === "online_modal_contact_click")) {
