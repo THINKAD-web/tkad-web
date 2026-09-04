@@ -6,6 +6,7 @@ import { useLocale } from "next-intl";
 import { X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { SupportAiChatModalLoading } from "@/components/support/support-ai-chat-modal-loading";
+import { useMobileChromeOverlayOptional } from "@/components/mobile/mobile-chrome-overlay-context";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { prefetchOnIdle, prefetchSupportAiChatModal } from "@/lib/lazy-chunk-prefetch";
 import { cn } from "@/lib/utils";
@@ -75,10 +76,15 @@ function ContactChannelSheetUI({
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
+    // body 가 아니라 html 에 직접 건다 — body 에 걸면 CSS 가 이를 뷰포트로
+    // "전파"하는데, 이 전파 경로에서 스크롤된 상태의 sticky/fixed 헤더가
+    // 화면 밖으로 튕겨나가는 브라우저 버그가 있다 (데스크톱 글로벌 헤더 참고).
+    const html = document.documentElement;
+    const prevOverflow = html.style.overflow;
+    html.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      html.style.overflow = prevOverflow;
     };
   }, [open, onClose]);
 
@@ -196,10 +202,22 @@ function ContactChannelSheetUI({
 export function ContactChannelProvider({ children }: { children: ReactNode }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const chromeOverlay = useMobileChromeOverlayOptional();
 
   const open = useCallback(() => setSheetOpen(true), []);
   const close = useCallback(() => setSheetOpen(false), []);
   const openAi = useCallback(() => setAiOpen(true), []);
+
+  /**
+   * 열려 있는 동안 BottomTabBar 를 숨긴다. 안 하면 탭바(z-80)가 이 시트(z-61)
+   * 보다 위에 그려져 마지막 항목("전화 상담")이 잘려 보인다.
+   */
+  useEffect(() => {
+    if (!chromeOverlay) return;
+    const anyOpen = sheetOpen || aiOpen;
+    chromeOverlay.setOpen("contact-channel", anyOpen);
+    return () => chromeOverlay.setOpen("contact-channel", false);
+  }, [sheetOpen, aiOpen, chromeOverlay]);
 
   useEffect(() => {
     const handler = () => open();

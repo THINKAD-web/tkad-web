@@ -11,6 +11,7 @@ import { HeaderCartLink } from "@/components/header-cart-link";
 import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { MediaNavHoverPanel } from "@/components/navigation/media-nav-hover-panel";
 import { useCommandPaletteOptional } from "@/components/navigation/command-palette-provider";
+import { useMobileChromeOverlayOptional } from "@/components/mobile/mobile-chrome-overlay-context";
 import { PublicNavSidebar } from "@/components/navigation/public-nav-sidebar";
 import { headerMobileMenuRowClass } from "@/components/public-chrome/header-chrome-buttons";
 import {
@@ -225,6 +226,7 @@ export function DesktopGlobalNav() {
   const mobileScrollLockYRef = useRef(0);
   const mobileNavToggleLockUntilRef = useRef(0);
   const commandPalette = useCommandPaletteOptional();
+  const chromeOverlay = useMobileChromeOverlayOptional();
 
   const navGroups = useMemo(() => buildPublicNavGroups(t), [t]);
   const activeGroupId = findActiveNavGroupId(pathname, navGroups, searchParams);
@@ -273,6 +275,13 @@ export function DesktopGlobalNav() {
     setOpenMenu(null);
   }, [pathname]);
 
+  /** 패널이 열려 있는 동안 BottomTabBar 를 숨긴다 — 이제 fixed 오버레이라 겹친다. */
+  useEffect(() => {
+    if (!chromeOverlay) return;
+    chromeOverlay.setOpen("mobile-nav", mobileNavOpen);
+    return () => chromeOverlay.setOpen("mobile-nav", false);
+  }, [mobileNavOpen, chromeOverlay]);
+
   useEffect(() => {
     if (!mobileNavOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -282,13 +291,17 @@ export function DesktopGlobalNav() {
 
     // Keep sticky header in place (no body position:fixed). Block background
     // scroll via overflow + non-passive touchmove outside the panel — iOS Safari.
+    //
+    // `body.style.overflow = "hidden"` 은 절대 같이 켜지 말 것. `html` 이 실제
+    // 루트 스크롤러라 `html` 하나만으로 스크롤은 이미 막힌다 — 그런데 `body` 에도
+    // overflow:hidden 을 얹으면, 충분히 스크롤된 상태(scrollY > 0)에서 브라우저가
+    // `position: sticky`/`fixed` 요소(이 헤더, 아래 패널)를 뷰포트가 아니라
+    // "문서" 기준으로 다시 계산해버려 화면 밖(-scrollY)으로 날아간다. 헤더가
+    // 사라지니 패널도 못 찾고 화면이 먹통처럼 보인다 — 스크롤 0에서만 멀쩡한 이유.
     const scrollY = mobileScrollLockYRef.current;
     const html = document.documentElement;
-    const { body } = document;
     const prevHtmlOverflow = html.style.overflow;
-    const prevBodyOverflow = body.style.overflow;
     html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
     html.classList.add("tkad-nav-scroll-lock");
 
     const onTouchMove = (e: TouchEvent) => {
@@ -303,7 +316,6 @@ export function DesktopGlobalNav() {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("touchmove", onTouchMove);
       html.style.overflow = prevHtmlOverflow;
-      body.style.overflow = prevBodyOverflow;
       html.classList.remove("tkad-nav-scroll-lock");
       const y = scrollY;
       requestAnimationFrame(() => {

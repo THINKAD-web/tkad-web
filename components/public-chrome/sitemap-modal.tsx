@@ -27,12 +27,15 @@ export function SitemapModal({
       if (event.key === "Escape") onClose();
     };
 
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // html 에 건다 — body 에 걸면 스크롤된 상태에서 sticky/fixed 헤더가 화면
+    // 밖으로 튕겨나가는 브라우저 버그가 있다 (desktop-global-nav.tsx 참고).
+    const html = document.documentElement;
+    const prevOverflow = html.style.overflow;
+    html.style.overflow = "hidden";
     window.addEventListener("keydown", onKey);
 
     return () => {
-      document.body.style.overflow = prevOverflow;
+      html.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose]);

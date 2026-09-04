@@ -4,12 +4,7 @@ import { type ReactNode, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import {
-  Building2,
-  KeyRound,
-  LogOut,
-  Settings,
-} from "lucide-react";
+import { Building2, LogOut } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageContainer } from "@/components/layout/page-container";
@@ -131,14 +126,7 @@ export function MyHubShell({ children }: Props) {
                       {isKo ? "매체사 포털" : "Media portal"}
                     </Link>
                   ) : null}
-                  <Link href="/my/api-keys" className={myHubOutlineBtn}>
-                    <KeyRound className="h-4 w-4" />
-                    {isKo ? "API 키" : "API keys"}
-                  </Link>
-                  <Link href="/my/settings" className={myHubOutlineBtn}>
-                    <Settings className="h-4 w-4" />
-                    {isKo ? "설정" : "Settings"}
-                  </Link>
+                  {/* API 키·설정은 아래 사이드바 "계정" 메뉴에 이미 있다 — 여기 중복 노출하지 않는다 */}
                   <button type="button" onClick={logout} className={myHubOutlineBtn}>
                     <LogOut className="h-4 w-4" />
                     {t("logout")}
