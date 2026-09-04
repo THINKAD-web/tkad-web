@@ -121,8 +121,35 @@ export function SupportAiChatModal({ open, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [claudeQuota, setClaudeQuota] = useState<QuotaState | null>(null);
+  const [keyboardInset, setKeyboardInset] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // 모바일 키보드가 올라오면 시각 뷰포트가 줄어든다 — 그 줄어든 만큼 시트를
+  // 끌어올려 입력창이 키보드 뒤에 가려지지 않게 한다. 데스크톱(sm: 코너 카드)엔
+  // 영향 없음 — visualViewport 는 키보드가 없으면 항상 0을 낸다.
+  useEffect(() => {
+    if (!open) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const isMobileLayout = () => window.matchMedia("(max-width: 639px)").matches;
+    const update = () => {
+      if (!isMobileLayout()) {
+        setKeyboardInset(0);
+        return;
+      }
+      const inset = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+      setKeyboardInset(inset);
+    };
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+      setKeyboardInset(0);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (open) {
@@ -260,7 +287,12 @@ export function SupportAiChatModal({ open, onClose }: Props) {
       role="presentation"
     >
       <div
-        className="pointer-events-auto fixed inset-x-3 bottom-3 top-auto z-[56] mx-auto flex max-h-[min(560px,78vh)] min-h-[360px] flex-col overflow-hidden rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.7)] backdrop-blur sm:inset-x-auto sm:bottom-6 sm:right-6 sm:left-auto sm:mx-0 sm:w-[min(400px,calc(100vw-2rem))]"
+        className="pointer-events-auto fixed inset-x-3 bottom-3 top-auto z-[56] mx-auto flex max-h-[min(560px,78dvh,82vh)] min-h-[360px] flex-col overflow-hidden rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.7)] backdrop-blur sm:inset-x-auto sm:bottom-6 sm:right-6 sm:left-auto sm:mx-0 sm:w-[min(400px,calc(100vw-2rem))]"
+        style={
+          keyboardInset > 0
+            ? { bottom: `calc(0.75rem + ${keyboardInset}px)` }
+            : undefined
+        }
         role="dialog"
         aria-label={t("dialogLabel")}
         onClick={(e) => e.stopPropagation()}
