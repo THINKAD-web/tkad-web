@@ -70,6 +70,10 @@ export type MediaWithAdvertiserExecutions = Media & {
     cpcMax: number | null;
     cpmMin: number | null;
     cpmMax: number | null;
+    targetingOptions: string[];
+    strengths: string[];
+    kpiHints: string[];
+    bestFor: string[];
   } | null;
 };
 
@@ -152,6 +156,10 @@ export const PUBLIC_MEDIA_ONLINE_SPEC_SELECT = {
   cpcMax: true,
   cpmMin: true,
   cpmMax: true,
+  targetingOptions: true,
+  strengths: true,
+  kpiHints: true,
+  bestFor: true,
 } as const;
 
 function mapPrismaOnlineSpec(
@@ -166,6 +174,10 @@ function mapPrismaOnlineSpec(
     cpcMax: spec.cpcMax,
     cpmMin: spec.cpmMin,
     cpmMax: spec.cpmMax,
+    targetingOptions: spec.targetingOptions ?? [],
+    strengths: spec.strengths ?? [],
+    kpiHints: spec.kpiHints ?? [],
+    bestFor: spec.bestFor ?? [],
   };
 }
 

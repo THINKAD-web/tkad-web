@@ -37,7 +37,7 @@ export type MediaPriceOption = {
   partialPeriodRates?: PartialPeriodRatesMap;
 };
 
-/** PR5-a — online catalog pricing spec (detail page only until PR5-b). */
+/** PR5-a/PR6-a — online catalog spec (detail + report inputs). */
 export type MediaOnlineSpecView = {
   platform?: string;
   minBudget: number;
@@ -45,6 +45,10 @@ export type MediaOnlineSpecView = {
   cpcMax: number | null;
   cpmMin: number | null;
   cpmMax: number | null;
+  targetingOptions?: string[];
+  strengths?: string[];
+  kpiHints?: string[];
+  bestFor?: string[];
 };
 
 /** `data/media-items-keyword-filter.json`에서 합성 상세에만 쓰는 메타 */

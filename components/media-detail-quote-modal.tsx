@@ -23,7 +23,9 @@ import {
 } from "@/lib/media-detail-quantity";
 import { resolveMediaQuantity } from "@/lib/media-quantity";
 import { resolveQuoteUnitsForPriceOption } from "@/lib/quote-entry-quantity";
-import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
+import { isOnlineCatalogMedia, hasOnlinePricingSpec } from "@/lib/pricing-unavailable";
+import { onlinePricingLabel } from "@/lib/pricing/online-performance-estimate";
+import { OnlineMediaBudgetFields, defaultOnlineBudgetWon } from "@/components/media/online-media-budget-fields";
 import { cn } from "@/lib/utils";
 
 function MediaDetailQuoteModalBody({
@@ -77,6 +79,16 @@ function MediaDetailQuoteModalBody({
   const selected = hasOpts ? opts[effectivePoIdx] : undefined;
 
   const isOnline = isOnlineCatalogMedia(media);
+  const [onlineBudgetWon, setOnlineBudgetWon] = useState(() =>
+    defaultOnlineBudgetWon(media),
+  );
+  const onlineCalculable = isOnline && hasOnlinePricingSpec(media);
+  const onlineHeadline =
+    onlineCalculable && media.onlineSpec
+      ? onlinePricingLabel(media.onlineSpec)
+      : isKo
+        ? "가격 문의"
+        : "Price inquiry";
 
   const btnBlockBase =
     "inline-flex w-full items-center justify-center gap-2 border-2 font-display font-bold uppercase tracking-[0.18em] transition-colors duration-150";
@@ -114,10 +126,33 @@ function MediaDetailQuoteModalBody({
           </div>
         </div>
         <p className="mb-4 text-sm leading-relaxed dark:text-white text-gray-700">
-          {t("quoteModalDescription")}
+          {isOnline
+            ? isKo
+              ? "온라인 매체는 문의 또는 MY PLAN 담기로 견적을 이어갈 수 있습니다."
+              : "For online media, continue via contact or MY PLAN."
+            : t("quoteModalDescription")}
         </p>
 
-        {showQuantity ? (
+        {isOnline ? (
+          <div className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-3 py-3 dark:text-white text-gray-900 backdrop-blur">
+            <p className="text-lg font-black leading-snug text-[color:var(--qp-accent)]">
+              {onlineHeadline}
+            </p>
+            {onlineCalculable ? (
+              <div className="mt-3">
+                <OnlineMediaBudgetFields
+                  media={media}
+                  budgetWon={onlineBudgetWon}
+                  onBudgetChange={setOnlineBudgetWon}
+                  isKo={isKo}
+                  inputCls="h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 text-sm dark:text-white text-gray-900"
+                />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!isOnline && showQuantity ? (
           <div className="mb-4">
             <PlannerMediaQuantityControl
               media={media}
@@ -140,7 +175,7 @@ function MediaDetailQuoteModalBody({
           </div>
         ) : null}
 
-        {hasOpts && !showQuantity ? (
+        {!isOnline && hasOpts && !showQuantity ? (
           <div
             className="mb-2 rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:p-4"
             role="radiogroup"
@@ -232,11 +267,11 @@ function MediaDetailQuoteModalBody({
             </p>
           ) : null}
         </div>
-      ) : media.keywordFilter?.priceText ? (
+      ) : !isOnline && media.keywordFilter?.priceText ? (
         <p className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-3 py-2.5 text-sm font-semibold dark:text-white text-gray-800 backdrop-blur">
           {media.keywordFilter.priceText}
         </p>
-      ) : (
+      ) : !isOnline ? (
         <div className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-3 py-3 dark:text-white text-gray-900 backdrop-blur">
           <p className="tkad-type-label dark:text-white text-gray-500">
             {isKo ? "기준 요금" : "Base rate"}
@@ -250,7 +285,7 @@ function MediaDetailQuoteModalBody({
             )}
           </p>
         </div>
-      )}
+      ) : null}
 
       </div>
 
