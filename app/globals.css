@@ -3748,7 +3748,24 @@ html:not(.dark) .tkad-nav-chrome {
   background: color-mix(in srgb, currentColor 6%, transparent);
 }
 
+/*
+ * position: fixed — 절대 normal flow(sticky 헤더의 자식)에 두지 말 것.
+ *
+ * 예전엔 이 패널이 `sticky top-0` 헤더 안의 일반 콘텐츠였다. 패널이 열리면
+ * 헤더 박스 자체의 렌더 높이가 (헤더 바 + 패널) 로 커지는데, 충분히 스크롤된
+ * 상태(scrollY > 0)에서 sticky 요소의 박스 높이가 갑자기 커지면 브라우저가
+ * sticky 고정을 풀어버리고 문서 흐름상의 원래 위치로 돌려보낸다 — 헤더 전체가
+ * 화면 밖(위)으로 사라지고 패널도 함께 사라져 "먹통"처럼 보인다. 최상단
+ * (scrollY=0) 에서만 재현되지 않는 이유가 여기 있다.
+ * 뷰포트 기준 fixed 로 떼어 놓으면 헤더 박스 높이가 절대 안 바뀌므로
+ * sticky 가 스크롤 위치와 무관하게 항상 유지된다.
+ */
 .tkad-site-header-panel {
+  position: fixed;
+  top: 3.5rem;
+  left: 0;
+  right: 0;
+  z-index: 45;
   border-top: 1px solid color-mix(in srgb, var(--border, #d8d6d0) 100%, transparent);
   background: inherit;
   padding: 16px 20px 20px;
