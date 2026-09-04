@@ -16,6 +16,7 @@ import {
   hasOnlinePricingSpec,
   isPublicQuoteWizardSelectableMedia,
 } from "../lib/pricing-unavailable.ts";
+import { e2eMixBypassHeaders } from "./lib/e2e-mix-bypass.mjs";
 
 const BASE = (process.env.BASE ?? "http://127.0.0.1:3000").replace(/\/$/, "");
 const LOCALE = `${BASE}/ko`;
@@ -479,7 +480,9 @@ async function main() {
 
   const mixCaptures = [];
   const browser = await launchBrowser();
-  const context = await browser.newContext();
+  const context = await browser.newContext({
+    extraHTTPHeaders: e2eMixBypassHeaders(),
+  });
   const page = await context.newPage();
   page.setDefaultTimeout(90_000);
   attachMixCapture(page, mixCaptures);
