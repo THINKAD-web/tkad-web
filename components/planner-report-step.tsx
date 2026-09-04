@@ -595,7 +595,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     return {
       ...payload,
       documentTitle:
-        compositionTitle ?? reportDocumentTitle.trim() || payload.documentTitle,
+        compositionTitle ??
+        (reportDocumentTitle.trim() || payload.documentTitle),
       clientName: reportClientName.trim() || undefined,
       // C-lite: creativeUploadedUrl(소재) → 표지 로고 임시 재사용. 전용 coverLogo 분리 예정.
       coverLogoUrl:
