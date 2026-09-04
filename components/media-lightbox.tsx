@@ -112,13 +112,12 @@ export default function MediaLightbox({
 
   useEffect(() => {
     if (!open) return;
+    // html 만 잠근다 — body 까지 같이 걸면 스크롤된 상태에서 sticky/fixed
+    // 헤더가 화면 밖으로 튕겨나가는 브라우저 버그가 있다 (desktop-global-nav.tsx 참고).
     const prevHtml = document.documentElement.style.overflow;
-    const prevBody = document.body.style.overflow;
     document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
     return () => {
       document.documentElement.style.overflow = prevHtml;
-      document.body.style.overflow = prevBody;
     };
   }, [open]);
 

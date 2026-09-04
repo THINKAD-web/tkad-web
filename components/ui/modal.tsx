@@ -42,11 +42,13 @@ export default function Modal({
   }, [open, onClose, locked]);
 
   useEffect(() => {
+    // html 에 건다 — body 에 걸면 스크롤된 상태에서 sticky/fixed 헤더가 화면
+    // 밖으로 튕겨나가는 브라우저 버그가 있다 (desktop-global-nav.tsx 참고).
     if (open) {
-      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
     }
     return () => {
-      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     };
   }, [open]);
 

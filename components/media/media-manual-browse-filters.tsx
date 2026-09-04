@@ -648,10 +648,13 @@ export function MediaManualBrowseFilters({
   // 바텀시트 열림 동안 배경 스크롤 잠금 (레거시 오버레이만 — vaul 은 자체 처리)
   useEffect(() => {
     if (!sheetOpen || mobileVaulSheets) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // html 에 건다 — body 에 걸면 스크롤된 상태에서 sticky/fixed 헤더가 화면
+    // 밖으로 튕겨나가는 브라우저 버그가 있다 (desktop-global-nav.tsx 참고).
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = prev;
+      html.style.overflow = prev;
     };
   }, [sheetOpen, mobileVaulSheets]);
 
