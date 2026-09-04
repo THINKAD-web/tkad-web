@@ -25,11 +25,13 @@ const LOCALE = `${BASE}/ko`;
 const INQUIRY_SLUGS = [
   "meta-advantage-plus",
   "naver-gfa-traffic",
+  "naver-brand-search",
   "kakao-moment-message",
   "youtube-action",
   "google-pmax-conversion",
   "karrot-local-traffic",
   "baemin-ad-visit",
+  "coupang-ad-traffic",
   "app-uai-install",
   "native-taboola-traffic",
 ];

@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "label": "pr5-d-phase1-content-2026-09-04",
-  "at": "2026-09-04T09:30:07.839Z",
+  "label": "pr5-e-add-online-media-2-2026-09-04",
+  "at": "2026-09-04T10:30:00.000Z",
   "source": "dmpilot-1/prisma/seed-digital-products.ts",
-  "count": 23,
+  "count": 25,
   "rows": [
     {
       "id": "ca9a554ad046b0180e73eea6d",
@@ -748,6 +748,58 @@
       "sortOrder": 53
     },
     {
+      "id": "cbcf32fc6d5b5d001edb5e27",
+      "slug": "naver-brand-search",
+      "name": "네이버 브랜드검색",
+      "nameEn": "Naver Brand Search",
+      "description": "브랜드명·상품명 검색 시 최상단 브랜드존(공식 채널·바로가기·프로모션) 노출. 검색광고(SA)와 별도인 정액 계약 상품으로, 구매 의도가 높은 검색 접점에서 브랜드 정보를 상시 노출합니다. 키워드·노출 기간·템플릿 유형에 따라 광고비가 달라져 사전 견적 후 안내합니다.",
+      "descriptionEn": "Naver Brand Search zone at top of brand queries; flat-fee contract — inquire for quote.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "search",
+      "mediaSubCategory": "search_ad",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "cd37c5aad4c75b2459604c96",
+        "platform": "Naver Brand Search",
+        "minBudget": 600000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:BEAUTY",
+          "industry:FNB",
+          "industry:B2B",
+          "goal:AWARENESS",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "브랜드존 최상단",
+          "공식 채널·바로가기",
+          "고의도 검색 접점"
+        ],
+        "kpiHints": [
+          "정액 계약(키워드·기간별)",
+          "사전 견적 후 안내"
+        ],
+        "bestFor": [
+          "브랜드명 검색 방어",
+          "공식 정보·프로모션 상시 노출"
+        ]
+      },
+      "dmpilotMediaType": "SA",
+      "sortOrder": 54
+    },
+    {
       "id": "c006c4fbdb7b05a2bc83fe51b",
       "slug": "kakao-moment-message",
       "name": "카카오 모먼트 메시지",
@@ -997,6 +1049,56 @@
       },
       "dmpilotMediaType": "RETAIL",
       "sortOrder": 71
+    },
+    {
+      "id": "c1be4bf39b299983082899c5",
+      "slug": "coupang-ad-traffic",
+      "name": "쿠팡 광고·상품 노출",
+      "nameEn": "Coupang Ads Traffic",
+      "description": "쿠팡 마켓플레이스 내 상품·키워드 CPC 광고. 검색·카테고리·추천 지면에서 구매 직전 노출로 상품 판매·전환 연결. 카테고리·경쟁도에 따라 CPC 편차가 커 사전 견적 후 안내합니다.",
+      "descriptionEn": "Coupang marketplace product ads (CPC); rates vary by category — inquire for quote.",
+      "location": "온라인",
+      "locationEn": "Online",
+      "region": "online",
+      "catalogChannel": "online",
+      "mediaMainCategory": "local",
+      "mediaSubCategory": "local",
+      "type": null,
+      "price": null,
+      "onlineSpec": {
+        "id": "c0ca7bee48fdf800e7f891e9",
+        "platform": "Coupang Ads",
+        "minBudget": 500000,
+        "cpcMin": null,
+        "cpcMax": null,
+        "cpmMin": null,
+        "cpmMax": null,
+        "targetingOptions": [
+          "industry:ECOMMERCE",
+          "industry:LOCAL",
+          "goal:TRAFFIC",
+          "goal:CONVERSION",
+          "age:25-34",
+          "age:35-44",
+          "gender:ALL",
+          "geo:KR"
+        ],
+        "strengths": [
+          "마켓플레이스 구매 직전 노출",
+          "상품·키워드 타겟",
+          "이커머스 전환 연결"
+        ],
+        "kpiHints": [
+          "CPC 카테고리별 편차",
+          "사전 견적 후 안내"
+        ],
+        "bestFor": [
+          "쿠팡 입점 셀러",
+          "상품 검색·카테고리 노출 확대"
+        ]
+      },
+      "dmpilotMediaType": "RETAIL",
+      "sortOrder": 72
     },
     {
       "id": "c87008b84948ce9803f5c89bb",
