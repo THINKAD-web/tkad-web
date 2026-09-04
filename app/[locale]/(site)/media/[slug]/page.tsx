@@ -59,6 +59,7 @@ import TrackMediaView from "@/components/track-media-view";
 import { EventOnMount } from "@/components/analytics/event-on-mount";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { MediaDetailPageView } from "@/components/media-detail/media-detail-page-view";
+import { OnlineMediaDetailPageView } from "@/components/media-detail/online-media-detail-page-view";
 import { MediaDetailOverviewSection } from "@/components/media-detail/media-detail-overview-section";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
 import { getMediaRecentBrands } from "@/lib/insights/media-recent-brands";
@@ -71,6 +72,7 @@ import {
   shouldRedirectMediaIdToSlug,
 } from "@/lib/media-slug";
 import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
+import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
 import { ExitSurveyBanner } from "@/components/exit-survey-banner";
 import { formatSizeDisplayOptional } from "@/lib/format-media-size";
 
@@ -324,6 +326,69 @@ export default async function MediaDetailPage({ params }: Props) {
 
   const placeJsonLd = buildMediaPlaceJsonLd(media, locale);
   const breadcrumbJsonLd = buildMediaBreadcrumbJsonLd(media, locale);
+  const isOnlineDetail = isOnlineCatalogMedia(media);
+
+  if (isOnlineDetail) {
+    const onlineBelowFold = (
+      <>
+        {!media.keywordFilter ? (
+          <MediaReviewsSection
+            mediaId={media.id}
+            mediaName={isKo ? media.name : media.nameEn || media.name}
+            initialStats={reviewInitialStats ?? undefined}
+          />
+        ) : null}
+        {seoContextPills.length > 0 ? (
+          <SeoContextualLinks
+            title={isKo ? "관련 SEO 가이드" : "Related guides"}
+            pills={seoContextPills}
+          />
+        ) : null}
+      </>
+    );
+
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([placeJsonLd, breadcrumbJsonLd]),
+          }}
+        />
+
+        <OnlineMediaDetailPageView
+          media={media}
+          similarSortCatalog={similarSortCatalog}
+          locale={locale}
+          isKo={isKo}
+          typeLabel={typeLabel}
+          similar={similar}
+          periodLabel={periodLabel}
+          labels={{
+            back: t("back"),
+            similarTitle: media.keywordFilter ? t("similarTitle") : t("viewedAlsoTitle"),
+          }}
+          belowFold={onlineBelowFold}
+        />
+        <TrackMediaView
+          record={mediaItemToRecentlyViewedRecord(media, { isKo })}
+          offlineCard={{
+            id: media.id,
+            name: isKo ? media.name : media.nameEn || media.name,
+            location: formatMediaLocationShort(media, isKo),
+            type: typeLabel,
+            price: media.price,
+            imageUrl: heroImage || undefined,
+          }}
+        />
+        <EventOnMount
+          event="view_media"
+          params={{ media_id: media.id, media_name: media.name, media_type: media.type }}
+        />
+        <ExitSurveyBanner surface="media_detail" />
+      </>
+    );
+  }
 
   return (
     <>
