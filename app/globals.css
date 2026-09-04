@@ -3835,6 +3835,18 @@ html.tkad-nav-scroll-lock body {
   overscroll-behavior: none;
 }
 
+/*
+ * vaul(react-remove-scroll)이 `modal` 드로어를 열 때 body[data-scroll-locked]
+ * 에 overflow:hidden !important 를 강제로 건다 — html-only 잠금 규칙(위 참고)과
+ * 정확히 같은 사유로 스크롤된 상태의 sticky/fixed 헤더를 화면 밖으로 보낸다.
+ * media-vaul-sheets.tsx 가 여는 드로어에서만 무력화한다 — 다른 vaul/Radix
+ * 사용처(plan-cart-sheet 등)는 아직 같은 fix 가 없으므로 그대로 둔다.
+ */
+html.tkad-vaul-sticky-fix body[data-scroll-locked] {
+  overflow: visible !important;
+  position: static !important;
+}
+
 .dark .tkad-site-header-panel {
   border-top-color: rgb(255 255 255 / 0.1);
   background: #05050a;
