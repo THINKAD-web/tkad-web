@@ -5,6 +5,7 @@ import { Drawer } from "vaul";
 import { Trash2, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { usePlanCart } from "@/hooks/use-plan-cart";
+import { useVaulStickyFix } from "@/hooks/use-vaul-sticky-fix";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { shouldUseUnoptimizedImage } from "@/lib/optimized-image-url";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function PlanCartSheet({ open, onOpenChange, isKo = true }: Props) {
+  useVaulStickyFix(open);
   const { cart, remove, clear } = usePlanCart();
   const items = cart.items;
   const locale = isKo ? "ko-KR" : "en-US";
