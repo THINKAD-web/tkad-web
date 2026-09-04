@@ -7,7 +7,7 @@ export type OnlineSlugMeta = {
   sortOrder: number;
 };
 
-/** 23 published online slugs — keyed lookup for adapter (PR5-c). */
+/** 25 published online slugs — keyed lookup for adapter (PR5-c). */
 export const ONLINE_SLUG_META: Record<string, OnlineSlugMeta> = {
   "ig-awareness-reach": {
     mediaType: "SNS",
@@ -99,6 +99,12 @@ export const ONLINE_SLUG_META: Record<string, OnlineSlugMeta> = {
     objective: "TRAFFIC",
     sortOrder: 53,
   },
+  "naver-brand-search": {
+    mediaType: "SA",
+    channel: "NAVER_SA",
+    objective: "AWARENESS",
+    sortOrder: 54,
+  },
   "kakao-moment-message": {
     mediaType: "MESSAGE",
     channel: "KAKAO",
@@ -128,6 +134,12 @@ export const ONLINE_SLUG_META: Record<string, OnlineSlugMeta> = {
     channel: "KAKAO",
     objective: "CONVERSION",
     sortOrder: 71,
+  },
+  "coupang-ad-traffic": {
+    mediaType: "RETAIL",
+    channel: "KAKAO",
+    objective: "TRAFFIC",
+    sortOrder: 72,
   },
   "tiktok-spark-awareness": {
     mediaType: "VERTICAL",

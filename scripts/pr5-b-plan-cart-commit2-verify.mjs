@@ -28,11 +28,13 @@ const LOCALE_BASE = `${ROOT}/ko`;
 const INQUIRY_SLUGS = new Set([
   "app-uai-install",
   "baemin-ad-visit",
+  "coupang-ad-traffic",
   "google-pmax-conversion",
   "kakao-moment-message",
   "karrot-local-traffic",
   "meta-advantage-plus",
   "native-taboola-traffic",
+  "naver-brand-search",
   "naver-gfa-traffic",
   "youtube-action",
 ]);
