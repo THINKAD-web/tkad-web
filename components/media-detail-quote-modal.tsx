@@ -295,13 +295,15 @@ function MediaDetailQuoteModalBody({
           {isOnline ? (
             <Link
               href={contactHref}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 trackGaEvent("online_modal_contact_click", {
                   media_id: media.id,
                   media_name: media.name,
                   source: "media_detail_quote_modal",
                 });
                 onClose();
+                window.location.assign(contactHref);
               }}
               className={primaryLinkClass}
             >
