@@ -1585,6 +1585,81 @@ export async function buildPlannerReportPdf(
       y += consultLines.length * 4.5 + 2;
     }
 
+    if (sec.kpiCards?.length) {
+      ensure(22);
+      const kpis = sec.kpiCards.slice(0, 4);
+      const kW = contentW / kpis.length;
+      kpis.forEach((k, i) => {
+        const x = M + kW * i;
+        setFill(GRAY_50);
+        doc.roundedRect(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm, R, R, "F");
+        doc.setFont(FONT, "normal");
+        doc.setFontSize(PDF_LAYOUT.kpiLabelPt);
+        setText(GRAY_500);
+        doc.text(k.label, x + 4, y + 5.5);
+        setText(QP_ACCENT);
+        doc.setFontSize(PDF_LAYOUT.kpiValuePt);
+        const vLines = doc.splitTextToSize(k.value, kW - 7) as string[];
+        doc.text(vLines.slice(0, 1), x + 4, y + 11);
+        drawKpiBadge(doc, k, x + 4, y + 13.5, kW - 7, isKo);
+      });
+      y += 26;
+    }
+
+    if (sec.categoryRows?.length) {
+      sectionTitle(isKo ? "유형별 비중" : "Share by type", 12);
+      const cc = [
+        { label: isKo ? "유형" : "Type", w: contentW * 0.22 },
+        { label: isKo ? "채널" : "Lines", w: contentW * 0.1 },
+        { label: isKo ? "월 예산" : "Budget", w: contentW * 0.18 },
+        { label: isKo ? "비중" : "Share", w: contentW * 0.1 },
+        { label: isKo ? "예상 도달" : "Est. reach", w: contentW * 0.2 },
+        { label: isKo ? "예상 클릭" : "Est. clicks", w: contentW * 0.2 },
+      ];
+      ensure(9);
+      setFill(QP_INK);
+      doc.rect(M, y, contentW, 7, "F");
+      doc.setFontSize(7.5);
+      doc.setTextColor(255, 255, 255);
+      let cx = M + 2;
+      for (const c of cc) {
+        doc.text(c.label, cx, y + 4.8);
+        cx += c.w;
+      }
+      y += 7;
+      doc.setFontSize(8);
+      const fmtWon = (n: number) =>
+        `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
+      const consult = isKo ? "별도 협의" : "Consultation";
+      sec.categoryRows.forEach((row, idx) => {
+        ensure(7);
+        if (idx % 2 === 1) {
+          setFill(GRAY_50);
+          doc.rect(M, y, contentW, 7, "F");
+        }
+        setText(INK);
+        let dx = M + 2;
+        doc.text(
+          (doc.splitTextToSize(row.label, cc[0].w - 3) as string[]).slice(0, 1),
+          dx,
+          y + 4.6,
+        );
+        dx += cc[0].w;
+        setText(GRAY_600);
+        doc.text(String(row.lineCount), dx, y + 4.6);
+        dx += cc[1].w;
+        doc.text(fmtWon(row.budgetWon), dx, y + 4.6);
+        dx += cc[2].w;
+        doc.text(`${row.budgetSharePct}%`, dx, y + 4.6);
+        dx += cc[3].w;
+        doc.text(row.reachLabel ?? consult, dx, y + 4.6);
+        dx += cc[4].w;
+        doc.text(row.clicksLabel ?? consult, dx, y + 4.6);
+        y += 7;
+      });
+      y += 4;
+    }
+
     const oc = [
       { label: isKo ? "매체" : "Media", w: contentW * 0.22 },
       { label: isKo ? "플랫폼" : "Platform", w: contentW * 0.14 },
@@ -1656,6 +1731,43 @@ export async function buildPlannerReportPdf(
         y += wrapped.length * 3.8 + 1;
       }
       y += 4;
+    }
+
+    if (sec.insights) {
+      const drawInsightBullets = (title: string, lines: readonly string[]) => {
+        if (!lines.length) return;
+        sectionTitle(title);
+        for (const line of lines) {
+          const wrapped = doc.splitTextToSize(line, contentW - 5) as string[];
+          ensure(wrapped.length * 4.6 + 2);
+          setFill(QP_ACCENT);
+          doc.circle(M + 1.2, y + 1.6, 0.7, "F");
+          setText(GRAY_600);
+          doc.text(wrapped, M + 4, y + 3);
+          y += wrapped.length * 4.6 + 1.5;
+        }
+        y += 2;
+      };
+
+      const pacingLines = sec.insights.pacingPlan.map(
+        (ph) => `${ph.label} (${ph.sharePct}%) — ${ph.description}`,
+      );
+      drawInsightBullets(isKo ? "소진 페이스" : "Spend pace", pacingLines);
+      drawInsightBullets(
+        isKo ? "소재 방향" : "Creative direction",
+        sec.insights.creativeDirections,
+      );
+      drawInsightBullets(
+        isKo ? "운영 메모" : "Operations notes",
+        sec.insights.operationalNotes,
+      );
+
+      const disc = doc.splitTextToSize(sec.insights.disclaimer, contentW) as string[];
+      ensure(disc.length * 4 + 4);
+      doc.setFontSize(7.5);
+      setText(GRAY_500);
+      doc.text(disc, M, y + 2);
+      y += disc.length * 4 + 6;
     }
   }
 

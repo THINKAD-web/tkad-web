@@ -18,10 +18,9 @@ import type {
   PlannerExportOnlineSection,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
-import {
-  onlineCatalogEstimationNotice,
-  onlineConsultationLineNotice,
-} from "@/lib/planner-report-export/online-consultation-notice";
+import { buildOnlineCategoryRows } from "@/lib/planner-report-export/online-category-breakdown";
+import { buildOnlineReportInsights } from "@/lib/planner-report-export/online-report-insights";
+import { onlineConsultationLineNotice, onlineCatalogEstimationNotice } from "@/lib/planner-report-export/online-consultation-notice";
 import { plannerReportPricingFootnote } from "@/lib/planner-report-export/pricing-footnote";
 import {
   buildOnlineReportStrategyLines,
@@ -51,6 +50,7 @@ export type BuildOnlineReportPayloadArgs = {
   portfolio: MediaItem[];
   planCartItems?: PlanCartItem[];
   generatedAt: string;
+  months?: number;
   clientName?: string;
   coverLogoUrl?: string | null;
   reportGreeting?: string;
@@ -107,6 +107,50 @@ function buildOnlineLines(
   });
 }
 
+function buildOnlineSectionKpis(
+  section: Pick<
+    PlannerExportOnlineSection,
+    | "lines"
+    | "totalBudgetWon"
+    | "reachLabel"
+    | "inquiryLineCount"
+  >,
+  isKo: boolean,
+): PlannerExportKpi[] {
+  const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
+  const lineCount = section.lines.length;
+  const avgBudget =
+    lineCount > 0 ? Math.round(section.totalBudgetWon / lineCount) : null;
+  const inquiryHint =
+    section.inquiryLineCount > 0
+      ? onlineConsultationLineNotice(section.inquiryLineCount, isKo)
+      : undefined;
+
+  return [
+    {
+      label: isKo ? "선택 채널" : "Channels",
+      value: String(lineCount),
+      badge: "estimated",
+    },
+    {
+      label: isKo ? "총 예산" : "Total budget",
+      value: `₩${fmt(section.totalBudgetWon)}`,
+      badge: "estimated",
+    },
+    {
+      label: isKo ? "예상 도달" : "Est. reach",
+      value: section.reachLabel ?? (isKo ? "별도 협의" : "Consultation"),
+      badge: section.reachLabel ? "estimated" : "pending",
+      pendingHint: !section.reachLabel ? inquiryHint ?? undefined : inquiryHint,
+    },
+    {
+      label: isKo ? "평균 채널 예산" : "Avg. channel budget",
+      value: avgBudget != null ? `₩${fmt(avgBudget)}` : "—",
+      badge: "estimated",
+    },
+  ];
+}
+
 export function buildOnlineReportSection(
   args: BuildOnlineReportPayloadArgs,
 ): PlannerExportOnlineSection {
@@ -151,7 +195,26 @@ export function buildOnlineReportSection(
     inquiryLineCount,
   };
 
-  return {
+  const reachLabel = hasReach ? formatKpiRange(reachMin, reachMax) : null;
+  const clicksLabel = hasClicks ? formatKpiRange(clicksMin, clicksMax) : null;
+
+  const categoryRows = buildOnlineCategoryRows(
+    args.portfolio,
+    lines.map((l) => ({ mediaId: l.mediaId, budgetWon: l.budgetWon })),
+    args.isKo,
+  );
+
+  const insights = buildOnlineReportInsights({
+    isKo: args.isKo,
+    portfolio: args.portfolio,
+    ageText: args.ageText,
+    regionsText: args.regionsText,
+    channelCount: lines.length,
+    budgetWon: totalBudgetWon,
+    months: args.months,
+  });
+
+  const baseSection = {
     title: args.isKo ? "온라인 채널" : "Online channels",
     estimationNotice: onlineCatalogEstimationNotice(args.isKo),
     consultationNotice: onlineConsultationLineNotice(inquiryLineCount, args.isKo),
@@ -161,8 +224,15 @@ export function buildOnlineReportSection(
     lines,
     strategyLines: buildOnlineReportStrategyLines(strategyInput),
     whyLine: buildOnlineReportWhyLine(strategyInput),
-    reachLabel: hasReach ? formatKpiRange(reachMin, reachMax) : null,
-    clicksLabel: hasClicks ? formatKpiRange(clicksMin, clicksMax) : null,
+    reachLabel,
+    clicksLabel,
+    categoryRows,
+    insights,
+  };
+
+  return {
+    ...baseSection,
+    kpiCards: buildOnlineSectionKpis(baseSection, args.isKo),
   };
 }
 

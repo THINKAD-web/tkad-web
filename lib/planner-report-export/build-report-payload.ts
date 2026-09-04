@@ -30,6 +30,7 @@ function toOnlineArgs(args: BuildReportPayloadArgs): BuildOnlineReportPayloadArg
     portfolio: args.portfolio,
     planCartItems: args.planCartItems,
     generatedAt: args.generatedAt,
+    months: args.months,
     clientName: args.clientName,
     coverLogoUrl: args.coverLogoUrl,
     reportGreeting: args.reportGreeting,

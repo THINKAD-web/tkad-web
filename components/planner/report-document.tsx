@@ -19,6 +19,7 @@ import {
   DocumentGradientHero,
   DocumentSectionHeading,
 } from "@/components/document/document-layout";
+import { ReportOnlineSectionEnrichment } from "@/components/planner/report-online-section-enrichment";
 import { ReportScanLine } from "@/components/planner/report-scan-text";
 import { ReportMediaLineupSection } from "@/components/planner/report-media-lineup-section";
 import { ReportQuoteSummarySection } from "@/components/planner/report-quote-summary-section";
@@ -748,6 +749,11 @@ export const PlannerReportDocument = forwardRef<
                 {p.onlineSection.consultationNotice}
               </p>
             ) : null}
+            <ReportOnlineSectionEnrichment
+              section={p.onlineSection}
+              isKo={isKo}
+              part="before"
+            />
             <div className="min-w-0 overflow-x-auto rounded-xl border border-gray-200">
               <table className="w-full min-w-[36rem] border-collapse text-sm">
                 <thead>
@@ -801,6 +807,11 @@ export const PlannerReportDocument = forwardRef<
                 </ul>
               </div>
             ) : null}
+            <ReportOnlineSectionEnrichment
+              section={p.onlineSection}
+              isKo={isKo}
+              part="after"
+            />
           </section>
         ) : null}
 
