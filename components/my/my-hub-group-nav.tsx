@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import {
   MY_HUB_NAV_GROUPS,
@@ -243,6 +243,12 @@ export function MyHubGroupNav({ className, variant = "sidebar" }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const tab = searchParams.get("tab");
+  const t = useTranslations("myHub");
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+    window.location.href = `/${locale}/login`;
+  }
 
   const primaryItems = useMemo(
     () =>
@@ -385,6 +391,21 @@ export function MyHubGroupNav({ className, variant = "sidebar" }: Props) {
                           />
                         </span>
                       ))}
+                      <span className="inline-flex items-center">
+                        <span
+                          className="mx-1 text-[10px] text-gray-300 dark:text-white/20"
+                          aria-hidden
+                        >
+                          ·
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => void logout()}
+                          className="rounded-md px-1 py-0.5 text-[11px] font-medium text-gray-500 transition-colors hover:text-gray-800 dark:text-white/45 dark:hover:text-white/75"
+                        >
+                          {t("logout")}
+                        </button>
+                      </span>
                     </div>
                   </CollapsibleSection>
                 );
