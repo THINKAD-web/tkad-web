@@ -4,7 +4,6 @@ import {
   pickTopDigitalPlatformsFromItems,
   pickTopOohSubsFromCounts,
   resolveLandingDigitalPlatform,
-  FALLBACK_DIGITAL_PLATFORM_IDS,
   FALLBACK_OOH_SUB_IDS,
 } from "./home-landing-media-grid.ts";
 
@@ -118,6 +117,6 @@ test("pickTopDigitalPlatformsFromItems prefers Meta Google Naver by count", () =
   const top = pickTopDigitalPlatformsFromItems(items, 3);
   assert.deepEqual(
     top.map((t) => t.platformId),
-    FALLBACK_DIGITAL_PLATFORM_IDS,
+    ["meta", "google", "naver"],
   );
 });

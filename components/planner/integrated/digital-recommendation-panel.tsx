@@ -16,7 +16,7 @@ import {
   type DigitalChannel,
   type DigitalChannelId,
 } from "@/lib/planner/digital-channels";
-import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
+import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge-types";
 import { mapMixToDigitalRecommendResult } from "@/lib/integrated/map-mix-to-ui";
 import {
   selectIntegratedBudgetNum,
@@ -302,7 +302,7 @@ export function IntegratedDigitalRecommendationPanel({
 
         <div
           data-testid="integrated-digital-channel-grid"
-          data-catalog-source={digitalCatalogMeta?.source ?? "static"}
+          data-catalog-source={digitalCatalogMeta?.source ?? "unavailable"}
           className="grid grid-cols-2 gap-3 p-5 sm:grid-cols-3 sm:p-6 md:grid-cols-3"
         >
           {digitalChannels.map((channel) => (

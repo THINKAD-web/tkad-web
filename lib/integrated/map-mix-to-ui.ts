@@ -4,7 +4,7 @@ import type { DigitalChannelId, DigitalChannel } from "@/lib/planner/digital-cha
 import {
   getDigitalChannelFromList,
   resolveDigitalChannels,
-} from "@/lib/planner/digital-catalog-bridge";
+} from "@/lib/planner/digital-channel-pool";
 import type { IntegratedCampaignMetrics } from "@/lib/planner/integrated-metrics";
 import type {
   DigitalRecommendResult,

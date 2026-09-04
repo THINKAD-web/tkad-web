@@ -59,7 +59,7 @@ import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { recommendDigitalChannels } from "@/lib/planner/recommend-digital";
 import type { DigitalChannel } from "@/lib/planner/digital-channels";
-import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
+import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge-types";
 import { computeIntegratedCampaignMetrics } from "@/lib/planner/integrated-metrics";
 import { buildIntegratedMixRequest } from "@/lib/integrated/build-mix-request";
 import {

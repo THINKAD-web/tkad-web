@@ -6,7 +6,7 @@ import { unstable_cache } from "next/cache";
 import { browseCategoryLabel, MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import { ONLINE_BROWSE_MAIN_SET } from "@/lib/online-browse-mains";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import { fetchDigitalCatalogInternal } from "@/lib/planner/digital-catalog-fetch";
+import { resolveDigitalCatalogItems } from "@/lib/digital/resolve-digital-catalog";
 import type { DigitalCatalogItem } from "@/lib/planner/digital-catalog-types";
 import { matchCatalogItemToPlatformId } from "@/lib/planner/digital-platform-map";
 import {
@@ -55,13 +55,6 @@ export const FALLBACK_OOH_SUB_IDS = [
   "subway_station",
   "airport",
 ] as const;
-
-/** Fallback when Digital catalog fetch fails — Meta / Google / Naver by volume. */
-export const FALLBACK_DIGITAL_PLATFORM_IDS: DigitalChannelId[] = [
-  "meta",
-  "google",
-  "naver",
-];
 
 export function findBrowseMainForSub(subId: string): string | undefined {
   return SUB_TO_MAIN.get(subId);
@@ -207,13 +200,14 @@ async function loadOohTilesUncached(): Promise<HomeLandingOohTile[]> {
 }
 
 async function loadDigitalTilesUncached(): Promise<HomeLandingDigitalTile[]> {
-  const fetched = await fetchDigitalCatalogInternal();
-  if (!fetched.ok) {
-    return FALLBACK_DIGITAL_PLATFORM_IDS.map((id) => digitalTileFor(id, 0));
+  const resolved = await resolveDigitalCatalogItems();
+  if (resolved.items.length === 0) {
+    console.warn("[home-landing-media-grid] local digital catalog empty");
+    return [];
   }
-  const picked = pickTopDigitalPlatformsFromItems(fetched.data.items, 3);
+  const picked = pickTopDigitalPlatformsFromItems(resolved.items, 3);
   if (picked.length === 0) {
-    return FALLBACK_DIGITAL_PLATFORM_IDS.map((id) => digitalTileFor(id, 0));
+    return [];
   }
   return picked.map(({ platformId, count }) =>
     digitalTileFor(platformId, count),
@@ -228,7 +222,7 @@ export const getHomeLandingOohTiles = unstable_cache(
 
 export const getHomeLandingDigitalTiles = unstable_cache(
   loadDigitalTilesUncached,
-  ["home-landing-digital-tiles-v1"],
+  ["home-landing-digital-tiles-v2"],
   { revalidate: 3600, tags: ["home-landing-media-grid"] },
 );
 

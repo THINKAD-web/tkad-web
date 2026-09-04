@@ -1,3 +1,4 @@
+import "@/lib/digital/server-only";
 import { unstable_cache } from "next/cache";
 import {
   DIGITAL_CHANNELS,
@@ -5,28 +6,20 @@ import {
   type DigitalChannelId,
 } from "@/lib/planner/digital-channels";
 import { notifyDigitalBucketGap } from "@/lib/planner/digital-catalog-alerts";
-import { fetchDigitalCatalogInternal } from "@/lib/planner/digital-catalog-fetch";
+import { resolveDigitalCatalogItems } from "@/lib/digital/resolve-digital-catalog";
 import type { DigitalCatalogItem } from "@/lib/planner/digital-catalog-types";
 import {
   DIGITAL_PLATFORM_IDS,
   matchCatalogItemToPlatformId,
 } from "@/lib/planner/digital-platform-map";
+import type { DigitalCatalogBridgeResult } from "@/lib/planner/digital-catalog-bridge-types";
+
+export type {
+  DigitalCatalogBridgeMeta,
+  DigitalCatalogBridgeResult,
+} from "@/lib/planner/digital-catalog-bridge-types";
 
 export const DIGITAL_CATALOG_BRIDGE_CACHE_TAG = "digital-catalog-bridge";
-
-export type DigitalCatalogBridgeMeta = {
-  source: "live" | "static";
-  catalogCount: number | null;
-  fetchedAt: string | null;
-  fallbackBucketIds: DigitalChannelId[];
-  unmappedProductCount: number;
-  upstreamError?: string;
-};
-
-export type DigitalCatalogBridgeResult = {
-  channels: DigitalChannel[];
-  meta: DigitalCatalogBridgeMeta;
-};
 
 function median(values: number[]): number | null {
   if (values.length === 0) return null;
@@ -146,51 +139,48 @@ export function buildDigitalChannelsFromCatalogItems(
 }
 
 async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<DigitalCatalogBridgeResult> {
-  const fetched = await fetchDigitalCatalogInternal();
-  if (!fetched.ok) {
-    console.error("[digital-catalog-bridge] using static channels", {
-      error: fetched.error,
-      status: fetched.status,
+  const resolved = await resolveDigitalCatalogItems();
+  if (resolved.items.length === 0) {
+    console.error("[digital-catalog-bridge] local catalog unavailable", {
+      source: resolved.source,
+      localOk: resolved.localOk,
     });
     return {
-      channels: DIGITAL_CHANNELS,
+      channels: [],
       meta: {
-        source: "static",
+        source: "unavailable",
         catalogCount: null,
         fetchedAt: null,
-        fallbackBucketIds: DIGITAL_PLATFORM_IDS,
+        fallbackBucketIds: [],
         unmappedProductCount: 0,
-        upstreamError: fetched.error,
+        upstreamError: "local online catalog unavailable",
       },
     };
   }
 
-  return buildDigitalChannelsFromCatalogItems(fetched.data.items, {
-    catalogCount: fetched.data.count,
-    fetchedAt: fetched.data.fetchedAt,
+  if (resolved.source === "local") {
+    console.info("[digital-catalog-bridge] local catalog", {
+      count: resolved.count,
+    });
+  }
+
+  return buildDigitalChannelsFromCatalogItems(resolved.items, {
+    catalogCount: resolved.count,
+    fetchedAt: resolved.fetchedAt,
   });
 }
 
 /**
- * SSR entry — fetch Digital internal catalog or fall back to static channels.
+ * SSR entry — build platform channels from local online catalog.
  * Cached 1h to match integrated planner page ISR (B1a).
  */
 export const loadDigitalChannelsForIntegratedPlanner = unstable_cache(
   loadDigitalChannelsForIntegratedPlannerUncached,
-  ["digital-catalog-bridge-integrated"],
+  ["digital-catalog-bridge-integrated-v2"],
   { revalidate: 3600, tags: [DIGITAL_CATALOG_BRIDGE_CACHE_TAG] },
 );
 
-export function resolveDigitalChannels(
-  liveChannels?: DigitalChannel[] | null,
-): DigitalChannel[] {
-  if (liveChannels?.length) return liveChannels;
-  return DIGITAL_CHANNELS;
-}
-
-export function getDigitalChannelFromList(
-  id: DigitalChannelId,
-  channels: DigitalChannel[],
-): DigitalChannel | undefined {
-  return channels.find((c) => c.id === id);
-}
+export {
+  getDigitalChannelFromList,
+  resolveDigitalChannels,
+} from "@/lib/planner/digital-channel-pool";

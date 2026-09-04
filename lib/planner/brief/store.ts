@@ -48,7 +48,7 @@ import {
   defaultDigitalChannelIds,
   type DigitalChannelId,
 } from "@/lib/planner/recommend-digital";
-import { DIGITAL_CHANNELS } from "@/lib/planner/digital-channels";
+import { DIGITAL_PLATFORM_IDS } from "@/lib/planner/digital-platform-map";
 
 export const BRIEF_STORAGE_KEY = "tkad-planner-brief-v1";
 
@@ -175,7 +175,7 @@ function clearOverBudgetUiState(): Pick<
 
 function normalizeDigitalChannelIds(raw: unknown): DigitalChannelId[] {
   if (!Array.isArray(raw) || raw.length === 0) return defaultDigitalChannelIds();
-  const allowed = new Set(DIGITAL_CHANNELS.map((c) => c.id));
+  const allowed = new Set(DIGITAL_PLATFORM_IDS);
   const out: DigitalChannelId[] = [];
   for (const id of raw) {
     if (typeof id === "string" && allowed.has(id as DigitalChannelId)) {

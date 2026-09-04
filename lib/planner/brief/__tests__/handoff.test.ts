@@ -31,6 +31,39 @@ function media(id: string): MediaItem {
   } as unknown as MediaItem;
 }
 
+function onlineCalculable(id: string): MediaItem {
+  return {
+    ...media(id),
+    catalogChannel: "online",
+    type: null,
+    price: null,
+    regionMain: "online",
+    region: "online",
+    onlineSpec: {
+      platform: "Meta",
+      minBudget: 500_000,
+      cpcMin: 100,
+      cpcMax: 300,
+      cpmMin: 3000,
+      cpmMax: 6000,
+    },
+  } as unknown as MediaItem;
+}
+
+function onlineInquiry(id: string): MediaItem {
+  return {
+    ...onlineCalculable(id),
+    onlineSpec: {
+      platform: "Inquiry",
+      minBudget: null,
+      cpcMin: null,
+      cpcMax: null,
+      cpmMin: null,
+      cpmMax: null,
+    },
+  } as unknown as MediaItem;
+}
+
 const CATALOG = [media("a"), media("b"), media("c")];
 
 // ── 우선순위 ───────────────────────────────────────────────
@@ -107,21 +140,29 @@ test("units 는 단일 매체일 때만 적용한다 (구 동작 유지)", () =>
   ]);
 });
 
-test("온라인 매체는 handoff mix 에서 제외한다 (PR3)", () => {
-  const online = {
-    ...media("online-1"),
-    catalogChannel: "online",
-    type: null,
-    price: null,
-  } as unknown as MediaItem;
-  const catalog = [media("a"), online];
+test("inquiry online 은 handoff mix 에서 제외한다 (PR5-c commit 5)", () => {
+  const catalog = [media("a"), onlineInquiry("inquiry-1")];
   const r = resolveHandoffMix({
     catalog,
-    mediaIds: ["a", "online-1"],
+    mediaIds: ["a", "inquiry-1"],
     units: null,
   });
   assert.deepEqual(r.lines, [{ mediaId: "a", units: 1 }]);
-  assert.deepEqual(r.blockedOnline, ["online-1"]);
+  assert.deepEqual(r.blockedOnline, ["inquiry-1"]);
+});
+
+test("calculable online 은 handoff mix 에 포함한다 (PR5-c commit 5)", () => {
+  const catalog = [media("a"), onlineCalculable("calc-1")];
+  const r = resolveHandoffMix({
+    catalog,
+    mediaIds: ["a", "calc-1"],
+    units: null,
+  });
+  assert.deepEqual(r.lines, [
+    { mediaId: "a", units: 1 },
+    { mediaId: "calc-1", units: 1 },
+  ]);
+  assert.deepEqual(r.blockedOnline, []);
 });
 
 test("중복 매체 id 는 한 번만 담는다", () => {
@@ -156,6 +197,34 @@ test("알 수 없는 목표는 awareness 로 단정하지 않는다", () => {
 
 // ── 내 플랜 카트 ───────────────────────────────────────────
 
+test("플랜 카트 → 브리프 + 믹스 (calculable online 통과, inquiry 차단)", () => {
+  const calc = onlineCalculable("calc-1");
+  const inquiry = onlineInquiry("inquiry-1");
+  const catalog = [media("a"), calc, inquiry];
+  const cart: PlanCart = {
+    items: [
+      { mediaId: "a", mediaName: "A", mediaType: "digital", region: "seoul", price: 1, quantity: 3 },
+      { mediaId: "calc-1", mediaName: "Calc", mediaType: "online", region: "online", price: 0, quantity: 1 },
+      { mediaId: "inquiry-1", mediaName: "Inq", mediaType: "online", region: "online", price: 0, quantity: 1 },
+      { mediaId: "gone", mediaName: "X", mediaType: "digital", region: "seoul", price: 1 },
+    ],
+    totalBudget: 20_000_000,
+    duration: 2,
+    campaignGoal: "brand",
+    industryKey: "indRetail",
+    updatedAt: "",
+  } as unknown as PlanCart;
+
+  const { patch, mix } = planCartToBriefHandoff(cart, catalog);
+  assert.equal(patch.budgetInputWon, 20_000_000);
+  assert.deepEqual(mix.missing, ["gone"]);
+  assert.deepEqual(mix.blockedOnline, ["inquiry-1"]);
+  assert.deepEqual(mix.lines, [
+    { mediaId: "a", units: 3 },
+    { mediaId: "calc-1", units: 1 },
+  ]);
+});
+
 test("플랜 카트 → 브리프 + 믹스", () => {
   const cart: PlanCart = {
     items: [
@@ -181,6 +250,25 @@ test("플랜 카트 → 브리프 + 믹스", () => {
 });
 
 // ── 구 저장 플랜 ───────────────────────────────────────────
+
+test("구 SavedPlannerPlan → calculable online 통과, inquiry 차단", () => {
+  const calc = onlineCalculable("calc-1");
+  const inquiry = onlineInquiry("inquiry-1");
+  const catalog = [media("a"), media("b"), calc, inquiry];
+  const { mix } = savedPlannerPlanToBriefHandoff(
+    {
+      campaignMediaIds: ["a", "calc-1", "inquiry-1", "missing-one"],
+      campaignMediaQuantities: { a: 5, "calc-1": 2 },
+    },
+    catalog,
+  );
+  assert.deepEqual(mix.missing, ["missing-one"]);
+  assert.deepEqual(mix.blockedOnline, ["inquiry-1"]);
+  assert.deepEqual(mix.lines, [
+    { mediaId: "a", units: 5 },
+    { mediaId: "calc-1", units: 2 },
+  ]);
+});
 
 test("구 SavedPlannerPlan → 브리프 + 믹스", () => {
   const { patch, mix } = savedPlannerPlanToBriefHandoff(

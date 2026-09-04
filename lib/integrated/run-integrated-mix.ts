@@ -4,7 +4,7 @@ import {
   buildDigitalMixPayload,
   buildOohRecommendationContext,
 } from "@/lib/integrated/field-adapters";
-import { fetchDigitalMixInternal } from "@/lib/integrated/fetch-digital-mix";
+import { resolveDigitalMix } from "@/lib/digital/resolve-digital-mix";
 import { mergeIntegratedKpis } from "@/lib/integrated/merge-kpis";
 import { buildOohLeg, isOohCatalogInsufficient } from "@/lib/integrated/ooh-leg";
 import type {
@@ -85,8 +85,8 @@ export async function runIntegratedMix(
     periodMonths: request.periodMonths,
   });
 
-  const digitalFetched = await fetchDigitalMixInternal(digitalPayload);
-  if (!digitalFetched.ok) {
+  const digitalResolved = await resolveDigitalMix(digitalPayload);
+  if (!digitalResolved.data) {
     return {
       ok: false,
       status: 503,
@@ -96,7 +96,7 @@ export async function runIntegratedMix(
   }
 
   const digitalMix = filterDigitalMixBySlugs(
-    digitalFetched.data,
+    digitalResolved.data,
     request.selectedDigitalSlugs,
   );
   if (!digitalMix || digitalMix.channels.length < MIN_DIGITAL_CHANNELS) {
@@ -120,7 +120,7 @@ export async function runIntegratedMix(
       generatedAt: new Date().toISOString(),
       version: "v1",
       oohCatalogSize: catalog.length,
-      digitalCatalogSize: digitalFetched.catalogSize,
+      digitalCatalogSize: digitalResolved.catalogSize,
       allocationPolicy: allocation.policy,
     },
     allocation: {

@@ -30,6 +30,7 @@ describe("recommendDigitalChannels regression (no Thinkad Digital package in cat
       budgetMan: 1000,
       digitalBudgetPct: 30,
       selectedChannelIds: ["naver", "kakao", "meta", "daangn", "buzzvil"],
+      channels: DIGITAL_CHANNELS,
     });
 
     assert.equal(result.digitalBudgetPct, 30);

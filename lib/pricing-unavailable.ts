@@ -67,8 +67,8 @@ export function isQuoteWizardSelectableMedia(
 }
 
 /**
- * Public `/quote` wizard only — calculable online addable (PR5-b commit 2).
- * Admin picker and brief planner keep `isQuoteWizardSelectableMedia`.
+ * Public `/quote` wizard and brief planner manual select + handoff (PR5-b/c).
+ * Admin picker and autofill rebuild keep offline-only `isQuoteWizardSelectableMedia`.
  */
 export function isPublicQuoteWizardSelectableMedia(
   media: Pick<PricingUnavailableMedia, "catalogChannel" | "onlineSpec">,
