@@ -19,6 +19,7 @@ import {
   hasOnlinePricingSpec,
   isPublicQuoteWizardSelectableMedia,
 } from "../lib/pricing-unavailable.ts";
+import { e2eMixBypassHeaders } from "./lib/e2e-mix-bypass.mjs";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dir, "..");
@@ -28,11 +29,13 @@ const LOCALE = `${BASE}/ko`;
 const INQUIRY_SLUGS = [
   "meta-advantage-plus",
   "naver-gfa-traffic",
+  "naver-brand-search",
   "kakao-moment-message",
   "youtube-action",
   "google-pmax-conversion",
   "karrot-local-traffic",
   "baemin-ad-visit",
+  "coupang-ad-traffic",
   "app-uai-install",
   "native-taboola-traffic",
 ];
@@ -354,7 +357,9 @@ async function main() {
 
   const mixCaptures = [];
   const browser = await launchBrowser();
-  const context = await browser.newContext();
+  const context = await browser.newContext({
+    extraHTTPHeaders: e2eMixBypassHeaders(),
+  });
   const page = await context.newPage();
   page.setDefaultTimeout(90_000);
   attachMixCapture(page, mixCaptures);

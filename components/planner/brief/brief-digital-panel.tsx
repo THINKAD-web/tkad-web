@@ -29,8 +29,8 @@ import {
 } from "@/lib/planner/brief/brief-integrated-adapters";
 import {
   AllocationSourceBadge,
-  type DigitalAllocationSource,
 } from "@/components/planner/brief/allocation-source-badge";
+import { resolveAllocationSource } from "@/lib/planner/brief/resolve-allocation-source";
 import { IntegratedMixErrorBanner } from "@/components/planner/integrated/integrated-mix-error-banner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -107,16 +107,6 @@ function PlatformCard({
       ) : null}
     </button>
   );
-}
-
-function resolveAllocationSource(params: {
-  mix: IntegratedMixResponse | null;
-  mixLoading: boolean;
-  mixError: Extract<IntegratedMixFetchResult, { ok: false }> | null;
-}): DigitalAllocationSource | null {
-  if (params.mixLoading) return null;
-  if (params.mix && !params.mixError) return "live";
-  return "benchmark";
 }
 
 export function BriefDigitalPanel({

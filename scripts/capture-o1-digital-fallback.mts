@@ -8,13 +8,17 @@
  */
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
+import { e2eMixBypassHeaders } from "./lib/e2e-mix-bypass.mjs";
 
 const BASE = (process.env.BASE ?? "http://127.0.0.1:3000").replace(/\/$/, "");
 const LOCALE = `${BASE}/ko`;
 
 async function main() {
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const context = await browser.newContext({
+    extraHTTPHeaders: e2eMixBypassHeaders(),
+  });
+  const page = await context.newPage({ viewport: { width: 1280, height: 900 } });
 
   await page.goto(`${LOCALE}/planner`, { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: /자세히 설계/ }).click();

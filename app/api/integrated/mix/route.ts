@@ -6,6 +6,7 @@ import {
   integratedMixNeedLoginBody,
   integratedMixTrialCookieOptions,
 } from "@/lib/integrated/mix-trial-cookie";
+import { isIntegratedMixE2eBypass } from "@/lib/integrated/mix-e2e-bypass";
 import { runIntegratedMix } from "@/lib/integrated/run-integrated-mix";
 import { integratedMixRequestSchema } from "@/lib/integrated/schemas";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -26,17 +27,20 @@ export async function POST(req: Request) {
   const ip = clientIp(req);
   const user = await getCurrentUser();
   const rateKey = user?.id ?? ip;
+  const e2eBypass = isIntegratedMixE2eBypass(req);
 
-  const rl = await enforceRateLimit("integratedMix", rateKey);
-  if (!rl.ok) {
-    return NextResponse.json(
-      { error: "RATE_LIMITED", message: rl.message },
-      { status: 429, headers: { "retry-after": "60" } },
-    );
+  if (!e2eBypass) {
+    const rl = await enforceRateLimit("integratedMix", rateKey);
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: "RATE_LIMITED", message: rl.message },
+        { status: 429, headers: { "retry-after": "60" } },
+      );
+    }
   }
 
   let setTrialCookie = false;
-  if (!user) {
+  if (!user && !e2eBypass) {
     const jar = await cookies();
     if (hasUsedIntegratedMixTrial(jar.get(INTEGRATED_MIX_TRIAL_COOKIE)?.value)) {
       return NextResponse.json(integratedMixNeedLoginBody(), { status: 401 });
