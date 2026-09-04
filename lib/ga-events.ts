@@ -15,7 +15,11 @@ export type GaLaunchEvent =
   | "use_chatbot"
   | "download_proposal"
   | "signup"
-  | "start_pro_trial";
+  | "start_pro_trial"
+  /** 매체 상세 견적 모달 오픈 (sticky / inline / feed) */
+  | "quote_modal_open"
+  /** 온라인 매체 견적 모달 → 문의하기 */
+  | "online_modal_contact_click";
 
 export const CART_USAGE_EVENT_PLAN = "add_to_plan_cart";
 

@@ -21,7 +21,7 @@ import type {
 } from "@/lib/planner/types";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
-import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
+import { buildReportPayload } from "@/lib/planner-report-export/build-report-payload";
 import {
   buildDefaultExecutiveSummaryLines,
   buildDefaultReportGreeting,
@@ -545,7 +545,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
 
   const payload = useMemo(
     () =>
-      buildOohReportPayload({
+      buildReportPayload({
         isKo: props.isKo,
         goalTitle: props.goalTitle,
         budgetMan: props.budgetNum,
@@ -990,7 +990,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
       if (downloading) return;
       setDownloading(format);
       try {
-        const payload = buildOohReportPayload({
+        const payload = buildReportPayload({
           isKo: props.isKo,
           goalTitle: props.goalTitle,
           budgetMan: props.budgetNum,

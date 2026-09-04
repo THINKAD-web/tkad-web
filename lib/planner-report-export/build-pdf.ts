@@ -1567,6 +1567,85 @@ export async function buildPlannerReportPdf(
 
   renderPortfolioLineup();
 
+  function renderOnlineSection() {
+    const sec = p.onlineSection;
+    if (!sec?.lines.length) return;
+
+    sectionTitle(sec.title);
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(8.5);
+    setText(GRAY_600);
+    const noticeLines = doc.splitTextToSize(sec.estimationNotice, contentW) as string[];
+    ensure(noticeLines.length * 4.5 + 2);
+    doc.text(noticeLines, M, y + 3);
+    y += noticeLines.length * 4.5 + 2;
+
+    if (sec.consultationNotice) {
+      setText([146, 64, 14]);
+      const consultLines = doc.splitTextToSize(sec.consultationNotice, contentW) as string[];
+      ensure(consultLines.length * 4.5 + 2);
+      doc.text(consultLines, M, y + 3);
+      y += consultLines.length * 4.5 + 2;
+    }
+
+    const oc = [
+      { label: isKo ? "매체" : "Media", w: contentW * 0.22 },
+      { label: isKo ? "플랫폼" : "Platform", w: contentW * 0.14 },
+      { label: isKo ? "과금" : "Pricing", w: contentW * 0.16 },
+      { label: isKo ? "월 예산" : "Monthly", w: contentW * 0.16 },
+      { label: isKo ? "예상 도달" : "Est. reach", w: contentW * 0.16 },
+      { label: isKo ? "예상 클릭" : "Est. clicks", w: contentW * 0.16 },
+    ];
+    ensure(9);
+    setFill(QP_INK);
+    doc.rect(M, y, contentW, 7, "F");
+    doc.setFontSize(7.5);
+    doc.setTextColor(255, 255, 255);
+    let cx = M + 2;
+    for (const c of oc) {
+      doc.text(c.label, cx, y + 4.8);
+      cx += c.w;
+    }
+    y += 7;
+    doc.setFontSize(8);
+    const fmtWon = (n: number) =>
+      `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
+    const consult = isKo ? "별도 협의" : "Consultation";
+    sec.lines.forEach((row, idx) => {
+      ensure(7);
+      if (idx % 2 === 1) {
+        setFill(GRAY_50);
+        doc.rect(M, y, contentW, 7, "F");
+      }
+      setText(INK);
+      let dx = M + 2;
+      doc.text(
+        (doc.splitTextToSize(row.name, oc[0].w - 3) as string[]).slice(0, 1),
+        dx,
+        y + 4.6,
+      );
+      dx += oc[0].w;
+      setText(GRAY_600);
+      doc.text(row.platform ?? "—", dx, y + 4.6);
+      dx += oc[1].w;
+      doc.text(
+        (doc.splitTextToSize(row.pricingLabel, oc[2].w - 3) as string[]).slice(0, 1),
+        dx,
+        y + 4.6,
+      );
+      dx += oc[2].w;
+      doc.text(fmtWon(row.budgetWon), dx, y + 4.6);
+      dx += oc[3].w;
+      doc.text(row.reachLabel ?? consult, dx, y + 4.6);
+      dx += oc[4].w;
+      doc.text(row.clicksLabel ?? consult, dx, y + 4.6);
+      y += 7;
+    });
+    y += 6;
+  }
+
+  renderOnlineSection();
+
   function renderAppendixMediaSpecs() {
     const specs = p.appendixMediaSpecs;
     if (!specs?.length) return;

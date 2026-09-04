@@ -33,6 +33,7 @@ import {
   reportPortfolioOrderOpts,
   resolveReportPortfolioOrder,
 } from "@/lib/plan-cart-report/sort-portfolio";
+import { splitPortfolioByCatalogChannel } from "@/lib/plan-cart-report/split-portfolio-by-channel";
 import type {
   PlannerExportChartDatum,
   PlannerExportRegionBreakdown,
@@ -180,6 +181,17 @@ export function buildPlanCartReportBundle(args: {
   );
   const pricing = planCartPortfolioPricing(cart);
 
+  const channelSplit = splitPortfolioByCatalogChannel(
+    portfolioSorted,
+    cart.items,
+  );
+  const oohPortfolioForMetrics =
+    channelSplit.composition === "mixed"
+      ? channelSplit.oohPortfolio
+      : channelSplit.composition === "onlyOoh"
+        ? portfolioSorted
+        : [];
+
   // A-1 Wave 2 — `Math.max(1, ...)` 클램프 제거.
   // planner-page-client 가 `duration: months` 로 저장하므로 21일 플랜은 0.7 이 들어온다.
   // 1 로 올림하면 「내 플랜」 보고서가 지역 표와 같은 금액 왜곡을 일으킨다.
@@ -191,14 +203,15 @@ export function buildPlanCartReportBundle(args: {
     ? GOAL_TITLES_KO[campaignGoal]
     : GOAL_TITLES_EN[campaignGoal];
 
-  const metrics: PlannerMetrics | null = computePlannerMetrics(
-    portfolioSorted,
-    budgetMan,
-    months,
-    { campaignGoal, pricing },
-  );
+  const metrics: PlannerMetrics | null =
+    channelSplit.composition === "onlyOnline"
+      ? null
+      : computePlannerMetrics(oohPortfolioForMetrics, budgetMan, months, {
+          campaignGoal,
+          pricing,
+        });
   const regionalBreakdown = computePlanCartRegionalBreakdown(
-    portfolioSorted,
+    oohPortfolioForMetrics.length > 0 ? oohPortfolioForMetrics : portfolioSorted,
     months,
     isKo,
     pricing,
@@ -222,10 +235,10 @@ export function buildPlanCartReportBundle(args: {
       pct: r.impressionPct,
     }));
 
-  const monthlyTotalMan = computePlannerPortfolioMonthlyMan(
-    portfolioSorted,
-    pricing,
-  );
+  const monthlyTotalMan =
+    channelSplit.composition === "onlyOnline"
+      ? 0
+      : computePlannerPortfolioMonthlyMan(oohPortfolioForMetrics, pricing);
 
   const industryKey: PlannerIndustryKey | null = isPlannerIndustryKey(
     cart.industryKey,

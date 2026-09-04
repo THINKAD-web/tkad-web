@@ -142,6 +142,36 @@ export type PlannerExportRegionSubdivision = {
   breakdown: PlannerExportRegionBreakdown[];
 };
 
+export type PlannerExportOnlineLine = {
+  mediaId: string;
+  slug?: string;
+  name: string;
+  platform?: string;
+  budgetWon: number;
+  pricingLabel: string;
+  reachLabel?: string | null;
+  clicksLabel?: string | null;
+  /** calculable CPC/CPM seed — false → inquiry / consultation row */
+  hasEstimate: boolean;
+};
+
+/** PR6-b — online report body (onlyOnline or mixed second section) */
+export type PlannerExportOnlineSection = {
+  title: string;
+  estimationNotice: string;
+  consultationNotice?: string | null;
+  inquiryLineCount: number;
+  calculableLineCount: number;
+  totalBudgetWon: number;
+  lines: PlannerExportOnlineLine[];
+  strategyLines: string[];
+  whyLine: string;
+  reachLabel?: string | null;
+  clicksLabel?: string | null;
+};
+
+export type PlannerReportComposition = "onlyOoh" | "onlyOnline" | "mixed";
+
 export type PlannerExportPortfolioGroup = {
   regionLabel: string;
   categories: {
@@ -224,6 +254,10 @@ export type PlannerReportExportPayload = {
   appendixMediaSpecs?: PlannerExportAppendixMediaSpec[];
   /** 부록 섹션 제목 (없으면 inquiry 기본 문구) */
   appendixSectionTitle?: string;
+  /** PR6-b — online section when composition is onlyOnline or mixed */
+  onlineSection?: PlannerExportOnlineSection;
+  /** PR6-b — cart channel mix driving payload builder */
+  reportComposition?: PlannerReportComposition;
   disclaimer: string;
 };
 

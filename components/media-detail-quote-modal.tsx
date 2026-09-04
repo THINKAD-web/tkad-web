@@ -23,6 +23,7 @@ import {
 } from "@/lib/media-detail-quantity";
 import { resolveMediaQuantity } from "@/lib/media-quantity";
 import { resolveQuoteUnitsForPriceOption } from "@/lib/quote-entry-quantity";
+import { trackGaEvent } from "@/lib/ga-events";
 import { isOnlineCatalogMedia, hasOnlinePricingSpec } from "@/lib/pricing-unavailable";
 import { onlinePricingLabel } from "@/lib/pricing/online-performance-estimate";
 import { OnlineMediaBudgetFields, defaultOnlineBudgetWon } from "@/components/media/online-media-budget-fields";
@@ -294,7 +295,14 @@ function MediaDetailQuoteModalBody({
           {isOnline ? (
             <Link
               href={contactHref}
-              onClick={onClose}
+              onClick={() => {
+                trackGaEvent("online_modal_contact_click", {
+                  media_id: media.id,
+                  media_name: media.name,
+                  source: "media_detail_quote_modal",
+                });
+                onClose();
+              }}
               className={primaryLinkClass}
             >
               <MessageCircle className="h-5 w-5 shrink-0" aria-hidden />

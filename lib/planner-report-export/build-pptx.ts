@@ -1471,6 +1471,77 @@ export async function buildPlannerReportPptx(
     });
   }
 
+  // ── 3b. 온라인 채널 (PR6-b) ──
+  if (p.onlineSection && p.onlineSection.lines.length > 0) {
+    const sec = p.onlineSection;
+    const sOnline = pptx.addSlide();
+    header(sOnline, sec.title);
+    let oy = 1.2;
+    sOnline.addText(sec.estimationNotice, {
+      x: 0.6,
+      y: oy,
+      w: 12.1,
+      h: 0.55,
+      fontFace: face,
+      fontSize: 11,
+      color: GRAY,
+    });
+    oy += 0.55;
+    if (sec.consultationNotice) {
+      sOnline.addText(sec.consultationNotice, {
+        x: 0.6,
+        y: oy,
+        w: 12.1,
+        h: 0.35,
+        fontFace: face,
+        fontSize: 11,
+        bold: true,
+        color: "92400E",
+      });
+      oy += 0.4;
+    }
+    const consult = isKo ? "별도 협의" : "Consultation";
+    const fmtWon = (n: number) =>
+      `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
+    const oHead = [
+      isKo ? "매체" : "Media",
+      isKo ? "플랫폼" : "Platform",
+      isKo ? "과금" : "Pricing",
+      isKo ? "월 예산" : "Monthly",
+      isKo ? "예상 도달" : "Est. reach",
+      isKo ? "예상 클릭" : "Est. clicks",
+    ].map((t) => ({
+      text: t,
+      options: {
+        fill: { color: INK_DEEP_BAR },
+        color: WHITE,
+        bold: true,
+        fontFace: face,
+        fontSize: 10,
+      },
+    }));
+    const oBody = sec.lines.map((r, i) => {
+      const fill = i % 2 ? { color: LIGHT } : { color: WHITE };
+      return [
+        { text: r.name, options: { fill, color: INK, fontFace: face, fontSize: 10 } },
+        { text: r.platform ?? "—", options: { fill, color: GRAY, fontFace: face, fontSize: 10 } },
+        { text: r.pricingLabel, options: { fill, color: GRAY, fontFace: face, fontSize: 9 } },
+        { text: fmtWon(r.budgetWon), options: { fill, color: INK, fontFace: face, fontSize: 10 } },
+        { text: r.reachLabel ?? consult, options: { fill, color: GRAY, fontFace: face, fontSize: 10 } },
+        { text: r.clicksLabel ?? consult, options: { fill, color: GRAY, fontFace: face, fontSize: 10 } },
+      ];
+    });
+    sOnline.addTable([oHead, ...oBody], {
+      x: 0.6,
+      y: oy + 0.15,
+      w: 12.1,
+      colW: [2.4, 1.8, 2.2, 2.0, 1.9, 1.8],
+      border: { type: "solid", color: "E4E6EC", pt: 0.5 },
+      rowH: 0.36,
+      valign: "middle",
+    });
+  }
+
   // ── 4. 디지털 배분 (통합) ──
   if (p.digital && p.digital.length) {
     const s4 = pptx.addSlide();
