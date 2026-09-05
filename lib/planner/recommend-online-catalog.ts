@@ -22,6 +22,15 @@
  * 3. 최종 배정액이 minBudget 미만인 채널이 조용히 살아남던 문제 → 반복
  *    제거(water-filling): 배정액이 자기 minBudget 미만인 채널을 빼고 남은
  *    채널끼리 예산을 다시 100% 재분배 — 안정될 때까지 반복.
+ *
+ * 후속 스코어링 세부 검증(확인1·확인2, 2026-08-31)에서 확인1(고득점 관련
+ * 채널이 water-filling의 최소예산 제거에서 조용히 탈락하는 문제)이 남는다는
+ * 게 확인됨. water-filling 알고리즘 재설계(옵션①)는 효과 불확실·복잡도 대비
+ * 이득 낮다고 판단해 보류하고, 대신 옵션②(안내 필드)를 채택 —
+ * `excludedForBudget`: 관련성 필터는 통과했지만 water-filling에서 최소
+ * 예산 미달로 제거된 채널을 메인 추천(`platforms`)과 분리된 별도 목록으로
+ * 노출한다. water-filling 알고리즘 자체(제거 순서 등)는 이 변경으로 건드리지
+ * 않는다 — 탈락자를 "그냥 버리지 않고 기록"하는 것만 추가.
  */
 import type { MediaItem, MediaOnlineSpecView } from "@/lib/media-data";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
@@ -102,6 +111,20 @@ export type ScoredOnlinePlatformGroup = {
   estimatedMetricMax: number;
 };
 
+/**
+ * 관련성 필터는 통과했지만 water-filling 최소예산 제거 단계에서 탈락한 채널.
+ * `platforms`(메인 추천)와는 별도 섹션으로 노출할 것 — "참고: 관련성은 높지만
+ * 현재 예산으로는 최소 집행금액을 채울 수 없어 제외됨" 같은 안내용.
+ */
+export type ExcludedForBudgetEntry = {
+  platform: string;
+  score: number;
+  /** 이 채널의 최소 집행금액(만원) */
+  minBudgetMan: number;
+  reasonKo: string;
+  reasonEn: string;
+};
+
 export type OnlineCatalogRecommendResult = {
   platforms: ScoredOnlinePlatformGroup[];
   totalBudgetMan: number;
@@ -109,6 +132,8 @@ export type OnlineCatalogRecommendResult = {
   noRelevantChannels: boolean;
   /** true면 관련 채널은 있었지만 예산이 그 채널들의 최소 집행금액에 전부 못 미쳐 전부 제외됨 */
   budgetTooSmall: boolean;
+  /** 관련성은 있었지만 예산 부족으로 제외된 채널(점수순 상위 최대 5개) — 참고용, 메인 추천과 구분해서 보여줄 것 */
+  excludedForBudget: ExcludedForBudgetEntry[];
 };
 
 function scoreProduct(
@@ -251,8 +276,14 @@ function minBudgetManOf(c: Candidate): number {
 function allocateBudgetWithMinBudgetFilter(
   candidates: Candidate[],
   totalBudgetMan: number,
-): { survivors: Candidate[]; budgetManByPlatform: Map<string, number> } {
+): {
+  survivors: Candidate[];
+  budgetManByPlatform: Map<string, number>;
+  /** 제거된 순서 그대로(가장 먼저 빠진 게 [0]) — 안내 필드 빌드용, 정렬은 호출부 책임 */
+  eliminated: Candidate[];
+} {
   let pool = [...candidates];
+  const eliminated: Candidate[] = [];
 
   for (let round = 0; round < candidates.length + 1; round++) {
     if (pool.length === 0) break;
@@ -266,17 +297,40 @@ function allocateBudgetWithMinBudgetFilter(
     if (failing.length === 0) {
       const map = new Map<string, number>();
       for (const { candidate, budgetMan } of allocated) map.set(candidate.platform, budgetMan);
-      return { survivors: pool, budgetManByPlatform: map };
+      return { survivors: pool, budgetManByPlatform: map, eliminated };
     }
     // 배정액/최소예산 비율이 가장 낮은(가장 많이 모자란) 후보 하나만 제거
     failing.sort(
       (a, b) => a.budgetMan / Math.max(a.minBudgetMan, 1) - b.budgetMan / Math.max(b.minBudgetMan, 1),
     );
-    const worst = failing[0].candidate.platform;
-    pool = pool.filter((c) => c.platform !== worst);
+    const worst = failing[0].candidate;
+    eliminated.push(worst);
+    pool = pool.filter((c) => c.platform !== worst.platform);
   }
 
-  return { survivors: [], budgetManByPlatform: new Map() };
+  return { survivors: [], budgetManByPlatform: new Map(), eliminated };
+}
+
+/** excludedForBudget 목록이 너무 길어 오히려 혼란을 주지 않도록 점수순 상위 N개만 노출 */
+const MAX_EXCLUDED_FOR_BUDGET = 5;
+
+function buildExcludedForBudget(
+  eliminated: Candidate[],
+  isKo: boolean,
+): ExcludedForBudgetEntry[] {
+  return [...eliminated]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, MAX_EXCLUDED_FOR_BUDGET)
+    .map((c) => {
+      const minBudgetMan = minBudgetManOf(c);
+      return {
+        platform: c.platform,
+        score: c.score,
+        minBudgetMan,
+        reasonKo: `${c.platform} — 관련성은 있지만 최소 집행금액(${minBudgetMan}만원)을 채우지 못해 제외`,
+        reasonEn: `${c.platform} — relevant but excluded (requires a minimum budget of ${minBudgetMan}만원)`,
+      };
+    });
 }
 
 /**
@@ -323,13 +377,15 @@ export function recommendOnlineCatalogChannels(
       totalBudgetMan: input.budgetMan,
       noRelevantChannels: hasAnyCriteria,
       budgetTooSmall: false,
+      excludedForBudget: [],
     };
   }
 
-  const { survivors, budgetManByPlatform } = allocateBudgetWithMinBudgetFilter(
+  const { survivors, budgetManByPlatform, eliminated } = allocateBudgetWithMinBudgetFilter(
     candidates,
     input.budgetMan,
   );
+  const excludedForBudget = buildExcludedForBudget(eliminated, isKo);
 
   if (survivors.length === 0) {
     return {
@@ -337,6 +393,7 @@ export function recommendOnlineCatalogChannels(
       totalBudgetMan: input.budgetMan,
       noRelevantChannels: false,
       budgetTooSmall: true,
+      excludedForBudget,
     };
   }
 
@@ -369,5 +426,6 @@ export function recommendOnlineCatalogChannels(
     totalBudgetMan: input.budgetMan,
     noRelevantChannels: false,
     budgetTooSmall: false,
+    excludedForBudget,
   };
 }

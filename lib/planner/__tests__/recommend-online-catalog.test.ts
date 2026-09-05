@@ -114,6 +114,10 @@ describe("recommendOnlineCatalogChannels", () => {
     assert.equal(result.platforms[0].platform, "인스타그램");
     assert.equal(result.platforms[0].budgetPct, 100);
     assert.equal(result.platforms[0].budgetMan, 200);
+    // excludedForBudget — 예산 부족으로 제외된 네이버가 안내 목록에 기록돼야 한다(옵션② 안내 필드)
+    const excludedNaver = result.excludedForBudget.find((e) => e.platform === "네이버 검색광고");
+    assert.ok(excludedNaver);
+    assert.equal(excludedNaver.minBudgetMan, 300);
   });
 
   it("예산 배분 비중 합은 대략 100%에 수렴한다 (반올림 오차 허용)", () => {
@@ -173,6 +177,8 @@ describe("recommendOnlineCatalogChannels", () => {
     assert.equal(result.platforms.length, 0);
     assert.equal(result.noRelevantChannels, true);
     assert.equal(result.budgetTooSmall, false);
+    // 관련 채널 자체가 없었으므로(water-filling까지 못 감) 안내 목록도 비어 있어야 한다
+    assert.deepEqual(result.excludedForBudget, []);
   });
 
   it("수정 3 — 관련 채널은 있지만 예산이 전부의 minBudget에도 못 미치면 budgetTooSmall=true, 빈 목록", () => {
@@ -187,6 +193,9 @@ describe("recommendOnlineCatalogChannels", () => {
     assert.equal(result.platforms.length, 0);
     assert.equal(result.noRelevantChannels, false);
     assert.equal(result.budgetTooSmall, true);
+    // 전멸 케이스에서도 "관련은 있었지만 예산 부족" 채널 목록은 남아 있어야 한다
+    assert.ok(result.excludedForBudget.length > 0);
+    assert.ok(result.excludedForBudget.some((e) => e.platform === "네이버 검색광고"));
   });
 
   it("수정 3 회귀 — 다수 후보가 동시에 미달이어도 전멸하지 않고 상위 소수로 수렴한다", () => {
@@ -305,5 +314,37 @@ describe("recommendOnlineCatalogChannels", () => {
     });
     assert.ok(!result.platforms.some((p) => p.platform === "목표만"));
     assert.ok(result.platforms.some((p) => p.platform === "업종만"));
+  });
+
+  it("excludedForBudget — 예산 부족 제외 채널은 점수순 상위 5개까지만 노출되고 platforms와는 겹치지 않는다", () => {
+    // 점수가 서로 다른 7개 채널, minBudget을 전부 크게 잡아 최고 득점 1개만 남기고
+    // 나머지 6개가 전부 water-filling에서 제거되도록 구성
+    const catalog: MediaItem[] = Array.from({ length: 7 }, (_, i) =>
+      onlineItem(`ch-${i}`, `채널${i}`, {
+        targetingOptions: ["goal:AWARENESS", "age:25-34"],
+        // bestFor 개수로 점수를 다르게 벌려 순위를 명확히 함(채널0이 최고점, 채널6이 최저점)
+        bestFor: Array.from({ length: 7 - i }, () => "관련 키워드"),
+        minBudget: 5_000_000, // 500만원 — 900만원 예산으로는 최고점 채널 1개만 채울 수 있음
+      }),
+    );
+    const result = recommendOnlineCatalogChannels({
+      goal: "brand",
+      industry: null,
+      ageBands: ["20s"],
+      genders: [],
+      budgetMan: 900,
+      catalog,
+    });
+
+    assert.ok(result.excludedForBudget.length <= 5);
+    // platforms에 남은 채널(있다면)은 excludedForBudget에 다시 나타나면 안 된다
+    const survivingPlatforms = new Set(result.platforms.map((p) => p.platform));
+    for (const e of result.excludedForBudget) {
+      assert.ok(!survivingPlatforms.has(e.platform));
+    }
+    // 상위 5개는 점수 내림차순이어야 한다
+    for (let i = 1; i < result.excludedForBudget.length; i++) {
+      assert.ok(result.excludedForBudget[i - 1].score >= result.excludedForBudget[i].score);
+    }
   });
 });
