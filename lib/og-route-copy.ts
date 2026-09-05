@@ -56,6 +56,18 @@ const routes = {
       subtitle: "Compare {count} verified billboards, DOOH, and transit media",
     },
   },
+  mediaOnline: {
+    ko: {
+      badge: "Online Ads",
+      title: "온라인 광고 매체 검색",
+      subtitle: "검색·디스플레이·SNS·영상 등 온라인 광고 매체를 THINKAD에서 비교",
+    },
+    en: {
+      badge: "Online Ads",
+      title: "Online ad media search",
+      subtitle: "Compare search, display, social, and video ad products on THINKAD",
+    },
+  },
   recommend: {
     ko: {
       badge: "AI",

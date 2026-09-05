@@ -292,6 +292,11 @@ export function DiscoveryMediaCardCompactGrid({
                 ) : null}
               </div>
               <MediaPriceExclNote isKo={isKo} className="tkad-type-note mt-0.5" />
+              {model.minBudgetLabel ? (
+                <p className="tkad-type-note mt-0.5 line-clamp-1 tabular-nums text-tkad-muted">
+                  {model.minBudgetLabel}
+                </p>
+              ) : null}
               <OnlineCardRecommendTags
                 slug={item.slug}
                 catalogChannel={item.catalogChannel}
@@ -583,6 +588,11 @@ export function DiscoveryMediaCardCatalogTile({
       {model.metricLine ? (
         <p className="tkad-type-note mt-0.5 line-clamp-1 tabular-nums text-tkad-muted">
           {model.metricLine}
+        </p>
+      ) : null}
+      {model.minBudgetLabel ? (
+        <p className="tkad-type-note mt-0.5 line-clamp-1 tabular-nums text-tkad-muted">
+          {model.minBudgetLabel}
         </p>
       ) : null}
 

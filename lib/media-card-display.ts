@@ -31,9 +31,23 @@ export type MediaCardDisplayModel = {
   metricLine?: string | null;
   /** 2열 그리드 등 좁은 셀 — CPM 축약 1줄 */
   metricLineCompact?: string | null;
+  /** 온라인 매체 — `onlineSpec.minBudget` 있을 때만 (`"최소 예산 ₩80만"`) */
+  minBudgetLabel?: string | null;
   highlights: string[];
   detailHref: string;
 };
+
+function buildMinBudgetLabel(
+  item: Pick<HomeCatalogMediaItem, "catalogChannel" | "onlineSpec">,
+  isKo: boolean,
+  locale: string,
+): string | null {
+  if (!isOnlineCatalogMedia({ catalogChannel: item.catalogChannel })) return null;
+  const minBudget = item.onlineSpec?.minBudget;
+  if (!minBudget || minBudget <= 0) return null;
+  const amount = formatCatalogPriceFieldWon(minBudget, locale);
+  return isKo ? `최소 예산 ${amount}` : `Min. budget ${amount}`;
+}
 
 function galleryExtraCount(item: {
   thumbnailUrl?: string;
@@ -152,6 +166,7 @@ export function catalogItemToDisplayModel(
     periodLabel,
     metricLine: buildCatalogItemMetricLine(item, opts.isKo, locale),
     metricLineCompact: buildCatalogItemMetricLineCompact(item, locale),
+    minBudgetLabel: buildMinBudgetLabel(item, opts.isKo, locale),
     highlights: opts.highlights ?? [],
     detailHref: opts.href,
   };

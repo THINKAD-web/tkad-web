@@ -7,7 +7,6 @@ import {
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
 import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
-import { getPublicMediaCountLabel } from "@/lib/trust-metrics";
 import {
   CATALOG_CHANNEL_ONLINE,
   canonicalCatalogChannel,
@@ -20,7 +19,6 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
-  const verifiedMediaLabel = await getPublicMediaCountLabel("verified");
   const title = isKo
     ? "온라인 광고 매체 — 검색·디스플레이·SNS·영상"
     : "Online ads — search, display, social & video";
@@ -53,8 +51,8 @@ export async function generateMetadata({
       title,
       description,
       path: "/media/online",
-      alt: ogAltForRoute("media", verifiedMediaLabel),
-      image: { kind: "segment", segment: "media" },
+      alt: ogAltForRoute("mediaOnline"),
+      image: { kind: "segment", segment: "media/online" },
     }),
   };
 }
