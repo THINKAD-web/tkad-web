@@ -123,6 +123,9 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
           >
             {t("ecosystemTitle")}
           </h2>
+          <p className="mx-auto mb-2 max-w-2xl text-center text-xs font-medium text-tkad-muted md:text-sm">
+            {t("ecosystemOohNote")}
+          </p>
           <p className="mx-auto mb-8 max-w-2xl text-center text-sm leading-relaxed text-gray-600 dark:text-white/65 md:text-base">
             {t("ecosystemBody")}
           </p>
@@ -150,10 +153,10 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
             </article>
 
             <article className={cardClass}>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
-                {t("ecosystemDigitalBadge")}
-              </p>
-              <h3 className="mt-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+              {/* 2026-08-31: 배지("자매 브랜드") 제거 — 옆 카드의 "통합" 배지와
+                  나란히 놓였을 때 "통합"이라는 단어가 겹쳐 보이는 걸 피하기 위함.
+                  온라인 광고가 THINKAD로 순차 통합되는 방향과 맞춰 타이틀+설명만 노출. */}
+              <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
                 {t("ecosystemDigitalTitle")}
               </h3>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-white/65">

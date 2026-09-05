@@ -386,6 +386,9 @@ export function DesktopGlobalNav() {
               </NavDropdown>
             );
           })}
+          {/* NOTE(2026-08-31): 온라인광고 상품이 /media/online 으로 점진 이관 중 —
+              이관이 진행될수록 이 외부 링크의 의미가 옅어짐. 다음 재검토 시점에
+              THINKAD_DIGITAL_URL 링크 유지 여부를 재확인할 것 (재한님 확인 필요, 이번엔 미변경). */}
           <a
             href={THINKAD_DIGITAL_URL}
             target="_blank"
