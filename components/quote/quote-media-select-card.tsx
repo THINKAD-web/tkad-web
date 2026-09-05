@@ -87,14 +87,6 @@ export function QuoteMediaSelectCard({
             {isKo ? "준비중" : "No image"}
           </div>
         )}
-        <MediaThumbnailTrustOverlay
-          item={{
-            isVerified: media.isVerified,
-            isInstantBooking: instant,
-          }}
-          isKo={isKo}
-          variant="card"
-        />
         <span
           className={cn(
             "absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border-2 shadow-sm",
@@ -112,6 +104,16 @@ export function QuoteMediaSelectCard({
           {isKo ? media.name : media.nameEn || media.name}
         </p>
         <p className="mt-1 text-xs text-gray-400 dark:text-white/40">{metaLine}</p>
+        <MediaThumbnailTrustOverlay
+          item={{
+            isVerified: media.isVerified,
+            isInstantBooking: instant,
+          }}
+          isKo={isKo}
+          variant="card"
+          layout="flow"
+          className="mt-1"
+        />
         {priceLabel ? (
           <div className="mt-2">
             <p className="text-sm font-bold tabular-nums tkad-home-accent-text">

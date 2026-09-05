@@ -58,17 +58,19 @@ export function MediaDiscoveryGridCard({
             {isKo ? "준비중" : "No image"}
           </div>
         )}
-        <MediaThumbnailTrustOverlay
-          item={{ isVerified, isInstantBooking }}
-          isKo={isKo}
-          variant="card"
-        />
       </div>
       <div className="p-3">
         <p className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
           {name}
         </p>
         <p className="mt-1 text-xs text-gray-400 dark:text-white/40">{metaLine}</p>
+        <MediaThumbnailTrustOverlay
+          item={{ isVerified, isInstantBooking }}
+          isKo={isKo}
+          variant="card"
+          layout="flow"
+          className="mt-1"
+        />
         <div className="mt-2 space-y-2">
           {priceLabel ? (
             <div>

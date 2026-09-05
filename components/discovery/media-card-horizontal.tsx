@@ -15,13 +15,15 @@ import { cn } from "@/lib/utils";
 function CategoryTrustLine({
   type,
   trustScore,
+  isVerified,
   isKo,
 }: {
   type?: string;
   trustScore?: number;
+  isVerified?: boolean;
   isKo: boolean;
 }) {
-  if (!type && trustScore == null) return null;
+  if (!type && trustScore == null && !isVerified) return null;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
       {type?.trim() ? (
@@ -29,6 +31,15 @@ function CategoryTrustLine({
       ) : null}
       {trustScore != null ? (
         <MediaTrustScoreBadge score={trustScore} isKo={isKo} compact />
+      ) : null}
+      {isVerified ? (
+        <MediaThumbnailTrustOverlay
+          item={{ isVerified: true, isInstantBooking: false }}
+          isKo={isKo}
+          variant="feed"
+          verifiedOnly
+          layout="flow"
+        />
       ) : null}
     </div>
   );
@@ -101,19 +112,6 @@ export function DiscoveryMediaCardHorizontal({
           {isKo ? "이미지 준비중" : "No image"}
         </div>
       )}
-      <MediaThumbnailTrustOverlay
-        item={{ isVerified: model.isVerified, isInstantBooking: false }}
-        isKo={isKo}
-        variant="feed"
-        verifiedOnly
-      />
-      {model.metricLine ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden bg-gradient-to-t from-black/80 via-black/50 to-transparent px-2 pb-1.5 pt-6 @[300px]:block">
-          <p className="tkad-type-meta truncate font-medium tabular-nums text-white/95">
-            {model.metricLine}
-          </p>
-        </div>
-      ) : null}
       {model.galleryExtraCount > 0 ? (
         <span className="tkad-type-note absolute bottom-1.5 right-1.5 z-20 rounded-md bg-black/60 px-1.5 py-0.5 font-semibold text-white backdrop-blur-sm">
           +{model.galleryExtraCount}
@@ -248,15 +246,29 @@ export function DiscoveryMediaCardHorizontal({
 
         <div className="flex min-w-0 flex-1 flex-col gap-1.5 py-0.5">
           <div className="min-w-0 space-y-1">
-            {model.type ? (
-              <span className="tkad-type-note inline-block max-w-full truncate rounded-md bg-gray-100 px-1.5 py-0.5 font-medium capitalize text-tkad-muted dark:bg-white/10 @[300px]:hidden">
-                {model.type}
-              </span>
+            {model.type || model.isVerified ? (
+              <div className="flex flex-wrap items-center gap-1.5 @[300px]:hidden">
+                {model.type ? (
+                  <span className="tkad-type-note inline-block max-w-full truncate rounded-md bg-gray-100 px-1.5 py-0.5 font-medium capitalize text-tkad-muted dark:bg-white/10">
+                    {model.type}
+                  </span>
+                ) : null}
+                {model.isVerified ? (
+                  <MediaThumbnailTrustOverlay
+                    item={{ isVerified: true, isInstantBooking: false }}
+                    isKo={isKo}
+                    variant="feed"
+                    verifiedOnly
+                    layout="flow"
+                  />
+                ) : null}
+              </div>
             ) : null}
             <div className="hidden @[300px]:block">
               <CategoryTrustLine
                 type={model.type}
                 trustScore={model.trustScore}
+                isVerified={model.isVerified}
                 isKo={isKo}
               />
             </div>
@@ -272,6 +284,11 @@ export function DiscoveryMediaCardHorizontal({
           {narrowMetric ? (
             <p className="tkad-type-meta tabular-nums text-tkad-muted @[300px]:hidden">
               {narrowMetric}
+            </p>
+          ) : null}
+          {model.metricLine ? (
+            <p className="tkad-type-meta hidden tabular-nums text-tkad-muted @[300px]:block">
+              {model.metricLine}
             </p>
           ) : null}
 
