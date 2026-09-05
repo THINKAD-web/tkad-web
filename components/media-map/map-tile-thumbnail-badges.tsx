@@ -104,6 +104,8 @@ type Props = {
   isKo?: boolean;
   hideVisibilityScore?: boolean;
   className?: string;
+  /** "overlay"(기본) — 썸네일 위. "flow" — 카드 정보 영역 안 일반 흐름. */
+  layout?: "overlay" | "flow";
 };
 
 export function MapTileThumbnailBadges({
@@ -111,6 +113,7 @@ export function MapTileThumbnailBadges({
   isKo = true,
   hideVisibilityScore = false,
   className,
+  layout = "overlay",
 }: Props) {
   let badges = buildMapTileThumbnailBadges(item, isKo);
   if (hideVisibilityScore) {
@@ -118,6 +121,10 @@ export function MapTileThumbnailBadges({
   }
 
   return (
-    <MediaThumbnailBadgeStack badges={badges} className={className} />
+    <MediaThumbnailBadgeStack
+      badges={badges}
+      className={className}
+      layout={layout}
+    />
   );
 }

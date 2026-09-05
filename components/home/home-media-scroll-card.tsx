@@ -50,7 +50,7 @@ function CardInfoButton({
 
 function VerifiedBadge({ isKo }: { isKo: boolean }) {
   return (
-    <span className="tkad-type-note absolute right-1.5 top-1.5 z-10 inline-flex items-center gap-0.5 rounded-md bg-black/55 px-1.5 py-0.5 font-semibold text-white backdrop-blur-sm">
+    <span className="tkad-type-note inline-flex items-center gap-0.5 rounded-md bg-[color:var(--qp-accent)] px-1.5 py-0.5 font-semibold uppercase text-white">
       <ShieldCheck className="h-3 w-3 shrink-0" aria-hidden />
       {isKo ? "검증" : "Verified"}
     </span>
@@ -94,13 +94,17 @@ export function HomeMediaScrollCard({
             {isKo ? "준비중" : "No image"}
           </div>
         )}
-        {item.isVerified ? <VerifiedBadge isKo={isKo} /> : null}
       </div>
 
       <div className="flex flex-col gap-1 p-3">
         <p className="tkad-type-title line-clamp-2 leading-snug text-foreground group-hover:text-tkad-accent">
           {item.name}
         </p>
+        {item.isVerified ? (
+          <div>
+            <VerifiedBadge isKo={isKo} />
+          </div>
+        ) : null}
         {regionParts.length > 0 ? (
           <p className="tkad-type-meta flex items-center gap-0.5 line-clamp-1 text-tkad-muted">
             <span className="min-w-0 truncate">{regionParts.join(" · ")}</span>

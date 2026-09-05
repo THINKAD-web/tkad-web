@@ -258,7 +258,6 @@ export function DiscoveryMediaCardCompactGrid({
           imageClassName="rounded-t-2xl"
           sizes="(max-width: 768px) 50vw, 25vw"
         />
-        <MediaThumbnailTrustOverlay item={item} isKo={isKo} variant="card" />
       </div>
       <div className="flex min-h-0 flex-1 flex-col p-3">
         <p className="tkad-type-title line-clamp-2 leading-snug text-foreground">
@@ -267,6 +266,13 @@ export function DiscoveryMediaCardCompactGrid({
         <p className="tkad-type-meta mt-1 line-clamp-1 text-tkad-muted">
           {[item.region, item.type].filter(Boolean).join(" · ") || "\u00a0"}
         </p>
+        <MediaThumbnailTrustOverlay
+          item={item}
+          isKo={isKo}
+          variant="card"
+          layout="flow"
+          className="mt-1"
+        />
         <div className="mt-auto space-y-2 pt-2">
           {showPrice ? (
             <div>
@@ -506,6 +512,8 @@ export function DiscoveryMediaCardCatalogTile({
   const locationLine = item.region || item.location || "";
   const planItem = planCartItemFromCatalog(item, planAddedFrom);
   const thumbnailBadges = buildCatalogThumbnailBadges(item, isKo, { rank });
+  const rankBadge = thumbnailBadges.find((b) => b.key === "rank");
+  const flowBadges = thumbnailBadges.filter((b) => b.key !== "rank");
 
   const imageBlock = (
     <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -516,13 +524,11 @@ export function DiscoveryMediaCardCatalogTile({
         sizes="(max-width: 768px) 50vw, 280px"
       />
 
-      <MediaThumbnailBadgeStack badges={thumbnailBadges} />
-
-      {model.metricLine ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent px-2 pb-1.5 pt-5">
-          <p className="tkad-type-meta line-clamp-1 font-medium tabular-nums text-white/95">
-            {model.metricLine}
-          </p>
+      {rankBadge ? (
+        <div className="pointer-events-none absolute inset-x-1.5 top-1.5 z-10 sm:inset-x-2 sm:top-2">
+          <span className={rankBadge.className} style={rankBadge.style}>
+            {rankBadge.label}
+          </span>
         </div>
       ) : null}
     </div>
@@ -551,6 +557,13 @@ export function DiscoveryMediaCardCatalogTile({
           className="mt-1 max-w-full"
         />
       ) : null}
+      {flowBadges.length > 0 ? (
+        <MediaThumbnailBadgeStack
+          badges={flowBadges}
+          layout="flow"
+          className="mt-1"
+        />
+      ) : null}
       <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
         <p
           className={cn(
@@ -567,6 +580,11 @@ export function DiscoveryMediaCardCatalogTile({
         ) : null}
         <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
       </div>
+      {model.metricLine ? (
+        <p className="tkad-type-note mt-0.5 line-clamp-1 tabular-nums text-tkad-muted">
+          {model.metricLine}
+        </p>
+      ) : null}
 
       <OnlineCardRecommendTags slug={item.slug} catalogChannel={item.catalogChannel} />
 
@@ -740,15 +758,6 @@ export const DiscoveryMediaCardMapTile = forwardRef<
           </div>
         )}
 
-        <MapTileThumbnailBadges item={item} isKo={isKo} hideVisibilityScore />
-
-        {model.metricLine ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent px-2 pb-1.5 pt-5">
-            <p className="tkad-type-meta line-clamp-1 font-medium tabular-nums text-white/95">
-              {model.metricLine}
-            </p>
-          </div>
-        ) : null}
       </div>
 
       <div className="p-2.5">
@@ -763,6 +772,13 @@ export const DiscoveryMediaCardMapTile = forwardRef<
         <p className="tkad-type-meta mt-0.5 line-clamp-1 text-tkad-secondary">
           {locationLine}
         </p>
+        <MapTileThumbnailBadges
+          item={item}
+          isKo={isKo}
+          hideVisibilityScore
+          layout="flow"
+          className="mt-1"
+        />
         <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
           <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
             {model.priceLabel}
@@ -774,6 +790,11 @@ export const DiscoveryMediaCardMapTile = forwardRef<
           ) : null}
           <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
         </div>
+        {model.metricLine ? (
+          <p className="tkad-type-note mt-0.5 line-clamp-1 tabular-nums text-tkad-muted">
+            {model.metricLine}
+          </p>
+        ) : null}
 
         <DiscoveryMediaCardActions
           mediaId={item.id}

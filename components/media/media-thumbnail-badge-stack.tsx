@@ -142,12 +142,19 @@ type StackProps = {
   badges: ThumbnailBadge[];
   className?: string;
   maxVisible?: number;
+  /**
+   * "overlay"(기본) — 썸네일 이미지 위 absolute 배치.
+   * "flow" — 카드 정보 영역(가격 근처 등) 안에서 일반 흐름으로 배치.
+   * 이미지를 가리지 않아야 하는 카드에서 사용.
+   */
+  layout?: "overlay" | "flow";
 };
 
 export function MediaThumbnailBadgeStack({
   badges,
   className,
   maxVisible = DEFAULT_MAX_VISIBLE,
+  layout = "overlay",
 }: StackProps) {
   if (badges.length === 0) return null;
 
@@ -158,10 +165,13 @@ export function MediaThumbnailBadgeStack({
   return (
     <div
       className={cn(
-        "pointer-events-none absolute inset-x-1.5 top-1.5 z-10 flex flex-wrap items-start gap-1 sm:inset-x-2 sm:top-2",
+        layout === "overlay"
+          ? "pointer-events-none absolute inset-x-1.5 top-1.5 z-10 flex flex-wrap items-start gap-1 sm:inset-x-2 sm:top-2"
+          : "flex flex-wrap items-center gap-1",
         className,
       )}
       data-media-thumbnail-badge-stack
+      data-badge-layout={layout}
     >
       {visible.map((badge) => (
         <span
