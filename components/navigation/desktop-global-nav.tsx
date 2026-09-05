@@ -44,16 +44,6 @@ function isMobileDetailPath(pathname: string): boolean {
   );
 }
 
-/**
- * 온라인 광고 전용 화면(`/media/online` 및 서브 라우트) — 이 경로에서는
- * GNB 브랜드 배지를 "OOH MKT" 그대로 두지 않고 "OOH · 온라인"으로 표시한다.
- * 개별 온라인 매체 상세(`/media/[slug]`, catalogChannel 이 online 인 경우)는
- * URL만으로 채널을 알 수 없어 이 함수로는 감지되지 않음 — 별도 후속 검토 대상.
- */
-function isOnlineMediaRoute(pathname: string): boolean {
-  return pathname === "/media/online" || pathname.startsWith("/media/online/");
-}
-
 function navItemClass(active: boolean, open: boolean) {
   return cn(
     "inline-flex min-h-8 items-center gap-0.5 rounded-[var(--qp-radius-md)] px-3 py-1.5 text-[13px] font-semibold leading-none transition-colors",
@@ -225,7 +215,6 @@ export function DesktopGlobalNav() {
   const router = useRouter();
   const locale = useLocale();
   const isKo = locale === "ko";
-  const isOnlineRoute = isOnlineMediaRoute(pathname);
   const t = useTranslations();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -360,21 +349,6 @@ export function DesktopGlobalNav() {
             >
               THINK
               <span className="tkad-home-accent-text">AD</span>
-            </Link>
-            <Link
-              href="/"
-              className="tkad-site-brand-sub"
-              aria-label={
-                isOnlineRoute
-                  ? isKo
-                    ? "THINKAD OOH · 온라인 홈"
-                    : "THINKAD OOH · Online home"
-                  : isKo
-                    ? "THINKAD OOH MKT 홈"
-                    : "THINKAD OOH MKT home"
-              }
-            >
-              {isOnlineRoute ? (isKo ? "OOH · 온라인" : "OOH · Online") : "OOH MKT"}
             </Link>
           </div>
         </div>
