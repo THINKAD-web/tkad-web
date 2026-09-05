@@ -18,16 +18,16 @@ import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { PlannerAgeKey, PlannerIndustryKey } from "@/lib/planner/types";
 
 /**
- * "digital_only" — 온라인 플래너 자체 재구현(PART3) 1단계. 타입·store 로직
- * 레벨까지만 이번에 준비하고, 토글 UI(`BRIEF_CHANNEL_MODES` 노출)는 브리프
- * 스텝2·3의 OOH 전용 필드 조정과 함께 3-5(UI 교체)에서 노출한다.
+ * "digital_only" — 온라인 플래너 자체 재구현(PART3). recommendOnlineCatalogChannels()
+ * (lib/planner/recommend-online-catalog.ts)로 자체 온라인 카탈로그를 스코어링한다 —
+ * dmpilot API 브릿지(ooh_digital의 BriefDigitalPanel)와는 별개 경로.
  */
 export type BriefChannelMode = "ooh_only" | "ooh_digital" | "digital_only";
 
-/** 채널 토글 UI(`brief-step-one.tsx`)에 노출되는 모드만 — "digital_only"는 3-5에서 추가 */
 export const BRIEF_CHANNEL_MODES: readonly BriefChannelMode[] = [
   "ooh_only",
   "ooh_digital",
+  "digital_only",
 ] as const;
 
 const GOAL_TO_PLANNER: Record<BriefGoal, PlannerCampaignGoal> = {
@@ -116,5 +116,5 @@ export function buildBriefIntegratedMixRequest(opts: {
 }
 
 export function isBriefChannelMode(v: unknown): v is BriefChannelMode {
-  return v === "ooh_only" || v === "ooh_digital";
+  return v === "ooh_only" || v === "ooh_digital" || v === "digital_only";
 }
