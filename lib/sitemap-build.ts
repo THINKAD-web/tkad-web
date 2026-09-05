@@ -17,6 +17,10 @@ import { KNOWN_SPECIAL_SLUGS } from "@/lib/special-media-landings";
 import { fetchMediaPackageSlugs } from "@/lib/media-package-db";
 import type { MediaItem } from "@/lib/media-data";
 import {
+  canonicalCatalogChannel,
+  CATALOG_CHANNEL_ONLINE,
+} from "@/lib/catalog-channel";
+import {
   KNOWN_REGION_SLUGS,
   KNOWN_TYPE_SLUGS,
 } from "@/lib/media-keyword-landing";
@@ -81,6 +85,9 @@ export function sitemapPriority(path: string): number {
   }
 
   if (isTechnicalMediaTypeLandingPath(path)) return 0.55;
+
+  /** 온라인 광고 허브 — OOH(`/media` 0.9)보다 낮게, `/services`(0.6)보다도 낮게 */
+  if (path === "/media/online") return 0.55;
 
   if (path === "/faq" || path === "/guides" || path.startsWith("/guides/"))
     return 0.8;
@@ -166,16 +173,20 @@ export function buildCatalogDerivedSitemapParts(
   ctx: SitemapBuildContext,
   catalog: MediaItem[],
 ): CatalogDerivedSitemapParts {
-  const mediaPart = catalog.map((m) =>
-    sitemapEntry(
+  const mediaPart = catalog.map((m) => {
+    const isOnline =
+      canonicalCatalogChannel(m.catalogChannel) === CATALOG_CHANNEL_ONLINE;
+    return sitemapEntry(
       ctx,
       `/media/${m.slug?.trim() || m.id}`,
       lastModifiedFromMedia(
         m as MediaItem & { updatedAt?: Date | string | null },
         ctx.buildTime,
       ),
-    ),
-  );
+      /** 온라인 매체 개별 상세 — OOH 개별 상세(0.7)보다 낮게 */
+      isOnline ? { priority: 0.45 } : undefined,
+    );
+  });
 
   const regionSet = new Set<string>();
   const typeSet = new Set<string>();
