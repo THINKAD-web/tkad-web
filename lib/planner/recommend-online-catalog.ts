@@ -27,8 +27,14 @@ import type { MediaItem, MediaOnlineSpecView } from "@/lib/media-data";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { BriefAgeBand, BriefIndustry } from "@/lib/planner/brief/types";
 import type { CampaignPlanGender } from "@/lib/campaign-plan-schema";
-import { targetingHasValue } from "@/lib/online/online-targeting-tags";
+import {
+  groupTargetingOptions,
+  targetingHasValue,
+} from "@/lib/online/online-targeting-tags";
 import { bestForGoalMatchCount } from "@/lib/online/online-best-for-match";
+
+/** 업종 태그가 있는데 지정 업종과 명시적으로 불일치할 때의 감점 — +2 매칭 보너스와 대칭 */
+const INDUSTRY_MISMATCH_PENALTY = 2;
 
 const GOAL_TO_ONLINE_TAGS: Record<PlannerCampaignGoal, string[]> = {
   brand: ["AWARENESS"],
@@ -73,6 +79,8 @@ type ScoredProduct = {
   matchedIndustry: boolean;
   matchedAge: boolean;
   bestForCount: number;
+  /** 업종 태그가 있는데 지정 업종과 명시적으로 다름(감점 적용됨) — 태그 자체가 없는 경우와 구분 */
+  industryMismatch: boolean;
 };
 
 export type OnlineRecommendMetricType = "impressions" | "clicks";
@@ -121,6 +129,15 @@ function scoreProduct(
   );
   if (matchedIndustry) score += 2;
 
+  // 업종 불일치 감점 — 상품에 industry 태그가 "있는데" 지정 업종과 하나도 안 겹칠 때만.
+  // 태그 자체가 없는 범용 채널(예: 순수 리치미디어)은 판단 근거가 없으므로 감점 대상 아님.
+  // industryTags.length===0(예: "other"처럼 매핑 태그가 아예 없는 업종)도 판단 불가이므로 제외 —
+  // 안 그러면 "other" 선택 시 태그 있는 상품 전부가 무조건 불일치로 몰려 부당하게 감점된다.
+  const productIndustryTags = groupTargetingOptions(options).industry ?? [];
+  const industryMismatch =
+    industryTags.length > 0 && productIndustryTags.length > 0 && !matchedIndustry;
+  if (industryMismatch) score -= INDUSTRY_MISMATCH_PENALTY;
+
   const ageTags = input.ageBands.flatMap((b) => AGE_BAND_TO_ONLINE_TAGS[b] ?? []);
   const matchedAge = ageTags.some((tag) => targetingHasValue(options, "age", tag));
   if (matchedAge) score += 1.5;
@@ -134,12 +151,33 @@ function scoreProduct(
     score += 0.5;
   }
 
-  return { media, spec, score, matchedGoal, matchedIndustry, matchedAge, bestForCount };
+  // 감점이 다른 가산점을 넘어서도 예산 배분 수식(비율 계산)이 깨지지 않도록 0 이하로 내려가지 않게 고정.
+  // 순위 비교엔 이미 감점이 반영된 뒤이므로(음수였던 정도는 0으로 뭉개져도) 다른 후보 대비 열위는 유지된다.
+  score = Math.max(0, score);
+
+  return {
+    media,
+    spec,
+    score,
+    matchedGoal,
+    matchedIndustry,
+    matchedAge,
+    bestForCount,
+    industryMismatch,
+  };
 }
 
-/** 목표/업종/연령 중 실제로 하나라도 매칭됐는지 — 성별 소가산·baseline은 포함하지 않는다 */
+/**
+ * 관련성 게이트 강화 — 예전엔 4개 신호(목표/업종/연령/bestFor) 중 1개만 맞아도 통과였음
+ * (시나리오 B에서 업종이 명백히 다른 쿠팡이 goal+age 둘만으로 통과한 사례로 문제 확인됨).
+ * 이제 "신호 2개 이상 매칭" 또는 "업종 명시적 일치"(가장 구체적인 축이라 단독으로도 충분)여야
+ * 관련 있다고 판정한다.
+ */
 function hasAnyRealMatch(p: ScoredProduct): boolean {
-  return p.matchedGoal || p.matchedIndustry || p.matchedAge || p.bestForCount > 0;
+  const signals = [p.matchedGoal, p.matchedIndustry, p.matchedAge, p.bestForCount > 0].filter(
+    Boolean,
+  ).length;
+  return signals >= 2 || p.matchedIndustry;
 }
 
 function buildReason(
