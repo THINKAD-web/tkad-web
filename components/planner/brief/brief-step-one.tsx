@@ -390,6 +390,11 @@ export function BriefStepOne({
       {/* ── 채널 (O-1) ── */}
       <section>
         <SectionLabel>{isKo ? "채널" : "Channels"}</SectionLabel>
+        <p className="mb-2 text-xs text-muted-foreground">
+          {isKo
+            ? "THINKAD는 OOH를 중심으로 하며, 필요하실 때 온라인 채널을 함께 구성할 수 있습니다."
+            : "THINKAD centers on OOH, with online channels available whenever you need them."}
+        </p>
         <div className="inline-flex overflow-hidden rounded-lg border border-border">
           {BRIEF_CHANNEL_MODES.map((mode) => (
             <button

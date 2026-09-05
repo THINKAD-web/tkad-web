@@ -1285,6 +1285,13 @@ function MediaSearchPageInner({
         {mapNavigating ? <MapNavigationLoading /> : null}
         <div className="tkad-media-app-shell tkad-media-list-shell media-accent-option-a relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]" data-media-accent="option-a">
           <div className="min-w-0 px-4 pt-3">{filtersBar}</div>
+          {isOnlineBrowse ? (
+            <p className="tkad-type-meta min-w-0 px-4 pt-2 text-tkad-muted">
+              {isKo
+                ? "THINKAD는 옥외광고(OOH)를 중심으로 하며, 온라인 광고도 함께 지원합니다."
+                : "THINKAD is built around out-of-home (OOH) advertising, and also supports online ad campaigns."}
+            </p>
+          ) : null}
           <div className="min-w-0 px-4 pt-3 pb-[calc(4.25rem+1.5rem+env(safe-area-inset-bottom,0px))] lg:pb-6">
             {bodyContent}
             <div className="mt-8 border-t border-gray-200/80 pt-4 text-center dark:border-white/10">

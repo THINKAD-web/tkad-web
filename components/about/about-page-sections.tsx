@@ -123,6 +123,9 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
           >
             {t("ecosystemTitle")}
           </h2>
+          <p className="mx-auto mb-2 max-w-2xl text-center text-xs font-medium text-tkad-muted md:text-sm">
+            {t("ecosystemOohNote")}
+          </p>
           <p className="mx-auto mb-8 max-w-2xl text-center text-sm leading-relaxed text-gray-600 dark:text-white/65 md:text-base">
             {t("ecosystemBody")}
           </p>
