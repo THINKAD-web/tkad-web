@@ -441,6 +441,7 @@ export default async function MediaDetailPage({ params }: Props) {
           execution: {
             size: t("size"),
             resolution: t("resolution"),
+            creativeSpec: t("creativeSpec"),
             brightness: t("brightness"),
             operatingHours: t("operatingHours"),
             installYear: t("installYear"),
@@ -460,6 +461,15 @@ export default async function MediaDetailPage({ params }: Props) {
           },
           similarTitle: media.keywordFilter ? t("similarTitle") : t("viewedAlsoTitle"),
         }}
+        overview={
+          overviewBody?.trim() ? (
+            <MediaDetailOverviewSection
+              title={t("overviewAccordion")}
+              body={overviewBody}
+              isKo={isKo}
+            />
+          ) : undefined
+        }
         belowFold={
           <>
             {media.keywordFilter ? (
@@ -480,14 +490,6 @@ export default async function MediaDetailPage({ params }: Props) {
                   </span>
                 ))}
               </div>
-            ) : null}
-
-            {overviewBody?.trim() ? (
-              <MediaDetailOverviewSection
-                title={t("overviewAccordion")}
-                body={overviewBody}
-                isKo={isKo}
-              />
             ) : null}
 
             {relatedCases.length > 0 ? (

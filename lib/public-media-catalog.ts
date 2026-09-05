@@ -62,6 +62,11 @@ export type MediaWithAdvertiserExecutions = Media & {
     spotDurationSec: number | null;
     loopDurationSec: number | null;
     playsPerHour: number | null;
+    sellingUnit: string | null;
+    resolutionW: number | null;
+    resolutionH: number | null;
+    aspectRatio: string | null;
+    fileFormats: string[];
   } | null;
   onlineSpec?: {
     platform: string;
@@ -309,6 +314,11 @@ export function prismaMediaToMediaItem(
       spotDurationSec?: number | null;
       loopDurationSec?: number | null;
       playsPerHour?: number | null;
+      sellingUnit?: string | null;
+      resolutionW?: number | null;
+      resolutionH?: number | null;
+      aspectRatio?: string | null;
+      fileFormats?: string[] | null;
     } | null;
   }).factSheet;
   const forceLoopSov = fs?.forceLoopSov === true ? true : undefined;
@@ -322,6 +332,13 @@ export function prismaMediaToMediaItem(
       : undefined;
   const playsPerHour =
     fs?.playsPerHour != null && fs.playsPerHour > 0 ? fs.playsPerHour : undefined;
+  const sellingUnit = (fs?.sellingUnit as MediaItem["sellingUnit"]) || undefined;
+  const resolutionW =
+    fs?.resolutionW != null && fs.resolutionW > 0 ? fs.resolutionW : undefined;
+  const resolutionH =
+    fs?.resolutionH != null && fs.resolutionH > 0 ? fs.resolutionH : undefined;
+  const aspectRatio = fs?.aspectRatio?.trim() || undefined;
+  const fileFormats = fs?.fileFormats?.length ? [...fs.fileFormats] : undefined;
 
   return {
     id: m.id,
@@ -445,6 +462,11 @@ export function prismaMediaToMediaItem(
     spotDurationSec,
     loopDurationSec,
     playsPerHour,
+    sellingUnit,
+    resolutionW,
+    resolutionH,
+    aspectRatio,
+    fileFormats,
     ...((): { onlineSpec?: MediaOnlineSpecView } => {
       const onlineSpec = mapPrismaOnlineSpec(m);
       return onlineSpec ? { onlineSpec } : {};
@@ -482,6 +504,11 @@ export const PUBLIC_MEDIA_CATALOG_INCLUDE = {
       spotDurationSec: true,
       loopDurationSec: true,
       playsPerHour: true,
+      sellingUnit: true,
+      resolutionW: true,
+      resolutionH: true,
+      aspectRatio: true,
+      fileFormats: true,
     },
   },
 } as const;

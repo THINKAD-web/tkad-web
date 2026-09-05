@@ -11,7 +11,6 @@ const MEDIA_DETAIL_DIR = path.join(ROOT, "components/media-detail");
 const ROOT_FILES = [
   "components/media-detail-performance.tsx",
   "components/media-detail-quote-modal.tsx",
-  "components/media-detail-extras.tsx",
   "components/media-detail-premium-points.tsx",
 ].map((f) => path.join(ROOT, f));
 

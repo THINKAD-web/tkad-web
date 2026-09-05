@@ -17,8 +17,14 @@ import {
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { PlannerAgeKey, PlannerIndustryKey } from "@/lib/planner/types";
 
-export type BriefChannelMode = "ooh_only" | "ooh_digital";
+/**
+ * "digital_only" — 온라인 플래너 자체 재구현(PART3) 1단계. 타입·store 로직
+ * 레벨까지만 이번에 준비하고, 토글 UI(`BRIEF_CHANNEL_MODES` 노출)는 브리프
+ * 스텝2·3의 OOH 전용 필드 조정과 함께 3-5(UI 교체)에서 노출한다.
+ */
+export type BriefChannelMode = "ooh_only" | "ooh_digital" | "digital_only";
 
+/** 채널 토글 UI(`brief-step-one.tsx`)에 노출되는 모드만 — "digital_only"는 3-5에서 추가 */
 export const BRIEF_CHANNEL_MODES: readonly BriefChannelMode[] = [
   "ooh_only",
   "ooh_digital",

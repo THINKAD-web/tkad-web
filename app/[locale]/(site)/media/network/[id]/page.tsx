@@ -33,6 +33,7 @@ import TrackMediaView from "@/components/track-media-view";
 import { EventOnMount } from "@/components/analytics/event-on-mount";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { MediaDetailPageView } from "@/components/media-detail/media-detail-page-view";
+import { MediaDetailOverviewSection } from "@/components/media-detail/media-detail-overview-section";
 import { attachRecommendReason } from "@/lib/media-recommend-reasons";
 import { resolveNetworkMediaDetail } from "@/lib/media-network-public";
 import {
@@ -256,6 +257,7 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
           execution: {
             size: t("size"),
             resolution: t("resolution"),
+            creativeSpec: t("creativeSpec"),
             brightness: t("brightness"),
             operatingHours: t("operatingHours"),
             installYear: t("installYear"),
@@ -275,18 +277,16 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
           },
           similarTitle: t("viewedAlsoTitle"),
         }}
-        belowFold={
+        overview={
           overviewBody ? (
-            <details className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
-              <summary className="cursor-pointer font-semibold text-gray-900 dark:text-white">
-                {t("overviewAccordion")}
-              </summary>
-              <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-gray-700 dark:text-white/75">
-                {overviewBody}
-              </div>
-            </details>
-          ) : null
+            <MediaDetailOverviewSection
+              title={t("overviewAccordion")}
+              body={overviewBody}
+              isKo={isKo}
+            />
+          ) : undefined
         }
+        belowFold={null}
       />
       <ExitSurveyBanner surface="media_detail" />
     </>

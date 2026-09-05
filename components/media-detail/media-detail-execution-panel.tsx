@@ -2,9 +2,9 @@
 
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Monitor, Ruler } from "lucide-react";
+import { Layers, Monitor, Ruler } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
-import { formatSizeDisplay } from "@/lib/format-media-size";
+import { formatCreativeSpecLine, formatSizeDisplay } from "@/lib/format-media-size";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 type Labels = {
   size: string;
   resolution: string;
+  creativeSpec: string;
   brightness: string;
   operatingHours: string;
   installYear: string;
@@ -87,13 +88,20 @@ function IconSpec({
   icon: Icon,
   label,
   value,
+  className,
 }: {
   icon: LucideIcon;
   label: string;
   value: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex gap-3 rounded-xl border dark:border-white/10 border-gray-100 dark:bg-black/20 bg-gray-50 p-3">
+    <div
+      className={cn(
+        "flex gap-3 rounded-xl border dark:border-white/10 border-gray-100 dark:bg-black/20 bg-gray-50 p-3",
+        className,
+      )}
+    >
       <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)]" aria-hidden />
       <div>
         <p className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
@@ -182,6 +190,12 @@ export function MediaDetailExecutionPanel({
             icon={Monitor}
             label={labels.resolution}
             value={media.resolution || labels.empty}
+          />
+          <IconSpec
+            icon={Layers}
+            label={labels.creativeSpec}
+            value={formatCreativeSpecLine(media, isKo) ?? labels.empty}
+            className="sm:col-span-2"
           />
         </div>
         {hasExtraSpecs ? (

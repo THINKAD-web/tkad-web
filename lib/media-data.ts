@@ -252,7 +252,23 @@ export interface MediaItem {
   spotDurationSec?: number;
   loopDurationSec?: number;
   playsPerHour?: number;
+  /** PR-3 Phase 2 — 판매 단위·크리에이티브 스펙 (제작 사이즈 노출) */
+  sellingUnit?: MediaSellingUnit;
+  resolutionW?: number;
+  resolutionH?: number;
+  aspectRatio?: string;
+  fileFormats?: string[];
 }
+
+/** DB `SellingUnit` enum과 동일 (Prisma import 없이 public 계층에서 사용) */
+export type MediaSellingUnit =
+  | "panel"
+  | "vehicle"
+  | "station"
+  | "route"
+  | "site"
+  | "network_package"
+  | "screen";
 
 export function getMediaById(id: string | number): MediaItem | undefined {
   const key = String(id);

@@ -223,6 +223,8 @@ export function MediaDetailLocationPanel({
     isKo,
     media.tags,
   );
+  /** 단일 사이트 매체는 아래 "주소" 카드와 완전 중복 — 복수 지점(네트워크 포함)일 때만 목록 표시 */
+  const showLocationList = locationRows.length > 1 || isNetwork;
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(spotName)},${mapLat},${mapLng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${mapLat},${mapLng}`;
   const useLeafletMap = mediaDetailUsesLeafletMap(media.country);
@@ -251,7 +253,7 @@ export function MediaDetailLocationPanel({
         </div>
       </div>
 
-      {locationRows.length > 0 ? (
+      {showLocationList && locationRows.length > 0 ? (
         <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white">
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b dark:border-white/10 border-gray-200 px-4 py-3">
             <p className="flex items-center gap-2 text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
