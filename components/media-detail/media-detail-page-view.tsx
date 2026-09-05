@@ -59,6 +59,7 @@ type Props = {
     execution: {
       size: string;
       resolution: string;
+      creativeSpec: string;
       brightness: string;
       operatingHours: string;
       installYear: string;
@@ -78,6 +79,8 @@ type Props = {
     };
     similarTitle: string;
   };
+  /** 히어로 직후·탭 이전 above-the-fold 영역 (예: 쉬운 말 요약) */
+  overview?: ReactNode;
   belowFold: ReactNode;
 };
 
@@ -104,6 +107,7 @@ export function MediaDetailPageView({
   instantBookingEligible,
   availabilitySparse = false,
   labels,
+  overview,
   belowFold,
 }: Props) {
   const displayName = isKo ? media.name : media.nameEn || media.name;
@@ -143,6 +147,7 @@ export function MediaDetailPageView({
         />
 
         <MediaDetailPageLayout
+          aboveTabs={overview}
           tabs={[
             { id: "execution", label: labels.tabs.execution },
             { id: "location", label: labels.tabs.location },

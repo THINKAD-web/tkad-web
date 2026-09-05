@@ -97,6 +97,16 @@ const CHANNEL_MODE_LABELS: Record<
       en: "Step 2 includes digital channel allocation.",
     },
   },
+  // PART3-1~3-3 준비 단계 — 토글 UI 노출은 3-5(UI 교체)에서. BRIEF_CHANNEL_MODES에는
+  // 아직 없어 이 항목은 렌더링되지 않지만, 타입 완전성을 위해 채워둔다.
+  digital_only: {
+    ko: "디지털 전용",
+    en: "Digital only",
+    hint: {
+      ko: "온라인 채널만 집행합니다.",
+      en: "Online channels only.",
+    },
+  },
 };
 
 const ENTRY_MODE_LABELS: Record<

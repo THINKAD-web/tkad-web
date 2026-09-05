@@ -1,16 +1,24 @@
 import type { MediaOnlineSpecView } from "@/lib/media-data";
 import { onlineBillingTypeLabel } from "@/lib/online/online-billing-label";
+import { formatTargetingSummary } from "@/lib/online/online-targeting-tags";
 
 export type OnlineDetailSpecRow = {
   label: string;
   value: string;
 };
 
+/**
+ * `targetingOptions`가 `category:VALUE` 태그로 구조화돼 있으면 그룹 요약
+ * ("업종: 이커머스·뷰티 / 목표: 인지도 / ...")을 보여준다. 파싱 가능한 태그가
+ * 하나도 없을 때만(과거 데이터·플레이스홀더) "가능"/"문의"로 폴백.
+ */
 export function onlineTargetingLabel(
   spec: MediaOnlineSpecView | null | undefined,
   isKo: boolean,
 ): string {
   const opts = spec?.targetingOptions ?? [];
+  const summary = formatTargetingSummary(opts, isKo);
+  if (summary) return summary;
   if (opts.length > 0) {
     return isKo ? "가능" : "Available";
   }

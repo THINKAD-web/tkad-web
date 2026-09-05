@@ -249,9 +249,23 @@ export const useBriefStore = create<BriefStore>()(
 
       setEntryMode: (mode) => set({ entryMode: mode }),
 
-      setChannelMode: (mode) => set({ channelMode: mode }),
+      setChannelMode: (mode) =>
+        set((s) => ({
+          channelMode: mode,
+          // digital_only는 예산 100% 고정(슬라이더 없음). 벗어나면 기본값(30)으로 복귀.
+          digitalBudgetPct:
+            mode === "digital_only"
+              ? 100
+              : s.channelMode === "digital_only"
+                ? 30
+                : s.digitalBudgetPct,
+        })),
       setDigitalBudgetPct: (pct) =>
-        set({ digitalBudgetPct: Math.max(10, Math.min(50, Math.round(pct))) }),
+        set((s) =>
+          s.channelMode === "digital_only"
+            ? {}
+            : { digitalBudgetPct: Math.max(10, Math.min(50, Math.round(pct))) },
+        ),
       toggleDigitalChannel: (id) =>
         set((s) => ({
           digitalChannelIds: s.digitalChannelIds.includes(id)
@@ -459,9 +473,11 @@ export const useBriefStore = create<BriefStore>()(
             ? p.channelMode
             : current.channelMode,
           digitalBudgetPct:
-            typeof p.digitalBudgetPct === "number"
-              ? Math.max(10, Math.min(50, Math.round(p.digitalBudgetPct)))
-              : current.digitalBudgetPct,
+            p.channelMode === "digital_only"
+              ? 100
+              : typeof p.digitalBudgetPct === "number"
+                ? Math.max(10, Math.min(50, Math.round(p.digitalBudgetPct)))
+                : current.digitalBudgetPct,
           digitalChannelIds: normalizeDigitalChannelIds(p.digitalChannelIds),
           mixUnits: normalizeMixUnits(p.mixUnits),
           customLines: normalizeBriefCustomLines(p.customLines),

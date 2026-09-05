@@ -19,6 +19,8 @@ type Props = {
   sidebar?: ReactNode;
   /** 모바일에서 탭 위에 표시 (사이드바 대체) */
   mobileProposal?: ReactNode;
+  /** 탭 바로 위, 히어로 직후 above-the-fold 영역 (예: 쉬운 말 요약) */
+  aboveTabs?: ReactNode;
   similarSection?: ReactNode;
   belowFold?: ReactNode;
   className?: string;
@@ -29,6 +31,7 @@ export function MediaDetailPageLayout({
   panels,
   sidebar,
   mobileProposal,
+  aboveTabs,
   similarSection,
   belowFold,
   className,
@@ -40,6 +43,10 @@ export function MediaDetailPageLayout({
           <div className="min-w-0">
             {mobileProposal ? (
               <div className="mb-[length:var(--qp-space-section)]">{mobileProposal}</div>
+            ) : null}
+
+            {aboveTabs ? (
+              <div className="mb-[length:var(--qp-space-section)]">{aboveTabs}</div>
             ) : null}
 
             <MediaDetailTabs tabs={tabs} panels={panels} />
