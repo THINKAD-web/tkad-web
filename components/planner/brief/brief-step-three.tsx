@@ -71,6 +71,7 @@ import {
 } from "@/lib/planner/brief/types";
 import { summarizeSidoCodes } from "@/lib/planner/brief/regions";
 import { summarizeBriefTargetLine } from "@/lib/planner/brief/plain-language-summary";
+import { BriefStepThreeOnlineOnly } from "@/components/planner/brief/brief-step-three-online-only";
 
 const GOAL_LABELS = {
   awareness: { ko: "인지", en: "Awareness" },
@@ -112,7 +113,7 @@ function storedMetricsToMixMetrics(
   };
 }
 
-function BriefSummary({
+export function BriefSummary({
   brief,
   isKo,
 }: {
@@ -195,7 +196,27 @@ function BriefSummary({
   );
 }
 
+/**
+ * `digital_only`는 OOH 믹스·제안서 파이프라인을 전혀 쓰지 않는 별도 결과
+ * 화면이라 — 별도 컴포넌트로 분기한다(하나의 컴포넌트 안에서 조건부로 훅
+ * 순서가 바뀌는 것을 피하기 위함). 기존 ooh_only/ooh_digital 로직은 아래
+ * `BriefStepThreeOohFlow`에 그대로 유지 — 변경 없음.
+ */
 export function BriefStepThree({
+  catalog,
+}: {
+  catalog: readonly MediaItem[];
+}) {
+  const locale = useLocale();
+  const isKo = locale === "ko";
+  const channelMode = useBriefStore((s) => s.channelMode);
+  if (channelMode === "digital_only") {
+    return <BriefStepThreeOnlineOnly catalog={catalog} isKo={isKo} />;
+  }
+  return <BriefStepThreeOohFlow catalog={catalog} />;
+}
+
+function BriefStepThreeOohFlow({
   catalog,
 }: {
   catalog: readonly MediaItem[];

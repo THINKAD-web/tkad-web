@@ -47,16 +47,35 @@ import {
   applyCustomLinesToMixMetrics,
   hasBriefMixContent,
 } from "@/lib/planner/brief/custom-mix-metrics";
+import { BriefStepTwoOnlineOnly } from "@/components/planner/brief/brief-step-two-online-only";
 
-export function BriefStepTwo({
-  catalog,
-  digitalChannels = [],
-  digitalCatalogMeta,
-}: {
+type BriefStepTwoProps = {
   catalog: readonly MediaItem[];
   digitalChannels?: readonly DigitalChannel[];
   digitalCatalogMeta?: DigitalCatalogBridgeMeta;
-}) {
+};
+
+/**
+ * `digital_only`는 OOH 믹스 빌더를 전혀 쓰지 않는 완전히 별도 화면이라 —
+ * 별도 컴포넌트로 분기한다(하나의 컴포넌트 안에서 조건부로 훅 순서가
+ * 바뀌는 것을 피하기 위함). 기존 ooh_only/ooh_digital 로직은 아래
+ * `BriefStepTwoOohFlow`에 그대로 유지 — 변경 없음.
+ */
+export function BriefStepTwo(props: BriefStepTwoProps) {
+  const locale = useLocale();
+  const isKo = locale === "ko";
+  const channelMode = useBriefStore((s) => s.channelMode);
+  if (channelMode === "digital_only") {
+    return <BriefStepTwoOnlineOnly catalog={props.catalog} isKo={isKo} />;
+  }
+  return <BriefStepTwoOohFlow {...props} />;
+}
+
+function BriefStepTwoOohFlow({
+  catalog,
+  digitalChannels = [],
+  digitalCatalogMeta,
+}: BriefStepTwoProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const store = useBriefStore();
