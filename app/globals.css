@@ -3685,7 +3685,7 @@ html:not(.dark) .tkad-nav-chrome {
   -webkit-text-fill-color: var(--qp-accent) !important;
 }
 
-/* Digital parity: THINKAD + OOH MKT brand labeling */
+/* THINKAD wordmark brand label */
 .tkad-site-brand {
   display: flex;
   align-items: baseline;
@@ -3705,23 +3705,6 @@ html:not(.dark) .tkad-nav-chrome {
 @media (min-width: 640px) {
   .tkad-site-brand-parent {
     font-size: 1.125rem;
-  }
-}
-
-.tkad-site-brand-sub {
-  font-weight: 700;
-  font-size: 0.68em;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  line-height: 1;
-  color: var(--qp-accent);
-  white-space: nowrap;
-}
-
-/* iPhone SE-class: keep THINKAD + account + menu; sublabel after brand fits once chrome icons hide */
-@media (max-width: 359px) {
-  .tkad-site-brand-sub {
-    display: none;
   }
 }
 

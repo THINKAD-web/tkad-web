@@ -20,7 +20,7 @@ export function HeaderDesktopChrome({ isKo }: Props) {
   return (
     <div className="flex items-center gap-1">
       <FavoritesSessionSync />
-      {/* Mobile: drop icon cluster so THINKAD + OOH MKT + account + menu fit SE widths */}
+      {/* Mobile: drop icon cluster so THINKAD + account + menu fit SE widths */}
       <button
         type="button"
         onClick={() => palette?.setOpen(true)}
