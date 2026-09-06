@@ -1476,6 +1476,70 @@ export async function buildPlannerReportPptx(
   // ── 3b. 온라인 채널 (PR6-b) ──
   if (p.onlineSection && p.onlineSection.lines.length > 0) {
     const sec = p.onlineSection;
+    if (sec.kpiCards?.length || sec.categoryRows?.length) {
+      const sKpi = pptx.addSlide();
+      header(sKpi, isKo ? "온라인 KPI·유형" : "Online KPI & types");
+      let ky = 1.15;
+      if (sec.kpiCards?.length) {
+        const kW = 12.1 / Math.min(sec.kpiCards.length, 4);
+        sec.kpiCards.slice(0, 4).forEach((k, i) => {
+          sKpi.addText(`${k.label}\n${k.value}`, {
+            x: 0.6 + kW * i,
+            y: ky,
+            w: kW - 0.1,
+            h: 0.85,
+            fontFace: face,
+            fontSize: 11,
+            color: INK,
+            fill: { color: LIGHT },
+          });
+        });
+        ky += 1.0;
+      }
+      if (sec.categoryRows?.length) {
+        const cHead = [
+          isKo ? "유형" : "Type",
+          isKo ? "채널" : "Lines",
+          isKo ? "월 예산" : "Budget",
+          isKo ? "비중" : "Share",
+          isKo ? "예상 도달" : "Est. reach",
+          isKo ? "예상 클릭" : "Est. clicks",
+        ].map((t) => ({
+          text: t,
+          options: {
+            fill: { color: INK_DEEP_BAR },
+            color: WHITE,
+            bold: true,
+            fontFace: face,
+            fontSize: 9,
+          },
+        }));
+        const consult = isKo ? "별도 협의" : "Consultation";
+        const fmtWon = (n: number) =>
+          `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
+        const cBody = sec.categoryRows.map((r, i) => {
+          const fill = i % 2 ? { color: LIGHT } : { color: WHITE };
+          return [
+            { text: r.label, options: { fill, color: INK, fontFace: face, fontSize: 9 } },
+            { text: String(r.lineCount), options: { fill, color: GRAY, fontFace: face, fontSize: 9 } },
+            { text: fmtWon(r.budgetWon), options: { fill, color: INK, fontFace: face, fontSize: 9 } },
+            { text: `${r.budgetSharePct}%`, options: { fill, color: GRAY, fontFace: face, fontSize: 9 } },
+            { text: r.reachLabel ?? consult, options: { fill, color: GRAY, fontFace: face, fontSize: 9 } },
+            { text: r.clicksLabel ?? consult, options: { fill, color: GRAY, fontFace: face, fontSize: 9 } },
+          ];
+        });
+        sKpi.addTable([cHead, ...cBody], {
+          x: 0.6,
+          y: ky,
+          w: 12.1,
+          colW: [2.2, 1.0, 2.2, 1.0, 2.4, 2.3],
+          border: { type: "solid", color: "E4E6EC", pt: 0.5 },
+          rowH: 0.32,
+          valign: "middle",
+        });
+      }
+    }
+
     const sOnline = pptx.addSlide();
     header(sOnline, sec.title);
     let oy = 1.2;
@@ -1569,6 +1633,41 @@ export async function buildPlannerReportPptx(
           valign: "top",
         },
       );
+    }
+
+    if (sec.insights) {
+      const sIns = pptx.addSlide();
+      header(sIns, isKo ? "온라인 인사이트" : "Online insights");
+      const blocks: string[] = [];
+      if (sec.insights.pacingPlan.length) {
+        blocks.push(isKo ? "■ 소진 페이스" : "■ Spend pace");
+        for (const ph of sec.insights.pacingPlan) {
+          blocks.push(`• ${ph.label} (${ph.sharePct}%) — ${ph.description}`);
+        }
+      }
+      if (sec.insights.creativeDirections.length) {
+        blocks.push(isKo ? "■ 소재 방향" : "■ Creative direction");
+        for (const line of sec.insights.creativeDirections) {
+          blocks.push(`• ${line}`);
+        }
+      }
+      if (sec.insights.operationalNotes.length) {
+        blocks.push(isKo ? "■ 운영 메모" : "■ Operations notes");
+        for (const line of sec.insights.operationalNotes) {
+          blocks.push(`• ${line}`);
+        }
+      }
+      blocks.push(sec.insights.disclaimer);
+      sIns.addText(blocks.join("\n"), {
+        x: 0.6,
+        y: 1.15,
+        w: 12.1,
+        h: 5.8,
+        fontFace: face,
+        fontSize: 11,
+        color: GRAY,
+        valign: "top",
+      });
     }
   }
 

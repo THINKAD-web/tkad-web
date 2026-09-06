@@ -156,6 +156,29 @@ export type PlannerExportOnlineLine = {
 };
 
 /** PR6-b — online report body (onlyOnline or mixed second section) */
+export type PlannerExportOnlineCategoryRow = {
+  key: string;
+  label: string;
+  lineCount: number;
+  budgetWon: number;
+  budgetSharePct: number;
+  reachLabel: string | null;
+  clicksLabel: string | null;
+};
+
+export type PlannerExportOnlinePacingPhase = {
+  label: string;
+  sharePct: number;
+  description: string;
+};
+
+export type PlannerExportOnlineInsights = {
+  pacingPlan: PlannerExportOnlinePacingPhase[];
+  creativeDirections: string[];
+  operationalNotes: string[];
+  disclaimer: string;
+};
+
 export type PlannerExportOnlineSection = {
   title: string;
   estimationNotice: string;
@@ -174,6 +197,12 @@ export type PlannerExportOnlineSection = {
    */
   excludedForBudgetNotice?: string;
   excludedForBudgetLines?: string[];
+  /** PR6-c — online block KPI row (채널 수·총예산·도달·평균) */
+  kpiCards?: PlannerExportKpi[];
+  /** PR6-c — mediaMainCategory breakdown */
+  categoryRows?: PlannerExportOnlineCategoryRow[];
+  /** PR6-c — pacing / creative / ops (no daily trend) */
+  insights?: PlannerExportOnlineInsights;
 };
 
 export type PlannerReportComposition = "onlyOoh" | "onlyOnline" | "mixed";
