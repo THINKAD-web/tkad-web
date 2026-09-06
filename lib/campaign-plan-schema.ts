@@ -130,14 +130,58 @@ export type CampaignPlanStoredMetrics = CampaignPlanMetrics & {
   dataQuality: CampaignPlanDataQuality;
 };
 
+/**
+ * 온라인 플래너(3-5, `channelMode: "digital_only"`) 채널 1건 — OOH `mediaMix`와
+ * 달리 "수량"이 아니라 `recommendOnlineCatalogChannels()`가 계산한 예산 비중
+ * 배분이라 `CampaignPlanMediaLine`에 억지로 맞추지 않는다. 값은 전부 저장
+ * 시점 화면 표시값 그대로(재계산 없음) — 매체 스펙이 그 사이 바뀌어도 이미
+ * 나간 제안서 숫자는 안 변한다는 A-1b Wave 3 원칙과 동일.
+ */
+export type CampaignPlanOnlineChannelLine = {
+  platform: string;
+  productName: string;
+  mediaId: string;
+  score: number;
+  budgetPct: number;
+  budgetWon: number;
+  metricType: "impressions" | "clicks";
+  estimatedMetricMin: number;
+  estimatedMetricMax: number;
+  /** 저장 시점 CPC/CPM 표기 (예: "CPM 4,000~8,000원") — 재조회 없음 */
+  pricingLabel: string;
+  reasonKo: string;
+  reasonEn: string;
+};
+
+/** 관련성은 있었지만 water-filling 최소예산 제거로 탈락한 채널 — 참고용 */
+export type CampaignPlanOnlineExcludedEntry = {
+  platform: string;
+  score: number;
+  minBudgetMan: number;
+  reasonKo: string;
+  reasonEn: string;
+};
+
+export type CampaignPlanOnlineRecommendSnapshot = {
+  totalBudgetWon: number;
+  channels: CampaignPlanOnlineChannelLine[];
+  excludedForBudget: CampaignPlanOnlineExcludedEntry[];
+};
+
 export type CampaignPlanSnapshot = {
   brief: CampaignPlanBrief;
-  /** catalog + custom 혼합. `kind` 없는 row = legacy catalog */
+  /** catalog + custom 혼합. `kind` 없는 row = legacy catalog. digital_only 플랜은 항상 [] */
   mediaMix: CampaignPlanMixEntry[];
   metrics: CampaignPlanStoredMetrics;
   engineVersion: string;
   /** 저장 시 `brief` Json 안에 함께 persist (별도 DB 컬럼 없음) */
   reportCopy?: PlannerReportCopyState | null;
+  /**
+   * `channelMode: "digital_only"` 플랜에만 존재 — 있으면 이 스냅샷은 OOH
+   * mediaMix가 아니라 온라인 채널 추천 결과다. `reportCopy`와 같은 방식으로
+   * `brief` Json 컬럼에 함께 저장한다(별도 DB 컬럼·마이그레이션 없음).
+   */
+  onlineRecommend?: CampaignPlanOnlineRecommendSnapshot | null;
 };
 
 export function defaultExpiresAt(now: Date = new Date()): Date {

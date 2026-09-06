@@ -1542,6 +1542,34 @@ export async function buildPlannerReportPptx(
       rowH: 0.36,
       valign: "middle",
     });
+
+    if (sec.excludedForBudgetNotice && (sec.excludedForBudgetLines?.length ?? 0) > 0) {
+      let exY = oy + 0.15 + 0.36 * (oBody.length + 1) + 0.25;
+      sOnline.addText(sec.excludedForBudgetNotice, {
+        x: 0.6,
+        y: exY,
+        w: 12.1,
+        h: 0.35,
+        fontFace: face,
+        fontSize: 10,
+        bold: true,
+        color: GRAY,
+      });
+      exY += 0.35;
+      sOnline.addText(
+        sec.excludedForBudgetLines!.map((line) => `· ${line}`).join("\n"),
+        {
+          x: 0.6,
+          y: exY,
+          w: 12.1,
+          h: Math.max(0.3, sec.excludedForBudgetLines!.length * 0.28),
+          fontFace: face,
+          fontSize: 9,
+          color: GRAY,
+          valign: "top",
+        },
+      );
+    }
   }
 
   // ── 4. 디지털 배분 (통합) ──

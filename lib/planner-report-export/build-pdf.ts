@@ -1639,6 +1639,24 @@ export async function buildPlannerReportPdf(
       y += 7;
     });
     y += 6;
+
+    if (sec.excludedForBudgetNotice && (sec.excludedForBudgetLines?.length ?? 0) > 0) {
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(8.5);
+      setText(GRAY_600);
+      const headLines = doc.splitTextToSize(sec.excludedForBudgetNotice, contentW) as string[];
+      ensure(headLines.length * 4.5 + 2);
+      doc.text(headLines, M, y + 3);
+      y += headLines.length * 4.5 + 2;
+      doc.setFontSize(7.5);
+      for (const line of sec.excludedForBudgetLines!) {
+        const wrapped = doc.splitTextToSize(`· ${line}`, contentW - 4) as string[];
+        ensure(wrapped.length * 3.8 + 1);
+        doc.text(wrapped, M + 2, y + 2);
+        y += wrapped.length * 3.8 + 1;
+      }
+      y += 4;
+    }
   }
 
   renderOnlineSection();
