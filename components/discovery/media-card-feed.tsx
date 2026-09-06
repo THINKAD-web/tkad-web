@@ -22,6 +22,7 @@ type FeedProps = Pick<
   | "onTogglePlan"
   | "rank"
   | "showPlanButton"
+  | "plannerCardContext"
 >;
 
 export function DiscoveryMediaCardFeed(props: FeedProps) {
@@ -38,6 +39,7 @@ export function DiscoveryMediaCardFeed(props: FeedProps) {
     onTogglePlan,
     rank,
     showPlanButton = true,
+    plannerCardContext,
   } = props;
 
   const model = catalogItemToDisplayModel(item, {
@@ -45,6 +47,7 @@ export function DiscoveryMediaCardFeed(props: FeedProps) {
     isKo,
     priceLabel,
     highlights,
+    ...plannerCardContext,
   });
 
   return (

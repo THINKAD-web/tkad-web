@@ -9,6 +9,7 @@ import { PlanCartToggleButton } from "@/components/plan/plan-cart-toggle-button"
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import {
   catalogItemToDisplayModel,
+  formatPlannerRecommendLine,
   mapItemToDisplayModel,
 } from "@/lib/media-card-display";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
@@ -204,6 +205,7 @@ type CompactGridProps = Pick<
   | "cardFooter"
   | "className"
   | "planAddedFrom"
+  | "plannerCardContext"
 >;
 
 export function DiscoveryMediaCardCompactGrid({
@@ -227,8 +229,15 @@ export function DiscoveryMediaCardCompactGrid({
   cardFooter,
   className,
   planAddedFrom = "search",
+  plannerCardContext,
 }: CompactGridProps) {
-  const model = catalogItemToDisplayModel(item, { href, isKo, priceLabel });
+  const model = catalogItemToDisplayModel(item, {
+    href,
+    isKo,
+    priceLabel,
+    ...plannerCardContext,
+  });
+  const plannerRecommendLine = formatPlannerRecommendLine(model, isKo);
   const [rationaleOpen, setRationaleOpen] = useState(false);
   const isOnlineCard = isOnlineCatalogMedia({ catalogChannel: item.catalogChannel });
   const extraBullets = recommendRationaleBullets?.filter(Boolean) ?? [];
@@ -301,6 +310,15 @@ export function DiscoveryMediaCardCompactGrid({
                 slug={item.slug}
                 catalogChannel={item.catalogChannel}
               />
+              {plannerRecommendLine ? (
+                <p className="tkad-type-note mt-0.5 line-clamp-1 tabular-nums text-tkad-accent">
+                  {plannerRecommendLine}
+                </p>
+              ) : model.excludedForBudgetReason ? (
+                <p className="tkad-type-note mt-0.5 line-clamp-1 text-tkad-muted">
+                  {isKo ? "예산 부족으로 플랜에서 제외됨" : "Excluded from plan (budget)"}
+                </p>
+              ) : null}
             </div>
           ) : null}
           {plannerMode && onTogglePlan ? (
@@ -493,6 +511,7 @@ type CatalogTileProps = Pick<
   | "planAddedFrom"
   | "cardFooter"
   | "className"
+  | "plannerCardContext"
 >;
 
 /** `/media` 카드형·지도 목록과 동일한 세로 스택 타일 (4:3 이미지 + 담기+·비교+) */
@@ -511,8 +530,15 @@ export function DiscoveryMediaCardCatalogTile({
   planAddedFrom = "search",
   cardFooter,
   className,
+  plannerCardContext,
 }: CatalogTileProps) {
-  const model = catalogItemToDisplayModel(item, { href, isKo, priceLabel });
+  const model = catalogItemToDisplayModel(item, {
+    href,
+    isKo,
+    priceLabel,
+    ...plannerCardContext,
+  });
+  const plannerRecommendLine = formatPlannerRecommendLine(model, isKo);
   const isOnlineCard = isOnlineCatalogMedia({ catalogChannel: item.catalogChannel });
   const locationLine = item.region || item.location || "";
   const planItem = planCartItemFromCatalog(item, planAddedFrom);
@@ -597,6 +623,15 @@ export function DiscoveryMediaCardCatalogTile({
       ) : null}
 
       <OnlineCardRecommendTags slug={item.slug} catalogChannel={item.catalogChannel} />
+      {plannerRecommendLine ? (
+        <p className="tkad-type-note mt-0.5 line-clamp-1 tabular-nums text-tkad-accent">
+          {plannerRecommendLine}
+        </p>
+      ) : model.excludedForBudgetReason ? (
+        <p className="tkad-type-note mt-0.5 line-clamp-1 text-tkad-muted">
+          {isKo ? "예산 부족으로 플랜에서 제외됨" : "Excluded from plan (budget)"}
+        </p>
+      ) : null}
 
       {plannerMode && onTogglePlan ? (
         <div

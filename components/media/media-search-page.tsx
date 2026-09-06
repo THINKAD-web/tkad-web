@@ -82,6 +82,10 @@ import {
   mediaItemHasMapCoordinates,
   resolveMediaIdFromMapPinId,
 } from "@/lib/media-detail-map-markers";
+import {
+  readPlannerOnlineCardContext,
+  type PlannerOnlineCardContextByPlatform,
+} from "@/lib/planner/online-catalog-card-context";
 
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,
@@ -305,6 +309,20 @@ function MediaSearchPageInner({
   const { count: planCount } = usePlanCart();
 
   const isOnlineBrowse = browseChannel === "online";
+
+  /**
+   * 온라인 플래너 3-6 — Step3 "카탈로그에서 보기"로 넘어온 세션만 대상.
+   * `plannerMode`(위저드 내 매체 추가 임베드)와는 별개 개념이라 제외.
+   */
+  const [plannerCardContextByPlatform, setPlannerCardContextByPlatform] =
+    useState<PlannerOnlineCardContextByPlatform | null>(null);
+  useEffect(() => {
+    if (!isOnlineBrowse || plannerMode) {
+      setPlannerCardContextByPlatform(null);
+      return;
+    }
+    setPlannerCardContextByPlatform(readPlannerOnlineCardContext());
+  }, [isOnlineBrowse, plannerMode]);
 
   const initialFromUrl = useMemo(
     () =>
@@ -863,6 +881,9 @@ function MediaSearchPageInner({
     const href = getMediaHref(item);
     const priceLabel = renderPrice(item);
     const inPlan = plannerSelectedIds.includes(item.id);
+    const plannerCardContext = item.onlineSpec?.platform
+      ? plannerCardContextByPlatform?.[item.onlineSpec.platform]
+      : undefined;
     const togglePlan = () => {
       const raw = catalogItems.find((m) => m.id === item.id);
       onPlannerToggleMedia?.(item.id, raw);
@@ -905,6 +926,7 @@ function MediaSearchPageInner({
             plannerMode={plannerMode}
             isInPlan={inPlan}
             onTogglePlan={plannerMode ? togglePlan : undefined}
+            plannerCardContext={plannerCardContext}
           />
         </div>
       );
@@ -934,6 +956,7 @@ function MediaSearchPageInner({
           isInPlan={inPlan}
           onTogglePlan={plannerMode ? togglePlan : undefined}
           showPlanButton={!plannerMode}
+          plannerCardContext={plannerCardContext}
         />
       </div>
     );

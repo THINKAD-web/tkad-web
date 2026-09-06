@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   catalogItemToDisplayModel,
   formatBrowseCardPriceLabel,
+  formatPlannerRecommendLine,
   priceLabelIncludesPeriodSuffix,
 } from "./media-card-display.ts";
 import { formatMediaPriceWithPeriodSuffix } from "./media-price-format.ts";
@@ -171,5 +172,79 @@ test("formatBrowseCardPriceLabel — offline zero price is inquiry (pre-existing
       "ko-KR",
     ),
     "가격 문의",
+  );
+});
+
+test("catalogItemToDisplayModel — 플래너 컨텍스트 없으면 새 필드는 전부 undefined(일반 카드 영향 없음)", () => {
+  const model = catalogItemToDisplayModel(shinsegaeDay, { href: "/x", isKo: true });
+  assert.equal(model.recommendedBudgetPct, undefined);
+  assert.equal(model.estimatedMetricMin, undefined);
+  assert.equal(model.estimatedMetricMax, undefined);
+  assert.equal(model.metricType, undefined);
+  assert.equal(model.excludedForBudgetReason, undefined);
+});
+
+test("catalogItemToDisplayModel — 플래너 컨텍스트가 있으면 그대로 모델에 실린다", () => {
+  const model = catalogItemToDisplayModel(shinsegaeDay, {
+    href: "/x",
+    isKo: true,
+    recommendedBudgetPct: 32,
+    estimatedMetricMin: 150_000,
+    estimatedMetricMax: 250_000,
+    metricType: "impressions",
+  });
+  assert.equal(model.recommendedBudgetPct, 32);
+  assert.equal(model.estimatedMetricMin, 150_000);
+  assert.equal(model.estimatedMetricMax, 250_000);
+  assert.equal(model.metricType, "impressions");
+});
+
+test("formatPlannerRecommendLine — 추천 비중 없으면 null(일반 카드는 라인 자체가 안 뜸)", () => {
+  assert.equal(formatPlannerRecommendLine({}, true), null);
+});
+
+test("formatPlannerRecommendLine — 비중만 있으면 비중만, 예상 지표까지 있으면 함께 표시", () => {
+  assert.equal(
+    formatPlannerRecommendLine({ recommendedBudgetPct: 32 }, true),
+    "추천 비중 32%",
+  );
+  assert.equal(
+    formatPlannerRecommendLine(
+      {
+        recommendedBudgetPct: 32,
+        estimatedMetricMin: 150_000,
+        estimatedMetricMax: 250_000,
+        metricType: "impressions",
+      },
+      true,
+    ),
+    "추천 비중 32% · 예상 노출 150,000~250,000",
+  );
+  assert.equal(
+    formatPlannerRecommendLine(
+      {
+        recommendedBudgetPct: 50,
+        estimatedMetricMin: 500,
+        estimatedMetricMax: 900,
+        metricType: "clicks",
+      },
+      false,
+    ),
+    "Recommended share 50% · Est. clicks 500~900",
+  );
+});
+
+test("formatPlannerRecommendLine — 단가 정보 없어 0~0인 채널은 지표 구간을 생략(OnlineChannelCard와 동일 규칙)", () => {
+  assert.equal(
+    formatPlannerRecommendLine(
+      {
+        recommendedBudgetPct: 14,
+        estimatedMetricMin: 0,
+        estimatedMetricMax: 0,
+        metricType: "impressions",
+      },
+      true,
+    ),
+    "추천 비중 14%",
   );
 });

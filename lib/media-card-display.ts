@@ -17,7 +17,18 @@ import {
   mediaPriceOnInquiryLabel,
 } from "@/lib/media-price-format";
 
-export type MediaCardDisplayModel = {
+/** 온라인 플래너 3-6 — 플래너 세션에서 온 카드에 얹는 추천 컨텍스트(채널·플랫폼 단위) */
+export type PlannerOnlineCardContextEntry = {
+  /** 이 채널(플랫폼)에 배분된 예산 비중(%) — 추천 플랫폼일 때만 */
+  recommendedBudgetPct?: number;
+  estimatedMetricMin?: number;
+  estimatedMetricMax?: number;
+  metricType?: "impressions" | "clicks";
+  /** 예산 부족으로 플랜에서 제외된 채널일 때만(사유 문구, 이미 로케일 반영됨) */
+  excludedForBudgetReason?: string;
+};
+
+export type MediaCardDisplayModel = PlannerOnlineCardContextEntry & {
   id: string;
   name: string;
   type?: string;
@@ -36,6 +47,41 @@ export type MediaCardDisplayModel = {
   highlights: string[];
   detailHref: string;
 };
+
+/**
+ * 온라인 플래너 3-6 — "추천 비중 32% · 예상 노출 15만~25만" 한 줄.
+ * `BriefDigitalPanel`의 `PlatformCard`가 쓰는 조건부 표시 패턴과 동일 —
+ * 값이 없으면(일반 브라우징 카드) null 반환.
+ */
+export function formatPlannerRecommendLine(
+  model: Pick<
+    PlannerOnlineCardContextEntry,
+    "recommendedBudgetPct" | "estimatedMetricMin" | "estimatedMetricMax" | "metricType"
+  >,
+  isKo: boolean,
+): string | null {
+  if (model.recommendedBudgetPct == null) return null;
+  const shareLabel = isKo ? "추천 비중" : "Recommended share";
+  let line = `${shareLabel} ${model.recommendedBudgetPct}%`;
+  const min = model.estimatedMetricMin;
+  const max = model.estimatedMetricMax;
+  // 단가 정보 없는 채널은 min/max가 둘 다 0 — `OnlineChannelCard`의
+  // formatMetricRange()와 동일하게 "0~0" 대신 라인 자체를 생략한다.
+  if (min != null && max != null && (min > 0 || max > 0)) {
+    const metricLabel =
+      model.metricType === "clicks"
+        ? isKo
+          ? "예상 클릭"
+          : "Est. clicks"
+        : isKo
+          ? "예상 노출"
+          : "Est. impr.";
+    const locale = isKo ? "ko-KR" : "en-US";
+    const range = `${min.toLocaleString(locale)}~${max.toLocaleString(locale)}`;
+    line += ` · ${metricLabel} ${range}`;
+  }
+  return line;
+}
 
 function buildMinBudgetLabel(
   item: Pick<HomeCatalogMediaItem, "catalogChannel" | "onlineSpec">,
@@ -132,7 +178,7 @@ export function catalogItemToDisplayModel(
     isKo: boolean;
     priceLabel?: string | null;
     highlights?: string[];
-  },
+  } & PlannerOnlineCardContextEntry,
 ): MediaCardDisplayModel {
   const locale = opts.isKo ? "ko-KR" : "en-US";
   const parentLabel = opts.priceLabel?.trim() || null;
@@ -169,6 +215,11 @@ export function catalogItemToDisplayModel(
     minBudgetLabel: buildMinBudgetLabel(item, opts.isKo, locale),
     highlights: opts.highlights ?? [],
     detailHref: opts.href,
+    recommendedBudgetPct: opts.recommendedBudgetPct,
+    estimatedMetricMin: opts.estimatedMetricMin,
+    estimatedMetricMax: opts.estimatedMetricMax,
+    metricType: opts.metricType,
+    excludedForBudgetReason: opts.excludedForBudgetReason,
   };
 }
 
