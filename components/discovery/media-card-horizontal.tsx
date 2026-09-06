@@ -8,7 +8,10 @@ import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-medi
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
-import type { MediaCardDisplayModel } from "@/lib/media-card-display";
+import {
+  formatPlannerRecommendLine,
+  type MediaCardDisplayModel,
+} from "@/lib/media-card-display";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
 import { cn } from "@/lib/utils";
 
@@ -90,6 +93,7 @@ export function DiscoveryMediaCardHorizontal({
     : null;
 
   const narrowMetric = model.metricLineCompact ?? model.metricLine;
+  const plannerRecommendLine = formatPlannerRecommendLine(model, isKo);
 
   const thumbInner = (
     <>
@@ -303,6 +307,16 @@ export function DiscoveryMediaCardHorizontal({
             ) : null}
             <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
           </div>
+
+          {plannerRecommendLine ? (
+            <p className="tkad-type-note line-clamp-1 tabular-nums text-tkad-accent">
+              {plannerRecommendLine}
+            </p>
+          ) : model.excludedForBudgetReason ? (
+            <p className="tkad-type-note line-clamp-1 text-tkad-muted">
+              {isKo ? "예산 부족으로 플랜에서 제외됨" : "Excluded from plan (budget)"}
+            </p>
+          ) : null}
 
           {model.highlights.length > 0 ? (
             <>

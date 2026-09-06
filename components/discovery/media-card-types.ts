@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { HomeCatalogMediaItem } from "@/types/media";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
+import type { PlannerOnlineCardContextEntry } from "@/lib/media-card-display";
 
 /** 발견하기 카드 표현 — 피드(쇼핑몰형) vs 컴팩트(리스트·그리드·지도 타일) */
 export type MediaCardVariant = "feed" | "compact";
@@ -32,6 +33,8 @@ export type DiscoveryMediaCardSharedProps = {
   onToggleCompare?: () => void;
   onToggleCart?: () => void;
   planAddedFrom?: "search" | "planner" | "ai_recommend" | "map";
+  /** 온라인 플래너 3-6 — 플래너 세션에서 온 카드에만 얹는 추천/제외 컨텍스트 */
+  plannerCardContext?: PlannerOnlineCardContextEntry;
 };
 
 export type DiscoveryMediaCardCatalogProps = DiscoveryMediaCardSharedProps & {

@@ -57,6 +57,7 @@ export const DiscoveryMediaCard = forwardRef<
     onToggleCompare,
     onToggleCart,
     planAddedFrom = "search",
+    plannerCardContext,
   } = props;
 
   if (isDiscoveryMapCardProps(props)) {
@@ -108,6 +109,7 @@ export const DiscoveryMediaCard = forwardRef<
         onTogglePlan={onTogglePlan}
         rank={rank}
         showPlanButton={showPlanButton}
+        plannerCardContext={plannerCardContext}
       />
     );
   } else if (compactLayout === "map-tile") {
@@ -127,6 +129,7 @@ export const DiscoveryMediaCard = forwardRef<
         planAddedFrom={planAddedFrom}
         cardFooter={cardFooter}
         className={className}
+        plannerCardContext={plannerCardContext}
       />
     );
   } else if (compactLayout === "grid") {
@@ -159,6 +162,7 @@ export const DiscoveryMediaCard = forwardRef<
         }
         cardFooter={cardFooter}
         planAddedFrom={planAddedFrom}
+        plannerCardContext={plannerCardContext}
       />
     );
   } else {

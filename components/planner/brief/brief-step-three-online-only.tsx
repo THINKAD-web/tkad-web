@@ -15,10 +15,11 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
-import { FileDown, Loader2, Lock } from "lucide-react";
+import { FileDown, Loader2, Lock, Search } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { useBriefStore } from "@/lib/planner/brief/store";
 import { BriefSummary } from "@/components/planner/brief/brief-step-three";
 import { useOnlineCatalogResult } from "@/components/planner/brief/brief-online-only-panel";
@@ -34,6 +35,10 @@ import { buildBriefReportPayload } from "@/lib/planner/brief/brief-report-adapte
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import { useToast } from "@/components/toast-provider";
+import {
+  buildPlannerOnlineCardContextByPlatform,
+  savePlannerOnlineCardContext,
+} from "@/lib/planner/online-catalog-card-context";
 
 export function BriefStepThreeOnlineOnly({
   catalog,
@@ -119,6 +124,12 @@ export function BriefStepThreeOnlineOnly({
     }
   }, [store, isKo, toast]);
 
+  const handleViewInCatalog = useCallback(() => {
+    savePlannerOnlineCardContext(
+      buildPlannerOnlineCardContextByPlatform(result, isKo),
+    );
+  }, [result, isKo]);
+
   const handleExport = useCallback(
     async (format: "pdf" | "pptx") => {
       if (exporting || !exportPayload) return;
@@ -186,6 +197,17 @@ export function BriefStepThreeOnlineOnly({
             entries={result.excludedForBudget}
             isKo={isKo}
           />
+
+          <Link
+            href="/media/online"
+            onClick={handleViewInCatalog}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border p-3 tkad-type-body text-foreground transition-colors hover:border-primary/40 hover:bg-muted/40"
+          >
+            <Search className="h-4 w-4" />
+            {isKo
+              ? "카탈로그에서 추천 채널 전체 보기"
+              : "View all recommended channels in catalog"}
+          </Link>
 
           <div className="rounded-xl border border-border bg-card p-4 space-y-3">
             <h3 className="tkad-type-title">
