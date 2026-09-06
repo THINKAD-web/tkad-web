@@ -347,4 +347,60 @@ describe("recommendOnlineCatalogChannels", () => {
       assert.ok(result.excludedForBudget[i - 1].score >= result.excludedForBudget[i].score);
     }
   });
+
+  it("tie-break 안정화 — 완전 동점 후보 5개가 있어도 카탈로그 배열 순서와 무관하게 항상 같은 채널이 생존한다", () => {
+    // 5개 플랫폼 전부 점수·minBudget 동일 → water-filling이 매 라운드 순수
+    // 동점 제거를 거쳐야 함(이전엔 이 경우 input.catalog 배열 순서에 따라
+    // 결과가 달라질 수 있었음 — DB updatedAt desc 순서로 실제 화면 검증 중
+    // 발견됨)
+    const buildCatalog = (order: readonly number[]): MediaItem[] =>
+      order.map((i) =>
+        onlineItem(`tie-${i}`, `플랫폼${i}`, {
+          targetingOptions: ["goal:AWARENESS", "age:25-34"],
+          minBudget: 1_000_000,
+        }),
+      );
+    const input = {
+      goal: "brand" as const,
+      industry: null,
+      ageBands: ["20s"] as const,
+      genders: [],
+      budgetMan: 150,
+    };
+
+    const forward = recommendOnlineCatalogChannels({ ...input, catalog: buildCatalog([0, 1, 2, 3, 4]) });
+    const reversed = recommendOnlineCatalogChannels({ ...input, catalog: buildCatalog([4, 3, 2, 1, 0]) });
+    const shuffled = recommendOnlineCatalogChannels({ ...input, catalog: buildCatalog([2, 0, 4, 1, 3]) });
+
+    assert.equal(forward.platforms.length, 1);
+    assert.equal(forward.platforms[0].platform, reversed.platforms[0].platform);
+    assert.equal(forward.platforms[0].platform, shuffled.platforms[0].platform);
+    assert.deepEqual(
+      reversed.excludedForBudget.map((e) => e.platform),
+      forward.excludedForBudget.map((e) => e.platform),
+    );
+    assert.deepEqual(
+      shuffled.excludedForBudget.map((e) => e.platform),
+      forward.excludedForBudget.map((e) => e.platform),
+    );
+  });
+
+  it("tie-break 안정화 — 같은 플랫폼 내 동점 상품도 배열 순서와 무관하게 같은 대표 상품이 뽑힌다", () => {
+    const spec = { targetingOptions: ["goal:AWARENESS", "age:25-34"] };
+    const productA = onlineItem("prod-a", "동일플랫폼", spec);
+    const productB = onlineItem("prod-b", "동일플랫폼", spec);
+    const input = {
+      goal: "brand" as const,
+      industry: null,
+      ageBands: ["20s"] as const,
+      genders: [],
+      budgetMan: 500,
+    };
+
+    const forward = recommendOnlineCatalogChannels({ ...input, catalog: [productA, productB] });
+    const reversed = recommendOnlineCatalogChannels({ ...input, catalog: [productB, productA] });
+
+    assert.equal(forward.platforms[0].topProduct.id, "prod-a");
+    assert.equal(reversed.platforms[0].topProduct.id, "prod-a");
+  });
 });

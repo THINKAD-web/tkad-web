@@ -31,6 +31,15 @@
  * 예산 미달로 제거된 채널을 메인 추천(`platforms`)과 분리된 별도 목록으로
  * 노출한다. water-filling 알고리즘 자체(제거 순서 등)는 이 변경으로 건드리지
  * 않는다 — 탈락자를 "그냥 버리지 않고 기록"하는 것만 추가.
+ *
+ * Tie-break 안정화(2026-08-31): 온라인 플래너 3-5 UI를 실제 DB 경로로 처음
+ * 검증했을 때, 점수가 동점인 후보들 사이에서 JSON 파일 순서 검증과 다른
+ * 채널이 최종 생존하는 사례를 발견했다 — water-filling 제거 순서(`failing`
+ * 정렬)와 후보 정렬이 전부 점수만 비교해, 동점일 때 `input.catalog` 배열
+ * 순서(DB `updatedAt desc`처럼 스코어링과 무관한 값)에 의존했기 때문. 모든
+ * 정렬에 2차 키(플랫폼명/상품id 오름차순)를 추가해 카탈로그 순서와 무관하게
+ * 항상 같은 결과가 나오도록 고정했다. water-filling 알고리즘(제거 로직·개수)
+ * 자체는 변경 없음 — 동점 시 "누가 먼저인지"만 결정론적으로 만든 것.
  */
 import type { MediaItem, MediaOnlineSpecView } from "@/lib/media-data";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
@@ -41,6 +50,18 @@ import {
   targetingHasValue,
 } from "@/lib/online/online-targeting-tags";
 import { bestForGoalMatchCount } from "@/lib/online/online-best-for-match";
+
+/**
+ * 문자열 오름차순 — 점수/비율이 동점일 때 2차 정렬 키(플랫폼명·상품id)로 써서
+ * 결과가 `input.catalog` 배열 순서(DB `updatedAt desc` 등 스코어링과 무관한
+ * 값)에 의존하지 않게 한다. 실제 DB 경로로 처음 검증했을 때, 같은 브리프인데
+ * JSON 파일 순서로 검증했을 때와 다른 채널이 최종 생존하는 사례를 발견해 추가.
+ */
+function compareStringAsc(a: string, b: string): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
 
 /** 업종 태그가 있는데 지정 업종과 명시적으로 불일치할 때의 감점 — +2 매칭 보너스와 대칭 */
 const INDUSTRY_MISMATCH_PENALTY = 2;
@@ -300,9 +321,11 @@ function allocateBudgetWithMinBudgetFilter(
       return { survivors: pool, budgetManByPlatform: map, eliminated };
     }
     // 배정액/최소예산 비율이 가장 낮은(가장 많이 모자란) 후보 하나만 제거
-    failing.sort(
-      (a, b) => a.budgetMan / Math.max(a.minBudgetMan, 1) - b.budgetMan / Math.max(b.minBudgetMan, 1),
-    );
+    failing.sort((a, b) => {
+      const ratioA = a.budgetMan / Math.max(a.minBudgetMan, 1);
+      const ratioB = b.budgetMan / Math.max(b.minBudgetMan, 1);
+      return ratioA - ratioB || compareStringAsc(a.candidate.platform, b.candidate.platform);
+    });
     const worst = failing[0].candidate;
     eliminated.push(worst);
     pool = pool.filter((c) => c.platform !== worst.platform);
@@ -319,7 +342,7 @@ function buildExcludedForBudget(
   isKo: boolean,
 ): ExcludedForBudgetEntry[] {
   return [...eliminated]
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => b.score - a.score || compareStringAsc(a.platform, b.platform))
     .slice(0, MAX_EXCLUDED_FOR_BUDGET)
     .map((c) => {
       const minBudgetMan = minBudgetManOf(c);
@@ -365,11 +388,11 @@ export function recommendOnlineCatalogChannels(
 
   const candidates: Candidate[] = Array.from(byPlatform.entries()).map(
     ([platform, members]) => {
-      members.sort((a, b) => b.score - a.score);
+      members.sort((a, b) => b.score - a.score || compareStringAsc(a.media.id, b.media.id));
       return { platform, members, score: members[0].score };
     },
   );
-  candidates.sort((a, b) => b.score - a.score);
+  candidates.sort((a, b) => b.score - a.score || compareStringAsc(a.platform, b.platform));
 
   if (candidates.length === 0) {
     return {
@@ -419,7 +442,7 @@ export function recommendOnlineCatalogChannels(
         estimatedMetricMax: max,
       };
     })
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => b.score - a.score || compareStringAsc(a.platform, b.platform));
 
   return {
     platforms,
