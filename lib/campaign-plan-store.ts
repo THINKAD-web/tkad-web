@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import {
   defaultExpiresAt,
   normalizeMediaMix,
+  type CampaignPlanOnlineRecommendSnapshot,
   type CampaignPlanSnapshot,
   type CampaignPlanStoredMetrics,
 } from "@/lib/campaign-plan-schema";
@@ -24,6 +25,8 @@ export type SavedCampaignPlan = {
   metrics: CampaignPlanStoredMetrics;
   engineVersion: string;
   reportCopy?: PlannerReportCopyState | null;
+  /** digital_only 플랜에만 존재 — 있으면 mediaMix는 항상 빈 배열 */
+  onlineRecommend?: CampaignPlanOnlineRecommendSnapshot | null;
   createdAt: string;
   expiresAt: string | null;
 };
@@ -44,6 +47,7 @@ export async function createCampaignPlan(params: {
       brief: packCampaignPlanBriefJson(
         params.snapshot.brief,
         params.snapshot.reportCopy,
+        params.snapshot.onlineRecommend,
       ) as never,
       mediaMix: params.snapshot.mediaMix as never,
       metrics: params.snapshot.metrics as never,
@@ -71,6 +75,7 @@ export async function createCampaignPlan(params: {
     metrics: row.metrics as SavedCampaignPlan["metrics"],
     engineVersion: row.engineVersion,
     reportCopy: unpacked.reportCopy,
+    onlineRecommend: unpacked.onlineRecommend,
     createdAt: row.createdAt.toISOString(),
     expiresAt: row.expiresAt?.toISOString() ?? null,
   };
@@ -104,6 +109,7 @@ export async function getCampaignPlanById(
     metrics: row.metrics as SavedCampaignPlan["metrics"],
     engineVersion: row.engineVersion,
     reportCopy: unpacked.reportCopy,
+    onlineRecommend: unpacked.onlineRecommend,
     createdAt: row.createdAt.toISOString(),
     expiresAt: row.expiresAt?.toISOString() ?? null,
   };

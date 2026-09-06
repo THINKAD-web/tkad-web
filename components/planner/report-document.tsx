@@ -786,6 +786,21 @@ export const PlannerReportDocument = forwardRef<
                 </tbody>
               </table>
             </div>
+            {p.onlineSection.excludedForBudgetNotice &&
+            (p.onlineSection.excludedForBudgetLines?.length ?? 0) > 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-3">
+                <p className="text-sm font-medium text-gray-600">
+                  {p.onlineSection.excludedForBudgetNotice}
+                </p>
+                <ul className="mt-1.5 space-y-1">
+                  {p.onlineSection.excludedForBudgetLines!.map((line) => (
+                    <li key={line} className="text-xs text-gray-500">
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </section>
         ) : null}
 

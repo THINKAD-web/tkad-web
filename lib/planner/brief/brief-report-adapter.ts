@@ -60,7 +60,19 @@ import {
   type PlannerExportBadgeKind,
 } from "@/lib/planner-report-export/export-badge";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
-import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
+import type {
+  PlannerExportChartDatum,
+  PlannerExportKpi,
+  PlannerExportMediaRow,
+  PlannerExportOnlineLine,
+  PlannerExportOnlineSection,
+  PlannerReportExportPayload,
+} from "@/lib/planner-report-export/types";
+import { formatKpiRange } from "@/lib/digital/mix-engine";
+import {
+  onlineCatalogEstimationNotice,
+  onlineConsultationLineNotice,
+} from "@/lib/planner-report-export/online-consultation-notice";
 import { buildReportBudgetHonesty } from "@/lib/planner/report-budget-honesty";
 import { buildPlannerOverBudgetAppendixSpecs } from "@/lib/planner/brief/over-budget-options";
 import { customMixEntriesToExportRows } from "@/lib/planner/brief/custom-export";
@@ -492,9 +504,214 @@ function buildBriefExportCalcPlan(args: {
   });
 }
 
+/**
+ * digital_only 저장 스냅샷 → export payload. `buildOnlineReportPayload`
+ * (plan-cart 경로, `payload-online.ts`)와 같은 `PlannerExportOnlineSection`
+ * 타입을 재사용해 3개 렌더러(web/PDF/PPTX)를 그대로 쓰지만, 숫자는 그쪽처럼
+ * `estimatePerformance()`로 재계산하지 않고 저장 시점 값을 그대로 옮긴다 —
+ * `recommendOnlineCatalogChannels()`가 이미 계산해 화면에 보여준 값과
+ * 어긋나면 안 되기 때문(SSOT).
+ */
+function buildBriefOnlineReportPayload(
+  args: BuildBriefReportPayloadArgs,
+): PlannerReportExportPayload {
+  const { plan, isKo } = args;
+  const rec = plan.onlineRecommend;
+  if (!rec) {
+    throw new Error("buildBriefOnlineReportPayload requires plan.onlineRecommend");
+  }
+  const brief = briefFromPlan(plan);
+  const industryKey = briefIndustryToPlanner(brief.industry);
+  const budgetMan = Math.max(0, Math.round(plan.brief.budgetWon / 10_000));
+
+  const resolvedPeriod = resolveBriefPeriodDays(plan);
+  const days = flightDays(brief);
+  const months = Math.max(1, Math.round(resolvedPeriod.days / MEDIA_DAYS_PER_MONTH));
+  const periodDisplay =
+    brief.flightStart && brief.flightEnd
+      ? days != null
+        ? isKo
+          ? `${brief.flightStart} ~ ${brief.flightEnd} (${days}일)`
+          : `${brief.flightStart} ~ ${brief.flightEnd} (${days}d)`
+        : `${brief.flightStart} ~ ${brief.flightEnd}`
+      : isKo
+        ? `${months}개월`
+        : `${months} month${months > 1 ? "s" : ""}`;
+
+  const cover = buildBriefCoverDemographics({
+    brief,
+    ageBands: plan.brief.ageBands,
+    industryKey,
+    isKo,
+    mixSource: args.mixSource,
+  });
+
+  const lines: PlannerExportOnlineLine[] = rec.channels.map((c) => {
+    const hasEstimate = !(c.estimatedMetricMin === 0 && c.estimatedMetricMax === 0);
+    const rangeLabel = hasEstimate
+      ? formatKpiRange(c.estimatedMetricMin, c.estimatedMetricMax)
+      : null;
+    return {
+      mediaId: c.mediaId,
+      name: c.productName,
+      platform: c.platform,
+      budgetWon: c.budgetWon,
+      pricingLabel: c.pricingLabel,
+      reachLabel: c.metricType === "impressions" ? rangeLabel : null,
+      clicksLabel: c.metricType === "clicks" ? rangeLabel : null,
+      hasEstimate,
+    };
+  });
+
+  const inquiryLineCount = lines.filter((l) => !l.hasEstimate).length;
+  const calculableLineCount = lines.length - inquiryLineCount;
+
+  let reachMin = 0;
+  let reachMax = 0;
+  let clicksMin = 0;
+  let clicksMax = 0;
+  let hasReach = false;
+  let hasClicks = false;
+  for (const c of rec.channels) {
+    if (c.estimatedMetricMin === 0 && c.estimatedMetricMax === 0) continue;
+    if (c.metricType === "impressions") {
+      reachMin += c.estimatedMetricMin;
+      reachMax += c.estimatedMetricMax;
+      hasReach = true;
+    } else {
+      clicksMin += c.estimatedMetricMin;
+      clicksMax += c.estimatedMetricMax;
+      hasClicks = true;
+    }
+  }
+
+  const excludedForBudgetNotice =
+    rec.excludedForBudget.length > 0
+      ? isKo
+        ? `참고 · 관련성은 높지만 예산 부족으로 제외된 채널 ${rec.excludedForBudget.length}개`
+        : `Note · ${rec.excludedForBudget.length} relevant channel(s) excluded for budget`
+      : undefined;
+  const excludedForBudgetLines = rec.excludedForBudget.map((e) =>
+    isKo ? e.reasonKo : e.reasonEn,
+  );
+
+  const onlineSection: PlannerExportOnlineSection = {
+    title: isKo ? "온라인 채널" : "Online channels",
+    estimationNotice: onlineCatalogEstimationNotice(isKo),
+    consultationNotice: onlineConsultationLineNotice(inquiryLineCount, isKo),
+    inquiryLineCount,
+    calculableLineCount,
+    totalBudgetWon: rec.totalBudgetWon,
+    lines,
+    strategyLines: [],
+    whyLine: "",
+    reachLabel: hasReach ? formatKpiRange(reachMin, reachMax) : null,
+    clicksLabel: hasClicks ? formatKpiRange(clicksMin, clicksMax) : null,
+    excludedForBudgetNotice,
+    excludedForBudgetLines:
+      excludedForBudgetLines.length > 0 ? excludedForBudgetLines : undefined,
+  };
+
+  const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
+  const kpis: PlannerExportKpi[] = [
+    {
+      label: isKo ? "추천 채널" : "Recommended channels",
+      value: `${rec.channels.length}${isKo ? "개" : ""}`,
+      badge: "estimated",
+    },
+    {
+      label: isKo ? "배분 예산" : "Allocated budget",
+      value: `₩${fmt(rec.totalBudgetWon)}`,
+      badge: "estimated",
+    },
+    {
+      label: isKo ? "예상 노출" : "Est. impressions",
+      value: onlineSection.reachLabel ?? (isKo ? "산정 불가" : "Not estimable"),
+      badge: onlineSection.reachLabel ? "estimated" : "pending",
+    },
+    {
+      label: isKo ? "예상 클릭" : "Est. clicks",
+      value: onlineSection.clicksLabel ?? (isKo ? "산정 불가" : "Not estimable"),
+      badge: onlineSection.clicksLabel ? "estimated" : "pending",
+    },
+  ];
+
+  const portfolio: PlannerExportMediaRow[] = lines.map((line) => ({
+    id: line.mediaId,
+    name: line.name,
+    type: line.platform,
+    priceLabel: line.pricingLabel,
+    monthlyPriceLabel: isKo ? `₩${fmt(line.budgetWon)}` : `₩${fmt(line.budgetWon)}`,
+    lineTotalLabel: isKo ? `₩${fmt(line.budgetWon)}` : `₩${fmt(line.budgetWon)}`,
+    metricsUnavailableLabel: line.hasEstimate
+      ? undefined
+      : isKo
+        ? "산정 불가"
+        : "Not estimable",
+    recommendReason: line.reachLabel
+      ? isKo
+        ? `예상 노출 ${line.reachLabel}`
+        : `Est. impressions ${line.reachLabel}`
+      : line.clicksLabel
+        ? isKo
+          ? `예상 클릭 ${line.clicksLabel}`
+          : `Est. clicks ${line.clicksLabel}`
+        : undefined,
+  }));
+
+  const budgetSplit: PlannerExportChartDatum[] = rec.channels.map((c) => ({
+    label: c.platform,
+    value: c.budgetWon,
+    pct: c.budgetPct,
+  }));
+
+  const copy = args.reportCopy;
+  const executiveSummaryLines = copy
+    ? splitReportCopyParagraphs(copy.executiveSummary)
+    : undefined;
+
+  return {
+    kind: "ooh",
+    reportComposition: "onlyOnline",
+    isKo,
+    documentTitle:
+      copy?.documentTitle?.trim() ||
+      (isKo ? "온라인 채널 제안 보고서" : "Online channel proposal"),
+    campaignName: cover.goalTitle,
+    clientName: copy?.clientName?.trim() || undefined,
+    coverLogoUrl: copy ? resolveCoverLogoUrl(copy) : undefined,
+    greetingText: copy?.greeting?.trim() || undefined,
+    executiveSummaryLines:
+      executiveSummaryLines && executiveSummaryLines.length > 0
+        ? executiveSummaryLines
+        : undefined,
+    generatedAt:
+      args.generatedAt ?? new Date().toLocaleString(isKo ? "ko-KR" : "en-US"),
+    goalTitle: cover.goalTitle,
+    budgetMan,
+    periodDisplay,
+    regionsText: cover.regionsText,
+    categoriesText: isKo ? "온라인" : "Online",
+    ageText: cover.ageText,
+    industryText: cover.industryText,
+    kpis,
+    charts: budgetSplit.length > 0 ? { budgetSplit } : undefined,
+    portfolio,
+    onlineSection,
+    sections: [],
+    staleEngineNotice: staleEngineNoticeFor(plan, isKo),
+    disclaimer: isKo
+      ? "본 보고서의 온라인 예상 성과는 저장 시점 카탈로그 CPC·CPM 참고 범위 기반이며, 실제 집행·과금 조건에 따라 달라질 수 있습니다."
+      : "Online estimates use catalog CPC/CPM reference ranges as of when this was saved; actual delivery and billing may vary.",
+  };
+}
+
 export function buildBriefReportPayload(
   args: BuildBriefReportPayloadArgs,
 ): PlannerReportExportPayload {
+  if (args.plan.onlineRecommend) {
+    return buildBriefOnlineReportPayload(args);
+  }
   const { plan, catalog, isKo } = args;
   const brief = briefFromPlan(plan);
   const portfolio = resolveBriefPortfolio(plan, catalog);

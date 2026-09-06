@@ -168,6 +168,12 @@ export type PlannerExportOnlineSection = {
   whyLine: string;
   reachLabel?: string | null;
   clicksLabel?: string | null;
+  /**
+   * 온라인 플래너(3-5) — 관련성은 있었지만 예산 부족으로 제외된 채널 안내.
+   * 없으면(undefined/빈 배열) 렌더하지 않음 — 억지로 섹션을 만들지 않음.
+   */
+  excludedForBudgetNotice?: string;
+  excludedForBudgetLines?: string[];
 };
 
 export type PlannerReportComposition = "onlyOoh" | "onlyOnline" | "mixed";
