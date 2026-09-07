@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import type { MediaItem, MediaOnlineSpecView } from "@/lib/media-data";
-import { recommendOnlineCatalogChannels } from "@/lib/planner/recommend-online-catalog";
+import { recommendOnlineCatalogChannels, reallocateOnlineBudget } from "@/lib/planner/recommend-online-catalog";
 
 function onlineItem(
   id: string,
@@ -402,5 +402,61 @@ describe("recommendOnlineCatalogChannels", () => {
 
     assert.equal(forward.platforms[0].topProduct.id, "prod-a");
     assert.equal(reversed.platforms[0].topProduct.id, "prod-a");
+  });
+});
+
+describe("reallocateOnlineBudget", () => {
+  it("선택한 채널만 남기고 예산 비율을 재계산한다", () => {
+    const input = {
+      goal: "launch" as const,
+      industry: "retail" as const,
+      ageBands: ["20s" as const],
+      genders: [] as const,
+      budgetMan: 500,
+      catalog: MOCK_CATALOG,
+    };
+    const baseline = recommendOnlineCatalogChannels(input);
+    assert.ok(baseline.platforms.length >= 2, "테스트 전제: baseline 2개 이상");
+
+    const keepId = baseline.platforms[0].topProduct.id;
+    const mixed = reallocateOnlineBudget(input, [keepId]);
+
+    assert.equal(mixed.platforms.length, 1);
+    assert.equal(mixed.platforms[0].topProduct.id, keepId);
+    assert.equal(mixed.platforms[0].budgetPct, 100);
+    assert.equal(mixed.platforms[0].budgetMan, 500);
+  });
+
+  it("선택 id가 비어 있거나 유효하지 않으면 budgetTooSmall 또는 빈 결과", () => {
+    const input = {
+      goal: "launch" as const,
+      industry: "retail" as const,
+      ageBands: ["20s" as const],
+      genders: [] as const,
+      budgetMan: 500,
+      catalog: MOCK_CATALOG,
+    };
+
+    const empty = reallocateOnlineBudget(input, []);
+    assert.equal(empty.platforms.length, 0);
+    assert.equal(empty.budgetTooSmall, true);
+
+    const invalid = reallocateOnlineBudget(input, ["nonexistent-id"]);
+    assert.equal(invalid.platforms.length, 0);
+    assert.equal(invalid.budgetTooSmall, true);
+  });
+
+  it("excludedForBudget 항목에 topProductMediaId가 포함된다", () => {
+    const result = recommendOnlineCatalogChannels({
+      goal: "sales",
+      industry: "tech",
+      ageBands: ["30s"],
+      genders: [],
+      budgetMan: 100,
+      catalog: MOCK_CATALOG,
+    });
+    for (const e of result.excludedForBudget) {
+      assert.ok(typeof e.topProductMediaId === "string" && e.topProductMediaId.length > 0);
+    }
   });
 });

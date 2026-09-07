@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { MediaItem, MediaOnlineSpecView } from "@/lib/media-data";
 import { EMPTY_BRIEF, type CampaignBriefInput } from "@/lib/planner/brief/types";
-import { recommendOnlineCatalogChannels } from "@/lib/planner/recommend-online-catalog";
+import { recommendOnlineCatalogChannels, reallocateOnlineBudget } from "@/lib/planner/recommend-online-catalog";
 import { buildOnlineCampaignPlanSnapshot } from "@/lib/planner/brief/build-plan-snapshot";
 import { buildBriefReportPayload } from "@/lib/planner/brief/brief-report-adapter";
 
@@ -144,4 +144,41 @@ test("buildBriefReportPayload — digital_only 플랜은 OOH 전용 필드(quote
   assert.equal(payload.digital, undefined);
   // 퍼널처럼 데이터 없는 섹션을 억지로 만들지 않음
   assert.deepEqual(payload.sections, []);
+});
+
+test("reallocateOnlineBudget — 사용자 선택 mix로 snapshot이 재계산된다", () => {
+  const baseline = recommendOnlineCatalogChannels(
+    { goal: "brand", industry: "retail", ageBands: ["20s", "30s"], genders: [], budgetMan: 600, catalog },
+    true,
+  );
+  assert.ok(baseline.platforms.length >= 1);
+  const keepId = baseline.platforms[0].topProduct.id;
+
+  const mixed = reallocateOnlineBudget(
+    { goal: "brand", industry: "retail", ageBands: ["20s", "30s"], genders: [], budgetMan: 600, catalog },
+    [keepId],
+    true,
+  );
+  assert.equal(mixed.platforms.length, 1);
+
+  const snapshot = buildOnlineCampaignPlanSnapshot({ brief, result: mixed, isKo: true });
+  assert.equal(snapshot.onlineRecommend!.channels.length, 1);
+  assert.equal(snapshot.onlineRecommend!.channels[0]!.mediaId, keepId);
+});
+
+test("buildBriefOnlineReportPayload — portfolio 행에 onlinePlatform이 담긴다", () => {
+  const result = recommendOnlineCatalogChannels(
+    { goal: "brand", industry: "retail", ageBands: ["20s", "30s"], genders: [], budgetMan: 600, catalog },
+    true,
+  );
+  const snapshot = buildOnlineCampaignPlanSnapshot({ brief, result, isKo: true });
+  const payload = buildBriefReportPayload({
+    plan: snapshot,
+    catalog,
+    isKo: true,
+    channelMode: "digital_only",
+  });
+  assert.ok(payload.portfolio.length > 0);
+  assert.ok(payload.portfolio.every((row) => row.onlinePlatform));
+  assert.equal(payload.portfolio[0]!.onlinePlatform, result.platforms[0]!.platform);
 });

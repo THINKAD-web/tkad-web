@@ -1,9 +1,8 @@
 "use client";
 
 /**
- * O-1 / PART3-5 — Step 2 `channelMode === "digital_only"` 전용 화면.
- * OOH 믹스 빌더(카탈로그 카드·수량·커스텀 라인)를 쓰지 않는다 — 온라인
- * 카탈로그 추천은 수동 담기가 아니라 스코어러가 계산한 배분 결과이기 때문.
+ * O-1 / PART3-5 + PR3 — Step 2 `channelMode === "digital_only"` 전용 화면.
+ * OOH BriefMediaCard(units) 대신 OnlineMixChannelCard(budgetPct)로 mix 편집.
  */
 
 import type { MediaItem } from "@/lib/media-data";
@@ -22,12 +21,17 @@ export function BriefStepTwoOnlineOnly({
   isKo: boolean;
 }) {
   const store = useBriefStore();
-  const result = useOnlineCatalogResult(catalog, isKo);
-  const canProceed = result.platforms.length > 0;
+  const hookResult = useOnlineCatalogResult(catalog, isKo);
+  const canProceed = hookResult.result.platforms.length > 0;
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-3xl space-y-4">
-      <BriefOnlineOnlyPanel catalog={catalog} isKo={isKo} result={result} />
+      <BriefOnlineOnlyPanel
+        catalog={catalog}
+        isKo={isKo}
+        hookResult={hookResult}
+        editable
+      />
 
       <div className="flex gap-2">
         <Button

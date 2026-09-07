@@ -50,6 +50,7 @@ function exportRowToDetail(
     name: row.name,
     location: row.location,
     thumbUrl: row.thumbUrl,
+    onlinePlatform: row.onlinePlatform,
     categoryLabel: row.categoryLabel,
     size: row.size,
     operatingHours: row.operatingHours,

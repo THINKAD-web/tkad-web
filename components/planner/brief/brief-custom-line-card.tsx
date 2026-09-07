@@ -60,14 +60,14 @@ export function BriefCustomLineCard({
 
   return (
     <li
-      className="rounded-xl border border-dashed border-violet-400/40 bg-violet-500/5 p-3"
+      className="rounded-xl border border-dashed border-primary/35 bg-primary/5 p-3"
       data-testid="brief-custom-line-row"
       data-editing="false"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-1.5">
-            <span className="rounded bg-violet-600/15 px-1.5 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+            <span className="rounded bg-primary/10 px-1.5 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-primary">
               {isKo ? "커스텀" : "Custom"}
             </span>
             <UnmeasurableBadge isKo={isKo} />

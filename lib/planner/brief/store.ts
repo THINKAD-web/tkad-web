@@ -52,6 +52,32 @@ import { DIGITAL_PLATFORM_IDS } from "@/lib/planner/digital-platform-map";
 
 export const BRIEF_STORAGE_KEY = "tkad-planner-brief-v1";
 
+/** PR3 — digital_only Step 2 사용자 mix (units 대신 topProduct mediaId) */
+export type BriefOnlineMix = {
+  /** 선택된 플랫폼 대표 상품 id */
+  selectedMediaIds: string[];
+  /** 사용자가 제거해 자동 시드에서 제외할 id */
+  excludedMediaIds: string[];
+};
+
+const EMPTY_ONLINE_MIX: BriefOnlineMix = {
+  selectedMediaIds: [],
+  excludedMediaIds: [],
+};
+
+function normalizeOnlineMix(raw: unknown): BriefOnlineMix {
+  if (!raw || typeof raw !== "object") return { ...EMPTY_ONLINE_MIX };
+  const o = raw as Record<string, unknown>;
+  const ids = (key: string) =>
+    Array.isArray(o[key])
+      ? [...new Set((o[key] as unknown[]).filter((v): v is string => typeof v === "string" && v.length > 0))]
+      : [];
+  return {
+    selectedMediaIds: ids("selectedMediaIds"),
+    excludedMediaIds: ids("excludedMediaIds"),
+  };
+}
+
 function toggleIn<T>(list: readonly T[], value: T): T[] {
   return list.includes(value)
     ? list.filter((v) => v !== value)
@@ -80,6 +106,8 @@ export type BriefStoreState = CampaignBriefInput & {
   overBudgetChoiceDismissed: boolean;
   /** Option A 적용 직전 mix — 되돌리기용 (persist 제외) */
   mixUndoBeforeOptionA: Record<string, number> | null;
+  /** PR3 — digital_only 채널 mix (topProduct mediaId 기준) */
+  onlineMix: BriefOnlineMix;
 };
 
 export type BriefStoreActions = {
@@ -144,6 +172,12 @@ export type BriefStoreActions = {
   ) => void;
   /** Option A 적용 직전 mix 로 복원 */
   restoreMixBeforeOptionA: () => void;
+
+  // ── PR3 digital_only mix ──
+  seedOnlineMixFromRecommend: (mediaIds: readonly string[]) => void;
+  addOnlineChannel: (mediaId: string) => void;
+  removeOnlineChannel: (mediaId: string) => void;
+  clearOnlineMix: () => void;
 };
 
 export type BriefStore = BriefStoreState & BriefStoreActions;
@@ -161,6 +195,7 @@ const INITIAL: BriefStoreState = {
   budgetWithinOnly: true,
   overBudgetChoiceDismissed: false,
   mixUndoBeforeOptionA: null,
+  onlineMix: { ...EMPTY_ONLINE_MIX },
 };
 
 function clearOverBudgetUiState(): Pick<
@@ -433,6 +468,50 @@ export const useBriefStore = create<BriefStore>()(
             ...stampMixFingerprint(state),
           };
         }),
+
+      seedOnlineMixFromRecommend: (mediaIds) =>
+        set((s) => {
+          const excluded = new Set(s.onlineMix.excludedMediaIds);
+          const selectedMediaIds = mediaIds.filter((id) => !excluded.has(id));
+          return {
+            onlineMix: {
+              ...s.onlineMix,
+              selectedMediaIds,
+            },
+          };
+        }),
+
+      addOnlineChannel: (mediaId) =>
+        set((s) => {
+          const selected = new Set(s.onlineMix.selectedMediaIds);
+          selected.add(mediaId);
+          const excludedMediaIds = s.onlineMix.excludedMediaIds.filter(
+            (id) => id !== mediaId,
+          );
+          return {
+            onlineMix: {
+              selectedMediaIds: [...selected],
+              excludedMediaIds,
+            },
+          };
+        }),
+
+      removeOnlineChannel: (mediaId) =>
+        set((s) => {
+          const selectedMediaIds = s.onlineMix.selectedMediaIds.filter(
+            (id) => id !== mediaId,
+          );
+          const excluded = new Set(s.onlineMix.excludedMediaIds);
+          excluded.add(mediaId);
+          return {
+            onlineMix: {
+              selectedMediaIds,
+              excludedMediaIds: [...excluded],
+            },
+          };
+        }),
+
+      clearOnlineMix: () => set({ onlineMix: { ...EMPTY_ONLINE_MIX } }),
     }),
     {
       name: BRIEF_STORAGE_KEY,
@@ -458,6 +537,7 @@ export const useBriefStore = create<BriefStore>()(
         customLines: s.customLines,
         mixBriefFingerprint: s.mixBriefFingerprint,
         budgetWithinOnly: s.budgetWithinOnly,
+        onlineMix: s.onlineMix,
       }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<BriefStoreState>;
@@ -489,6 +569,7 @@ export const useBriefStore = create<BriefStore>()(
             typeof p.budgetWithinOnly === "boolean"
               ? p.budgetWithinOnly
               : true,
+          onlineMix: normalizeOnlineMix(p.onlineMix),
         };
       },
     },

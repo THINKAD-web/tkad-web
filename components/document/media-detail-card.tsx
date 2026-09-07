@@ -12,7 +12,9 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { OnlinePlatformBadge } from "@/components/media/online-platform-badge";
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
+import { REPORT_BRAND } from "@/lib/planner-report-export/document-theme";
 import { footfallVsReachShortFootnote } from "@/lib/planner-report-performance-guide";
 
 const LIGHT = {
@@ -21,7 +23,7 @@ const LIGHT = {
   border: "#E5E7EB",
   title: "#111827",
   sub: "#6B7280",
-  accent: "#7C3AED",
+  accent: REPORT_BRAND.teal,
   divider: "#F0F0F0",
 } as const;
 
@@ -128,6 +130,8 @@ export function MediaDetailCard({
               backgroundRepeat: "no-repeat",
             }}
           />
+        ) : detail.onlinePlatform ? (
+          <OnlinePlatformBadge platform={detail.onlinePlatform} size="tile" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-[10px] font-medium uppercase tracking-widest text-[#9CA3AF]">
             {isKo ? "이미지 없음" : "No image"}
@@ -143,7 +147,7 @@ export function MediaDetailCard({
           >
             {detail.name}
             {detail.quantityLabel ? (
-              <span className="ml-1.5 text-sm font-semibold tabular-nums text-[#7C3AED]">
+              <span className="ml-1.5 text-sm font-semibold tabular-nums" style={{ color: LIGHT.accent }}>
                 · {detail.quantityLabel}
               </span>
             ) : null}
@@ -205,7 +209,7 @@ export function MediaDetailCard({
                 <p className="text-[11px] font-medium text-[#6B7280]">
                   {isKo ? "월 단가" : "Monthly"}
                 </p>
-                <p className="text-sm font-semibold tabular-nums text-[#7C3AED]">
+                <p className="text-sm font-semibold tabular-nums" style={{ color: LIGHT.accent }}>
                   {detail.monthlyPriceLabel}
                 </p>
               </div>
@@ -215,7 +219,7 @@ export function MediaDetailCard({
                 <p className="text-[11px] font-medium text-[#6B7280]">
                   {isKo ? "집행 소계" : "Subtotal"}
                 </p>
-                <p className="text-sm font-semibold tabular-nums text-[#7C3AED]">
+                <p className="text-sm font-semibold tabular-nums" style={{ color: LIGHT.accent }}>
                   {detail.lineTotalLabel}
                 </p>
               </div>
@@ -225,7 +229,7 @@ export function MediaDetailCard({
 
         {detail.recommendReason ? (
           <p className="text-sm leading-relaxed text-[#374151]">
-            <span className="font-semibold text-[#7C3AED]">
+            <span className="font-semibold" style={{ color: LIGHT.accent }}>
               {isKo ? "추천 " : "Why "}
             </span>
             {detail.recommendReason}
@@ -246,7 +250,7 @@ export function MediaDetailCard({
                 <ContributionBar
                   label={isKo ? "예산 비중" : "Budget share"}
                   pct={detail.budgetContributionPct}
-                  color="#7C3AED"
+                  color={LIGHT.accent}
                 />
               ) : (
                 <div className="space-y-1">
@@ -273,7 +277,8 @@ export function MediaDetailCard({
           <div className="flex justify-end border-t pt-3" style={{ borderColor: LIGHT.divider }}>
             <Link
               href={mediaPageHref}
-              className="tkad-document-cta inline-flex items-center gap-1.5 rounded-lg bg-[#7C3AED] px-4 py-2.5 text-sm font-semibold text-white no-underline transition hover:bg-[#6D28D9]"
+              className="tkad-document-cta inline-flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold text-white no-underline transition hover:opacity-90"
+              style={{ background: LIGHT.accent }}
             >
               {isKo ? "매체 상세 보기" : "View media page"}
               <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -357,7 +362,7 @@ export function MediaDetailTableRow({
       <td className="px-2 py-4 text-right text-sm tabular-nums text-[#374151]">
         {unitPriceLabel}
       </td>
-      <td className="px-2 py-4 text-right text-sm font-semibold tabular-nums text-[#7C3AED]">
+      <td className="px-2 py-4 text-right text-sm font-semibold tabular-nums" style={{ color: LIGHT.accent }}>
         {lineTotalLabel}
       </td>
     </tr>

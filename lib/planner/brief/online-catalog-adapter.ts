@@ -9,9 +9,12 @@ import type { MediaItem } from "@/lib/media-data";
 import { canonicalCatalogChannel } from "@/lib/catalog-channel";
 import {
   recommendOnlineCatalogChannels,
+  reallocateOnlineBudget,
+  type OnlineCatalogRecommendInput,
   type OnlineCatalogRecommendResult,
 } from "@/lib/planner/recommend-online-catalog";
 import type { CampaignBriefInput } from "@/lib/planner/brief/types";
+import type { BriefOnlineMix } from "@/lib/planner/brief/store";
 import { briefBudgetMan, briefGoalToPlanner } from "@/lib/planner/brief/brief-integrated-adapters";
 
 /** 카탈로그(OOH+온라인 혼재)에서 온라인 상품만 추출 — onlineSpec 없는 행은 스코어링 불가하므로 제외 */
@@ -25,21 +28,41 @@ export function onlineCatalogFromBrief(
   );
 }
 
-export function recommendOnlineCatalogFromBrief(
+export function briefToOnlineCatalogInput(
+  brief: CampaignBriefInput,
+  catalog: readonly MediaItem[],
+): OnlineCatalogRecommendInput {
+  return {
+    goal: briefGoalToPlanner(brief.goal),
+    industry: brief.industry,
+    ageBands: brief.ageBands,
+    genders: brief.genders,
+    budgetMan: briefBudgetMan(brief),
+    catalog: onlineCatalogFromBrief(catalog),
+  };
+}
+
+/** 자동 추천 baseline — mix 편집 UI의 시드·복원 풀 */
+export function baselineOnlineCatalogFromBrief(
   brief: CampaignBriefInput,
   catalog: readonly MediaItem[],
   isKo: boolean,
 ): OnlineCatalogRecommendResult {
-  const onlineCatalog = onlineCatalogFromBrief(catalog);
   return recommendOnlineCatalogChannels(
-    {
-      goal: briefGoalToPlanner(brief.goal),
-      industry: brief.industry,
-      ageBands: brief.ageBands,
-      genders: brief.genders,
-      budgetMan: briefBudgetMan(brief),
-      catalog: onlineCatalog,
-    },
+    briefToOnlineCatalogInput(brief, catalog),
     isKo,
   );
+}
+
+export function recommendOnlineCatalogFromBrief(
+  brief: CampaignBriefInput,
+  catalog: readonly MediaItem[],
+  isKo: boolean,
+  onlineMix?: BriefOnlineMix | null,
+): OnlineCatalogRecommendResult {
+  const input = briefToOnlineCatalogInput(brief, catalog);
+  if (onlineMix?.selectedMediaIds.length) {
+    return reallocateOnlineBudget(input, onlineMix.selectedMediaIds, isKo);
+  }
+  return recommendOnlineCatalogChannels(input, isKo);
 }
