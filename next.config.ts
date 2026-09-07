@@ -72,16 +72,6 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: "/:locale(ko|en)/planner/integrated",
-        destination: "/:locale/planner",
-        permanent: true,
-      },
-      {
-        source: "/:locale(ko|en)/planner/integrated/:path*",
-        destination: "/:locale/planner",
-        permanent: true,
-      },
-      {
         source: "/:locale(ko|en)/media/packages",
         destination: "/:locale/planner",
         permanent: true,
