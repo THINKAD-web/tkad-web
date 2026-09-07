@@ -25,8 +25,11 @@ import {
   buildFallbackProposal,
   buildGeneralFallback,
 } from "../lib/proposal/generate-proposal.ts";
-import { buildProposalOnlineFacts } from "../lib/proposal/proposal-online-adapter.ts";
-import { estimatePerformance } from "../lib/pricing/online-performance-estimate.ts";
+import { buildProposalOnlineFacts, splitMixedChannelBudgetWon } from "../lib/proposal/proposal-online-adapter.ts";
+import {
+  estimatePerformance,
+  hasOnlinePricingSpec,
+} from "../lib/pricing/online-performance-estimate.ts";
 import { isOnlineCatalogMedia } from "../lib/pricing-unavailable.ts";
 import { sectionsForType } from "../lib/proposal/types.ts";
 
@@ -42,7 +45,7 @@ const SHARE = resolveVercelShareToken();
 
 const report = {
   base: PREVIEW_ORIGIN,
-  sha: "ede84191",
+  sha: "77fb7850",
   scenarios: {},
   checks: [],
   pr6cRebaseNotes: [],
@@ -174,7 +177,11 @@ async function main() {
   assert.ok(catalog.length >= 3, "catalog unavailable — check preview access / VERCEL_SHARE");
 
   const online = catalog.filter(isOnlineCatalogMedia);
+  const calculableOnline = online.filter((m) =>
+    hasOnlinePricingSpec(m.onlineSpec ?? undefined),
+  );
   assert.ok(online.length >= 3, "need 3+ online media");
+  assert.ok(calculableOnline.length >= 2, "need 2+ calculable online media");
   const pick3 = online.slice(0, 3);
 
   // ── Scenario A: below-min (100만원 + 3 online)
@@ -241,8 +248,8 @@ async function main() {
     inquiryLineCount: factsBelow.section.inquiryLineCount,
   };
 
-  // ── Scenario B: Studio integrated ROI (500만원 + 2 online)
-  const pick2 = online.slice(0, 2);
+  // ── Scenario B: Studio integrated ROI (500만원 + 2 calculable online)
+  const pick2 = calculableOnline.slice(0, 2);
   const studioInput = {
     type: "integrated",
     brandName: "PR7 Studio",
@@ -285,13 +292,55 @@ async function main() {
     metrics: studioOut.metrics,
   };
 
-  // ── PR6-c rebase interface notes
-  report.pr6cRebaseNotes = [
-    "buildFactBlockMarkdown() in proposal-online-adapter.ts is the single extension point — PR6-c can re-add insights.creativeBullets / operationalBullets blocks (removed on main-only branch).",
-    "buildProposalOnlineFacts() calls buildOnlineReportSection(args) — PR6-c adds insights on section; adapter applyCalculabilityGate already post-filters lines; no signature change needed.",
-    "months field on BuildOnlineReportPayloadArgs exists in PR6-c for pacing — add optional months back to toOnlineReportArgs() on rebase.",
-    "PROPOSAL_ONLINE_INSIGHTS_DISCLAIMER_KO duplicates ONLINE_INSIGHTS_DISCLAIMER_KO — rebase should import from online-report-insights.ts.",
-  ];
+  // ── Scenario C: onlyOnline fact block insights reconnect
+  const soloInput = proposalInput({
+    mediaIds: [calculableOnline[0].id],
+    budgetManwon: 300,
+    regions: ["online"],
+  });
+  const factsSolo = buildProposalOnlineFacts(soloInput, [calculableOnline[0]], 3_000_000);
+  assert.ok(factsSolo.factBlockMarkdown.includes("제안 집행 페이스"));
+  assert.ok(factsSolo.factBlockMarkdown.includes("소재·크리에이티브 제안"));
+  assert.ok(!factsSolo.factBlockMarkdown.includes("소진 페이스"), "report title leak");
+  pass("onlyOnline-fact-insights", "proposal fact block has PR6-c hints");
+
+  // ── Scenario D: mixed fact block (online + OOH)
+  const ooh = catalog.find(
+    (m) =>
+      m.name?.includes("광화문") &&
+      m.catalogChannel !== "online" &&
+      !isOnlineCatalogMedia(m),
+  );
+  if (ooh && calculableOnline[0]) {
+    const mixedPortfolio = [ooh, calculableOnline[0]];
+    const mixedInput = proposalInput({
+      mediaIds: mixedPortfolio.map((m) => m.id),
+      budgetManwon: 500,
+      regions: ["서울"],
+    });
+    const { onlineBudgetWon } = splitMixedChannelBudgetWon(5_000_000, 1, 1);
+    const factsMixed = buildProposalOnlineFacts(
+      mixedInput,
+      [calculableOnline[0]],
+      onlineBudgetWon,
+    );
+    assert.ok(factsMixed.factBlockMarkdown.includes("집행 시 유의사항"));
+    pass("mixed-fact-insights", "mixed online slice has insight hints");
+    report.scenarios.mixedFact = {
+      onlineBudgetWon,
+      factSnippet: factsMixed.factBlockMarkdown.slice(0, 400),
+    };
+  }
+
+  report.scenarios.onlyOnlineFact = {
+    factSnippet: factsSolo.factBlockMarkdown.slice(0, 400),
+  };
+
+  report.insightsReconnect = {
+    status: "connected",
+    extensionPoint: "buildFactBlockMarkdown()",
+    disclaimerSource: "online-report-insights.ts",
+  };
 
   // ── HTML + PDF + PPTX via Playwright
   const htmlBelow = renderCampaignProposalHtml(inputBelowMin, proposalBelowMin);

@@ -7,6 +7,7 @@ import {
   buildProposalOnlineFacts,
   splitMixedChannelBudgetWon,
 } from "@/lib/proposal/proposal-online-adapter";
+import { ONLINE_INSIGHTS_DISCLAIMER_KO } from "@/lib/planner-report-export/online-report-insights";
 import {
   buildFallbackProposal,
   buildGeneralFallback,
@@ -73,6 +74,34 @@ test("allocateProposalOnlineBudgets — below-min lines not calculable", () => {
   for (const row of belowMin) {
     assert.ok(row.allocatedWon < row.minBudgetWon);
   }
+});
+
+test("buildProposalOnlineFacts — fact block includes proposal insight hints (PR6-c reconnect)", () => {
+  const portfolio = [
+    onlineMedia("a", 500_000),
+    onlineMedia("b", 600_000),
+  ];
+  const input = {
+    brandName: "TestBrand",
+    industry: "뷰티",
+    campaignName: "캠페인",
+    goal: "awareness" as const,
+    startDate: "2026-09-01",
+    endDate: "2026-10-01",
+    budgetManwon: 100,
+    regions: ["online"],
+    targetAge: "20-34",
+    targetGender: "전체",
+    targetInterests: "",
+    locale: "ko" as const,
+  };
+  const facts = buildProposalOnlineFacts(input, portfolio, 1_000_000);
+  assert.ok(facts.section.insights?.pacingPlan.length);
+  assert.ok(facts.factBlockMarkdown.includes("제안 집행 페이스"));
+  assert.ok(facts.factBlockMarkdown.includes("소재·크리에이티브 제안"));
+  assert.ok(facts.factBlockMarkdown.includes("집행 시 유의사항"));
+  assert.ok(facts.factBlockMarkdown.includes(ONLINE_INSIGHTS_DISCLAIMER_KO));
+  assert.ok(!facts.factBlockMarkdown.includes("소진 페이스"), "report section title leak");
 });
 
 test("buildProposalOnlineFacts — metrics match estimatePerformance for calculable lines", () => {

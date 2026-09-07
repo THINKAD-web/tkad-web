@@ -6,7 +6,14 @@ import {
   buildOnlineReportSection,
   type BuildOnlineReportPayloadArgs,
 } from "@/lib/planner-report-export/payload-online";
-import type { PlannerExportOnlineSection } from "@/lib/planner-report-export/types";
+import type {
+  PlannerExportOnlineInsights,
+  PlannerExportOnlineSection,
+} from "@/lib/planner-report-export/types";
+import {
+  ONLINE_INSIGHTS_DISCLAIMER_EN,
+  ONLINE_INSIGHTS_DISCLAIMER_KO,
+} from "@/lib/planner-report-export/online-report-insights";
 import {
   buildOnlineReportCopyDraft,
 } from "@/lib/planner-report-export/report-copy-online";
@@ -31,11 +38,13 @@ import { proposalGoalToPlanner } from "@/lib/proposal/prefill-from-planner";
 export const PROPOSAL_ONLINE_BUDGET_DISCLAIMER_KO =
   "본 제안서의 온라인 예산 배분은 플래너 카트와 다를 수 있으며, 최소 집행금액 미달 채널은 견적 참고용입니다.";
 
-export const PROPOSAL_ONLINE_INSIGHTS_DISCLAIMER_KO =
-  "참고용 제안이며 실제 운영 시 예산·소재·타겟은 성과에 따라 조정이 필요합니다.";
+/** @deprecated Import ONLINE_INSIGHTS_DISCLAIMER_KO from online-report-insights.ts */
+export const PROPOSAL_ONLINE_INSIGHTS_DISCLAIMER_KO = ONLINE_INSIGHTS_DISCLAIMER_KO;
 
 export const PROPOSAL_ONLINE_BUDGET_DISCLAIMER_EN =
   "Online budget splits in this proposal may differ from the plan cart; channels below minimum spend are indicative only.";
+
+export const PROPOSAL_ONLINE_INSIGHTS_DISCLAIMER_EN = ONLINE_INSIGHTS_DISCLAIMER_EN;
 
 export type OnlineBudgetAllocation = {
   mediaId: string;
@@ -179,6 +188,20 @@ function goalTitleFromProposal(goal: ProposalGoal, isKo: boolean): string {
   }
 }
 
+function resolveProposalCampaignMonths(
+  startDate: string,
+  endDate: string,
+): number | undefined {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return undefined;
+  const daySpan = Math.max(
+    1,
+    Math.round((end.getTime() - start.getTime()) / 86_400_000),
+  );
+  return Math.max(1, Math.round(daySpan / 30));
+}
+
 function toOnlineReportArgs(
   input: ProposalBriefInput,
   portfolio: readonly MediaItem[],
@@ -200,8 +223,20 @@ function toOnlineReportArgs(
     portfolio: [...portfolio],
     planCartItems,
     generatedAt: new Date().toISOString(),
+    months: resolveProposalCampaignMonths(input.startDate, input.endDate),
     clientName: input.brandName,
   };
+}
+
+/** Proposal fact-block tone — same signals as report insights, not verbatim report copy. */
+function proposalInsightLine(text: string, isKo: boolean): string {
+  if (!isKo) return text;
+  return text
+    .replace(/^초기 1~2주:/, "1~2주차에는")
+    .replace(/에 집중합니다\.?$/, "을 제안합니다.")
+    .replace(/을 권장합니다\.?$/, "을 제안드립니다.")
+    .replace(/하세요\.?$/, "하는 방안을 검토하세요.")
+    .replace(/목표로 하세요\.?$/, "일정을 전제로 제안합니다.");
 }
 
 function applyCalculabilityGate(
@@ -316,6 +351,63 @@ function aggregateOnlineMetrics(
   };
 }
 
+function appendProposalInsightFactBlocks(
+  lines: string[],
+  insights: PlannerExportOnlineInsights | undefined,
+  isKo: boolean,
+): void {
+  if (!insights) return;
+
+  lines.push("");
+  lines.push(
+    isKo
+      ? "### 제안 집행 페이스 (서사 힌트 — KPI·예산 숫자 변경 금지)"
+      : "### Proposed pacing (narrative hint — do not change KPI/budget numbers)",
+  );
+  lines.push(
+    isKo
+      ? "제안서 overview/strategy에 자연스럽게 녹일 집행 리듬입니다. 보고서 PDF 문구를 그대로 복사하지 마세요."
+      : "Weave pacing into proposal narrative naturally; do not copy report PDF wording verbatim.",
+  );
+  for (const phase of insights.pacingPlan) {
+    lines.push(
+      `- ${phase.label} (${phase.sharePct}%): ${proposalInsightLine(phase.description, isKo)}`,
+    );
+  }
+
+  if (insights.creativeDirections.length > 0) {
+    lines.push("");
+    lines.push(
+      isKo
+        ? "### 소재·크리에이티브 제안 (서사 힌트)"
+        : "### Creative direction (narrative hint)",
+    );
+    lines.push(
+      isKo
+        ? "플랫폼 특성에 맞는 소재 방향 — 제안서 톤으로 재서술 가능, KPI는 위 수치 유지."
+        : "Platform-fit creative angles — rephrase for proposal tone; keep KPI figures above.",
+    );
+    for (const line of insights.creativeDirections) {
+      lines.push(`- ${proposalInsightLine(line, isKo)}`);
+    }
+  }
+
+  if (insights.operationalNotes.length > 0) {
+    lines.push("");
+    lines.push(
+      isKo
+        ? "### 집행 시 유의사항 (서사 힌트)"
+        : "### Operations notes (narrative hint)",
+    );
+    for (const note of insights.operationalNotes) {
+      lines.push(`- ${proposalInsightLine(note, isKo)}`);
+    }
+  }
+
+  lines.push("");
+  lines.push(`> ${insights.disclaimer}`);
+}
+
 function buildFactBlockMarkdown(
   section: PlannerExportOnlineSection,
   allocations: readonly OnlineBudgetAllocation[],
@@ -343,6 +435,7 @@ function buildFactBlockMarkdown(
       return `- ${line?.name ?? a.mediaId}: ₩${fmt(a.allocatedWon)} (${status})`;
     }),
   ];
+  appendProposalInsightFactBlocks(lines, section.insights, isKo);
   return lines.filter(Boolean).join("\n");
 }
 
@@ -398,8 +491,8 @@ export function buildProposalOnlineFacts(
   });
 
   const disclaimer = isKo
-    ? `${PROPOSAL_ONLINE_BUDGET_DISCLAIMER_KO} ${PROPOSAL_ONLINE_INSIGHTS_DISCLAIMER_KO}`
-    : `${PROPOSAL_ONLINE_BUDGET_DISCLAIMER_EN}`;
+    ? `${PROPOSAL_ONLINE_BUDGET_DISCLAIMER_KO} ${ONLINE_INSIGHTS_DISCLAIMER_KO}`
+    : `${PROPOSAL_ONLINE_BUDGET_DISCLAIMER_EN} ${ONLINE_INSIGHTS_DISCLAIMER_EN}`;
 
   return {
     allocations,
