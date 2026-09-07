@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { ogAltForRoute } from "@/lib/og-route-copy";
-import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
+import { pageAlternates, pageTitleKeyword, segmentOpenGraphImages } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 
 export async function generateMetadata({
@@ -17,9 +17,10 @@ export async function generateMetadata({
   const description = isKo
     ? "브리프 → 믹스 → 결과, 3단계로 캠페인 플랜을 만듭니다."
     : "Brief → mix → result — build a campaign plan in three steps.";
+  const titleKeyword = pageTitleKeyword(title);
   const ogTitle = title;
   return {
-    title,
+    title: titleKeyword,
     description,
     alternates: pageAlternates(locale, "/planner"),
     openGraph: {

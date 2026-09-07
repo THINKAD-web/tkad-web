@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronDown, ExternalLink, MessageSquare, MonitorSmartphone } from "lucide-react";
+import { ChevronDown, MessageSquare, MonitorSmartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ResolvedPublicNavGroup } from "@/lib/navigation/build-public-nav";
 import { findActiveNavGroupId } from "@/lib/navigation/build-public-nav";
@@ -14,7 +14,6 @@ import {
   MOBILE_DEMOTED_NAV_GROUP_IDS,
   MOBILE_PRIMARY_NAV_GROUP_IDS,
 } from "@/lib/navigation/public-nav-data";
-import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 import { NavBetaBadge } from "@/components/navigation/nav-beta-badge";
 
 function defaultMobileOpenIds(activeGroupId: string | null): Set<string> {
@@ -144,10 +143,8 @@ export function PublicNavSidebar({
             {t("contact")}
           </span>
         </Link>
-        <a
-          href={THINKAD_DIGITAL_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href="/media/online"
           onClick={onNavigate}
           className={cn(
             "flex items-center gap-3 text-gray-900 transition-colors hover:text-gray-950 dark:text-white dark:hover:text-white",
@@ -155,7 +152,6 @@ export function PublicNavSidebar({
               ? "min-h-11 border-b border-gray-200/80 py-3 dark:border-white/10"
               : "min-h-12",
           )}
-          aria-label={t("thinkadDigitalExternal")}
         >
           {!isPanel ? (
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70">
@@ -165,20 +161,19 @@ export function PublicNavSidebar({
           <span className="min-w-0 flex-1">
             <span
               className={cn(
-                "flex items-center gap-2 font-semibold leading-snug tracking-tight",
+                "block font-semibold leading-snug tracking-tight",
                 isPanel ? "text-[0.95rem]" : "text-xl",
               )}
             >
-              {t("thinkadDigital")}
-              <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-50" aria-hidden />
+              {t("thinkadOnline")}
             </span>
             {!isPanel ? (
               <span className="mt-0.5 block text-xs text-gray-400 dark:text-white/40">
-                {t("thinkadDigitalDesc")}
+                {t("thinkadOnlineDesc")}
               </span>
             ) : null}
           </span>
-        </a>
+        </Link>
       </div>
       <ul
         className={cn(

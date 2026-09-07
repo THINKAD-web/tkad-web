@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { buildShareMetadata, pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, pageTitleKeyword } from "@/lib/seo";
 import IntegratedPlannerPageClient from "./integrated-planner-page-client";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
 import { loadDigitalChannelsForIntegratedPlanner } from "@/lib/planner/digital-catalog-bridge";
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = t("metaTitle");
   const description = t("metaDescription");
   return {
-    title,
+    title: pageTitleKeyword(title),
     description,
     alternates: pageAlternates(locale, "/planner/integrated"),
     ...buildShareMetadata({

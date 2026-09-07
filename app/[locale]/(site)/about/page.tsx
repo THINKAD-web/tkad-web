@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
+import { pageAlternates, pageTitleKeyword, segmentOpenGraphImages } from "@/lib/seo";
 import { ogAltForRoute } from "@/lib/og-route-copy";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageHero } from "@/components/layout/page-hero";
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "about" });
 
   return {
-    title: t("metaTitle"),
+    title: pageTitleKeyword(t("metaTitle")),
     description: t("metaDescription"),
     alternates: pageAlternates(locale, "/about"),
     openGraph: {

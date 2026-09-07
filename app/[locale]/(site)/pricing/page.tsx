@@ -4,12 +4,13 @@ import { setRequestLocale } from "next-intl/server";
 import { CreditCard } from "lucide-react";
 import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { buildShareMetadata, pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, siteKeywords } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/user-session";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
 import { PageContainer } from "@/components/layout/page-container";
 import { PricingPageClient } from "@/components/pricing/pricing-page-client";
+import { PricingPlanGrid } from "@/components/pricing/pricing-plan-grid";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -25,18 +26,25 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
-  const title = isKo ? "요금제 | THINKAD 싱커드" : "Pricing | THINKAD";
+  const titleKeyword = isKo ? "요금제" : "Pricing";
+  const titleShare = isKo ? "요금제 | THINKAD 싱커드" : "Pricing | THINKAD";
   const description = isKo
     ? "FREE·LITE·PRO·AGENCY·ENTERPRISE. 제안서·견적표·이메일 발송(LITE), 시뮬레이션·마켓 인사이트(PRO)."
     : "FREE, LITE, PRO, Agency & Enterprise — proposals & quote tables on LITE; simulation & market on PRO.";
 
   return {
-    title,
+    title: titleKeyword,
     description,
+    keywords: [
+      ...siteKeywords(locale),
+      ...(isKo
+        ? ["요금제", "PRO", "LITE", "옥외광고", "미디어 플래너"]
+        : ["pricing", "PRO", "LITE", "OOH", "media planner"]),
+    ],
     alternates: pageAlternates(locale, "/pricing"),
     ...buildShareMetadata({
       locale,
-      title,
+      title: titleShare,
       description,
       path: "/pricing",
     }),
@@ -81,13 +89,17 @@ export default async function PricingPage({ params, searchParams }: Props) {
                 {isKo ? "PRO 구독이 활성화되었습니다!" : "PRO subscription activated!"}
               </p>
             ) : null}
+            <PricingPlanGrid
+              isKo={isKo}
+              loggedIn={Boolean(user)}
+              showTrial={sp.trial === "1" || !user}
+            />
             <Suspense fallback={null}>
               <PricingPageClient
                 isKo={isKo}
                 loggedIn={Boolean(user)}
                 userName={user?.name}
                 userEmail={user?.email}
-                showTrial={sp.trial === "1" || !user}
               />
             </Suspense>
           </PageContainer>

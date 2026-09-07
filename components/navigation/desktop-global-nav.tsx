@@ -20,7 +20,6 @@ import {
   type ResolvedPublicNavGroup,
   type ResolvedPublicNavItem,
 } from "@/lib/navigation/build-public-nav";
-import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 
 /** Ignore rapid double-taps that open-then-immediately-close the panel. */
 const MOBILE_NAV_TOGGLE_GUARD_MS = 320;
@@ -381,19 +380,12 @@ export function DesktopGlobalNav() {
               </NavDropdown>
             );
           })}
-          {/* NOTE(2026-08-31): 온라인광고 상품이 /media/online 으로 점진 이관 중 —
-              이관이 진행될수록 이 외부 링크의 의미가 옅어짐. 다음 재검토 시점에
-              THINKAD_DIGITAL_URL 링크 유지 여부를 재확인할 것 (재한님 확인 필요, 이번엔 미변경). */}
-          <a
-            href={THINKAD_DIGITAL_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/media/online"
             className={navItemClass(false, false)}
-            aria-label={t("nav.thinkadDigitalExternal")}
           >
-            {t("nav.thinkadDigital")}
-            <ExternalLink className="h-3 w-3 opacity-55" aria-hidden />
-          </a>
+            {t("nav.thinkadOnline")}
+          </Link>
         </nav>
 
         <div className="relative z-10 ml-auto flex shrink-0 items-center gap-1">

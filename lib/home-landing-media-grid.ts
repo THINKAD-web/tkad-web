@@ -13,7 +13,6 @@ import {
   DIGITAL_CHANNELS,
   type DigitalChannelId,
 } from "@/lib/planner/digital-channels";
-import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 export type HomeLandingOohTile = {
