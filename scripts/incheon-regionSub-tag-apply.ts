@@ -10,6 +10,7 @@ import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import { revalidateMediaListAfterScript } from "./lib/revalidate-media-list-after-script";
 
 config({ path: ".env.local" });
 
@@ -115,6 +116,8 @@ async function main() {
       `  ${ok ? "✓" : "✗"} [${row.id}] ${row.name} → ${row.regionSub ?? "(null)"}`,
     );
   }
+
+  await revalidateMediaListAfterScript();
 
   await prisma.$disconnect();
   await pool.end();

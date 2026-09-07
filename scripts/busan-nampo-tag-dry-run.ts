@@ -17,6 +17,7 @@ import {
   parsePlannerFreetextBrief,
 } from "@/lib/planner/parse-freetext-brief";
 import { recommendPlannerMedia } from "@/lib/planner/recommend";
+import { revalidateMediaListAfterScript } from "./lib/revalidate-media-list-after-script";
 
 config({ path: ".env.local" });
 
@@ -246,6 +247,7 @@ async function main() {
   const updated = await applyTags(candidates);
   console.log(`\n✅ ${updated}건 regionSub → busan_nampo 적용`);
   await verifyApplied(candidates.map((c) => c.id));
+  await revalidateMediaListAfterScript();
 }
 
 main()
