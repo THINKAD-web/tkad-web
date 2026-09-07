@@ -5,6 +5,7 @@ import {
   getAnthropicClient,
   resolveModel,
 } from "@/lib/ai-content-generator";
+import { logAiUsage, recordAiUsage } from "@/lib/ai-usage-log";
 import {
   OOH_EXPERT_PERSONA,
   OOH_EXPERT_STRUCTURED_OUTPUT_RULES,
@@ -25,6 +26,20 @@ import {
   buildOnlineCatalogBlock,
 } from "@/lib/proposal/proposal-catalog-blocks";
 import { resolveProposalSystemPrompt } from "@/lib/proposal/proposal-context";
+import {
+  buildExpectedOutcomes,
+  buildMixedMediaRationale,
+  buildMixedOohOverviewOverlay,
+  buildMixedOohStrategyOverlay,
+  buildOohMediaRationale,
+  buildOohOverview,
+  buildOohStrategy,
+  buildOnlineMediaRationale,
+  buildProposalTimeline,
+  buildStudioOohSectionNarrative,
+  proposalCopySeed,
+  type ProposalNarrativeBrief,
+} from "@/lib/proposal/proposal-fallback-copy";
 import {
   type CampaignProposalOutput,
   type GeneralProposalOutput,
@@ -142,6 +157,33 @@ function extractToolInput(message: Anthropic.Message): unknown {
   throw new Error(`Model did not return tool "${PROPOSAL_TOOL}".`);
 }
 
+type ProposalAiUsageKind =
+  | "campaign_ooh"
+  | "campaign_online"
+  | "campaign_mixed"
+  | "studio_general";
+
+function logProposalAiUsage(
+  message: Anthropic.Message,
+  model: string,
+  kind: ProposalAiUsageKind,
+): void {
+  const inputTokens = message.usage?.input_tokens ?? 0;
+  const outputTokens = message.usage?.output_tokens ?? 0;
+  void logAiUsage({
+    type: kind,
+    model,
+    tokensUsed: inputTokens + outputTokens,
+    note: kind,
+  });
+  void recordAiUsage({
+    feature: kind === "studio_general" ? "studio_proposal" : "campaign_proposal",
+    model,
+    inputTokens,
+    outputTokens,
+  });
+}
+
 function goalLabelKo(goal: ProposalInput["goal"]): string {
   switch (goal) {
     case "awareness":
@@ -151,6 +193,22 @@ function goalLabelKo(goal: ProposalInput["goal"]): string {
     case "event":
       return "이벤트·프로모션";
   }
+}
+
+function toNarrativeBrief(input: ProposalInput): ProposalNarrativeBrief {
+  return {
+    brandName: input.brandName,
+    industry: input.industry,
+    campaignName: input.campaignName,
+    goal: input.goal,
+    startDate: input.startDate,
+    endDate: input.endDate,
+    budgetManwon: input.budgetManwon,
+    regions: input.regions,
+    targetAge: input.targetAge,
+    targetGender: input.targetGender,
+    locale: input.locale,
+  };
 }
 
 function proposalBriefBlock(input: ProposalInput, budgetWon: number, isKo: boolean): string {
@@ -370,21 +428,18 @@ function buildMixedDeterministicShell(
   onlineFacts: ProposalOnlineFacts,
   oohMedia: MediaItem[],
   oohBudgetWon: number,
+  seed: number,
 ): Pick<
   CampaignProposalOutput,
   "overview" | "strategy" | "budgetAllocation" | "metrics"
 > {
-  const isKo = input.locale !== "en";
+  const brief = toNarrativeBrief(input);
   const totalWon = input.budgetManwon * 10_000;
   const oohRows = allocateOohBudgetRows(oohMedia, oohBudgetWon);
   const oohMetrics = computeOohMetrics(oohMedia, oohBudgetWon, input);
 
-  const oohOverview = isKo
-    ? `${input.regions.join(", ")} 중심 OOH·DOOH ${oohMedia.length}개 매체로 오프라인 노출을 설계합니다.`
-    : `OOH/DOOH (${oohMedia.length} placements) for visibility in ${input.regions.join(", ")}.`;
-  const oohStrategy = isKo
-    ? `오프라인은 상권·동선 기반 반복 노출, 온라인은 플랫폼별 타겟·과금으로 ${goalLabelKo(input.goal)} 목표를 보완합니다.`
-    : `Offline for corridor reach; online platforms support ${input.goal} with paid targeting.`;
+  const oohOverview = buildMixedOohOverviewOverlay(brief, oohMedia.length, seed);
+  const oohStrategy = buildMixedOohStrategyOverlay(brief, seed);
 
   return {
     overview: `${onlineFacts.overview}\n\n${oohOverview}`,
@@ -412,44 +467,17 @@ function defaultOnlineMediaMix(
   input: ProposalInput,
   onlineMedia: MediaItem[],
   shareById: Map<string, number>,
+  seed: number,
 ): CampaignProposalOutput["mediaMix"] {
   const isKo = input.locale !== "en";
+  const brief = toNarrativeBrief(input);
   return onlineMedia.map((m, i) => ({
     mediaId: m.id,
     mediaName: m.name,
     role: i === 0 ? (isKo ? "핵심 채널" : "Primary channel") : isKo ? "보조 채널" : "Support",
-    rationale: isKo
-      ? `${m.onlineSpec?.platform ?? "온라인"} — ${goalLabelKo(input.goal)} 목표 타겟 도달`
-      : `${m.onlineSpec?.platform ?? "Online"} for ${input.goal}`,
+    rationale: buildOnlineMediaRationale(brief, m, i, seed),
     budgetSharePct: shareById.get(m.id) ?? 0,
   }));
-}
-
-function defaultMixedTimeline(input: ProposalInput): CampaignProposalOutput["timeline"] {
-  const isKo = input.locale !== "en";
-  return [
-    {
-      phase: isKo ? "사전 준비" : "Pre-flight",
-      period: isKo ? "집행 2~3주 전" : "2–3 weeks before launch",
-      tasks: isKo
-        ? ["OOH 소재·예약", "온라인 픽셀·전환 추적", "플랫폼별 소재 제작"]
-        : ["OOH creative & booking", "Online pixels & tracking", "Platform creatives"],
-    },
-    {
-      phase: isKo ? "집행" : "Flight",
-      period: `${input.startDate} ~ ${input.endDate}`,
-      tasks: isKo
-        ? ["OOH 송출 모니터링", "온라인 캠페인 최적화", "주간 리포트"]
-        : ["OOH monitoring", "Online optimization", "Weekly reports"],
-    },
-    {
-      phase: isKo ? "사후" : "Post-flight",
-      period: isKo ? "종료 후 1주" : "Within 1 week after end",
-      tasks: isKo
-        ? ["채널별 성과 요약", "차기 미디어믹스 제안"]
-        : ["Channel wrap-up", "Next mix proposal"],
-    },
-  ];
 }
 
 /** OOH-only fallback — legacy logic preserved. */
@@ -458,6 +486,12 @@ function buildOohFallbackProposal(
   oohMedia: MediaItem[],
 ): CampaignProposalOutput {
   const isKo = input.locale !== "en";
+  const brief = toNarrativeBrief(input);
+  const seed = proposalCopySeed(
+    brief,
+    oohMedia.map((m) => m.id),
+    "onlyOoh",
+  );
   const totalWon = input.budgetManwon * 10_000;
   const shareEach = Math.floor(100 / oohMedia.length);
   const remainder = 100 - shareEach * oohMedia.length;
@@ -466,9 +500,7 @@ function buildOohFallbackProposal(
     mediaId: m.id,
     mediaName: m.name,
     role: i === 0 ? (isKo ? "메인 노출" : "Hero placement") : isKo ? "보조 매체" : "Support",
-    rationale: isKo
-      ? `${input.regions.join(", ")} 타깃과 ${goalLabelKo(input.goal)} 목적에 맞춘 ${m.type} 매체입니다.`
-      : `Fits ${input.goal} goal in ${input.regions.join(", ")} as ${m.type}.`,
+    rationale: buildOohMediaRationale(brief, m, i, seed),
     budgetSharePct: shareEach + (i === 0 ? remainder : 0),
   }));
 
@@ -481,51 +513,13 @@ function buildOohFallbackProposal(
   const metrics = computeOohMetrics(oohMedia, totalWon, input);
 
   return {
-    overview: isKo
-      ? `${input.brandName}의 「${input.campaignName}」 캠페인은 ${input.startDate}부터 ${input.endDate}까지 ${input.regions.join(", ")} 중심으로 집행하는 ${goalLabelKo(input.goal)} 캠페인입니다. 총 예산 ${input.budgetManwon.toLocaleString("ko-KR")}만원 규모로 OOH·DOOH 믹스를 통해 타깃에게 반복 노출을 설계합니다.`
-      : `${input.brandName} — "${input.campaignName}" runs ${input.startDate}–${input.endDate} across ${input.regions.join(", ")} with a ${input.budgetManwon}×10k KRW budget focused on ${input.goal}.`,
-    strategy: isKo
-      ? `핵심 타깃(${input.targetAge || "전 연령"}, ${input.targetGender || "전체"})에게 상권·동선 기반 노출을 우선하고, 인지 → 관심 → 방문(또는 참여) 퍼널에 맞춰 매체 역할을 분리합니다.`
-      : `Prioritize corridor and district visibility for ${input.targetAge || "broad"} audiences; separate hero vs support placements along the awareness funnel.`,
+    overview: buildOohOverview(brief, seed),
+    strategy: buildOohStrategy(brief, oohMedia.length, seed),
     mediaMix,
     budgetAllocation,
     metrics,
-    timeline: [
-      {
-        phase: isKo ? "사전 준비" : "Pre-flight",
-        period: isKo ? "집행 2~3주 전" : "2–3 weeks before launch",
-        tasks: isKo
-          ? ["소재 가이드 확정", "매체 예약·견적 확정", "집행 일정 LOCK"]
-          : ["Creative specs", "Booking confirmation", "Schedule lock"],
-      },
-      {
-        phase: isKo ? "집행" : "Flight",
-        period: `${input.startDate} ~ ${input.endDate}`,
-        tasks: isKo
-          ? ["송출·설치 모니터링", "현장 사진·리포트"]
-          : ["Monitoring", "Proof of posting"],
-      },
-      {
-        phase: isKo ? "사후" : "Post-flight",
-        period: isKo ? "종료 후 1주" : "Within 1 week after end",
-        tasks: isKo
-          ? ["성과 요약", "차기 캠페인 제안"]
-          : ["Performance wrap-up", "Next-step proposal"],
-      },
-    ],
-    expectedOutcomes: isKo
-      ? [
-          "타깃 상권 내 브랜드 인지도 상승",
-          "디지털·오프라인 연계 시 검색·방문 증가 기대",
-          "반복 노출을 통한 메시지 리콜 강화",
-          "집행 구간별 효율 데이터 확보",
-        ]
-      : [
-          "Stronger brand recall in target districts",
-          "Uplift in search or store visits when paired with digital",
-          "Consistent message frequency across the flight",
-          "Actionable data for the next flight",
-        ],
+    timeline: buildProposalTimeline(brief, seed),
+    expectedOutcomes: buildExpectedOutcomes(brief, "onlyOoh", seed),
   };
 }
 
@@ -533,28 +527,22 @@ function buildOnlineFallbackProposal(
   input: ProposalInput,
   onlineMedia: MediaItem[],
 ): CampaignProposalOutput {
+  const brief = toNarrativeBrief(input);
+  const seed = proposalCopySeed(
+    brief,
+    onlineMedia.map((m) => m.id),
+    "onlyOnline",
+  );
   const totalWon = input.budgetManwon * 10_000;
-  const facts = buildProposalOnlineFacts(input, onlineMedia, totalWon);
+  const facts = buildProposalOnlineFacts(input, onlineMedia, totalWon, "onlyOnline");
   const shareById = mergeBudgetShares(onlineMedia, facts, 0, totalWon);
   return {
     ...mergeNarrativeWithFacts(
       facts,
       {
-        mediaMix: defaultOnlineMediaMix(input, onlineMedia, shareById),
-        timeline: defaultMixedTimeline(input),
-        expectedOutcomes: input.locale !== "en"
-          ? [
-              "타겟 플랫폼 내 브랜드·제안 도달 확대",
-              "클릭·전환 추적 가능한 퍼포먼스 데이터 확보",
-              "채널별 예산·소재 최적화 기반 마련",
-              "차기 미디어믹스 고도화",
-            ]
-          : [
-              "Broader reach on selected platforms",
-              "Trackable performance data",
-              "Basis for budget and creative optimization",
-              "Inputs for the next media mix",
-            ],
+        mediaMix: defaultOnlineMediaMix(input, onlineMedia, shareById, seed),
+        timeline: buildProposalTimeline(brief, seed),
+        expectedOutcomes: buildExpectedOutcomes(brief, "onlyOnline", seed),
       },
       shareById,
     ),
@@ -566,18 +554,27 @@ function buildMixedFallbackProposal(
   oohMedia: MediaItem[],
   onlineMedia: MediaItem[],
 ): CampaignProposalOutput {
+  const brief = toNarrativeBrief(input);
+  const mediaIds = [...onlineMedia, ...oohMedia].map((m) => m.id);
+  const seed = proposalCopySeed(brief, mediaIds, "mixed");
   const totalWon = input.budgetManwon * 10_000;
   const { oohBudgetWon, onlineBudgetWon } = splitMixedChannelBudgetWon(
     totalWon,
     oohMedia.length,
     onlineMedia.length,
   );
-  const onlineFacts = buildProposalOnlineFacts(input, onlineMedia, onlineBudgetWon);
+  const onlineFacts = buildProposalOnlineFacts(
+    input,
+    onlineMedia,
+    onlineBudgetWon,
+    "mixed",
+  );
   const shell = buildMixedDeterministicShell(
     input,
     onlineFacts,
     oohMedia,
     oohBudgetWon,
+    seed,
   );
   const shareById = mergeBudgetShares(
     [...onlineMedia, ...oohMedia],
@@ -598,29 +595,15 @@ function buildMixedFallbackProposal(
         : isKo
           ? "보조 매체"
           : "Support",
-    rationale: isKo
-      ? `${m.onlineSpec?.platform ?? m.type ?? "매체"} — 통합 미디어믹스 역할`
-      : `${m.onlineSpec?.platform ?? m.type ?? "media"} in integrated mix`,
+    rationale: buildMixedMediaRationale(brief, m, i, seed),
     budgetSharePct: shareById.get(m.id) ?? 0,
   }));
 
   return {
     ...shell,
     mediaMix,
-    timeline: defaultMixedTimeline(input),
-    expectedOutcomes: isKo
-      ? [
-          "OOH 반복 노출 + 온라인 타겟 도달 시너지",
-          "채널별 KPI 추적으로 효율 개선",
-          "브랜드 인지 및 전환 기여",
-          "통합 집행 리포트 기반",
-        ]
-      : [
-          "OOH frequency plus online targeting",
-          "Cross-channel KPI tracking",
-          "Brand and conversion uplift",
-          "Integrated reporting baseline",
-        ],
+    timeline: buildProposalTimeline(brief, seed),
+    expectedOutcomes: buildExpectedOutcomes(brief, "mixed", seed),
   };
 }
 
@@ -672,6 +655,8 @@ async function generateOohCampaignProposal(
     ],
   });
 
+  logProposalAiUsage(message, model, "campaign_ooh");
+
   const raw = extractToolInput(message);
   const parsed = proposalOutputSchema.safeParse(raw);
   if (!parsed.success) {
@@ -697,7 +682,12 @@ async function generateHybridCampaignProposal(
   const hasKey = !!process.env.ANTHROPIC_API_KEY?.trim();
 
   if (split.composition === "onlyOnline") {
-    const facts = buildProposalOnlineFacts(input, split.onlinePortfolio, totalWon);
+    const facts = buildProposalOnlineFacts(
+      input,
+      split.onlinePortfolio,
+      totalWon,
+      "onlyOnline",
+    );
     const shareById = mergeBudgetShares(selectedMedia, facts, 0, totalWon);
     if (!hasKey) {
       return buildOnlineFallbackProposal(input, split.onlinePortfolio);
@@ -722,6 +712,7 @@ async function generateHybridCampaignProposal(
           },
         ],
       });
+      logProposalAiUsage(message, model, "campaign_online");
       const raw = extractToolInput(message);
       const parsed = narrativeOutputSchema.safeParse(raw);
       if (!parsed.success) {
@@ -744,16 +735,23 @@ async function generateHybridCampaignProposal(
     split.oohPortfolio.length,
     split.onlinePortfolio.length,
   );
+  const mixedSeed = proposalCopySeed(
+    toNarrativeBrief(input),
+    selectedMedia.map((m) => m.id),
+    "mixed",
+  );
   const onlineFacts = buildProposalOnlineFacts(
     input,
     split.onlinePortfolio,
     onlineBudgetWon,
+    "mixed",
   );
   const shell = buildMixedDeterministicShell(
     input,
     onlineFacts,
     split.oohPortfolio,
     oohBudgetWon,
+    mixedSeed,
   );
   const shareById = mergeBudgetShares(
     selectedMedia,
@@ -791,6 +789,7 @@ async function generateHybridCampaignProposal(
         },
       ],
     });
+    logProposalAiUsage(message, model, "campaign_mixed");
     const raw = extractToolInput(message);
     const parsed = narrativeOutputSchema.safeParse(raw);
     if (!parsed.success) {
@@ -1120,6 +1119,13 @@ function applyStudioDeterministicOverlay(
   const split = splitPortfolioByCatalogChannel(selectedMedia);
   const isKo = input.locale !== "en";
 
+  const narrativeBrief = toNarrativeBrief(brief);
+  const studioSeed = proposalCopySeed(
+    narrativeBrief,
+    selectedMedia.map((m) => m.id),
+    composition,
+  );
+
   const { oohBudgetWon, onlineBudgetWon } = splitMixedChannelBudgetWon(
     totalWon,
     split.oohPortfolio.length,
@@ -1129,30 +1135,37 @@ function applyStudioDeterministicOverlay(
     brief,
     split.onlinePortfolio,
     composition === "onlyOnline" ? totalWon : onlineBudgetWon,
+    composition === "mixed" ? "mixed" : "onlyOnline",
   );
+
+  const mixedShell =
+    composition === "mixed"
+      ? buildMixedDeterministicShell(
+          brief,
+          onlineFacts,
+          split.oohPortfolio,
+          oohBudgetWon,
+          studioSeed,
+        )
+      : null;
 
   if (has("cover")) {
     output.overview =
       composition === "onlyOnline"
         ? onlineFacts.overview
-        : `${onlineFacts.overview}\n\n${isKo ? "OOH·DOOH와 연계한 통합 미디어믹스 제안입니다." : "Integrated OOH and online media mix."}`;
+        : mixedShell!.overview;
   }
   if (has("strategy")) {
-    output.strategy = onlineFacts.strategy;
+    output.strategy =
+      composition === "onlyOnline" ? onlineFacts.strategy : mixedShell!.strategy;
   }
   if (has("budget")) {
     if (composition === "onlyOnline") {
       output.budgetAllocation = onlineFacts.budgetAllocation;
       output.metrics = onlineFacts.metrics;
     } else {
-      const shell = buildMixedDeterministicShell(
-        brief,
-        onlineFacts,
-        split.oohPortfolio,
-        oohBudgetWon,
-      );
-      output.budgetAllocation = shell.budgetAllocation;
-      output.metrics = shell.metrics;
+      output.budgetAllocation = mixedShell!.budgetAllocation;
+      output.metrics = mixedShell!.metrics;
     }
   }
   if (has("roi_scenario")) {
@@ -1242,20 +1255,29 @@ export function buildGeneralFallback(
   const has = (s: ProposalSectionType) => sections.includes(s);
   const out: GeneralProposalOutput = {};
   const totalWon = (input.budgetManwon || 0) * 10_000;
+  const brief = studioInputToProposalBrief(input);
+  const narrativeBrief = toNarrativeBrief(brief);
+  const seed = proposalCopySeed(
+    narrativeBrief,
+    selectedMedia.map((m) => m.id),
+    "onlyOoh",
+  );
+  const studioNarrative = buildStudioOohSectionNarrative(
+    narrativeBrief,
+    selectedMedia.length,
+    seed,
+  );
 
-  if (has("cover"))
-    out.overview = `${input.brandName}의 ${input.campaignName || input.industry} 제안서입니다. ${input.industry} 시장에서 ${input.goal ? goalLabelKo(input.goal) : "성과"}를 목표로 OOH 중심 전략을 제시합니다.`;
-  if (has("market_analysis"))
-    out.marketAnalysis = `${input.industry} 시장은 디지털 전환과 오프라인 경험의 결합이 가속화되고 있습니다. 타깃(${input.targetAge || "전 연령"})은 이동 동선상 반복 노출에 민감하며, OOH는 신뢰·각인 측면에서 강점을 가집니다.`;
-  if (has("strategy"))
-    out.strategy = `핵심 상권·동선 중심으로 OOH 노출을 설계하고, 디지털 리타깃과 연계해 인지→관심→행동 퍼널을 강화합니다.`;
+  if (has("cover")) out.overview = studioNarrative.overview;
+  if (has("market_analysis")) out.marketAnalysis = studioNarrative.marketAnalysis;
+  if (has("strategy")) out.strategy = studioNarrative.strategy;
   if (has("media_recommend") && selectedMedia.length) {
     const each = Math.floor(100 / selectedMedia.length);
     out.mediaMix = selectedMedia.map((m, i) => ({
       mediaId: m.id,
       mediaName: m.name,
       role: i === 0 ? "메인 노출" : "보조 매체",
-      rationale: `${input.regions.join(", ") || "타깃 지역"} ${m.type} 매체`,
+      rationale: buildOohMediaRationale(narrativeBrief, m, i, seed),
       budgetSharePct: each + (i === 0 ? 100 - each * selectedMedia.length : 0),
     }));
   }
@@ -1287,12 +1309,8 @@ export function buildGeneralFallback(
     };
   }
   if (has("timeline")) {
-    out.timeline = [
-      { phase: "사전 준비", period: "집행 2~3주 전", tasks: ["소재 확정", "매체 예약"] },
-      { phase: "집행", period: `${input.startDate ?? ""} ~ ${input.endDate ?? ""}`.trim() || "집행 기간", tasks: ["모니터링", "현장 리포트"] },
-      { phase: "사후", period: "종료 후 1주", tasks: ["성과 요약", "차기 제안"] },
-    ];
-    out.expectedOutcomes = ["브랜드 인지 상승", "검색·방문 증가", "메시지 리콜 강화", "효율 데이터 확보"];
+    out.timeline = studioNarrative.timeline;
+    out.expectedOutcomes = studioNarrative.expectedOutcomes;
   }
   if (has("appendix"))
     out.appendix = "본 제안은 추정치를 포함하며 실제 집행 결과와 다를 수 있습니다.";
@@ -1333,6 +1351,7 @@ export async function generateProposal(
                 split.oohPortfolio.length,
                 split.onlinePortfolio.length,
               ).onlineBudgetWon,
+          composition === "mixed" ? "mixed" : "onlyOnline",
         )
       : null;
 
@@ -1361,6 +1380,7 @@ export async function generateProposal(
         },
       ],
     });
+    logProposalAiUsage(message, model, "studio_general");
     const raw = extractGeneralToolInput(message);
     const parsed = generalProposalOutputSchema.safeParse(raw);
     if (!parsed.success) {

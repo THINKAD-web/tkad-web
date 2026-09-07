@@ -20,20 +20,20 @@ export function PageHero({
 }: PageHeroProps) {
   return (
     <PageContainer className="pt-6 pb-4">
-      <p className="mb-2 flex flex-wrap items-center gap-2 text-xs tracking-widest uppercase text-[color:var(--qp-fg-muted)]">
+      <p className="tkad-type-label mb-2 flex flex-wrap items-center gap-2">
         <span>{eyebrow}</span>
         {showBeta ? (
-          <span className="inline-flex items-center rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-[color:var(--qp-accent)] normal-case">
+          <span className="inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-accent normal-case">
             Beta
           </span>
         ) : null}
       </p>
-      <h1 className="mb-2 text-3xl font-bold leading-tight text-gray-900 dark:text-white md:text-4xl">
+      <h1 className="mb-2 text-3xl font-bold leading-tight text-foreground md:text-4xl">
         {title}
-        <span className="text-[color:var(--qp-accent)]">{highlight}</span>
+        <span className="text-accent">{highlight}</span>
         {titleEnd}
       </h1>
-      <p className="text-sm text-gray-500 dark:text-white/50">{description}</p>
+      <p className="tkad-type-body text-muted-foreground">{description}</p>
     </PageContainer>
   );
 }

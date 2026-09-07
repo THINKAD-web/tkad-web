@@ -19,6 +19,7 @@ function onlineMedia(
   minBudget: number,
   cpmMin = 4000,
   cpmMax = 8000,
+  platform = "Meta Instagram",
 ): MediaItem {
   return {
     id,
@@ -33,7 +34,7 @@ function onlineMedia(
     price: null,
     onlineSpec: {
       id: `${id}-spec`,
-      platform: "Meta Instagram",
+      platform,
       minBudget,
       cpcMin: 200,
       cpcMax: 600,
@@ -45,6 +46,60 @@ function onlineMedia(
       bestFor: [],
     },
   } as MediaItem;
+}
+
+const DISCLAIMER_MARKERS = [
+  "본 제안서의 온라인 예산 배분",
+  "참고용 제안이며",
+  "Online budget splits",
+  "Reference suggestions only",
+];
+
+function strategyBodyLines(strategy: string): string[] {
+  return strategy
+    .split("\n\n")
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        line.length > 0 &&
+        !DISCLAIMER_MARKERS.some((marker) => line.includes(marker)),
+    );
+}
+
+/** overview가 다르거나, strategy 본문에 고유 문장이 있으면 '눈에 띄게' 다른 것으로 본다 */
+function assertNoticeablyDifferentNarrative(
+  a: { overview: string; strategy: string },
+  b: { overview: string; strategy: string },
+  label: string,
+): void {
+  const overviewDiff = a.overview !== b.overview;
+  const setA = new Set(strategyBodyLines(a.strategy));
+  const setB = new Set(strategyBodyLines(b.strategy));
+  const uniqueLines = [
+    ...[...setA].filter((line) => !setB.has(line)),
+    ...[...setB].filter((line) => !setA.has(line)),
+  ];
+  assert.ok(
+    overviewDiff || uniqueLines.length > 0,
+    `${label}: expected overview or strategy body to differ noticeably`,
+  );
+}
+
+function onlineFallbackBaseInput(budgetManwon: number) {
+  return {
+    brandName: "Brand",
+    industry: "뷰티",
+    campaignName: "캠페인",
+    goal: "awareness" as const,
+    startDate: "2026-09-01",
+    endDate: "2026-10-01",
+    budgetManwon,
+    regions: ["online"],
+    targetAge: "20-34",
+    targetGender: "전체",
+    targetInterests: "",
+    locale: "ko" as const,
+  };
 }
 
 test("allocateProposalOnlineBudgets — floor + remainder when feasible", () => {
@@ -184,4 +239,95 @@ test("buildGeneralFallback integrated+online — roi_scenario deterministic", ()
   assert.ok(out.roiScenarios && out.roiScenarios.length === 3);
   assert.ok(out.metrics && out.metrics.estimatedReach > 0);
   assert.ok(out.overview?.includes("온라인") || out.overview?.includes("Online"));
+});
+
+test("fallback narrative — different industries yield different strategy copy", () => {
+  const portfolio = [onlineMedia("solo", 500_000)];
+  const base = {
+    brandName: "Brand",
+    campaignName: "캠페인",
+    goal: "awareness" as const,
+    startDate: "2026-09-01",
+    endDate: "2026-10-01",
+    budgetManwon: 100,
+    regions: ["online"],
+    targetAge: "",
+    targetGender: "",
+    targetInterests: "",
+    locale: "ko" as const,
+  };
+  const beauty = buildFallbackProposal({ ...base, industry: "뷰티" }, portfolio);
+  const fintech = buildFallbackProposal({ ...base, industry: "핀테크" }, portfolio);
+  assert.notEqual(beauty.strategy, fintech.strategy);
+  assert.equal(beauty.metrics.estimatedReach, fintech.metrics.estimatedReach);
+});
+
+test("fallback narrative — same input yields stable strategy copy", () => {
+  const portfolio = [onlineMedia("solo", 500_000)];
+  const input = {
+    brandName: "Stable",
+    industry: "뷰티",
+    campaignName: "캠페인",
+    goal: "awareness" as const,
+    startDate: "2026-09-01",
+    endDate: "2026-10-01",
+    budgetManwon: 100,
+    regions: ["online"],
+    targetAge: "",
+    targetGender: "",
+    targetInterests: "",
+    locale: "ko" as const,
+  };
+  const a = buildFallbackProposal(input, portfolio);
+  const b = buildFallbackProposal(input, portfolio);
+  assert.equal(a.strategy, b.strategy);
+  assert.equal(a.overview, b.overview);
+});
+
+test("fallback narrative — same industry/goal, different budget yields noticeably different copy", () => {
+  const portfolio = [
+    onlineMedia("meta-a", 500_000),
+    onlineMedia("meta-b", 600_000),
+  ];
+  const at100 = buildFallbackProposal(onlineFallbackBaseInput(100), portfolio);
+  const at150 = buildFallbackProposal(onlineFallbackBaseInput(150), portfolio);
+
+  assertNoticeablyDifferentNarrative(at100, at150, "budget 100 vs 150");
+  assert.notEqual(at100.overview, at150.overview);
+  assert.notEqual(at100.strategy, at150.strategy);
+  assert.notEqual(
+    at100.metrics.estimatedReach,
+    at150.metrics.estimatedReach,
+    "metrics should reflect budget via estimatePerformance",
+  );
+});
+
+test("fallback narrative — one media swap yields noticeably different copy", () => {
+  const portfolioAb = [
+    onlineMedia("meta-a", 500_000, 4000, 8000, "Meta Instagram"),
+    onlineMedia("meta-b", 600_000, 4000, 8000, "Meta Instagram"),
+  ];
+  const portfolioAc = [
+    onlineMedia("meta-a", 500_000, 4000, 8000, "Meta Instagram"),
+    onlineMedia("naver-c", 600_000, 4000, 8000, "Naver GFA"),
+  ];
+  const input = onlineFallbackBaseInput(100);
+  const mixAb = buildFallbackProposal(input, portfolioAb);
+  const mixAc = buildFallbackProposal(input, portfolioAc);
+
+  assertNoticeablyDifferentNarrative(mixAb, mixAc, "media b vs naver-c");
+  assert.notEqual(mixAb.overview, mixAc.overview);
+  assert.ok(mixAb.overview.includes("Meta Instagram"));
+  assert.ok(mixAc.overview.includes("Naver GFA"));
+  assert.ok(
+    strategyBodyLines(mixAb.strategy).some((line) => line.includes("Meta Instagram")),
+  );
+  assert.ok(
+    strategyBodyLines(mixAc.strategy).some((line) => line.includes("Naver GFA")),
+  );
+  assert.equal(
+    mixAb.metrics.estimatedReach,
+    mixAc.metrics.estimatedReach,
+    "same budget split → same reach when specs comparable",
+  );
 });

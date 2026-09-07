@@ -22,8 +22,7 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 function resolveUseClaude(opts: RunRecommendationOpts): boolean {
   if (opts.useClaude === true) return true;
   if (opts.useClaude === false) return false;
-  if (opts.source === "planner") return isPlannerClaudeEnabled();
-  return true;
+  return isPlannerClaudeEnabled();
 }
 
 export type RunRecommendationOpts = {

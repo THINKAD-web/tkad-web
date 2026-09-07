@@ -620,7 +620,6 @@ export default function RecommendPageClient({
             seed,
             limit: 30,
             locale,
-            useClaude: true,
             excludeNetwork: opts?.excludeNetwork || undefined,
             turnstileToken: captchaToken || undefined,
           }),
