@@ -14,8 +14,6 @@ const base = {
   price: 1_000_000,
   pricePeriod: "month",
   availability: "available",
-  visibility: "public",
-  status: "active",
   country: "KR",
   subCategory: "subway",
   regionSub: "gangnam",
@@ -26,7 +24,7 @@ const base = {
   popularOrder: null,
   popularityScore: 0,
   isVerified: true,
-  networkId: null,
+  reviewStatus: "clean",
   mediaMainCategory: "digital",
   mediaSubCategory: "led",
   regionMain: "seoul",
@@ -45,6 +43,23 @@ describe("mediaListCacheNeedsInvalidation", () => {
     );
     assert.equal(
       mediaListCacheNeedsInvalidation({ ...base }, { ...base, slug: "new-slug" }),
+      true,
+    );
+  });
+
+  it("returns true when reviewStatus changes (flag/unflag gates public visibility)", () => {
+    assert.equal(
+      mediaListCacheNeedsInvalidation(
+        { ...base },
+        { ...base, reviewStatus: "flagged" },
+      ),
+      true,
+    );
+    assert.equal(
+      mediaListCacheNeedsInvalidation(
+        { ...base, reviewStatus: "flagged" },
+        { ...base, reviewStatus: "clean" },
+      ),
       true,
     );
   });

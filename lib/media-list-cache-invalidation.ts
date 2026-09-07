@@ -13,8 +13,6 @@ const LIST_CACHE_FIELD_NAMES = [
   "price",
   "pricePeriod",
   "availability",
-  "visibility",
-  "status",
   "country",
   "subCategory",
   "regionSub",
@@ -25,7 +23,13 @@ const LIST_CACHE_FIELD_NAMES = [
   "popularOrder",
   "popularityScore",
   "isVerified",
-  "networkId",
+  // Gates public visibility directly: publicNotFlaggedMediaWhere() excludes
+  // reviewStatus:"flagged" from every public catalog query. This replaces a
+  // phantom "status" entry that never matched a real Media column, so
+  // flagging/un-flagging a media has never actually triggered list
+  // invalidation despite going through revalidateMediaCaches(). See
+  // lib/media-review-status.ts.
+  "reviewStatus",
   // Browse chip filters (discovery filter/counts) — were missing from this
   // gate, so bulk taxonomy migrations and manual edits to these fields
   // silently skipped list invalidation. See media-catalog-list-dto.ts.
