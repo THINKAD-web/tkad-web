@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { fetchPublishedCases } from "@/lib/case-queries";
-import { generateProposal } from "@/lib/proposal/generate-proposal";
+import { buildGeneralFallback } from "@/lib/proposal/generate-proposal";
 import { studioProposalInputSchema, sectionsForType } from "@/lib/proposal/types";
 import { requirePlannerPdfAccess, plannerPdfAccessDeniedMessage } from "@/lib/require-planner-pdf-access";
 import type { MediaItem } from "@/lib/media-data";
@@ -67,13 +67,15 @@ export async function POST(request: NextRequest) {
         .catch(() => [])
     : [];
 
+  // Studio는 비용·지연 절감을 위해 Claude 없이 규칙 기반 템플릿만 사용한다.
   try {
-    const result = await generateProposal(input, selectedMedia, cases);
+    const type = input.type;
+    const output = buildGeneralFallback(input, type, sections, selectedMedia, cases);
     return NextResponse.json({
       input,
-      type: result.type,
-      sections: result.sections,
-      output: result.output,
+      type,
+      sections,
+      output,
     });
   } catch (e) {
     console.error("[studio/proposal] generate failed", e);

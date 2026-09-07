@@ -105,6 +105,8 @@ export function featureLabel(type: string): string {
     content: "콘텐츠 생성",
     chat_reply: "상담 답변",
     creative_review: "크리에이티브 검토",
+    campaign_proposal: "캠페인 제안서",
+    studio_proposal: "Studio 제안서",
     trend_report: "트렌드 리포트",
     academy_lesson: "아카데미 레슨",
     success_case: "성공 사례",

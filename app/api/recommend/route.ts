@@ -6,6 +6,7 @@ import {
   displayContextFromAiInput,
 } from "@/lib/recommendation-adapters";
 import { resolveAiRecommendPlannerRegionIds } from "@/lib/recommend/recommend-region-filter";
+import { isPlannerClaudeEnabled } from "@/lib/planner/planner-claude-config";
 import { getCurrentUser } from "@/lib/user-session";
 import type { AiRecommendInput } from "@/lib/ai-media-recommend";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
       input: matchingInput,
       source: "recommend",
       limit,
-      useClaude,
+      useClaude: useClaude ?? isPlannerClaudeEnabled(),
       excludeNetwork,
       isKo,
       userId,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
-import { generateCampaignProposal } from "@/lib/proposal/generate-proposal";
+import { buildFallbackProposal } from "@/lib/proposal/generate-proposal";
 import { proposalInputSchema } from "@/lib/proposal/types";
 import { getCurrentUser } from "@/lib/user-session";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
@@ -47,7 +47,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const proposal = await generateCampaignProposal(input, selectedMedia);
+    // Claude 없이 규칙 기반 템플릿만 사용 (비용·지연 절감).
+    const proposal = buildFallbackProposal(input, selectedMedia);
 
     if (!isDatabaseConfigured()) {
       return NextResponse.json({

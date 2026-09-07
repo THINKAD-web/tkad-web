@@ -15,12 +15,14 @@ import {
   ONLINE_INSIGHTS_DISCLAIMER_KO,
 } from "@/lib/planner-report-export/online-report-insights";
 import {
-  buildOnlineReportCopyDraft,
-} from "@/lib/planner-report-export/report-copy-online";
-import {
   buildOnlineReportStrategyLines,
   buildOnlineReportWhyLine,
 } from "@/lib/planner/report-strategy-online";
+import {
+  buildProposalOnlineCopy,
+  proposalCopySeed,
+  resolveIndustryKeyFromText,
+} from "@/lib/proposal/proposal-fallback-copy";
 import {
   estimateImpressionsFromBudget,
   estimatePerformance,
@@ -443,6 +445,7 @@ export function buildProposalOnlineFacts(
   input: ProposalBriefInput,
   onlinePortfolio: readonly MediaItem[],
   onlineBudgetWon: number,
+  composition: "onlyOnline" | "mixed" = "onlyOnline",
 ): ProposalOnlineFacts {
   const isKo = input.locale !== "en";
   const allocations = allocateProposalOnlineBudgets(onlinePortfolio, onlineBudgetWon);
@@ -456,17 +459,57 @@ export function buildProposalOnlineFacts(
     input,
   );
 
-  const copy = buildOnlineReportCopyDraft({
+  const industryKey = resolveIndustryKeyFromText(input.industry);
+  const seed = proposalCopySeed(
+    {
+      brandName: input.brandName,
+      industry: input.industry,
+      campaignName: input.campaignName,
+      goal: input.goal,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      budgetManwon: input.budgetManwon,
+      regions: input.regions,
+      targetAge: input.targetAge,
+      targetGender: input.targetGender,
+      locale: input.locale,
+    },
+    onlinePortfolio.map((m) => m.id),
+    composition,
+  );
+
+  const strategyInput = {
     isKo,
     campaignGoal: proposalGoalToPlanner(input.goal) as PlannerCampaignGoal,
     goalTitle: goalTitleFromProposal(input.goal, isKo),
-    industryKey: null,
+    industryKey,
     industryText: input.industry,
     onlineLineCount: section.lines.length,
     calculableLineCount: section.calculableLineCount,
     inquiryLineCount: section.inquiryLineCount,
-    clientName: input.brandName,
-  });
+  };
+
+  const copy = buildProposalOnlineCopy(
+    {
+      brandName: input.brandName,
+      industry: input.industry,
+      campaignName: input.campaignName,
+      goal: input.goal,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      budgetManwon: input.budgetManwon,
+      regions: input.regions,
+      targetAge: input.targetAge,
+      targetGender: input.targetGender,
+      locale: input.locale,
+    },
+    strategyInput,
+    seed,
+    onlinePortfolio.map((m) => {
+      const platform = m.onlineSpec?.platform?.trim();
+      return platform ? `${platform} · ${m.name}` : m.name;
+    }),
+  );
 
   const { metrics, reachMid, clicksMid } = aggregateOnlineMetrics(
     section,
@@ -490,9 +533,7 @@ export function buildProposalOnlineFacts(
     };
   });
 
-  const disclaimer = isKo
-    ? `${PROPOSAL_ONLINE_BUDGET_DISCLAIMER_KO} ${ONLINE_INSIGHTS_DISCLAIMER_KO}`
-    : `${PROPOSAL_ONLINE_BUDGET_DISCLAIMER_EN} ${ONLINE_INSIGHTS_DISCLAIMER_EN}`;
+  const disclaimer = copy.disclaimer;
 
   return {
     allocations,

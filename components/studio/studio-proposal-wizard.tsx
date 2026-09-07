@@ -25,7 +25,7 @@ const GOAL_LABEL: Record<ProposalGoal, string> = {
 };
 
 const field =
-  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-hermes/30 dark:border-white/12 dark:bg-white/5 dark:text-white";
+  "w-full rounded-xl border border-border bg-background px-3 py-2.5 tkad-type-body text-foreground outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30";
 
 type GenResult = {
   input: StudioProposalInput;
@@ -135,7 +135,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
     return (
       <div className="mt-8">
         <Stepper step={1} isKo={isKo} />
-        <h2 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">
+        <h2 className="tkad-type-title mb-4">
           {isKo ? "1. 제안서 유형 선택" : "1. Choose a type"}
         </h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -150,13 +150,13 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
                 className={
                   "rounded-2xl border p-5 text-left transition-ui " +
                   (active
-                    ? "border-hermes bg-hermes/5 ring-1 ring-hermes/30 dark:bg-hermes/10"
-                    : "border-gray-200 bg-white hover:border-hermes/30 dark:border-white/10 dark:bg-white/5")
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                    : "border-border bg-card hover:border-primary/50")
                 }
               >
                 <p className="text-2xl" aria-hidden>{m.emoji}</p>
-                <p className="mt-2 font-bold text-gray-900 dark:text-white">{isKo ? m.ko : m.en}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">{m.descKo}</p>
+                <p className="mt-2 tkad-type-title">{isKo ? m.ko : m.en}</p>
+                <p className="mt-0.5 tkad-type-meta">{m.descKo}</p>
               </button>
             );
           })}
@@ -166,7 +166,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
           <button
             type="button"
             onClick={() => setStep(2)}
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-hermes px-6 text-sm font-bold text-white hover:bg-cta-hover"
+            className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary/90"
           >
             {isKo ? "다음" : "Next"}
           </button>
@@ -183,9 +183,9 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
         <button type="button" onClick={() => setStep(1)} className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground">
           <ChevronLeft className="h-4 w-4" /> {isKo ? "유형 변경" : "Change type"}
         </button>
-        <h2 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">
+        <h2 className="tkad-type-title mb-4">
           {isKo ? "2. 정보 입력" : "2. Enter details"}{" "}
-          <span className="text-sm font-normal text-hermes">{PROPOSAL_TYPE_META[type].emoji} {isKo ? PROPOSAL_TYPE_META[type].ko : PROPOSAL_TYPE_META[type].en}</span>
+          <span className="tkad-type-body font-normal text-accent">{PROPOSAL_TYPE_META[type].emoji} {isKo ? PROPOSAL_TYPE_META[type].ko : PROPOSAL_TYPE_META[type].en}</span>
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="block">
@@ -227,8 +227,8 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
                   className={
                     "rounded-full border px-3 py-1.5 text-xs font-semibold transition " +
                     (regions.includes(r)
-                      ? "border-hermes bg-hermes/10 text-hermes dark:text-hermes"
-                      : "border-gray-200 text-gray-600 dark:border-white/10 dark:text-white/60")
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-background text-foreground hover:border-primary/50")
                   }
                 >
                   {r}
@@ -241,13 +241,13 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
             <textarea className={field} rows={3} value={freeRequest} onChange={(e) => setFreeRequest(e.target.value)} placeholder={isKo ? "추가로 강조하고 싶은 내용을 적어주세요" : "Anything to emphasize"} />
           </label>
         </div>
-        {error ? <p className="mt-3 text-sm text-rose-500">{error}</p> : null}
+        {error ? <p className="mt-3 tkad-type-body text-destructive">{error}</p> : null}
         <div className="mt-6 flex justify-end">
           <button
             type="button"
             onClick={() => void generate()}
             disabled={loading}
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-hermes px-6 text-sm font-bold text-white hover:bg-cta-hover disabled:opacity-60"
+            className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             {loading ? (isKo ? "AI 생성 중..." : "Generating...") : isKo ? "AI 제안서 생성" : "Generate"}
@@ -270,7 +270,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
             type="button"
             onClick={() => void downloadPdf()}
             disabled={downloading}
-            className="inline-flex h-10 items-center gap-2 rounded-xl bg-hermes px-4 text-sm font-bold text-white hover:bg-cta-hover disabled:opacity-60"
+            className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
             {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
             PDF
@@ -279,16 +279,16 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
             type="button"
             onClick={() => void downloadPptx()}
             disabled={downloading}
-            className="inline-flex h-10 items-center gap-2 rounded-xl border border-hermes/30 px-4 text-sm font-bold text-hermes disabled:opacity-60 dark:border-hermes/30 dark:text-hermes"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-primary/30 px-4 text-sm font-bold text-primary disabled:opacity-60"
           >
             <Download className="h-4 w-4" />
             PPT
           </button>
         </div>
       </div>
-      {error ? <p className="mb-3 text-sm text-rose-500">{error}</p> : null}
+      {error ? <p className="mb-3 tkad-type-body text-destructive">{error}</p> : null}
       {result ? (
-        <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm dark:border-white/10">
+        <div className="overflow-hidden rounded-2xl border border-border shadow-sm">
           <div ref={docRef} data-quote-pdf-background="#ffffff">
             <StudioProposalContent
               input={result.input}
@@ -307,10 +307,10 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
 function SectionPreview({ type, isKo }: { type: ProposalType; isKo: boolean }) {
   const sections = sectionsForType(type);
   return (
-    <div className="mt-4 rounded-xl border border-gray-200 bg-white/60 p-3 text-xs dark:border-white/10 dark:bg-white/5">
+    <div className="mt-4 rounded-xl border border-border bg-muted/60 p-3 tkad-type-meta">
       <span className="font-semibold text-muted-foreground">{isKo ? "포함 섹션: " : "Sections: "}</span>
       {sections.map((s, i) => (
-        <span key={s} className="text-gray-700 dark:text-white/70">
+        <span key={s} className="text-foreground">
           {i > 0 ? " · " : ""}
           {isKo ? PROPOSAL_SECTION_META[s].ko : PROPOSAL_SECTION_META[s].en}
         </span>
@@ -331,13 +331,13 @@ function Stepper({ step, isKo }: { step: 1 | 2 | 3; isKo: boolean }) {
             <span
               className={
                 "flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold " +
-                (active ? "bg-hermes text-white" : "bg-gray-200 text-gray-500 dark:bg-white/10")
+                (active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")
               }
             >
               {n}
             </span>
-            <span className={"text-xs font-semibold " + (active ? "text-hermes dark:text-hermes" : "text-muted-foreground")}>{l}</span>
-            {i < 2 ? <span className="mx-1 h-px w-6 bg-gray-300 dark:bg-white/20" /> : null}
+            <span className={"tkad-type-meta font-semibold " + (active ? "text-primary" : "text-muted-foreground")}>{l}</span>
+            {i < 2 ? <span className="mx-1 h-px w-6 bg-border" /> : null}
           </div>
         );
       })}
