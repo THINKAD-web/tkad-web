@@ -6,6 +6,7 @@ import {
 } from "@/lib/media-browse-categories";
 import { inferBrowseRegionFromMedia } from "@/lib/media-browse-regions";
 import { getPrisma } from "@/lib/prisma";
+import { revalidateMediaCachesBulk } from "@/lib/media-cache-revalidate";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest) {
   const rows = await db.media.findMany({
     select: {
       id: true,
+      slug: true,
       name: true,
       type: true,
       subCategory: true,
@@ -45,6 +47,7 @@ export async function POST(request: NextRequest) {
 
   let updated = 0;
   const samples: { id: string; name: string }[] = [];
+  const changedRefs: { id: string; slug: string | null }[] = [];
 
   for (const m of rows) {
     const cat = inferBrowseCategoryFromMedia({
@@ -95,7 +98,12 @@ export async function POST(request: NextRequest) {
           mediaCategory: nextMediaCategory,
         },
       });
+      changedRefs.push({ id: m.id, slug: m.slug });
     }
+  }
+
+  if (changedRefs.length > 0) {
+    revalidateMediaCachesBulk(changedRefs);
   }
 
   return json({

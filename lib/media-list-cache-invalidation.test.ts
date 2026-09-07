@@ -27,6 +27,10 @@ const base = {
   popularityScore: 0,
   isVerified: true,
   networkId: null,
+  mediaMainCategory: "digital",
+  mediaSubCategory: "led",
+  regionMain: "seoul",
+  mediaCategory: ["digital", "led"] as string[],
 } as const;
 
 describe("mediaListCacheNeedsInvalidation", () => {
@@ -42,6 +46,37 @@ describe("mediaListCacheNeedsInvalidation", () => {
     assert.equal(
       mediaListCacheNeedsInvalidation({ ...base }, { ...base, slug: "new-slug" }),
       true,
+    );
+  });
+
+  it("returns true when browse taxonomy fields change", () => {
+    assert.equal(
+      mediaListCacheNeedsInvalidation(
+        { ...base },
+        { ...base, mediaMainCategory: "ooh" },
+      ),
+      true,
+    );
+    assert.equal(
+      mediaListCacheNeedsInvalidation({ ...base }, { ...base, regionMain: "busan" }),
+      true,
+    );
+    assert.equal(
+      mediaListCacheNeedsInvalidation(
+        { ...base },
+        { ...base, mediaCategory: ["digital", "static"] },
+      ),
+      true,
+    );
+  });
+
+  it("ignores mediaCategory reordering (content-equal arrays)", () => {
+    assert.equal(
+      mediaListCacheNeedsInvalidation(
+        { ...base },
+        { ...base, mediaCategory: ["led", "digital"] },
+      ),
+      false,
     );
   });
 });

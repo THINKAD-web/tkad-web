@@ -13,6 +13,7 @@ import { validateMappedMediaMetrics } from "@/lib/media-metrics-write";
 import { resolveCatalogChannelForMediaWrite } from "@/lib/catalog-channel";
 import { onMediaApplicationApproved } from "@/lib/media-owner-incentives";
 import { notifyMediaOwnerApplicationApproved } from "@/lib/media-owner-notify";
+import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
 
 function applicationToQuickAdd(
   app: MediaApplication,
@@ -208,6 +209,8 @@ export async function approveMediaApplication(
     });
     return media;
   });
+
+  revalidateMediaCaches({ id: result.id, slug: result.slug });
 
   void onMediaApplicationApproved({
     ownerUserId,
