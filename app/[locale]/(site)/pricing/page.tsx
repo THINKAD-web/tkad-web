@@ -9,8 +9,11 @@ import { getCurrentUser } from "@/lib/user-session";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
 import { PageContainer } from "@/components/layout/page-container";
+import {
+  LITE_MONTHLY_KRW,
+  PRO_MONTHLY_KRW,
+} from "@/lib/entitlements/constants";
 import { PricingPageClient } from "@/components/pricing/pricing-page-client";
-import { PricingPlanGrid } from "@/components/pricing/pricing-plan-grid";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -89,17 +92,18 @@ export default async function PricingPage({ params, searchParams }: Props) {
                 {isKo ? "PRO 구독이 활성화되었습니다!" : "PRO subscription activated!"}
               </p>
             ) : null}
-            <PricingPlanGrid
-              isKo={isKo}
-              loggedIn={Boolean(user)}
-              showTrial={sp.trial === "1" || !user}
-            />
+            <p className="sr-only">
+              {isKo
+                ? `LITE 월 ₩${LITE_MONTHLY_KRW.toLocaleString("ko-KR")}, PRO 월 ₩${PRO_MONTHLY_KRW.toLocaleString("ko-KR")}`
+                : `LITE ₩${LITE_MONTHLY_KRW.toLocaleString("en-US")}/mo, PRO ₩${PRO_MONTHLY_KRW.toLocaleString("en-US")}/mo`}
+            </p>
             <Suspense fallback={null}>
               <PricingPageClient
                 isKo={isKo}
                 loggedIn={Boolean(user)}
                 userName={user?.name}
                 userEmail={user?.email}
+                showTrial={sp.trial === "1" || !user}
               />
             </Suspense>
           </PageContainer>
