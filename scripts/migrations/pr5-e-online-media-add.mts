@@ -17,7 +17,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "../../lib/normalize-pg-database-url.ts";
 import { hasOnlinePricingSpec } from "../../lib/pricing/online-performance-estimate.ts";
-import { revalidateMediaCachesBulk } from "../../lib/media-cache-revalidate.ts";
+import { revalidateMediaCachesAfterScript } from "../lib/revalidate-media-list-after-script";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "../..");
 
@@ -137,7 +137,9 @@ async function main() {
       await tx.mediaOnlineSpec.deleteMany({ where: { mediaId: { in: ids } } });
       await tx.media.deleteMany({ where: { id: { in: ids } } });
     });
-    revalidateMediaCachesBulk(newRows.map((r) => ({ id: r.id, slug: r.slug })));
+    await revalidateMediaCachesAfterScript(
+      newRows.map((r) => ({ id: r.id, slug: r.slug })),
+    );
     console.log(`Rollback complete — removed ${ids.length} PR5-e media rows.`);
     await pool.end();
     return;
@@ -200,7 +202,7 @@ async function main() {
     { timeout: 120_000 },
   );
 
-  revalidateMediaCachesBulk(
+  await revalidateMediaCachesAfterScript(
     report.toInsert.map((r) => ({ id: r.id, slug: r.slug })),
   );
   console.log(`Insert complete — added ${report.toInsert.length} online media rows.`);

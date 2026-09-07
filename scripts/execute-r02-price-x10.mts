@@ -14,7 +14,7 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "../lib/normalize-pg-database-url.ts";
-import { revalidateMediaCachesBulk } from "../lib/media-cache-revalidate.ts";
+import { revalidateMediaCachesAfterScript } from "./lib/revalidate-media-list-after-script";
 import {
   batchReportMeta,
   writeBatchExecuteReport,
@@ -188,7 +188,7 @@ async function main() {
     }
 
     const cacheRefs = approveRows.map((r) => ({ id: r.id, slug: r.slug }));
-    revalidateMediaCachesBulk(cacheRefs);
+    await revalidateMediaCachesAfterScript(cacheRefs);
 
     const report = {
       ...batchReportMeta("scripts/execute-r02-price-x10.mts"),
