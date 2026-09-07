@@ -1,9 +1,9 @@
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
 import type { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { prismaMediaToAdminDto } from "@/lib/admin-media-dto";
 import { assignUniqueMediaSlug } from "@/lib/assign-media-slug";
+import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
 import { getPrisma } from "@/lib/prisma";
 import {
   attachCoverageDistrictCodesById,
@@ -116,8 +116,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       await attachInstallLocationsById(db, [withCov ?? created])
     )[0];
 
-    revalidatePath("/ko/media");
-    revalidatePath("/en/media");
+    revalidateMediaCaches({ id: created.id, slug: created.slug });
 
     return json(
       { media: prismaMediaToAdminDto(withExtras ?? created), sourceId: id },

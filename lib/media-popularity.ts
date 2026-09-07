@@ -1,5 +1,6 @@
 import type { ConversionEventType } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { revalidatePublicMediaListTagOnly } from "@/lib/media-cache-revalidate";
 
 /** 찜×3 + 문의×5 + 조회×1 + 예약×10 */
 export const POPULARITY_WEIGHTS = {
@@ -336,6 +337,10 @@ export async function updateAllMediaPopularityScores(): Promise<{
         });
       }),
     );
+  }
+
+  if (allMedia.length > 0) {
+    revalidatePublicMediaListTagOnly();
   }
 
   return { updated: allMedia.length, withActivity };
