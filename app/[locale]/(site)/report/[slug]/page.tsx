@@ -11,7 +11,12 @@ import { COMMUNITY_CATEGORY_LABELS } from "@/lib/community/types";
 import { cn } from "@/lib/utils";
 import { InsightMarkdownBody } from "@/components/insights/markdown-body";
 import { CategoryHeroBetaBadge } from "@/components/category-explore-hero";
-import { buildShareMetadata, pageAlternates, siteUrl } from "@/lib/seo";
+import {
+  buildShareMetadata,
+  pageAlternates,
+  pageTitleKeyword,
+  siteUrl,
+} from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -31,11 +36,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const isKo = locale === "ko";
   const row = await getPublishedReportBySlug(slug);
   if (!row) {
-    return { title: isKo ? "리포트 없음 | THINKAD" : "Report not found | THINKAD" };
+    return {
+      title: pageTitleKeyword(
+        isKo ? "리포트 없음 | THINKAD" : "Report not found | THINKAD",
+      ),
+    };
   }
   const url = `${siteUrl}/${locale}/report/${slug}`;
   return {
-    title: `${row.title} | THINKAD`,
+    title: pageTitleKeyword(`${row.title} | THINKAD`),
     description: row.summary.slice(0, 220),
     alternates: pageAlternates(locale, `/report/${slug}`),
     robots: isKo ? { index: true, follow: true } : { index: false, follow: true },

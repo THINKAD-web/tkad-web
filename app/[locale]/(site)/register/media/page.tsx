@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import type { Metadata } from "next";
-import { buildShareMetadata, pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, pageTitleKeyword } from "@/lib/seo";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaRegisterNeonClient } from "./media-register-neon-client";
 import { MediaOwnerRevenueCalculator } from "@/components/media-owner/media-owner-revenue-calculator";
@@ -25,9 +25,9 @@ export async function generateMetadata({
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
   return {
-    title: isKo
-      ? "매체 등록 신청 | THINKAD"
-      : "Register your media | THINKAD",
+    title: pageTitleKeyword(
+      isKo ? "매체 등록 신청 | THINKAD" : "Register your media | THINKAD",
+    ),
     description: isKo
       ? "매체사 셀프 등록 신청 — 싱커드 심사 후 카탈로그에 노출됩니다."
       : "Submit your OOH media for THINKAD review and catalog listing.",

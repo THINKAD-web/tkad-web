@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { StrictMode, Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
@@ -10,19 +9,6 @@ import { BriefFlowClient } from "@/components/planner/brief/brief-flow-client";
 export const revalidate = 3600;
 
 type Props = { params: Promise<{ locale: string }> };
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const locale = await resolveLocaleParam(params);
-  const isKo = locale === "ko";
-  return {
-    title: isKo
-      ? "미디어 플래너 | THINKAD"
-      : "Media Planner | THINKAD",
-    description: isKo
-      ? "브리프 → 믹스 → 결과, 3단계로 캠페인 플랜을 만듭니다."
-      : "Brief → mix → result — build a campaign plan in three steps.",
-  };
-}
 
 export default async function PlannerPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);

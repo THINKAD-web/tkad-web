@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/user-session";
 import { checkReportAccess } from "@/lib/report-access";
 import { PageHero } from "@/components/layout/page-hero";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { pageTitleKeyword } from "@/lib/seo";
 import { StudioRfpParser } from "@/components/studio/studio-rfp-parser";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
   return {
-    title: isKo ? "RFP 그룹 파서 | THINKAD" : "RFP Group Parser | THINKAD",
+    title: pageTitleKeyword(
+      isKo ? "RFP 그룹 파서 | THINKAD" : "RFP Group Parser | THINKAD",
+    ),
     description: isKo
       ? "장문 RFP를 권역 그룹으로 구조화하고 확인·수정합니다."
       : "Structure long RFPs into region groups for review.",
