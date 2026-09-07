@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import { ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
   categoryHeroCtaPrimaryClass,
@@ -12,7 +11,6 @@ import {
   type AboutTimelineItem,
 } from "@/components/about/about-brand-timeline";
 import { ArrowRight } from "lucide-react";
-import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 import { cn } from "@/lib/utils";
 
 type Props = { verifiedLabel: string };
@@ -153,29 +151,23 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
             </article>
 
             <article className={cardClass}>
-              {/* 2026-08-31: 배지("자매 브랜드") 제거 — 옆 카드의 "통합" 배지와
-                  나란히 놓였을 때 "통합"이라는 단어가 겹쳐 보이는 걸 피하기 위함.
-                  온라인 광고가 THINKAD로 순차 통합되는 방향과 맞춰 타이틀+설명만 노출. */}
               <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
                 {t("ecosystemDigitalTitle")}
               </h3>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-white/65">
                 {t("ecosystemDigitalDesc")}
               </p>
-              <a
-                href={THINKAD_DIGITAL_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/media/online"
                 className={cn(
                   cardCtaClass,
                   "border border-gray-300 bg-white text-gray-900 hover:bg-gray-50",
                   "dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5",
                 )}
-                aria-label={t("ecosystemDigitalCtaExternal")}
               >
                 {t("ecosystemDigitalCta")}
-                <ExternalLink className="h-3.5 w-3.5 opacity-60" aria-hidden />
-              </a>
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
             </article>
           </div>
         </div>

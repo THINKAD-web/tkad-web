@@ -11,7 +11,12 @@ import {
   type BlogSection,
 } from "@/lib/blog-seo-posts";
 import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
-import { buildShareMetadata, pageAlternates, serializeJsonLd } from "@/lib/seo";
+import {
+  buildShareMetadata,
+  pageAlternates,
+  pageTitleKeyword,
+  serializeJsonLd,
+} from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import {
   buildBlogSeoLinks,
@@ -88,7 +93,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = isKo ? post.descriptionKo : post.descriptionEn;
 
   return {
-    title: `${title} | THINKAD`,
+    title: pageTitleKeyword(`${title} | THINKAD`),
     description,
     keywords: isKo ? post.keywordsKo : post.keywordsEn,
     alternates: pageAlternates(locale, `/blog/${slug}`),

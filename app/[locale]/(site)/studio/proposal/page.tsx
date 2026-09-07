@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/user-session";
 import { checkReportAccess } from "@/lib/report-access";
 import { PageHero } from "@/components/layout/page-hero";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { pageTitleKeyword } from "@/lib/seo";
 import { StudioProposalWizard } from "@/components/studio/studio-proposal-wizard";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
   return {
-    title: isKo ? "AI 제안서 스튜디오 | THINKAD" : "AI Proposal Studio | THINKAD",
+    title: pageTitleKeyword(
+      isKo ? "AI 제안서 스튜디오 | THINKAD" : "AI Proposal Studio | THINKAD",
+    ),
     description: isKo
       ? "유형별 맞춤 마케팅 제안서를 AI로 3분 만에. OOH 캠페인·통합·업종·매체 영업."
       : "AI-generated marketing proposals by type in minutes.",

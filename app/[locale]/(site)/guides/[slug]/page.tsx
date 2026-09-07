@@ -8,7 +8,7 @@ import { getPublishedGuideBySlug } from "@/lib/public-auto-content";
 import { SEO_GUIDE_SLUGS, SEO_GUIDE_TOPICS } from "@/lib/seo-content/seo-guide-topics";
 import { DbGuideArticlePage } from "@/components/guides/db-guide-article-page";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
-import { pageAlternates, segmentOpenGraphImages, serializeJsonLd, siteUrl } from "@/lib/seo";
+import { pageAlternates, pageTitleKeyword, segmentOpenGraphImages, serializeJsonLd, siteUrl } from "@/lib/seo";
 import { ogAltForRoute } from "@/lib/og-route-copy";
 import { regionLabel, typeLabel } from "@/lib/media-keyword-landing";
 import { ArrowRight, BookText, Calendar } from "lucide-react";
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       dbGuide.excerptKo?.slice(0, 160) ??
       "";
     return {
-      title: `${title} | THINKAD 싱커드`,
+      title: pageTitleKeyword(`${title} | THINKAD 싱커드`),
       description,
       keywords: dbGuide.tags,
       alternates: pageAlternates(locale, `/guides/${slug}`),

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { buildShareMetadata, pageAlternates, siteKeywords } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, pageTitleKeyword, siteKeywords } from "@/lib/seo";
 import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { buildPricingGuideStats, seoZoneKeywords,
 } from "@/lib/pricing-guide-stats";
@@ -11,10 +11,10 @@ import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ locale: string }> }; export async function generateMetadata({ params }: Props): Promise<Metadata> { const locale = await resolveLocaleParam(params); const isKo = locale === "ko"; const kw = seoZoneKeywords(); return { title: isKo ? "옥외광고 가격 가이드 · 지역별 단가 | THINKAD" : "OOH pricing guide · rates by district | THINKAD", description: isKo ? "강남 전광판 광고비, 지역별 평균 단가, 매체 유형별 가격 범위와 시즌·협상 팁을 공개합니다." : "Public OOH price ranges by media type and Seoul districts, with season and negotiation tips.", keywords: [ ...siteKeywords(locale), ...(isKo ? kw.ko : kw.en), ], alternates: pageAlternates(locale, "/pricing-guide"),
+type Props = { params: Promise<{ locale: string }> }; export async function generateMetadata({ params }: Props): Promise<Metadata> { const locale = await resolveLocaleParam(params); const isKo = locale === "ko"; const kw = seoZoneKeywords(); const titleShare = isKo ? "옥외광고 가격 가이드 · 지역별 단가 | THINKAD" : "OOH pricing guide · rates by district | THINKAD"; return { title: pageTitleKeyword(titleShare), description: isKo ? "강남 전광판 광고비, 지역별 평균 단가, 매체 유형별 가격 범위와 시즌·협상 팁을 공개합니다." : "Public OOH price ranges by media type and Seoul districts, with season and negotiation tips.", keywords: [ ...siteKeywords(locale), ...(isKo ? kw.ko : kw.en), ], alternates: pageAlternates(locale, "/pricing-guide"),
     ...buildShareMetadata({
       locale,
-      title: isKo ? "옥외광고 가격 가이드 · 지역별 단가 | THINKAD" : "OOH pricing guide · rates by district | THINKAD",
+      title: titleShare,
       description: isKo ? "강남 전광판 광고비, 지역별 평균 단가, 매체 유형별 가격 범위와 시즌·협상 팁을 공개합니다." : "Public OOH price ranges by media type and Seoul districts, with season and negotiation tips.",
       path: "/pricing-guide",
       image: { kind: "segment", segment: "media" },

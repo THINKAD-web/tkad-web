@@ -24,12 +24,12 @@ const routes = {
     ko: {
       badge: "About THINKAD",
       title: "THINKAD",
-      subtitle: "2016년 설립 · 15년 이상 OOH 업력 · 100+ 대기업 파트너",
+      subtitle: "2014년 서비스 시작 · 12년 이상 OOH 업력 · 100+ 대기업 파트너",
     },
     en: {
       badge: "About THINKAD",
       title: "THINKAD — Korea's OOH platform",
-      subtitle: "Founded 2016 · 15+ years in OOH · 100+ enterprise partners",
+      subtitle: "Since 2014 · 12+ years in OOH · 100+ enterprise partners",
     },
   },
   contact: {
@@ -204,12 +204,12 @@ const routes = {
     ko: {
       badge: "History",
       title: "싱커드 연혁",
-      subtitle: "2016년부터 이어온 OOH 여정",
+      subtitle: "2014년부터 이어온 OOH 여정",
     },
     en: {
       badge: "History",
       title: "THINKAD timeline",
-      subtitle: "Our OOH journey since 2016",
+      subtitle: "Our OOH journey since 2014",
     },
   },
   portfolio: {

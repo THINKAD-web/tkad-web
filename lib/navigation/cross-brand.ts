@@ -1,2 +1,2 @@
-/** Sister product — THINKAD Digital (separate Vercel project). */
-export const THINKAD_DIGITAL_URL = "https://digital.tkad.co.kr";
+/** Online ads catalog on THINKAD (formerly THINKAD Digital). */
+export const THINKAD_ONLINE_MEDIA_PATH = "/media/online" as const;

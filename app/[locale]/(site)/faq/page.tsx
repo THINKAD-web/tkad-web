@@ -5,6 +5,7 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getPublicFaqs } from "@/lib/public-faq";
 import {
   pageAlternates,
+  pageTitleKeyword,
   segmentOpenGraphImages,
   serializeJsonLd,
 } from "@/lib/seo";
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const meta = isKo ? FAQ_META_KO : FAQ_META_EN;
 
   return {
-    title: meta.title,
+    title: pageTitleKeyword(meta.title),
     description: meta.description,
     alternates: pageAlternates(locale, "/faq"),
     openGraph: {

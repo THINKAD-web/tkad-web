@@ -13,7 +13,7 @@ import {
 import { listGuideMeta } from "@/lib/guides-data";
 import { getPublishedGuideArticles } from "@/lib/public-auto-content";
 import { SEO_GUIDE_SLUGS } from "@/lib/seo-content/seo-guide-topics";
-import { pageAlternates, segmentOpenGraphImages, serializeJsonLd, siteUrl } from "@/lib/seo";
+import { pageAlternates, pageTitleKeyword, segmentOpenGraphImages, serializeJsonLd, siteUrl } from "@/lib/seo";
 import { ogAltForRoute } from "@/lib/og-route-copy";
 import {
   buildBreadcrumbJsonLd,
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const meta = isKo ? GUIDES_INDEX_META_KO : GUIDES_INDEX_META_EN;
 
   return {
-    title: meta.title,
+    title: pageTitleKeyword(meta.title),
     description: meta.description,
     keywords: isKo ? BEGINNER_GUIDE_META.keywordsKo : BEGINNER_GUIDE_META.keywordsEn,
     alternates: pageAlternates(locale, "/guides"),
