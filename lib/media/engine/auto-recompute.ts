@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { recomputeOneMedia } from "./recompute-one";
+import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
 
 type Db = PrismaClient;
 
@@ -27,12 +28,22 @@ export async function maybeAutoRecomputeMediaMetrics(
     select: {
       dailyFootfall: true,
       impressions: true,
+      slug: true,
     },
   });
   if (!media || !shouldAutoRecomputeMediaMetrics(media)) return;
 
   try {
     await recomputeOneMedia(db, mediaId);
+    // This runs fire-and-forget after the caller's own revalidateMediaCaches()
+    // call, so without this the detail cache can be re-marked fresh with the
+    // pre-recompute cpm/impressions if regen races ahead of this write.
+    // Detail-only — cpm/impressions aren't list-DTO gate fields, and this
+    // path never sets markReviewed, so reviewStatus can't change here.
+    revalidateMediaCaches(
+      { id: mediaId, slug: media.slug },
+      { invalidateList: false },
+    );
   } catch (err) {
     console.error("[media-engine] auto-recompute failed", { mediaId, err });
   }

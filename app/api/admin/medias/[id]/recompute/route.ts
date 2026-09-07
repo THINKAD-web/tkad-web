@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { recomputeOneMedia } from "@/lib/media/engine/recompute-one";
+import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,17 @@ export async function POST(request: NextRequest, { params }: Params) {
 
   try {
     const result = await recomputeOneMedia(db, id);
+    // cpm/impressions aren't list-DTO gate fields (ranking/detail display
+    // only) — detail path only. This call never passes markReviewed, so
+    // reviewStatus can't change here.
+    const media = await db.media.findUnique({
+      where: { id },
+      select: { slug: true },
+    });
+    revalidateMediaCaches(
+      { id, slug: media?.slug },
+      { invalidateList: false },
+    );
     return json(result);
   } catch (err) {
     const message =
