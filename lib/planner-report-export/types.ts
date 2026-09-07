@@ -54,6 +54,8 @@ export type PlannerExportMediaRow = {
   budgetContributionPct?: number | null;
   /** 선택 수량 (네트워크·이동형) */
   quantityLabel?: string;
+  /** digital_only / online catalog — 실물 사진 대신 플랫폼 배지 */
+  onlinePlatform?: string | null;
 };
 
 export type PlannerExportDigitalRow = {

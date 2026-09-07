@@ -11,6 +11,7 @@ import { normalizeBriefInput } from "@/lib/planner/brief/types";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
 import { parsePlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
 import { recommendOnlineCatalogFromBrief } from "@/lib/planner/brief/online-catalog-adapter";
+import type { BriefOnlineMix } from "@/lib/planner/brief/store";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,9 @@ const SaveBodySchema = z.object({
   mixUnits: z.record(z.string(), z.number()).optional(),
   customLines: z.array(z.record(z.string(), z.unknown())).optional(),
   reportCopy: z.record(z.string(), z.unknown()).optional(),
+  /** PR3 — digital_only 사용자 mix (서버가 budgetPct를 재계산, 비율은 신뢰하지 않음) */
+  onlineSelectedMediaIds: z.array(z.string()).optional(),
+  onlineExcludedMediaIds: z.array(z.string()).optional(),
 });
 
 /**
@@ -51,10 +55,19 @@ export async function POST(request: NextRequest) {
   let snapshot;
   if (parsed.data.channelMode === "digital_only") {
     const { catalog } = await fetchPlannerMediaCatalog();
-    // 클라이언트가 계산한 결과를 신뢰하지 않고 브리프+카탈로그로 서버에서
-    // 재계산한다 — OOH 저장이 mixUnits+카탈로그로 metrics를 재계산하는 것과
-    // 동일한 원칙(저장값은 항상 서버 재계산 기준).
-    const result = recommendOnlineCatalogFromBrief(brief, catalog, true);
+    const onlineMix: BriefOnlineMix = {
+      selectedMediaIds: parsed.data.onlineSelectedMediaIds ?? [],
+      excludedMediaIds: parsed.data.onlineExcludedMediaIds ?? [],
+    };
+    // 클라이언트가 계산한 결과를 신뢰하지 않고 브리프+카탈로그(+선택 id)로
+    // 서버에서 재계산한다 — OOH 저장이 mixUnits+카탈로그로 metrics를 재계산하는
+    // 것과 동일한 원칙(저장값은 항상 서버 재계산 기준).
+    const result = recommendOnlineCatalogFromBrief(
+      brief,
+      catalog,
+      true,
+      onlineMix.selectedMediaIds.length > 0 ? onlineMix : null,
+    );
     if (result.platforms.length === 0) {
       return NextResponse.json({ error: "No online channels to save" }, { status: 400 });
     }

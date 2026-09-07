@@ -60,10 +60,10 @@ export function BriefCustomLineForm({
 
   return (
     <div
-      className="rounded-xl border border-dashed border-violet-400/50 bg-violet-500/5 p-3"
+      className="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3"
       data-testid="brief-custom-line-form"
     >
-      <p className="mb-2 tkad-type-title text-violet-800 dark:text-violet-300">
+      <p className="mb-2 tkad-type-title text-primary">
         {mode === "add"
           ? isKo
             ? "커스텀 항목 추가"

@@ -640,6 +640,7 @@ function buildBriefOnlineReportPayload(
     id: line.mediaId,
     name: line.name,
     type: line.platform,
+    onlinePlatform: line.platform,
     priceLabel: line.pricingLabel,
     monthlyPriceLabel: isKo ? `₩${fmt(line.budgetWon)}` : `₩${fmt(line.budgetWon)}`,
     lineTotalLabel: isKo ? `₩${fmt(line.budgetWon)}` : `₩${fmt(line.budgetWon)}`,

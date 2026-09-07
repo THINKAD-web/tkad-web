@@ -246,6 +246,7 @@ function onlineLineToExportRow(
     id: line.mediaId,
     name: line.name,
     type: line.platform,
+    onlinePlatform: line.platform,
     priceLabel: line.pricingLabel,
     monthlyPriceLabel: isKo ? `월 ₩${fmt(line.budgetWon)}` : `₩${fmt(line.budgetWon)}/mo`,
     lineTotalLabel: isKo ? `월 ₩${fmt(line.budgetWon)}` : `₩${fmt(line.budgetWon)}/mo`,

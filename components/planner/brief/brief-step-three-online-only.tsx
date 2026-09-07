@@ -16,6 +16,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { FileDown, Loader2, Lock, Search } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
 import type { MediaItem } from "@/lib/media-data";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,14 @@ import { buildOnlineCampaignPlanSnapshot } from "@/lib/planner/brief/build-plan-
 import { buildBriefReportPayload } from "@/lib/planner/brief/brief-report-adapter";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
+import {
+  BriefProposalPreviewSection,
+  briefProposalPreviewVisible,
+} from "@/components/planner/brief/brief-proposal-preview-section";
+import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
+import { useReportCopyStore } from "@/lib/planner-report-export/report-copy-store";
+import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { useToast } from "@/components/toast-provider";
 import {
   buildPlannerOnlineCardContextByPlatform,
@@ -48,15 +57,43 @@ export function BriefStepThreeOnlineOnly({
   isKo: boolean;
 }) {
   const store = useBriefStore();
-  const result = useOnlineCatalogResult(catalog, isKo);
+  const { result } = useOnlineCatalogResult(catalog, isKo);
   const kpis = summarizeOnlineResultKpis(result);
   const hasResult = result.platforms.length > 0;
   const { toast } = useToast();
+  const {
+    allowed: reportPreviewAllowed,
+    loading: reportPreviewLoading,
+  } = useFeatureAccess("planner_result");
+  const [reportStyle, setReportStyle] = usePlannerReportStyle();
+  const setReportClientName = useReportCopyStore((s) => s.setClientName);
+  const setReportDocumentTitle = useReportCopyStore((s) => s.setDocumentTitle);
+  const setGreeting = useReportCopyStore((s) => s.setGreeting);
+  const setExecutiveSummary = useReportCopyStore((s) => s.setExecutiveSummary);
+  const reportCopySnapshot = useReportCopyStore(
+    useShallow((s) => ({
+      clientName: s.clientName,
+      documentTitle: s.documentTitle,
+      coverLogoUrl: s.coverLogoUrl,
+      greeting: s.greeting,
+      executiveSummary: s.executiveSummary,
+      greetingTouched: s.greetingTouched,
+      executiveSummaryTouched: s.executiveSummaryTouched,
+      copyFingerprint: s.copyFingerprint,
+      productionCostWon: s.productionCostWon,
+    })),
+  );
 
   const [savedPlan, setSavedPlan] = useState<SavedCampaignPlan | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [exporting, setExporting] = useState<"pdf" | "pptx" | null>(null);
+  const [exporting, setExporting] = useState<PlannerReportExportFormat | null>(
+    null,
+  );
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [snapshotAt] = useState(() =>
+    new Date().toLocaleString(isKo ? "ko-KR" : "en-US"),
+  );
 
   const exportPlan = useMemo(() => {
     if (savedPlan) return savedPlan;
@@ -72,8 +109,10 @@ export function BriefStepThreeOnlineOnly({
       catalog,
       isKo,
       channelMode: "digital_only",
+      reportCopy: reportCopySnapshot,
+      generatedAt: snapshotAt,
     });
-  }, [exportPlan, catalog, isKo]);
+  }, [exportPlan, catalog, isKo, reportCopySnapshot, snapshotAt]);
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -96,6 +135,8 @@ export function BriefStepThreeOnlineOnly({
             freeText: store.freeText,
           },
           channelMode: "digital_only",
+          onlineSelectedMediaIds: store.onlineMix.selectedMediaIds,
+          onlineExcludedMediaIds: store.onlineMix.excludedMediaIds,
         }),
       });
       if (!res.ok) {
@@ -131,12 +172,14 @@ export function BriefStepThreeOnlineOnly({
   }, [result, isKo]);
 
   const handleExport = useCallback(
-    async (format: "pdf" | "pptx") => {
+    async (format: PlannerReportExportFormat) => {
       if (exporting || !exportPayload) return;
       setExporting(format);
+      setExportError(null);
       try {
         await downloadPlannerReport(format, exportPayload, {
           activitySource: "planner",
+          style: reportStyle,
         });
         toast(
           "success",
@@ -149,12 +192,13 @@ export function BriefStepThreeOnlineOnly({
             : isKo
               ? "제안서 생성에 실패했습니다."
               : "Proposal export failed.";
+        setExportError(msg);
         toast("error", msg);
       } finally {
         setExporting(null);
       }
     },
-    [exporting, exportPayload, toast, isKo],
+    [exporting, exportPayload, toast, isKo, reportStyle],
   );
 
   return (
@@ -289,7 +333,32 @@ export function BriefStepThreeOnlineOnly({
                 )}
               </p>
             ) : null}
+            <p className="tkad-type-caption text-muted-foreground">
+              {isKo
+                ? "제안서 PDF·PPTX는 아래 미리보기에서도 생성할 수 있습니다."
+                : "You can also export from the proposal preview below."}
+            </p>
           </div>
+
+          {exportPayload && briefProposalPreviewVisible(exportPayload) ? (
+            <BriefProposalPreviewSection
+              isKo={isKo}
+              variant="online"
+              exportPayload={exportPayload}
+              reportStyle={reportStyle}
+              onReportStyleChange={setReportStyle}
+              reportPreviewAllowed={reportPreviewAllowed}
+              reportPreviewLoading={reportPreviewLoading}
+              onDocumentTitleChange={setReportDocumentTitle}
+              onClientNameChange={setReportClientName}
+              onGreetingChange={setGreeting}
+              onExecutiveSummaryChange={setExecutiveSummary}
+              onExportPdf={() => void handleExport("pdf")}
+              onExportPptx={() => void handleExport("pptx")}
+              exporting={exporting}
+              exportError={exportError}
+            />
+          ) : null}
         </>
       )}
 

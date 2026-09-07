@@ -21,6 +21,7 @@ import type { DocumentMediaDetail } from "@/lib/document-media-detail";
 import { QuoteStampImage } from "@/components/quote/quote-stamp-image";
 import { formatQuoteValidUntilLabel } from "@/lib/admin-quote-calc";
 import { formatCampaignDurationMeta } from "@/lib/quote-campaign-period";
+import { REPORT_BRAND } from "@/lib/planner-report-export/document-theme";
 
 /** 카드 대신 컴팩트 표로 전환하는 매체 건수 */
 const COMPACT_MEDIA_MIN = 5;
@@ -43,7 +44,10 @@ function QuoteDocSectionHeading({
       )}
     >
       <span
-        className="inline-block h-[18px] w-[3px] shrink-0 rounded-full bg-gradient-to-b from-violet-600 to-cyan-500"
+        className="inline-block h-[18px] w-[3px] shrink-0 rounded-full"
+        style={{
+          background: `linear-gradient(180deg, ${REPORT_BRAND.teal} 0%, ${REPORT_BRAND.ink} 100%)`,
+        }}
         aria-hidden
       />
       {children}
@@ -121,11 +125,11 @@ function QuoteSummaryStrip({
       data-quote-summary-strip
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-violet-200/70 bg-white/90 px-4 py-3.5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-500">
+        <div className="rounded-xl border border-primary/15/70 bg-white/90 px-4 py-3.5 shadow-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary/80">
             {isKo ? "총액 (VAT 포함)" : "Total (incl. VAT)"}
           </p>
-          <p className="quote-pdf-amount mt-1 text-2xl font-black tabular-nums tracking-tight text-violet-700">
+          <p className="quote-pdf-amount mt-1 text-2xl font-black tabular-nums tracking-tight text-primary">
             {formatAmount(grandTotalWon)}
           </p>
         </div>
@@ -212,7 +216,7 @@ function QuoteDefaultTotalsPanel({
       <div
         className="quote-pdf-totals-gradient flex items-center justify-between gap-6 rounded-lg px-4 py-3 text-base font-black text-white"
         style={{
-          background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
+          background: `linear-gradient(135deg, ${REPORT_BRAND.teal} 0%, ${REPORT_BRAND.ink} 100%)`,
         }}
       >
         <span>{isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}</span>
@@ -241,12 +245,12 @@ function QuoteMediaCompactTable({
     <div className="overflow-hidden rounded-xl border border-gray-200">
       <table className="w-full border-collapse text-left">
         <thead>
-          <tr className="border-b border-violet-100 bg-violet-50/70">
+          <tr className="border-b border-primary/10 bg-primary/5">
             {tHead.map((h, i) => (
               <th
                 key={h}
                 className={cn(
-                  "px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-violet-800",
+                  "px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70",
                   i === 3 && "text-right",
                   i === 0 && "w-8",
                 )}
@@ -271,7 +275,7 @@ function QuoteMediaCompactTable({
               <td className="px-3 py-2.5 text-xs leading-snug text-gray-500">
                 {row.location || "—"}
               </td>
-              <td className="px-3 py-2.5 text-right text-sm font-bold tabular-nums text-violet-700">
+              <td className="px-3 py-2.5 text-right text-sm font-bold tabular-nums text-primary">
                 {formatAdminQuoteLineCell(row.lineTotalWon, isKo, (n) =>
                   formatAmount(n),
                 {
@@ -524,7 +528,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   {periodLabel}
                 </span>
                 {campaignDurationMeta ? (
-                  <span className="text-sm font-semibold tabular-nums text-violet-700">
+                  <span className="text-sm font-semibold tabular-nums text-primary">
                     · {campaignDurationMeta}
                   </span>
                 ) : null}
@@ -664,7 +668,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                     <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
                       {isKo ? "소계" : "Subtotal"}
                     </span>
-                    <span className="font-bold tabular-nums text-violet-700">
+                    <span className="font-bold tabular-nums text-primary">
                       {formatAmount(linesSubtotalWon)}
                     </span>
                   </div>
@@ -683,7 +687,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
                     {t("pdfSupply")}
                   </span>
-                  <span className="font-bold tabular-nums text-violet-700">
+                  <span className="font-bold tabular-nums text-primary">
                     {formatAmount(subtotalWon)}
                   </span>
                 </div>
@@ -691,14 +695,14 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
                     {t("pdfVat")}
                   </span>
-                  <span className="font-bold tabular-nums text-violet-700">
+                  <span className="font-bold tabular-nums text-primary">
                     {formatAmount(vatWon)}
                   </span>
                 </div>
                 <div
                   className="flex justify-between rounded-lg px-3 py-2.5 text-base font-black text-white"
                   style={{
-                    background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
+                    background: `linear-gradient(135deg, ${REPORT_BRAND.teal} 0%, ${REPORT_BRAND.ink} 100%)`,
                   }}
                 >
                   <span>{isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}</span>
@@ -725,7 +729,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   </p>
                   <p
                     className={cn(
-                      "quote-pdf-amount mt-1.5 font-bold tabular-nums text-violet-700",
+                      "quote-pdf-amount mt-1.5 font-bold tabular-nums text-primary",
                       isDefaultDoc ? "text-xl" : "text-lg",
                     )}
                   >
@@ -748,7 +752,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   </p>
                   <p
                     className={cn(
-                      "quote-pdf-amount mt-1.5 font-bold tabular-nums text-violet-700",
+                      "quote-pdf-amount mt-1.5 font-bold tabular-nums text-primary",
                       isDefaultDoc ? "text-xl" : "text-lg",
                     )}
                   >
@@ -756,12 +760,12 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   </p>
                 </div>
                 <div
-                  className="col-span-2 rounded-xl border border-violet-200 p-4 sm:col-span-1"
+                  className="col-span-2 rounded-xl border border-primary/15 p-4 sm:col-span-1"
                   style={{
-                    background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
+                    background: `linear-gradient(135deg, ${REPORT_BRAND.teal} 0%, ${REPORT_BRAND.ink} 100%)`,
                   }}
                 >
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-100">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary/60">
                     {isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}
                   </p>
                   <p
@@ -798,7 +802,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
               <div>
                 <p
                   className={cn(
-                    "font-bold text-violet-700",
+                    "font-bold text-primary",
                     isDefaultDoc ? "text-xs uppercase tracking-[0.1em]" : "text-xs font-semibold",
                   )}
                 >
@@ -809,7 +813,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
               <div className="relative min-h-[64px] pr-16">
                 <p
                   className={cn(
-                    "font-bold text-violet-700",
+                    "font-bold text-primary",
                     isDefaultDoc ? "text-xs uppercase tracking-[0.1em]" : "text-xs font-semibold",
                   )}
                 >

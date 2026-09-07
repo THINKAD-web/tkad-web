@@ -10,7 +10,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { FileDown, Loader2, Lock, Mail } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import {
@@ -28,7 +27,6 @@ import {
   hasBriefMixContent,
 } from "@/lib/planner/brief/custom-mix-metrics";
 import { BriefResultSummary } from "@/components/planner/brief/brief-result-summary";
-import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import { useBriefStore } from "@/lib/planner/brief/store";
 import {
   buildCampaignPlanSnapshot,
@@ -42,21 +40,20 @@ import {
   resolveBriefPortfolio,
 } from "@/lib/planner/brief/brief-report-adapter";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
-import { ReportStylePicker } from "@/components/planner/report-style-picker";
 import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { useShallow } from "zustand/react/shallow";
 import { useReportCopyStore } from "@/lib/planner-report-export/report-copy-store";
 import { serializePlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
 import { useReportCopyAutoDraft } from "@/lib/planner-report-export/use-report-copy-auto-draft";
-import { DocumentPreviewFrame } from "@/components/document/document-layout";
-import { PlannerReportDocument } from "@/components/planner/report-document";
-import { ReportCopyStaleBanner } from "@/components/planner/report-copy-stale-banner";
 import { ReportEmailSendDialog } from "@/components/planner/report-email-send-dialog";
+import {
+  BriefProposalPreviewSection,
+  briefProposalPreviewVisible,
+} from "@/components/planner/brief/brief-proposal-preview-section";
 import { Input } from "@/components/ui/input";
 import { uploadPlannerCreative } from "@/lib/planner/creative-upload";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
-import { plannerProposalGateHint } from "@/lib/entitlements/tier-copy";
 import { useToast } from "@/components/toast-provider";
 import {
   calcMixMetrics,
@@ -110,6 +107,7 @@ function storedMetricsToMixMetrics(
     budgetUsedRate,
     overBudgetWon,
     isOverBudget: overBudgetWon > 0,
+    reachMeta: null,
   };
 }
 
@@ -654,7 +652,7 @@ function BriefStepThreeOohFlow({
                   >
                     <div className="min-w-0">
                       <p className="truncate font-medium">
-                        <span className="mr-1.5 rounded bg-violet-600/15 px-1 py-0.5 tkad-type-note font-bold text-violet-700 dark:text-violet-300">
+                        <span className="mr-1.5 rounded bg-primary/10 px-1 py-0.5 tkad-type-note font-bold text-primary">
                           {isKo ? "커스텀" : "Custom"}
                         </span>
                         {row.name}
@@ -831,149 +829,63 @@ function BriefStepThreeOohFlow({
       </div>
     </div>
 
-    {exportPayload && exportPayload.portfolio.length > 0 ? (
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="tkad-type-title">
-              {isKo ? "제안서 미리보기" : "Proposal preview"}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {isKo
-                ? "표지·인사말·요약을 편집한 뒤 PDF·이메일로 보낼 수 있습니다."
-                : "Edit cover copy, then export or email the proposal."}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              ref={logoInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                e.target.value = "";
-                if (file) void handleLogoUpload(file);
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={logoUploading || !reportPreviewAllowed}
-              onClick={() => logoInputRef.current?.click()}
-            >
-              {logoUploading
-                ? isKo
-                  ? "업로드 중…"
-                  : "Uploading…"
-                : coverLogoUrl
+    {exportPayload && briefProposalPreviewVisible(exportPayload) ? (
+      <>
+        <BriefProposalPreviewSection
+          isKo={isKo}
+          variant="ooh"
+          exportPayload={exportPayload}
+          reportStyle={reportStyle}
+          onReportStyleChange={setReportStyle}
+          reportPreviewAllowed={reportPreviewAllowed}
+          reportPreviewLoading={reportPreviewLoading}
+          mapPortfolio={exportPortfolio}
+          onDocumentTitleChange={setReportDocumentTitle}
+          onClientNameChange={setReportClientName}
+          onGreetingChange={setGreeting}
+          onExecutiveSummaryChange={setExecutiveSummary}
+          copyStale={copyStale}
+          onRegenerateCopy={regenerateReportCopy}
+          onKeepCopyEdits={keepReportCopyEdits}
+          headerActions={
+            <>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (file) void handleLogoUpload(file);
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={logoUploading || !reportPreviewAllowed}
+                onClick={() => logoInputRef.current?.click()}
+              >
+                {logoUploading
                   ? isKo
-                    ? "표지 로고 변경"
-                    : "Change cover logo"
-                  : isKo
-                    ? "표지 로고 업로드"
-                    : "Upload cover logo"}
-            </Button>
-          </div>
-        </div>
-
-        {reportPreviewLoading ? (
-          <p className="text-sm text-muted-foreground">
-            {isKo ? "권한 확인 중…" : "Checking access…"}
-          </p>
-        ) : !reportPreviewAllowed ? (
-          <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-            {plannerProposalGateHint(isKo)}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {copyStale ? (
-              <ReportCopyStaleBanner
-                isKo={isKo}
-                onRegenerate={regenerateReportCopy}
-                onKeep={keepReportCopyEdits}
-              />
-            ) : null}
-            <ReportStylePicker
-              isKo={isKo}
-              value={reportStyle}
-              onChange={setReportStyle}
-            />
-            <DocumentPreviewFrame>
-              <PlannerReportDocument
-                payload={exportPayload}
-                mapPortfolio={exportPortfolio}
-                reportStyle={reportStyle}
-                editableTitle
-                onDocumentTitleChange={setReportDocumentTitle}
-                editableClientName
-                onClientNameChange={setReportClientName}
-                editableGreeting
-                onGreetingChange={setGreeting}
-                editableExecutiveSummary
-                onExecutiveSummaryChange={setExecutiveSummary}
-              />
-            </DocumentPreviewFrame>
-
-            <div className="flex flex-wrap gap-2">
-              <PlannerPdfDownloadGate
-                isKo={isKo}
-                onAllowedDownload={() => void handleExport("pdf")}
-              >
-                {({ onDownloadClick, pdfAllowed, checking }) => (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={exporting !== null || checking}
-                    onClick={onDownloadClick}
-                  >
-                    {exporting === "pdf" ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : !pdfAllowed ? (
-                      <Lock className="mr-2 h-4 w-4" />
-                    ) : (
-                      <FileDown className="mr-2 h-4 w-4" />
-                    )}
-                    {!pdfAllowed
-                      ? isKo
-                        ? "제안서 PDF (PRO)"
-                        : "Proposal PDF (PRO)"
-                      : isKo
-                        ? "제안서 PDF 생성"
-                        : "Generate proposal PDF"}
-                  </Button>
-                )}
-              </PlannerPdfDownloadGate>
-
-              <PlannerPdfDownloadGate
-                isKo={isKo}
-                onAllowedDownload={() => setEmailDialogOpen(true)}
-              >
-                {({ onDownloadClick, pdfAllowed, checking }) => (
-                  <Button
-                    type="button"
-                    variant="default"
-                    disabled={checking}
-                    onClick={onDownloadClick}
-                  >
-                    {!pdfAllowed ? (
-                      <Lock className="mr-2 h-4 w-4" />
-                    ) : (
-                      <Mail className="mr-2 h-4 w-4" />
-                    )}
-                    {isKo ? "이메일로 보내기" : "Email proposal"}
-                  </Button>
-                )}
-              </PlannerPdfDownloadGate>
-            </div>
-
-            {exportError ? (
-              <p className="text-xs text-destructive">{exportError}</p>
-            ) : null}
-          </div>
-        )}
-
+                    ? "업로드 중…"
+                    : "Uploading…"
+                  : coverLogoUrl
+                    ? isKo
+                      ? "표지 로고 변경"
+                      : "Change cover logo"
+                    : isKo
+                      ? "표지 로고 업로드"
+                      : "Upload cover logo"}
+              </Button>
+            </>
+          }
+          onExportPdf={() => void handleExport("pdf")}
+          onEmailClick={() => setEmailDialogOpen(true)}
+          exporting={exporting}
+          exportError={exportError}
+        />
         <ReportEmailSendDialog
           open={emailDialogOpen}
           onClose={() => setEmailDialogOpen(false)}
@@ -987,7 +899,7 @@ function BriefStepThreeOohFlow({
             );
           }}
         />
-      </section>
+      </>
     ) : null}
     </div>
   );

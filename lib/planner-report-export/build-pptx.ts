@@ -27,6 +27,7 @@ import {
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
 import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
+import { onlinePlatformBadgePptxColors } from "@/lib/online/document-platform-badge-export";
 import { reportExportCoverSubtitle } from "@/lib/planner-report-export/report-cover-copy";
 
 /**
@@ -899,9 +900,11 @@ export async function buildPlannerReportPptx(
       h: cardH,
       fill: { color: WHITE },
       rectRadius: 0.08,
-      line: { color: isCustom ? "C4B5FD" : "E5E7EB", width: 0.75 },
+      line: { color: isCustom ? ACCENT_LT : "E5E7EB", width: 0.75 },
     });
-    const hasThumb = !isCustom && Boolean(row.thumbUrl?.trim());
+    const hasOnlineBadge = !isCustom && Boolean(row.onlinePlatform?.trim());
+    const hasThumb =
+      !isCustom && (Boolean(row.thumbUrl?.trim()) || hasOnlineBadge);
     const thumb = hasThumb && row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
     const textX = hasThumb ? 0.75 + THUMB_W_IN + 0.25 : 0.75;
     const textW = CARD_X + CARD_W - textX - 0.25;
@@ -919,6 +922,28 @@ export async function buildPlannerReportPptx(
       } catch {
         /* broken thumb */
       }
+    } else if (hasOnlineBadge && row.onlinePlatform) {
+      const badge = onlinePlatformBadgePptxColors(row.onlinePlatform);
+      slide.addShape(pptx.ShapeType.roundRect, {
+        x: 0.75,
+        y: cardY + 0.2,
+        w: THUMB_W_IN,
+        h: THUMB_H_IN,
+        fill: { color: badge.bg },
+        rectRadius: 0.06,
+        line: { color: badge.bg, width: 0.5 },
+      });
+      slide.addText(badge.initial, {
+        x: 0.75,
+        y: cardY + 0.2 + THUMB_H_IN / 2 - 0.22,
+        w: THUMB_W_IN,
+        h: 0.44,
+        fontFace: face,
+        fontSize: /[가-힣]/.test(badge.initial) ? 11 : 16,
+        color: badge.text,
+        bold: true,
+        align: "center",
+      });
     } else if (hasThumb && row.thumbUrl?.trim()) {
       slide.addShape(pptx.ShapeType.roundRect, {
         x: 0.75,

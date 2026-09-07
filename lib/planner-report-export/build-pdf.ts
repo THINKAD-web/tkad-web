@@ -42,6 +42,7 @@ import {
 } from "@/lib/planner-report-export/export-badge";
 import type { PlannerExportKpi } from "@/lib/planner-report-export/types";
 import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
+import { onlinePlatformBadgePdfColors } from "@/lib/online/document-platform-badge-export";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
@@ -947,8 +948,10 @@ export async function buildPlannerReportPdf(
 
   function drawMediaCard(row: PlannerExportMediaRow, thumb?: string) {
     const isCustom = row.kind === "custom";
+    const hasOnlineBadge = !isCustom && Boolean(row.onlinePlatform?.trim());
     const pad = PDF_LAYOUT.detailPadMm;
-    const thumbSlot = !isCustom && Boolean(row.thumbUrl?.trim());
+    const thumbSlot =
+      !isCustom && (Boolean(row.thumbUrl?.trim()) || hasOnlineBadge);
     const thumbW = thumbSlot ? thumbBox.w : 0;
     const textX = M + pad + (thumbSlot ? thumbW + 3 : 0);
     const textW = contentW - pad * 2 - (thumbSlot ? thumbW + 3 : 0);
@@ -991,7 +994,20 @@ export async function buildPlannerReportPdf(
     if (thumbSlot) {
       if (thumb) {
         addPdfThumbImage(doc, thumb, M + pad, y + pad, thumbBox.w, thumbBox.h);
-      } else {
+      } else if (hasOnlineBadge && row.onlinePlatform) {
+        const badge = onlinePlatformBadgePdfColors(row.onlinePlatform);
+        setFill(badge.bg);
+        doc.roundedRect(M + pad, y + pad, thumbBox.w, thumbBox.h, R, R, "F");
+        doc.setFont(FONT, "bold");
+        doc.setFontSize(/[가-힣]/.test(badge.initial) ? 11 : 14);
+        setText(badge.text);
+        doc.text(
+          badge.initial,
+          M + pad + thumbBox.w / 2,
+          y + pad + thumbBox.h / 2 + 1.5,
+          { align: "center" },
+        );
+      } else if (row.thumbUrl?.trim()) {
         setFill(GRAY_50);
         doc.roundedRect(M + pad, y + pad, thumbBox.w, thumbBox.h, R, R, "F");
         doc.setFont(FONT, "normal");
@@ -1017,7 +1033,7 @@ export async function buildPlannerReportPdf(
     if (isCustom && row.categoryLabel) {
       doc.setFont(FONT, "normal");
       doc.setFontSize(PDF_LAYOUT.detailBodyPt);
-      setText("7C3AED");
+      setText(QP_ACCENT);
       doc.text(row.categoryLabel, textX, ty);
       ty += 4.2;
     }

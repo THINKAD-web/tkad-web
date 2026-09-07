@@ -61,6 +61,7 @@ function resultFixture(
         platform: "구글 디스플레이",
         score: 4,
         minBudgetMan: 150,
+        topProductMediaId: "google-1",
         reasonKo: "구글 디스플레이 — 관련성은 있지만 최소 집행금액(150만원)을 채우지 못해 제외",
         reasonEn: "Google Display — relevant but excluded (requires a minimum budget of 150만원)",
       },

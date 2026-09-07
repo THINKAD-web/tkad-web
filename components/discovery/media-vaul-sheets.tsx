@@ -122,7 +122,7 @@ export function MediaSortVaulSheet({
                     className={cn(
                       "tkad-type-body flex w-full items-center justify-between rounded-xl px-4 py-3 text-left font-medium transition-colors",
                       selected
-                        ? "bg-violet-500/12 text-tkad-accent"
+                        ? "bg-primary/10 text-primary"
                         : "text-foreground hover:bg-muted/60 dark:hover:bg-white/5",
                     )}
                     aria-pressed={selected}

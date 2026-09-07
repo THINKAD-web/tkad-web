@@ -1,13 +1,14 @@
 "use client";
 
 /**
- * O-1 / PART3-5 — digital_only 결과 카드 (Step 2 패널 · Step 3 결과 화면 공용).
- * 값은 전부 recommendOnlineCatalogChannels() 산출값 그대로 — 가공 없음.
+ * O-1 / PART3-5 + PR3 — digital_only 채널 카드 (Step 2 mix 편집 · Step 3 결과 공용).
+ * 값은 recommendOnlineCatalogChannels() / reallocateOnlineBudget() 산출값 그대로.
  */
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import type {
   ExcludedForBudgetEntry,
   ScoredOnlinePlatformGroup,
@@ -21,7 +22,7 @@ function formatMetricRange(min: number, max: number, isKo: boolean): string {
   return min === max ? fmt(min) : `${fmt(min)} ~ ${fmt(max)}`;
 }
 
-export function OnlineChannelCard({
+function OnlineChannelCardBody({
   group,
   isKo,
 }: {
@@ -41,10 +42,7 @@ export function OnlineChannelCard({
     : group.topProduct.nameEn || group.topProduct.name;
 
   return (
-    <div
-      className="rounded-xl border border-border bg-card p-3"
-      data-testid="brief-online-channel-card"
-    >
+    <>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate tkad-type-title">{group.platform}</p>
@@ -75,6 +73,81 @@ export function OnlineChannelCard({
       <p className="mt-2 tkad-type-caption leading-relaxed text-muted-foreground">
         {isKo ? group.reasonKo : group.reasonEn}
       </p>
+    </>
+  );
+}
+
+/** Step 3 등 읽기 전용 카드 */
+export function OnlineChannelCard({
+  group,
+  isKo,
+}: {
+  group: ScoredOnlinePlatformGroup;
+  isKo: boolean;
+}) {
+  return (
+    <div
+      className="rounded-xl border border-border bg-card p-3"
+      data-testid="brief-online-channel-card"
+    >
+      <OnlineChannelCardBody group={group} isKo={isKo} />
+    </div>
+  );
+}
+
+/** PR3 Step 2 — mix 편집용 (BriefMediaCard 재사용 X) */
+export function OnlineMixChannelCard({
+  group,
+  isKo,
+  variant,
+  onAdd,
+  onRemove,
+}: {
+  group: ScoredOnlinePlatformGroup;
+  isKo: boolean;
+  variant: "selected" | "pool";
+  onAdd?: () => void;
+  onRemove?: () => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-xl border bg-card p-3",
+        variant === "selected" ? "border-primary/30" : "border-border",
+      )}
+      data-testid={
+        variant === "selected"
+          ? "brief-online-mix-selected-card"
+          : "brief-online-mix-pool-card"
+      }
+    >
+      <OnlineChannelCardBody group={group} isKo={isKo} />
+      <div className="mt-3 flex justify-end">
+        {variant === "selected" && onRemove ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onRemove}
+            data-testid="brief-online-mix-remove"
+          >
+            <Minus className="mr-1 h-3.5 w-3.5" />
+            {isKo ? "제거" : "Remove"}
+          </Button>
+        ) : null}
+        {variant === "pool" && onAdd ? (
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={onAdd}
+            data-testid="brief-online-mix-add"
+          >
+            <Plus className="mr-1 h-3.5 w-3.5" />
+            {isKo ? "추가" : "Add"}
+          </Button>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -82,9 +155,11 @@ export function OnlineChannelCard({
 export function OnlineExcludedForBudgetSection({
   entries,
   isKo,
+  onForceAdd,
 }: {
   entries: readonly ExcludedForBudgetEntry[];
   isKo: boolean;
+  onForceAdd?: (mediaId: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   if (entries.length === 0) return null;
@@ -114,14 +189,29 @@ export function OnlineExcludedForBudgetSection({
         />
       </button>
       {open ? (
-        <ul className="space-y-1.5 border-t border-border p-3 pt-2">
+        <ul className="space-y-2 border-t border-border p-3 pt-2">
           {entries.map((e) => (
             <li
               key={e.platform}
-              className="tkad-type-caption text-muted-foreground"
+              className="flex flex-wrap items-center justify-between gap-2"
               data-testid="brief-online-excluded-row"
             >
-              {isKo ? e.reasonKo : e.reasonEn}
+              <span className="tkad-type-caption text-muted-foreground">
+                {isKo ? e.reasonKo : e.reasonEn}
+              </span>
+              {onForceAdd ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 shrink-0 px-2"
+                  onClick={() => onForceAdd(e.topProductMediaId)}
+                  data-testid="brief-online-excluded-force-add"
+                >
+                  <Plus className="mr-1 h-3.5 w-3.5" />
+                  {isKo ? "강제 추가" : "Force add"}
+                </Button>
+              ) : null}
             </li>
           ))}
         </ul>

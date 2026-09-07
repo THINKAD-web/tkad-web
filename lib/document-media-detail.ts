@@ -68,6 +68,8 @@ export type DocumentMediaDetail = {
   recommendReason?: string;
   exposureContributionPct?: number;
   budgetContributionPct?: number | null;
+  /** 온라인 채널 — 플랫폼 배지(썸네일 없을 때) */
+  onlinePlatform?: string | null;
 };
 
 export type DocumentMediaDetailSource =

@@ -142,6 +142,8 @@ export type ExcludedForBudgetEntry = {
   score: number;
   /** 이 채널의 최소 집행금액(만원) */
   minBudgetMan: number;
+  /** force-add UI용 — 대표 상품 id */
+  topProductMediaId: string;
   reasonKo: string;
   reasonEn: string;
 };
@@ -350,21 +352,23 @@ function buildExcludedForBudget(
         platform: c.platform,
         score: c.score,
         minBudgetMan,
+        topProductMediaId: candidateTopProductId(c),
         reasonKo: `${c.platform} — 관련성은 있지만 최소 집행금액(${minBudgetMan}만원)을 채우지 못해 제외`,
         reasonEn: `${c.platform} — relevant but excluded (requires a minimum budget of ${minBudgetMan}만원)`,
       };
     });
 }
 
-/**
- * 온라인 카탈로그에서 브리프에 맞는 채널(플랫폼)을 추천. 상품 단위 스코어링
- * → 관련성 필터 → 플랫폼 단위 그룹핑(최고점 대표) → 최소예산 반복 제거 →
- * 플랫폼 간 예산 비중 분배 순.
- */
-export function recommendOnlineCatalogChannels(
+type ScoredCatalogContext = {
+  candidates: Candidate[];
+  hasAnyCriteria: boolean;
+};
+
+/** 스코어링 + 관련성 필터 + 플랫폼 그룹핑까지 — water-filling 전 단계 */
+function buildScoredCatalogContext(
   input: OnlineCatalogRecommendInput,
-  isKo = true,
-): OnlineCatalogRecommendResult {
+  isKo: boolean,
+): ScoredCatalogContext {
   const scored: ScoredProduct[] = [];
   for (const media of input.catalog) {
     const spec = media.onlineSpec;
@@ -377,8 +381,6 @@ export function recommendOnlineCatalogChannels(
 
   const byPlatform = new Map<string, ScoredProduct[]>();
   for (const item of scored) {
-    // 브리프에 조건이 하나라도 있으면, 그중 아무것도 안 맞고 bestFor도 안 걸리는 상품은
-    // 애초에 후보에 넣지 않는다(수정 1) — 조건이 전혀 없으면(자유 탐색) 필터하지 않는다.
     if (hasAnyCriteria && !hasAnyRealMatch(item)) continue;
     const platform = item.spec.platform?.trim() || (isKo ? "기타" : "Other");
     const bucket = byPlatform.get(platform) ?? [];
@@ -394,12 +396,25 @@ export function recommendOnlineCatalogChannels(
   );
   candidates.sort((a, b) => b.score - a.score || compareStringAsc(a.platform, b.platform));
 
+  return { candidates, hasAnyCriteria };
+}
+
+function candidateTopProductId(c: Candidate): string {
+  return c.members[0].media.id;
+}
+
+function buildRecommendResultFromCandidates(
+  candidates: Candidate[],
+  input: OnlineCatalogRecommendInput,
+  isKo: boolean,
+  flags: { noRelevantChannels: boolean },
+): OnlineCatalogRecommendResult {
   if (candidates.length === 0) {
     return {
       platforms: [],
       totalBudgetMan: input.budgetMan,
-      noRelevantChannels: hasAnyCriteria,
-      budgetTooSmall: false,
+      noRelevantChannels: flags.noRelevantChannels,
+      budgetTooSmall: !flags.noRelevantChannels,
       excludedForBudget: [],
     };
   }
@@ -451,4 +466,68 @@ export function recommendOnlineCatalogChannels(
     budgetTooSmall: false,
     excludedForBudget,
   };
+}
+
+/**
+ * 사용자가 선택한 플랫폼(topProduct mediaId)만 남기고 예산을 100% 재분배한다.
+ * 클라이언트 mix 비율은 신뢰하지 않고 서버/스코어러에서 다시 계산한다.
+ */
+export function reallocateOnlineBudget(
+  input: OnlineCatalogRecommendInput,
+  selectedMediaIds: readonly string[],
+  isKo = true,
+): OnlineCatalogRecommendResult {
+  const { candidates, hasAnyCriteria } = buildScoredCatalogContext(input, isKo);
+  if (candidates.length === 0) {
+    return {
+      platforms: [],
+      totalBudgetMan: input.budgetMan,
+      noRelevantChannels: hasAnyCriteria,
+      budgetTooSmall: false,
+      excludedForBudget: [],
+    };
+  }
+
+  const selected = new Set(selectedMediaIds);
+  const filtered = candidates.filter((c) => selected.has(candidateTopProductId(c)));
+
+  if (filtered.length === 0) {
+    return {
+      platforms: [],
+      totalBudgetMan: input.budgetMan,
+      noRelevantChannels: false,
+      budgetTooSmall: true,
+      excludedForBudget: [],
+    };
+  }
+
+  return buildRecommendResultFromCandidates(filtered, input, isKo, {
+    noRelevantChannels: false,
+  });
+}
+
+/**
+ * 온라인 카탈로그에서 브리프에 맞는 채널(플랫폼)을 추천. 상품 단위 스코어링
+ * → 관련성 필터 → 플랫폼 단위 그룹핑(최고점 대표) → 최소예산 반복 제거 →
+ * 플랫폼 간 예산 비중 분배 순.
+ */
+export function recommendOnlineCatalogChannels(
+  input: OnlineCatalogRecommendInput,
+  isKo = true,
+): OnlineCatalogRecommendResult {
+  const { candidates, hasAnyCriteria } = buildScoredCatalogContext(input, isKo);
+
+  if (candidates.length === 0) {
+    return {
+      platforms: [],
+      totalBudgetMan: input.budgetMan,
+      noRelevantChannels: hasAnyCriteria,
+      budgetTooSmall: false,
+      excludedForBudget: [],
+    };
+  }
+
+  return buildRecommendResultFromCandidates(candidates, input, isKo, {
+    noRelevantChannels: hasAnyCriteria,
+  });
 }
