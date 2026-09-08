@@ -514,6 +514,57 @@ function scoreCategory(
     }
   }
 
+  const hay = plannerCategoryHaystack(m);
+
+  if (mediaIntents?.includes("delivery_vehicle")) {
+    if (
+      m.mediaSubCategory === "vehicle_wrap" ||
+      /택배|vehicle\s*wrap|차량\s*래핑|vehicle_wrap/i.test(hay)
+    ) {
+      best = Math.max(best, 15);
+    } else {
+      best = Math.min(best, 3);
+    }
+  }
+
+  if (mediaIntents?.includes("bus_shelter")) {
+    if (
+      m.mediaSubCategory === "bus_shelter" ||
+      m.mediaSubCategory === "digital_shelter" ||
+      /버스\s*정류장|bus\s*shelter|스마트\s*쉘터/i.test(hay)
+    ) {
+      best = Math.max(best, 15);
+    } else {
+      best = Math.min(best, 3);
+    }
+  }
+
+  if (mediaIntents?.includes("train_station")) {
+    if (
+      m.mediaSubCategory === "ktx_terminal" ||
+      /ktx|srt|기차역|철도\s*역|역\s*사\s*광고/i.test(hay)
+    ) {
+      best = Math.max(best, 14);
+    } else {
+      best = Math.min(best, 3);
+    }
+  }
+
+  if (mediaIntents?.includes("express_bus_terminal")) {
+    if (
+      /고속\s*버스\s*터미널|고속버스터미널|express\s*bus/i.test(hay) ||
+      m.mediaSubCategory === "ktx_terminal"
+    ) {
+      best = Math.max(best, 14);
+    } else {
+      best = Math.min(best, 3);
+    }
+  }
+
+  if (mediaIntents?.includes("intercity_bus_terminal")) {
+    best = Math.min(best, 1);
+  }
+
   return Math.min(15, best);
 }
 
