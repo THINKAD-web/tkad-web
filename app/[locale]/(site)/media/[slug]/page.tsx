@@ -43,7 +43,7 @@ import {
   resolveMediaForDetail,
 } from "@/lib/public-media-catalog";
 import { fetchSimilarMediaPeers } from "@/lib/media-similar-peers";
-import { enrichMediaWithTrust } from "@/lib/media-trust-catalog";
+import { enrichMediaWithTrustCore } from "@/lib/media-trust-catalog";
 import {
   attachReviewStatsToMediaItems,
   fetchMediaReviewsInitialStats,
@@ -183,7 +183,7 @@ export default async function MediaDetailPage({ params }: Props) {
     console.error("[media-detail] review stats failed", media.id, e);
   }
   try {
-    media = await enrichMediaWithTrust(media);
+    media = await enrichMediaWithTrustCore(media);
   } catch (e) {
     console.error("[media-detail] trust enrich failed", media.id, e);
   }

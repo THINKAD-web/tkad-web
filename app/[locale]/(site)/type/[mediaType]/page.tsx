@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { Monitor } from "lucide-react";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogCore } from "@/lib/public-media-catalog";
 import {
   isMarketingMediaTypeSlug,
   MARKETING_MEDIA_TYPE_SLUGS,
@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   let count = 0;
   try {
-    const catalog = await fetchPublicMediaCatalogList();
+    const catalog = await fetchPublicMediaCatalogCore();
     count = catalog.filter((m) => matchesMarketingMediaType(m, mediaType)).length;
   } catch {
     /* metadata only */
@@ -98,9 +98,9 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
   const isKo = locale === "ko" || locale.startsWith("ko");
   const def = marketingTypeDef(mediaType);
 
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogCore>> = [];
   try {
-    catalog = await fetchPublicMediaCatalogList();
+    catalog = await fetchPublicMediaCatalogCore();
   } catch {
     /* empty */
   }

@@ -7,6 +7,7 @@ import { config as loadEnv } from "dotenv";
 import { resolve } from "node:path";
 import { getPrisma } from "../lib/prisma";
 import { generateMediaSlug } from "../lib/slug";
+import { revalidateMediaListAfterScript } from "./lib/revalidate-media-list-after-script";
 
 loadEnv({ path: resolve(process.cwd(), ".env.local"), override: true });
 loadEnv({ path: resolve(process.cwd(), ".env") });
@@ -41,6 +42,10 @@ async function main() {
   }
 
   console.log(`Done. created=${created} skipped=${skipped} total=${rows.length}`);
+
+  if (created > 0) {
+    await revalidateMediaListAfterScript();
+  }
 }
 
 main()

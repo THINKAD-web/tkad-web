@@ -15,7 +15,7 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "../../lib/normalize-pg-database-url.ts";
-import { revalidateMediaCachesBulk } from "../../lib/media-cache-revalidate.ts";
+import { revalidateMediaCachesAfterScript } from "../lib/revalidate-media-list-after-script";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "../..");
 const usePreview = process.argv.includes("--preview") || (process.argv.includes("--execute") && !process.argv.includes("--prod"));
@@ -124,7 +124,9 @@ async function main() {
       await tx.mediaOnlineSpec.deleteMany({ where: { mediaId: { in: ids } } });
       await tx.media.deleteMany({ where: { id: { in: ids } } });
     });
-    revalidateMediaCachesBulk(seed.rows.map((r) => ({ id: r.id, slug: r.slug })));
+    await revalidateMediaCachesAfterScript(
+      seed.rows.map((r) => ({ id: r.id, slug: r.slug })),
+    );
     console.log(`Rollback complete — removed ${ids.length} media rows.`);
     await pool.end();
     return;
@@ -180,7 +182,9 @@ async function main() {
     { timeout: 120_000 },
   );
 
-  revalidateMediaCachesBulk(seed.rows.map((r) => ({ id: r.id, slug: r.slug })));
+  await revalidateMediaCachesAfterScript(
+    seed.rows.map((r) => ({ id: r.id, slug: r.slug })),
+  );
   console.log(`Seed complete — inserted ${seed.rows.length} online media rows.`);
   await pool.end();
 }

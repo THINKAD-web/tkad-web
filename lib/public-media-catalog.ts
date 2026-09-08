@@ -553,6 +553,29 @@ export async function loadPublicMediaCatalogRowsFromDb(): Promise<MediaItem[]> {
   return appendNetworksIfAny(await attachMediaTrustToMediaItems(withReviews));
 }
 
+/**
+ * Admin-owned fields only — same base rows as loadPublicMediaCatalogRowsFromDb()
+ * but skips attachReviewStatsToMediaItems/attachMediaTrustToMediaItems (review
+ * aggregates + fetchTrustBadgeContext()). Those two calls are what silently cap
+ * every long-TTL ISR route to 3600s (see reports/isr-writes-root-cause-20260907.md)
+ * — this loader exists so routes that declare 21600/86400/604800 actually get it.
+ */
+async function loadPublicMediaCatalogCoreRowsFromDb(): Promise<MediaItem[]> {
+  const db = getPrisma();
+  const rows = await db.media.findMany({
+    where: publicActiveMediaWhere(),
+    orderBy: { updatedAt: "desc" },
+    include: PUBLIC_MEDIA_CATALOG_INCLUDE,
+  });
+  const rowsWithCoverage = await attachPublicMediaCatalogExtras(
+    db,
+    rows,
+    PUBLIC_BROWSE_CATALOG_EXTRAS,
+  );
+  const dbItems = rowsWithCoverage.map((row) => prismaMediaToMediaItem(row));
+  return appendNetworksIfAny(dbItems);
+}
+
 async function loadPublicMediaCatalogFromDb(): Promise<MediaItem[]> {
   const { logMediaCacheMiss } = await import("@/lib/media-cache-diagnostics");
   logMediaCacheMiss("public-media-catalog");
@@ -637,6 +660,62 @@ export const fetchPublicMediaCatalogList = cache(
     } catch (e) {
       console.error(
         "[fetchPublicMediaCatalogList] DB query failed — returning empty catalog (NOT mocks)",
+        e instanceof Error ? `${e.name}: ${e.message}` : e,
+      );
+      return [];
+    }
+  },
+);
+
+async function loadPublicMediaCatalogCoreListFromDb(): Promise<MediaCatalogListItem[]> {
+  const { logMediaCacheMiss } = await import("@/lib/media-cache-diagnostics");
+  logMediaCacheMiss("public-media-catalog-core");
+  const rows = await loadPublicMediaCatalogCoreRowsFromDb();
+  return appendNetworkListItems(mediaItemsToCatalogListItems(rows));
+}
+
+/**
+ * `revalidate: false` — cached indefinitely until an explicit revalidateTag()
+ * call (same PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG as the enriched list above,
+ * so every admin-write invalidation path already fixed for that tag also
+ * invalidates this one; no new invalidation call sites needed).
+ */
+const getCrossRequestPublicMediaCatalogCore = unstable_cache(
+  loadPublicMediaCatalogCoreListFromDb,
+  ["public-media-catalog-core-v1"],
+  {
+    revalidate: false,
+    tags: [PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG],
+  },
+);
+
+/**
+ * For long-TTL ISR routes (media/[slug] 604800s, quote/budget-tool 86400s,
+ * local/type/target/industry/category/special 21600s) — admin-owned fields
+ * only, no review/trust overlay, no 3600s revalidate floor. The `/media`
+ * browse shell keeps using fetchPublicMediaCatalogList() (enriched) since it
+ * actually renders the overlay (ratings, trust badges) on browse cards.
+ */
+export const fetchPublicMediaCatalogCore = cache(
+  async function fetchPublicMediaCatalogCore(): Promise<MediaItem[]> {
+    const forceMockOnly =
+      process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "1" ||
+      process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "true";
+
+    if (!isDatabaseConfigured() || forceMockOnly) {
+      return catalogListItemsToMediaItems(
+        await appendNetworkListItems(
+          mediaItemsToCatalogListItems(getMediaBrowseMockCatalog()),
+        ),
+      );
+    }
+
+    try {
+      const slim = await getCrossRequestPublicMediaCatalogCore();
+      return catalogListItemsToMediaItems(slim);
+    } catch (e) {
+      console.error(
+        "[fetchPublicMediaCatalogCore] DB query failed — returning empty catalog (NOT mocks)",
         e instanceof Error ? `${e.name}: ${e.message}` : e,
       );
       return [];

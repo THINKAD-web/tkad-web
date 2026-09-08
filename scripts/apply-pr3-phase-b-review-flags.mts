@@ -20,6 +20,7 @@ import {
   MEDIA_REVIEW_STATUS,
   PHASE_B_ABC_FLAG_TARGETS,
 } from "../lib/media-review-status.ts";
+import { revalidateMediaListAfterScript } from "./lib/revalidate-media-list-after-script";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 config({ path: resolve(root, ".env") });
@@ -133,6 +134,10 @@ async function main() {
       );
     }
     console.log("[apply] 6건 flagged. impressions/dailyFootfall 불변 확인");
+
+    // reviewStatus:"flagged" hides these from the public catalog
+    // (publicNotFlaggedMediaWhere) — list cache needs invalidating.
+    await revalidateMediaListAfterScript();
   } finally {
     await db.$disconnect();
     await pool.end();

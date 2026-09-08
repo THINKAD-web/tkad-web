@@ -31,6 +31,7 @@ import {
   snapshotBatchMediaMetrics,
   writeBatchExecuteReport,
 } from "./lib/batch-execute-report.mts";
+import { revalidateMediaListAfterScript } from "./lib/revalidate-media-list-after-script";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 config({ path: resolve(root, ".env.vercel.production"), override: true });
@@ -198,6 +199,12 @@ async function main() {
         mediaBefore: beforeRow ? snapshotBatchMediaMetrics(beforeRow) : null,
         mediaAfter: after ? snapshotBatchMediaMetrics(after) : null,
       });
+    }
+
+    // markReviewed:true flips reviewStatus flagged -> reviewed, which un-hides
+    // these media from the public catalog (publicNotFlaggedMediaWhere).
+    if (EXECUTE && batch1.length > 0) {
+      await revalidateMediaListAfterScript();
     }
 
     const report = {

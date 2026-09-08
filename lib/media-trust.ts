@@ -149,6 +149,21 @@ export function formatLastExecutionLabel(
     : `Last flight ${monthsAgo} mo ago`;
 }
 
+/**
+ * The two badges gated on MediaTrustBadgeContext (topInquiryIds/hotWeekIds).
+ * Pure function, no server-only imports — safe to call from a client
+ * component that fetched the context from GET /api/public/trust-badges.
+ */
+export function contextTrustBadges(
+  ctx: MediaTrustBadgeContext,
+  mediaId: string,
+): MediaTrustBadge[] {
+  const badges: MediaTrustBadge[] = [];
+  if (ctx.topInquiryIds.has(mediaId)) badges.push(badge("popular"));
+  if (ctx.hotWeekIds.has(mediaId)) badges.push(badge("hot_week"));
+  return badges;
+}
+
 export function computeTrustBadges(
   media: MediaItem,
   ctx: MediaTrustBadgeContext,

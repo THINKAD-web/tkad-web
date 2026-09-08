@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { revalidatePath } from "next/cache";
 import { assertAdminDb, json } from "@/lib/admin-guard";
+import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
 import { getPrisma } from "@/lib/prisma";
 import {
   deleteFromBunnyStorage,
@@ -79,12 +79,11 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
   }
 
-  revalidatePath("/ko/media");
-  revalidatePath("/en/media");
-  if (existing.slug) {
-    revalidatePath(`/ko/media/${existing.slug}`);
-    revalidatePath(`/en/media/${existing.slug}`);
-  }
+  // proposalUrl/proposalFileName/hasProposal aren't list-DTO fields — detail path only.
+  revalidateMediaCaches(
+    { id: existing.id, slug: existing.slug },
+    { invalidateList: false },
+  );
 
   return json({
     ok: true,
@@ -127,12 +126,10 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     },
   });
 
-  revalidatePath("/ko/media");
-  revalidatePath("/en/media");
-  if (existing.slug) {
-    revalidatePath(`/ko/media/${existing.slug}`);
-    revalidatePath(`/en/media/${existing.slug}`);
-  }
+  revalidateMediaCaches(
+    { id: existing.id, slug: existing.slug },
+    { invalidateList: false },
+  );
 
   return json({
     ok: true,

@@ -19,7 +19,7 @@ import {
   MediaExecutionSummary,
   MediaTrustScoreBadge,
 } from "@/components/media/media-trust-score";
-import { MediaTrustBadges } from "@/components/media/media-trust-badges";
+import { MediaTrustBadgesLive } from "@/components/media-detail/media-trust-badges-live";
 import { cn } from "@/lib/utils";
 
 type Labels = {
@@ -154,9 +154,11 @@ export function MediaDetailHeroInfo({
       media.executionCount != null ||
       locationShort ? (
         <div className="space-y-[length:var(--qp-space-stack)] border-t border-gray-200 pt-[length:var(--qp-space-group)] dark:border-white/10">
-          {media.trustBadges && media.trustBadges.length > 0 ? (
-            <MediaTrustBadges badges={media.trustBadges} isKo={isKo} />
-          ) : null}
+          <MediaTrustBadgesLive
+            mediaId={media.id}
+            baseBadges={media.trustBadges ?? []}
+            isKo={isKo}
+          />
           {media.trustScore != null || media.executionCount != null ? (
             <div className="space-y-1.5">
               {media.trustScore != null ? (

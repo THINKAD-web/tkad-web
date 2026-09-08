@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
+import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
 import type { MediaReviewStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -34,9 +35,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     where: { id },
     data: { status },
     include: {
-      media: { select: { id: true, name: true } },
+      media: { select: { id: true, slug: true, name: true } },
     },
   });
+
+  // averageRating/reviewCount only count status:"APPROVED" reviews (lib/media-reviews.ts),
+  // so an approve/reject transition changes what the public catalog + detail page show.
+  revalidateMediaCaches({ id: review.media.id, slug: review.media.slug });
 
   if (status === "APPROVED") {
     await createNotification({

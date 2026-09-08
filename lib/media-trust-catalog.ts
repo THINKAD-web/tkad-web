@@ -360,14 +360,28 @@ export async function fetchCertifiedPhotoCountsByMediaIds(
   return out;
 }
 
+const EMPTY_TRUST_BADGE_CONTEXT: MediaTrustBadgeContext = {
+  topInquiryIds: new Set(),
+  hotWeekIds: new Set(),
+};
+
 export async function attachMediaTrustToMediaItems(
   items: MediaItem[],
+  /**
+   * Pre-supplied context skips fetchTrustBadgeContext() (the unstable_cache
+   * call whose 3600s revalidate silently caps any page that calls it — see
+   * reports/isr-writes-root-cause-20260907.md). Pass EMPTY_TRUST_BADGE_CONTEXT
+   * from a long-TTL ISR page; the "popular"/"hot_week" badges just won't be
+   * included server-side (client fetches them from /api/public/trust-badges
+   * instead). Omit to fetch the real context (existing callers unaffected).
+   */
+  ctxOverride?: MediaTrustBadgeContext,
 ): Promise<MediaItem[]> {
   if (items.length === 0) return items;
 
   const ids = items.map((m) => m.id);
   const [ctx, execMap, responseMap, certifiedMap] = await Promise.all([
-    fetchTrustBadgeContext(),
+    ctxOverride ? Promise.resolve(ctxOverride) : fetchTrustBadgeContext(),
     fetchExecutionStatsByMediaIds(ids),
     fetchOwnerResponseMinutesByMediaIds(ids),
     fetchCertifiedPhotoCountsByMediaIds(ids),
@@ -402,6 +416,24 @@ export async function enrichMediaWithTrust(
   media: MediaItem,
 ): Promise<MediaItem> {
   const [enriched] = await attachMediaTrustToMediaItems([media]);
+  return enriched;
+}
+
+/**
+ * Same as enrichMediaWithTrust but skips fetchTrustBadgeContext() — for long-TTL
+ * ISR pages (e.g. media/[slug], 604800s) where that 3600s-TTL call would
+ * otherwise cap the page's effective revalidate. trustScore and the
+ * instant_booking/verified_execution/new badges are unaffected (none of them
+ * depend on topInquiryIds/hotWeekIds); "popular"/"hot_week" are simply omitted
+ * here and rendered client-side instead via GET /api/public/trust-badges.
+ */
+export async function enrichMediaWithTrustCore(
+  media: MediaItem,
+): Promise<MediaItem> {
+  const [enriched] = await attachMediaTrustToMediaItems(
+    [media],
+    EMPTY_TRUST_BADGE_CONTEXT,
+  );
   return enriched;
 }
 
