@@ -320,6 +320,7 @@ function BriefStepTwoOohFlow({
           metrics={metrics}
           isKo={isKo}
           customLineCount={customLines.length}
+          listingSourceText={store.freeText}
         />
 
         <div

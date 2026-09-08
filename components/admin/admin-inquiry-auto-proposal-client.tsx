@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { PILOT_DEFAULT_INQUIRY_TEXT } from "@/lib/inquiry-auto-proposal/pilot-skus";
 import { GMAIL_INBOUND_NEXT_ROUND_STEPS_KO } from "@/lib/inquiry-auto-proposal/gmail-inbound-next-round";
+import { CatalogListingPendingList } from "@/components/catalog-listing-pending";
+import type { CatalogListingNotice } from "@/lib/catalog-listing-pending";
 
 type Matched = {
   id: string;
@@ -56,6 +58,7 @@ type DryRun = {
     netReach: number;
   } | null;
   thumbs: { id?: string; name: string; thumbUrl: string | null }[];
+  listingPending?: CatalogListingNotice[];
 };
 
 function won(n: number) {
@@ -192,6 +195,10 @@ export function AdminInquiryAutoProposalClient() {
             <p className="text-[11px] text-amber-800">
               예산이 본문에서 확실하지 않아 3,000만원으로 가정했습니다.
             </p>
+          ) : null}
+
+          {result.listingPending && result.listingPending.length > 0 ? (
+            <CatalogListingPendingList notices={result.listingPending} isKo />
           ) : null}
 
           {result.snapshot ? (

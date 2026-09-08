@@ -3,6 +3,7 @@ import type {
   PlannerExportOnlineInsights,
   PlannerExportOnlinePacingPhase,
 } from "@/lib/planner-report-export/types";
+import { withInventoryDisclaimer } from "@/lib/catalog-listing-pending";
 
 export const ONLINE_INSIGHTS_DISCLAIMER_KO =
   "참고용 제안이며 실제 운영 시 예산·소재·타겟은 성과에 따라 조정이 필요합니다.";
@@ -345,8 +346,11 @@ export function buildOnlineReportInsights(input: {
       daySpan,
       regionsText: input.regionsText,
     }),
-    disclaimer: input.isKo
-      ? ONLINE_INSIGHTS_DISCLAIMER_KO
-      : ONLINE_INSIGHTS_DISCLAIMER_EN,
+    disclaimer: withInventoryDisclaimer(
+      input.isKo
+        ? ONLINE_INSIGHTS_DISCLAIMER_KO
+        : ONLINE_INSIGHTS_DISCLAIMER_EN,
+      input.isKo,
+    ),
   };
 }

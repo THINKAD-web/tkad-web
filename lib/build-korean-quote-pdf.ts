@@ -1,6 +1,7 @@
 import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
 import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
 import { CONTACT_EMAIL } from "@/lib/constants";
+import { QUOTE_INVENTORY_DISCLAIMER_KO } from "@/lib/catalog-listing-pending";
 
 const NAVY = [13, 27, 46] as const;
 const GOLD = [200, 145, 60] as const;
@@ -237,15 +238,18 @@ export async function buildKoreanQuotePdf(
   y += 10;
 
   // ─ 안내 박스 ─
-  if (y < pageH - 35) {
+  if (y < pageH - 48) {
+    const disc = doc.splitTextToSize(QUOTE_INVENTORY_DISCLAIMER_KO, pageW - M * 2 - 8) as string[];
+    const boxH = 28 + disc.length * 4;
     doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
-    doc.roundedRect(M, y, pageW - M * 2, 22, 1.5, 1.5, "F");
+    doc.roundedRect(M, y, pageW - M * 2, boxH, 1.5, 1.5, "F");
     doc.setFontSize(8);
     doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
     doc.text("본 견적은 THINKAD 매체 검증 기준에 따라 산출되었습니다.", M + 4, y + 6);
     doc.text("● 현장 검증 항목: 입지 · 가시성 · 조도 · 경쟁매체", M + 4, y + 11);
     doc.text("● 유효 기간: 발행일로부터 30일", M + 4, y + 16);
     doc.text(`● 문의: ${CONTACT_EMAIL} / 02-515-2772`, M + 4, y + 21);
+    doc.text(disc, M + 4, y + 26);
   }
 
   // ─ 푸터 ─

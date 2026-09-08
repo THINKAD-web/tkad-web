@@ -152,8 +152,28 @@ export function BriefFlowClient({
   const pendingHandoff = handoff && handoff.kind !== "savedPlan" ? handoff : null;
   const handledHandoffRef = useRef<string | null>(null);
 
+  const stripHandoffQuery = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    for (const k of BRIEF_HANDOFF_QUERY_KEYS) url.searchParams.delete(k);
+    window.history.replaceState({}, "", url.toString());
+  }, []);
+
   // L-2: hydration 직후 1회만 — mixCount를 effect deps에 넣지 않는다.
+  // `?new=1` 은 제목·광고주명 포함 전체 세션 리셋 (사이드바 「새 플랜」).
   useLayoutEffect(() => {
+    if (!hydrated) return;
+    if (
+      searchParams.get("new") === "1" &&
+      pendingHandoff == null &&
+      !planFromUrl
+    ) {
+      reset();
+      stripHandoffQuery();
+      resumePromptedRef.current = true;
+      setResumeOpen(false);
+      return;
+    }
     if (resumePromptedRef.current) return;
     const state = useBriefStore.getState();
     const shouldOpen = shouldPromptResumeSession({
@@ -166,14 +186,7 @@ export function BriefFlowClient({
     if (!shouldOpen) return;
     resumePromptedRef.current = true;
     setResumeOpen(true);
-  }, [hydrated, planFromUrl, pendingHandoff]);
-
-  const stripHandoffQuery = useCallback(() => {
-    if (typeof window === "undefined") return;
-    const url = new URL(window.location.href);
-    for (const k of BRIEF_HANDOFF_QUERY_KEYS) url.searchParams.delete(k);
-    window.history.replaceState({}, "", url.toString());
-  }, []);
+  }, [hydrated, planFromUrl, pendingHandoff, searchParams, reset, stripHandoffQuery]);
 
   const noticeMissing = useCallback(
     (missing: readonly string[]) => {

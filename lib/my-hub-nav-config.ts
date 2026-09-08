@@ -134,7 +134,7 @@ export const MY_HUB_NAV_GROUPS: MyHubNavGroup[] = [
         id: "new-plan",
         labelKo: "새 플랜 만들기",
         labelEn: "New plan",
-        href: "/planner",
+        href: "/planner?new=1",
         icon: Plus,
         priority: 2,
       },

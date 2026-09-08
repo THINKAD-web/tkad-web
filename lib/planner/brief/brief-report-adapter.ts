@@ -42,6 +42,10 @@ import {
 } from "@/lib/planner/brief/brief-integrated-adapters";
 import { summarizeSidoCodes } from "@/lib/planner/brief/regions";
 import {
+  withInventoryDisclaimer,
+  withListingPendingSection,
+} from "@/lib/catalog-listing-pending";
+import {
   flightDays,
   type CampaignBriefInput,
 } from "@/lib/planner/brief/types";
@@ -671,7 +675,7 @@ function buildBriefOnlineReportPayload(
     ? splitReportCopyParagraphs(copy.executiveSummary)
     : undefined;
 
-  return {
+  const onlinePayload: PlannerReportExportPayload = {
     kind: "ooh",
     reportComposition: "onlyOnline",
     isKo,
@@ -701,10 +705,14 @@ function buildBriefOnlineReportPayload(
     onlineSection,
     sections: [],
     staleEngineNotice: staleEngineNoticeFor(plan, isKo),
-    disclaimer: isKo
-      ? "본 보고서의 온라인 예상 성과는 저장 시점 카탈로그 CPC·CPM 참고 범위 기반이며, 실제 집행·과금 조건에 따라 달라질 수 있습니다."
-      : "Online estimates use catalog CPC/CPM reference ranges as of when this was saved; actual delivery and billing may vary.",
+    disclaimer: withInventoryDisclaimer(
+      isKo
+        ? "본 보고서의 온라인 예상 성과는 저장 시점 카탈로그 CPC·CPM 참고 범위 기반이며, 실제 집행·과금 조건에 따라 달라질 수 있습니다."
+        : "Online estimates use catalog CPC/CPM reference ranges as of when this was saved; actual delivery and billing may vary.",
+      isKo,
+    ),
   };
+  return withListingPendingSection(onlinePayload, brief.freeText, isKo);
 }
 
 export function buildBriefReportPayload(
@@ -891,13 +899,10 @@ export function buildBriefReportPayload(
     appendixMediaSpecs: plannerAppendixSpecs,
   });
 
-  if (!copy?.documentTitle?.trim()) {
-    return payload;
-  }
-  return {
-    ...payload,
-    documentTitle: copy.documentTitle.trim(),
-  };
+  const titled = copy?.documentTitle?.trim()
+    ? { ...payload, documentTitle: copy.documentTitle.trim() }
+    : payload;
+  return withListingPendingSection(titled, brief.freeText, isKo);
 }
 
 /** CampaignPlan dataQuality → export badge (화면 DataQualityBadge 와 1:1) */

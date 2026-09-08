@@ -72,7 +72,7 @@ const planWorkItems: ContextSidebarItem[] = [
     id: "new-plan",
     labelKo: PLAN_NAV_LABELS.newPlan.ko,
     labelEn: PLAN_NAV_LABELS.newPlan.en,
-    href: "/planner",
+    href: "/planner?new=1",
     icon: Plus,
     activeMatch: exactOrPrefix("/planner"),
   },
@@ -220,7 +220,7 @@ export function resolveContextSidebar(pathname: string): ContextSidebarConfig {
             id: "planner",
             labelKo: PLAN_NAV_LABELS.newPlan.ko,
             labelEn: PLAN_NAV_LABELS.newPlan.en,
-            href: "/planner",
+            href: "/planner?new=1",
             icon: BarChart3,
           },
           {
