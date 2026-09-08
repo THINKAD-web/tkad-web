@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildStructuredDataGraph } from "@/lib/structured-data";
+import {
+  buildMediaCatalogItemListJsonLd,
+  buildStructuredDataGraph,
+} from "@/lib/structured-data";
 import { serializeJsonLd } from "@/lib/seo";
 
 type GraphNode = {
@@ -42,6 +45,19 @@ test("Organization keeps @id and drops agency / No.1 wording", () => {
   assert.ok(org.description);
   assert.doesNotMatch(org.description, /에이전시|agency|No\.?\s*1/i);
   assert.match(org.description, /플랫폼|OOH/);
+});
+
+test("buildMediaCatalogItemListJsonLd numberOfItems matches sliced itemListElement", () => {
+  const items = Array.from({ length: 50 }, (_, i) => ({
+    id: `id-${i}`,
+    slug: `slug-${i}`,
+    name: `Media ${i}`,
+    location: "서울",
+  }));
+  const ld = buildMediaCatalogItemListJsonLd("ko", items, 30);
+  const elements = ld.itemListElement as unknown[];
+  assert.equal(ld.numberOfItems, 30);
+  assert.equal(elements.length, 30);
 });
 
 test("WebApplication is linked to Organization via provider and has free KRW offer", () => {
