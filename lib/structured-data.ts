@@ -447,11 +447,12 @@ export function buildMediaCatalogItemListJsonLd(
 ): Record<string, unknown> {
   const origin = siteUrl.replace(/\/$/, "");
   const isKo = locale === "ko";
+  const listed = items.slice(0, limit);
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    numberOfItems: items.length,
-    itemListElement: items.slice(0, limit).map((m, idx) => ({
+    numberOfItems: listed.length,
+    itemListElement: listed.map((m, idx) => ({
       "@type": "ListItem",
       position: idx + 1,
       url: `${origin}/${locale}${mediaItemDetailPath(m)}`,
