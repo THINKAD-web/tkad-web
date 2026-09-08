@@ -20,25 +20,39 @@ export function selectInquiryBodyMix(args: {
   designated: readonly MatchedProposalMedia[];
   budgetWon: number;
   months: number;
+  /** named/pilot lock-in — mix에 우선 포함 (예산 내) */
+  forceIncludeIds?: ReadonlySet<string>;
 }): InquiryMixSelection {
   const months = Math.max(1, Math.round(args.months));
-  const eligible = args.designated
-    .filter((m) => m.eligible)
-    .sort((a, b) => {
-      const cpmA = a.cpmWon ?? Number.POSITIVE_INFINITY;
-      const cpmB = b.cpmWon ?? Number.POSITIVE_INFINITY;
-      if (cpmA !== cpmB) return cpmA - cpmB;
-      return a.monthlyWon - b.monthlyWon;
-    });
+  const forceIncludeIds = args.forceIncludeIds ?? new Set<string>();
+
+  const sortByCpm = (a: MatchedProposalMedia, b: MatchedProposalMedia) => {
+    const cpmA = a.cpmWon ?? Number.POSITIVE_INFINITY;
+    const cpmB = b.cpmWon ?? Number.POSITIVE_INFINITY;
+    if (cpmA !== cpmB) return cpmA - cpmB;
+    return a.monthlyWon - b.monthlyWon;
+  };
+
+  const eligible = args.designated.filter((m) => m.eligible);
+  const forced = eligible
+    .filter((m) => forceIncludeIds.has(m.id))
+    .sort(sortByCpm);
+  const rest = eligible
+    .filter((m) => !forceIncludeIds.has(m.id))
+    .sort(sortByCpm);
 
   const mixUnits: Record<string, number> = {};
   let bodyTotalWon = 0;
-  for (const m of eligible) {
-    const periodCost = m.monthlyWon * months;
-    if (bodyTotalWon + periodCost > args.budgetWon) continue;
-    mixUnits[m.id] = 1;
-    bodyTotalWon += periodCost;
+
+  for (const ordered of [forced, rest]) {
+    for (const m of ordered) {
+      const periodCost = m.monthlyWon * months;
+      if (bodyTotalWon + periodCost > args.budgetWon) continue;
+      mixUnits[m.id] = 1;
+      bodyTotalWon += periodCost;
+    }
   }
+
   return {
     mixUnits,
     selectedIds: Object.keys(mixUnits),

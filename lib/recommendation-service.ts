@@ -2,6 +2,7 @@ import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { matchMediaCatalog } from "@/lib/matching-engine";
 import type { MatchingInput, MatchedMedia } from "@/lib/matching-engine";
 import type { AiRecommendInput } from "@/lib/ai-media-recommend";
+import type { MediaItem } from "@/lib/media-data";
 import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
 import {
   filterRecommendCatalogByRegions,
@@ -40,6 +41,8 @@ export type RunRecommendationOpts = {
   plannerRegionIds?: string[];
   /** `/recommend` AI 입력 — 광역·상권 필터·보완 정책 (source=recommend) */
   aiRecommendInput?: AiRecommendInput;
+  /** shadow/script — unstable_cache 없이 직접 주입 (fetchPublicMediaCatalogList 우회) */
+  catalogOverride?: MediaItem[];
 };
 
 export type RunRecommendationResult = {
@@ -68,7 +71,8 @@ export async function runRecommendation(
     }
   }
 
-  const fullCatalog = await fetchPublicMediaCatalogList();
+  const fullCatalog =
+    opts.catalogOverride ?? (await fetchPublicMediaCatalogList());
   let catalog = filterRecommendCandidateCatalog(
     fullCatalog,
     opts.aiRecommendInput,
