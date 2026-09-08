@@ -153,15 +153,15 @@ export function CompareSpecTable({
 
   /**
    * 각 비교 컬럼 상단을 네온 팔레트로 구분.
-   * 랜딩 네온(보라 → 시안 → 핑크)과 동일 톤이라 페이지 톤 통일.
+   * 랜딩 네온(딥틸 → 시안 → 핑크)과 동일 톤이라 페이지 톤 통일.
    */
   const COLUMN_STRIPES = [
-    "from-[#a855f7] to-[#22d3ee]",
+    "from-hermes to-[#22d3ee]",
     "from-[#22d3ee] to-[#ec4899]",
-    "from-[#ec4899] to-[#a855f7]",
-    "from-[#7c3aed] to-[#0ea5e9]",
+    "from-[#ec4899] to-hermes",
+    "from-hermes to-[#0ea5e9]",
     "from-[#0ea5e9] to-[#f43f5e]",
-    "from-[#f43f5e] to-[#7c3aed]",
+    "from-[#f43f5e] to-hermes",
   ];
 
   const totalCols = items.length;

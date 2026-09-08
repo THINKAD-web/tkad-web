@@ -82,7 +82,7 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
     <HomeLandingDayNight>
       <div className="mx-auto flex min-h-[80vh] max-w-6xl flex-col gap-6 px-4 py-8 lg:flex-row lg:py-12">
         <aside className="lg:w-56 lg:shrink-0">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-violet-300/80">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-hermes/80">
             {isKo ? "매체사 포털" : "Media owner"}
           </p>
           <h1 className="mt-2 text-lg font-bold dark:text-white text-gray-900">{me.name}</h1>
@@ -98,7 +98,7 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
                   className={cn(
                     "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
                     active
-                      ? "bg-violet-500/20 text-violet-100"
+                      ? "bg-hermes/20 text-hermes"
                       : "dark:text-white text-gray-600 hover:dark:bg-white/5 bg-gray-50 hover:dark:text-white text-gray-900",
                   )}
                 >
@@ -112,7 +112,7 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
           <div className="mt-6 flex flex-col gap-2">
             <Link
               href="/register/media"
-              className="text-xs text-violet-300 hover:underline"
+              className="text-xs text-hermes hover:underline"
             >
               {isKo ? "+ 매체 추가 등록" : "+ Register media"}
             </Link>
@@ -136,7 +136,7 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
 export function MediaOwnerPageLoader() {
   return (
     <div className="flex justify-center py-20">
-      <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
+      <Loader2 className="h-8 w-8 animate-spin text-hermes" />
     </div>
   );
 }
@@ -145,4 +145,4 @@ export const ownerGlassCard =
   "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
 
 export const ownerInputCls =
-  "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3  text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/40";
+  "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3  text-sm dark:text-white text-gray-900 outline-none focus:border-hermes/40";

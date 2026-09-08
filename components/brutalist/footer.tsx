@@ -102,9 +102,7 @@ function BrandCell({
         className="inline-block font-display text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
       >
         THINK
-        <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
-          AD
-        </span>
+        <span className="tkad-home-accent-text">AD</span>
       </Link>
       <div className="mt-4 max-w-xs space-y-3 text-sm leading-relaxed text-gray-700 dark:text-white/90">
         <p className="font-medium text-gray-800 dark:text-white">{description}</p>

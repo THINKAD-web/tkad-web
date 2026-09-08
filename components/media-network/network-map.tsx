@@ -100,7 +100,7 @@ export function NetworkMap({ isKo, mapPoints }: Props) {
 
           {selected ? (
             <div className="absolute bottom-4 left-4 right-4 z-[500] rounded-2xl border border-gray-200 bg-white/95 p-4 text-gray-900 shadow-lg backdrop-blur sm:left-auto sm:right-4 sm:max-w-xs dark:border-white/10 dark:bg-white/10 dark:text-white">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-300">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-hermes">
                 {selected.regionLabelKo}
               </p>
               <p className="mt-1 font-bold">{selected.name}</p>
@@ -128,7 +128,7 @@ export function NetworkMap({ isKo, mapPoints }: Props) {
               <li key={key}>
                 <button
                   type="button"
-                  className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600 transition hover:border-violet-500/40 hover:bg-violet-500/5 hover:text-violet-700 dark:border-white/12 dark:bg-white/6 dark:text-white/70 dark:hover:bg-white/10"
+                  className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600 transition hover:border-hermes/40 hover:bg-hermes/5 hover:text-hermes dark:border-white/12 dark:bg-white/6 dark:text-white/70 dark:hover:bg-white/10"
                   onMouseEnter={() => setHoveredId(pts[0]?.id ?? null)}
                   onMouseLeave={() => setHoveredId(null)}
                   onClick={() => setSelectedId(pts[0]?.id ?? null)}

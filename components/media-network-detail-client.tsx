@@ -257,7 +257,7 @@ export default function MediaNetworkDetailClient({
               </Button>
             </Link>
             <div className="flex flex-wrap gap-2">
-              <Badge className="gap-1 bg-violet-600 text-white">
+              <Badge className="gap-1 bg-hermes text-white">
                 <Globe className="h-3 w-3" />
                 {isKo ? "네트워크 매체" : "Network media"}
               </Badge>

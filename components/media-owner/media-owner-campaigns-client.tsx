@@ -130,7 +130,7 @@ export function MediaOwnerCampaignsClient() {
                 <div>
                   <p className="font-medium dark:text-white text-gray-900">{r.campaignName}</p>
                   <p className="text-sm dark:text-white text-gray-500">{r.mediaName}</p>
-                  <p className="mt-1 text-xs text-violet-200/90">
+                  <p className="mt-1 text-xs text-hermes/90">
                     {isKo ? "업종" : "Industry"}: {r.industryLabel}
                   </p>
                   <p className="mt-2 text-xs dark:text-white text-gray-400">

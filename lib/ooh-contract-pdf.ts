@@ -51,8 +51,8 @@ export type OohContractSignAudit = {
   signatureImageSha256: string;
 };
 
-/** THINKAD 브랜드 violet — 최종합계 등 절제된 포인트 강조용 */
-const KO_ACCENT: [number, number, number] = [91, 33, 182];
+/** THINKAD 브랜드 딥틸(hermes) — 최종합계 등 절제된 포인트 강조용 */
+const KO_ACCENT: [number, number, number] = [15, 95, 92];
 
 /** KO 11조 PDF 레이아웃 (원문 문구는 템플릿 그대로) */
 const KO_LAYOUT = {

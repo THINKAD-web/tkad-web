@@ -22,7 +22,7 @@
 
 /* ── 텍스트 선택 ── */
 ::selection {
-  background: rgba(139, 92, 246, 0.3);
+  background: rgba(15, 95, 92, 0.3);
   color: inherit;
 }
 

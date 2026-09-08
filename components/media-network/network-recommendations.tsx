@@ -84,7 +84,7 @@ export function NetworkRecommendations({ isKo, networks }: Props) {
                   <span className="text-gray-300 dark:text-white/20">·</span>
                   {isKo ? `최소 ${n.minUnits}면` : `min. ${n.minUnits} units`}
                 </p>
-                <p className="font-display text-lg font-black tabular-nums text-violet-600 dark:text-violet-300">
+                <p className="font-display text-lg font-black tabular-nums text-hermes">
                   {formatNetworkPriceWon(n.pricePerUnit, isKo)}
                   <span className="ml-1 text-xs font-semibold text-gray-400 dark:text-white/40">
                     {isKo ? "/월·면" : "/mo·unit"}

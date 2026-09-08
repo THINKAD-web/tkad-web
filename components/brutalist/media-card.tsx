@@ -40,8 +40,8 @@ export type MediaCardProps = {
   premium?: boolean;
   /** 컴팩트(인기 섹션 등) 텍스트 스케일 다운 */
   density?: "default" | "compact";
-  /** 랜딩(퍼플) 등 액센트 글로우 테마 */
-  glowTheme?: "orange" | "purple";
+  /** 카드 액센트 글로우 테마 */
+  glowTheme?: "orange";
   /** 카드 하단 추가 메타 영역 */
   footer?: ReactNode;
   /** LCP — 상위 카드에 priority 로드 */
@@ -74,14 +74,9 @@ export function MediaCard({
 }: MediaCardProps) {
   const resolved = imageSrc ? resolveCatalogImageSrc(imageSrc) : null;
   const compact = density === "compact";
-  const topRightClass =
-    premium && glowTheme === "purple"
-      ? "bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_45%,#ec4899_100%)] shadow-[0_0_14px_rgba(168,85,247,0.16)]"
-      : "bg-hermes shadow-[0_0_16px_rgba(255,98,0,0.35)]";
+  const topRightClass = "bg-hermes shadow-[0_0_16px_rgba(255,98,0,0.35)]";
   const neon =
-    glowTheme === "purple"
-      ? "dark:hover:shadow-[0_30px_102px_rgba(0,0,0,0.72),0_0_0_1px_rgba(124,58,237,0.26),0_0_46px_rgba(124,58,237,0.16)]"
-      : "dark:hover:shadow-[0_30px_102px_rgba(0,0,0,0.68),0_0_0_1px_rgba(255,107,0,0.3),0_0_64px_rgba(255,107,0,0.22)]";
+    "dark:hover:shadow-[0_30px_102px_rgba(0,0,0,0.68),0_0_0_1px_rgba(255,107,0,0.3),0_0_64px_rgba(255,107,0,0.22)]";
   return (
     <Link
       href={href}

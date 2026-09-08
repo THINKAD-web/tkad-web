@@ -12,7 +12,7 @@ const buttonVariants = cva(
         default:
           "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md motion-reduce:hover:shadow-sm",
         gradient:
-          "bg-gradient-to-r from-violet-500 to-cyan-400 text-white shadow-sm hover:opacity-90",
+          "bg-hermes text-white shadow-sm hover:bg-hermes-shade",
         cta:
           "bg-cta dark:text-white text-gray-900 hover:bg-cta-hover focus-visible:ring-cta/35",
         destructive:
@@ -23,7 +23,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/70",
         ghost:
           "hover:bg-secondary/60 hover:text-foreground dark:hover:bg-accent/50",
-        link: "text-violet-600 underline-offset-4 shadow-none hover:text-violet-500 hover:underline dark:text-violet-400 dark:hover:text-violet-300",
+        link: "text-hermes underline-offset-4 shadow-none hover:text-hermes-shade hover:underline dark:hover:text-hermes-tint",
         /** 하단 플로팅 바 등 — gold primary */
         floatingPrimary:
           "border-0 bg-gold font-bold text-navy shadow-sm hover:translate-y-0 hover:bg-gold-dark hover:scale-[1.05] hover:shadow-lg active:translate-y-0 active:scale-[0.98] motion-reduce:hover:scale-100",

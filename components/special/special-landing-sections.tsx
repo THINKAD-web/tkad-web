@@ -102,7 +102,7 @@ export function SpecialGuideSection({
               key={step.titleKo}
               className="flex gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-pink-500/20 text-sm font-black text-violet-700 dark:text-violet-200">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-hermes/20 to-pink-500/20 text-sm font-black text-hermes">
                 {i + 1}
               </span>
               <div>

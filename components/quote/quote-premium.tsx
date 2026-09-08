@@ -939,7 +939,7 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
                   className="mt-4 inline-flex w-full items-center justify-center rounded-xl py-2.5 text-xs font-bold text-white"
                   style={{
                     background:
-                      "linear-gradient(90deg, #7c3aed 0%, #22d3ee 100%)",
+                      "linear-gradient(90deg, #0f5f5c 0%, #22d3ee 100%)",
                   }}
                 >
                   {copy.cta}

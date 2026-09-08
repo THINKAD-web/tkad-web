@@ -134,7 +134,7 @@ export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMet
     dailyAdjustedReach: resolveDailyAdjustedReach(media),
     donut: [
       // Premium neon palette (matches landing day/night)
-      { key: "peak", percent: peak, color: "#a855f7" }, // violet
+      { key: "peak", percent: peak, color: "#0f5f5c" }, // deep teal (hermes)
       { key: "standard", percent: standard, color: "#22d3ee" }, // cyan
       { key: "extended", percent: extended, color: "#ec4899" }, // pink
     ],

@@ -672,7 +672,7 @@ export const verticalColors: Record<CaseStudyVertical, string> = {
   automotive: "border border-slate-200 bg-slate-100 text-slate-800",
   fb: "border border-amber-200/80 bg-amber-50 text-amber-950",
   tech: "border border-cyan-200/80 bg-cyan-50 text-cyan-900",
-  entertainment: "border border-violet-200/80 bg-violet-50 text-violet-900",
+  entertainment: "border border-hermes/30 bg-hermes/10 text-hermes",
   finance: "border border-emerald-200/80 bg-emerald-50 text-emerald-900",
 };
 

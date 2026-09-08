@@ -62,15 +62,15 @@ export function MediaOwnerRevenueCalculator({
     : "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-6";
 
   const inputCls = isLanding
-    ? "mt-2 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-white px-4 py-2.5 text-sm dark:text-white text-gray-900 focus:border-violet-400/50 focus:outline-none"
-    : "mt-2 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black/30 bg-white px-4 py-2.5 text-sm dark:text-white text-gray-900 focus:border-violet-400/40 focus:outline-none";
+    ? "mt-2 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-white px-4 py-2.5 text-sm dark:text-white text-gray-900 focus:border-hermes/50 focus:outline-none"
+    : "mt-2 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black/30 bg-white px-4 py-2.5 text-sm dark:text-white text-gray-900 focus:border-hermes/40 focus:outline-none";
 
   return (
     <section className={cn(className)}>
       <div className={shell}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-400">
+            <p className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes">
               <Calculator className="h-3.5 w-3.5" />
               {isKo ? "수익 시뮬레이터" : "Revenue simulator"}
             </p>
@@ -148,7 +148,7 @@ export function MediaOwnerRevenueCalculator({
                 step={REVENUE_PRICE_SLIDER.step}
                 value={monthlyPriceWon}
                 onChange={(e) => setMonthlyPriceWon(Number(e.target.value))}
-                className="mt-3 w-full accent-violet-500"
+                className="mt-3 w-full accent-hermes"
               />
               <div className="mt-1 flex justify-between text-[10px] dark:text-white/40 text-gray-400">
                 <span>{isKo ? "50만" : "₩0.5M"}</span>
@@ -161,7 +161,7 @@ export function MediaOwnerRevenueCalculator({
             </div>
           </div>
 
-          <div className="rounded-2xl border dark:border-violet-400/25 border-violet-200 bg-[linear-gradient(135deg,rgba(139,92,246,0.12),rgba(34,211,238,0.08))] p-5 sm:p-6">
+          <div className="rounded-2xl border dark:border-hermes/25 border-hermes/30 bg-[linear-gradient(135deg,rgba(15,95,92,0.12),rgba(34,211,238,0.08))] p-5 sm:p-6">
             <dl className="space-y-4">
               <div>
                 <dt className="text-xs font-semibold dark:text-white/60 text-gray-600">
@@ -219,7 +219,7 @@ export function MediaOwnerRevenueCalculator({
                   "mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-transform hover:-translate-y-0.5",
                   isLanding
                     ? "tkad-neon-cta-clean dark:text-white text-gray-900"
-                    : "bg-violet-600 text-white hover:bg-violet-500",
+                    : "bg-hermes text-white hover:bg-hermes-shade",
                 )}
               >
                 {isKo ? "매체 등록 신청하기" : "Apply to list media"}
@@ -232,7 +232,7 @@ export function MediaOwnerRevenueCalculator({
                   "mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-transform hover:-translate-y-0.5",
                   isLanding
                     ? "tkad-neon-cta-clean dark:text-white text-gray-900"
-                    : "bg-violet-600 text-white hover:bg-violet-500",
+                    : "bg-hermes text-white hover:bg-hermes-shade",
                 )}
               >
                 {isKo ? "매체 등록 신청하기" : "Apply to list media"}

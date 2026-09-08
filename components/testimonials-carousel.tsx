@@ -184,7 +184,7 @@ export function TestimonialsCarousel({ items }: Props) {
             className={cn(
               "h-2 transition-ui",
               selected === i
-                ? "w-8 bg-[linear-gradient(90deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)]"
+                ? "w-8 bg-[linear-gradient(90deg,#0f5f5c_0%,#22d3ee_55%,#ec4899_100%)]"
                 : "w-2 bg-muted-foreground/25 hover:bg-muted-foreground/40 dark:bg-white/12 dark:hover:bg-white/22",
             )}
           />

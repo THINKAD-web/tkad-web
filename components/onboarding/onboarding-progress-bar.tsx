@@ -64,7 +64,7 @@ export function OnboardingProgressBar() {
       href="/onboarding"
       className={cn(
         "group relative block overflow-hidden border-b transition-colors",
-        "border-violet-500/20 bg-gray-50/95 dark:border-white/10 dark:bg-[#05050a]/95",
+        "border-hermes/20 bg-gray-50/95 dark:border-white/10 dark:bg-[#05050a]/95",
       )}
     >
       <div
@@ -73,7 +73,7 @@ export function OnboardingProgressBar() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(168,85,247,0.14),transparent_55%),radial-gradient(circle_at_right,rgba(34,211,238,0.12),transparent_50%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(15,95,92,0.14),transparent_55%),radial-gradient(circle_at_right,rgba(34,211,238,0.12),transparent_50%)]"
       />
       <div
         aria-hidden
@@ -82,7 +82,7 @@ export function OnboardingProgressBar() {
 
       <div className="relative mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-5 sm:px-6 sm:py-3.5 lg:px-8">
         <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-violet-500/25 bg-gradient-to-br from-violet-500/20 to-cyan-400/15 text-violet-500 shadow-[0_0_24px_rgba(168,85,247,0.18)] dark:text-cyan-300">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-hermes/25 bg-gradient-to-br from-hermes/20 to-cyan-400/15 text-hermes shadow-[0_0_24px_rgba(15,95,92,0.18)] dark:text-cyan-300">
             <Sparkles className="h-4 w-4" aria-hidden />
           </span>
           <div className="min-w-0">
@@ -119,7 +119,7 @@ export function OnboardingProgressBar() {
               aria-label={t("progressLabel")}
             >
               <div
-                className="h-full rounded-full bg-gradient-to-r from-violet-500 via-cyan-400 to-pink-400 shadow-[0_0_14px_rgba(34,211,238,0.45)] transition-bar duration-500"
+                className="h-full rounded-full bg-gradient-to-r from-hermes via-cyan-400 to-pink-400 shadow-[0_0_14px_rgba(34,211,238,0.45)] transition-bar duration-500"
                 style={{ width: `${Math.max(pct, 6)}%` }}
               />
             </div>
@@ -128,7 +128,7 @@ export function OnboardingProgressBar() {
           <span
             className={cn(
               "inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 font-display text-[10px] font-semibold uppercase tracking-[0.16em]",
-              "border-violet-500/25 bg-white/70 text-gray-900 shadow-sm",
+              "border-hermes/25 bg-white/70 text-gray-900 shadow-sm",
               "transition-bar group-hover:border-cyan-400/40 group-hover:bg-white group-hover:shadow-[0_0_20px_rgba(34,211,238,0.2)]",
               "dark:border-white/15 dark:bg-white/8 dark:text-white/90 dark:group-hover:bg-white/12",
             )}

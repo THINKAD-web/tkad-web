@@ -22,7 +22,7 @@ const REGIONS: RegionChip[] = [
     labelKo: "내 위치",
     labelEn: "Nearby",
     query: "",
-    gradient: "from-violet-400 to-violet-600",
+    gradient: "from-hermes-tint to-hermes",
     isLocation: true,
   },
   {
@@ -99,7 +99,7 @@ export function RegionImageChips({
           </h3>
           <Link
             href="/my"
-            className="text-xs font-medium text-violet-600 dark:text-violet-300"
+            className="text-xs font-medium text-hermes"
           >
             {isKo ? "관심 지역 설정" : "Set regions"}
           </Link>
@@ -125,7 +125,7 @@ export function RegionImageChips({
                   size,
                   region.gradient,
                   active
-                    ? "ring-violet-500"
+                    ? "ring-hermes"
                     : "ring-transparent hover:ring-gray-200 dark:hover:ring-white/20",
                 )}
               >
@@ -141,7 +141,7 @@ export function RegionImageChips({
                 className={cn(
                   "max-w-[4rem] text-center text-[10px] leading-tight",
                   active
-                    ? "font-semibold text-violet-600 dark:text-violet-300"
+                    ? "font-semibold text-hermes"
                     : "text-gray-600 dark:text-white/60",
                 )}
               >

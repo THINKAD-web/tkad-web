@@ -79,7 +79,7 @@ export function MediaOwnerSettlementsClient() {
       </div>
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold text-violet-200">
+        <h3 className="mb-3 text-sm font-semibold text-hermes">
           {isKo ? "정산 예정" : "Scheduled"}
         </h3>
         {scheduled.length === 0 ? (

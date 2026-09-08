@@ -154,7 +154,7 @@ export function ProofUploadMobileClient({
 
   return (
     <div className="mx-auto min-h-[100dvh] max-w-lg px-4 py-6 pb-10">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-violet-300/80">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-hermes/80">
         {title ?? (isKo ? "현장 인증" : "Field proof")}
       </p>
       <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900">
@@ -173,7 +173,7 @@ export function ProofUploadMobileClient({
             <button
               type="button"
               onClick={() => void refreshGeo()}
-              className="text-xs font-semibold text-violet-300 underline underline-offset-2"
+              className="text-xs font-semibold text-hermes underline underline-offset-2"
             >
               {isKo ? "위치 다시 요청" : "Retry location"}
             </button>
@@ -226,7 +226,7 @@ export function ProofUploadMobileClient({
           disabled={uploading}
           onClick={() => cameraRef.current?.click()}
           className={cn(
-            "flex h-24 items-center justify-center gap-3 rounded-2xl bg-violet-500 text-lg font-bold dark:text-white text-gray-900 shadow-lg shadow-violet-500/25 disabled:opacity-50",
+            "flex h-24 items-center justify-center gap-3 rounded-2xl bg-hermes text-lg font-bold dark:text-white text-gray-900 shadow-lg shadow-hermes/25 disabled:opacity-50",
           )}
         >
           {uploading ? (

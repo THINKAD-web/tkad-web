@@ -8,7 +8,7 @@ export const MEDIA_PACKAGE_SEED_DATA: MediaPackageSeedInput[] = [
     subtitle: "강남·서초 핵심 상권 OOH",
     description:
       "강남대로·테헤란로·신논현 일대 검증 프리미엄 매체. 전국 660+ 카탈로그 중 고가시성 DOOH·빌보드를 묶어 럭셔리·테크 론칭에 맞춥니다.",
-    heroColor: "from-violet-600 to-purple-800",
+    heroColor: "from-hermes to-hermes-shade",
     icon: "🏢",
     order: 1,
     filterRegion: ["강남", "서초", "강남구", "서초구"],

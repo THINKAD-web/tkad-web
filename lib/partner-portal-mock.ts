@@ -138,7 +138,7 @@ export const settlementStatusStyles: Record<
     labelEn: "Scheduled",
   },
   processing: {
-    className: "bg-violet-100 text-violet-800",
+    className: "bg-hermes/10 text-hermes",
     labelKo: "정산처리중",
     labelEn: "Processing",
   },

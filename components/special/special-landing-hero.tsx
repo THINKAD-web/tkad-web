@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { CategoryHeroBetaBadge } from "@/components/category-explore-hero";
 
 const HEADLINE_GRADIENT =
-  "bg-gradient-to-r from-violet-500 via-pink-500 to-cyan-400 bg-clip-text text-transparent";
+  "bg-gradient-to-r from-hermes via-pink-500 to-cyan-400 bg-clip-text text-transparent";
 
 type Cta = { href: string; label: string };
 

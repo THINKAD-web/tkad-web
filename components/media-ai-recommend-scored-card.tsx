@@ -183,7 +183,7 @@ export function RecommendTop3PickRow({
         </Link>
         <span className="inline-flex min-w-0 flex-col gap-0.5">
           <span className="inline-flex min-w-0 items-center gap-2">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] text-[11px] font-black text-gray-900 shadow-sm dark:text-white">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-[linear-gradient(135deg,#0f5f5c_0%,#22d3ee_55%,#ec4899_100%)] text-[11px] font-black text-gray-900 shadow-sm dark:text-white">
               {index + 1}
             </span>
             <span className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">

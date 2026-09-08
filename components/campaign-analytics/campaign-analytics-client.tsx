@@ -37,7 +37,7 @@ import {
 } from "@/lib/campaign-actuals";
 import { formatVariancePct } from "@/lib/prediction-accuracy";
 
-const PIE_COLORS = ["#a855f7", "#22d3ee", "#ec4899", "#7c3aed", "#0ea5e9", "#f43f5e"];
+const PIE_COLORS = ["var(--qp-accent)", "#22d3ee", "#ec4899", "#6366f1", "#0ea5e9", "#f43f5e"];
 
 type Props = {
   data: CampaignAnalyticsData;
@@ -109,7 +109,7 @@ export function CampaignAnalyticsClient({
     {
       label: isKo ? "총 추정 노출수" : "Total impressions (est.)",
       value: fmt(data.kpis.totalImpressions, isKo),
-      accent: "from-[#a855f7]/20 to-transparent",
+      accent: "from-hermes/20 to-transparent",
     },
     {
       label: isKo ? "예상 순 도달 (Reach)" : "Est. reach",
@@ -129,7 +129,7 @@ export function CampaignAnalyticsClient({
           : isKo
             ? "—"
             : "—",
-      accent: "from-[#7c3aed]/20 to-transparent",
+      accent: "from-hermes/20 to-transparent",
     },
   ];
 
@@ -163,7 +163,7 @@ export function CampaignAnalyticsClient({
               {data.clientCompany ? ` · ${data.clientCompany}` : ""}
             </p>
           </div>
-          <BarChart3 className="hidden h-10 w-10 text-[#a855f7] sm:block" aria-hidden />
+          <BarChart3 className="hidden h-10 w-10 text-hermes sm:block" aria-hidden />
         </div>
 
         <p className="mt-4 text-[10px] tracking-tight dark:text-white">
@@ -443,7 +443,7 @@ export function CampaignAnalyticsClient({
               size="lg"
               disabled={downloading}
               onClick={() => void downloadPdf()}
-              className="inline-flex flex-1 min-w-[200px] items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95))] dark:text-white text-gray-900"
+              className="inline-flex flex-1 min-w-[200px] items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 bg-hermes dark:text-white text-gray-900"
             >
               <Download className="h-4 w-4" />
               {downloading
@@ -575,7 +575,7 @@ function PredictedVsActual({
   ];
 
   return (
-    <section className="mt-8 rounded-[24px] border border-[#a855f7]/30 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
+    <section className="mt-8 rounded-[24px] border border-hermes/30 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-display text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
           {isKo ? "예측 vs 실제" : "Predicted vs Actual"}
@@ -663,7 +663,7 @@ function PredictedVsActual({
               type="button"
               onClick={() => void save()}
               disabled={saving}
-              className="inline-flex h-9 items-center gap-2 rounded-xl bg-[#a855f7] px-4 text-sm font-bold text-white disabled:opacity-60"
+              className="inline-flex h-9 items-center gap-2 rounded-xl bg-hermes px-4 text-sm font-bold text-white disabled:opacity-60"
             >
               {saving ? <RefreshCw className="h-4 w-4 animate-spin" /> : null}
               {isKo ? "저장" : "Save"}
@@ -701,7 +701,7 @@ function RegionShareRow({
       </p>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full dark:bg-white/10 bg-gray-100">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[#a855f7] via-[#22d3ee] to-[#ec4899]"
+          className="h-full rounded-full bg-gradient-to-r from-hermes via-[#22d3ee] to-[#ec4899]"
           style={{ width: `${Math.min(100, row.sharePct)}%` }}
         />
       </div>

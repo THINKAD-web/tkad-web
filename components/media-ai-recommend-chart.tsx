@@ -164,7 +164,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
           />
           <ReferenceLine
             y={reachP75}
-            stroke="rgba(168,85,247,0.30)"
+            stroke="rgba(15,95,92,0.30)"
             strokeDasharray="6 6"
           />
           <XAxis

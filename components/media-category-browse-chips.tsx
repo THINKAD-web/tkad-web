@@ -51,7 +51,7 @@ export function MediaCategoryBrowseChips({
             className={cn(
               "shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
               selected
-                ? "bg-violet-500 text-white shadow-sm shadow-violet-500/25"
+                ? "bg-hermes text-white shadow-sm shadow-hermes/25"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15",
             )}
           >

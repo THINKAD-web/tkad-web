@@ -1276,7 +1276,7 @@ export default function KakaoMapView({
         strokeWeight: 2,
         strokeColor: "#3730a3",
         strokeOpacity: 0.88,
-        fillColor: "#a855f7",
+        fillColor: "#0f5f5c",
         fillOpacity: 0.12,
       });
       coveragePolygonsRef.current.push(poly);

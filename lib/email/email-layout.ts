@@ -47,7 +47,7 @@ export function buildThinkadCtaEmail({
           ${greeting ? `<p style="margin:0 0 14px 0;font-size:14px;color:#f8fafc;font-weight:600;">${greeting}</p>` : ""}
           ${body}
           <table role="presentation" cellspacing="0" cellpadding="0" style="margin:20px 0 8px 0;">
-            <tr><td style="border-radius:14px;background:linear-gradient(135deg,#8b5cf6,#22d3ee,#ec4899);">
+            <tr><td style="border-radius:14px;background:linear-gradient(135deg,#0f5f5c,#22d3ee,#ec4899);">
               <a href="${ctaUrl}" style="display:inline-block;padding:14px 28px;font-size:14px;font-weight:800;color:#fff;text-decoration:none;letter-spacing:0.04em;">${ctaLabel}</a>
             </td></tr>
           </table>

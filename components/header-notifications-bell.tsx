@@ -237,7 +237,7 @@ export function HeaderNotificationsBell({
                 setOpen(false);
                 onNavigate?.();
               }}
-              className="block rounded-xl px-3 py-2 text-center text-xs font-semibold text-violet-600 hover:bg-muted/50 dark:text-cyan-300 dark:hover:dark:bg-white/6 bg-gray-50"
+              className="block rounded-xl px-3 py-2 text-center text-xs font-semibold text-hermes hover:bg-muted/50 dark:hover:dark:bg-white/6 bg-gray-50"
             >
               {isKo ? "전체 보기" : "View all"}
             </Link>

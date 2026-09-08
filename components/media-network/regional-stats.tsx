@@ -68,7 +68,7 @@ export function RegionalStats({ isKo, regions }: Props) {
                 <td className="px-5 py-3.5 tabular-nums text-gray-700 dark:text-white/80">
                   {r.unitCount.toLocaleString(isKo ? "ko-KR" : "en-US")}
                 </td>
-                <td className="px-5 py-3.5 font-semibold tabular-nums text-violet-600 dark:text-violet-400">
+                <td className="px-5 py-3.5 font-semibold tabular-nums text-hermes">
                   {formatNetworkPriceWon(r.avgPriceManWon, isKo)}
                 </td>
                 <td className="px-5 py-3.5 tabular-nums text-emerald-600 dark:text-emerald-400">
@@ -95,7 +95,7 @@ export function RegionalStats({ isKo, regions }: Props) {
                 <dt className="text-gray-500 dark:text-white/45">
                   {isKo ? "평균 단가" : "Avg. price"}
                 </dt>
-                <dd className="font-semibold tabular-nums text-violet-600 dark:text-violet-400">
+                <dd className="font-semibold tabular-nums text-hermes">
                   {formatNetworkPriceWon(r.avgPriceManWon, isKo)}
                 </dd>
               </div>

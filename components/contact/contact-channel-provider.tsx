@@ -171,7 +171,7 @@ function ContactChannelSheetUI({
           <Link
             href="/contact"
             onClick={onClose}
-            className="flex w-full flex-col rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-5 text-left text-white transition hover:opacity-95 md:rounded-xl md:px-4 md:py-3.5"
+            className="flex w-full flex-col rounded-2xl bg-hermes px-5 py-5 text-left text-white transition hover:bg-hermes-shade md:rounded-xl md:px-4 md:py-3.5"
           >
             <span className="text-base font-semibold md:text-sm">
               {isKo ? "📋 견적 요청서" : "📋 Quote request form"}

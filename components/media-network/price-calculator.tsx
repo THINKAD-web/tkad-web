@@ -73,7 +73,7 @@ export function PriceCalculator({
               >
                 {isKo ? "지점 수" : "Number of sites"}
               </label>
-              <span className="font-sans text-2xl font-bold tabular-nums text-violet-600 dark:text-violet-400">
+              <span className="font-sans text-2xl font-bold tabular-nums text-hermes">
                 {points}
               </span>
             </div>
@@ -84,7 +84,7 @@ export function PriceCalculator({
               max={100}
               value={points}
               onChange={(e) => setPoints(Number(e.target.value))}
-              className="h-2 w-full cursor-pointer accent-violet-500"
+              className="h-2 w-full cursor-pointer accent-hermes"
             />
             <div className="mt-1 flex justify-between text-[11px] text-gray-400 dark:text-white/35">
               <span>1</span>
@@ -143,11 +143,11 @@ export function PriceCalculator({
         <div
           className={cn(
             NETWORK_NEON_PANEL,
-            "flex flex-col justify-center border-violet-500/25 bg-gradient-to-br from-violet-500/10 via-transparent to-cyan-500/10 dark:border-violet-400/20",
+            "flex flex-col justify-center border-hermes/25 bg-gradient-to-br from-hermes/10 via-transparent to-cyan-500/10 dark:border-hermes/20",
           )}
         >
           <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500 dark:text-white/45">
-            <Sparkles className="h-3.5 w-3.5 text-violet-500" />
+            <Sparkles className="h-3.5 w-3.5 text-hermes" />
             {isKo ? "총 예상 비용" : "Estimated total"}
           </p>
           <p className="mt-3 font-sans text-4xl font-bold tabular-nums tracking-normal text-gray-900 dark:text-white sm:text-5xl">

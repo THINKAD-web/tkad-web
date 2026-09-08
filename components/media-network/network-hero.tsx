@@ -91,7 +91,7 @@ export function NetworkHero({ isKo, stats }: Props) {
               <button
                 type="button"
                 onClick={() => openAt(activeThumb)}
-                className="absolute inset-0 z-10 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                className="absolute inset-0 z-10 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-hermes"
                 aria-label={labels.expand}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -126,7 +126,7 @@ export function NetworkHero({ isKo, stats }: Props) {
                   className={cn(
                     "relative aspect-[4/3] overflow-hidden rounded-xl border bg-gray-100 transition dark:bg-black/30",
                     activeThumb === i
-                      ? "border-violet-500 ring-2 ring-violet-500/30"
+                      ? "border-hermes ring-2 ring-hermes/30"
                       : "border-gray-200 opacity-80 hover:opacity-100 dark:border-white/12",
                   )}
                   aria-label={`${labels.expand} ${i + 1}`}
@@ -144,7 +144,7 @@ export function NetworkHero({ isKo, stats }: Props) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-violet-600 dark:text-violet-400">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-hermes">
             <Network className="h-4 w-4" aria-hidden />
             {isKo ? "네트워크 옥외광고" : "Network OOH"}
           </div>
@@ -179,7 +179,7 @@ export function NetworkHero({ isKo, stats }: Props) {
                   </span>
                 </>
               }
-              valueClassName="text-violet-600 dark:text-violet-300"
+              valueClassName="text-hermes"
             />
             <NetworkKpiChip
               label={isKo ? "총 설치 개소" : "Locations"}

@@ -211,10 +211,7 @@
   --tkad-fg-primary: var(--foreground);
   --tkad-fg-secondary: #4b5563;
   --tkad-fg-muted: var(--muted-foreground);
-  --tkad-neon-violet: #7c3aed;
-  --tkad-neon-violet-hover: #6d28d9;
-  --tkad-neon-violet-muted: #8b5cf6;
-  --tkad-fg-accent: var(--tkad-neon-violet);
+  --tkad-fg-accent: var(--hermes);
 
   --background: #f4f3f0;
   --foreground: #08080a;
@@ -258,23 +255,6 @@
   :root {
     --nav-height: 4rem;
   }
-}
-
-/* ── Landing (neo) theme scope: purple accent ── */
-.tkad-landing-neo {
-  --accent: #7c3aed;
-  --accent-foreground: #ffffff;
-  --ring: #7c3aed;
-  --cta: #7c3aed;
-  --cta-hover: #6d28d9;
-  --tkad-fg-accent: var(--accent);
-}
-.dark .tkad-landing-neo {
-  --accent: #7c3aed;
-  --accent-foreground: #050505;
-  --ring: #7c3aed;
-  --cta: #7c3aed;
-  --cta-hover: #8b5cf6;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -681,10 +661,7 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: 
   --tkad-fg-primary: var(--foreground);
   --tkad-fg-secondary: rgb(255 255 255 / 0.65);
   --tkad-fg-muted: var(--muted-foreground);
-  --tkad-neon-violet: #8b5cf6;
-  --tkad-neon-violet-hover: #a78bfa;
-  --tkad-neon-violet-muted: #c4b5fd;
-  --tkad-fg-accent: var(--tkad-neon-violet);
+  --tkad-fg-accent: var(--hermes);
 
   /* OLED black base */
   --background: #070707;
@@ -844,13 +821,6 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
 }
 
-/* ── Neo section depth (subtle) ── */
-.tkad-neo-depth {
-  background:
-    radial-gradient(900px 520px at 50% 8%, rgba(124, 58, 237, 0.16), transparent 60%),
-    radial-gradient(900px 520px at 18% 92%, rgba(56, 189, 248, 0.08), transparent 55%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.46), rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 1));
-}
 .tkad-neo-grid {
   background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
@@ -861,7 +831,7 @@ body {
 /* ── Neon cyber (landing) ── */
 .tkad-neon-depth {
   background:
-    radial-gradient(1200px 720px at 50% 0%, rgba(124, 58, 237, 0.30), transparent 62%),
+    radial-gradient(1200px 720px at 50% 0%, rgba(15, 95, 92, 0.30), transparent 62%),
     radial-gradient(980px 620px at 14% 86%, rgba(34, 211, 238, 0.14), transparent 58%),
     radial-gradient(820px 520px at 92% 62%, rgba(236, 72, 153, 0.11), transparent 58%),
     radial-gradient(700px 520px at 72% 18%, rgba(59, 130, 246, 0.08), transparent 60%),
@@ -869,7 +839,7 @@ body {
 }
 html:not(.dark) .tkad-neon-depth {
   background:
-    radial-gradient(900px 480px at 50% 0%, rgba(139, 92, 246, 0.08), transparent 62%),
+    radial-gradient(900px 480px at 50% 0%, rgba(15, 95, 92, 0.08), transparent 62%),
     radial-gradient(700px 400px at 80% 100%, rgba(34, 211, 238, 0.06), transparent 55%),
     linear-gradient(to bottom, #f9fafb, #ffffff);
 }
@@ -894,7 +864,7 @@ html:not(.dark) .tkad-neon-grid {
   padding: 1px;
   background: linear-gradient(
     135deg,
-    rgba(168, 85, 247, 0.95),
+    rgba(15, 95, 92, 0.95),
     rgba(34, 211, 238, 0.7),
     rgba(236, 72, 153, 0.65),
     rgba(59, 130, 246, 0.65)
@@ -904,20 +874,6 @@ html:not(.dark) .tkad-neon-grid {
   mask-composite: exclude;
   opacity: 0.14;
   pointer-events: none;
-}
-.tkad-neon-glow {
-  box-shadow:
-    0 30px 120px rgba(0, 0, 0, 0.78),
-    0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 0 34px rgba(124, 58, 237, 0.12),
-    0 0 26px rgba(34, 211, 238, 0.08),
-    0 0 26px rgba(236, 72, 153, 0.055);
-}
-.tkad-neon-text {
-  text-shadow:
-    0 28px 140px rgba(0, 0, 0, 0.86),
-    0 0 18px rgba(124, 58, 237, 0.12),
-    0 0 12px rgba(34, 211, 238, 0.07);
 }
 /* P2-0: 클래스명 유지, 값은 Quiet Professional 단색 액센트. */
 .tkad-neon-cta {
@@ -946,45 +902,6 @@ html:not(.dark) .tkad-neon-grid {
   box-shadow: none;
 }
 
-/* 푸터 사용 가이드 — 네온 링크 */
-.tkad-neon-guide-link {
-  display: inline-block;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  background-image: linear-gradient(
-    105deg,
-    #22d3ee 0%,
-    #a855f7 42%,
-    #fb923c 88%
-  );
-  background-size: 100% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.45))
-    drop-shadow(0 0 14px rgba(168, 85, 247, 0.28))
-    drop-shadow(0 0 20px rgba(251, 146, 60, 0.2));
-  transition:
-    filter 0.2s ease,
-    transform 0.2s ease;
-}
-.tkad-neon-guide-link:hover {
-  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.7))
-    drop-shadow(0 0 20px rgba(168, 85, 247, 0.45))
-    drop-shadow(0 0 28px rgba(251, 146, 60, 0.35));
-  transform: translateY(-1px);
-}
-
-/* 풀페이지 네온 스피너 링 */
-.tkad-neon-spinner-ring {
-  border-color: rgb(255 255 255 / 0.12);
-  border-top-color: #22d3ee;
-  box-shadow:
-    0 0 18px rgba(34, 211, 238, 0.35),
-    0 0 32px rgba(168, 85, 247, 0.2),
-    inset 0 0 12px rgba(34, 211, 238, 0.08);
-}
 
 /* Landing scope — P2-0: accent tokens → Quiet Professional (클래스명 유지, ~70 파일 무수정) */
 .tkad-landing-neon {
@@ -1960,11 +1877,6 @@ html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-dark-surf
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
-html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-dark-surface [class*="text-violet"] {
-  color: rgb(196 181 253) !important;
-  -webkit-text-fill-color: rgb(196 181 253) !important;
-}
-
 /* 보고서·견적 흰 문서 본문 — planner-neon 글자색 재매핑과 격리 */
 html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface,
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface {
@@ -1983,11 +1895,6 @@ html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface 
 html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-white"],
 html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-gray-"] {
   color: rgb(55 65 81) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-violet"] {
-  color: rgb(124 58 237) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
@@ -2930,16 +2837,13 @@ html:not(.dark) .tkad-glass-surface textarea {
   -webkit-text-fill-color: currentColor !important;
 }
 
-html:not(.dark) .tkad-glass-surface .bg-clip-text.text-transparent,
-html:not(.dark) .tkad-glass-surface [class*="from-violet-3"].bg-clip-text {
+html:not(.dark) .tkad-glass-surface .bg-clip-text.text-transparent {
   -webkit-text-fill-color: transparent !important;
   color: transparent !important;
 }
 
 html:not(.dark) .tkad-glass-surface .tkad-neon-cta,
-html:not(.dark) .tkad-glass-surface .tkad-neon-cta *,
-html:not(.dark) .tkad-glass-surface a[class*="from-violet-5"],
-html:not(.dark) .tkad-glass-surface a[class*="from-violet-5"] * {
+html:not(.dark) .tkad-glass-surface .tkad-neon-cta * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
@@ -4715,7 +4619,7 @@ img {
   animation: loadingSlide 1.4s ease-in-out infinite;
 }
 
-/* 라우트 전환 상단 바 — 인디터미넌트 캡슐(violet / cyan 글로우, Hermès 주황 미사용) */
+/* 라우트 전환 상단 바 — 인디터미넌트 캡슐(SSOT: --qp-accent 글로우) */
 @keyframes navCapsule {
   0% {
     transform: translate3d(-120%, 0, 0);
@@ -4883,11 +4787,6 @@ img {
   transform: scale(1.05);
   filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.28));
 }
-.tkad-map-pin-icon--selected {
-  transform: scale(1.1);
-  filter: drop-shadow(0 4px 10px rgba(124, 58, 237, 0.35));
-}
-
 .tkad-map-cluster {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }

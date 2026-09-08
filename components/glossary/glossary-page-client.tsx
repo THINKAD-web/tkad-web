@@ -77,11 +77,11 @@ export function GlossaryPageClient() {
     <NeonPageShell>
       <section className="relative overflow-hidden bg-gray-50 py-16 text-gray-900 tkad-neon-depth tkad-neon-grid dark:bg-[#05050a] dark:text-white sm:py-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-medium uppercase tracking-widest text-violet-600 dark:text-violet-400">
+          <p className="text-xs font-medium uppercase tracking-widest text-hermes">
             {isKo ? "용어집" : "Glossary"}
           </p>
           <h1 className={cn("mt-3 flex items-center gap-3", neonTitleClass)}>
-            <BookOpen className="h-8 w-8 text-violet-600 dark:text-violet-400" aria-hidden />
+            <BookOpen className="h-8 w-8 text-hermes" aria-hidden />
             {isKo ? "옥외광고 용어집" : "OOH Advertising Glossary"}
           </h1>
           <p className={cn("mt-4 max-w-2xl", neonSubtitleClass)}>
@@ -114,7 +114,7 @@ export function GlossaryPageClient() {
             className={cn(
               "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
               activeCategory === "all"
-                ? "bg-violet-500 text-white"
+                ? "bg-hermes text-white"
                 : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
             )}
           >
@@ -132,7 +132,7 @@ export function GlossaryPageClient() {
                 className={cn(
                   "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
                   activeCategory === cat
-                    ? "bg-violet-500 text-white"
+                    ? "bg-hermes text-white"
                     : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
                 )}
               >
@@ -148,7 +148,7 @@ export function GlossaryPageClient() {
               <a
                 key={letter}
                 href={`#glossary-${letter}`}
-                className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 text-xs font-bold text-gray-600 hover:bg-violet-100 hover:text-violet-600 dark:bg-white/10 dark:text-white/70 dark:hover:bg-violet-500/20 dark:hover:text-violet-300"
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 text-xs font-bold text-gray-600 hover:bg-hermes/10 hover:text-hermes dark:bg-white/10 dark:text-white/70 dark:hover:bg-hermes/20"
               >
                 {letter}
               </a>
@@ -187,7 +187,7 @@ export function GlossaryPageClient() {
                   </p>
                 ) : null}
                 {t.abbreviationFull ? (
-                  <p className="mt-2 text-xs font-medium text-violet-500 dark:text-violet-400">
+                  <p className="mt-2 text-xs font-medium text-hermes">
                     {t.abbreviationFull}
                   </p>
                 ) : null}
@@ -206,7 +206,7 @@ export function GlossaryPageClient() {
           <div className="mt-4 flex flex-wrap justify-center gap-3">
             <Link
               href="/media"
-              className="rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2.5 text-sm font-medium text-white"
+              className="rounded-xl bg-hermes px-5 py-2.5 text-sm font-medium text-white"
             >
               {isKo ? "매체 검색" : "Browse media"}
             </Link>

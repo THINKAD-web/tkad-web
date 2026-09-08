@@ -108,9 +108,9 @@ export function ExitSurveyBanner({ surface }: { surface: Surface }) {
       aria-label="찾으시는 게 있으셨나요?"
       className="fixed inset-x-0 bottom-0 z-[120] flex justify-center px-3 pb-3 sm:px-4 sm:pb-4"
     >
-      <div className="pointer-events-auto w-full max-w-xl rounded-2xl border border-violet-300/60 bg-white p-4 shadow-2xl shadow-violet-500/20 dark:border-violet-400/30 dark:bg-[#15131f] sm:p-5">
+      <div className="pointer-events-auto w-full max-w-xl rounded-2xl border border-hermes/40 bg-white p-4 shadow-2xl shadow-hermes/20 dark:border-hermes/30 dark:bg-[#15131f] sm:p-5">
         {done ? (
-          <p className="py-2 text-center text-sm font-semibold text-violet-600 dark:text-violet-300">
+          <p className="py-2 text-center text-sm font-semibold text-hermes">
             소중한 의견 감사합니다 🙏
           </p>
         ) : (
@@ -137,7 +137,7 @@ export function ExitSurveyBanner({ surface }: { surface: Surface }) {
                   key={a.key}
                   type="button"
                   onClick={() => answer(a.key)}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-xs font-semibold text-gray-800 transition hover:border-violet-400 hover:bg-violet-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-violet-400/50 dark:hover:bg-violet-500/10"
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-xs font-semibold text-gray-800 transition hover:border-hermes hover:bg-hermes/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-hermes/50 dark:hover:bg-hermes/10"
                 >
                   <span aria-hidden>{a.emoji}</span>
                   <span>{a.label}</span>

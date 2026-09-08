@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const VIOLET = "7C3AED";
+const ACCENT = "0F5F5C";
 const INK = "111827";
 const GRAY = "6B7280";
 
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   // 표지
   const cover = pptx.addSlide();
   cover.background = { color: "FFFFFF" };
-  cover.addText("THINKAD · 싱커드", { x: 0.6, y: 0.5, fontSize: 12, color: VIOLET, bold: true });
+  cover.addText("THINKAD · 싱커드", { x: 0.6, y: 0.5, fontSize: 12, color: ACCENT, bold: true });
   cover.addText(inp.campaignName || `${inp.brandName} ${isKo ? "제안서" : "Proposal"}`, {
     x: 0.6, y: 2.4, w: W - 1.2, fontSize: 32, bold: true, color: INK,
   });
@@ -62,14 +62,14 @@ export async function POST(request: NextRequest) {
     if (!content?.trim()) return;
     const s = pptx.addSlide();
     s.background = { color: "FFFFFF" };
-    s.addText(title, { x: 0.6, y: 0.4, fontSize: 22, bold: true, color: VIOLET });
+    s.addText(title, { x: 0.6, y: 0.4, fontSize: 22, bold: true, color: ACCENT });
     s.addText(content, { x: 0.6, y: 1.3, w: W - 1.2, h: 5.5, fontSize: 14, color: INK, valign: "top" });
   };
   const bulletSlide = (title: string, items: string[]) => {
     if (!items.length) return;
     const s = pptx.addSlide();
     s.background = { color: "FFFFFF" };
-    s.addText(title, { x: 0.6, y: 0.4, fontSize: 22, bold: true, color: VIOLET });
+    s.addText(title, { x: 0.6, y: 0.4, fontSize: 22, bold: true, color: ACCENT });
     s.addText(items.map((t) => ({ text: t, options: { bullet: true } })), {
       x: 0.6, y: 1.3, w: W - 1.2, h: 5.5, fontSize: 14, color: INK, valign: "top",
     });

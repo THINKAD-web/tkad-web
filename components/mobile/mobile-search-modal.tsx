@@ -142,7 +142,7 @@ export function MobileSearchModal({ suggestions = [] }: Props) {
               if (e.key === "Enter") submit(queryInput.value);
             }}
             placeholder={isKo ? "매체, 지역, 유형 검색" : "Search media, area, type"}
-            className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-9 pr-9 text-sm text-gray-900 outline-none focus:border-violet-500 dark:border-white/10 dark:bg-white/5 dark:text-white"
+            className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-9 pr-9 text-sm text-gray-900 outline-none focus:border-hermes dark:border-white/10 dark:bg-white/5 dark:text-white"
             autoComplete="off"
           />
           {queryInput.value ? (
@@ -175,7 +175,7 @@ export function MobileSearchModal({ suggestions = [] }: Props) {
                     onClick={() => submit(item)}
                     className="flex w-full items-center gap-3 py-3 text-left text-sm text-gray-900 transition-colors active:bg-gray-100 dark:text-white dark:active:bg-white/5"
                   >
-                    <Search className="h-4 w-4 shrink-0 text-violet-500" />
+                    <Search className="h-4 w-4 shrink-0 text-hermes" />
                     {item}
                   </button>
                 </li>
@@ -222,7 +222,7 @@ export function MobileSearchModal({ suggestions = [] }: Props) {
                       onClick={() => submit(item)}
                       className="flex w-full items-center gap-3 py-3.5 text-left text-sm text-gray-900 transition-colors active:bg-gray-100 dark:text-white dark:active:bg-white/5"
                     >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-violet-500/10 text-xs font-bold text-violet-500">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-hermes/10 text-xs font-bold text-hermes">
                         #
                       </span>
                       {item}

@@ -26,7 +26,7 @@ export function MobilePullToRefresh({ onRefresh, children, className }: Props) {
           </div>
         }
         refreshingContent={
-          <div className="flex items-center justify-center gap-2 py-3 text-xs text-violet-500 md:hidden">
+          <div className="flex items-center justify-center gap-2 py-3 text-xs text-hermes md:hidden">
             <Loader2 className="h-4 w-4 animate-spin" />
             {isKo ? "새로고침 중..." : "Refreshing..."}
           </div>

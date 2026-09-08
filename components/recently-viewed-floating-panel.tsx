@@ -103,7 +103,7 @@ export function RecentlyViewedFloatingPanel({
                     <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
                       {item.name || item.id}
                     </p>
-                    <p className="text-xs tabular-nums text-violet-600 dark:text-violet-300">
+                    <p className="text-xs tabular-nums text-hermes">
                       {formatPrice(item.price, isKo)}
                     </p>
                     {item.price > 0 ? (
@@ -116,7 +116,7 @@ export function RecentlyViewedFloatingPanel({
           </ul>
           <Link
             href="/my"
-            className="block border-t border-gray-100 px-4 py-2.5 text-center text-xs font-medium text-violet-600 hover:bg-gray-50 dark:border-white/10 dark:text-violet-300 dark:hover:bg-white/5"
+            className="block border-t border-gray-100 px-4 py-2.5 text-center text-xs font-medium text-hermes hover:bg-gray-50 dark:border-white/10 dark:hover:bg-white/5"
             onClick={() => setExpanded(false)}
           >
             {isKo ? "전체 보기 →" : "View all →"}

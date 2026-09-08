@@ -92,7 +92,7 @@ export function MediaOwnerDashboardClient() {
       <div className="grid gap-4 sm:grid-cols-2">
         {cards.map(({ icon: Icon, label, value, href }) => (
           <Link key={label} href={href} className={ownerGlassCard}>
-            <Icon className="h-5 w-5 text-violet-300" />
+            <Icon className="h-5 w-5 text-hermes" />
             <p className="mt-3 text-xs dark:text-white text-gray-400">{label}</p>
             <p className="mt-1 text-2xl font-bold tabular-nums dark:text-white text-gray-900">
               {value}
@@ -110,7 +110,7 @@ export function MediaOwnerDashboardClient() {
           </p>
           <Link
             href="/register/media"
-            className="mt-4 inline-block rounded-xl bg-violet-500 px-5 py-2 text-sm font-bold dark:text-white text-gray-900 hover:bg-violet-400"
+            className="mt-4 inline-block rounded-xl bg-hermes px-5 py-2 text-sm font-bold dark:text-white text-gray-900 hover:bg-hermes-tint"
           >
             {isKo ? "매체 등록 신청" : "Register media"}
           </Link>

@@ -103,7 +103,7 @@ export function ThemeToggle({
         )}
       </span>
       {autoMode && !iconOnly ? (
-        <span className="text-[9px] font-semibold leading-none text-violet-600 dark:text-violet-300">
+        <span className="text-[9px] font-semibold leading-none text-hermes">
           자동
         </span>
       ) : null}

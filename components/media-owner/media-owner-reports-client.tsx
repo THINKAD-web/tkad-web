@@ -157,7 +157,7 @@ export default function MediaOwnerReportsClient() {
       {access ? (
         <div className={`${ownerGlassCard} text-sm dark:text-white text-gray-700`}>
           <p>
-            플랜: <strong className="text-violet-200">{access.tier}</strong>
+            플랜: <strong className="text-hermes">{access.tier}</strong>
             {access.watermark ? " · 워터마크 포함" : " · 화이트라벨"}
           </p>
           <p className="mt-1">
@@ -167,13 +167,13 @@ export default function MediaOwnerReportsClient() {
               : " · 무제한"}
           </p>
           {!access.unlimitedDownloads ? (
-            <Link href="/pricing" className="mt-2 inline-block text-violet-300 underline">
+            <Link href="/pricing" className="mt-2 inline-block text-hermes underline">
               PRO 업그레이드 →
             </Link>
           ) : null}
           <Link
             href="/media-owner/branding"
-            className="ml-4 text-violet-300 underline"
+            className="ml-4 text-hermes underline"
           >
             브랜딩 설정
           </Link>

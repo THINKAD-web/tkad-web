@@ -151,9 +151,9 @@ export default function RecommendCartBar({
                 className={cn(
                   "flex shrink-0 items-center gap-2 border-2 bg-muted px-3 py-1.5",
                   usesMultiEditor
-                    ? "cursor-pointer border-violet-400/50"
+                    ? "cursor-pointer border-hermes/50"
                     : "border-border",
-                  isExpanded && "ring-2 ring-violet-400/40",
+                  isExpanded && "ring-2 ring-hermes/40",
                 )}
                 {...(usesMultiEditor
                   ? {
@@ -190,7 +190,7 @@ export default function RecommendCartBar({
                 {usesMultiEditor ? (
                   <ChevronDown
                     className={cn(
-                      "h-3.5 w-3.5 shrink-0 text-violet-600 transition",
+                      "h-3.5 w-3.5 shrink-0 text-hermes transition",
                       isExpanded && "rotate-180",
                     )}
                     aria-hidden

@@ -115,7 +115,7 @@ export function MediaOwnerMatchesClient() {
               <Link href={`/media-owner/matches/${item.id}`} className={ownerGlassCard}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-violet-300">
+                    <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-hermes">
                       <Bell className="h-3.5 w-3.5" />
                       {item.openBid.mode === "OPEN_BID"
                         ? isKo

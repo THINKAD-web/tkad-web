@@ -16,7 +16,7 @@ export function NetworkCTA({ isKo }: Props) {
       <div
         className={cn(
           NETWORK_NEON_PANEL,
-          "relative overflow-hidden border-violet-500/20 bg-gradient-to-br from-violet-50 via-white to-cyan-50 py-12 text-center dark:border-violet-500/25 dark:from-violet-600/10 dark:via-white/5 dark:to-cyan-600/10 sm:py-16",
+          "relative overflow-hidden border-hermes/20 bg-gradient-to-br from-hermes/10 via-white to-cyan-50 py-12 text-center dark:border-hermes/25 dark:from-hermes/10 dark:via-white/5 dark:to-cyan-600/10 sm:py-16",
         )}
       >
         <div

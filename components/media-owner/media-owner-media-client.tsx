@@ -189,7 +189,7 @@ export function MediaOwnerMediaClient() {
                     className={cn(
                       ownerGlassCard,
                       "w-full text-left transition-colors",
-                      selectedId === m.id && "border-violet-400/40",
+                      selectedId === m.id && "border-hermes/40",
                     )}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -208,7 +208,7 @@ export function MediaOwnerMediaClient() {
                       {isKo ? "찜" : "Fav"} {m.favoriteCount} ·{" "}
                       {isKo ? "문의" : "Inq."} {m.inquiryCount}
                     </p>
-                    <p className="mt-1 text-sm text-violet-200">
+                    <p className="mt-1 text-sm text-hermes">
                       ₩{m.price.toLocaleString(isKo ? "ko-KR" : "en-US")}
                       /{isKo ? "월" : "mo"}
                     </p>
@@ -222,7 +222,7 @@ export function MediaOwnerMediaClient() {
             <div className="space-y-4">
               <div className={ownerGlassCard}>
                 <h3 className="flex items-center gap-2 font-semibold dark:text-white text-gray-900">
-                  <CalendarRange className="h-4 w-4 text-violet-300" />
+                  <CalendarRange className="h-4 w-4 text-hermes" />
                   {isKo ? "집행 불가 기간" : "Blocked dates"}
                 </h3>
                 <form onSubmit={addBlock} className="mt-3 space-y-2">
@@ -245,7 +245,7 @@ export function MediaOwnerMediaClient() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-bold dark:text-white text-gray-900 disabled:opacity-50"
+                    className="rounded-xl bg-hermes px-4 py-2 text-sm font-bold dark:text-white text-gray-900 disabled:opacity-50"
                   >
                     {saving ? (
                       <Loader2 className="inline h-4 w-4 animate-spin" />
@@ -307,7 +307,7 @@ export function MediaOwnerMediaClient() {
                 <button
                   type="submit"
                   disabled={saving || !newPrice}
-                  className="mt-3 rounded-xl border border-violet-400/40 px-4 py-2 text-sm text-violet-100 hover:bg-violet-500/10 disabled:opacity-50"
+                  className="mt-3 rounded-xl border border-hermes/40 px-4 py-2 text-sm text-hermes hover:bg-hermes/10 disabled:opacity-50"
                 >
                   {isKo ? "요청 제출" : "Submit request"}
                 </button>

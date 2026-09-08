@@ -14,7 +14,7 @@ import { TurnstileWidget } from "@/components/turnstile";
 import { MEDIA_APPLICATION_MEDIA_TYPES } from "@/lib/media-application";
 
 const inputCls =
-  "h-11 w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30";
+  "h-11 w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-hermes/50 focus:outline-none focus:ring-1 focus:ring-hermes/30";
 const labelCls =
   "block font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500";
 const sectionTitleCls =

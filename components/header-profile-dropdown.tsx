@@ -172,7 +172,7 @@ export function HeaderProfileDropdown({
                 close();
                 onNavigate?.();
               }}
-              className="mx-2 mb-1 flex items-center justify-between gap-2 rounded-lg border border-violet-400/30 bg-violet-500/10 px-3 py-2 text-xs font-bold text-violet-800 dark:text-violet-200"
+              className="mx-2 mb-1 flex items-center justify-between gap-2 rounded-lg border border-hermes/30 bg-hermes/10 px-3 py-2 text-xs font-bold text-hermes"
             >
               <span className="rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-700 dark:border-white/15 dark:bg-white/10 dark:text-white/80">
                 FREE

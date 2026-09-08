@@ -54,7 +54,7 @@ export const ui = {
 
   /** Primary CTA */
   btnPrimary:
-    "inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2.5 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-95 md:text-base",
+    "inline-flex items-center justify-center gap-2 rounded-xl bg-hermes px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-hermes-shade active:scale-95 md:text-base",
 
   /** Secondary CTA */
   btnSecondary:
@@ -62,7 +62,7 @@ export const ui = {
 
   /** Ghost 링크형 */
   btnGhost:
-    "inline-flex items-center justify-center gap-2 text-sm font-medium text-violet-600 underline-offset-4 transition-colors hover:text-violet-500 hover:underline dark:text-violet-400 dark:hover:text-violet-300 md:text-base",
+    "inline-flex items-center justify-center gap-2 text-sm font-medium text-hermes underline-offset-4 transition-colors hover:text-hermes-shade hover:underline md:text-base",
 
   /** 다크 네온 카드 */
   cardDark:

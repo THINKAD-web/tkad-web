@@ -23,7 +23,7 @@ function ContactOfficeNeonPin() {
         <linearGradient id="officeRing" x1="10" y1="10" x2="34" y2="34" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#22d3ee" stopOpacity="1" />
           <stop offset="0.55" stopColor="#ffffff" stopOpacity="0.42" />
-          <stop offset="1" stopColor="#a855f7" stopOpacity="0.95" />
+          <stop offset="1" stopColor="#0f5f5c" stopOpacity="0.95" />
         </linearGradient>
         <radialGradient
           id="officeCap"
@@ -39,7 +39,7 @@ function ContactOfficeNeonPin() {
       </defs>
       <path
         d="M22 51C31 39 36 30.5 36 22.5C36 12.85 29.15 5 22 5C14.85 5 8 12.85 8 22.5C8 30.5 13 39 22 51Z"
-        fill="#a855f7"
+        fill="#0f5f5c"
         stroke="rgba(0,0,0,0.22)"
         strokeWidth="2"
       />

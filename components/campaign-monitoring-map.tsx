@@ -76,10 +76,10 @@ function pinColorForType(type: "dooh" | "static" | "mobile" | "network"): {
       };
     default:
       return {
-        fill: "#a855f7",
-        stroke: "#ead6ff",
+        fill: "#0f5f5c",
+        stroke: "#7fd9ce",
         text: "#0a0a0c",
-        glow: "rgba(168,85,247,0.55)",
+        glow: "rgba(15,95,92,0.55)",
         ink: "rgba(10,10,12,0.92)",
       };
   }

@@ -193,7 +193,7 @@ export function DevelopersPageClient({ isKo, base, exampleKey }: Props) {
         <div
           className={cn(
             neonCardClass,
-            "mt-16 border-violet-200 bg-gradient-to-br from-violet-50/90 to-cyan-50/70 p-8 text-center dark:border-violet-500/30 dark:from-violet-950/30 dark:to-cyan-950/20",
+            "mt-16 border-hermes/30 bg-gradient-to-br from-hermes/10 to-cyan-50/70 p-8 text-center dark:border-hermes/30 dark:from-hermes/10 dark:to-cyan-950/20",
           )}
         >
           <p className="text-lg font-semibold text-foreground">

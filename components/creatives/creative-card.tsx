@@ -49,7 +49,7 @@ export function CreativeCard({
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-violet-600/30 via-cyan-500/20 to-pink-500/20">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-hermes/30 via-cyan-500/20 to-pink-500/20">
             <Film className="h-10 w-10 dark:text-white text-gray-600" />
           </div>
         )}
@@ -114,7 +114,7 @@ export function CreativeCard({
       <button
         type="button"
         onClick={() => onToggle(item)}
-        className="block h-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a855f7] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="block h-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hermes focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {inner}
       </button>

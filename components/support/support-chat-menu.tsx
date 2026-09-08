@@ -81,7 +81,7 @@ export function SupportChatMenu({ open, onClose, hours, onOpenAi }: Props) {
                   onClose();
                   onOpenAi();
                 }}
-                className="flex w-full items-center gap-3 rounded-xl border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.85),rgba(34,211,238,0.85))] px-3 py-3 text-sm font-bold dark:text-white text-gray-900 shadow-md shadow-violet-500/20 transition hover:brightness-110"
+                className="flex w-full items-center gap-3 rounded-xl border dark:border-white/14 border-gray-200 bg-hermes px-3 py-3 text-sm font-bold dark:text-white text-gray-900 shadow-md shadow-hermes/20 transition hover:brightness-110"
               >
                 <Bot className="h-5 w-5 shrink-0" aria-hidden />
                 {t("aiCtaAfterHours")}

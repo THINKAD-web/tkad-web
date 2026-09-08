@@ -55,7 +55,7 @@ export function CategoryButtonGrid({
                 className={cn(
                   "flex h-16 w-16 items-center justify-center rounded-full transition-colors",
                   active
-                    ? "bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300"
+                    ? "bg-hermes/10 text-hermes dark:bg-hermes/20"
                     : "bg-gray-100 text-gray-700 group-hover:bg-gray-200 dark:bg-white/10 dark:text-white/80 dark:group-hover:bg-white/15",
                 )}
               >
@@ -65,7 +65,7 @@ export function CategoryButtonGrid({
                 className={cn(
                   "max-w-[4.5rem] text-center text-xs leading-tight",
                   active
-                    ? "font-semibold text-violet-600 dark:text-violet-300"
+                    ? "font-semibold text-hermes"
                     : "text-gray-600 dark:text-white/60",
                 )}
               >

@@ -24,7 +24,7 @@ export function PageHeaderSkeleton() {
           <Bone className="h-full w-full" />
         </div>
         <div className="mx-auto mt-8 h-1 w-48 overflow-hidden rounded-full border border-border dark:border-white/18 border-gray-300">
-          <div className="h-full w-1/3 bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)] loading-slide" />
+          <div className="h-full w-1/3 bg-[linear-gradient(90deg,#0f5f5c,#22d3ee,#ec4899)] loading-slide" />
         </div>
       </div>
     </section>

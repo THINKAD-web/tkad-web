@@ -123,7 +123,7 @@ export function PwaHomeWidget() {
         <div className="flex flex-col justify-end gap-2">
           <Link
             href={`/${locale}/contact`}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 text-sm font-black dark:text-white text-gray-900"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-hermes px-4 text-sm font-black dark:text-white text-gray-900"
           >
             <MessageSquarePlus className="h-4 w-4" />
             {isKo ? "새 문의하기" : "New inquiry"}

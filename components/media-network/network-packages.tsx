@@ -93,11 +93,11 @@ export function NetworkPackages({ isKo }: Props) {
               NETWORK_NEON_CARD,
               "flex flex-col p-6 sm:p-7",
               pkg.featured &&
-                "border-violet-500/40 bg-gradient-to-b from-violet-500/10 to-transparent shadow-[0_0_40px_rgba(139,92,246,0.12)]",
+                "border-hermes/40 bg-gradient-to-b from-hermes/10 to-transparent shadow-[0_0_40px_rgba(15,95,92,0.12)]",
             )}
           >
             {pkg.featured ? (
-              <span className="mb-3 w-fit rounded-full bg-violet-600 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+              <span className="mb-3 w-fit rounded-full bg-hermes px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                 {isKo ? "인기" : "Popular"}
               </span>
             ) : (

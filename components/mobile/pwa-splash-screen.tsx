@@ -27,7 +27,7 @@ export function PwaSplashScreen({ className }: Props) {
         <motion.div
           className={cn(
             "fixed inset-0 z-[100] flex flex-col items-center justify-center md:hidden",
-            "bg-gradient-to-br from-[#050508] via-violet-950 to-cyan-900",
+            "bg-gradient-to-br from-[#050508] via-[#0b2f2d] to-cyan-900",
             className,
           )}
           initial={{ opacity: 1 }}
@@ -49,7 +49,7 @@ export function PwaSplashScreen({ className }: Props) {
               width={88}
               height={88}
               priority
-              className="rounded-[22px] shadow-[0_20px_60px_rgba(139,92,246,0.45)]"
+              className="rounded-[22px] shadow-[0_20px_60px_rgba(15,95,92,0.45)]"
             />{" "}
             <p className="mt-5 text-3xl font-black tracking-tight text-white">
               THINK

@@ -108,7 +108,7 @@ export function MediaOwnerMatchDetailClient({ bidId }: { bidId: string }) {
         <h2 className="text-2xl font-bold dark:text-white text-gray-900">
           {isKo ? "매칭 응답" : "Match response"}
         </h2>
-        <p className="mt-1 text-sm text-violet-200/80">D-{bid.openBid.daysLeft}</p>
+        <p className="mt-1 text-sm text-hermes/80">D-{bid.openBid.daysLeft}</p>
       </div>
 
       <div className={ownerGlassCard}>
@@ -136,7 +136,7 @@ export function MediaOwnerMatchDetailClient({ bidId }: { bidId: string }) {
           type="button"
           disabled={busy || isClosed}
           onClick={() => void postAction("interested")}
-          className="w-full rounded-xl bg-violet-500 px-4 py-3 text-sm font-bold dark:text-white text-gray-900 hover:bg-violet-400 disabled:opacity-50"
+          className="w-full rounded-xl bg-hermes px-4 py-3 text-sm font-bold dark:text-white text-gray-900 hover:bg-hermes-tint disabled:opacity-50"
         >
           {busy ? (
             <Loader2 className="mx-auto h-5 w-5 animate-spin" />

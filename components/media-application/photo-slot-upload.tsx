@@ -73,10 +73,10 @@ export function PhotoSlotUpload({
         type="button"
         disabled={disabled || uploading}
         onClick={() => inputRef.current?.click()}
-        className="mt-3 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-dashed dark:border-white/20 border-gray-300 dark:bg-white/5 bg-gray-50 transition-colors hover:border-violet-500/40 hover:dark:bg-white/8 bg-gray-100 disabled:opacity-50"
+        className="mt-3 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-dashed dark:border-white/20 border-gray-300 dark:bg-white/5 bg-gray-50 transition-colors hover:border-hermes/40 hover:dark:bg-white/8 bg-gray-100 disabled:opacity-50"
       >
         {uploading ? (
-          <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
+          <Loader2 className="h-8 w-8 animate-spin text-hermes" />
         ) : value ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

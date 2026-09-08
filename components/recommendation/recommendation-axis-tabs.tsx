@@ -143,11 +143,11 @@ function PlannerAxisList({
             key={item.media.id}
             className={cn(
               "grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1 py-2.5 sm:gap-x-3",
-              selected && "dark:bg-violet-500/5 bg-violet-50/50 -mx-2 rounded-lg px-2",
+              selected && "dark:bg-hermes/5 bg-hermes/5 -mx-2 rounded-lg px-2",
             )}
           >
             <span
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-500/15 text-xs font-bold tabular-nums text-violet-700 dark:text-violet-200"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-hermes/15 text-xs font-bold tabular-nums text-hermes"
               aria-label={isKo ? `${item.rank}위` : `Rank ${item.rank}`}
             >
               {item.rank}
@@ -169,7 +169,7 @@ function PlannerAxisList({
                 ))}
               </div>
               {axisPts ? (
-                <p className="mt-0.5 text-[11px] font-medium text-violet-600 dark:text-violet-300">
+                <p className="mt-0.5 text-[11px] font-medium text-hermes">
                   {t(`recommendTabScore.${effectiveAxis}`, { score: axisPts })}
                 </p>
               ) : null}
@@ -246,7 +246,7 @@ function RecommendAxisList({
             key={item.media.id}
             className="grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1 py-2.5 sm:gap-x-3"
           >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-500/15 text-xs font-bold tabular-nums text-violet-700 dark:text-violet-200">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-hermes/15 text-xs font-bold tabular-nums text-hermes">
               {item.rank}
             </span>
             <PlannerMediaThumb
@@ -486,8 +486,8 @@ export function RecommendationAxisTabs(props: RecommendationAxisTabsProps) {
     cn(
       "inline-flex items-center justify-center gap-1 rounded-full border px-2.5 py-1.5 text-xs font-semibold transition-colors",
       active
-        ? "border-violet-400/60 bg-violet-500/15 text-violet-700 dark:text-violet-200"
-        : "border-border bg-background text-muted-foreground hover:border-violet-300/40",
+        ? "border-hermes/60 bg-hermes/15 text-hermes"
+        : "border-border bg-background text-muted-foreground hover:border-hermes/40",
     );
 
   return (
@@ -565,8 +565,8 @@ export function RecommendationAxisTabs(props: RecommendationAxisTabsProps) {
             className={cn(
               "shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors sm:px-4 sm:text-sm",
               effectiveAxis === axis
-                ? "border-violet-400/60 bg-violet-500/15 text-violet-700 dark:text-violet-200"
-                : "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white text-muted-foreground hover:border-violet-300/40",
+                ? "border-hermes/60 bg-hermes/15 text-hermes"
+                : "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white text-muted-foreground hover:border-hermes/40",
             )}
           >
             {t(`recommendTab.${axis}`)}
