@@ -740,6 +740,7 @@ function BriefStepThreeOohFlow({
           metrics={displayMetrics}
           isKo={isKo}
           customLineCount={customLineCount}
+          listingSourceText={brief.freeText}
         />
 
         <div className="mt-3 rounded-xl border border-border bg-card p-4">

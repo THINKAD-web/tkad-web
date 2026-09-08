@@ -19,3 +19,10 @@ test("buildOohReportPayload — attaches pricingFootnote", () => {
   const payload = buildOohReportPayload(buildScenarioArgs(scenario));
   assert.equal(payload.pricingFootnote, plannerReportPricingFootnote(true));
 });
+
+test("buildOohReportPayload — disclaimer includes inventory snapshot line", () => {
+  const scenario = SNAPSHOT_SCENARIOS.find((s) => s.id === "korea-campaign-21d")!;
+  const payload = buildOohReportPayload(buildScenarioArgs(scenario));
+  assert.match(payload.disclaimer, /작성 시점 기준/);
+  assert.match(payload.disclaimer, /입점 현황/);
+});

@@ -31,6 +31,7 @@ import {
 import { buildReportBudgetHonesty } from "@/lib/planner/report-budget-honesty";
 import { portfolioQuoteOnlyMedia } from "@/lib/media-pricing-mode";
 import { plannerReportPricingFootnote } from "@/lib/planner-report-export/pricing-footnote";
+import { withInventoryDisclaimer } from "@/lib/catalog-listing-pending";
 import { buildPlannerQuoteSummary } from "@/lib/planner-report-export/build-quote-summary";
 import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-rationale";
 import { regionalBreakdownSectionLines } from "@/lib/plan-cart-report/regional-breakdown";
@@ -613,8 +614,11 @@ export function buildOohReportPayload(
     quoteSummary,
     appendixSectionTitle: a.appendixSectionTitle,
     appendixMediaSpecs: a.appendixMediaSpecs,
-    disclaimer: isKo
-      ? "본 보고서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
-      : "This report uses THINKAD internal estimates; actual delivery may vary by inventory and terms.",
+    disclaimer: withInventoryDisclaimer(
+      isKo
+        ? "본 보고서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
+        : "This report uses THINKAD internal estimates; actual delivery may vary by inventory and terms.",
+      isKo,
+    ),
   };
 }

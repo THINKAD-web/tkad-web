@@ -62,6 +62,7 @@ export const BRIEF_HANDOFF_QUERY_KEYS = [
   "mediaIds",
   "addMedia",
   "units",
+  "new",
 ] as const;
 
 function trimmed(v: string | null | undefined): string | null {

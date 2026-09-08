@@ -15,6 +15,7 @@ import type {
 import { computePortfolioReportMetrics } from "@/lib/planner-logic";
 import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-rationale";
 import { plannerReportPricingFootnote } from "@/lib/planner-report-export/pricing-footnote";
+import { withInventoryDisclaimer } from "@/lib/catalog-listing-pending";
 
 export type BuildIntegratedPayloadArgs = {
   isKo: boolean;
@@ -210,8 +211,11 @@ export function buildIntegratedReportPayload(
       : `Suggested digital share: ${a.digitalResult.digitalBudgetPct}% of total (${a.digitalResult.totalDigitalBudgetMan.toLocaleString()}M KRW)`,
     sections,
     pricingFootnote: plannerReportPricingFootnote(isKo),
-    disclaimer: isKo
-      ? "본 제안서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체·플랫폼 재고에 따라 달라질 수 있습니다."
-      : "This proposal uses THINKAD internal estimates; actual delivery may vary by inventory.",
+    disclaimer: withInventoryDisclaimer(
+      isKo
+        ? "본 제안서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체·플랫폼 재고에 따라 달라질 수 있습니다."
+        : "This proposal uses THINKAD internal estimates; actual delivery may vary by inventory.",
+      isKo,
+    ),
   };
 }

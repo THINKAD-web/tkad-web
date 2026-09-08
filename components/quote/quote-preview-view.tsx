@@ -28,6 +28,10 @@ import { QuoteStatusBadge } from "@/components/my/quote-status-badge";
 import { QuoteContractCta } from "@/components/quote/quote-contract-cta";
 import { QuoteRevisionRequestPanel } from "@/components/quote/quote-revision-request-panel";
 import { useAppToast } from "@/lib/use-toast";
+import {
+  QUOTE_INVENTORY_DISCLAIMER_EN,
+  QUOTE_INVENTORY_DISCLAIMER_KO,
+} from "@/lib/catalog-listing-pending";
 import { cn } from "@/lib/utils";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import {
@@ -624,6 +628,11 @@ export default function QuotePreviewView({
                   <FileText className="h-10 w-10 shrink-0 text-primary/40" aria-hidden />
                 </div>
               </div>
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                {isKo
+                  ? QUOTE_INVENTORY_DISCLAIMER_KO
+                  : QUOTE_INVENTORY_DISCLAIMER_EN}
+              </p>
             </div>
           </div>
         </section>

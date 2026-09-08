@@ -27,6 +27,12 @@ import {
 } from "./select-inquiry-mix";
 import { assertInquiryBriefFlight, inquiryToBrief } from "./to-brief";
 import { logInquiryShadowDiffAsync } from "./shadow-recommend";
+import {
+  listingPendingLines,
+  listingPendingSectionTitle,
+  parseCatalogListingNotices,
+  type CatalogListingNotice,
+} from "@/lib/catalog-listing-pending";
 
 export type InquiryAutoProposalDryRun = {
   parsed: ReturnType<typeof parseInquiryProposalText>;
@@ -39,6 +45,7 @@ export type InquiryAutoProposalDryRun = {
   mixUnits: Record<string, number>;
   bodyTotalWon: number;
   appendixMediaSpecs: PlannerExportAppendixMediaSpec[];
+  listingPending: CatalogListingNotice[];
 };
 
 export type InquiryAutoProposalBuild = {
@@ -86,6 +93,23 @@ function inquiryFollowUpLines(dryRun: InquiryAutoProposalDryRun): string[] {
     lines.push(SELLING_UNIT_FOLLOWUP_LINE_KO);
   }
   return lines;
+}
+
+function withInquiryListingPending(
+  payload: PlannerReportExportPayload,
+  notices: readonly CatalogListingNotice[],
+): PlannerReportExportPayload {
+  if (notices.length === 0) return payload;
+  return {
+    ...payload,
+    sections: [
+      ...(payload.sections ?? []),
+      {
+        title: listingPendingSectionTitle(true),
+        lines: listingPendingLines(notices, true),
+      },
+    ],
+  };
 }
 
 function withInquiryFollowUp(
@@ -160,7 +184,8 @@ export async function runInquiryAutoProposalDryRun(
   }
   const brief = inquiryToBrief(parsed, { flightStart: deps?.flightStart });
   assertInquiryBriefFlight(brief);
-  const dryRun = { parsed, matched, ...mix, brief };
+  const listingPending = parseCatalogListingNotices(text);
+  const dryRun = { parsed, matched, ...mix, brief, listingPending };
   if (process.env.INQUIRY_SHADOW_RECOMMEND !== "0") {
     logInquiryShadowDiffAsync({
       text,
@@ -195,18 +220,21 @@ export async function buildInquiryAutoProposal(
     catalog: mixCatalog,
     mixUnits: dryRun.mixUnits,
   });
-  const payload = withInquiryFollowUp(
-    {
-      ...buildBriefReportPayload({
-        plan: snapshot,
-        catalog: mixCatalog,
-        isKo: true,
-        generatedAt: args.generatedAt,
-        mixSource: "inquiry_match",
-      }),
-      appendixMediaSpecs: dryRun.appendixMediaSpecs,
-    },
-    inquiryFollowUpLines(dryRun),
+  const payload = withInquiryListingPending(
+    withInquiryFollowUp(
+      {
+        ...buildBriefReportPayload({
+          plan: snapshot,
+          catalog: mixCatalog,
+          isKo: true,
+          generatedAt: args.generatedAt,
+          mixSource: "inquiry_match",
+        }),
+        appendixMediaSpecs: dryRun.appendixMediaSpecs,
+      },
+      inquiryFollowUpLines(dryRun),
+    ),
+    dryRun.listingPending,
   );
   return { dryRun, snapshot, payload };
 }

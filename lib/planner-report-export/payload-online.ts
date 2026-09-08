@@ -22,6 +22,7 @@ import { buildOnlineCategoryRows } from "@/lib/planner-report-export/online-cate
 import { buildOnlineReportInsights } from "@/lib/planner-report-export/online-report-insights";
 import { onlineConsultationLineNotice, onlineCatalogEstimationNotice } from "@/lib/planner-report-export/online-consultation-notice";
 import { plannerReportPricingFootnote } from "@/lib/planner-report-export/pricing-footnote";
+import { withInventoryDisclaimer } from "@/lib/catalog-listing-pending";
 import {
   buildOnlineReportStrategyLines,
   buildOnlineReportWhyLine,
@@ -326,8 +327,11 @@ export function buildOnlineReportPayload(
     onlineSection,
     sections: [],
     pricingFootnote: plannerReportPricingFootnote(isKo),
-    disclaimer: isKo
-      ? "본 보고서의 온라인 예상 성과는 카탈로그 CPC·CPM 참고 범위 기반이며, 실제 집행·과금 조건에 따라 달라질 수 있습니다."
-      : "Online estimates use catalog CPC/CPM reference ranges; actual delivery and billing may vary.",
+    disclaimer: withInventoryDisclaimer(
+      isKo
+        ? "본 보고서의 온라인 예상 성과는 카탈로그 CPC·CPM 참고 범위 기반이며, 실제 집행·과금 조건에 따라 달라질 수 있습니다."
+        : "Online estimates use catalog CPC/CPM reference ranges; actual delivery and billing may vary.",
+      isKo,
+    ),
   };
 }

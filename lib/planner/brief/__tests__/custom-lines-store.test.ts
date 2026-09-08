@@ -3,6 +3,8 @@ import test from "node:test";
 
 import { normalizeBriefCustomLines } from "../custom-lines.ts";
 import { useBriefStore } from "../store.ts";
+import { useReportCopyStore } from "@/lib/planner-report-export/report-copy-store";
+import { EMPTY_PLANNER_REPORT_COPY } from "@/lib/planner-report-export/report-copy-state";
 
 test("customLines store: add / update / remove", () => {
   useBriefStore.setState({ mixUnits: {}, customLines: [] });
@@ -47,6 +49,36 @@ test("clearMix clears catalog + custom", () => {
   const s = useBriefStore.getState();
   assert.deepEqual(s.mixUnits, {});
   assert.deepEqual(s.customLines, []);
+});
+
+test("reset clears mix and report copy title/clientName; clearMix does not", () => {
+  useBriefStore.setState({
+    mixUnits: { a: 1 },
+    customLines: [
+      {
+        lineId: "custom-keep",
+        name: "Keep",
+        quantity: 1,
+        unitPriceWon: 100,
+      },
+    ],
+  });
+  useReportCopyStore.setState({
+    ...EMPTY_PLANNER_REPORT_COPY,
+    clientName: "이전광고주",
+    documentTitle: "이전제목",
+  });
+
+  useBriefStore.getState().clearMix();
+  assert.equal(useReportCopyStore.getState().clientName, "이전광고주");
+  assert.equal(useReportCopyStore.getState().documentTitle, "이전제목");
+
+  useBriefStore.setState({ mixUnits: { a: 1 } });
+  useBriefStore.getState().reset();
+  assert.deepEqual(useBriefStore.getState().mixUnits, {});
+  assert.deepEqual(useBriefStore.getState().customLines, []);
+  assert.equal(useReportCopyStore.getState().clientName, "");
+  assert.equal(useReportCopyStore.getState().documentTitle, "");
 });
 
 test("normalizeBriefCustomLines drops invalid persisted rows", () => {

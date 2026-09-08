@@ -111,7 +111,7 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
   const actions: DesktopQuickAction[] = [
     {
       id: "planner",
-      href: "/planner",
+      href: "/planner?new=1",
       labelKo: PLAN_NAV_LABELS.newPlan.ko,
       labelEn: PLAN_NAV_LABELS.newPlan.en,
       icon: Plus,

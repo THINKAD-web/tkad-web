@@ -19,6 +19,11 @@ import {
   DATA_QUALITY_PENDING_HINT,
   dataQualityExcludedNote,
 } from "@/lib/planner/brief/data-quality-copy";
+import {
+  parseCatalogListingNotices,
+  withInventoryDisclaimer,
+} from "@/lib/catalog-listing-pending";
+import { CatalogListingPendingList } from "@/components/catalog-listing-pending";
 
 function Row({
   label,
@@ -84,11 +89,14 @@ export function MetricsPanel({
   metrics,
   isKo,
   customLineCount = 0,
+  listingSourceText = "",
 }: {
   metrics: MixMetrics;
   isKo: boolean;
   /** 커스텀 라인 — CPM·노출 집계 제외 안내 */
   customLineCount?: number;
+  /** 브리프 자유문장 — 입점대기 안내 */
+  listingSourceText?: string;
 }) {
   const won = (n: number) =>
     isKo
@@ -103,6 +111,8 @@ export function MetricsPanel({
   const reachReady = metrics.netReach != null;
   const excluded = metrics.reachMeta?.excludedCount ?? 0;
 
+  const listingNotices = parseCatalogListingNotices(listingSourceText);
+
   return (
     <aside className="rounded-xl border border-border bg-card p-4">
       {/*
@@ -112,10 +122,18 @@ export function MetricsPanel({
         문구를 고칠 때는 양쪽을 함께 고칠 것.
       */}
       <p className="mb-3 rounded-lg border border-border bg-muted/50 p-2.5 tkad-type-caption leading-relaxed text-muted-foreground">
-        {isKo
-          ? "노출·도달은 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
-          : "Impressions and reach use THINKAD internal estimates; actual delivery may vary by inventory and terms."}
+        {withInventoryDisclaimer(
+          isKo
+            ? "노출·도달은 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
+            : "Impressions and reach use THINKAD internal estimates; actual delivery may vary by inventory and terms.",
+          isKo,
+        )}
       </p>
+      {listingNotices.length > 0 ? (
+        <div className="mb-3">
+          <CatalogListingPendingList notices={listingNotices} isKo={isKo} />
+        </div>
+      ) : null}
 
       <h3 className="mb-1 tkad-type-title">
         {isKo ? "실시간 지표" : "Live metrics"}

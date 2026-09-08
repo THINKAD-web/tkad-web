@@ -13,6 +13,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { resetPlannerReportCopy } from "@/lib/planner/reset-planner-session";
 import type { CampaignPlanGender } from "@/lib/campaign-plan-schema";
 import {
   EMPTY_BRIEF,
@@ -280,7 +281,10 @@ export const useBriefStore = create<BriefStore>()(
       applyBriefPreset: (preset) => set({ ...normalizeBriefInput(preset) }),
 
       setWizardStep: (step) => set({ wizardStep: step }),
-      reset: () => set({ ...INITIAL }),
+      reset: () => {
+        resetPlannerReportCopy();
+        set({ ...INITIAL });
+      },
 
       setEntryMode: (mode) => set({ entryMode: mode }),
 
@@ -383,7 +387,8 @@ export const useBriefStore = create<BriefStore>()(
           return { mixUnits, ...stampMixFingerprint(state) };
         }),
 
-      startFromHandoff: ({ patch, lines }) =>
+      startFromHandoff: ({ patch, lines }) => {
+        resetPlannerReportCopy();
         set((s) => {
           const brief = normalizeBriefInput({ ...EMPTY_BRIEF, ...patch });
           const mixUnits: Record<string, number> = {};
@@ -393,7 +398,8 @@ export const useBriefStore = create<BriefStore>()(
           }
           const state = { ...s, ...brief, mixUnits };
           return { ...brief, mixUnits, ...stampMixFingerprint(state) };
-        }),
+        });
+      },
 
       clearMix: () =>
         set({ mixUnits: {}, customLines: [], mixBriefFingerprint: null }),

@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
         },
         snapshot: null,
         thumbs: [],
+        listingPending: dry.listingPending,
       });
     }
 
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
         name: row.name,
         thumbUrl: row.thumbUrl ?? null,
       })),
+      listingPending: built.dryRun.listingPending,
     });
   } catch (e) {
     console.error("[inquiry-auto-proposal/dry-run]", e);
