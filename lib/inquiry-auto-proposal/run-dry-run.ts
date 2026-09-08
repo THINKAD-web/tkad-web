@@ -26,6 +26,7 @@ import {
   selectInquiryBodyMix,
 } from "./select-inquiry-mix";
 import { assertInquiryBriefFlight, inquiryToBrief } from "./to-brief";
+import { logInquiryShadowDiffAsync } from "./shadow-recommend";
 
 export type InquiryAutoProposalDryRun = {
   parsed: ReturnType<typeof parseInquiryProposalText>;
@@ -159,7 +160,15 @@ export async function runInquiryAutoProposalDryRun(
   }
   const brief = inquiryToBrief(parsed, { flightStart: deps?.flightStart });
   assertInquiryBriefFlight(brief);
-  return { parsed, matched, ...mix, brief };
+  const dryRun = { parsed, matched, ...mix, brief };
+  if (process.env.INQUIRY_SHADOW_RECOMMEND !== "0") {
+    logInquiryShadowDiffAsync({
+      text,
+      legacyDry: dryRun,
+      proposalCatalog: rows,
+    });
+  }
+  return dryRun;
 }
 
 /**

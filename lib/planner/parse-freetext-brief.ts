@@ -635,6 +635,13 @@ function escapeRegExp(s: string): string {
 }
 
 function parseIndustryKey(text: string): ParsedField<PlannerIndustryKey> {
+  const publicSector = text.match(
+    /공공기관|공공\s*센터|관공서|행정기관|public\s*sector|government/i,
+  );
+  if (publicSector?.[0]) {
+    return field("indOther", "high", publicSector[0]);
+  }
+
   const lower = text.toLowerCase();
 
   for (const { key, patterns } of SUPPLEMENTAL_INDUSTRY) {

@@ -1,0 +1,1248 @@
+{
+  "generatedAt": "2026-09-08T10:32:46.306Z",
+  "sampleCount": 6,
+  "summary": {
+    "total": 6,
+    "byCategory": {
+      "nearly_identical": 0,
+      "both_reasonable": 1,
+      "shadow_better": 5,
+      "shadow_problematic": 0
+    },
+    "canPromoteToPrimary": true,
+    "promotionBlockers": []
+  },
+  "reports": [
+    {
+      "sampleId": "pilot-default",
+      "label": "파일럿 기본 (인천공항 지정 5 SKU + 휴게소 LED)",
+      "textPreview": "인천공항 지정 매체: - 인천공항 국제선 T1 키로뷰 광고 - 인천공항 국제선 T2 키로뷰 광고 - 인천국제공항 키로뷰 Full Package 광고 - 인천공항 T1 체크인 스퀘어 광고 - 인천공항 T2 웰컴미디어월",
+      "category": "shadow_better",
+      "mixJaccard": 0.6666666666666666,
+      "legacyMixIds": [
+        "cmqrvefua00010ajgb2ra6gal",
+        "cmqrvanaa000104kwitn49xax"
+      ],
+      "shadowMixIds": [
+        "cmqrvefua00010ajgb2ra6gal",
+        "cmqrvanaa000104kwitn49xax",
+        "cmrm54gsp000005jv1s4w13bi"
+      ],
+      "legacyMixTotalWon": 24000000,
+      "shadowMixTotalWon": 27000000,
+      "namedLockInSurvivalRate": 1,
+      "namedLockIns": [
+        {
+          "needle": "인천공항 국제선 T1 키로뷰 광고",
+          "matchedIds": [
+            "cmqrvanaa000104kwitn49xax"
+          ],
+          "matchedNames": [
+            "인천공항 국제선 T1 키로뷰 광고"
+          ],
+          "inLegacyDesignated": true,
+          "inShadowDesignated": true,
+          "inLegacyMix": true,
+          "inShadowMix": true
+        },
+        {
+          "needle": "인천공항 국제선 T2 키로뷰 광고",
+          "matchedIds": [
+            "cmqrvefua00010ajgb2ra6gal"
+          ],
+          "matchedNames": [
+            "인천공항 국제선 T2 키로뷰 광고"
+          ],
+          "inLegacyDesignated": true,
+          "inShadowDesignated": true,
+          "inLegacyMix": true,
+          "inShadowMix": true
+        },
+        {
+          "needle": "인천국제공항 키로뷰 Full Package 광고",
+          "matchedIds": [
+            "cmqruwydr00010bj8vetag2sj"
+          ],
+          "matchedNames": [
+            "인천국제공항 키로뷰 Full Package 광고"
+          ],
+          "inLegacyDesignated": true,
+          "inShadowDesignated": true,
+          "inLegacyMix": false,
+          "inShadowMix": false
+        },
+        {
+          "needle": "인천공항 T1 체크인 스퀘어 광고",
+          "matchedIds": [
+            "cmp01lb30000004l1a32ebn6d"
+          ],
+          "matchedNames": [
+            "인천공항 T1 체크인 스퀘어 광고"
+          ],
+          "inLegacyDesignated": true,
+          "inShadowDesignated": true,
+          "inLegacyMix": false,
+          "inShadowMix": false
+        },
+        {
+          "needle": "인천공항 T2 웰컴미디어월 광고",
+          "matchedIds": [
+            "cmokcrlqk000004l26wcjkpbn",
+            "cmrpziv05000004ib6eyjx30k"
+          ],
+          "matchedNames": [
+            "인천공항 T2 웰컴미디어 광고",
+            "인천공항 T2 웰컴미디어월 광고"
+          ],
+          "inLegacyDesignated": true,
+          "inShadowDesignated": true,
+          "inLegacyMix": false,
+          "inShadowMix": false
+        }
+      ],
+      "legacyDesignatedCount": 6,
+      "shadowDesignatedCount": 17,
+      "recommendTopIds": [
+        "cmokdric4000004lgqn0unkfc",
+        "cmp01tkc6000004labmfsdbe1",
+        "cmp01h6tk000404l5lwgdofvm",
+        "cmp01fr8b000004kz8trce8bq",
+        "cmokde10o000604l1gcqhdeng",
+        "cmrpziv05000004ib6eyjx30k",
+        "cmp26x0g5000004jrplv5qpwn",
+        "cmp01lb30000004l1a32ebn6d",
+        "cmokdndn9000004jmpqbjexjc",
+        "cmrtamqyk000c09i0zmplqavs"
+      ],
+      "notes": [
+        "named lock-in 5건 중 shadow mix에 2건만 포함 (예산·CPM 제약)",
+        "다지역·지역 키워드 문의에서 shadow가 더 많은 eligible mix 제안"
+      ],
+      "shadow": {
+        "ok": true,
+        "recommendCount": 15,
+        "recommendTop": [
+          {
+            "id": "cmokdric4000004lgqn0unkfc",
+            "name": "인천공항 T2 센터스퀘어 광고",
+            "score": 100,
+            "rank": 1,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmp01tkc6000004labmfsdbe1",
+            "name": "인천공항 T1 센터 스퀘어 광고",
+            "score": 100,
+            "rank": 2,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmp01h6tk000404l5lwgdofvm",
+            "name": "인천공항 T1 웰컴 미디어 (Welcome Media) 광고",
+            "score": 100,
+            "rank": 3,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmp01fr8b000004kz8trce8bq",
+            "name": "인천공항 T1 웰컴 브릿지 (Welcome Media) 광고",
+            "score": 100,
+            "rank": 4,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmokde10o000604l1gcqhdeng",
+            "name": "인천공항 T2 미디어폴 광고",
+            "score": 100,
+            "rank": 5,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmrpziv05000004ib6eyjx30k",
+            "name": "인천공항 T2 웰컴미디어월 광고",
+            "score": 100,
+            "rank": 6,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmp26x0g5000004jrplv5qpwn",
+            "name": "인천공항 T1 트윈타워 광고",
+            "score": 95,
+            "rank": 7,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmp01lb30000004l1a32ebn6d",
+            "name": "인천공항 T1 체크인 스퀘어 광고",
+            "score": 95,
+            "rank": 8,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmokdndn9000004jmpqbjexjc",
+            "name": "인천공항 T2 빅스퀘어 광고",
+            "score": 95,
+            "rank": 9,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmrtamqyk000c09i0zmplqavs",
+            "name": "인천공항 T1 엔틀러 브릿지(R) 광고",
+            "score": 95,
+            "rank": 10,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmocwp83j000004jydnleh4qj",
+            "name": "인천 파라다이스시티 쓰리 윈도우 미디어 광고",
+            "score": 95,
+            "rank": 11,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrvefua00010ajgb2ra6gal",
+            "name": "인천공항 국제선 T2 키로뷰 광고",
+            "score": 72,
+            "rank": 12,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmrm54gsp000005jv1s4w13bi",
+            "name": "공항철도 검암역 디지털사이니지 광고",
+            "score": 72,
+            "rank": 13,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrvanaa000104kwitn49xax",
+            "name": "인천공항 국제선 T1 키로뷰 광고",
+            "score": 72,
+            "rank": 14,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmrm5a2pl000004ievne55oex",
+            "name": "공항철도 인천국제공항 T1 디지털사이니지 광고",
+            "score": 72,
+            "rank": 15,
+            "eligible": true,
+            "reasons": []
+          }
+        ],
+        "namedLockIns": [
+          {
+            "needle": "인천공항 국제선 T1 키로뷰 광고",
+            "matchedIds": [
+              "cmqrvanaa000104kwitn49xax"
+            ],
+            "matchedNames": [
+              "인천공항 국제선 T1 키로뷰 광고"
+            ],
+            "inLegacyDesignated": true,
+            "inShadowDesignated": true,
+            "inLegacyMix": true,
+            "inShadowMix": true
+          },
+          {
+            "needle": "인천공항 국제선 T2 키로뷰 광고",
+            "matchedIds": [
+              "cmqrvefua00010ajgb2ra6gal"
+            ],
+            "matchedNames": [
+              "인천공항 국제선 T2 키로뷰 광고"
+            ],
+            "inLegacyDesignated": true,
+            "inShadowDesignated": true,
+            "inLegacyMix": true,
+            "inShadowMix": true
+          },
+          {
+            "needle": "인천국제공항 키로뷰 Full Package 광고",
+            "matchedIds": [
+              "cmqruwydr00010bj8vetag2sj"
+            ],
+            "matchedNames": [
+              "인천국제공항 키로뷰 Full Package 광고"
+            ],
+            "inLegacyDesignated": true,
+            "inShadowDesignated": true,
+            "inLegacyMix": false,
+            "inShadowMix": false
+          },
+          {
+            "needle": "인천공항 T1 체크인 스퀘어 광고",
+            "matchedIds": [
+              "cmp01lb30000004l1a32ebn6d"
+            ],
+            "matchedNames": [
+              "인천공항 T1 체크인 스퀘어 광고"
+            ],
+            "inLegacyDesignated": true,
+            "inShadowDesignated": true,
+            "inLegacyMix": false,
+            "inShadowMix": false
+          },
+          {
+            "needle": "인천공항 T2 웰컴미디어월 광고",
+            "matchedIds": [
+              "cmokcrlqk000004l26wcjkpbn",
+              "cmrpziv05000004ib6eyjx30k"
+            ],
+            "matchedNames": [
+              "인천공항 T2 웰컴미디어 광고",
+              "인천공항 T2 웰컴미디어월 광고"
+            ],
+            "inLegacyDesignated": true,
+            "inShadowDesignated": true,
+            "inLegacyMix": false,
+            "inShadowMix": false
+          }
+        ],
+        "shadowDesignatedCount": 17
+      }
+    },
+    {
+      "sampleId": "four-region-mix",
+      "label": "4개 지역 동시 문의 (서울·부산·대구·인천)",
+      "textPreview": "브랜드 인지도 향상 캠페인 기간 2개월 [서울] 예산 2,000만원 — 지하철·강남 일대 노출 희망 [부산] 예산 1,500만원 — 시외버스터미널·전광판 [대구] 예산 1,000만원 — 택배차량 래핑 [인천] 예산",
+      "category": "shadow_better",
+      "mixJaccard": 0,
+      "legacyMixIds": [],
+      "shadowMixIds": [
+        "cmo6fei36000004l1m01yef2h"
+      ],
+      "legacyMixTotalWon": 0,
+      "shadowMixTotalWon": 18000000,
+      "namedLockInSurvivalRate": 1,
+      "namedLockIns": [],
+      "legacyDesignatedCount": 0,
+      "shadowDesignatedCount": 20,
+      "recommendTopIds": [
+        "cmp01tkc6000004labmfsdbe1",
+        "cmtn73b71000504id3ynzicsh",
+        "cmtn68ly9000004l9je39gikc",
+        "cmtn7b6a0000104l7hcqendv2",
+        "cmtn61lf3000204jrg59a7min",
+        "cmtqkdsg9000l04jwxzt58l23",
+        "cmo6gymei000004jmfz9zvdze",
+        "cmtn35udj000q04l53pxrl663",
+        "cmtqjxy4d000704jlgstr4oag",
+        "cmo6h4p41000004l5bxhz9d37"
+      ],
+      "notes": [
+        "다지역·지역 키워드 문의에서 shadow가 더 많은 eligible mix 제안"
+      ],
+      "shadow": {
+        "ok": true,
+        "recommendCount": 20,
+        "recommendTop": [
+          {
+            "id": "cmp01tkc6000004labmfsdbe1",
+            "name": "인천공항 T1 센터 스퀘어 광고",
+            "score": 100,
+            "rank": 1,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn73b71000504id3ynzicsh",
+            "name": "대구 두류역 두류네거리 광장빌딩 전광판",
+            "score": 100,
+            "rank": 2,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn68ly9000004l9je39gikc",
+            "name": "대구 반월당역 반월당네거리 메디스퀘어 전광판 광고",
+            "score": 100,
+            "rank": 3,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn7b6a0000104l7hcqendv2",
+            "name": "대구 반고개역 천일빌딩 전광판 광고",
+            "score": 100,
+            "rank": 4,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn61lf3000204jrg59a7min",
+            "name": "대구 서성네거리 전광판 광고",
+            "score": 100,
+            "rank": 5,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtqkdsg9000l04jwxzt58l23",
+            "name": "대구 죽전역 죽전사거리 죽전메디빌 전광판 광고",
+            "score": 100,
+            "rank": 6,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmo6gymei000004jmfz9zvdze",
+            "name": "논현역 국전빌딩 옥상 전광판 광고",
+            "score": 100,
+            "rank": 7,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn35udj000q04l53pxrl663",
+            "name": "서울고속버스터미널 전광판 광고",
+            "score": 100,
+            "rank": 8,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtqjxy4d000704jlgstr4oag",
+            "name": "대구 상인역 상인네거리 전광판 광고",
+            "score": 100,
+            "rank": 9,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmo6h4p41000004l5bxhz9d37",
+            "name": "논현역 논현빌딩 전광판 광고",
+            "score": 100,
+            "rank": 10,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmoeiqs47000004k7n7mp111t",
+            "name": "지하철 2호선 강남역 미디어월 광고",
+            "score": 100,
+            "rank": 11,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmtn6xnkr000204idjnbrw6mw",
+            "name": "대구 두류역 두류네거리 구구스빌딩 전광판 광고",
+            "score": 100,
+            "rank": 12,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtqkgvgq000s04jl6909y94v",
+            "name": "대구 침산네거리 명성프라임 전광판 광고",
+            "score": 100,
+            "rank": 13,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn5xga5000104lcnpeil7pm",
+            "name": "대구 경북대 봉산육거리 진성빌딩 전광판 광고",
+            "score": 100,
+            "rank": 14,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn6qxc7000004jr01acu0xb",
+            "name": "대구 더블유병원 전광판 광고",
+            "score": 100,
+            "rank": 15,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          }
+        ],
+        "namedLockIns": [],
+        "shadowDesignatedCount": 20
+      }
+    },
+    {
+      "sampleId": "named-subset-budget",
+      "label": "지정 SKU 2개 + 예산 2,000만",
+      "textPreview": "인천공항 T1 키로뷰 광고 인천공항 T2 키로뷰 광고 예산 2,000만원 1개월",
+      "category": "shadow_better",
+      "mixJaccard": 0.3333333333333333,
+      "legacyMixIds": [
+        "cmqrvefua00010ajgb2ra6gal"
+      ],
+      "shadowMixIds": [
+        "cmqrvefua00010ajgb2ra6gal",
+        "cmqrmo26a000f0bkxmar02m9t",
+        "cmrm54gsp000005jv1s4w13bi"
+      ],
+      "legacyMixTotalWon": 12000000,
+      "shadowMixTotalWon": 18200000,
+      "namedLockInSurvivalRate": 1,
+      "namedLockIns": [],
+      "legacyDesignatedCount": 5,
+      "shadowDesignatedCount": 22,
+      "recommendTopIds": [
+        "cmp01tkc6000004labmfsdbe1",
+        "cmqrpvzn200010ai3wthj2nhw",
+        "cmqrpy6vh00030ai366l1xgkn",
+        "cmqrp5lq8000004i8dr4ysajj",
+        "cmqrp2sdo000204levvkf0tp6",
+        "cmp01h6tk000404l5lwgdofvm",
+        "cmqrvefua00010ajgb2ra6gal",
+        "cmrm54gsp000005jv1s4w13bi",
+        "cmqrvanaa000104kwitn49xax",
+        "cmp01fr8b000004kz8trce8bq"
+      ],
+      "notes": [
+        "다지역·지역 키워드 문의에서 shadow가 더 많은 eligible mix 제안"
+      ],
+      "shadow": {
+        "ok": true,
+        "recommendCount": 20,
+        "recommendTop": [
+          {
+            "id": "cmp01tkc6000004labmfsdbe1",
+            "name": "인천공항 T1 센터 스퀘어 광고",
+            "score": 96,
+            "rank": 1,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmqrpvzn200010ai3wthj2nhw",
+            "name": "공항철도 계양역 개찰구 래핑 광고",
+            "score": 96,
+            "rank": 2,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrpy6vh00030ai366l1xgkn",
+            "name": "공항철도 검암역 개찰구 래핑 광고",
+            "score": 96,
+            "rank": 3,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrp5lq8000004i8dr4ysajj",
+            "name": "공항철도 인천공항T2역 개찰구 래핑 광고",
+            "score": 96,
+            "rank": 4,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrp2sdo000204levvkf0tp6",
+            "name": "공항철도 인천공항T1역 개찰구 래핑 광고",
+            "score": 96,
+            "rank": 5,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmp01h6tk000404l5lwgdofvm",
+            "name": "인천공항 T1 웰컴 미디어 (Welcome Media) 광고",
+            "score": 96,
+            "rank": 6,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmqrvefua00010ajgb2ra6gal",
+            "name": "인천공항 국제선 T2 키로뷰 광고",
+            "score": 96,
+            "rank": 7,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmrm54gsp000005jv1s4w13bi",
+            "name": "공항철도 검암역 디지털사이니지 광고",
+            "score": 96,
+            "rank": 8,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrvanaa000104kwitn49xax",
+            "name": "인천공항 국제선 T1 키로뷰 광고",
+            "score": 96,
+            "rank": 9,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmp01fr8b000004kz8trce8bq",
+            "name": "인천공항 T1 웰컴 브릿지 (Welcome Media) 광고",
+            "score": 96,
+            "rank": 10,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmokdric4000004lgqn0unkfc",
+            "name": "인천공항 T2 센터스퀘어 광고",
+            "score": 86,
+            "rank": 11,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmokde10o000604l1gcqhdeng",
+            "name": "인천공항 T2 미디어폴 광고",
+            "score": 86,
+            "rank": 12,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmrpziv05000004ib6eyjx30k",
+            "name": "인천공항 T2 웰컴미디어월 광고",
+            "score": 86,
+            "rank": 13,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqz954e3000204i9989ts451",
+            "name": "도심공항 리무진버스 헤드시트 광고",
+            "score": 81,
+            "rank": 14,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmqz98w4l000204juaxwqz27x",
+            "name": "도심공항 리무진버스 창문상단 광고",
+            "score": 81,
+            "rank": 15,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          }
+        ],
+        "namedLockIns": [],
+        "shadowDesignatedCount": 22
+      }
+    },
+    {
+      "sampleId": "rest-stop-led-only",
+      "label": "휴게소 LED만 (카테고리 확장)",
+      "textPreview": "휴게소 LED 전광판 예산 1,500만원 기간 1개월",
+      "category": "both_reasonable",
+      "mixJaccard": 0,
+      "legacyMixIds": [],
+      "shadowMixIds": [
+        "cmox1if98000004l8xl49fghr",
+        "cmqk75i0a000h04jpxjru9hpr"
+      ],
+      "legacyMixTotalWon": 0,
+      "shadowMixTotalWon": 9600000,
+      "namedLockInSurvivalRate": 1,
+      "namedLockIns": [],
+      "legacyDesignatedCount": 0,
+      "shadowDesignatedCount": 20,
+      "recommendTopIds": [
+        "cmocwp83j000004jydnleh4qj",
+        "cmqi6xjgq000604jj5krliihl",
+        "cmo6lp8m6000004l2gwox9kgi",
+        "cmtn73b71000504id3ynzicsh",
+        "cmqk75i0a000h04jpxjru9hpr",
+        "cmox1if98000004l8xl49fghr",
+        "cmox127nj000804l8p3nmo48i",
+        "cmtn4jgye000004k22isj9j9k",
+        "cmo6ja078000204kw1hpw20tx",
+        "cmoczr4q0000004l8h6aqllk3"
+      ],
+      "notes": [
+        "mix Jaccard 0% — 구성 차이 큼, shadow recommend top 확인 필요"
+      ],
+      "shadow": {
+        "ok": true,
+        "recommendCount": 20,
+        "recommendTop": [
+          {
+            "id": "cmocwp83j000004jydnleh4qj",
+            "name": "인천 파라다이스시티 쓰리 윈도우 미디어 광고",
+            "score": 98,
+            "rank": 1,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqi6xjgq000604jj5krliihl",
+            "name": "광주 유스퀘어 기둥 전광판 광고",
+            "score": 98,
+            "rank": 2,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmo6lp8m6000004l2gwox9kgi",
+            "name": "광주 어등산CC 전광판 광고",
+            "score": 98,
+            "rank": 3,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn73b71000504id3ynzicsh",
+            "name": "대구 두류역 두류네거리 광장빌딩 전광판",
+            "score": 98,
+            "rank": 4,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmqk75i0a000h04jpxjru9hpr",
+            "name": "인천 송도 A~C동 지하 연결통로 미디어 월 광고",
+            "score": 98,
+            "rank": 5,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmox1if98000004l8xl49fghr",
+            "name": "강변 동서울터미널 LED 전광판 광고",
+            "score": 98,
+            "rank": 6,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmox127nj000804l8p3nmo48i",
+            "name": "불광역 보광빌딩 전광판 광고",
+            "score": 98,
+            "rank": 7,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn4jgye000004k22isj9j9k",
+            "name": "구로디지털단지역 조광빌딩 전광판 광고",
+            "score": 98,
+            "rank": 8,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmo6ja078000204kw1hpw20tx",
+            "name": "광주 신세계안과 광연빌딩 전광판 광고",
+            "score": 98,
+            "rank": 9,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmoczr4q0000004l8h6aqllk3",
+            "name": "용산역 아이파크몰 3F 싱크월 광고",
+            "score": 98,
+            "rank": 10,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmtn68ly9000004l9je39gikc",
+            "name": "대구 반월당역 반월당네거리 메디스퀘어 전광판 광고",
+            "score": 98,
+            "rank": 11,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn4qnwm000m04jrf0wt1spq",
+            "name": "노원역 KB국민은행 전광판 광고",
+            "score": 98,
+            "rank": 12,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtr5mam4000g04l4c3fr128w",
+            "name": "울산 남구 번영사거리 전광판 광고",
+            "score": 98,
+            "rank": 13,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn7b6a0000104l7hcqendv2",
+            "name": "대구 반고개역 천일빌딩 전광판 광고",
+            "score": 98,
+            "rank": 14,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmtn61lf3000204jrg59a7min",
+            "name": "대구 서성네거리 전광판 광고",
+            "score": 98,
+            "rank": 15,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          }
+        ],
+        "namedLockIns": [],
+        "shadowDesignatedCount": 20
+      }
+    },
+    {
+      "sampleId": "seoul-subway-national",
+      "label": "서울 지하철 + 전국 인지도",
+      "textPreview": "신규 앱 런칭, 20대 MZ 타겟 서울 지하철 2호선·강남역 일대 예산 5,000만원 3개월",
+      "category": "shadow_better",
+      "mixJaccard": 0,
+      "legacyMixIds": [],
+      "shadowMixIds": [
+        "cms7d8drw000x04jlbomogrol",
+        "cms8acjaq001g04jxb9udagk4",
+        "cmoifvxb6000604jxmw7b3ov7"
+      ],
+      "legacyMixTotalWon": 0,
+      "shadowMixTotalWon": 47100000,
+      "namedLockInSurvivalRate": 1,
+      "namedLockIns": [],
+      "legacyDesignatedCount": 0,
+      "shadowDesignatedCount": 20,
+      "recommendTopIds": [
+        "cmqzask0o000004jvjc51e6pq",
+        "cmoifvxb6000604jxmw7b3ov7",
+        "cmoforsto000004jrjawzqx3y",
+        "cmsswbsqk000104jts3jleei9",
+        "cmrs0ktz9000704jvhrsyu61b",
+        "cmssvgvt5000304ldgc898el9",
+        "cms89h3fg000t04lcajlrjc8b",
+        "cmofpvqak000204jrmhjsdgk7",
+        "cmoeiqs47000004k7n7mp111t",
+        "cmpdvixn0000104jre8fcrabz"
+      ],
+      "notes": [
+        "다지역·지역 키워드 문의에서 shadow가 더 많은 eligible mix 제안"
+      ],
+      "shadow": {
+        "ok": true,
+        "recommendCount": 20,
+        "recommendTop": [
+          {
+            "id": "cmqzask0o000004jvjc51e6pq",
+            "name": "지하철 2호선 삼성역 인피니티로드 광고 (코엑스몰)",
+            "score": 120,
+            "rank": 1,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmoifvxb6000604jxmw7b3ov7",
+            "name": "지하철 2호선 강남역 아트캔버스 광고",
+            "score": 120,
+            "rank": 2,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmoforsto000004jrjawzqx3y",
+            "name": "지하철 2호선 강남역 PMP 광고",
+            "score": 120,
+            "rank": 3,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmsswbsqk000104jts3jleei9",
+            "name": "지하철 2호선 삼성역 엔스퀘어 광고",
+            "score": 120,
+            "rank": 4,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmrs0ktz9000704jvhrsyu61b",
+            "name": "지하철 2호선 역삼역 맥스비전 광고",
+            "score": 120,
+            "rank": 5,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmssvgvt5000304ldgc898el9",
+            "name": "지하철 2호선 강남역 엔스퀘어 광고",
+            "score": 120,
+            "rank": 6,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cms89h3fg000t04lcajlrjc8b",
+            "name": "지하철 2호선 선릉역 맥스비전 광고",
+            "score": 120,
+            "rank": 7,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmofpvqak000204jrmhjsdgk7",
+            "name": "지하철 2호선 강남역 아트래핑 지하철 광고",
+            "score": 120,
+            "rank": 8,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmoeiqs47000004k7n7mp111t",
+            "name": "지하철 2호선 강남역 미디어월 광고",
+            "score": 120,
+            "rank": 9,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmpdvixn0000104jre8fcrabz",
+            "name": "지하철 2호선 강남역 아트플랫폼 광고",
+            "score": 120,
+            "rank": 10,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmssvstt0000004jr7tp1rbdv",
+            "name": "지하철 2호선 교대역 엔스퀘어 광고",
+            "score": 115,
+            "rank": 11,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cms7d8drw000x04jlbomogrol",
+            "name": "지하철 2호선 강남역 맥스비전 광고",
+            "score": 115,
+            "rank": 12,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmsswdyll000104jxek16x3rs",
+            "name": "지하철 2호선 선릉역 엔스퀘어 광고",
+            "score": 115,
+            "rank": 13,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cms8acjaq001g04jxb9udagk4",
+            "name": "지하철 2호선 삼성역 맥스비전 광고",
+            "score": 115,
+            "rank": 14,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmssxciu3000204l7kli6su45",
+            "name": "지하철 2호선 역삼역 엔스퀘어 광고",
+            "score": 115,
+            "rank": 15,
+            "eligible": true,
+            "reasons": []
+          }
+        ],
+        "namedLockIns": [],
+        "shadowDesignatedCount": 20
+      }
+    },
+    {
+      "sampleId": "budget-assumed-airport",
+      "label": "예산 미기재 + 인천공항",
+      "textPreview": "인천국제공항 키로뷰 Full Package 광고 인천공항 T1 체크인 스퀘어 광고 기간 1개월",
+      "category": "shadow_better",
+      "mixJaccard": 0.6666666666666666,
+      "legacyMixIds": [
+        "cmqrvefua00010ajgb2ra6gal",
+        "cmqrvanaa000104kwitn49xax"
+      ],
+      "shadowMixIds": [
+        "cmqrvefua00010ajgb2ra6gal",
+        "cmqrvanaa000104kwitn49xax",
+        "cmqrmo26a000f0bkxmar02m9t"
+      ],
+      "legacyMixTotalWon": 24000000,
+      "shadowMixTotalWon": 27200000,
+      "namedLockInSurvivalRate": 1,
+      "namedLockIns": [
+        {
+          "needle": "인천국제공항 키로뷰 Full Package 광고",
+          "matchedIds": [
+            "cmqruwydr00010bj8vetag2sj"
+          ],
+          "matchedNames": [
+            "인천국제공항 키로뷰 Full Package 광고"
+          ],
+          "inLegacyDesignated": true,
+          "inShadowDesignated": true,
+          "inLegacyMix": false,
+          "inShadowMix": false
+        },
+        {
+          "needle": "인천공항 T1 체크인 스퀘어 광고",
+          "matchedIds": [
+            "cmp01lb30000004l1a32ebn6d"
+          ],
+          "matchedNames": [
+            "인천공항 T1 체크인 스퀘어 광고"
+          ],
+          "inLegacyDesignated": true,
+          "inShadowDesignated": true,
+          "inLegacyMix": false,
+          "inShadowMix": false
+        }
+      ],
+      "legacyDesignatedCount": 5,
+      "shadowDesignatedCount": 18,
+      "recommendTopIds": [
+        "cmqrp5lq8000004i8dr4ysajj",
+        "cmrm54gsp000005jv1s4w13bi",
+        "cmqrpvzn200010ai3wthj2nhw",
+        "cmqrpy6vh00030ai366l1xgkn",
+        "cmqrp2sdo000204levvkf0tp6",
+        "cmqz954e3000204i9989ts451",
+        "cmqz98w4l000204juaxwqz27x",
+        "cmqz9dlm3000004kz40bnelm7",
+        "cmqz91a0e000104js4dd8i780",
+        "cmqrmo26a000f0bkxmar02m9t"
+      ],
+      "notes": [
+        "named lock-in 2건 중 shadow mix에 0건만 포함 (예산·CPM 제약)",
+        "다지역·지역 키워드 문의에서 shadow가 더 많은 eligible mix 제안"
+      ],
+      "shadow": {
+        "ok": true,
+        "recommendCount": 13,
+        "recommendTop": [
+          {
+            "id": "cmqrp5lq8000004i8dr4ysajj",
+            "name": "공항철도 인천공항T2역 개찰구 래핑 광고",
+            "score": 96,
+            "rank": 1,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmrm54gsp000005jv1s4w13bi",
+            "name": "공항철도 검암역 디지털사이니지 광고",
+            "score": 96,
+            "rank": 2,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrpvzn200010ai3wthj2nhw",
+            "name": "공항철도 계양역 개찰구 래핑 광고",
+            "score": 96,
+            "rank": 3,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrpy6vh00030ai366l1xgkn",
+            "name": "공항철도 검암역 개찰구 래핑 광고",
+            "score": 96,
+            "rank": 4,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrp2sdo000204levvkf0tp6",
+            "name": "공항철도 인천공항T1역 개찰구 래핑 광고",
+            "score": 96,
+            "rank": 5,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqz954e3000204i9989ts451",
+            "name": "도심공항 리무진버스 헤드시트 광고",
+            "score": 81,
+            "rank": 6,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmqz98w4l000204juaxwqz27x",
+            "name": "도심공항 리무진버스 창문상단 광고",
+            "score": 81,
+            "rank": 7,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmqz9dlm3000004kz40bnelm7",
+            "name": "도심공항 리무진버스 트렁크존 광고",
+            "score": 81,
+            "rank": 8,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmqz91a0e000104js4dd8i780",
+            "name": "도심공항 리무진버스 윈도우스티커 광고",
+            "score": 81,
+            "rank": 9,
+            "eligible": false,
+            "reasons": [
+              "cpm_class_bounds"
+            ]
+          },
+          {
+            "id": "cmqrmo26a000f0bkxmar02m9t",
+            "name": "공항철도 서울역 에스컬레이터 광고 ⑤ (지하2층~지하3층)",
+            "score": 86,
+            "rank": 10,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmocwp83j000004jydnleh4qj",
+            "name": "인천 파라다이스시티 쓰리 윈도우 미디어 광고",
+            "score": 76,
+            "rank": 11,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrmn6dd000d0bkxnyv1k95o",
+            "name": "공항철도 서울역 에스컬레이터 광고 ④ (지하1층~지하2층)",
+            "score": 76,
+            "rank": 12,
+            "eligible": true,
+            "reasons": []
+          },
+          {
+            "id": "cmqrouzqm00000bgh3hmh6sza",
+            "name": "공항철도 서울역 개찰구 래핑 광고",
+            "score": 76,
+            "rank": 13,
+            "eligible": true,
+            "reasons": []
+          }
+        ],
+        "namedLockIns": [
+          {
+            "needle": "인천국제공항 키로뷰 Full Package 광고",
+            "matchedIds": [
+              "cmqruwydr00010bj8vetag2sj"
+            ],
+            "matchedNames": [
+              "인천국제공항 키로뷰 Full Package 광고"
+            ],
+            "inLegacyDesignated": true,
+            "inShadowDesignated": true,
+            "inLegacyMix": false,
+            "inShadowMix": false
+          },
+          {
+            "needle": "인천공항 T1 체크인 스퀘어 광고",
+            "matchedIds": [
+              "cmp01lb30000004l1a32ebn6d"
+            ],
+            "matchedNames": [
+              "인천공항 T1 체크인 스퀘어 광고"
+            ],
+            "inLegacyDesignated": true,
+            "inShadowDesignated": true,
+            "inLegacyMix": false,
+            "inShadowMix": false
+          }
+        ],
+        "shadowDesignatedCount": 18
+      }
+    }
+  ]
+}
