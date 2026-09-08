@@ -10,7 +10,7 @@ import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
-import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogCore } from "@/lib/public-media-catalog";
 import {
   getPublicMediaCountLabel,
   mediaListingMetadataDescription,
@@ -90,7 +90,7 @@ export default async function MediaLayout({
 
   let itemList: Record<string, unknown> | null = null;
   try {
-    const catalog = await fetchPublicMediaCatalogList();
+    const catalog = await fetchPublicMediaCatalogCore();
     if (catalog.length > 0) {
       itemList = buildMediaCatalogItemListJsonLd(
         locale,

@@ -1040,19 +1040,45 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     setSelectedIds(new Set());
   }, []);
 
-  const popularIds = useMemo(
-    () =>
-      new Set(
-        catalog
-          .filter((m) =>
-            m.trustBadges?.some(
-              (b) => b.id === "popular" || b.id === "hot_week",
-            ),
-          )
-          .map((m) => m.id),
-      ),
-    [catalog],
-  );
+  // catalog comes from fetchPublicMediaCatalogCore() (no review/trust overlay —
+  // see reports/isr-writes-root-cause-20260907.md), so m.trustBadges is never
+  // populated here. Fetch the same global popular/hot-week context the detail
+  // page uses instead.
+  const [trustBadgeCtx, setTrustBadgeCtx] = useState<{
+    topInquiryIds: Set<string>;
+    hotWeekIds: Set<string>;
+  } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/public/trust-badges")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { topInquiryIds?: string[]; hotWeekIds?: string[] } | null) => {
+        if (cancelled || !data) return;
+        setTrustBadgeCtx({
+          topInquiryIds: new Set(data.topInquiryIds ?? []),
+          hotWeekIds: new Set(data.hotWeekIds ?? []),
+        });
+      })
+      .catch(() => {
+        /* popularIds just stays empty on failure */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const popularIds = useMemo(() => {
+    if (!trustBadgeCtx) return new Set<string>();
+    return new Set(
+      catalog
+        .filter(
+          (m) =>
+            trustBadgeCtx.topInquiryIds.has(m.id) ||
+            trustBadgeCtx.hotWeekIds.has(m.id),
+        )
+        .map((m) => m.id),
+    );
+  }, [catalog, trustBadgeCtx]);
 
   const updateField = useCallback((field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));

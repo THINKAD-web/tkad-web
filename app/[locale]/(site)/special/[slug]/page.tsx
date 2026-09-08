@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalogCore } from "@/lib/public-media-catalog";
 import {
   getSpecialLandingConfig,
   KNOWN_SPECIAL_SLUGS,
@@ -71,9 +71,9 @@ export default async function SpecialLandingPage({ params }: Props) {
   if (!config) notFound();
 
   const isKo = locale.startsWith("ko");
-  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogList>> = [];
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalogCore>> = [];
   try {
-    catalog = await fetchPublicMediaCatalogList();
+    catalog = await fetchPublicMediaCatalogCore();
   } catch {
     /* empty */
   }
