@@ -68,6 +68,25 @@ export function revalidateMediaCaches(
 }
 
 /**
+ * List tag만 무효화 — 매체별 상세 path/tag는 건드리지 않음.
+ *
+ * popularityScore 일괄 재계산처럼 "정렬 순서만" 바뀌는 대량 배치용. 매체마다
+ * revalidatePath 를 걸면(`revalidateMediaCachesBulk`) 배치 규모(수백~수천)만큼
+ * ISR write 가 발생해 이 정리 작업 자체가 write-amplification 을 재현한다.
+ */
+export function revalidatePublicMediaListTagOnly(): void {
+  try {
+    revalidateTag(PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG, "max");
+    revalidatePublicMediaCatalogApiPaths();
+    for (const locale of MEDIA_CACHE_LOCALES) {
+      revalidatePath(`/${locale}/media`);
+    }
+  } catch {
+    /* revalidatePath 는 build/script 등 일부 환경에서만 no-op */
+  }
+}
+
+/**
  * 대량 임포트 전용: list tag 1회 + 영향 상세 path만 (행별 list wave 방지).
  */
 export function revalidateMediaCachesBulk(
