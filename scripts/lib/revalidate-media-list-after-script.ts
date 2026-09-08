@@ -48,7 +48,11 @@ async function callRevalidateEndpoint(
       );
       return;
     }
-    console.log(`[${label}] 캐시 무효화 완료`);
+    const responseBody = await res.json().catch(() => null);
+    console.log(
+      `[${label}] 캐시 무효화 완료 —`,
+      responseBody ? JSON.stringify(responseBody) : "(응답 본문 파싱 실패)",
+    );
   } catch (e) {
     console.warn(`[${label}] 호출 실패 —`, e instanceof Error ? e.message : e);
   }
