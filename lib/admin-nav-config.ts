@@ -75,6 +75,7 @@ export const ADMIN_NAV_PRIORITY_1: AdminNavKey[] = [
 
 /** 자주 쓰는 보조 — Top3 아래 컴팩트 링크 */
 export const ADMIN_NAV_PRIORITY_2: AdminNavKey[] = [
+  "campaigns",
   "quotesBooking",
   "quotesNew",
   "contractsNew",
@@ -139,6 +140,7 @@ export const adminNavGroupDefs: {
     id: "quotes",
     labelKey: "groupQuotes",
     itemKeys: [
+      "campaigns",
       "quotesList",
       "contractsDashboard",
       "contractsNew",
@@ -146,7 +148,6 @@ export const adminNavGroupDefs: {
       "quotesNew",
       "quoteTemplates",
       "biddings",
-      "campaigns",
       "forecast",
     ],
   },
