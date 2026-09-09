@@ -14,6 +14,7 @@ import {
 import { calculatePlan } from "@/lib/planner/calc/engine";
 import { blendedCpmExcludingQuoteOnly, categoryCpmBarsExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
 import { usePlannerStore } from "@/lib/planner/store";
+import { useReportCopyStore } from "@/lib/planner-report-export/report-copy-store";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
@@ -422,10 +423,10 @@ export function RecommendReportSection({
     ],
   );
 
-  const reportClientName = usePlannerStore((s) => s.reportClientName);
-  const setReportClientName = usePlannerStore((s) => s.setReportClientName);
-  const reportDocumentTitle = usePlannerStore((s) => s.reportDocumentTitle);
-  const setReportDocumentTitle = usePlannerStore((s) => s.setReportDocumentTitle);
+  const reportClientName = useReportCopyStore((s) => s.clientName);
+  const setReportClientName = useReportCopyStore((s) => s.setClientName);
+  const reportDocumentTitle = useReportCopyStore((s) => s.documentTitle);
+  const setReportDocumentTitle = useReportCopyStore((s) => s.setDocumentTitle);
   const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
 
   const exportPayload = useMemo(
