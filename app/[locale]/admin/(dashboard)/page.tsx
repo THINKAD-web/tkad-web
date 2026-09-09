@@ -6,6 +6,7 @@ import {
   Calculator,
   ClipboardList,
   FileBarChart,
+  Megaphone,
   MessageSquareText,
   Monitor,
   Plus,
@@ -138,8 +139,13 @@ export default async function AdminOverviewPage({ params }: Props) {
     },
     {
       href: `${prefix}/admin/reports/new`,
-      label: "리포트 생성",
+      label: "트렌드 리포트",
       icon: FileBarChart,
+    },
+    {
+      href: `${prefix}/admin/campaigns`,
+      label: "캠페인 성과보고서",
+      icon: Megaphone,
     },
   ];
 

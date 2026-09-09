@@ -27,6 +27,10 @@ import {
   STATUS_LABEL,
   FINANCIAL_DOC_KIND_LABEL,
 } from "./constants";
+import {
+  campaignReportPreviewHeader,
+  selectedCampaignReportIdentity,
+} from "@/lib/admin-campaign-report-identity";
 
 const CampaignReportPreview = dynamic(() => import("@/components/campaign-report-preview"), { ssr: false });
 
@@ -731,6 +735,14 @@ export default function AdminCampaignsPage() {
     if (selectedId) await loadDetail(selectedId);
   };
 
+  const selectedCampaign = selectedCampaignReportIdentity(list, selectedId);
+  const reportPreviewHeader = selectedCampaign
+    ? campaignReportPreviewHeader(
+        selectedCampaign,
+        STATUS_LABEL[selectedCampaign.status],
+      )
+    : null;
+
   return (
     <div className="space-y-6">
       <div>
@@ -1095,7 +1107,7 @@ export default function AdminCampaignsPage() {
                     (CURSOR_RULES) AI 자동 생성 경로는 비노출 */}
                 <div className="space-y-2 border-2 border-bx-black bg-bx-white p-3">
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-                    [ REPORT ACTIONS ]
+                    광고 진행 후 성과보고서
                   </p>
                   <div className="flex flex-wrap gap-0">
                     <button
@@ -1130,20 +1142,11 @@ export default function AdminCampaignsPage() {
                   </p>
                 </div>
 
-                {showReportPreview && selectedId && (
+                {showReportPreview && selectedId && reportPreviewHeader && (
                   <div className="mt-4">
                     <CampaignReportPreview
                       data={{
-                        campaignName: form.name,
-                        clientCompany: form.clientCompany ?? "",
-                        clientName: form.clientName,
-                        clientEmail: form.clientEmail,
-                        status: list.find(c => c.id === selectedId)?.status ?? "진행중",
-                        notes: list.find(c => c.id === selectedId)?.notes ?? null,
-                        startDate: list.find(c => c.id === selectedId)?.startDate ?? null,
-                        endDate: list.find(c => c.id === selectedId)?.endDate ?? null,
-                        budgetMin: list.find(c => c.id === selectedId)?.budgetMin ?? null,
-                        budgetMax: list.find(c => c.id === selectedId)?.budgetMax ?? null,
+                        ...reportPreviewHeader,
                         scheduleEvents: events?.map((e: { title: string; startsAt: string; endsAt: string; kind: string }) => ({
                           title: e.title,
                           startsAt: e.startsAt,
