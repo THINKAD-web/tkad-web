@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useTranslations, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef, useLayoutEffect } from "react";
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
@@ -69,6 +69,9 @@ import {
   filterRecommendCandidateCatalog,
   type RecommendMatchMeta,
 } from "@/lib/recommend/recommend-region-filter";
+import type { RecommendOnlineStatus } from "@/lib/recommend/build-mixed-recommend-result";
+import type { AllocationPolicyResult } from "@/lib/integrated/allocation-policy";
+import type { OnlineCatalogRecommendResult } from "@/lib/planner/recommend-online-catalog";
 import {
   aiInputToMatching,
   displayContextFromAiInput,
@@ -81,7 +84,16 @@ import {
   readRecommendSessionSnapshot,
   serializeScoredList,
   writeRecommendSessionSnapshot,
+  type RecommendSessionSnapshot,
 } from "@/lib/recommend/recommend-session-persist";
+import {
+  recommendResumeMediaCount,
+  shouldPromptRecommendResumeSession,
+} from "@/lib/recommend/recommend-session-logic";
+import { resetRecommendSessionState } from "@/lib/recommend/recommend-session-reset";
+import { resetAllPlannerReportCopyFields } from "@/lib/planner/reset-planner-session";
+import { getPlanCart } from "@/lib/plan-cart";
+import { BriefResumeDialog } from "@/components/planner/brief/brief-session-dialogs";
 import { readStoredRecommendChannelType } from "@/lib/recommend/channel-type";
 import {
   buildIntegratedRecommendPlanTransfer,
@@ -134,7 +146,11 @@ export default function RecommendPageClient({
   const modeFromUrl = searchParams.get("mode");
   const modeAiFromUrl = modeFromUrl === "ai";
   const sessionRestoredRef = useRef(false);
+  const resumePromptedRef = useRef(false);
+  const pendingSessionRef = useRef<RecommendSessionSnapshot | null>(null);
   const modeAiApplied = useRef(false);
+  const [resumeOpen, setResumeOpen] = useState(false);
+  const [resumeMediaCount, setResumeMediaCount] = useState(0);
 
   const [similarBanner, setSimilarBanner] = useState<string | null>(null);
 
@@ -152,6 +168,13 @@ export default function RecommendPageClient({
   const [recommendPriceOptionIndex, setRecommendPriceOptionIndex] =
     useState<CampaignMediaPriceOptionIndex>({});
   const [regionMeta, setRegionMeta] = useState<RecommendMatchMeta | null>(null);
+  const [onlineResult, setOnlineResult] =
+    useState<OnlineCatalogRecommendResult | null>(null);
+  const [onlineStatus, setOnlineStatus] =
+    useState<RecommendOnlineStatus | null>(null);
+  const [allocation, setAllocation] = useState<AllocationPolicyResult | null>(
+    null,
+  );
   const [mediaBrowseOpen, setMediaBrowseOpen] = useState(false);
 
   const router = useRouter();
@@ -531,25 +554,75 @@ export default function RecommendPageClient({
     Boolean(similarCampaignId) ||
     Boolean(searchParams.get("createQuote"));
 
-  useEffect(() => {
+  const applySessionSnapshot = useCallback(
+    (snap: RecommendSessionSnapshot) => {
+      const scored = hydrateScoredList(snap.scored, catalog);
+      if (scored.length === 0 && snap.phase !== "noResults") return false;
+
+      setInputMode(snap.inputMode);
+      setLastPayload(snap.lastPayload);
+      setFullList(scored.length > 0 ? scored : null);
+      setAnalysisSeed(snap.analysisSeed);
+      setRecommendQuantities(snap.recommendQuantities);
+      setRecommendPriceOptionIndex(snap.recommendPriceOptionIndex);
+      setPhase(snap.phase);
+      return true;
+    },
+    [catalog],
+  );
+
+  useLayoutEffect(() => {
     if (catalog.length === 0 || sessionRestoredRef.current) return;
     sessionRestoredRef.current = true;
     if (skipSessionRestore) return;
 
     const snap = readRecommendSessionSnapshot();
-    if (!snap) return;
+    const planCartCount = getPlanCart().items.length;
+    const shouldOpen = shouldPromptRecommendResumeSession({
+      alreadyPrompted: resumePromptedRef.current,
+      skipSessionRestore: false,
+      sessionSnapshot: snap,
+      planCartCount,
+    });
 
-    const scored = hydrateScoredList(snap.scored, catalog);
-    if (scored.length === 0 && snap.phase !== "noResults") return;
+    if (shouldOpen) {
+      resumePromptedRef.current = true;
+      pendingSessionRef.current = snap;
+      setResumeMediaCount(
+        recommendResumeMediaCount({ planCartCount, sessionSnapshot: snap }),
+      );
+      setResumeOpen(true);
+      return;
+    }
 
-    setInputMode(snap.inputMode);
-    setLastPayload(snap.lastPayload);
-    setFullList(scored.length > 0 ? scored : null);
-    setAnalysisSeed(snap.analysisSeed);
-    setRecommendQuantities(snap.recommendQuantities);
-    setRecommendPriceOptionIndex(snap.recommendPriceOptionIndex);
-    setPhase(snap.phase);
-  }, [catalog, skipSessionRestore]);
+    if (planCartCount === 0 && !snap) {
+      resetAllPlannerReportCopyFields();
+    }
+
+    if (snap) {
+      applySessionSnapshot(snap);
+    }
+  }, [catalog, skipSessionRestore, applySessionSnapshot]);
+
+  const handleRecommendResumeContinue = useCallback(() => {
+    const snap = pendingSessionRef.current ?? readRecommendSessionSnapshot();
+    if (snap) applySessionSnapshot(snap);
+    pendingSessionRef.current = null;
+    setResumeOpen(false);
+  }, [applySessionSnapshot]);
+
+  const handleRecommendResumeFreshStart = useCallback(() => {
+    resetRecommendSessionState();
+    pendingSessionRef.current = null;
+    setPhase("form");
+    setFullList(null);
+    setLastPayload(null);
+    setAnalysisSeed(0);
+    setRecommendQuantities({});
+    setRecommendPriceOptionIndex({});
+    setRegionMeta(null);
+    setResumeOpen(false);
+  }, []);
 
   useEffect(() => {
     if (!lastPayload) return;
@@ -602,6 +675,9 @@ export default function RecommendPageClient({
       clearRecommendSessionSnapshot();
       setPhase("loading");
       setRegionMeta(null);
+      setOnlineResult(null);
+      setOnlineStatus(null);
+      setAllocation(null);
       // v1 AI 자유입력: 네트워크 매체 제외(서버 후보 + 클라 폴백 모두 일관 적용)
       const effectiveCatalog = filterRecommendCandidateCatalog(
         catalog,
@@ -632,6 +708,9 @@ export default function RecommendPageClient({
           }>;
           logId?: string;
           regionMeta?: RecommendMatchMeta;
+          online?: OnlineCatalogRecommendResult | null;
+          onlineStatus?: RecommendOnlineStatus;
+          allocation?: AllocationPolicyResult;
         };
 
         if (data.ok && data.items?.length) {
@@ -656,12 +735,18 @@ export default function RecommendPageClient({
           }
           setRecommendLogId(data.logId ?? null);
           setRegionMeta(data.regionMeta ?? null);
+          setOnlineResult(data.online ?? null);
+          setOnlineStatus(data.onlineStatus ?? null);
+          setAllocation(data.allocation ?? null);
           setFullList(scored);
           setPhase(scored.length > 0 ? "dashboard" : "noResults");
           return;
         }
 
         /** API 실패 시 클라이언트 폴백 — recommend 지역 필터·보완 정책 동일 적용 */
+        setOnlineResult(null);
+        setOnlineStatus(null);
+        setAllocation(null);
         const matchingInput = aiInputToMatching(payload.input, seed);
         const { recommendations, meta } = runRecommendMatchFromCatalog(
           effectiveCatalog,
@@ -1098,6 +1183,9 @@ export default function RecommendPageClient({
                 clearRecommendSessionSnapshot();
                 setPhase("form");
                 setFullList(null);
+                setOnlineResult(null);
+                setOnlineStatus(null);
+                setAllocation(null);
               }}
               onViewFullList={() => setPhase("list")}
               onRemix={handleRemix}
@@ -1110,6 +1198,9 @@ export default function RecommendPageClient({
               recommendQuantities={effectiveQuantities}
               recommendPriceOptionIndex={effectivePriceOptionIndex}
               regionMeta={regionMeta}
+              online={onlineResult}
+              onlineStatus={onlineStatus}
+              allocation={allocation}
               onOpenMediaBrowse={() => setMediaBrowseOpen(true)}
             />
           )}
@@ -1270,6 +1361,14 @@ export default function RecommendPageClient({
       />
 
       {planCartPickedItems.length > 0 && <div className="h-24" />}
+
+      <BriefResumeDialog
+        open={resumeOpen}
+        mixCount={resumeMediaCount}
+        isKo={isKo}
+        onContinue={handleRecommendResumeContinue}
+        onFreshStart={handleRecommendResumeFreshStart}
+      />
       </div>
     </PlanningPageShell>
   );
