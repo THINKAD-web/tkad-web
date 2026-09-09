@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { issueCampaignCompletionReport } from "@/lib/campaign-completion-report-issue";
+import { parsePlannerReportStyle } from "@/lib/planner-report-export/document-theme";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -18,11 +19,14 @@ export async function POST(request: NextRequest, { params }: Params) {
   const { id } = await params;
 
   let force = false;
+  let style = parsePlannerReportStyle(undefined);
   try {
     const body = (await request.json().catch(() => ({}))) as {
       force?: boolean;
+      style?: string;
     };
     force = body.force === true;
+    style = parsePlannerReportStyle(body.style);
   } catch {
     /* empty body ok */
   }
@@ -32,6 +36,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       sendEmail: true,
       markCompleted: true,
       force,
+      style,
     });
 
     if (result.reason === "not_found") {

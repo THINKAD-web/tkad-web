@@ -9,7 +9,22 @@ import {
 test("completion-report href matches campaigns 3-button", () => {
   assert.equal(
     campaignCompletionReportHref("abc"),
-    "/api/admin/campaigns/abc/completion-report",
+    "/api/admin/campaigns/abc/completion-report?style=brand",
+  );
+});
+
+test("completion-report href forwards hub style", () => {
+  assert.equal(
+    campaignCompletionReportHref("abc", "minimal"),
+    "/api/admin/campaigns/abc/completion-report?style=minimal",
+  );
+  assert.equal(
+    campaignCompletionReportHref("abc", "corporate"),
+    "/api/admin/campaigns/abc/completion-report?style=corporate",
+  );
+  assert.equal(
+    campaignCompletionReportHref("abc", "nope"),
+    "/api/admin/campaigns/abc/completion-report?style=brand",
   );
 });
 

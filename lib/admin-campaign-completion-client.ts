@@ -8,9 +8,17 @@ import {
   type CampaignReportIdentitySource,
 } from "@/lib/admin-campaign-report-identity";
 import type { CampaignReportData } from "@/components/campaign-report-preview";
+import {
+  parsePlannerReportStyle,
+  type PlannerReportStyle,
+} from "@/lib/planner-report-export/document-theme";
 
-export function campaignCompletionReportHref(campaignId: string): string {
-  return `/api/admin/campaigns/${campaignId}/completion-report`;
+export function campaignCompletionReportHref(
+  campaignId: string,
+  style?: PlannerReportStyle | string | null,
+): string {
+  const parsed = parsePlannerReportStyle(style);
+  return `/api/admin/campaigns/${campaignId}/completion-report?style=${parsed}`;
 }
 
 export type GenerateCampaignReportResult = {
@@ -24,6 +32,7 @@ export type GenerateCampaignReportResult = {
 
 export async function postGenerateCampaignCompletionReport(
   campaignId: string,
+  style?: PlannerReportStyle | string | null,
 ): Promise<GenerateCampaignReportResult> {
   const res = await fetch(
     `/api/admin/campaigns/${campaignId}/generate-report`,
@@ -31,7 +40,10 @@ export async function postGenerateCampaignCompletionReport(
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ force: true }),
+      body: JSON.stringify({
+        force: true,
+        style: parsePlannerReportStyle(style),
+      }),
     },
   );
   const j = (await res.json().catch(() => ({}))) as GenerateCampaignReportResult;

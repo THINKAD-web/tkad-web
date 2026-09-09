@@ -1,5 +1,6 @@
 import { CampaignStatus, type PrismaClient } from "@prisma/client";
 import { buildCampaignCompletionReportPdfBuffer } from "@/lib/campaign-completion-report";
+import type { PlannerReportStyle } from "@/lib/planner-report-export/document-theme";
 import {
   isEmailConfigured,
   sendEmailWithPdfAttachment,
@@ -18,6 +19,8 @@ export type IssueCampaignCompletionReportOpts = {
    */
   force?: boolean;
   db?: PrismaClient;
+  /** document-theme style for the issued PDF (default brand) */
+  style?: PlannerReportStyle | string | null;
 };
 
 export type IssueCampaignCompletionReportResult = {
@@ -93,7 +96,10 @@ export async function issueCampaignCompletionReport(
     };
   }
 
-  const buf = await buildCampaignCompletionReportPdfBuffer(campaignId);
+  const buf = await buildCampaignCompletionReportPdfBuffer(
+    campaignId,
+    opts?.style,
+  );
   const filename = buildClientReportFilename(campaign.clientCompany);
   const pdfBase64 = buf.toString("base64");
   const now = new Date();

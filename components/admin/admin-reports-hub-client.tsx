@@ -216,6 +216,7 @@ export default function AdminReportsHubClient() {
           isKo={isKo}
           locale={locale}
           step={step}
+          style={style}
           includeImages={includeImages}
           initialCampaignId={campaignFromUrl}
           onReadyForPreview={() => goStep(3)}
@@ -261,7 +262,7 @@ function CommonOptions({
   includeImages: boolean;
   onImages: (v: boolean) => void;
 }) {
-  const styleApplies = type === "proposal";
+  const styleApplies = type === "proposal" || type === "campaign";
   return (
     <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
       <p className="mb-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
@@ -272,8 +273,8 @@ function CommonOptions({
       ) : (
         <p className="text-xs text-muted-foreground">
           {isKo
-            ? "스타일(minimal/brand/corporate)은 매체 제안서 PDF/PPTX에만 적용됩니다."
-            : "Style applies to media proposal export only."}
+            ? "스타일(minimal/brand/corporate)은 매체 제안서·성과보고서에 적용됩니다."
+            : "Style applies to media proposal and campaign performance reports."}
         </p>
       )}
       <div className="mt-3 flex flex-wrap gap-4 text-sm">
@@ -531,6 +532,7 @@ function CampaignTrack({
   isKo,
   locale,
   step,
+  style,
   includeImages,
   initialCampaignId,
   onReadyForPreview,
@@ -538,6 +540,7 @@ function CampaignTrack({
   isKo: boolean;
   locale: string;
   step: AdminReportHubStep;
+  style: Parameters<typeof ReportStylePicker>[0]["value"];
   includeImages: boolean;
   initialCampaignId: string | null;
   onReadyForPreview: () => void;
@@ -609,7 +612,7 @@ function CampaignTrack({
     setBusy(true);
     setErr(null);
     try {
-      const j = await postGenerateCampaignCompletionReport(selectedId);
+      const j = await postGenerateCampaignCompletionReport(selectedId, style);
       if (!j.ok) {
         setErr(j.error ?? "generate_failed");
         return;
@@ -691,7 +694,7 @@ function CampaignTrack({
                   : "Preview report"}
             </button>
             <a
-              href={campaignCompletionReportHref(selectedId)}
+              href={campaignCompletionReportHref(selectedId, style)}
               className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black hover:bg-bx-black hover:text-bx-white"
               target="_blank"
               rel="noreferrer"
@@ -712,7 +715,9 @@ function CampaignTrack({
           <p className="font-mono text-[10px] tracking-tight text-bx-gray-dim">
             {`// `}미리보기 / 간단 PDF / 생성·발송 — /admin/campaigns 와 동일 API
           </p>
-          {showPreview && preview ? <CampaignReportPreview data={preview} /> : null}
+          {showPreview && preview ? (
+            <CampaignReportPreview data={preview} style={style} />
+          ) : null}
         </section>
       ) : null}
     </div>

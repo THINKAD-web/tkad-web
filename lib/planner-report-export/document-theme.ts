@@ -185,6 +185,74 @@ export function getReportDocumentTheme(
   return THEMES[style] ?? THEMES.brand;
 }
 
+/** Hex tokens for campaign completion preview (structure unchanged — colors only). */
+export type CampaignReportPreviewColors = {
+  accent: string;
+  accentSoft: string;
+  ink: string;
+  coverBg: string;
+  coverText: string;
+  coverMuted: string;
+  paper: string;
+  paperMuted: string;
+  slate: string;
+  onInk: string;
+  onInkMuted: string;
+};
+
+export function campaignReportPreviewColors(
+  style?: PlannerReportStyle | string | null,
+): CampaignReportPreviewColors {
+  const theme = getReportDocumentTheme(parsePlannerReportStyle(style));
+  return {
+    accent: theme.accent,
+    accentSoft: theme.accentSoft,
+    ink: theme.ink,
+    coverBg: theme.coverBg,
+    coverText: theme.coverText,
+    coverMuted: theme.coverMuted,
+    paper: REPORT_BRAND.paper,
+    paperMuted: REPORT_BRAND.paperMuted,
+    slate: REPORT_BRAND.slate,
+    onInk: REPORT_BRAND.paper,
+    onInkMuted: "#CBD5E1",
+  };
+}
+
+export type CampaignReportPdfPalette = {
+  style: PlannerReportStyle;
+  accent: [number, number, number];
+  ink: [number, number, number];
+  coverBg: [number, number, number];
+  coverText: [number, number, number];
+  coverMuted: [number, number, number];
+  accentSoft: [number, number, number];
+  paper: [number, number, number];
+  paperMuted: [number, number, number];
+  slate: [number, number, number];
+};
+
+export function campaignReportPdfPalette(
+  style?: PlannerReportStyle | string | null,
+): CampaignReportPdfPalette {
+  const parsed = parsePlannerReportStyle(style);
+  const theme = getReportDocumentTheme(parsed);
+  const paperMuted = hexToRgb(REPORT_BRAND.paperMuted);
+  const slate = hexToRgb(REPORT_BRAND.slate);
+  return {
+    style: parsed,
+    accent: [...theme.pdf.accentRgb] as [number, number, number],
+    ink: [...theme.pdf.inkRgb] as [number, number, number],
+    coverBg: [...theme.pdf.coverBgRgb] as [number, number, number],
+    coverText: [...theme.pdf.coverTextRgb] as [number, number, number],
+    coverMuted: [...theme.pdf.coverMutedRgb] as [number, number, number],
+    accentSoft: [...theme.pdf.accentSoftRgb] as [number, number, number],
+    paper: [255, 255, 255],
+    paperMuted: [...paperMuted] as [number, number, number],
+    slate: [...slate] as [number, number, number],
+  };
+}
+
 export const REPORT_STYLE_LABELS: Record<
   PlannerReportStyle,
   { ko: string; en: string; descKo: string; descEn: string }
