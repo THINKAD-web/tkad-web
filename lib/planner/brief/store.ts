@@ -50,6 +50,10 @@ import {
   type DigitalChannelId,
 } from "@/lib/planner/recommend-digital";
 import { DIGITAL_PLATFORM_IDS } from "@/lib/planner/digital-platform-map";
+import {
+  normalizeMixPriceOptionIndex,
+  pruneMixPriceOptionIndex,
+} from "@/lib/planner/brief/mix-price-option";
 
 export const BRIEF_STORAGE_KEY = "tkad-planner-brief-v1";
 
@@ -97,6 +101,8 @@ export type BriefStoreState = CampaignBriefInput & {
   digitalChannelIds: DigitalChannelId[];
   /** 선택한 매체 → 구매 수량 (Step 2 믹스). 0 이하면 제거된 것으로 본다 */
   mixUnits: Record<string, number>;
+  /** 사용자가 고른 priceOptions 인덱스. 없으면 비행 일수 추천 옵션. */
+  mixPriceOptionIndex: Record<string, number>;
   /** 카탈로그 외 수동 mix 라인 (Step 2) */
   customLines: BriefCustomLine[];
   /** mixUnits 가 마지막으로 확정·담긴 시점의 브리프 지문 (L-1) */
@@ -142,6 +148,7 @@ export type BriefStoreActions = {
   addMediaToMix: (mediaId: string, units?: number) => void;
   removeMediaFromMix: (mediaId: string) => void;
   setMixUnits: (mediaId: string, units: number) => void;
+  setMixPriceOptionIndex: (mediaId: string, index: number) => void;
   replaceMix: (lines: readonly { mediaId: string; units: number }[]) => void;
   /** 딥링크 인계 — 기존 믹스에 매체를 더한다 (브리프 입력은 건드리지 않는다) */
   addMixLines: (lines: readonly { mediaId: string; units: number }[]) => void;
@@ -191,6 +198,7 @@ const INITIAL: BriefStoreState = {
   digitalBudgetPct: 30,
   digitalChannelIds: defaultDigitalChannelIds(),
   mixUnits: {},
+  mixPriceOptionIndex: {},
   customLines: [],
   mixBriefFingerprint: null,
   budgetWithinOnly: true,
@@ -334,9 +342,14 @@ export const useBriefStore = create<BriefStore>()(
         set((s) => {
           const next = { ...s.mixUnits };
           delete next[mediaId];
-          const state = { ...s, mixUnits: next };
+          const mixPriceOptionIndex = pruneMixPriceOptionIndex(
+            s.mixPriceOptionIndex,
+            next,
+          );
+          const state = { ...s, mixUnits: next, mixPriceOptionIndex };
           return {
             mixUnits: next,
+            mixPriceOptionIndex,
             ...clearOverBudgetUiState(),
             ...stampMixFingerprint(state),
           };
@@ -351,13 +364,31 @@ export const useBriefStore = create<BriefStore>()(
           } else {
             next[mediaId] = n;
           }
-          const state = { ...s, mixUnits: next };
+          const mixPriceOptionIndex = pruneMixPriceOptionIndex(
+            s.mixPriceOptionIndex,
+            next,
+          );
+          const state = { ...s, mixUnits: next, mixPriceOptionIndex };
           return {
             mixUnits: next,
+            mixPriceOptionIndex,
             ...clearOverBudgetUiState(),
             ...(countMixUnits(next) === 0 || countMixUnits(s.mixUnits) === 0
               ? stampMixFingerprint(state)
               : {}),
+          };
+        }),
+
+      setMixPriceOptionIndex: (mediaId, index) =>
+        set((s) => {
+          const n = Math.floor(index);
+          if (!Number.isFinite(n) || n < 0) return {};
+          if ((s.mixUnits[mediaId] ?? 0) <= 0) return {};
+          return {
+            mixPriceOptionIndex: {
+              ...s.mixPriceOptionIndex,
+              [mediaId]: n,
+            },
           };
         }),
 
@@ -368,9 +399,14 @@ export const useBriefStore = create<BriefStore>()(
             const n = Math.floor(l.units);
             if (Number.isFinite(n) && n > 0) mixUnits[l.mediaId] = n;
           }
-          const state = { ...s, mixUnits };
+          const mixPriceOptionIndex = pruneMixPriceOptionIndex(
+            s.mixPriceOptionIndex,
+            mixUnits,
+          );
+          const state = { ...s, mixUnits, mixPriceOptionIndex };
           return {
             mixUnits,
+            mixPriceOptionIndex,
             ...clearOverBudgetUiState(),
             ...stampMixFingerprint(state),
           };
@@ -396,13 +432,24 @@ export const useBriefStore = create<BriefStore>()(
             const n = Math.floor(l.units);
             if (Number.isFinite(n) && n > 0) mixUnits[l.mediaId] = n;
           }
-          const state = { ...s, ...brief, mixUnits };
-          return { ...brief, mixUnits, ...stampMixFingerprint(state) };
+          const mixPriceOptionIndex: Record<string, number> = {};
+          const state = { ...s, ...brief, mixUnits, mixPriceOptionIndex };
+          return {
+            ...brief,
+            mixUnits,
+            mixPriceOptionIndex,
+            ...stampMixFingerprint(state),
+          };
         });
       },
 
       clearMix: () =>
-        set({ mixUnits: {}, customLines: [], mixBriefFingerprint: null }),
+        set({
+          mixUnits: {},
+          mixPriceOptionIndex: {},
+          customLines: [],
+          mixBriefFingerprint: null,
+        }),
 
       addCustomLine: (partial) =>
         set((s) => ({
@@ -453,9 +500,14 @@ export const useBriefStore = create<BriefStore>()(
           }
           const undo =
             countMixUnits(s.mixUnits) > 0 ? { ...s.mixUnits } : null;
-          const state = { ...s, mixUnits };
+          const mixPriceOptionIndex = pruneMixPriceOptionIndex(
+            s.mixPriceOptionIndex,
+            mixUnits,
+          );
+          const state = { ...s, mixUnits, mixPriceOptionIndex };
           return {
             mixUnits,
+            mixPriceOptionIndex,
             mixUndoBeforeOptionA: undo,
             overBudgetChoiceDismissed: false,
             ...stampMixFingerprint(state),
@@ -540,6 +592,7 @@ export const useBriefStore = create<BriefStore>()(
         digitalBudgetPct: s.digitalBudgetPct,
         digitalChannelIds: s.digitalChannelIds,
         mixUnits: s.mixUnits,
+        mixPriceOptionIndex: s.mixPriceOptionIndex,
         customLines: s.customLines,
         mixBriefFingerprint: s.mixBriefFingerprint,
         budgetWithinOnly: s.budgetWithinOnly,
@@ -566,6 +619,10 @@ export const useBriefStore = create<BriefStore>()(
                 : current.digitalBudgetPct,
           digitalChannelIds: normalizeDigitalChannelIds(p.digitalChannelIds),
           mixUnits: normalizeMixUnits(p.mixUnits),
+          mixPriceOptionIndex: pruneMixPriceOptionIndex(
+            normalizeMixPriceOptionIndex(p.mixPriceOptionIndex),
+            normalizeMixUnits(p.mixUnits),
+          ),
           customLines: normalizeBriefCustomLines(p.customLines),
           mixBriefFingerprint:
             typeof p.mixBriefFingerprint === "string"

@@ -8,6 +8,7 @@ import {
 } from "@/lib/planner/brief/build-plan-snapshot";
 import { normalizeBriefCustomLines } from "@/lib/planner/brief/custom-lines";
 import { normalizeBriefInput } from "@/lib/planner/brief/types";
+import { normalizeMixPriceOptionIndex } from "@/lib/planner/brief/mix-price-option";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
 import { parsePlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
 import { recommendOnlineCatalogFromBrief } from "@/lib/planner/brief/online-catalog-adapter";
@@ -20,6 +21,7 @@ const SaveBodySchema = z.object({
   /** digital_only 저장 요청 — 있으면 mixUnits 대신 브리프에서 온라인 채널을 재계산해 저장 */
   channelMode: z.enum(["ooh_only", "ooh_digital", "digital_only"]).optional(),
   mixUnits: z.record(z.string(), z.number()).optional(),
+  mixPriceOptionIndex: z.record(z.string(), z.number()).optional(),
   customLines: z.array(z.record(z.string(), z.unknown())).optional(),
   reportCopy: z.record(z.string(), z.unknown()).optional(),
   /** PR3 — digital_only 사용자 mix (서버가 budgetPct를 재계산, 비율은 신뢰하지 않음) */
@@ -88,6 +90,9 @@ export async function POST(request: NextRequest) {
       brief,
       catalog,
       mixUnits,
+      mixPriceOptionIndex: normalizeMixPriceOptionIndex(
+        parsed.data.mixPriceOptionIndex,
+      ),
       customLines,
     });
   }

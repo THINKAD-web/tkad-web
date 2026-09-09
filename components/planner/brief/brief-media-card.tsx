@@ -11,6 +11,8 @@
 import type { ScoredMedia } from "@/lib/planner/brief/scoring";
 import { Button } from "@/components/ui/button";
 import { PlannerMediaThumb } from "@/components/planner/planner-media-thumb";
+import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
+import { shouldShowPlannerQuantityControl } from "@/lib/planner/planner-media-quantity";
 
 const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
   target: { ko: "타깃 적합", en: "Target fit" },
@@ -27,6 +29,8 @@ export function BriefMediaCard({
   onAdd,
   onRemove,
   onUnits,
+  priceOptionIndex,
+  onPriceOptionChange,
   rank,
   testIdPrefix,
 }: {
@@ -37,6 +41,8 @@ export function BriefMediaCard({
   onAdd: () => void;
   onRemove: () => void;
   onUnits: (n: number) => void;
+  priceOptionIndex?: number;
+  onPriceOptionChange?: (index: number) => void;
   /** 빠른 추천 랭킹 배지 — Step 2 믹스 편집에는 없다 */
   rank?: number;
   /** E2E 테스트 훅 접두사 (예: "brief-quick-rank") */
@@ -45,6 +51,7 @@ export function BriefMediaCard({
   const { media, axes, total } = scored;
   const selected = units > 0;
   const mediaName = isKo ? media.name : media.nameEn || media.name;
+  const showPackageControl = shouldShowPlannerQuantityControl(media);
   const testId = (suffix: string) =>
     testIdPrefix ? `${testIdPrefix}-${suffix}` : undefined;
 
@@ -109,29 +116,41 @@ export function BriefMediaCard({
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
         {selected ? (
           <>
-            <div className="flex items-center gap-1">
-              <Button
-                type="button"
-                size="icon-sm"
-                variant="outline"
-                onClick={() => onUnits(units - 1)}
-                aria-label={isKo ? "수량 감소" : "Decrease"}
-              >
-                −
-              </Button>
-              <span className="w-8 text-center text-sm tabular-nums">
-                {units}
-              </span>
-              <Button
-                type="button"
-                size="icon-sm"
-                variant="outline"
-                onClick={() => onUnits(units + 1)}
-                aria-label={isKo ? "수량 증가" : "Increase"}
-              >
-                +
-              </Button>
-            </div>
+            {showPackageControl ? (
+              <PlannerMediaQuantityControl
+                media={media}
+                isKo={isKo}
+                quantities={{ [media.id]: units }}
+                priceOptionIndex={{ [media.id]: priceOptionIndex ?? 0 }}
+                onQuantityChange={onUnits}
+                onPriceOptionChange={(index) => onPriceOptionChange?.(index)}
+                compact
+              />
+            ) : (
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="outline"
+                  onClick={() => onUnits(units - 1)}
+                  aria-label={isKo ? "수량 감소" : "Decrease"}
+                >
+                  −
+                </Button>
+                <span className="w-8 text-center text-sm tabular-nums">
+                  {units}
+                </span>
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="outline"
+                  onClick={() => onUnits(units + 1)}
+                  aria-label={isKo ? "수량 증가" : "Increase"}
+                >
+                  +
+                </Button>
+              </div>
+            )}
             <Button
               type="button"
               size="xs"

@@ -38,6 +38,7 @@ import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import { BriefDigitalPanel } from "@/components/planner/brief/brief-digital-panel";
 import { BriefMediaCard } from "@/components/planner/brief/brief-media-card";
+import { effectiveMixPriceOptionIndex } from "@/lib/planner/brief/mix-price-option";
 import { isPublicQuoteWizardSelectableMedia } from "@/lib/pricing-unavailable";
 import { BriefCustomLineCard } from "@/components/planner/brief/brief-custom-line-card";
 import { BriefCustomLineForm } from "@/components/planner/brief/brief-custom-line-form";
@@ -127,10 +128,17 @@ function BriefStepTwoOohFlow({
     const out: MixLine[] = [];
     for (const [mediaId, units] of Object.entries(store.mixUnits)) {
       const media = catalog.find((m) => m.id === mediaId);
-      if (media && units > 0) out.push({ media, units });
+      if (media && units > 0) {
+        const stored = store.mixPriceOptionIndex[mediaId];
+        out.push({
+          media,
+          units,
+          ...(stored != null ? { priceOptionIndex: stored } : {}),
+        });
+      }
     }
     return out;
-  }, [catalog, store.mixUnits]);
+  }, [catalog, store.mixUnits, store.mixPriceOptionIndex]);
 
   const catalogMetrics = useMemo(
     () =>
@@ -275,6 +283,14 @@ function BriefStepTwoOohFlow({
               onAdd={() => store.addMediaToMix(s.media.id, 1)}
               onRemove={() => store.removeMediaFromMix(s.media.id)}
               onUnits={(n) => store.setMixUnits(s.media.id, n)}
+              priceOptionIndex={effectiveMixPriceOptionIndex(
+                s.media,
+                days,
+                store.mixPriceOptionIndex[s.media.id],
+              )}
+              onPriceOptionChange={(index) =>
+                store.setMixPriceOptionIndex(s.media.id, index)
+              }
               testIdPrefix="brief-mix-card"
             />
           ))}

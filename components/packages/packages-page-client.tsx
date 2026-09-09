@@ -6,8 +6,7 @@ import type { PublicMediaPackage } from "@/lib/media-package-types";
 import type { MediaLandingPreview } from "@/lib/media-landing-previews";
 import { PackageGridCard } from "@/components/packages/package-grid-card";
 import { PageHero } from "@/components/layout/page-hero";
-import { SubTabs } from "@/components/layout/sub-tabs";
-import { PLANNING_TABS } from "@/lib/navigation/sub-page-tabs";
+import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
 import { BtnBlock } from "@/components/brutalist";
 
 type Props = {
@@ -35,7 +34,7 @@ export function PackagesPageClient({
             : `Curated packs from ${verifiedCountLabel} verified placements — see live match counts, then open a pack.`
         }
       />
-      <SubTabs tabs={PLANNING_TABS} currentPath="/media/packages" />
+      <SubTabsBar group="planning" currentPath="/media/packages" />
 
       <section className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <div className="flex flex-col gap-3 border border-border/70 bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-4 dark:bg-white/[0.03]">

@@ -24,6 +24,7 @@ import {
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import { isPublicQuoteWizardSelectableMedia } from "@/lib/pricing-unavailable";
 import { BriefMediaCard } from "@/components/planner/brief/brief-media-card";
+import { effectiveMixPriceOptionIndex } from "@/lib/planner/brief/mix-price-option";
 import { partitionScoredByBudget } from "@/lib/planner/brief/budget-ranking";
 import { BudgetFilterBar } from "@/components/planner/brief/budget-filter-bar";
 import { totalBudgetWon } from "@/lib/planner/brief/types";
@@ -123,6 +124,14 @@ export function BriefQuickRankPanel({
             onAdd={() => store.addMediaToMix(s.media.id, 1)}
             onRemove={() => store.removeMediaFromMix(s.media.id)}
             onUnits={(n) => store.setMixUnits(s.media.id, n)}
+            priceOptionIndex={effectiveMixPriceOptionIndex(
+              s.media,
+              QUICK_DAYS,
+              store.mixPriceOptionIndex[s.media.id],
+            )}
+            onPriceOptionChange={(index) =>
+              store.setMixPriceOptionIndex(s.media.id, index)
+            }
             testIdPrefix="brief-quick-rank"
           />
         ))}

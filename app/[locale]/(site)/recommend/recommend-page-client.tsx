@@ -8,10 +8,7 @@ import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { useAuthSession } from "@/components/auth/auth-session-provider";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { PageHero } from "@/components/layout/page-hero";
-import { SubTabs } from "@/components/layout/sub-tabs";
-import { PLANNING_TABS } from "@/lib/navigation/sub-page-tabs";
+import { PlanningPageShell } from "@/components/layout/planning-page-shell";
 import MediaAiRecommendForm, {
   type MediaAiRecommendFormSubmit,
 } from "@/components/media-ai-recommend-form";
@@ -914,22 +911,29 @@ export default function RecommendPageClient({
   }
 
   return (
-    <HomeLandingDayNight>
-      <div className="recommend-accent-option-a tkad-landing-neon tkad-planner-neon min-w-0 overflow-x-auto" data-accent-scope="option-a-recommend">
-        <PageHero
-          eyebrow={isKo ? "// AI 플래너" : "// AI Planner"}
-          title={isKo ? "쉽고 빠르게 " : "AI recommends "}
-          highlight={isKo ? "AI가 매체를 추천" : "media quickly"}
-          description={
-            isKo
-              ? "쉽고 빠르게 AI가 매체를 추천합니다. 믹스를 다듬고 제안서까지 만들려면 「상세 플래너」로 이어가세요."
-              : "AI recommends media quickly and easily. Use Detailed planner when you want a finished mix and deck."
-          }
-        />
-        <SubTabs tabs={PLANNING_TABS} currentPath="/recommend" />
-
-        <section className="tkad-media-browse-main border-t border-border/60 bg-card py-16 sm:py-20">
-          <div className="ui-container">
+    <PlanningPageShell
+      currentPath="/recommend"
+      header={
+        <header className="mx-auto mb-8 max-w-3xl border-b border-border pb-6 text-center">
+          <p className="tkad-type-label text-primary">
+            {isKo ? "AI 플래너" : "AI Planner"}
+          </p>
+          <h1 className="tkad-type-display mt-2">
+            {isKo
+              ? "쉽고 빠르게 AI가 매체를 추천합니다"
+              : "AI recommends media quickly and easily"}
+          </h1>
+          <p className="tkad-type-body mt-3 text-muted-foreground">
+            {isKo
+              ? "믹스를 다듬고 제안서까지 만들려면 「상세 플래너」로 이어가세요."
+              : "Use Detailed planner when you want a finished mix and deck."}
+          </p>
+        </header>
+      }
+    >
+      <div className="recommend-accent-option-a tkad-landing-neon tkad-planner-neon min-w-0" data-accent-scope="option-a-recommend">
+        <section className="tkad-media-browse-main">
+          <div>
           {similarBanner ? (
             <p className="mb-6 rounded-2xl border border-[#22d3ee]/30 bg-[#22d3ee]/10 px-4 py-3 text-center text-sm font-semibold text-[#0e7490] dark:text-[#22d3ee]">
               {similarBanner}
@@ -1267,7 +1271,7 @@ export default function RecommendPageClient({
 
       {planCartPickedItems.length > 0 && <div className="h-24" />}
       </div>
-    </HomeLandingDayNight>
+    </PlanningPageShell>
   );
 }
 

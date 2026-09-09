@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildPlannerBriefPath,
+  buildRecommendAiBriefPath,
   buildRecommendAiModePath,
   buildRecommendBriefPath,
   decodeBriefFromPlannerQuery,
@@ -28,6 +29,11 @@ test("buildRecommendBriefPath", () => {
 
 test("buildRecommendAiModePath", () => {
   assert.equal(buildRecommendAiModePath(), "/recommend?mode=ai");
+});
+
+test("buildRecommendAiBriefPath includes mode and brief", () => {
+  const path = buildRecommendAiBriefPath("강남역 한 달 3천만원");
+  assert.ok(path.startsWith("/recommend?mode=ai&brief="));
 });
 
 test("rejects too short brief", () => {
