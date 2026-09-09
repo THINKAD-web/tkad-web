@@ -1,8 +1,11 @@
+import type { CampaignBuilderDocumentType } from "@/lib/admin-campaign-builder/schemas";
+import { campaignBuilderCopy } from "@/lib/admin-campaign-builder/copy-ko";
 import type { PlannerReportComposition } from "@/lib/planner-report-export/types";
 
 type CoverSubtitleInput = {
-  kind?: "ooh" | "integrated";
+  kind?: "ooh" | "integrated" | "builder";
   reportComposition?: PlannerReportComposition;
+  builderDocumentType?: CampaignBuilderDocumentType;
 };
 
 /** HTML 미리보기 표지 부제 (날짜는 호출측에서 ` · ${generatedAt}` 붙임) */
@@ -10,6 +13,10 @@ export function reportCoverSubtitle(
   isKo: boolean,
   input: CoverSubtitleInput,
 ): string {
+  if (input.kind === "builder" && input.builderDocumentType) {
+    const copy = campaignBuilderCopy[input.builderDocumentType];
+    return isKo ? copy.coverSubtitle : copy.documentLabel;
+  }
   if (input.kind === "integrated") {
     return isKo ? "OOH + 디지털 통합 제안" : "OOH + Digital integrated";
   }
@@ -28,6 +35,12 @@ export function reportExportCoverSubtitle(
   isKo: boolean,
   input: CoverSubtitleInput,
 ): string {
+  if (input.kind === "builder" && input.builderDocumentType) {
+    const copy = campaignBuilderCopy[input.builderDocumentType];
+    return isKo
+      ? `${copy.documentLabel} · ${copy.coverSubtitle}`
+      : copy.documentLabel;
+  }
   if (input.kind === "integrated") {
     return isKo
       ? "OOH + 디지털 통합 캠페인 제안서"

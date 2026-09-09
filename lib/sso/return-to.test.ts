@@ -9,6 +9,10 @@ import { ssoSecretsEqual } from "@/lib/sso/shared-secret";
 test("sanitizeSsoReturnTo: relative paths only", () => {
   assert.equal(sanitizeSsoReturnTo("/checkout/basic"), "/checkout/basic");
   assert.equal(sanitizeSsoReturnTo("/contact?tier=pro"), "/contact?tier=pro");
+  assert.equal(
+    sanitizeSsoReturnTo("/admin/reports?type=builder"),
+    "/admin/reports?type=builder",
+  );
   assert.equal(sanitizeSsoReturnTo("https://evil.com/"), "/");
   assert.equal(sanitizeSsoReturnTo("//evil.com"), "/");
   assert.equal(sanitizeSsoReturnTo("/\\evil"), "/");

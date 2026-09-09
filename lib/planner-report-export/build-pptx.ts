@@ -28,7 +28,9 @@ import {
 } from "@/lib/planner-report-export/export-badge";
 import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
 import { onlinePlatformBadgePptxColors } from "@/lib/online/document-platform-badge-export";
+import { campaignBuilderCopy } from "@/lib/admin-campaign-builder/copy-ko";
 import { reportExportCoverSubtitle } from "@/lib/planner-report-export/report-cover-copy";
+import type { PlannerExportOnlineLine } from "@/lib/planner-report-export/types";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
@@ -354,6 +356,179 @@ export async function buildPlannerReportPptx(
       x: W - 5.1, y: 0.3, w: 4.5, h: 0.35, fontFace: face, fontSize: 11,
       color: "E1DCF5", align: "right",
     });
+  }
+
+  if (p.kind === "builder" && p.builderSection) {
+    const bs = p.builderSection;
+    const copy = campaignBuilderCopy[bs.documentType];
+    const fmtWon = (n: number) =>
+      `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
+    const consult = isKo ? "별도 협의" : "Consultation";
+
+    const builderCover = pptx.addSlide();
+    builderCover.background = { color: COVER_BG };
+    const coverTitleColor = theme.coverMode === "filled" ? WHITE : COVER_TEXT;
+    const coverMutedColor = theme.coverMode === "filled" ? "D1D5DB" : COVER_MUTED;
+    builderCover.addText(wordmark(30), { x: 0.7, y: 1.35, w: 6, h: 0.7 });
+    builderCover.addText("CAMPAIGN BUILDER", {
+      x: 0.72, y: 2.05, w: 9, h: 0.4, fontFace: face,
+      fontSize: 12, color: coverMutedColor, charSpacing: 3,
+    });
+    builderCover.addText(p.documentTitle, {
+      x: 0.7, y: 2.7, w: 12, h: 1.4, fontFace: face,
+      fontSize: 38, bold: true, color: coverTitleColor,
+    });
+    builderCover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.0, w: 2.2, h: 0.06, fill: { color: ACCENT } });
+    builderCover.addText(
+      reportExportCoverSubtitle(isKo, {
+        kind: p.kind,
+        builderDocumentType: bs.documentType,
+      }),
+      { x: 0.7, y: 4.25, w: 12, h: 0.5, fontFace: face, fontSize: 17, color: coverMutedColor },
+    );
+    if (p.clientName) {
+      builderCover.addText(`${p.clientName} ${isKo ? "귀중" : ""}`.trim(), {
+        x: 0.7, y: 6.0, w: 12, h: 0.4, fontFace: face, fontSize: 14, color: coverTitleColor,
+      });
+    }
+    builderCover.addText(p.generatedAt, {
+      x: 0.7, y: 6.6, w: 12, h: 0.4, fontFace: face, fontSize: 12, color: coverMutedColor,
+    });
+
+    const addKpiSlide = () => {
+      if (!p.kpis.length) return;
+      const s = pptx.addSlide();
+      header(s, isKo ? "KPI 요약" : "KPI summary");
+      const kpis = p.kpis.slice(0, 4);
+      const cardW = 12 / kpis.length;
+      kpis.forEach((k, i) => {
+        const x = 0.7 + cardW * i;
+        s.addShape(pptx.ShapeType.roundRect, {
+          x, y: 1.35, w: cardW - 0.15, h: 1.1, fill: { color: LIGHT }, rectRadius: 0.04,
+        });
+        s.addText(k.label, {
+          x: x + 0.12, y: 1.45, w: cardW - 0.3, h: 0.25, fontFace: face, fontSize: 11, color: GRAY,
+        });
+        s.addText(k.value, {
+          x: x + 0.12, y: 1.75, w: cardW - 0.3, h: 0.45, fontFace: face, fontSize: 18, bold: true, color: ACCENT,
+        });
+      });
+    };
+
+    const addDigitalSlide = (lines: PlannerExportOnlineLine[]) => {
+      if (!lines.length) return;
+      const s = pptx.addSlide();
+      header(s, copy.sectionTitles.estimateProducts);
+      s.addText(copy.estimateNotice, {
+        x: 0.7, y: 1.15, w: 12, h: 0.6, fontFace: face, fontSize: 11, color: GRAY,
+      });
+      const rows = [
+        [
+          isKo ? "매체" : "Media",
+          isKo ? "플랫폼" : "Platform",
+          isKo ? "과금" : "Pricing",
+          isKo ? "예산" : "Budget",
+          isKo ? "예상 도달" : "Est. reach",
+          isKo ? "예상 클릭" : "Est. clicks",
+        ],
+        ...lines.map((row) => [
+          row.name,
+          row.platform ?? "—",
+          row.pricingLabel,
+          fmtWon(row.budgetWon),
+          row.reachLabel ?? consult,
+          row.clicksLabel ?? consult,
+        ]),
+      ];
+      s.addTable(rows, {
+        x: 0.6, y: 1.85, w: 12.1, h: 4.8,
+        fontFace: face, fontSize: 10, color: INK,
+        border: { type: "solid", color: "E4E6EC", pt: 0.5 },
+        fill: { color: WHITE },
+        colW: [2.2, 1.4, 2.0, 1.6, 2.2, 2.2],
+      });
+    };
+
+    const addMediaRowsSlide = (
+      title: string,
+      rows: PlannerExportMediaRow[],
+      notice?: string,
+    ) => {
+      if (!rows.length) return;
+      const s = pptx.addSlide();
+      header(s, title);
+      let tableY = 1.15;
+      if (notice) {
+        s.addText(notice, {
+          x: 0.7, y: 1.15, w: 12, h: 0.6, fontFace: face, fontSize: 11, color: GRAY,
+        });
+        tableY = 1.85;
+      }
+      const tableRows = [
+        [
+          isKo ? "매체" : "Media",
+          isKo ? "유형/지역" : "Type/Region",
+          isKo ? "예산/가격" : "Budget/Price",
+          isKo ? "비고" : "Notes",
+        ],
+        ...rows.map((row) => [
+          row.name,
+          [row.type, row.region].filter(Boolean).join(" · ") || "—",
+          row.priceLabel ?? "—",
+          row.notes ?? row.metricsUnavailableLabel ?? "—",
+        ]),
+      ];
+      s.addTable(tableRows, {
+        x: 0.6, y: tableY, w: 12.1, h: 4.8,
+        fontFace: face, fontSize: 10, color: INK,
+        border: { type: "solid", color: "E4E6EC", pt: 0.5 },
+        fill: { color: WHITE },
+        colW: [3.5, 2.5, 2.5, 3.6],
+      });
+    };
+
+    addKpiSlide();
+    addDigitalSlide(bs.digitalLines);
+    addMediaRowsSlide(isKo ? "OOH 매체" : "OOH media", bs.oohLines);
+    addMediaRowsSlide(copy.sectionTitles.executionGroup, bs.customLines, copy.executionNotice);
+
+    const budgetSplit = bs.charts.budgetSplit ?? p.charts?.budgetSplit;
+    if (budgetSplit?.length) {
+      const s = pptx.addSlide();
+      header(s, isKo ? "채널 예산 구성" : "Channel budget mix");
+      addBudgetSplitShapes(s, pptx, 0.6, 1.15, 12, budgetSplit, face, isKo);
+    }
+
+    if (bs.insights) {
+      const s = pptx.addSlide();
+      header(s, copy.sectionTitles.insightsGroup);
+      s.addText(copy.insightsHint, {
+        x: 0.7, y: 1.1, w: 12, h: 0.5, fontFace: face, fontSize: 11, color: GRAY,
+      });
+      const bullets = [
+        ...bs.insights.pacingPlan.map(
+          (ph) => `${ph.label} (${ph.sharePct}%) — ${ph.description}`,
+        ),
+        ...bs.insights.creativeDirections,
+        ...bs.insights.operationalNotes,
+      ];
+      s.addText(
+        bullets.map((line) => ({
+          text: line,
+          options: { bullet: { code: "2022" }, color: INK, fontFace: face, fontSize: 13, paraSpaceAfter: 6 },
+        })),
+        { x: 0.7, y: 1.7, w: 12, h: 4.8, valign: "top" },
+      );
+    }
+
+    const last = pptx.addSlide();
+    last.background = { color: WHITE };
+    last.addText(p.disclaimer, {
+      x: 0.8, y: 3.2, w: 11.7, h: 1.2, fontFace: face, fontSize: 11, color: GRAY, align: "center", valign: "middle",
+    });
+
+    const buf = (await pptx.write({ outputType: "nodebuffer" })) as Buffer;
+    return new Uint8Array(buf);
   }
 
   function lineupSlideTitle(slideIndex: number): string {

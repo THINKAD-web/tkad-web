@@ -5,6 +5,8 @@ Cross-brand integrated planner: live Digital catalog pricing on OOH (`/planner/i
 **Repos:** `tkad-web` (OOH BFF) · `dmpilot` (Digital internal APIs)  
 **Auth v1:** `INTEGRATION_SERVICE_SECRET` Bearer + `X-Tkad-Caller: tkad-web-bff` (Preview ≠ Production secret values)
 
+**Campaign report builder:** 네이티브 이전 완료 — `/admin/reports?type=builder` (허브 4번째 카드). 이전 Digital 외부 링크(`digital.tkad.co.kr/admin/campaign-report`)는 허브에서 제거됨.
+
 ---
 
 ## Stage overview

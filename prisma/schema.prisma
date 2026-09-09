@@ -2364,6 +2364,20 @@ model PlanReportActivity {
   @@map("plan_report_activities")
 }
 
+/// Admin 캠페인 리포트 빌더 — CRM Campaign 성과완료 보고서와 별도 저장
+model AdminCampaignBuilderReport {
+  id             String   @id @default(cuid())
+  title          String
+  mode           String   @default("digital")
+  payload        Json
+  createdByAdmin String   @map("created_by_admin")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([createdByAdmin, updatedAt])
+  @@map("admin_campaign_builder_reports")
+}
+
 /// 로그인 사용자 최근 본 매체 (다기기 동기화, 최대 20개는 앱 레이어에서 유지)
 model UserRecentlyViewedMedia {
   id        String   @id @default(cuid())

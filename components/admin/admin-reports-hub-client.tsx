@@ -5,9 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Download,
-  ExternalLink,
   Eye,
   FileText,
+  Layers,
   Loader2,
   Megaphone,
   Send,
@@ -28,11 +28,9 @@ import {
   type CampaignReportIdentitySource,
 } from "@/lib/admin-campaign-report-identity";
 import {
+  ADMIN_REPORT_HUB_CARD_TYPES,
   ADMIN_REPORT_HUB_TYPE_COPY,
-  ADMIN_REPORT_HUB_TYPES,
   ADMIN_TREND_REPORT_PATH,
-  DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY,
-  DIGITAL_CAMPAIGN_REPORT_BUILDER_URL,
   buildAdminCampaignsReportPath,
   buildAdminReportsHubPath,
   parseAdminReportHubStep,
@@ -40,6 +38,10 @@ import {
   type AdminReportHubStep,
   type AdminReportHubType,
 } from "@/lib/admin-reports-hub";
+import {
+  CampaignBuilderTrack,
+  type CampaignBuilderCatalogProps,
+} from "@/components/admin/campaign-builder/campaign-builder-track";
 import { PILOT_DEFAULT_INQUIRY_TEXT } from "@/lib/inquiry-auto-proposal/pilot-skus";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { isPlannerReportExportPayload } from "@/lib/planner-report-export/types";
@@ -64,7 +66,13 @@ type DryRunSummary = {
   msg: string;
 };
 
-export default function AdminReportsHubClient() {
+type AdminReportsHubClientProps = {
+  builderCatalog?: CampaignBuilderCatalogProps | null;
+};
+
+export default function AdminReportsHubClient({
+  builderCatalog,
+}: AdminReportsHubClientProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -82,6 +90,11 @@ export default function AdminReportsHubClient() {
   const [style, setStyle] = usePlannerReportStyle();
   const [includeOnline, setIncludeOnline] = useState(true);
   const [includeImages, setIncludeImages] = useState(true);
+
+  useEffect(() => {
+    setType(typeFromUrl);
+    setStep(typeFromUrl ? stepFromUrl : 1);
+  }, [typeFromUrl, stepFromUrl]);
 
   const pushQuery = useCallback(
     (next: {
@@ -124,8 +137,8 @@ export default function AdminReportsHubClient() {
           </h1>
           <p className="mt-1 text-[11px] text-muted-foreground">
             {isKo
-              ? "// 제안서 · 성과보고서 · 트렌드 · Digital 리포트 빌더"
-              : "// Proposal · performance · trend · Digital report builder"}
+              ? "// 제안서 · 성과보고서 · 트렌드 · 캠페인 리포트 빌더"
+              : "// Proposal · performance · trend · campaign report builder"}
           </p>
         </div>
         <ol className="flex gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
@@ -160,11 +173,17 @@ export default function AdminReportsHubClient() {
 
       {step === 1 ? (
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {ADMIN_REPORT_HUB_TYPES.map((id) => {
+          {ADMIN_REPORT_HUB_CARD_TYPES.map((id) => {
             const copy = ADMIN_REPORT_HUB_TYPE_COPY[id];
             const selected = type === id;
             const Icon =
-              id === "proposal" ? FileText : id === "campaign" ? Megaphone : Sparkles;
+              id === "proposal"
+                ? FileText
+                : id === "campaign"
+                  ? Megaphone
+                  : id === "builder"
+                    ? Layers
+                    : Sparkles;
             return (
               <button
                 key={id}
@@ -185,34 +204,10 @@ export default function AdminReportsHubClient() {
               </button>
             );
           })}
-          <a
-            href={DIGITAL_CAMPAIGN_REPORT_BUILDER_URL}
-            target="_blank"
-            rel="noreferrer"
-            data-testid="hub-type-digital-builder"
-            className="rounded-2xl border border-border/60 bg-card/40 p-4 text-left transition hover:border-[color:var(--qp-accent)]/40"
-          >
-            <ExternalLink className="mb-3 h-5 w-5 text-[color:var(--qp-accent)]" />
-            <p className="font-bold">
-              {isKo
-                ? DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.ko
-                : DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.en}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {isKo
-                ? DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.descKo
-                : DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.descEn}
-            </p>
-            <p className="mt-2 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-              {isKo
-                ? DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.badgeKo
-                : DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.badgeEn}
-            </p>
-          </a>
         </section>
       ) : null}
 
-      {step >= 2 && type ? (
+      {step >= 2 && type && type !== "builder" ? (
         <CommonOptions
           isKo={isKo}
           type={type}
@@ -265,6 +260,32 @@ export default function AdminReportsHubClient() {
           </p>
           <AdminReportNewClient compact />
         </div>
+      ) : null}
+
+      {step >= 2 && type === "builder" ? (
+        <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
+          <ReportStylePicker value={style} onChange={setStyle} />
+        </section>
+      ) : null}
+
+      {step >= 2 && type === "builder" ? (
+        builderCatalog ? (
+          <CampaignBuilderTrack
+            isKo={isKo}
+            locale={locale}
+            step={step}
+            style={style}
+            onReadyForPreview={() => goStep(3)}
+            digitalViews={builderCatalog.digitalViews}
+            oohItems={builderCatalog.oohItems}
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {isKo
+              ? "카탈로그를 불러오지 못했습니다. 페이지를 새로고침하세요."
+              : "Failed to load catalogs. Refresh the page."}
+          </p>
+        )
       ) : null}
     </div>
   );
