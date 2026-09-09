@@ -57,6 +57,7 @@ import {
   exportKpiValue,
 } from "@/lib/planner-report-export/export-kpi";
 import type { PlannerExportBadgeKind } from "@/lib/planner-report-export/export-badge";
+import type { PatternComboDimensions } from "@/lib/recommend/pattern-stats-types";
 
 export type BuildOohPayloadArgs = {
   isKo: boolean;
@@ -106,6 +107,8 @@ export type BuildOohPayloadArgs = {
   campaignMediaImpressions?: Record<string, number>;
   /** 내 플랜 보고서 — 복수 옵션 라벨·금액 */
   planCartItems?: import("@/lib/plan-cart").PlanCartItem[];
+  /** B-1 pattern stats lookup — not rendered directly */
+  patternStatsQuery?: PatternComboDimensions;
   /** 4번 확장 — 명시적 portfolio mediaId 순서 (cartItems보다 우선) */
   manualPortfolioOrder?: readonly string[];
   /** R-3: channelMode=ooh_digital 이지만 digital 스냅샷 없을 때 */
@@ -614,6 +617,7 @@ export function buildOohReportPayload(
     quoteSummary,
     appendixSectionTitle: a.appendixSectionTitle,
     appendixMediaSpecs: a.appendixMediaSpecs,
+    patternStatsQuery: a.patternStatsQuery,
     disclaimer: withInventoryDisclaimer(
       isKo
         ? "본 보고서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."

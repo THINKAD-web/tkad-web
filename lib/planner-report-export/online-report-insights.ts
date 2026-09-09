@@ -4,6 +4,7 @@ import type {
   PlannerExportOnlinePacingPhase,
 } from "@/lib/planner-report-export/types";
 import { withInventoryDisclaimer } from "@/lib/catalog-listing-pending";
+import { appendPatternStatsOperationalNote } from "@/lib/recommend/pattern-stats-combo";
 
 export const ONLINE_INSIGHTS_DISCLAIMER_KO =
   "참고용 제안이며 실제 운영 시 예산·소재·타겟은 성과에 따라 조정이 필요합니다.";
@@ -329,8 +330,22 @@ export function buildOnlineReportInsights(input: {
   channelCount: number;
   budgetWon: number;
   months?: number;
+  /** Pre-resolved pattern stats count — append-only operational note */
+  patternStatsCount?: number | null;
 }): PlannerExportOnlineInsights {
   const daySpan = resolveOnlineCampaignDaySpan(input.months);
+  const operationalNotes = appendPatternStatsOperationalNote(
+    buildOnlineOperationalNotes({
+      isKo: input.isKo,
+      channelCount: input.channelCount,
+      budgetWon: input.budgetWon,
+      daySpan,
+      regionsText: input.regionsText,
+    }),
+    input.patternStatsCount,
+    input.isKo,
+  );
+
   return {
     pacingPlan: buildOnlinePacingPlan(daySpan, input.isKo),
     creativeDirections: buildOnlineCreativeDirections({
@@ -339,13 +354,7 @@ export function buildOnlineReportInsights(input: {
       ageText: input.ageText,
       regionsText: input.regionsText,
     }),
-    operationalNotes: buildOnlineOperationalNotes({
-      isKo: input.isKo,
-      channelCount: input.channelCount,
-      budgetWon: input.budgetWon,
-      daySpan,
-      regionsText: input.regionsText,
-    }),
+    operationalNotes,
     disclaimer: withInventoryDisclaimer(
       input.isKo
         ? ONLINE_INSIGHTS_DISCLAIMER_KO

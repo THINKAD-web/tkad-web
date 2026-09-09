@@ -279,6 +279,14 @@
     {
       "path": "/api/cron/health-check",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/recommendation-pattern-stats",
+      "schedule": "0 18 * * 0"
+    },
+    {
+      "path": "/api/cron/recommendation-logs-cleanup",
+      "schedule": "0 19 * * 0"
     }
   ]
 }

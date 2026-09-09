@@ -30,6 +30,7 @@ import type { PlannerReportStyle } from "@/lib/planner-report-export/document-th
 import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
 import { reportCoverSubtitle } from "@/lib/planner-report-export/report-cover-copy";
 import type { MediaItem } from "@/lib/media-data";
+import { usePatternStatsNote } from "@/hooks/use-pattern-stats-note";
 
 /**
  * 플래너 보고서 화면 문서 — 서버 PDF/PPTX 와 동일한 payload·레이아웃으로 렌더한다.
@@ -267,15 +268,27 @@ export const PlannerReportDocument = forwardRef<
   ref,
 ) {
   const isKo = p.isKo;
+  const patternStatsNote = usePatternStatsNote(p.patternStatsQuery, isKo);
   const theme = getReportDocumentTheme(reportStyle);
   const vis = sectionVisibility;
-  const visibleSections = filterExportSections(p.sections, vis)?.filter(
-    (sec) =>
-      !(
-        p.executiveSummaryLines?.length &&
-        (sec.title === "전략 요약" || sec.title === "Strategy summary")
-      ),
-  );
+  const visibleSections = filterExportSections(p.sections, vis)
+    ?.filter(
+      (sec) =>
+        !(
+          p.executiveSummaryLines?.length &&
+          (sec.title === "전략 요약" || sec.title === "Strategy summary")
+        ),
+    )
+    ?.map((sec) => {
+      if (
+        !patternStatsNote ||
+        (sec.title !== "효과 요약" && sec.title !== "Effect summary") ||
+        sec.lines.includes(patternStatsNote)
+      ) {
+        return sec;
+      }
+      return { ...sec, lines: [...sec.lines, patternStatsNote] };
+    });
   const summary: Array<[string, string]> = [
     [isKo ? "캠페인 목표" : "Goal", p.goalTitle || "—"],
     [isKo ? "총 예산" : "Total budget", p.budgetHonesty?.coverValue ?? fmtBudget(p.budgetMan, isKo)],
@@ -811,6 +824,7 @@ export const PlannerReportDocument = forwardRef<
               section={p.onlineSection}
               isKo={isKo}
               part="after"
+              patternStatsNote={patternStatsNote}
             />
           </section>
         ) : null}

@@ -75,7 +75,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
   }
 
-  const base = plannerReportFileBase(payload);
+  const { enrichPlannerExportPayloadWithPatternStats } = await import(
+    "@/lib/recommend/pattern-stats-enrich-export"
+  );
+  const enrichedPayload = await enrichPlannerExportPayloadWithPatternStats(payload);
+
+  const base = plannerReportFileBase(enrichedPayload);
 
   const sectionVisibility = parseSectionVisibility(rawVisibility);
   const lineupViewMode = parseExportLineupViewMode(rawLineupViewMode);
@@ -91,15 +96,15 @@ export async function POST(request: NextRequest) {
           activitySource,
         )
           ? activitySource
-          : resolveSourceFromExportPayload(payload);
+          : resolveSourceFromExportPayload(enrichedPayload);
       logPlanReportActivityFireAndForget(userId, {
         eventType: format === "pdf" ? "pdf_export" : "pptx_export",
         source,
         format,
-        mediaCount: payload.portfolio?.length ?? 0,
-        goalTitle: payload.goalTitle,
-        regionsText: payload.regionsText,
-        reportTitle: payload.documentTitle || payload.campaignName,
+        mediaCount: enrichedPayload.portfolio?.length ?? 0,
+        goalTitle: enrichedPayload.goalTitle,
+        regionsText: enrichedPayload.regionsText,
+        reportTitle: enrichedPayload.documentTitle || enrichedPayload.campaignName,
       });
     }
   };
@@ -109,7 +114,7 @@ export async function POST(request: NextRequest) {
       const { buildPlannerReportPdf } = await import(
         "@/lib/planner-report-export/build-pdf"
       );
-      const bytes = await buildPlannerReportPdf(payload, exportAssets);
+      const bytes = await buildPlannerReportPdf(enrichedPayload, exportAssets);
       logExport();
       return new NextResponse(new Blob([bytes as BlobPart]), {
         status: 200,
@@ -124,7 +129,7 @@ export async function POST(request: NextRequest) {
     const { buildPlannerReportPptx } = await import(
       "@/lib/planner-report-export/build-pptx"
     );
-    const bytes = await buildPlannerReportPptx(payload, exportAssets);
+    const bytes = await buildPlannerReportPptx(enrichedPayload, exportAssets);
     logExport();
     return new NextResponse(new Blob([bytes as BlobPart]), {
       status: 200,

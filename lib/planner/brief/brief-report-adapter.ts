@@ -51,7 +51,10 @@ import {
 } from "@/lib/planner/brief/types";
 import { priceOptionIndexFromOptionId } from "@/lib/planner/brief/mix-price-option";
 import { MEDIA_DAYS_PER_MONTH } from "@/lib/media-metrics";
-import { plannerIndustryLabel } from "@/lib/planner/types";
+import {
+  plannerIndustryLabel,
+  type PlannerIndustryKey,
+} from "@/lib/planner/types";
 import {
   EXPORT_DIGITAL_OMITTED_EN,
   EXPORT_DIGITAL_OMITTED_KO,
@@ -64,6 +67,7 @@ import {
   type PlannerExportBadgeKind,
 } from "@/lib/planner-report-export/export-badge";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
+import { patternComboFromPlannerBrief } from "@/lib/recommend/pattern-stats-combo";
 import type {
   PlannerExportChartDatum,
   PlannerExportKpi,
@@ -90,6 +94,20 @@ import {
 } from "@/lib/planner-report-export/report-copy-state";
 import { splitReportCopyParagraphs } from "@/lib/planner-report-export/report-copy";
 import type { DefaultExecutiveSummaryInput } from "@/lib/planner-report-export/report-copy";
+
+function briefPatternStatsQuery(args: {
+  briefGoal: BriefGoal | null;
+  industryKey: PlannerIndustryKey;
+  budgetMan: number;
+  months: number;
+}) {
+  return patternComboFromPlannerBrief({
+    briefGoal: args.briefGoal,
+    industryKey: args.industryKey,
+    budgetMan: args.budgetMan,
+    months: args.months,
+  });
+}
 
 const GOAL_TITLES_KO: Record<PlannerCampaignGoal, string> = {
   brand: "브랜드 인지도",
@@ -710,6 +728,12 @@ function buildBriefOnlineReportPayload(
         : "Online estimates use catalog CPC/CPM reference ranges as of when this was saved; actual delivery and billing may vary.",
       isKo,
     ),
+    patternStatsQuery: briefPatternStatsQuery({
+      briefGoal: brief.goal,
+      industryKey,
+      budgetMan,
+      months,
+    }),
   };
   return withListingPendingSection(onlinePayload, brief.freeText, isKo);
 }
@@ -860,6 +884,12 @@ export function buildBriefReportPayload(
     industryText: cover.industryText,
     industryKey,
     campaignGoal,
+    patternStatsQuery: briefPatternStatsQuery({
+      briefGoal: brief.goal,
+      industryKey,
+      budgetMan,
+      months,
+    }),
     portfolio,
     metrics: exportMetrics as PlannerMetrics,
     blendedCpmKrw,

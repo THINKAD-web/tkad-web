@@ -59,6 +59,8 @@ import {
   lineupViewModeForExport,
   readPlannerReportViewMode,
 } from "@/lib/planner-report-view-mode";
+import { patternComboFromAiInput } from "@/lib/recommend/pattern-stats-combo";
+import { usePatternStatsNote } from "@/hooks/use-pattern-stats-note";
 
 type Props = {
   isKo: boolean;
@@ -150,6 +152,11 @@ export function RecommendReportSection({
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(isKo ? "ko-KR" : "en-US"),
   );
+  const patternStatsQuery = useMemo(
+    () => patternComboFromAiInput(input),
+    [input],
+  );
+  const patternStatsNote = usePatternStatsNote(patternStatsQuery, isKo);
 
   const ageText = useMemo(() => {
     const keyMap = {
@@ -343,6 +350,9 @@ export function RecommendReportSection({
     } else if (metrics) {
       lines.push(tPlanner("reportSummaryRoi", { n: metrics.roiExpected }));
     }
+    if (patternStatsNote) {
+      lines.push(patternStatsNote);
+    }
     lines.push(tPlanner("reportSummaryDisclaimerShort"));
     return lines;
   }, [
@@ -355,6 +365,7 @@ export function RecommendReportSection({
     reachRoiPending,
     isKo,
     tPlanner,
+    patternStatsNote,
   ]);
 
   const portfolioForExport = useMemo(() => {
@@ -402,6 +413,7 @@ export function RecommendReportSection({
         isAutoPortfolio: false,
         campaignMediaQuantities: quantities,
         campaignMediaPriceOptionIndex: priceOptionIndex,
+        patternStatsQuery,
       }),
     [
       isKo,
@@ -420,6 +432,7 @@ export function RecommendReportSection({
       snapshotAt,
       quantities,
       priceOptionIndex,
+      patternStatsQuery,
     ],
   );
 

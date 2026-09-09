@@ -10,6 +10,7 @@
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import type { PlannerExportBadgeKind } from "@/lib/planner-report-export/export-badge";
 import type { PlannerExportBudgetHonesty } from "@/lib/planner/brief/over-budget-copy";
+import type { PatternComboDimensions } from "@/lib/recommend/pattern-stats-types";
 
 export type PlannerExportKpiStatus = "value" | "pending";
 
@@ -303,6 +304,8 @@ export type PlannerReportExportPayload = {
   appendixSectionTitle?: string;
   /** PR6-b — online section when composition is onlyOnline or mixed */
   onlineSection?: PlannerExportOnlineSection;
+  /** B-1 pattern stats lookup key — not rendered; server/client enrich only */
+  patternStatsQuery?: PatternComboDimensions;
   /** PR6-b — cart channel mix driving payload builder */
   reportComposition?: PlannerReportComposition;
   /** 캠페인 빌더 export — kind === "builder" 일 때 본문 SSOT */
