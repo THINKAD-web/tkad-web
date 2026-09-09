@@ -8,8 +8,8 @@ test("PLANNING_TABS splits browse vs proposal vs packages", () => {
   assert.deepEqual(
     PLANNING_TABS.map((t) => [t.label, t.href]),
     [
-      ["둘러보기", "/recommend"],
-      ["제안서 만들기", "/planner"],
+      ["AI 플래너", "/recommend"],
+      ["상세 플래너", "/planner"],
       ["패키지", "/media/packages"],
     ],
   );

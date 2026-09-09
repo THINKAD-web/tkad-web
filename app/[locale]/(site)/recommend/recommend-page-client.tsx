@@ -917,13 +917,13 @@ export default function RecommendPageClient({
     <HomeLandingDayNight>
       <div className="recommend-accent-option-a tkad-landing-neon tkad-planner-neon min-w-0 overflow-x-auto" data-accent-scope="option-a-recommend">
         <PageHero
-          eyebrow={isKo ? "// 둘러보기" : "// Browse picks"}
-          title={isKo ? "조건 없이 " : "Explore "}
-          highlight={isKo ? "빠르게 후보 탐색" : "candidates quickly"}
+          eyebrow={isKo ? "// AI 플래너" : "// AI Planner"}
+          title={isKo ? "쉽고 빠르게 " : "AI recommends "}
+          highlight={isKo ? "AI가 매체를 추천" : "media quickly"}
           description={
             isKo
-              ? "조건 없이 빠르게 후보를 탐색합니다. 믹스를 다듬고 제안서까지 만들려면 「제안서 만들기」로 이어가세요."
-              : "Explore candidates quickly — no brief required. Use Create a proposal when you want a finished mix and deck."
+              ? "쉽고 빠르게 AI가 매체를 추천합니다. 믹스를 다듬고 제안서까지 만들려면 「상세 플래너」로 이어가세요."
+              : "AI recommends media quickly and easily. Use Detailed planner when you want a finished mix and deck."
           }
         />
         <SubTabs tabs={PLANNING_TABS} currentPath="/recommend" />
