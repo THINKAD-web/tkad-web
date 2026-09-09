@@ -11,6 +11,9 @@ import {
   type InquiryShadowRunResult,
 } from "./shadow-recommend";
 
+/** dry-run 내부 fire-and-forget shadow와 테스트 본문 shadow가 경합하지 않도록 */
+process.env.INQUIRY_SHADOW_RECOMMEND = "0";
+
 function row(partial: {
   id: string;
   name: string;
@@ -37,7 +40,7 @@ function row(partial: {
     dailyFootTraffic: 80_000,
     impressions: partial.impressions,
     mediaSubCategory: partial.mediaSubCategory ?? "airport",
-    regionSub: partial.regionSub,
+    regionSub: partial.regionSub ?? "incheon_airport",
     sampleImages: [],
   };
   return {
@@ -178,4 +181,47 @@ test("buildInquiryShadowDiffReport: pilot catalog legacy path (shadow may fail w
   assert.equal(Object.keys(legacyDry.mixUnits).length, 2);
   assert.equal(legacyDry.mixUnits.t1, 1);
   assert.equal(legacyDry.mixUnits.t2, 1);
+});
+
+/** STEP3d — shadow recommend golden snapshot (pilot fixture; DB/catalog fetch 없음) */
+const PILOT_SHADOW_GOLDEN = {
+  recommendCount: 5,
+  recommendTopIds: ["welcome", "t2", "t1", "checkin", "pkg"],
+  recommendTopScores: [
+    { id: "welcome", score: 100 },
+    { id: "t2", score: 72 },
+    { id: "t1", score: 72 },
+    { id: "checkin", score: 72 },
+    { id: "pkg", score: 72 },
+  ],
+  shadowMixIds: ["t2", "t1"],
+  category: "nearly_identical" as const,
+  mixJaccard: 1,
+};
+
+test("buildInquiryShadowDiffReport: pilot golden snapshot — recommendTop ids/scores + shadowMixIds", async () => {
+  const legacyDry = await runInquiryAutoProposalDryRun(PILOT_DEFAULT_INQUIRY_TEXT, {
+    proposalCatalog: catalog,
+    flightStart: "2026-09-01",
+  });
+  const report = await buildInquiryShadowDiffReport({
+    text: PILOT_DEFAULT_INQUIRY_TEXT,
+    legacyDry,
+    proposalCatalog: catalog,
+    sampleId: "pilot-default",
+  });
+
+  assert.equal(report.shadow.ok, true);
+  assert.equal(report.shadow.recommendCount, PILOT_SHADOW_GOLDEN.recommendCount);
+  assert.deepEqual(
+    report.shadow.recommendTop.map((r) => r.id),
+    PILOT_SHADOW_GOLDEN.recommendTopIds,
+  );
+  assert.deepEqual(
+    report.shadow.recommendTop.map((r) => ({ id: r.id, score: r.score })),
+    PILOT_SHADOW_GOLDEN.recommendTopScores,
+  );
+  assert.deepEqual(report.shadowMixIds, PILOT_SHADOW_GOLDEN.shadowMixIds);
+  assert.equal(report.category, PILOT_SHADOW_GOLDEN.category);
+  assert.equal(report.mixJaccard, PILOT_SHADOW_GOLDEN.mixJaccard);
 });

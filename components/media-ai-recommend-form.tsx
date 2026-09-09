@@ -48,7 +48,11 @@ import {
   type PlannerIncheonZoneKey,
 } from "@/lib/planner/incheon-zones";
 import type { PlannerCampaignGoal } from "@/lib/planner/types";
-import { recommendIndustryToPlannerIndustryKey as recommendIndustryToPlanner } from "@/lib/recommend/recommend-report-adapter";
+import { goalDefaultDigitalPct } from "@/lib/integrated/allocation-policy";
+import {
+  recommendGoalToPlannerCampaignGoal,
+  recommendIndustryToPlannerIndustryKey as recommendIndustryToPlanner,
+} from "@/lib/recommend/recommend-report-adapter";
 
 export type RegionCheckboxCode =
   | "seoul"
@@ -169,6 +173,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   );
   const [ageBands, setAgeBands] = useState<Set<AgeBand>>(() => new Set());
   const [budgetMan, setBudgetMan] = useState(1000);
+  const [digitalBudgetPct, setDigitalBudgetPct] = useState(30);
+  const [digitalBudgetTouched, setDigitalBudgetTouched] = useState(false);
   const [campaignGoal, setCampaignGoal] = useState<CampaignGoal | null>(null);
   const [industry, setIndustry] = useState<Industry | null>(null);
   const [periodWeeks, setPeriodWeeks] = useState<PeriodWeeks | null>(null);
@@ -189,6 +195,25 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
 
   const budgetMin = 100;
   const budgetMax = 10000;
+  const digitalPctMin = 0;
+  const digitalPctMax = 50;
+  const digitalPctStep = 5;
+
+  useEffect(() => {
+    if (!campaignGoal || digitalBudgetTouched) return;
+    setDigitalBudgetPct(
+      goalDefaultDigitalPct(recommendGoalToPlannerCampaignGoal(campaignGoal)),
+    );
+  }, [campaignGoal, digitalBudgetTouched]);
+
+  const digitalSplitPreview = useMemo(() => {
+    const budgetTotalWon = budgetMan > 0 ? budgetMan * 10_000 : 0;
+    const pct = digitalBudgetPct;
+    const digitalWon = Math.round((budgetTotalWon * pct) / 100);
+    const oohWon = budgetTotalWon - digitalWon;
+    const oohPct = 100 - pct;
+    return { oohPct, digitalPct: pct, oohWon, digitalWon };
+  }, [budgetMan, digitalBudgetPct]);
 
   const requiredMark = tr("form.requiredMark");
   const optionalMark = tr("form.optionalMark");
@@ -475,6 +500,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       gyeonggiZoneList: readonly PlannerGyeonggiZoneKey[],
       incheonZoneList: readonly PlannerIncheonZoneKey[],
       channel: RecommendChannelType,
+      digitalPct: number,
+      digitalTouched: boolean,
     ): MediaAiRecommendFormSubmit => {
       const regionCodes = [...regionSet];
       let regionCode: AiRecommendInput["region"] = "all";
@@ -506,6 +533,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           regionSet.has("incheon") && incheonZoneList.length > 0
             ? [...incheonZoneList]
             : undefined,
+        ...(digitalTouched ? { digitalBudgetPct: digitalPct } : {}),
       };
 
       return {
@@ -537,6 +565,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         gyeonggiZones,
         incheonZones,
         channelType,
+        digitalBudgetPct,
+        digitalBudgetTouched,
       ),
     );
   };
@@ -763,6 +793,42 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
               />
             </div>
           </FormField>
+
+          {campaignGoal ? (
+            <FormField
+              label={isKo ? "디지털 예산 비중" : "Digital budget share"}
+              hint={
+                isKo
+                  ? "조작하지 않으면 캠페인 목표에 맞는 기본값이 적용됩니다."
+                  : "If you don't adjust the slider, a goal-based default is used."
+              }
+              {...fieldBadge}
+            >
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-white/5">
+                <input
+                  type="range"
+                  min={digitalPctMin}
+                  max={digitalPctMax}
+                  step={digitalPctStep}
+                  value={digitalBudgetPct}
+                  onChange={(e) => {
+                    setDigitalBudgetPct(Number(e.target.value));
+                    setDigitalBudgetTouched(true);
+                  }}
+                  className="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-[color:var(--qp-accent)] dark:bg-white/10"
+                  aria-valuemin={digitalPctMin}
+                  aria-valuemax={digitalPctMax}
+                  aria-valuenow={digitalBudgetPct}
+                  data-testid="recommend-digital-budget-slider"
+                />
+                <p className="mt-3 text-sm tabular-nums text-foreground">
+                  {isKo
+                    ? `OOH ${digitalSplitPreview.oohPct}% · 온라인 ${digitalSplitPreview.digitalPct}% (예산 ${digitalSplitPreview.oohWon.toLocaleString("ko-KR")}원 / ${digitalSplitPreview.digitalWon.toLocaleString("ko-KR")}원)`
+                    : `OOH ${digitalSplitPreview.oohPct}% · Online ${digitalSplitPreview.digitalPct}% (${digitalSplitPreview.oohWon.toLocaleString("en-US")} KRW / ${digitalSplitPreview.digitalWon.toLocaleString("en-US")} KRW)`}
+                </p>
+              </div>
+            </FormField>
+          ) : null}
 
           <FormField
             label={tr("form.industryLabel")}

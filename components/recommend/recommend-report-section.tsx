@@ -14,6 +14,7 @@ import {
 import { calculatePlan } from "@/lib/planner/calc/engine";
 import { blendedCpmExcludingQuoteOnly, categoryCpmBarsExcludingQuoteOnly } from "@/lib/planner/quote-only-portfolio";
 import { usePlannerStore } from "@/lib/planner/store";
+import { useReportCopyStore } from "@/lib/planner-report-export/report-copy-store";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
@@ -58,6 +59,8 @@ import {
   lineupViewModeForExport,
   readPlannerReportViewMode,
 } from "@/lib/planner-report-view-mode";
+import { patternComboFromAiInput } from "@/lib/recommend/pattern-stats-combo";
+import { usePatternStatsNote } from "@/hooks/use-pattern-stats-note";
 
 type Props = {
   isKo: boolean;
@@ -149,6 +152,11 @@ export function RecommendReportSection({
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(isKo ? "ko-KR" : "en-US"),
   );
+  const patternStatsQuery = useMemo(
+    () => patternComboFromAiInput(input),
+    [input],
+  );
+  const patternStatsNote = usePatternStatsNote(patternStatsQuery, isKo);
 
   const ageText = useMemo(() => {
     const keyMap = {
@@ -342,6 +350,9 @@ export function RecommendReportSection({
     } else if (metrics) {
       lines.push(tPlanner("reportSummaryRoi", { n: metrics.roiExpected }));
     }
+    if (patternStatsNote) {
+      lines.push(patternStatsNote);
+    }
     lines.push(tPlanner("reportSummaryDisclaimerShort"));
     return lines;
   }, [
@@ -354,6 +365,7 @@ export function RecommendReportSection({
     reachRoiPending,
     isKo,
     tPlanner,
+    patternStatsNote,
   ]);
 
   const portfolioForExport = useMemo(() => {
@@ -401,6 +413,7 @@ export function RecommendReportSection({
         isAutoPortfolio: false,
         campaignMediaQuantities: quantities,
         campaignMediaPriceOptionIndex: priceOptionIndex,
+        patternStatsQuery,
       }),
     [
       isKo,
@@ -419,13 +432,14 @@ export function RecommendReportSection({
       snapshotAt,
       quantities,
       priceOptionIndex,
+      patternStatsQuery,
     ],
   );
 
-  const reportClientName = usePlannerStore((s) => s.reportClientName);
-  const setReportClientName = usePlannerStore((s) => s.setReportClientName);
-  const reportDocumentTitle = usePlannerStore((s) => s.reportDocumentTitle);
-  const setReportDocumentTitle = usePlannerStore((s) => s.setReportDocumentTitle);
+  const reportClientName = useReportCopyStore((s) => s.clientName);
+  const setReportClientName = useReportCopyStore((s) => s.setClientName);
+  const reportDocumentTitle = useReportCopyStore((s) => s.documentTitle);
+  const setReportDocumentTitle = useReportCopyStore((s) => s.setDocumentTitle);
   const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
 
   const exportPayload = useMemo(

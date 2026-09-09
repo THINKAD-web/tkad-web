@@ -35,6 +35,8 @@
     "test:compare-quote-typography": "tsx --test lib/ui/__tests__/compare-quote-typography.test.ts",
     "test:planner-calc": "tsx --test lib/planner/calc/__tests__/*.test.ts",
     "test:pr2-golden": "tsx --test lib/pricing/__tests__/pr2-golden-baseline.test.ts",
+    "test:shadow-recommend-golden": "node --import tsx --test lib/inquiry-auto-proposal/shadow-recommend.test.ts",
+    "test:recommend-online-mix": "node --import tsx --test lib/recommend/__tests__/*.test.ts lib/inquiry-auto-proposal/*.test.ts",
     "test:import-csv": "node --experimental-test-module-mocks --import tsx --test app/api/admin/medias/import-csv/route.test.ts",
     "build:metro-geo": "tsx scripts/build-metro-geojson.mts",
     "build:metro-geo:capital": "tsx scripts/build-seoul-metro-geojson.mts",

@@ -33,6 +33,8 @@ export const recommendInputSchema = z.object({
     .array(z.enum(["digital", "static", "mobile"]))
     .optional(),
   freetextSource: z.string().max(2000).optional(),
+  /** 사용자 슬라이더 override. 미전송 시 goal 기본값 */
+  digitalBudgetPct: z.number().min(0).max(100).optional(),
 });
 
 export const recommendRequestSchema = z.object({

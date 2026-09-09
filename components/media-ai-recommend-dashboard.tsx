@@ -36,6 +36,14 @@ import type {
 } from "@/lib/planner/planner-media-quantity";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import { formatRecommendQuestionLine } from "@/lib/recommend/format-recommend-question";
+import { RecommendOnlineMixSection } from "@/components/recommend/recommend-online-mix-section";
+import type { RecommendOnlineStatus } from "@/lib/recommend/build-mixed-recommend-result";
+import type { AllocationPolicyResult } from "@/lib/integrated/allocation-policy";
+import type { OnlineCatalogRecommendResult } from "@/lib/planner/recommend-online-catalog";
+import {
+  RECOMMEND_ONLINE_PDF_NOTICE_EN,
+  RECOMMEND_ONLINE_PDF_NOTICE_KO,
+} from "@/lib/recommend/copy-ko";
 
 type DashboardPanelAction =
   | {
@@ -110,6 +118,9 @@ type Props = {
   recommendQuantities?: CampaignMediaQuantities;
   recommendPriceOptionIndex?: CampaignMediaPriceOptionIndex;
   regionMeta?: RecommendMatchMeta | null;
+  online?: OnlineCatalogRecommendResult | null;
+  onlineStatus?: RecommendOnlineStatus | null;
+  allocation?: AllocationPolicyResult | null;
   onOpenMediaBrowse?: () => void;
 };
 
@@ -137,6 +148,9 @@ export default function MediaAiRecommendDashboard({
   recommendQuantities = {},
   recommendPriceOptionIndex = {},
   regionMeta = null,
+  online = null,
+  onlineStatus = null,
+  allocation = null,
   onOpenMediaBrowse,
 }: Props) {
   const isKo = locale === "ko";
@@ -363,6 +377,28 @@ export default function MediaAiRecommendDashboard({
             </ul>
           </div>
         </section>
+
+        {onlineStatus && allocation ? (
+          <>
+            <RecommendOnlineMixSection
+              online={online}
+              onlineStatus={onlineStatus}
+              allocation={allocation}
+              budgetMaxMan={recommendInput.budgetMaxMan}
+              isKo={isKo}
+            />
+            {onlineStatus === "ok" ? (
+              <div
+                className="rounded-xl border border-dashed border-border bg-muted/40 px-4 py-3 text-sm leading-relaxed text-muted-foreground"
+                data-testid="recommend-online-pdf-notice"
+              >
+                {isKo
+                  ? RECOMMEND_ONLINE_PDF_NOTICE_KO
+                  : RECOMMEND_ONLINE_PDF_NOTICE_EN}
+              </div>
+            ) : null}
+          </>
+        ) : null}
 
         <RecommendationAxisTabs
           variant="recommend"

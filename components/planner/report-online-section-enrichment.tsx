@@ -10,9 +10,16 @@ type Props = {
   section: PlannerExportOnlineSection;
   isKo: boolean;
   part: "before" | "after";
+  /** B-1 — appended to operational notes in preview (export enriches server-side) */
+  patternStatsNote?: string | null;
 };
 
-export function ReportOnlineSectionEnrichment({ section, isKo, part }: Props) {
+export function ReportOnlineSectionEnrichment({
+  section,
+  isKo,
+  part,
+  patternStatsNote,
+}: Props) {
   const consult = isKo ? "별도 협의" : "Consultation";
   const fmtWon = (n: number) =>
     `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
@@ -138,18 +145,27 @@ export function ReportOnlineSectionEnrichment({ section, isKo, part }: Props) {
             </div>
           ) : null}
 
-          {section.insights.operationalNotes.length > 0 ? (
+          {(() => {
+            const operationalNotes = [
+              ...section.insights.operationalNotes,
+              ...(patternStatsNote &&
+              !section.insights.operationalNotes.includes(patternStatsNote)
+                ? [patternStatsNote]
+                : []),
+            ];
+            return operationalNotes.length > 0 ? (
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-gray-900">
                 {isKo ? "운영 메모" : "Operations notes"}
               </h3>
               <ul className="space-y-2">
-                {section.insights.operationalNotes.map((line) => (
+                {operationalNotes.map((line) => (
                   <ReportScanLine key={line} text={line} />
                 ))}
               </ul>
             </div>
-          ) : null}
+            ) : null;
+          })()}
 
           <p className="border-t border-gray-200 pt-3 text-[11px] leading-relaxed text-gray-500">
             {section.insights.disclaimer}

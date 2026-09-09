@@ -51,6 +51,11 @@ export function planCartItemFromCatalog(
   };
 }
 
+export type PlanCartItemFromMediaItemOpts = {
+  /** Online monthly budget — overrides `onlineSpec.minBudget` default snapshot when set */
+  lineTotalWonOverride?: number;
+};
+
 export function planCartItemFromMediaItem(
   item: Pick<
     MediaItem,
@@ -72,9 +77,15 @@ export function planCartItemFromMediaItem(
     | "onlineSpec"
   >,
   addedFrom: PlanCartAddedFrom,
+  opts?: PlanCartItemFromMediaItemOpts,
 ): Omit<PlanCartItem, "addedAt"> {
   const regionKey = resolvePlanCartItemRegionKey(item.region ?? "", item as MediaItem);
-  const lineTotalWon = planCartOnlineLineTotalWonSnapshot(item);
+  const defaultLineTotalWon = planCartOnlineLineTotalWonSnapshot(item);
+  const override = opts?.lineTotalWonOverride;
+  const lineTotalWon =
+    override != null && Number.isFinite(override) && override > 0
+      ? Math.round(override)
+      : defaultLineTotalWon;
   return {
     mediaId: item.id,
     mediaName: item.name,

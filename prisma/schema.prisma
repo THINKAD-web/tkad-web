@@ -3420,6 +3420,24 @@ model RecommendationLog {
   @@map("recommendation_logs")
 }
 
+/// B-1 패턴 통계 — recommendation_logs 주간 집계 (PII 없음)
+model RecommendationPatternStats {
+  id           String   @id @default(cuid())
+  comboKey     String   @unique @map("combo_key") @db.VarChar(128)
+  industry     String   @db.VarChar(32)
+  target       String   @db.VarChar(32)
+  budgetBucket String   @map("budget_bucket") @db.VarChar(32)
+  goal         String   @db.VarChar(32)
+  source       String   @db.VarChar(16)
+  count        Int
+  topMediaIds  String[] @default([]) @map("top_media_ids")
+  refreshedAt  DateTime @updatedAt @map("refreshed_at")
+
+  @@index([source, industry, goal])
+  @@index([refreshedAt(sort: Desc)])
+  @@map("recommendation_pattern_stats")
+}
+
 /// OOH 패키지 큐레이션 — 동적 필터로 매체 자동 매칭
 model MediaPackage {
   id          String  @id @default(cuid())

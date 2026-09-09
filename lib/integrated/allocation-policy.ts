@@ -16,6 +16,11 @@ const GOAL_DEFAULT_DIGITAL_PCT: Record<PlannerCampaignGoal, number> = {
   sales: 45,
 };
 
+/** UI 슬라이더 기본 위치 — 내부 GOAL_DEFAULT_DIGITAL_PCT SSOT 그대로 노출 */
+export function goalDefaultDigitalPct(goal: PlannerCampaignGoal): number {
+  return GOAL_DEFAULT_DIGITAL_PCT[goal] ?? 30;
+}
+
 /** Cross-channel budget split — user slider wins over goal defaults (§11). */
 export function resolveCrossChannelAllocation(opts: {
   budgetTotalWon: number;

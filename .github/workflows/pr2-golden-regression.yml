@@ -18,3 +18,5 @@ jobs:
       - run: npm ci
       - name: Golden baseline (102 core + 12 boundary + 3 condition/error asserts)
         run: npm run test:pr2-golden
+      - name: Shadow recommend golden snapshot (pilot fixture)
+        run: npm run test:shadow-recommend-golden

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { runRecommendation } from "@/lib/recommendation-service";
 import {
   aiInputToMatching,
   matchedToApiItems,
   displayContextFromAiInput,
 } from "@/lib/recommendation-adapters";
+import { buildMixedRecommendResult } from "@/lib/recommend/build-mixed-recommend-result";
 import { resolveAiRecommendPlannerRegionIds } from "@/lib/recommend/recommend-region-filter";
 import { isPlannerClaudeEnabled } from "@/lib/planner/planner-claude-config";
 import { getCurrentUser } from "@/lib/user-session";
@@ -108,7 +110,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { recommendations, cached, logId, regionMeta } = await runRecommendation({
+    const fullCatalog = await fetchPublicMediaCatalogList();
+
+    const oohResult = await runRecommendation({
       input: matchingInput,
       source: "recommend",
       limit,
@@ -119,10 +123,18 @@ export async function POST(request: NextRequest) {
       sessionId: sessionId ?? null,
       plannerRegionIds,
       aiRecommendInput: aiInput,
+      catalogOverride: fullCatalog,
+    });
+
+    const mixed = await buildMixedRecommendResult({
+      aiInput,
+      oohRecommendations: oohResult.recommendations,
+      catalog: fullCatalog,
+      isKo,
     });
 
     const items = matchedToApiItems(
-      recommendations,
+      oohResult.recommendations,
       input.industry,
       [input.target],
       isKo,
@@ -132,11 +144,14 @@ export async function POST(request: NextRequest) {
 
     return json({
       ok: true,
-      cached,
-      logId,
+      cached: oohResult.cached,
+      logId: oohResult.logId,
       items,
       recommendations: items,
-      regionMeta,
+      regionMeta: oohResult.regionMeta,
+      online: mixed.online,
+      onlineStatus: mixed.onlineStatus,
+      allocation: mixed.allocation,
     });
   } catch (e) {
     console.error("[api/recommend]", e);

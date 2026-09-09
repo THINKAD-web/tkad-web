@@ -11,6 +11,7 @@ import {
   type BuildOnlineReportPayloadArgs,
 } from "@/lib/planner-report-export/payload-online";
 import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
+import { patternComboFromOnlineExportArgs } from "@/lib/recommend/pattern-stats-combo";
 
 export type BuildReportPayloadArgs = BuildOohPayloadArgs;
 
@@ -62,6 +63,7 @@ function buildMixedReportPayload(
   return {
     ...oohPayload,
     reportComposition: "mixed",
+    patternStatsQuery: patternComboFromOnlineExportArgs(toOnlineArgs(args)),
     onlineSection,
     documentTitle: isKo ? "통합 매체 제안 보고서" : "Integrated media proposal",
     sections: [

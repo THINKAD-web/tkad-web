@@ -82,6 +82,21 @@ test("planCartItemFromCatalog — online calculable carries lineTotalWon snapsho
   assert.equal(item.lineTotalWon, 2_000_000);
 });
 
+test("planCartItemFromMediaItem — lineTotalWonOverride wins over minBudget default", () => {
+  const item = planCartItemFromMediaItem(
+    {
+      ...calculableOnline,
+      sampleImages: [],
+      location: "온라인",
+      locationEn: "Online",
+      nameEn: "Google",
+    },
+    "ai_recommend",
+    { lineTotalWonOverride: 970_000 },
+  );
+  assert.equal(item.lineTotalWon, 970_000);
+});
+
 test("planCartItemFromMediaItem — default minBudget when spec has no minBudget", () => {
   const item = planCartItemFromMediaItem(
     {

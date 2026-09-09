@@ -35,6 +35,7 @@ import {
 import type { PlannerIndustryKey } from "@/lib/planner/types";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import { patternComboFromOnlineExportArgs } from "@/lib/recommend/pattern-stats-combo";
 
 export type BuildOnlineReportPayloadArgs = {
   isKo: boolean;
@@ -307,6 +308,7 @@ export function buildOnlineReportPayload(
   return {
     kind: "ooh",
     reportComposition: "onlyOnline",
+    patternStatsQuery: patternComboFromOnlineExportArgs(args),
     isKo,
     documentTitle: isKo ? "온라인 매체 제안 보고서" : "Online media proposal",
     campaignName: args.goalTitle,

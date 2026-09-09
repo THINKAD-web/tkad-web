@@ -32,6 +32,7 @@ import {
   savedPlannerPlanToBriefHandoff,
 } from "@/lib/planner/brief/handoff";
 import { getPlanCart } from "@/lib/plan-cart";
+import { resetPlannerReportCopy } from "@/lib/planner/reset-planner-session";
 import { useToast } from "@/components/toast-provider";
 import { BriefStepOne } from "@/components/planner/brief/brief-step-one";
 import { BriefStepTwo } from "@/components/planner/brief/brief-step-two";
@@ -183,7 +184,16 @@ export function BriefFlowClient({
       mixUnits: state.mixUnits,
       handoffActive: pendingHandoff != null,
     });
-    if (!shouldOpen) return;
+    if (!shouldOpen) {
+      if (
+        pendingHandoff == null &&
+        !planFromUrl &&
+        countMixUnits(state.mixUnits) === 0
+      ) {
+        resetPlannerReportCopy();
+      }
+      return;
+    }
     resumePromptedRef.current = true;
     setResumeOpen(true);
   }, [hydrated, planFromUrl, pendingHandoff, searchParams, reset, stripHandoffQuery]);

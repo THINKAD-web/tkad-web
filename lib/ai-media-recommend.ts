@@ -74,6 +74,8 @@ export type AiRecommendInput = {
    * 값: subway | bus | roadside | building | airport | retail
    */
   placementHints?: readonly string[] | null;
+  /** 사용자 슬라이더 override. 미전송 시 goal 기본값(resolveCrossChannelAllocation) */
+  digitalBudgetPct?: number;
 };
 
 export type MatchReason = { ko: string; en: string };
