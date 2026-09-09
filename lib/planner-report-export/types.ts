@@ -217,9 +217,19 @@ export type PlannerExportPortfolioGroup = {
   }[];
 };
 
+export type PlannerExportBuilderSection = {
+  documentType: "proposal" | "report";
+  digitalLines: PlannerExportOnlineLine[];
+  oohLines: PlannerExportMediaRow[];
+  /** kind: "custom" — 카탈로그 외 실집행 행 */
+  customLines: PlannerExportMediaRow[];
+  charts: PlannerExportCharts;
+  insights?: PlannerExportOnlineInsights;
+};
+
 export type PlannerReportExportPayload = {
-  /** ooh = 클래식 플래너, integrated = 통합 플래너 */
-  kind: "ooh" | "integrated";
+  /** ooh = 클래식 플래너, integrated = 통합 플래너, builder = 캠페인 빌더 */
+  kind: "ooh" | "integrated" | "builder";
   isKo: boolean;
   documentTitle: string;
   /** slim 헤더·표지용 캠페인명 (없으면 목표명 사용) */
@@ -295,6 +305,8 @@ export type PlannerReportExportPayload = {
   onlineSection?: PlannerExportOnlineSection;
   /** PR6-b — cart channel mix driving payload builder */
   reportComposition?: PlannerReportComposition;
+  /** 캠페인 빌더 export — kind === "builder" 일 때 본문 SSOT */
+  builderSection?: PlannerExportBuilderSection;
   disclaimer: string;
 };
 
@@ -370,7 +382,18 @@ function resolveReportFileCampName(p: PlannerReportExportPayload): string | null
  */
 export function plannerReportFileBase(p: PlannerReportExportPayload): string {
   const date = new Date().toISOString().slice(0, 10);
-  const word = p.isKo ? "제안서" : "proposal";
+  const word =
+    p.kind === "builder"
+      ? p.builderSection?.documentType === "report"
+        ? p.isKo
+          ? "리포트"
+          : "report"
+        : p.isKo
+          ? "제안서"
+          : "proposal"
+      : p.isKo
+        ? "제안서"
+        : "proposal";
   const camp = resolveReportFileCampName(p);
   if (camp) {
     return `THINKAD_${camp}_${word}_${date}`;
@@ -385,10 +408,12 @@ export function isPlannerReportExportPayload(
   if (!v || typeof v !== "object") return false;
   const p = v as Record<string, unknown>;
   return (
-    (p.kind === "ooh" || p.kind === "integrated") &&
+    (p.kind === "ooh" || p.kind === "integrated" || p.kind === "builder") &&
     typeof p.isKo === "boolean" &&
     typeof p.documentTitle === "string" &&
     Array.isArray(p.kpis) &&
-    Array.isArray(p.portfolio)
+    Array.isArray(p.portfolio) &&
+    (p.kind !== "builder" ||
+      (typeof p.builderSection === "object" && p.builderSection !== null))
   );
 }

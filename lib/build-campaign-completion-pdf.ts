@@ -14,6 +14,10 @@ import {
   formatImpressionsCompact,
   formatVariancePct,
 } from "@/lib/prediction-accuracy";
+import {
+  campaignReportPdfPalette,
+  type PlannerReportStyle,
+} from "@/lib/planner-report-export/document-theme";
 
 export type CompletionPdfSchedule = {
   title: string;
@@ -67,15 +71,33 @@ export type BuildCampaignCompletionPdfParams = {
   aiMediaDetailKo?: string | null;
   aiPerformanceKo?: string | null;
   aiInsightsKo?: string | null;
+  /** document-theme.ts 스타일 (기본 brand). 구조는 유지, 색만 교체. */
+  style?: PlannerReportStyle | string | null;
 };
 
-// ── 디자인 토큰 (검정 + 주황 #FF6600 통일) ──
-const C_BLACK: [number, number, number] = [0, 0, 0];
-const C_WHITE: [number, number, number] = [255, 255, 255];
-const C_ACCENT: [number, number, number] = [255, 102, 0]; // #FF6600
-const C_OFF: [number, number, number] = [245, 245, 245];
-const C_GRAY: [number, number, number] = [115, 115, 115];
-const C_GRAY_LIGHT: [number, number, number] = [200, 200, 200];
+// ── 디자인 토큰 (document-theme.ts — 기본 brand 딥틸) ──
+type Rgb = [number, number, number];
+let C_BLACK: Rgb = [13, 27, 46];
+const C_WHITE: Rgb = [255, 255, 255];
+let C_ACCENT: Rgb = [13, 148, 136];
+let C_OFF: Rgb = [248, 250, 252];
+let C_GRAY: Rgb = [100, 116, 139];
+let C_GRAY_LIGHT: Rgb = [203, 213, 225];
+let C_COVER: Rgb = [13, 27, 46];
+let C_COVER_TEXT: Rgb = [255, 255, 255];
+let C_COVER_MUTED: Rgb = [203, 213, 225];
+
+function applyCampaignPdfTheme(style?: PlannerReportStyle | string | null) {
+  const pal = campaignReportPdfPalette(style);
+  C_ACCENT = pal.accent;
+  C_BLACK = pal.ink;
+  C_OFF = pal.paperMuted;
+  C_GRAY = pal.slate;
+  C_GRAY_LIGHT = pal.coverMuted;
+  C_COVER = pal.coverBg;
+  C_COVER_TEXT = pal.coverText;
+  C_COVER_MUTED = pal.coverMuted;
+}
 
 // A4 portrait
 const PAGE_W = 210;
@@ -241,7 +263,7 @@ function drawCoverPage(
   p: BuildCampaignCompletionPdfParams,
   totalPages: number,
 ) {
-  fillBg(doc, C_BLACK);
+  fillBg(doc, C_COVER);
 
   // 좌측 4mm 주황 액센트 바 (전체 높이)
   setColor(doc, "fill", C_ACCENT);
@@ -252,12 +274,12 @@ function drawCoverPage(
 
   doc.setFont("courier", "normal");
   doc.setFontSize(8);
-  setColor(doc, "text", [255, 255, 255]);
+  setColor(doc, "text", C_COVER_TEXT);
   doc.text("OOH MEDIA PLATFORM", MARGIN_X, 30);
 
   doc.setFont("courier", "bold");
   doc.setFontSize(8);
-  setColor(doc, "text", [255, 255, 255]);
+  setColor(doc, "text", C_COVER_TEXT);
   doc.text(`01 / ${String(totalPages).padStart(2, "0")}`, PAGE_W - MARGIN_X, 24, {
     align: "right",
   });
@@ -268,13 +290,13 @@ function drawCoverPage(
   // 보고서 라벨
   doc.setFont(fam, "normal");
   doc.setFontSize(11);
-  setColor(doc, "text", [255, 255, 255]);
+  setColor(doc, "text", C_COVER_TEXT);
   doc.text("OOH 광고 성과 보고서", MARGIN_X, 78);
 
   // 캠페인명 (큰 타이포)
   doc.setFont(fam, hasKrFont ? "normal" : "bold");
   doc.setFontSize(28);
-  setColor(doc, "text", C_WHITE);
+  setColor(doc, "text", C_COVER_TEXT);
   const titleLines = doc.splitTextToSize(
     p.campaignName || "캠페인명",
     CONTENT_W,
@@ -322,14 +344,14 @@ function drawCoverPage(
   ];
 
   // 상단 구분선
-  accentLine(doc, MARGIN_X, metaY - 8, PAGE_W - MARGIN_X, 0.3, [80, 80, 80]);
+  accentLine(doc, MARGIN_X, metaY - 8, PAGE_W - MARGIN_X, 0.3, C_COVER_MUTED);
 
   cells.forEach((cell, i) => {
     const cx = MARGIN_X + colW * i;
-    monoLabel(doc, fam, cell.label, cx, metaY, 7, [180, 180, 180]);
+    monoLabel(doc, fam, cell.label, cx, metaY, 7, C_COVER_MUTED);
     doc.setFont(fam, hasKrFont ? "normal" : "bold");
     doc.setFontSize(13);
-    setColor(doc, "text", cell.accent ? C_ACCENT : C_WHITE);
+    setColor(doc, "text", cell.accent ? C_ACCENT : C_COVER_TEXT);
     const lines = cell.value.split("\n");
     let cy = metaY + 7;
     for (const ln of lines) {
@@ -341,7 +363,7 @@ function drawCoverPage(
   // 푸터
   doc.setFont("courier", "normal");
   doc.setFontSize(8);
-  setColor(doc, "text", [180, 180, 180]);
+  setColor(doc, "text", C_COVER_MUTED);
   doc.text(
     "THINKAD · 02-515-2772 · mannote@tkad.co.kr",
     MARGIN_X,
@@ -1000,6 +1022,7 @@ function drawFooters(doc: jsPDF, fam: string) {
 export async function createCampaignCompletionPdfDoc(
   p: BuildCampaignCompletionPdfParams,
 ): Promise<jsPDF> {
+  applyCampaignPdfTheme(p.style);
   const { default: JsPDF } = await import("jspdf");
   const doc = new JsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const hasKrFont = registerNotoSansKrIfAvailable(doc);
@@ -1024,12 +1047,12 @@ export async function createCampaignCompletionPdfDoc(
   // 표지의 페이지 인디케이터 갱신 — 다시 그림 (이중 그리기 방지 위해 페이지 1 만 부분 덮기)
   doc.setPage(1);
   const totalPages = doc.getNumberOfPages();
-  // 우측 상단의 "01 / NN" 부분만 새로 덮어쓰기 (검정 배경)
-  setColor(doc, "fill", C_BLACK);
+  // 우측 상단의 "01 / NN" 부분만 새로 덮어쓰기 (표지 배경)
+  setColor(doc, "fill", C_COVER);
   doc.rect(PAGE_W - MARGIN_X - 30, 18, 30, 8, "F");
   doc.setFont("courier", "bold");
   doc.setFontSize(8);
-  setColor(doc, "text", C_WHITE);
+  setColor(doc, "text", C_COVER_TEXT);
   doc.text(
     `01 / ${String(totalPages).padStart(2, "0")}`,
     PAGE_W - MARGIN_X,

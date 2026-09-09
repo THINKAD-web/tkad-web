@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CompositionInput } from "@/components/ui/composition-input";
@@ -31,6 +31,11 @@ import {
   campaignReportPreviewHeader,
   selectedCampaignReportIdentity,
 } from "@/lib/admin-campaign-report-identity";
+import {
+  campaignCompletionReportHref,
+  postGenerateCampaignCompletionReport,
+} from "@/lib/admin-campaign-completion-client";
+import { parseAdminCampaignsReportQuery } from "@/lib/admin-reports-hub";
 
 const CampaignReportPreview = dynamic(() => import("@/components/campaign-report-preview"), { ssr: false });
 
@@ -100,7 +105,9 @@ type LinkedQuoteRow = {
 
 export default function AdminCampaignsPage() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const adminLocale = pathname.split("/")[1] || "ko";
+  const reportQuery = parseAdminCampaignsReportQuery(searchParams);
 
   const [list, setList] = useState<CampaignRow[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -201,6 +208,15 @@ export default function AdminCampaignsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const reportQueryApplied = useRef(false);
+  useEffect(() => {
+    if (reportQueryApplied.current) return;
+    if (!reportQuery.selectedId || list.length === 0) return;
+    reportQueryApplied.current = true;
+    void loadDetail(reportQuery.selectedId);
+    if (reportQuery.openPreview) setShowReportPreview(true);
+  }, [list, reportQuery.openPreview, reportQuery.selectedId]);
 
   const loadDetail = async (id: string) => {
     setSelectedId(id);
@@ -607,23 +623,8 @@ export default function AdminCampaignsPage() {
     }
     setPdfBusy(true);
     try {
-      const res = await fetch(
-        `/api/admin/campaigns/${selectedId}/generate-report`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ force: true }),
-        },
-      );
-      const j = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        emailed?: boolean;
-        reportGeneratedAt?: string | null;
-        skipped?: boolean;
-        reason?: string | null;
-      };
-      if (!res.ok) {
+      const j = await postGenerateCampaignCompletionReport(selectedId);
+      if (!j.ok) {
         window.alert(j.error ?? "리포트 생성·발송 실패");
         return;
       }
@@ -1109,6 +1110,12 @@ export default function AdminCampaignsPage() {
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
                     광고 진행 후 성과보고서
                   </p>
+                  <a
+                    href={`/${adminLocale}/admin/reports?type=campaign&step=2${selectedId ? `&campaignId=${selectedId}` : ""}`}
+                    className="font-mono text-[10px] underline-offset-2 hover:underline"
+                  >
+                    보고서 허브에서 같은 작업 →
+                  </a>
                   <div className="flex flex-wrap gap-0">
                     <button
                       type="button"
@@ -1119,7 +1126,7 @@ export default function AdminCampaignsPage() {
                       {showReportPreview ? "미리보기 닫기" : "보고서 미리보기"}
                     </button>
                     <a
-                      href={`/api/admin/campaigns/${selectedId}/completion-report`}
+                      href={campaignCompletionReportHref(selectedId)}
                       className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
                       target="_blank"
                       rel="noreferrer"

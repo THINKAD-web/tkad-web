@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  campaignReportPdfPalette,
+  campaignReportPreviewColors,
   getReportDocumentTheme,
   parsePlannerReportStyle,
   PLANNER_REPORT_STYLES,
@@ -25,6 +27,22 @@ test("all report styles expose pdf and pptx accent", () => {
 test("brand style uses deep teal accent", () => {
   const theme = getReportDocumentTheme("brand");
   assert.equal(theme.accent.toUpperCase(), "#0D9488");
+});
+
+test("campaign completion palette drops legacy orange", () => {
+  for (const style of PLANNER_REPORT_STYLES) {
+    const pdf = campaignReportPdfPalette(style);
+    const preview = campaignReportPreviewColors(style);
+    assert.notDeepEqual(pdf.accent, [255, 102, 0]);
+    assert.notEqual(preview.accent.toUpperCase(), "#FF6600");
+    assert.equal(preview.accent.toUpperCase(), "#0D9488");
+    assert.deepEqual(pdf.accent, [13, 148, 136]);
+  }
+  const brand = campaignReportPdfPalette("brand");
+  assert.deepEqual(brand.coverBg, brand.ink);
+  const minimal = campaignReportPdfPalette("minimal");
+  assert.deepEqual(minimal.coverBg, [255, 255, 255]);
+  assert.notDeepEqual(minimal.coverText, [255, 255, 255]);
 });
 
 test("chart palette no longer uses legacy amber", () => {

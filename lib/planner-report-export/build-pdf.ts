@@ -20,9 +20,7 @@ import { addPdfMediaDetailLink, addPdfRectLink } from "@/lib/planner-report-expo
 import { plannerChartColorRgb } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 import { formatExportBudgetWonLabel } from "@/lib/planner-report-export/format-export-money";
-import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import { footfallVsReachShortFootnote } from "@/lib/planner-report-performance-guide";
-import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import {
   filterExportSections,
   sectionVisible,
@@ -41,25 +39,28 @@ import {
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
 import type { PlannerExportKpi } from "@/lib/planner-report-export/types";
+import { campaignBuilderCopy } from "@/lib/admin-campaign-builder/copy-ko";
 import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
+import type { PlannerExportOnlineLine } from "@/lib/planner-report-export/types";
 import { onlinePlatformBadgePdfColors } from "@/lib/online/document-platform-badge-export";
+import {
+  BAR_TRACK,
+  createPdfDrawPrimitives,
+  GRAY_100,
+  GRAY_200,
+  GRAY_50,
+  GRAY_500,
+  GRAY_600,
+  INK,
+  R,
+  WHITE,
+} from "@/lib/planner-report-export/pdf-draw-primitives";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
  * 견적서 PDF(`build-korean-quote-pdf.ts`)와 동일한 서버 생성 패턴.
  * 색상·표지 레이아웃은 `document-theme.ts` SSOT.
  */
-
-const INK = [17, 24, 39] as const;
-const GRAY_600 = [75, 85, 99] as const;
-const GRAY_500 = [107, 114, 128] as const;
-const GRAY_200 = [228, 230, 236] as const;
-const GRAY_50 = [248, 249, 251] as const;
-const GRAY_100 = [238, 240, 244] as const;
-const WHITE = [255, 255, 255] as const;
-const BAR_TRACK = [243, 244, 246] as const;
-/** qp 각진 카드 — roundedRect radius mm (견적 PDF와 동일) */
-const R = 0;
 
 /** PR3 균형안 — 여백·타이포·카드 레이아웃 (미세조정은 이 객체만 수정) */
 export const PDF_LAYOUT = {
@@ -171,214 +172,325 @@ export async function buildPlannerReportPdf(
   const setDraw = (c: readonly number[]) => doc.setDrawColor(c[0]!, c[1]!, c[2]!);
 
   let y = 0;
+  const getY = () => y;
+  const setY = (next: number) => {
+    y = next;
+  };
 
-  /** 페이지 하단을 넘기면 새 페이지로 — need: 다음 블록 높이(mm) */
-  function ensure(need: number) {
-    if (y + need > pageH - PDF_LAYOUT.pageBottomReserveMm) {
-      doc.addPage();
-      y = M;
-    }
-  }
+  const {
+    ensure,
+    footer,
+    sectionTitle,
+    drawWordmark,
+    drawDonut,
+    drawShareBars,
+    drawBars,
+    drawPerformanceGuide,
+  } = createPdfDrawPrimitives({
+    doc,
+    font: FONT,
+    pageW,
+    pageH,
+    contentW,
+    marginMm: M,
+    isKo,
+    accentRgb: QP_ACCENT,
+    accentSoftRgb: QP_ACCENT_SOFT,
+    inkRgb: QP_INK,
+    wordmarkOnDark,
+    pageBottomReserveMm: PDF_LAYOUT.pageBottomReserveMm,
+    footerYm: PDF_LAYOUT.footerYm,
+    setFill,
+    setText,
+    setDraw,
+    getY,
+    setY,
+  });
 
-  function footer() {
-    const pages = doc.getNumberOfPages();
-    // 표지(1p) 제외, 본문 페이지에만 푸터.
-    for (let i = 2; i <= pages; i++) {
-      doc.setPage(i);
-      doc.setFont(FONT, "normal");
-      doc.setFontSize(7);
-      setText(GRAY_500);
-      doc.text("THINKAD CAMPAIGN PLANNER", M, pageH - PDF_LAYOUT.footerYm);
-      doc.text(`${i - 1} / ${pages - 1}`, pageW - M, pageH - PDF_LAYOUT.footerYm, {
-        align: "right",
-      });
-    }
-  }
+  if (p.kind === "builder" && p.builderSection) {
+    const bs = p.builderSection;
+    const copy = campaignBuilderCopy[bs.documentType];
+    const subtitle = reportExportCoverSubtitle(isKo, {
+      kind: p.kind,
+      builderDocumentType: bs.documentType,
+    });
+    const fmtWon = (n: number) =>
+      `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
+    const consult = isKo ? "별도 협의" : "Consultation";
 
-  function sectionTitle(label: string, followingBlockMm = 0) {
-    ensure(14 + followingBlockMm);
-    doc.setFont(FONT, "normal");
-    doc.setFontSize(11);
-    setFill(QP_ACCENT);
-    doc.rect(M, y, 1.6, 5.2, "F");
-    setText(INK);
-    doc.text(label, M + 4, y + 4.6);
-    y += 9;
-  }
-
-  /** THINKAD 워드마크 */
-  function drawWordmark(x: number, baseY: number, size: number) {
-    doc.setFont(FONT, "normal");
-    doc.setFontSize(size);
-    if (wordmarkOnDark) {
+    const drawSimpleTable = (
+      title: string,
+      cols: { label: string; w: number }[],
+      rows: string[][],
+    ) => {
+      if (!rows.length) return;
+      if (title) sectionTitle(title);
+      ensure(9);
+      setFill(QP_INK);
+      doc.rect(M, y, contentW, 7, "F");
+      doc.setFontSize(7.5);
       doc.setTextColor(255, 255, 255);
-      doc.text("THINK", x, baseY);
-      const w = doc.getTextWidth("THINK");
-      setText(QP_ACCENT);
-      doc.text("AD", x + w, baseY);
-    } else {
-      setText(QP_INK);
-      doc.text("THINK", x, baseY);
-      const w = doc.getTextWidth("THINK");
-      setText(QP_ACCENT);
-      doc.text("AD", x + w, baseY);
-    }
-  }
-
-  /** 도넛 차트 (삼각형 팬 + 중앙 흰 원) */
-  function drawDonut(
-    cx: number,
-    cy: number,
-    rOut: number,
-    rIn: number,
-    segs: { label: string; value: number; colorKey?: string }[],
-  ) {
-    const total = segs.reduce((s, d) => s + d.value, 0);
-    if (total <= 0) return;
-    let a0 = -Math.PI / 2;
-    segs.forEach((seg, i) => {
-      const a1 = a0 + (seg.value / total) * 2 * Math.PI;
-      const c = plannerChartColorRgb(seg.colorKey, i);
-      doc.setFillColor(c[0]!, c[1]!, c[2]!);
-      const steps = Math.max(2, Math.ceil((a1 - a0) / 0.1));
-      for (let s = 0; s < steps; s++) {
-        const t0 = a0 + ((a1 - a0) * s) / steps;
-        const t1 = a0 + ((a1 - a0) * (s + 1)) / steps;
-        doc.triangle(
-          cx,
-          cy,
-          cx + rOut * Math.cos(t0),
-          cy + rOut * Math.sin(t0),
-          cx + rOut * Math.cos(t1),
-          cy + rOut * Math.sin(t1),
-          "F",
-        );
+      let cx = M + 2;
+      for (const c of cols) {
+        doc.text(c.label, cx, y + 4.8);
+        cx += c.w;
       }
-      a0 = a1;
-    });
-    doc.setFillColor(255, 255, 255);
-    doc.circle(cx, cy, rIn, "F");
-  }
-
-  /** 가로 막대 — 비중(%) 표시 */
-  function drawShareBars(
-    x: number,
-    w: number,
-    rows: PlannerExportChartDatum[],
-  ) {
-    const labelW = 30;
-    const valW = 20;
-    const barX = x + labelW;
-    const barW = w - labelW - valW;
-    rows.forEach((row, i) => {
-      ensure(7);
-      const pct = row.pct ?? 0;
-      doc.setFont(FONT, "normal");
-      doc.setFontSize(8);
-      setText(GRAY_600);
-      doc.text(
-        (doc.splitTextToSize(row.label, labelW - 2) as string[]).slice(0, 1),
-        x,
-        y + 3,
-      );
-      doc.setFillColor(GRAY_100[0], GRAY_100[1], GRAY_100[2]);
-      doc.roundedRect(barX, y, barW, 3.2, R, R, "F");
-      const barRgb = plannerChartColorRgb(row.colorKey, i);
-      doc.setFillColor(barRgb[0]!, barRgb[1]!, barRgb[2]!);
-      doc.roundedRect(barX, y, Math.max(2, (barW * pct) / 100), 3.2, R, R, "F");
-      setText(INK);
-      doc.text(formatPlannerSharePct(pct), x + w, y + 3, { align: "right" });
       y += 7;
-    });
-  }
-
-  /** 가로 막대 차트 */
-  function drawBars(
-    x: number,
-    w: number,
-    rows: { label: string; value: number; colorKey?: string }[],
-    color: readonly number[],
-    perRowColor = false,
-  ) {
-    const max = Math.max(1, ...rows.map((r) => r.value));
-    const labelW = 30;
-    const valW = 26;
-    const barX = x + labelW;
-    const barW = w - labelW - valW;
-    rows.forEach((row, i) => {
-      ensure(7);
-      doc.setFont(FONT, "normal");
       doc.setFontSize(8);
-      setText(GRAY_600);
-      doc.text(
-        (doc.splitTextToSize(row.label, labelW - 2) as string[]).slice(0, 1),
-        x,
-        y + 3,
-      );
-      doc.setFillColor(GRAY_100[0], GRAY_100[1], GRAY_100[2]);
-      doc.roundedRect(barX, y, barW, 3.2, R, R, "F");
-      const barRgb = perRowColor ? plannerChartColorRgb(row.colorKey, i) : color;
-      doc.setFillColor(barRgb[0]!, barRgb[1]!, barRgb[2]!);
-      doc.roundedRect(barX, y, Math.max(2, (barW * row.value) / max), 3.2, R, R, "F");
-      setText(INK);
-      doc.text(fmtImp(row.value, isKo), x + w, y + 3, { align: "right" });
-      y += 7;
-    });
-  }
-
-  function drawPerformanceGuide(guide: PlannerPerformanceGuide) {
-    const colCount = guide.table.headers.length;
-    const labelColW = 34;
-    const dataColW = (contentW - labelColW) / Math.max(1, colCount - 1);
-    const rowH = 6.5;
-
-    ensure(10 + guide.bullets.length * 8);
-    doc.setFont(FONT, "bold");
-    doc.setFontSize(9);
-    setText(QP_ACCENT);
-    doc.text(guide.title, M, y + 3);
-    y += 7;
-
-    setFill(QP_ACCENT_SOFT);
-    doc.roundedRect(M, y, contentW, rowH + guide.table.rows.length * rowH + 2, R, R, "F");
-
-    doc.setFont(FONT, "bold");
-    doc.setFontSize(7.5);
-    setText(QP_ACCENT);
-    guide.table.headers.forEach((h, i) => {
-      const x =
-        i === 0 ? M + 2 : M + labelColW + (i - 1) * dataColW + 1;
-      const w = i === 0 ? labelColW - 2 : dataColW - 2;
-      doc.text(h, x, y + 4.5, { maxWidth: w });
-    });
-    y += rowH;
-
-    doc.setFont(FONT, "normal");
-    guide.table.rows.forEach((row) => {
-      setText(GRAY_600);
-      doc.text(row.label, M + 2, y + 4.5, { maxWidth: labelColW - 3 });
-      row.cells.forEach((cell, i) => {
-        setText(INK);
-        doc.setFont(FONT, "bold");
-        doc.text(cell, M + labelColW + i * dataColW + 1, y + 4.5, {
-          maxWidth: dataColW - 2,
+      rows.forEach((cells, idx) => {
+        ensure(7);
+        if (idx % 2 === 1) {
+          setFill(GRAY_50);
+          doc.rect(M, y, contentW, 7, "F");
+        }
+        let dx = M + 2;
+        cells.forEach((cell, i) => {
+          setText(i === 0 ? INK : GRAY_600);
+          doc.text(
+            (doc.splitTextToSize(cell, (cols[i]?.w ?? 20) - 3) as string[]).slice(
+              0,
+              1,
+            ),
+            dx,
+            y + 4.6,
+          );
+          dx += cols[i]?.w ?? 20;
         });
-        doc.setFont(FONT, "normal");
+        y += 7;
       });
-      y += rowH;
-    });
-    y += 5;
+      y += 4;
+    };
 
+    const drawDigitalTable = (lines: PlannerExportOnlineLine[]) => {
+      if (!lines.length) return;
+      sectionTitle(copy.sectionTitles.estimateProducts);
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(8.5);
+      setText(GRAY_600);
+      const noticeLines = doc.splitTextToSize(copy.estimateNotice, contentW) as string[];
+      ensure(noticeLines.length * 4.5 + 2);
+      doc.text(noticeLines, M, y + 3);
+      y += noticeLines.length * 4.5 + 4;
+
+      const cols = [
+        { label: isKo ? "매체" : "Media", w: contentW * 0.22 },
+        { label: isKo ? "플랫폼" : "Platform", w: contentW * 0.14 },
+        { label: isKo ? "과금" : "Pricing", w: contentW * 0.16 },
+        { label: isKo ? "예산" : "Budget", w: contentW * 0.16 },
+        { label: isKo ? "예상 도달" : "Est. reach", w: contentW * 0.16 },
+        { label: isKo ? "예상 클릭" : "Est. clicks", w: contentW * 0.16 },
+      ];
+      drawSimpleTable(
+        "",
+        cols,
+        lines.map((row) => [
+          row.name,
+          row.platform ?? "—",
+          row.pricingLabel,
+          fmtWon(row.budgetWon),
+          row.reachLabel ?? consult,
+          row.clicksLabel ?? consult,
+        ]),
+      );
+    };
+
+    const drawMediaRowsTable = (
+      title: string,
+      rows: PlannerExportMediaRow[],
+      notice?: string,
+    ) => {
+      if (!rows.length) return;
+      sectionTitle(title);
+      if (notice) {
+        doc.setFont(FONT, "normal");
+        doc.setFontSize(8.5);
+        setText(GRAY_600);
+        const noticeLines = doc.splitTextToSize(notice, contentW) as string[];
+        ensure(noticeLines.length * 4.5 + 2);
+        doc.text(noticeLines, M, y + 3);
+        y += noticeLines.length * 4.5 + 4;
+      }
+      const cols = [
+        { label: isKo ? "매체" : "Media", w: contentW * 0.34 },
+        { label: isKo ? "유형/지역" : "Type/Region", w: contentW * 0.22 },
+        { label: isKo ? "예산/가격" : "Budget/Price", w: contentW * 0.2 },
+        { label: isKo ? "비고" : "Notes", w: contentW * 0.24 },
+      ];
+      drawSimpleTable(
+        "",
+        cols,
+        rows.map((row) => [
+          row.name,
+          [row.type, row.region].filter(Boolean).join(" · ") || "—",
+          row.priceLabel ?? "—",
+          row.notes ?? row.metricsUnavailableLabel ?? "—",
+        ]),
+      );
+    };
+
+    const drawInsightBullets = (title: string, lines: readonly string[]) => {
+      if (!lines.length) return;
+      sectionTitle(title);
+      for (const line of lines) {
+        const wrapped = doc.splitTextToSize(line, contentW - 5) as string[];
+        ensure(wrapped.length * 4.6 + 2);
+        setFill(QP_ACCENT);
+        doc.circle(M + 1.2, y + 1.6, 0.7, "F");
+        setText(GRAY_600);
+        doc.text(wrapped, M + 4, y + 3);
+        y += wrapped.length * 4.6 + 1.5;
+      }
+      y += 2;
+    };
+
+    setFill(COVER_BG);
+    doc.rect(0, 0, pageW, pageH, "F");
+    if (theme.topAccentBar) {
+      setFill(QP_ACCENT);
+      doc.rect(0, 0, pageW, theme.coverMode === "minimal" ? 1.2 : 3, "F");
+    }
+    if (theme.coverMode === "filled") {
+      setFill(QP_INK);
+      doc.rect(0, 3, pageW, 1.4, "F");
+    }
+
+    drawWordmark(M, 50, 26);
+    doc.setFont(FONT, "normal");
+    setText(COVER_MUTED);
+    doc.setFontSize(10);
+    doc.text("CAMPAIGN BUILDER", M, 58);
+    setText(COVER_TEXT);
+    doc.setFontSize(28);
+    const titleLines = doc.splitTextToSize(p.documentTitle, contentW) as string[];
+    doc.text(titleLines, M, 92);
+    setFill(QP_ACCENT);
+    doc.rect(M, 92 + titleLines.length * 11, 28, 1.6, "F");
+    doc.setFontSize(13);
+    setText(COVER_MUTED);
+    doc.text(subtitle, M, 104 + titleLines.length * 11);
+    if (p.clientName) {
+      doc.setFontSize(13);
+      setText(COVER_TEXT);
+      doc.text(
+        `${p.clientName} ${isKo ? "귀중" : ""}`.trim(),
+        M,
+        pageH - 40,
+      );
+    }
+    doc.setFontSize(10);
+    setText(COVER_MUTED);
+    doc.text(p.generatedAt, M, pageH - 28);
+    doc.text(
+      `THINKAD (싱커드)   ·   ${CONTACT_EMAIL}   ·   02-515-2772`,
+      M,
+      pageH - 21,
+    );
+
+    doc.addPage();
+    y = 0;
+    setFill(QP_ACCENT);
+    doc.rect(0, 0, pageW, 26, "F");
+    setFill(QP_INK);
+    doc.rect(0, 26, pageW, 1.4, "F");
+    drawWordmark(M, 11, 12);
     doc.setFont(FONT, "normal");
     doc.setFontSize(8);
-    setText(GRAY_600);
-    for (const line of guide.bullets) {
-      const wrapped = doc.splitTextToSize(`• ${line}`, contentW - 4) as string[];
-      ensure(wrapped.length * 4.5 + 2);
-      doc.text(wrapped, M + 2, y + 3);
-      y += wrapped.length * 4.2 + 1.5;
+    setText(QP_ON_ACCENT_MUTED);
+    const headSub = [p.clientName, p.campaignName].filter(Boolean).join("  ·  ");
+    if (headSub) doc.text(headSub, M, 19);
+    doc.text(p.generatedAt, pageW - M, 11, { align: "right" });
+    doc.text(p.documentTitle, pageW - M, 19, { align: "right" });
+    y = 38;
+
+    if (p.kpis.length) {
+      ensure(20);
+      const kpis = p.kpis.slice(0, 4);
+      const kW = contentW / kpis.length;
+      kpis.forEach((k, i) => {
+        const x = M + kW * i;
+        setFill(GRAY_50);
+        doc.roundedRect(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm, R, R, "F");
+        doc.setFont(FONT, "normal");
+        doc.setFontSize(PDF_LAYOUT.kpiLabelPt);
+        setText(GRAY_500);
+        doc.text(k.label, x + 4, y + 5.5);
+        setText(QP_ACCENT);
+        doc.setFontSize(PDF_LAYOUT.kpiValuePt);
+        const vLines = doc.splitTextToSize(k.value, kW - 7) as string[];
+        doc.text(vLines.slice(0, 1), x + 4, y + 11);
+        drawKpiBadge(doc, k, x + 4, y + 13.5, kW - 7, isKo);
+      });
+      y += 26;
     }
-    y += 3;
+
+    drawDigitalTable(bs.digitalLines);
+    drawMediaRowsTable(
+      isKo ? "OOH 매체" : "OOH media",
+      bs.oohLines,
+    );
+    drawMediaRowsTable(
+      copy.sectionTitles.executionGroup,
+      bs.customLines,
+      copy.executionNotice,
+    );
+
+    const budgetSplit = bs.charts.budgetSplit ?? p.charts?.budgetSplit;
+    if (budgetSplit?.length) {
+      sectionTitle(isKo ? "채널 예산 구성" : "Channel budget mix", 46);
+      ensure(46);
+      doc.setFontSize(8);
+      setText(GRAY_500);
+      doc.text(isKo ? "디지털 채널 예산 비중" : "Digital budget share", M, y + 2);
+      drawDonut(M + 22, y + 26, 18, 10, budgetSplit);
+      y += 50;
+      drawShareBars(M, contentW, budgetSplit);
+      y += 4;
+    }
+
+    if (bs.insights) {
+      sectionTitle(copy.sectionTitles.insightsGroup);
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(8.5);
+      setText(GRAY_600);
+      const hintLines = doc.splitTextToSize(copy.insightsHint, contentW) as string[];
+      ensure(hintLines.length * 4.5 + 2);
+      doc.text(hintLines, M, y + 3);
+      y += hintLines.length * 4.5 + 4;
+
+      const pacingLines = bs.insights.pacingPlan.map(
+        (ph) => `${ph.label} (${ph.sharePct}%) — ${ph.description}`,
+      );
+      drawInsightBullets(isKo ? "소진 페이스" : "Spend pace", pacingLines);
+      drawInsightBullets(
+        isKo ? "소재 방향" : "Creative direction",
+        bs.insights.creativeDirections,
+      );
+      drawInsightBullets(
+        isKo ? "운영 메모" : "Operations notes",
+        bs.insights.operationalNotes,
+      );
+      const disc = doc.splitTextToSize(bs.insights.disclaimer, contentW) as string[];
+      ensure(disc.length * 4 + 4);
+      doc.setFontSize(7.5);
+      setText(GRAY_500);
+      doc.text(disc, M, y + 2);
+      y += disc.length * 4 + 6;
+    }
+
+    ensure(14);
+    y += 2;
+    setDraw(GRAY_200);
+    doc.line(M, y, pageW - M, y);
+    y += 5;
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(7.5);
+    setText(GRAY_500);
+    const disc = doc.splitTextToSize(p.disclaimer, contentW) as string[];
+    doc.text(disc, M, y + 2);
+
+    footer();
+    const ab = doc.output("arraybuffer") as ArrayBuffer;
+    return new Uint8Array(ab);
   }
 
   const subtitle = reportExportCoverSubtitle(isKo, {

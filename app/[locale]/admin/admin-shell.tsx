@@ -114,7 +114,7 @@ const navDefs: NavDef[] = [
   { href: "/admin/ai-usage", key: "aiUsage", icon: Coins },
   { href: "/admin/trust-metrics", key: "trustMetrics", icon: TrendingUp },
   { href: "/admin/ab-test", key: "abTest", icon: FlaskConical },
-  { href: "/admin/reports/new", key: "trendReports", icon: FileText },
+  { href: "/admin/reports", key: "trendReports", icon: FileText },
   { href: "/admin/academy/new", key: "academyNew", icon: Sparkles },
   { href: "/admin/content", key: "content", icon: FileText },
   { href: "/admin/content-seed", key: "contentSeed", icon: Sparkles },
@@ -200,6 +200,9 @@ export default function AdminShell({ children }: { children: ReactNode }) {
     }
     if (href === "/admin/health") {
       return pathWithoutLocale.startsWith("/admin/health");
+    }
+    if (href === "/admin/reports") {
+      return pathWithoutLocale.startsWith("/admin/reports");
     }
     return pathWithoutLocale.startsWith(href);
   };

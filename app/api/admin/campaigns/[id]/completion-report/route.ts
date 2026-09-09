@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb } from "@/lib/admin-guard";
 import { campaignCompletionPdfToBuffer } from "@/lib/build-campaign-completion-pdf";
+import { parsePlannerReportStyle } from "@/lib/planner-report-export/document-theme";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     return new Response("Not found", { status: 404 });
   }
 
+  const style = parsePlannerReportStyle(request.nextUrl.searchParams.get("style"));
   const buf = await campaignCompletionPdfToBuffer({
     campaignName: c.name,
     clientCompany: c.clientCompany,
@@ -67,6 +69,7 @@ export async function GET(request: NextRequest, { params }: Params) {
         (b.media as { trafficPattern?: { hourly?: number[]; weekly?: number[]; monthly?: number[] } | null } | null | undefined)
           ?.trafficPattern ?? null,
     })),
+    style,
   });
 
   const filename = buildClientReportFilename(c.clientCompany);
