@@ -283,7 +283,7 @@ export default function AdminAiContentPage() {
               className="w-full"
               asChild
             >
-              <Link href={`/${locale}/admin/reports/new`}>
+              <Link href={`/${locale}/admin/reports?type=trend&step=2`}>
                 트렌드 리포트 작성 (Tavily+AI)
               </Link>
             </Button>

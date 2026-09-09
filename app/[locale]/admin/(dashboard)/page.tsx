@@ -6,6 +6,7 @@ import {
   Calculator,
   ClipboardList,
   FileBarChart,
+  FileText,
   Megaphone,
   MessageSquareText,
   Monitor,
@@ -21,6 +22,7 @@ import { AdminWebVitalsCard } from "@/components/admin/admin-web-vitals-card";
 import { AdminBrokenImagesCard } from "@/components/admin/admin-broken-images-card";
 import { AdminSystemStatusCard } from "@/components/admin/admin-system-status-card";
 import { loadWebVitalsSummary } from "@/lib/web-vitals-summary";
+import { buildAdminReportsHubLandingPath } from "@/lib/admin-reports-hub";
 
 export const dynamic = "force-dynamic";
 
@@ -138,14 +140,19 @@ export default async function AdminOverviewPage({ params }: Props) {
       icon: FileSignature,
     },
     {
-      href: `${prefix}/admin/reports/new`,
-      label: "트렌드 리포트",
-      icon: FileBarChart,
+      href: `${prefix}${buildAdminReportsHubLandingPath("proposal")}`,
+      label: "매체 제안서",
+      icon: FileText,
     },
     {
-      href: `${prefix}/admin/campaigns`,
+      href: `${prefix}${buildAdminReportsHubLandingPath("campaign")}`,
       label: "캠페인 성과보고서",
       icon: Megaphone,
+    },
+    {
+      href: `${prefix}${buildAdminReportsHubLandingPath("trend")}`,
+      label: "트렌드 리포트",
+      icon: FileBarChart,
     },
   ];
 

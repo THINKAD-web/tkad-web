@@ -12,6 +12,12 @@ test("campaigns is P2 so it stays in the frequent-use row", () => {
   assert.ok(ADMIN_NAV_PRIORITY_2.includes("campaigns"));
 });
 
+test("content group keeps reports hub entry", () => {
+  const content = adminNavGroupDefs.find((g) => g.id === "content");
+  assert.ok(content);
+  assert.ok(content.itemKeys.includes("trendReports"));
+});
+
 test("quotes group lists campaigns first among remaining P3 items only", () => {
   const quotes = adminNavGroupDefs.find((g) => g.id === "quotes");
   assert.ok(quotes);

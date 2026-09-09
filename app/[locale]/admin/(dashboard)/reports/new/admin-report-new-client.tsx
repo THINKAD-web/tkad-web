@@ -24,7 +24,11 @@ function bulletsFromLines(text: string): string[] {
     .filter(Boolean);
 }
 
-export default function AdminReportNewClient() {
+export default function AdminReportNewClient({
+  compact = false,
+}: {
+  compact?: boolean;
+} = {}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const logId = useId();
@@ -264,7 +268,7 @@ export default function AdminReportNewClient() {
   }
 
   return (
-    <div className="space-y-6 p-6 text-foreground">
+    <div className={`space-y-6 text-foreground ${compact ? "" : "p-6"}`}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/80">
@@ -278,6 +282,9 @@ export default function AdminReportNewClient() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/${locale}/admin/reports`}>보고서 허브</Link>
+          </Button>
           <Button variant="outline" size="sm" asChild>
             <Link href={`/${locale}/admin/ai-content`}>AI 콘텐츠 목록</Link>
           </Button>
