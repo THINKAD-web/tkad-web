@@ -12,15 +12,23 @@
   position: relative;
   isolation: isolate;
   background: var(--ooh-hero-navy-0);
-  /* Room for headline + lead + AI prompt + chips */
-  aspect-ratio: 3 / 5;
+  /* Mobile: grow with content (headline + lead + AI prompt + chips) */
   min-height: 28rem;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 640px) {
   .ooh-home-hero {
     aspect-ratio: 16 / 10;
     min-height: 0;
+    display: block;
+  }
+
+  .ooh-home-hero__content {
+    position: absolute;
+    inset: 0;
+    justify-content: center;
   }
 }
 
@@ -126,15 +134,12 @@
 }
 
 .ooh-home-hero__content {
-  position: absolute;
-  inset: 0;
   z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 1.5rem 1.25rem 2.75rem;
   text-align: center;
+  padding: 1.5rem 1.25rem 2.75rem;
 }
 
 @media (min-width: 768px) {
@@ -416,5 +421,38 @@
 @media (min-width: 768px) {
   .ooh-home-hero__ai {
     margin-top: 1.15rem;
+  }
+}
+
+/* Mobile — content-driven height; no line-clamp truncation on lead */
+@media (max-width: 639px) {
+  .ooh-home-hero {
+    aspect-ratio: auto;
+  }
+
+  .ooh-home-hero__content {
+    position: relative;
+    inset: auto;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    padding: 1.25rem 1rem 3rem;
+  }
+
+  .ooh-home-hero__slogan {
+    font-size: clamp(1.2rem, 4.2vw + 0.55rem, 1.625rem);
+    line-height: 1.25;
+  }
+
+  .ooh-home-hero__lead {
+    display: block;
+    overflow: visible;
+    -webkit-box-orient: unset;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    font-size: clamp(0.8125rem, 2.8vw + 0.45rem, 0.875rem);
+  }
+
+  .ooh-home-hero__slide-img {
+    object-position: center 35%;
   }
 }
