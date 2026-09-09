@@ -12,6 +12,7 @@ import {
   MonitorSmartphone,
   Palette,
   Search,
+  Sparkles,
   Target,
   Trophy,
   Wand2,
@@ -88,7 +89,10 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
   {
     id: "planning",
     icon: ClipboardList,
-    items: [{ id: "media-planner", href: "/planner", icon: Lightbulb }],
+    items: [
+      { id: "ai-recommend", href: "/recommend", icon: Sparkles },
+      { id: "media-planner", href: "/planner", icon: Lightbulb },
+    ],
   },
   {
     id: "insights",

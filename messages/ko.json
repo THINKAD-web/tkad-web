@@ -137,8 +137,8 @@
     "thinkadOnline": "온라인 광고",
     "thinkadOnlineDesc": "검색·디스플레이·SNS·영상",
     "sidebarLabel": "사이트 메뉴",
-    "planner": "미디어 플래너",
-    "recommend": "AI 매체추천",
+    "planner": "제안서 만들기",
+    "recommend": "둘러보기",
     "packages": "패키지",
     "packagesDesc": "업종·목적별 검증 패키지",
     "packageProposal": "패키지 제안",
@@ -190,8 +190,8 @@
         "desc": "목적별 탐색 랜딩 · 카탈로그 축으로 찾기"
       },
       "media-planner": {
-        "label": "OOH 캠페인 플래너",
-        "desc": "예산·기간·매체 조합 설계"
+        "label": "제안서 만들기",
+        "desc": "믹스를 편집하고 제안서까지 완성합니다"
       },
       "integrated-planner": {
         "label": "고급 · OOH+디지털",
@@ -202,8 +202,8 @@
         "desc": "목적·지역별 사전 조합 패키지"
       },
       "ai-recommend": {
-        "label": "빠른 AI 추천",
-        "desc": "1분 즉시 매칭 · 단계별 설계는 플래너로"
+        "label": "둘러보기",
+        "desc": "조건 없이 빠르게 후보를 탐색합니다"
       },
       "creative-library": {
         "label": "소재 라이브러리",
@@ -3452,7 +3452,7 @@
       "speedMetric1Label": "브리프 → 믹스 → 결과",
       "speedMetric2Value": "{count}",
       "speedMetric2Label": "옥외·온라인 동시 비교",
-      "speedCtaPrimary": "플래너 시작",
+      "speedCtaPrimary": "제안서 만들기",
       "speedCtaSecondary": "매체 먼저 보기",
       "speedClose": "그 속도는, 입력 단계를 줄였기 때문입니다.",
       "stepsEyebrow": "3단계",
@@ -3474,7 +3474,7 @@
       "precisionExampleColGoal": "목적",
       "precisionExampleColBudget": "예산",
       "precisionHint": "자연어 한 줄로도, 필터로도 같은 조건을 넘길 수 있습니다.",
-      "precisionCta": "플래너에서 조건 넣기",
+      "precisionCta": "제안서 만들기에서 조건 넣기",
       "precisionClose": "조건이 정해지면, 견적과 계약까지 같은 흐름으로 이어집니다.",
       "quoteEyebrow": "Quote to launch",
       "quoteTitle": "광고주에게 간편한 견적·계약 경험을",
@@ -3501,7 +3501,7 @@
       "closeEyebrow": "Begin",
       "closeTitle": "지금 바로 옥외+온라인 통합 미디어 플래닝을 시작하세요",
       "closeLead": "5분 뒤, 팀에 공유할 초안이 남습니다.",
-      "closeCtaPrimary": "플래너 시작",
+      "closeCtaPrimary": "제안서 만들기",
       "closeCtaSecondary": "매체 먼저 보기",
       "closeNote": "검증 매체 · 투명 단가 · 통합 제안서"
     },
@@ -3525,8 +3525,8 @@
     "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
     "heroBannerSlogan": "광고, 손끝에서 5분 — OOH 플래너와 보고서까지.",
     "heroBannerLead": "실시간 단가 비교와 AI 추천, 전국 {count} 매체를 한 곳에서.",
-    "heroBannerCtaBrowse": "매체 둘러보기",
-    "heroBannerCtaAi": "AI 추천 시작",
+    "heroBannerCtaBrowse": "매체 검색",
+    "heroBannerCtaAi": "둘러보기",
     "heroLiveToday": "오늘 누적 노출",
     "heroLiveBrands": "활성 브랜드",
     "heroLiveResponse": "평균 응답",

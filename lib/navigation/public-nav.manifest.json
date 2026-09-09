@@ -16,6 +16,7 @@
       "id": "planning",
       "icon": "clipboard-list",
       "items": [
+        { "id": "ai-recommend", "href": "/recommend" },
         { "id": "media-planner", "href": "/planner" }
       ]
     },

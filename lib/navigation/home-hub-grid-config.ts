@@ -90,8 +90,8 @@ export const HOME_HUB_SECTIONS: HomeHubSection[] = [
       {
         id: "planner",
         href: "/planner",
-        labelKo: "미디어플래너",
-        labelEn: "Media planner",
+        labelKo: "제안서 만들기",
+        labelEn: "Create a proposal",
         icon: LayoutGrid,
       },
       {
@@ -104,8 +104,8 @@ export const HOME_HUB_SECTIONS: HomeHubSection[] = [
       {
         id: "ai-recommend",
         href: "/recommend",
-        labelKo: "AI 매체추천",
-        labelEn: "AI recommend",
+        labelKo: "둘러보기",
+        labelEn: "Browse picks",
         icon: Sparkles,
       },
       {

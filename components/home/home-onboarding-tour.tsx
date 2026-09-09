@@ -33,10 +33,10 @@ const STEPS: TourStep[] = [
   },
   {
     selector: '[data-tour="planning-group"]',
-    titleKo: "AI 플래너로 자동 설계",
-    titleEn: "Let AI plan for you",
-    descKo: "기획하기 → 미디어 플래너에서 예산·목표에 맞는 조합을 추천받으세요.",
-    descEn: "Planning → Media planner recommends the best mix for your goals.",
+    titleKo: "둘러보기와 제안서 만들기",
+    titleEn: "Browse picks or create a proposal",
+    descKo: "기획하기에서 둘러보기로 후보를 빠르게 보고, 믹스·제안서가 필요하면 제안서 만들기로 이어가세요.",
+    descEn: "Under Planning, browse picks quickly — then Create a proposal when you need a mix and a deck.",
   },
 ];
 

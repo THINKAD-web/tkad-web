@@ -137,8 +137,8 @@
     "thinkadOnline": "Online ads",
     "thinkadOnlineDesc": "Search, display, social & video",
     "sidebarLabel": "Site navigation",
-    "planner": "Media Planner",
-    "recommend": "AI media picks",
+    "planner": "Create a proposal",
+    "recommend": "Browse picks",
     "packages": "Packages",
     "packagesDesc": "Verified bundles by goal and region",
     "packageProposal": "Package proposals",
@@ -190,8 +190,8 @@
         "desc": "Goal-based browse landing · explore by purpose"
       },
       "media-planner": {
-        "label": "OOH campaign planner",
-        "desc": "Budget, timeline, and media mix"
+        "label": "Create a proposal",
+        "desc": "Edit the mix and finish a proposal"
       },
       "integrated-planner": {
         "label": "Advanced · OOH + digital",
@@ -202,8 +202,8 @@
         "desc": "Ready-made bundles by goal and region"
       },
       "ai-recommend": {
-        "label": "Quick AI picks",
-        "desc": "1-min instant match · step-by-step in Planner"
+        "label": "Browse picks",
+        "desc": "Explore candidates quickly, no brief required"
       },
       "creative-library": {
         "label": "Creative library",
@@ -3406,7 +3406,7 @@
       "speedMetric1Label": "Brief → mix → result",
       "speedMetric2Value": "{count}",
       "speedMetric2Label": "OOH & digital, side by side",
-      "speedCtaPrimary": "Start planner",
+      "speedCtaPrimary": "Create a proposal",
       "speedCtaSecondary": "Browse media first",
       "speedClose": "That pace comes from fewer inputs — not shortcuts.",
       "stepsEyebrow": "Three steps",
@@ -3428,7 +3428,7 @@
       "precisionExampleColGoal": "Goal",
       "precisionExampleColBudget": "Budget",
       "precisionHint": "One line of natural language or filters — same conditions either way.",
-      "precisionCta": "Set conditions in the planner",
+      "precisionCta": "Set conditions in Create a proposal",
       "precisionClose": "Once the brief is set, quote and contract follow the same path.",
       "quoteEyebrow": "Quote to launch",
       "quoteTitle": "A simpler path from quote to contract",
@@ -3455,7 +3455,7 @@
       "closeEyebrow": "Begin",
       "closeTitle": "Start integrated OOH + digital media planning now",
       "closeLead": "In about five minutes, you’ll have a draft to share with your team.",
-      "closeCtaPrimary": "Start planner",
+      "closeCtaPrimary": "Create a proposal",
       "closeCtaSecondary": "Browse media first",
       "closeNote": "Verified media · transparent rates · integrated proposal"
     },
@@ -3479,8 +3479,8 @@
     "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
     "heroBannerSlogan": "Ads in 5 minutes — from OOH planner to report.",
     "heroBannerLead": "Compare live rates, get AI picks, and browse {count} media nationwide — in one place.",
-    "heroBannerCtaBrowse": "Browse media",
-    "heroBannerCtaAi": "Start AI recommend",
+    "heroBannerCtaBrowse": "Search media",
+    "heroBannerCtaAi": "Browse picks",
     "heroLiveToday": "Today's impressions",
     "heroLiveBrands": "Active brands",
     "heroLiveResponse": "Avg. response",

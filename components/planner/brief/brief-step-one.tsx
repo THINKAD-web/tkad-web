@@ -117,8 +117,8 @@ const ENTRY_MODE_LABELS: Record<
     ko: "빠른 추천",
     en: "Quick recommend",
     desc: {
-      ko: "예산·지역만으로 매체 순위를 바로 확인합니다.",
-      en: "See media rankings with budget and region only.",
+      ko: "예산만으로 후보 순위를 바로 보고, 이어서 믹스를 고릅니다.",
+      en: "See ranked candidates from budget alone, then pick a mix.",
     },
   },
   detailed: {
