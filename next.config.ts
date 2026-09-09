@@ -131,7 +131,7 @@ const nextConfig: NextConfig = {
      * 정적 페이지 생성 워커 수. Next 16 기본값은 "최소 4 워커"를 강제하는데,
      * 각 워커가 NODE_OPTIONS(--max-old-space-size)를 상속해 8GB Vercel 빌더에서
      * OOM(SIGKILL)을 유발한다. Vercel 에서는 1 워커로 고정해 피크 RSS 를 낮춘다.
-     * (vercel-build heap 3072MB × 1 worker + webpack native ≈ 8GB 한도 내)
+     * (vercel-build heap 6144MB × 1 worker + webpack native ≈ 8GB Vercel 컨테이너 한도 내)
      */
     cpus: process.env.VERCEL === "1" ? 1 : undefined,
   },
