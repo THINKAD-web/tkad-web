@@ -3,12 +3,14 @@ import test from "node:test";
 import {
   ADMIN_REPORT_CLICK_PATHS,
   ADMIN_REPORTS_HUB_PATH,
+  DIGITAL_CAMPAIGN_REPORT_BUILDER_URL,
   buildAdminCampaignsReportPath,
   buildAdminReportsHubLandingPath,
   buildAdminReportsHubPath,
   parseAdminCampaignsReportQuery,
   parseAdminReportHubType,
 } from "@/lib/admin-reports-hub";
+import { sanitizeSsoReturnTo } from "@/lib/sso/return-to";
 
 test("parseAdminReportHubType accepts aliases", () => {
   assert.equal(parseAdminReportHubType("proposal"), "proposal");
@@ -17,6 +19,18 @@ test("parseAdminReportHubType accepts aliases", () => {
   assert.equal(parseAdminReportHubType("trend"), "trend");
   assert.equal(parseAdminReportHubType("nope"), null);
   assert.equal(parseAdminReportHubType(null), null);
+  assert.equal(parseAdminReportHubType("digital"), null);
+});
+
+test("Digital report builder is an external ops URL, not a hub track", () => {
+  assert.equal(
+    DIGITAL_CAMPAIGN_REPORT_BUILDER_URL,
+    "https://digital.tkad.co.kr/admin/campaign-report",
+  );
+  assert.equal(
+    sanitizeSsoReturnTo("/admin/campaign-report"),
+    "/admin/campaign-report",
+  );
 });
 
 test("dashboard cards land on hub step 2 for the chosen type", () => {

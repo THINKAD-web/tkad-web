@@ -1,11 +1,25 @@
 /**
- * Admin 보고서 허브 — 3트랙 진입 SSOT.
+ * Admin 보고서 허브 — 3트랙 진입 + Digital 리포트 빌더 외부 링크.
  * 실제 PDF/발송/트렌드 생성은 기존 API를 호출한다 (병렬 구현 금지).
+ * Digital 빌더는 dmpilot 복제가 아니라 운영 URL로만 연결한다.
  */
 
 export const ADMIN_REPORTS_HUB_PATH = "/admin/reports";
 export const ADMIN_TREND_REPORT_PATH = "/admin/reports/new";
 export const ADMIN_CAMPAIGNS_PATH = "/admin/campaigns";
+
+/** dmpilot 운영 리포트 빌더 — 허브 4번째 카드 (복제 금지, 새 탭). */
+export const DIGITAL_CAMPAIGN_REPORT_BUILDER_URL =
+  "https://digital.tkad.co.kr/admin/campaign-report";
+
+export const DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY = {
+  ko: "캠페인 리포트 빌더 (Digital)",
+  en: "Campaign report builder (Digital)",
+  descKo: "날짜·매체 자유 선택, PDF/PPTX, A/B 비교",
+  descEn: "Pick dates and media freely — PDF, PPTX, and A/B compare.",
+  badgeKo: "Digital 어드민에서 열림",
+  badgeEn: "Opens in Digital admin",
+} as const;
 
 export const ADMIN_REPORT_HUB_TYPES = [
   "proposal",

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Download,
+  ExternalLink,
   Eye,
   FileText,
   Loader2,
@@ -30,6 +31,8 @@ import {
   ADMIN_REPORT_HUB_TYPE_COPY,
   ADMIN_REPORT_HUB_TYPES,
   ADMIN_TREND_REPORT_PATH,
+  DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY,
+  DIGITAL_CAMPAIGN_REPORT_BUILDER_URL,
   buildAdminCampaignsReportPath,
   buildAdminReportsHubPath,
   parseAdminReportHubStep,
@@ -121,8 +124,8 @@ export default function AdminReportsHubClient() {
           </h1>
           <p className="mt-1 text-[11px] text-muted-foreground">
             {isKo
-              ? "// 제안서 · 성과보고서 · 트렌드 — 기존 API를 그대로 호출합니다."
-              : "// Proposal · performance · trend — existing APIs only."}
+              ? "// 제안서 · 성과보고서 · 트렌드 · Digital 리포트 빌더"
+              : "// Proposal · performance · trend · Digital report builder"}
           </p>
         </div>
         <ol className="flex gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
@@ -156,7 +159,7 @@ export default function AdminReportsHubClient() {
       </header>
 
       {step === 1 ? (
-        <section className="grid gap-3 md:grid-cols-3">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {ADMIN_REPORT_HUB_TYPES.map((id) => {
             const copy = ADMIN_REPORT_HUB_TYPE_COPY[id];
             const selected = type === id;
@@ -182,6 +185,30 @@ export default function AdminReportsHubClient() {
               </button>
             );
           })}
+          <a
+            href={DIGITAL_CAMPAIGN_REPORT_BUILDER_URL}
+            target="_blank"
+            rel="noreferrer"
+            data-testid="hub-type-digital-builder"
+            className="rounded-2xl border border-border/60 bg-card/40 p-4 text-left transition hover:border-[color:var(--qp-accent)]/40"
+          >
+            <ExternalLink className="mb-3 h-5 w-5 text-[color:var(--qp-accent)]" />
+            <p className="font-bold">
+              {isKo
+                ? DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.ko
+                : DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.en}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {isKo
+                ? DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.descKo
+                : DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.descEn}
+            </p>
+            <p className="mt-2 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              {isKo
+                ? DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.badgeKo
+                : DIGITAL_CAMPAIGN_REPORT_BUILDER_COPY.badgeEn}
+            </p>
+          </a>
         </section>
       ) : null}
 
