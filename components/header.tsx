@@ -176,8 +176,8 @@ export default function Header() {
       items: [
         { href: "/media", label: t("nav.media"), desc: "전국 OOH 매체 목록", icon: Layers },
         { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색", icon: MapIcon },
-        { href: "/recommend", label: t("nav.recommend"), desc: "AI 기반 추천", icon: Sparkles },
-        { href: "/planner", label: t("nav.planner"), desc: "예산·기간별 플래닝", icon: ClipboardList },
+        { href: "/recommend", label: t("nav.recommend"), desc: "조건 없이 빠르게 후보 탐색", icon: Sparkles },
+        { href: "/planner", label: t("nav.planner"), desc: "믹스 편집·제안서까지 완성", icon: ClipboardList },
       ],
     },
     {

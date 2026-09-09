@@ -6,11 +6,13 @@ import {
   Map,
   MonitorSmartphone,
   Network,
+  Package,
   Palette,
   RefreshCw,
   Search,
   Shield,
   Target,
+  Sparkles,
   Trophy,
   Tv2,
   Wand2,
@@ -53,15 +55,22 @@ export const DISCOVERY_TABS: SubTab[] = [
 
 export const PLANNING_TABS: SubTab[] = [
   {
-    label: "미디어 플래너",
+    label: "둘러보기",
+    href: "/recommend",
+    icon: Sparkles,
+    match: (p) => p === "/recommend" || p.startsWith("/recommend/"),
+  },
+  {
+    label: "제안서 만들기",
     href: "/planner",
     icon: BarChart3,
-    match: (p) =>
-      p === "/planner" ||
-      p.startsWith("/planner/") ||
-      p === "/recommend" ||
-      p.startsWith("/recommend") ||
-      p === "/media/packages",
+    match: (p) => p === "/planner" || p.startsWith("/planner/"),
+  },
+  {
+    label: "패키지",
+    href: "/media/packages",
+    icon: Package,
+    match: (p) => p === "/media/packages" || p.startsWith("/media/packages/"),
   },
 ];
 

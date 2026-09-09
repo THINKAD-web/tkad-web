@@ -27,8 +27,8 @@ const ITEMS: QuickItem[] = [
   },
   {
     id: "plan",
-    labelKo: "캠페인 기획",
-    labelEn: "Plan campaign",
+    labelKo: "제안서 만들기",
+    labelEn: "Create a proposal",
     icon: BarChart3,
     href: "/planner",
     color: "text-hermes",

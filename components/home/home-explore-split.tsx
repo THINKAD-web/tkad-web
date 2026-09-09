@@ -9,8 +9,8 @@ import { HomeFreetextEntry } from "@/components/home/home-freetext-entry";
 import { cn } from "@/lib/utils";
 
 /**
- * 홈 above-fold: "매체 둘러보기" vs "AI 추천" 2갈래 분기.
- * 모바일 — 탐색(검색+퀵액세스) 먼저, AI 추천은 슬림 카드로 아래.
+ * 홈 above-fold: 카탈로그 검색 vs 둘러보기(/recommend) 2갈래.
+ * 모바일 — 탐색(검색+퀵액세스) 먼저, 둘러보기는 슬림 카드로 아래.
  */
 export function HomeExploreSplit() {
   const locale = useLocale();
@@ -36,7 +36,7 @@ export function HomeExploreSplit() {
             </span>
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white md:text-xl">
-                {isKo ? "매체 둘러보기" : "Browse media"}
+                {isKo ? "매체 검색" : "Search media"}
               </h2>
               <p className="mt-1.5 text-base text-gray-600 dark:text-white/65">
                 {isKo
@@ -73,12 +73,12 @@ export function HomeExploreSplit() {
             </span>
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white md:text-xl">
-                {isKo ? "AI로 추천받기" : "AI recommendations"}
+                {isKo ? "둘러보기" : "Browse picks"}
               </h2>
               <p className="mt-1.5 text-base text-gray-600 dark:text-white/65">
                 {isKo
-                  ? "추천 페이지에서 조건을 입력하면 순위·지도·견적까지 한 번에."
-                  : "Enter your brief on the recommend page for ranked picks and quotes."}
+                  ? "조건 없이 빠르게 후보를 탐색합니다. 제안서까지 만들려면 「제안서 만들기」로 이어가세요."
+                  : "Explore candidates quickly — no brief required. Use Create a proposal when you want a finished mix."}
               </p>
             </div>
           </div>
