@@ -12,9 +12,9 @@
   position: relative;
   isolation: isolate;
   background: var(--ooh-hero-navy-0);
-  /* Room for headline + lead + dual CTAs (was aspect-video-only) */
-  aspect-ratio: 4 / 5;
-  min-height: 22rem;
+  /* Room for headline + lead + AI prompt + chips */
+  aspect-ratio: 3 / 5;
+  min-height: 28rem;
 }
 
 @media (min-width: 640px) {
@@ -320,4 +320,101 @@
   width: 1rem;
   background: var(--ooh-hero-orange);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+}
+
+.ooh-home-hero__ai {
+  margin-top: 1rem;
+  width: min(100%, 36rem);
+  text-align: left;
+}
+
+.ooh-home-hero__ai-label {
+  margin: 0 0 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.72);
+}
+
+.ooh-home-hero__ai-box {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(255 255 255 / 0.28);
+  background: rgb(8 16 22 / 0.55);
+  color: #fff;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.04);
+}
+
+.ooh-home-hero__ai-box:hover {
+  border-color: color-mix(in srgb, var(--ooh-hero-orange) 55%, white);
+}
+
+.ooh-home-hero__ai-placeholder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.88);
+}
+
+.ooh-home-hero__ai-hint {
+  margin: 0.4rem 0 0.65rem;
+  font-size: 0.75rem;
+  color: rgb(255 255 255 / 0.62);
+}
+
+.ooh-home-hero__ai-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.15rem;
+}
+
+.ooh-home-hero__ai-chip {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.9);
+  padding: 0.28rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ooh-home-hero__ai-chip:hover {
+  border-color: color-mix(in srgb, var(--ooh-hero-orange) 50%, white);
+  background: rgb(255 255 255 / 0.14);
+}
+
+.ooh-home-hero__cta-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.4rem 0.2rem;
+  color: rgb(255 255 255 / 0.82);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ooh-home-hero__cta-link:hover {
+  color: #fff;
+}
+
+@media (min-width: 768px) {
+  .ooh-home-hero__ai {
+    margin-top: 1.15rem;
+  }
 }

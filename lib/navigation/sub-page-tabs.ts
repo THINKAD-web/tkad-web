@@ -55,13 +55,13 @@ export const DISCOVERY_TABS: SubTab[] = [
 
 export const PLANNING_TABS: SubTab[] = [
   {
-    label: "둘러보기",
+    label: "AI 플래너",
     href: "/recommend",
     icon: Sparkles,
     match: (p) => p === "/recommend" || p.startsWith("/recommend/"),
   },
   {
-    label: "제안서 만들기",
+    label: "상세 플래너",
     href: "/planner",
     icon: BarChart3,
     match: (p) => p === "/planner" || p.startsWith("/planner/"),

@@ -19,7 +19,7 @@ import {
   type BriefCustomLine,
 } from "@/lib/planner/brief/custom-lines";
 import { MIN_IMPRESSIONS_FOR_CPM } from "@/lib/metrics/constants";
-import { resolveMediaProductPrice } from "@/lib/metrics/media-price-adapter";
+import { resolveMixLineProductPrice } from "@/lib/planner/brief/mix-price-option";
 import type { MediaItem } from "@/lib/media-data";
 import {
   calcMixMetrics,
@@ -37,12 +37,20 @@ import {
 export function buildMixLines(
   catalog: readonly MediaItem[],
   mixUnits: Record<string, number>,
+  mixPriceOptionIndex?: Record<string, number>,
 ): MixLine[] {
   const out: MixLine[] = [];
   for (const [mediaId, units] of Object.entries(mixUnits)) {
     if (units <= 0) continue;
     const media = catalog.find((m) => m.id === mediaId);
-    if (media) out.push({ media, units });
+    if (media) {
+      const stored = mixPriceOptionIndex?.[mediaId];
+      out.push({
+        media,
+        units,
+        ...(stored != null ? { priceOptionIndex: stored } : {}),
+      });
+    }
   }
   return out;
 }
@@ -51,12 +59,18 @@ export function buildCampaignPlanSnapshot(params: {
   brief: CampaignBriefInput;
   catalog: readonly MediaItem[];
   mixUnits: Record<string, number>;
+  /** 사용자가 고른 priceOptions 인덱스 — 없으면 비행 일수 추천가 */
+  mixPriceOptionIndex?: Record<string, number>;
   /** 카탈로그 외 수동 항목 — 스냅샷에 denormalize 저장 */
   customLines?: readonly BriefCustomLine[];
 }): CampaignPlanSnapshot {
   const planBrief = toCampaignPlanBrief(params.brief);
   const days = flightDays(params.brief) ?? BRIEF_DEFAULT_DAYS;
-  const lines = buildMixLines(params.catalog, params.mixUnits);
+  const lines = buildMixLines(
+    params.catalog,
+    params.mixUnits,
+    params.mixPriceOptionIndex,
+  );
   const metrics = calcMixMetrics({
     lines,
     days,
@@ -67,7 +81,11 @@ export function buildCampaignPlanSnapshot(params: {
   const customLines = params.customLines ?? [];
   const catalogMix: CampaignPlanMediaLine[] = lines.map((line) => {
     const lineMetrics = calcLineMetrics(line, days);
-    const price = resolveMediaProductPrice(line.media, days);
+    const price = resolveMixLineProductPrice(
+      line.media,
+      days,
+      line.priceOptionIndex,
+    );
     let cpmWon: number | null = null;
     if (
       lineMetrics.impressions.value > 0 &&

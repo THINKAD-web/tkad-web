@@ -228,8 +228,9 @@ function BriefStepThreeOohFlow({
   const days = flightDays(store) ?? BRIEF_DEFAULT_DAYS;
   const budgetWon = totalBudgetWon(store);
   const lines = useMemo(
-    () => buildMixLines(catalog, store.mixUnits),
-    [catalog, store.mixUnits],
+    () =>
+      buildMixLines(catalog, store.mixUnits, store.mixPriceOptionIndex),
+    [catalog, store.mixUnits, store.mixPriceOptionIndex],
   );
 
   const liveCatalogMetrics = useMemo(
@@ -415,6 +416,7 @@ function BriefStepThreeOohFlow({
             freeText: store.freeText,
           },
           mixUnits: store.mixUnits,
+          mixPriceOptionIndex: store.mixPriceOptionIndex,
           customLines: store.customLines,
           reportCopy,
         }),
@@ -452,9 +454,18 @@ function BriefStepThreeOohFlow({
       brief: store,
       catalog,
       mixUnits: store.mixUnits,
+      mixPriceOptionIndex: store.mixPriceOptionIndex,
       customLines: store.customLines,
     });
-  }, [savedPlan, hasMix, store.mixUnits, store.customLines, catalog, store]);
+  }, [
+    savedPlan,
+    hasMix,
+    store.mixUnits,
+    store.mixPriceOptionIndex,
+    store.customLines,
+    catalog,
+    store,
+  ]);
 
   const exportPortfolio = useMemo(
     () => (exportPlan ? resolveBriefPortfolio(exportPlan, catalog) : []),

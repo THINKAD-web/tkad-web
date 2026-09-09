@@ -9,8 +9,8 @@ import { HomeFreetextEntry } from "@/components/home/home-freetext-entry";
 import { cn } from "@/lib/utils";
 
 /**
- * 홈 above-fold: 카탈로그 검색 vs 둘러보기(/recommend) 2갈래.
- * 모바일 — 탐색(검색+퀵액세스) 먼저, 둘러보기는 슬림 카드로 아래.
+ * 홈 above-fold: 카탈로그 검색 vs AI 플래너(/recommend) 2갈래.
+ * 모바일 — 탐색(검색+퀵액세스) 먼저, AI 플래너는 슬림 카드로 아래.
  */
 export function HomeExploreSplit() {
   const locale = useLocale();
@@ -73,12 +73,12 @@ export function HomeExploreSplit() {
             </span>
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white md:text-xl">
-                {isKo ? "둘러보기" : "Browse picks"}
+                {isKo ? "AI 플래너" : "AI Planner"}
               </h2>
               <p className="mt-1.5 text-base text-gray-600 dark:text-white/65">
                 {isKo
-                  ? "조건 없이 빠르게 후보를 탐색합니다. 제안서까지 만들려면 「제안서 만들기」로 이어가세요."
-                  : "Explore candidates quickly — no brief required. Use Create a proposal when you want a finished mix."}
+                  ? "쉽고 빠르게 AI가 매체를 추천합니다. 믹스·제안서까지 만들려면 「상세 플래너」로 이어가세요."
+                  : "AI recommends media quickly and easily. Use Detailed planner when you want a finished mix."}
               </p>
             </div>
           </div>

@@ -52,3 +52,10 @@ export const RECOMMEND_MODE_AI = "ai";
 export function buildRecommendAiModePath(): string {
   return `/recommend?${RECOMMEND_MODE_QUERY_KEY}=${RECOMMEND_MODE_AI}`;
 }
+
+/** 히어로 칩 — AI 탭 + 예시 문구. */
+export function buildRecommendAiBriefPath(text: string): string {
+  const encoded = encodeBriefForPlannerQuery(text);
+  if (!encoded) return buildRecommendAiModePath();
+  return `/recommend?${RECOMMEND_MODE_QUERY_KEY}=${RECOMMEND_MODE_AI}&${PLANNER_BRIEF_QUERY_KEY}=${encoded}`;
+}

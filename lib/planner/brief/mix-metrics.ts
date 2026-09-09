@@ -17,7 +17,7 @@ import type { MediaItem } from "@/lib/media-data";
 import { isQuoteOnlyMedia } from "@/lib/media-pricing-mode";
 import { calcImpressions } from "@/lib/metrics/impressions";
 import { calcNetReach } from "@/lib/metrics/reach";
-import { resolveMediaProductPrice } from "@/lib/metrics/media-price-adapter";
+import { resolveMixLineProductPrice } from "@/lib/planner/brief/mix-price-option";
 import { classifyMedia } from "@/lib/metrics/classify";
 import { CPM_BOUNDS, MIN_IMPRESSIONS_FOR_CPM } from "@/lib/metrics/constants";
 import {
@@ -34,10 +34,12 @@ import {
   mediaIdsWithoutCoverage,
 } from "./reach-adapter.ts";
 
-/** 믹스 한 줄 — 매체 + 구매 수량 */
+/** 믹스 한 줄 — 매체 + 구매 수량 (+ 선택 가격 옵션) */
 export type MixLine = {
   media: MediaItem;
   units: number;
+  /** 사용자가 고른 priceOptions 인덱스. 없으면 비행 일수 추천가. */
+  priceOptionIndex?: number;
 };
 
 export type MixLineMetrics = {
@@ -115,7 +117,8 @@ function mediaSovSource(media: MediaItem) {
  * 한 매체 줄의 지표 (노출·금액).
  *
  * **금액의 역할 — 「협상 전 참고치」.**
- * `costWon` 은 `resolveMediaProductPrice(media, days)` 즉 **실제 등록 상품가**다.
+ * `costWon` 은 `resolveMixLineProductPrice` — 기본은 비행 일수 등록가,
+ * 사용자가 옵션을 고르면 그 옵션 등록가다.
  * 반달 상품이 없으면 최소 판매 단위(보통 월정가) 전액이 나온다 — 반달을 팔지
  * 않는 매체에서 실제로 청구될 수 있는 금액이다.
  *
@@ -133,7 +136,7 @@ function mediaSovSource(media: MediaItem) {
  * 고치기 전에 그 문서를 먼저 읽을 것.
  */
 export function calcLineMetrics(line: MixLine, days: number): MixLineMetrics {
-  const { media, units } = line;
+  const { media, units, priceOptionIndex } = line;
 
   const contactRate = resolveContactRateWithBasis({
     type: media.type,
@@ -152,7 +155,7 @@ export function calcLineMetrics(line: MixLine, days: number): MixLineMetrics {
     days,
   });
 
-  const price = resolveMediaProductPrice(media, days);
+  const price = resolveMixLineProductPrice(media, days, priceOptionIndex);
   const costWon: MetricValue<number> | null =
     price == null
       ? null

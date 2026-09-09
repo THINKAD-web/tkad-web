@@ -33,10 +33,10 @@ const STEPS: TourStep[] = [
   },
   {
     selector: '[data-tour="planning-group"]',
-    titleKo: "둘러보기와 제안서 만들기",
-    titleEn: "Browse picks or create a proposal",
-    descKo: "기획하기에서 둘러보기로 후보를 빠르게 보고, 믹스·제안서가 필요하면 제안서 만들기로 이어가세요.",
-    descEn: "Under Planning, browse picks quickly — then Create a proposal when you need a mix and a deck.",
+    titleKo: "AI 플래너와 상세 플래너",
+    titleEn: "AI Planner or Detailed planner",
+    descKo: "기획하기에서 AI 플래너로 후보를 빠르게 보고, 믹스·제안서가 필요하면 상세 플래너로 이어가세요.",
+    descEn: "Under Planning, use AI Planner for quick picks — then Detailed planner when you need a mix and a deck.",
   },
 ];
 

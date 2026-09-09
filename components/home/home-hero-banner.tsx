@@ -3,12 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import {
-  MEDIA_COUNT_LABEL_FALLBACK,
-  injectMediaCountPlaceholder,
-} from "@/lib/media-count-copy";
+import { HomeHeroAiPrompt } from "@/components/home/home-hero-ai-prompt";
+import { MEDIA_COUNT_LABEL_FALLBACK } from "@/lib/media-count-copy";
 import {
   optimizeHeroMarqueeUrl,
   shouldUseUnoptimizedImage,
@@ -83,10 +80,8 @@ export function HomeHeroBanner({ mediaCountLabel }: HomeHeroBannerProps = {}) {
   }, [next]);
 
   const slogan = t("heroBannerSlogan");
-  const lead = injectMediaCountPlaceholder(
-    t("heroBannerLead"),
-    mediaCountLabel || MEDIA_COUNT_LABEL_FALLBACK,
-  );
+  const countLabel = mediaCountLabel || MEDIA_COUNT_LABEL_FALLBACK;
+  const lead = t("heroBannerLead", { count: countLabel });
 
   return (
     <div className="px-4 pt-3 pb-2 md:px-6 md:pt-4 md:pb-3 lg:px-8">
@@ -143,21 +138,7 @@ export function HomeHeroBanner({ mediaCountLabel }: HomeHeroBannerProps = {}) {
         <div className="ooh-home-hero__content">
           <p className="ooh-home-hero__slogan">{slogan}</p>
           <p className="ooh-home-hero__lead">{lead}</p>
-          <div className="ooh-home-hero__ctas">
-            <Link
-              href="/media"
-              className="ooh-home-hero__cta ooh-home-hero__cta--primary"
-              data-accent-keep="true"
-            >
-              {t("heroBannerCtaBrowse")}
-            </Link>
-            <Link
-              href="/recommend?mode=ai"
-              className="ooh-home-hero__cta ooh-home-hero__cta--secondary"
-            >
-              {t("heroBannerCtaAi")}
-            </Link>
-          </div>
+          <HomeHeroAiPrompt />
         </div>
 
         <div className="ooh-home-hero__dots">

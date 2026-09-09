@@ -3,13 +3,14 @@ import test from "node:test";
 import { PLANNING_TABS } from "@/lib/navigation/sub-page-tabs";
 import { PUBLIC_NAV_GROUPS } from "@/lib/navigation/public-nav-data";
 import { isPublicNavItemActive } from "@/lib/navigation/public-nav-active";
+import { resolveContextSidebar } from "@/lib/navigation/context-sidebar-config";
 
 test("PLANNING_TABS splits browse vs proposal vs packages", () => {
   assert.deepEqual(
     PLANNING_TABS.map((t) => [t.label, t.href]),
     [
-      ["둘러보기", "/recommend"],
-      ["제안서 만들기", "/planner"],
+      ["AI 플래너", "/recommend"],
+      ["상세 플래너", "/planner"],
       ["패키지", "/media/packages"],
     ],
   );
@@ -39,4 +40,15 @@ test("public nav active state does not collapse recommend into planner", () => {
   assert.equal(isPublicNavItemActive("/recommend", "media-planner"), false);
   assert.equal(isPublicNavItemActive("/planner", "media-planner"), true);
   assert.equal(isPublicNavItemActive("/planner", "ai-recommend"), false);
+});
+
+test("recommend and planner share the plan-workspace sidebar", () => {
+  const planner = resolveContextSidebar("/ko/planner");
+  const recommend = resolveContextSidebar("/ko/recommend");
+  assert.equal(planner.contextId, "planner");
+  assert.equal(recommend.contextId, "planner");
+  assert.deepEqual(
+    planner.sections[0]?.items.map((i) => i.id),
+    recommend.sections[0]?.items.map((i) => i.id),
+  );
 });

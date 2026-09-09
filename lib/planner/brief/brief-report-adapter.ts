@@ -49,7 +49,7 @@ import {
   flightDays,
   type CampaignBriefInput,
 } from "@/lib/planner/brief/types";
-import { getMediaPackageOptions } from "@/lib/media-quantity";
+import { priceOptionIndexFromOptionId } from "@/lib/planner/brief/mix-price-option";
 import { MEDIA_DAYS_PER_MONTH } from "@/lib/media-metrics";
 import { plannerIndustryLabel } from "@/lib/planner/types";
 import {
@@ -218,9 +218,8 @@ export function briefPriceOptionIndex(
     if (!line.optionId) continue;
     const media = byId.get(line.mediaId);
     if (!media) continue;
-    const options = getMediaPackageOptions(media);
-    const idx = options.findIndex((o) => o.id === line.optionId);
-    if (idx >= 0) out[line.mediaId] = idx;
+    const idx = priceOptionIndexFromOptionId(media, line.optionId);
+    if (idx != null) out[line.mediaId] = idx;
   }
   return out;
 }

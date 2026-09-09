@@ -81,7 +81,11 @@ const planWorkItems: ContextSidebarItem[] = [
 export function resolveContextSidebar(pathname: string): ContextSidebarConfig {
   const path = pathname.replace(/^\/(ko|en)/, "") || "/";
 
-  if (path.startsWith("/planner") || path.startsWith("/my/plan")) {
+  if (
+    path.startsWith("/planner") ||
+    path.startsWith("/recommend") ||
+    path.startsWith("/my/plan")
+  ) {
     return {
       contextId: "planner",
       titleKo: "플랜 작업",
@@ -90,7 +94,7 @@ export function resolveContextSidebar(pathname: string): ContextSidebarConfig {
     };
   }
 
-  if (path.startsWith("/media") || path.startsWith("/recommend") || path.startsWith("/compare")) {
+  if (path.startsWith("/media") || path.startsWith("/compare")) {
     return {
       contextId: "media",
       titleKo: "매체 도구",

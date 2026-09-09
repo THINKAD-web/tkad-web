@@ -35,19 +35,19 @@ export function HomeFreetextEntry({
               {isKo ? "무료 · 규칙" : "Free · Rules"}
             </span>
             <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-              {isKo ? "둘러보기 · 0토큰" : "Browse · 0 tokens"}
+              {isKo ? "AI 플래너 · 0토큰" : "AI Planner · 0 tokens"}
             </span>
           </div>
           <h2
             id="home-freetext-heading"
             className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white md:text-xl"
           >
-            {isKo ? "둘러보기" : "Browse picks"}
+            {isKo ? "AI 플래너" : "AI Planner"}
           </h2>
           <p className="text-sm leading-relaxed text-gray-600 dark:text-white/65">
             {isKo
-              ? "조건 없이 빠르게 후보를 탐색합니다. 믹스·제안서가 필요하면 제안서 만들기로 이어가세요."
-              : "Explore candidates quickly. Switch to Create a proposal when you need a mix and a deck."}
+              ? "쉽고 빠르게 AI가 매체를 추천합니다. 믹스·제안서가 필요하면 상세 플래너로 이어가세요."
+              : "AI recommends media quickly and easily. Switch to Detailed planner when you need a mix and a deck."}
           </p>
         </div>
       ) : null}
@@ -78,7 +78,7 @@ export function HomeFreetextEntry({
             slim && "py-2.5 text-sm",
           )}
         >
-          {isKo ? "둘러보기 시작" : "Start browsing"}
+          {isKo ? "AI 플래너 시작" : "Start AI Planner"}
           <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
         <Link
@@ -88,7 +88,7 @@ export function HomeFreetextEntry({
             slim ? "sm:ml-1" : "inline-flex w-full items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-3 dark:border-white/12 dark:bg-white/5 sm:w-auto",
           )}
         >
-          {isKo ? "제안서 만들기 →" : "Create a proposal →"}
+          {isKo ? "상세 플래너 →" : "Detailed planner →"}
         </Link>
       </div>
     </div>
