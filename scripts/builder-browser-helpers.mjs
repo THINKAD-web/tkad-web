@@ -2,6 +2,41 @@
  * Shared helpers for campaign builder browser verification scripts.
  */
 
+/** Wait until loadReport finished — edits before this can be wiped or mis-saved. */
+export async function waitForBuilderReady(page, { timeoutMs = 60_000 } = {}) {
+  await page
+    .locator('[data-testid="campaign-builder-track"]')
+    .waitFor({ state: "visible", timeout: timeoutMs });
+
+  const id = new URL(page.url()).searchParams.get("id");
+  if (id) {
+    await page
+      .locator('[data-testid="campaign-builder-loading"]')
+      .waitFor({ state: "visible", timeout: 10_000 })
+      .catch(() => {});
+  }
+
+  await page
+    .locator('[data-testid="campaign-builder-loading"]')
+    .waitFor({ state: "detached", timeout: timeoutMs });
+
+  await page
+    .locator('[data-testid="campaign-builder-track"][data-builder-ready="true"]')
+    .waitFor({ state: "attached", timeout: timeoutMs });
+
+  if (id) {
+    await page.waitForFunction(
+      () => {
+        const titleInput = document.querySelector(
+          '[data-testid="campaign-builder-track"] label input',
+        );
+        return Boolean(titleInput?.value?.trim());
+      },
+      { timeout: timeoutMs },
+    );
+  }
+}
+
 /**
  * Click save and wait for API + client state. URL ?id= can lag on Preview;
  * prefer response JSON id, then UI "id:" span, then URL param.
@@ -77,17 +112,53 @@ export async function clickSaveAndWaitForReportId(page, { timeoutMs = 15_000 } =
   };
 }
 
+/** Fill a KPI card label and wait until React state reflects the value. */
+export async function fillKpiLabel(page, cardId, text) {
+  const input = page
+    .getByTestId(`builder-kpi-card-${cardId}`)
+    .locator('input[type="text"]');
+  await input.scrollIntoViewIfNeeded();
+  await input.click({ clickCount: 3 });
+  await input.fill("");
+  await input.fill(text);
+  if (
+    (await input.inputValue()) !== text
+  ) {
+    await input.evaluate((el, value) => {
+      const setter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )?.set;
+      setter?.call(el, value);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }, text);
+  }
+  await input.waitFor({ state: "visible", timeout: 10_000 });
+  await page.waitForFunction(
+    ([testId, expected]) => {
+      const el = document.querySelector(`[data-testid="${testId}"] input[type="text"]`);
+      return el?.value === expected;
+    },
+    [`builder-kpi-card-${cardId}`, text],
+    { timeout: 10_000 },
+  );
+}
+
 export async function goToPreview(page, base, reportId) {
   await page.getByTestId("campaign-builder-go-preview").click();
   await page.waitForTimeout(800);
   if (!page.url().includes("step=3") && reportId) {
     await page.goto(
       `${base}/ko/admin/reports?type=builder&step=3&id=${encodeURIComponent(reportId)}`,
-      { waitUntil: "domcontentloaded" },
+      { waitUntil: "domcontentloaded", timeout: 120_000 },
     );
-    await page.waitForTimeout(1000);
   }
+  await waitForBuilderReady(page);
   await page.waitForSelector('[data-testid="campaign-builder-report-preview"]', {
+    timeout: 60_000,
+  });
+  await page.waitForSelector('[data-testid="builder-preview-kpi"]', {
     timeout: 60_000,
   });
 }

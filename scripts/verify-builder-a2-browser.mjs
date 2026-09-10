@@ -9,7 +9,9 @@ import path from "node:path";
 import { config } from "dotenv";
 import {
   clickSaveAndWaitForReportId,
+  fillKpiLabel,
   goToPreview,
+  waitForBuilderReady,
 } from "./builder-browser-helpers.mjs";
 
 config({ path: ".env.local" });
@@ -49,9 +51,7 @@ async function setupProposalReport(page) {
     waitUntil: "domcontentloaded",
     timeout: 120_000,
   });
-  await page.waitForSelector('[data-testid="campaign-builder-track"]', {
-    timeout: 120_000,
-  });
+  await waitForBuilderReady(page);
   await page.getByRole("button", { name: "새로" }).click();
   await page.waitForTimeout(400);
   await page.locator('label:text("제목") input').first().fill("A2 proposal");
@@ -138,7 +138,7 @@ async function main() {
   await page.goto(`${BASE}/ko/admin/reports?type=builder&step=2`, {
     waitUntil: "domcontentloaded",
   });
-  await page.waitForSelector('[data-testid="campaign-builder-track"]');
+  await waitForBuilderReady(page);
   await setupProposalReport(page);
   await page.getByTestId("builder-kpi-card-avgBudget")
     .locator('label:has-text("노출") input[type="checkbox"]').uncheck();
@@ -165,7 +165,7 @@ async function main() {
   await page.goto(`${BASE}/ko/admin/reports?type=builder&step=2`, {
     waitUntil: "domcontentloaded",
   });
-  await page.waitForSelector('[data-testid="campaign-builder-track"]');
+  await waitForBuilderReady(page);
   await page.getByRole("button", { name: "새로" }).click();
   await page.locator('label:text("제목") input').first().fill("A2 report");
   await page.getByRole("button", { name: "리포트", exact: true }).click();
@@ -187,6 +187,67 @@ async function main() {
   results.push({
     step: "report preview value still 50,000",
     ok: previewText.includes("50,000"),
+  });
+
+  // --- Reopen existing report (재한님 flow): edit KPI → PATCH → preview ---
+  const REOPEN_KPI = "A2 재오픈 KPI 라벨";
+  const REOPEN_KPI2 = "A2 재오픈 PATCH KPI";
+  await page.goto(`${BASE}/ko/admin/reports?type=builder&step=2`, {
+    waitUntil: "domcontentloaded",
+  });
+  await waitForBuilderReady(page);
+  await page.getByRole("button", { name: "새로" }).click();
+  await page.locator('label:text("제목") input').first().fill("A2 reopen flow");
+  await page.locator("section").filter({ hasText: "디지털 채널" }).first()
+    .getByRole("button", { name: "추가" }).first().click();
+  await fillKpiLabel(page, "totalBudget", REOPEN_KPI);
+  const reopenSave = await clickSaveAndWaitForReportId(page);
+  await page.goto(
+    `${BASE}/ko/admin/reports?type=builder&step=2&id=${reopenSave.reportId}`,
+    { waitUntil: "domcontentloaded" },
+  );
+  await waitForBuilderReady(page);
+  const kpiAfterLoad = await page
+    .getByTestId("builder-kpi-card-totalBudget")
+    .locator('input[type="text"]')
+    .inputValue();
+  results.push({
+    step: "reopen UI shows saved KPI override",
+    ok: kpiAfterLoad === REOPEN_KPI,
+    detail: kpiAfterLoad,
+  });
+  await fillKpiLabel(page, "totalBudget", REOPEN_KPI2);
+  let patchBody = null;
+  const patchWait = page.waitForResponse(
+    (res) =>
+      res.request().method() === "PATCH" &&
+      res.url().includes(`/api/admin/campaign-builder/reports/${reopenSave.reportId}`) &&
+      res.status() >= 200 &&
+      res.status() < 300,
+    { timeout: 60_000 },
+  );
+  await page
+    .locator('[data-testid="campaign-builder-track"]')
+    .getByRole("button", { name: /^저장/ })
+    .click();
+  const patchRes = await patchWait;
+  try {
+    patchBody = patchRes.request().postDataJSON();
+  } catch {
+    patchBody = null;
+  }
+  results.push({
+    step: "reopen PATCH body includes kpiCards override",
+    ok: patchBody?.insightsOverride?.kpiCards?.some(
+      (k) => k.labelOverride === REOPEN_KPI2,
+    ) === true,
+    detail: JSON.stringify(patchBody?.insightsOverride?.kpiCards),
+  });
+  await goToPreview(page, BASE, reopenSave.reportId);
+  previewText = await page.getByTestId("campaign-builder-report-preview").innerText();
+  results.push({
+    step: "reopen preview shows PATCH KPI label",
+    ok: previewText.includes(REOPEN_KPI2),
   });
 
   await writeFile(path.join(OUT, "results.json"), JSON.stringify(results, null, 2));

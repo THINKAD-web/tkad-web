@@ -11,6 +11,7 @@ import { config } from "dotenv";
 import {
   clickSaveAndWaitForReportId,
   goToPreview,
+  waitForBuilderReady,
 } from "./builder-browser-helpers.mjs";
 
 config({ path: ".env.local" });
@@ -97,9 +98,7 @@ async function main() {
     waitUntil: "domcontentloaded",
     timeout: 120_000,
   });
-  await page.waitForSelector('[data-testid="campaign-builder-track"]', {
-    timeout: 120_000,
-  });
+  await waitForBuilderReady(page);
   await page.getByRole("button", { name: "새로" }).click();
   await page.waitForTimeout(400);
   await page.locator('label:text("제목") input').first().fill("A3 브라우저 검증");
@@ -123,7 +122,7 @@ async function main() {
   await insightsSection.getByTestId("builder-insight-subtitle-operational").fill(CUSTOM_OPERATIONAL_SUBTITLE);
   results.push({ step: "fill insight subtitles", ok: true });
 
-  await saveAndPreview(page);
+  const savedReportId = await saveAndPreview(page);
   const previewText = await page.getByTestId("campaign-builder-report-preview").innerText();
   results.push({
     step: "preview digital note column",
@@ -200,6 +199,72 @@ async function main() {
       step: "PDF text extraction skipped",
       ok: true,
       detail: "pdftotext unavailable — covered by build-pdf-builder unit test",
+    });
+  }
+
+  // --- Reopen existing report: edit subtitle → PATCH → preview ---
+  const REOPEN_SUB = "A3 재오픈 페이스 소제목";
+  const REOPEN_SUB2 = "A3 재오픈 PATCH 페이스";
+  if (savedReportId) {
+    const firstReportId = savedReportId;
+    await page.goto(
+      `${BASE}/ko/admin/reports?type=builder&step=2&id=${firstReportId}`,
+      { waitUntil: "domcontentloaded" },
+    );
+    await waitForBuilderReady(page);
+    await page.getByTestId("builder-insight-subtitle-pacing").fill(REOPEN_SUB);
+    await clickSaveAndWaitForReportId(page);
+    await page.goto(
+      `${BASE}/ko/admin/reports?type=builder&step=2&id=${firstReportId}`,
+      { waitUntil: "domcontentloaded" },
+    );
+    await waitForBuilderReady(page);
+    const subAfterLoad = await page
+      .getByTestId("builder-insight-subtitle-pacing")
+      .inputValue();
+    results.push({
+      step: "reopen UI shows saved pacing subtitle",
+      ok: subAfterLoad === REOPEN_SUB,
+      detail: subAfterLoad,
+    });
+    await page.getByTestId("builder-insight-subtitle-pacing").fill(REOPEN_SUB2);
+    let patchBody = null;
+    const patchWait = page.waitForResponse(
+      (res) =>
+        res.request().method() === "PATCH" &&
+        res.url().includes(`/api/admin/campaign-builder/reports/${firstReportId}`) &&
+        res.status() >= 200 &&
+        res.status() < 300,
+      { timeout: 60_000 },
+    );
+    await page
+      .locator('[data-testid="campaign-builder-track"]')
+      .getByRole("button", { name: /^저장/ })
+      .click();
+    const patchRes = await patchWait;
+    try {
+      patchBody = patchRes.request().postDataJSON();
+    } catch {
+      patchBody = null;
+    }
+    results.push({
+      step: "reopen PATCH body includes pacing subtitle",
+      ok: patchBody?.insightsOverride?.insightSubtitles?.pacing === REOPEN_SUB2,
+      detail: patchBody?.insightsOverride?.insightSubtitles?.pacing,
+    });
+    await goToPreview(page, BASE, firstReportId);
+    const reopenPreview = await page
+      .getByTestId("campaign-builder-report-preview")
+      .innerText();
+    results.push({
+      step: "reopen preview shows PATCH pacing subtitle",
+      ok: reopenPreview.includes(REOPEN_SUB2),
+    });
+  } else {
+    results.push({
+      step: "reopen scenario skipped",
+      ok: false,
+      detail: "missing report id from first save",
     });
   }
 
