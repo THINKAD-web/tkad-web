@@ -1,4 +1,8 @@
-import { EXPORT_THUMB_BOX_MM, PLANNER_EXPORT_THUMB_BOX_MM, loadExportThumbMap, loadExportImageForPdf } from "@/lib/export-media-images";
+import { EXPORT_THUMB_BOX_MM, PLANNER_EXPORT_THUMB_BOX_MM, loadExportThumbMap } from "@/lib/export-media-images";
+import {
+  addPptxCoverLogo,
+  loadCoverLogoExportData,
+} from "@/lib/planner-report-export/cover-logo-export";
 import type {
   PlannerExportMediaRow,
   PlannerReportExportAssets,
@@ -302,13 +306,7 @@ export async function buildPlannerReportPptx(
     });
   }
 
-  const coverLogoData = p.coverLogoUrl?.trim()
-    ? await loadExportImageForPdf(p.coverLogoUrl.trim(), {
-        width: 256,
-        height: 256,
-        quality: 88,
-      })
-    : null;
+  const coverLogoData = await loadCoverLogoExportData(p.coverLogoUrl);
 
   // ── 1. 표지 (planner / integrated only — builder uses its own cover below) ──
   // 배경은 화면 미리보기(DocumentGradientHero, bg-[#1c1c1f])와 통일한다.
@@ -316,19 +314,7 @@ export async function buildPlannerReportPptx(
   if (p.kind !== "builder" || !p.builderSection) {
   const cover = pptx.addSlide();
   cover.background = { color: COVER_BG };
-  if (coverLogoData) {
-    try {
-      cover.addImage({
-        data: coverLogoData,
-        x: W - 2.2,
-        y: 0.45,
-        w: 1.5,
-        h: 1.5,
-      });
-    } catch {
-      /* broken logo */
-    }
-  }
+  addPptxCoverLogo(cover, coverLogoData, W);
   const coverTitleColor = theme.coverMode === "filled" ? WHITE : COVER_TEXT;
   const coverMutedColor = theme.coverMode === "filled" ? "D1D5DB" : COVER_MUTED;
 
@@ -370,6 +356,7 @@ export async function buildPlannerReportPptx(
     builderCover.background = { color: COVER_BG };
     const coverTitleColor = theme.coverMode === "filled" ? WHITE : COVER_TEXT;
     const coverMutedColor = theme.coverMode === "filled" ? "D1D5DB" : COVER_MUTED;
+    addPptxCoverLogo(builderCover, coverLogoData, W);
     builderCover.addText(wordmark(30), { x: 0.7, y: 1.35, w: 6, h: 0.7 });
     builderCover.addText("CAMPAIGN BUILDER", {
       x: 0.72, y: 2.05, w: 9, h: 0.4, fontFace: face,
