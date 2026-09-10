@@ -7,6 +7,10 @@ import { chromium } from "playwright";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "dotenv";
+import {
+  clickSaveAndWaitForReportId,
+  goToPreview,
+} from "./builder-browser-helpers.mjs";
 
 config({ path: ".env.local" });
 config({ path: ".env" });
@@ -124,23 +128,19 @@ async function main() {
   await digitalTitleField.fill(CUSTOM_DIGITAL);
   results.push({ step: "edit digital section title", ok: true });
 
-  await page.locator('[data-testid="campaign-builder-track"]').getByRole("button", { name: /저장/ }).click();
-  await page.waitForTimeout(2500);
-  const reportId = new URL(page.url()).searchParams.get("id");
-  results.push({ step: "save report", ok: Boolean(reportId), detail: reportId ?? "no id" });
-
-  await page.getByTestId("campaign-builder-go-preview").click();
-  await page.waitForTimeout(800);
-  if (!page.url().includes("step=3") && reportId) {
-    await page.goto(
-      `${BASE}/ko/admin/reports?type=builder&step=3&id=${encodeURIComponent(reportId)}`,
-      { waitUntil: "domcontentloaded" },
-    );
-    await page.waitForTimeout(1000);
-  }
-  await page.waitForSelector('[data-testid="campaign-builder-report-preview"]', {
-    timeout: 60_000,
+  const save = await clickSaveAndWaitForReportId(page);
+  results.push({
+    step: "save report",
+    ok: save.ok,
+    detail: save.reportId ?? "no id",
+    apiStatus: save.api.status,
+    apiError: save.api.error ?? undefined,
+    apiBody: save.api.body?.slice(0, 500) || undefined,
+    urlId: save.urlId ?? undefined,
+    uiId: save.uiId ?? undefined,
   });
+
+  await goToPreview(page, BASE, save.reportId);
 
   const previewText = await page.getByTestId("campaign-builder-report-preview").innerText();
   results.push({

@@ -7,6 +7,10 @@ import { chromium } from "playwright";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "dotenv";
+import {
+  clickSaveAndWaitForReportId,
+  goToPreview,
+} from "./builder-browser-helpers.mjs";
 
 config({ path: ".env.local" });
 config({ path: ".env" });
@@ -56,22 +60,14 @@ async function setupProposalReport(page) {
 }
 
 async function saveAndPreview(page) {
-  await page.locator('[data-testid="campaign-builder-track"]').getByRole("button", { name: /저장/ }).click();
-  await page.waitForTimeout(2500);
-  const reportId = new URL(page.url()).searchParams.get("id");
-  await page.getByTestId("campaign-builder-go-preview").click();
-  await page.waitForTimeout(800);
-  if (!page.url().includes("step=3") && reportId) {
-    await page.goto(
-      `${BASE}/ko/admin/reports?type=builder&step=3&id=${encodeURIComponent(reportId)}`,
-      { waitUntil: "domcontentloaded" },
+  const save = await clickSaveAndWaitForReportId(page);
+  if (!save.ok) {
+    throw new Error(
+      `save failed: status=${save.api.status} body=${save.api.body?.slice(0, 300)}`,
     );
-    await page.waitForTimeout(1000);
   }
-  await page.waitForSelector('[data-testid="campaign-builder-report-preview"]', {
-    timeout: 60_000,
-  });
-  return reportId;
+  await goToPreview(page, BASE, save.reportId);
+  return save.reportId;
 }
 
 async function pptxXml(pptxPath) {
