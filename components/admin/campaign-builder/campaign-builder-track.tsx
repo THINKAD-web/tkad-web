@@ -123,8 +123,13 @@ export function CampaignBuilderTrack({
       setLoading(false);
       return;
     }
+    // After POST save, URL ?id= updates while payload is already in memory — skip redundant fetch.
+    if (reportId === idFromUrl && payload.title.trim()) {
+      setLoading(false);
+      return;
+    }
     void loadReport(idFromUrl);
-  }, [idFromUrl, loadReport]);
+  }, [idFromUrl, loadReport, reportId, payload.title]);
 
   async function saveReport() {
     if (loading) {

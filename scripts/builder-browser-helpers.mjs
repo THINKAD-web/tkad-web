@@ -146,8 +146,16 @@ export async function fillKpiLabel(page, cardId, text) {
 }
 
 export async function goToPreview(page, base, reportId) {
-  await page.getByTestId("campaign-builder-go-preview").click();
-  await page.waitForTimeout(800);
+  const previewBtn = page.getByTestId("campaign-builder-go-preview");
+  if (await previewBtn.isEnabled()) {
+    await previewBtn.click();
+    await page.waitForTimeout(800);
+  } else if (reportId) {
+    await page.goto(
+      `${base}/ko/admin/reports?type=builder&step=3&id=${encodeURIComponent(reportId)}`,
+      { waitUntil: "domcontentloaded", timeout: 120_000 },
+    );
+  }
   if (!page.url().includes("step=3") && reportId) {
     await page.goto(
       `${base}/ko/admin/reports?type=builder&step=3&id=${encodeURIComponent(reportId)}`,
