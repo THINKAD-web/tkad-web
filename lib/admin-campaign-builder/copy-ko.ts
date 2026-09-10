@@ -48,10 +48,10 @@ export const campaignBuilderCopy = {
       actualClicks: "실측 클릭 합산",
     },
     sectionTitles: {
-      estimateGroup: "② 참고 견적",
-      executionGroup: "① 집행 내역",
-      insightsGroup: "③ 운영 인사이트",
-      estimateProducts: "디지털 채널 (참고)",
+      estimateGroup: "① 참고 견적",
+      executionGroup: "③ 집행 내역",
+      insightsGroup: "④ 운영 인사이트",
+      estimateProducts: "① 디지털 채널 (참고)",
     },
     estimateNotice:
       "참고 견적은 카탈로그 기반 예상 범위이며, 집행 결과 KPI와 합산하지 않습니다.",

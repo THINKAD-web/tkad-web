@@ -102,6 +102,17 @@ export function CampaignBuilderDigitalPanel({
     });
   }
 
+  function updateNote(slug: string, note: string) {
+    onChange({
+      ...payload,
+      digitalLines: payload.digitalLines.map((l) =>
+        l.slug === slug
+          ? { ...l, note: note.trim() || undefined }
+          : l,
+      ),
+    });
+  }
+
   function removeLine(slug: string) {
     onChange({
       ...payload,
@@ -210,40 +221,51 @@ export function CampaignBuilderDigitalPanel({
               return (
                 <li
                   key={line.slug}
-                  className="flex flex-wrap items-center gap-3 rounded-lg border border-border/50 p-3"
+                  className="space-y-2 rounded-lg border border-border/50 p-3"
                 >
-                  <div className="min-w-[160px] flex-1">
-                    <p className="font-medium">{view?.nameKo ?? line.slug}</p>
-                    {est ? (
-                      <p className="text-xs text-muted-foreground">
-                        {isKo ? "도달" : "Reach"}:{" "}
-                        {formatKpiRange(est.reachMin, est.reachMax)} ·{" "}
-                        {isKo ? "클릭" : "Clicks"}:{" "}
-                        {formatKpiRange(est.clicksMin, est.clicksMax)}
-                      </p>
-                    ) : null}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="min-w-[160px] flex-1">
+                      <p className="font-medium">{view?.nameKo ?? line.slug}</p>
+                      {est ? (
+                        <p className="text-xs text-muted-foreground">
+                          {isKo ? "도달" : "Reach"}:{" "}
+                          {formatKpiRange(est.reachMin, est.reachMax)} ·{" "}
+                          {isKo ? "클릭" : "Clicks"}:{" "}
+                          {formatKpiRange(est.clicksMin, est.clicksMax)}
+                        </p>
+                      ) : null}
+                    </div>
+                    <label className="flex items-center gap-2 text-sm">
+                      {isKo ? "예산" : "Budget"}
+                      <input
+                        type="number"
+                        min={0}
+                        step={100_000}
+                        value={line.budgetWon}
+                        onChange={(e) =>
+                          updateBudget(line.slug, Number(e.target.value) || 0)
+                        }
+                        className="w-32 rounded border border-border bg-background px-2 py-1"
+                      />
+                    </label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeLine(line.slug)}
+                    >
+                      {isKo ? "삭제" : "Remove"}
+                    </Button>
                   </div>
-                  <label className="flex items-center gap-2 text-sm">
-                    {isKo ? "예산" : "Budget"}
+                  <label className="block w-full text-sm">
+                    {isKo ? "메모" : "Notes"}
                     <input
-                      type="number"
-                      min={0}
-                      step={100_000}
-                      value={line.budgetWon}
-                      onChange={(e) =>
-                        updateBudget(line.slug, Number(e.target.value) || 0)
-                      }
-                      className="w-32 rounded border border-border bg-background px-2 py-1"
+                      value={line.note ?? ""}
+                      onChange={(e) => updateNote(line.slug, e.target.value)}
+                      data-testid={`builder-digital-note-${line.slug}`}
+                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
                     />
                   </label>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => removeLine(line.slug)}
-                  >
-                    {isKo ? "삭제" : "Remove"}
-                  </Button>
                 </li>
               );
             })}

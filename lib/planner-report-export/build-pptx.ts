@@ -288,6 +288,20 @@ export async function buildPlannerReportPptx(
     { text: "AD", options: { color: ACCENT_LT, bold: true } },
   ].map((r) => ({ ...r, options: { ...r.options, fontFace: face, fontSize: size } }));
 
+  function header(slide: ReturnType<typeof pptx.addSlide>, label: string) {
+    slide.background = { color: WHITE };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.9, fill: { color: ACCENT } });
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0.9, w: W, h: 0.05, fill: { color: CYAN } });
+    slide.addText(label, {
+      x: 0.6, y: 0.12, w: 9, h: 0.66, fontFace: face, fontSize: 20, bold: true, color: WHITE,
+    });
+    const sub = [p.campaignName, p.generatedAt].filter(Boolean).join("  ·  ");
+    slide.addText(sub, {
+      x: W - 5.1, y: 0.3, w: 4.5, h: 0.35, fontFace: face, fontSize: 11,
+      color: "E1DCF5", align: "right",
+    });
+  }
+
   const coverLogoData = p.coverLogoUrl?.trim()
     ? await loadExportImageForPdf(p.coverLogoUrl.trim(), {
         width: 256,
@@ -296,9 +310,10 @@ export async function buildPlannerReportPptx(
       })
     : null;
 
-  // ── 1. 표지 ──
+  // ── 1. 표지 (planner / integrated only — builder uses its own cover below) ──
   // 배경은 화면 미리보기(DocumentGradientHero, bg-[#1c1c1f])와 통일한다.
   // INK_DEEP 상수가 이름과 달리 값은 이미 "1C1C1F" 라 그대로 근흑색 배경으로 쓴다.
+  if (p.kind !== "builder" || !p.builderSection) {
   const cover = pptx.addSlide();
   cover.background = { color: COVER_BG };
   if (coverLogoData) {
@@ -342,25 +357,11 @@ export async function buildPlannerReportPptx(
   cover.addText(p.generatedAt, {
     x: 0.7, y: 6.6, w: 12, h: 0.4, fontFace: face, fontSize: 12, color: coverMutedColor,
   });
-
-  // 공통 헤더 그리기
-  function header(slide: ReturnType<typeof pptx.addSlide>, label: string) {
-    slide.background = { color: WHITE };
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.9, fill: { color: ACCENT } });
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0.9, w: W, h: 0.05, fill: { color: CYAN } });
-    slide.addText(label, {
-      x: 0.6, y: 0.12, w: 9, h: 0.66, fontFace: face, fontSize: 20, bold: true, color: WHITE,
-    });
-    const sub = [p.campaignName, p.generatedAt].filter(Boolean).join("  ·  ");
-    slide.addText(sub, {
-      x: W - 5.1, y: 0.3, w: 4.5, h: 0.35, fontFace: face, fontSize: 11,
-      color: "E1DCF5", align: "right",
-    });
   }
 
   if (p.kind === "builder" && p.builderSection) {
     const bs = p.builderSection;
-    const copy = campaignBuilderCopy[bs.documentType];
+    const sectionCopy = bs.sectionCopy;
     const fmtWon = (n: number) =>
       `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
     const consult = isKo ? "별도 협의" : "Consultation";
@@ -398,7 +399,7 @@ export async function buildPlannerReportPptx(
     const addKpiSlide = () => {
       if (!p.kpis.length) return;
       const s = pptx.addSlide();
-      header(s, isKo ? "KPI 요약" : "KPI summary");
+      header(s, sectionCopy.titles.kpi);
       const kpis = p.kpis.slice(0, 4);
       const cardW = 12 / kpis.length;
       kpis.forEach((k, i) => {
@@ -418,8 +419,8 @@ export async function buildPlannerReportPptx(
     const addDigitalSlide = (lines: PlannerExportOnlineLine[]) => {
       if (!lines.length) return;
       const s = pptx.addSlide();
-      header(s, copy.sectionTitles.estimateProducts);
-      s.addText(copy.estimateNotice, {
+      header(s, sectionCopy.titles.digital);
+      s.addText(sectionCopy.notices.digitalEstimateNotice, {
         x: 0.7, y: 1.15, w: 12, h: 0.6, fontFace: face, fontSize: 11, color: GRAY,
       });
       const rows = [
@@ -430,6 +431,7 @@ export async function buildPlannerReportPptx(
           isKo ? "예산" : "Budget",
           isKo ? "예상 도달" : "Est. reach",
           isKo ? "예상 클릭" : "Est. clicks",
+          isKo ? "비고" : "Notes",
         ],
         ...lines.map((row) => [
           row.name,
@@ -438,6 +440,7 @@ export async function buildPlannerReportPptx(
           fmtWon(row.budgetWon),
           row.reachLabel ?? consult,
           row.clicksLabel ?? consult,
+          row.notes ?? "—",
         ]),
       ];
       s.addTable(rows, {
@@ -445,7 +448,7 @@ export async function buildPlannerReportPptx(
         fontFace: face, fontSize: 10, color: INK,
         border: { type: "solid", color: "E4E6EC", pt: 0.5 },
         fill: { color: WHITE },
-        colW: [2.2, 1.4, 2.0, 1.6, 2.2, 2.2],
+        colW: [2.0, 1.2, 1.8, 1.4, 1.8, 1.8, 1.9],
       });
     };
 
@@ -489,36 +492,62 @@ export async function buildPlannerReportPptx(
 
     addKpiSlide();
     addDigitalSlide(bs.digitalLines);
-    addMediaRowsSlide(isKo ? "OOH 매체" : "OOH media", bs.oohLines);
-    addMediaRowsSlide(copy.sectionTitles.executionGroup, bs.customLines, copy.executionNotice);
+    addMediaRowsSlide(
+      sectionCopy.titles.ooh,
+      bs.oohLines,
+      sectionCopy.notices.oohSectionNotice,
+    );
+    addMediaRowsSlide(
+      sectionCopy.titles.custom,
+      bs.customLines,
+      sectionCopy.notices.executionNotice,
+    );
 
     const budgetSplit = bs.charts.budgetSplit ?? p.charts?.budgetSplit;
     if (budgetSplit?.length) {
       const s = pptx.addSlide();
-      header(s, isKo ? "채널 예산 구성" : "Channel budget mix");
+      header(s, sectionCopy.titles.donut);
       addBudgetSplitShapes(s, pptx, 0.6, 1.15, 12, budgetSplit, face, isKo);
     }
 
     if (bs.insights) {
       const s = pptx.addSlide();
-      header(s, copy.sectionTitles.insightsGroup);
-      s.addText(copy.insightsHint, {
+      header(s, sectionCopy.titles.insights);
+      s.addText(sectionCopy.notices.insightsHint, {
         x: 0.7, y: 1.1, w: 12, h: 0.5, fontFace: face, fontSize: 11, color: GRAY,
       });
-      const bullets = [
-        ...bs.insights.pacingPlan.map(
-          (ph) => `${ph.label} (${ph.sharePct}%) — ${ph.description}`,
-        ),
-        ...bs.insights.creativeDirections,
-        ...bs.insights.operationalNotes,
-      ];
-      s.addText(
-        bullets.map((line) => ({
-          text: line,
-          options: { bullet: { code: "2022" }, color: INK, fontFace: face, fontSize: 13, paraSpaceAfter: 6 },
-        })),
-        { x: 0.7, y: 1.7, w: 12, h: 4.8, valign: "top" },
-      );
+      const blocks: string[] = [];
+      if (bs.insights.pacingPlan.length) {
+        blocks.push(`■ ${sectionCopy.insightSubtitles.pacing}`);
+        for (const ph of bs.insights.pacingPlan) {
+          blocks.push(`• ${ph.label} (${ph.sharePct}%) — ${ph.description}`);
+        }
+      }
+      if (bs.insights.creativeDirections.length) {
+        blocks.push(`■ ${sectionCopy.insightSubtitles.creative}`);
+        for (const line of bs.insights.creativeDirections) {
+          blocks.push(`• ${line}`);
+        }
+      }
+      if (bs.insights.operationalNotes.length) {
+        blocks.push(`■ ${sectionCopy.insightSubtitles.operational}`);
+        for (const line of bs.insights.operationalNotes) {
+          blocks.push(`• ${line}`);
+        }
+      }
+      s.addText(blocks.join("\n"), {
+        x: 0.7, y: 1.7, w: 12, h: 3.8, fontFace: face, fontSize: 11, color: INK, valign: "top",
+      });
+      s.addText(bs.insights.disclaimer, {
+        x: 0.7,
+        y: 5.8,
+        w: 12,
+        h: 1.0,
+        fontFace: face,
+        fontSize: 9,
+        color: GRAY,
+        valign: "top",
+      });
     }
 
     const last = pptx.addSlide();

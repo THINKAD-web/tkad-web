@@ -39,7 +39,6 @@ import {
   exportBadgeBracketLabel,
 } from "@/lib/planner-report-export/export-badge";
 import type { PlannerExportKpi } from "@/lib/planner-report-export/types";
-import { campaignBuilderCopy } from "@/lib/admin-campaign-builder/copy-ko";
 import { getReportDocumentTheme } from "@/lib/planner-report-export/document-theme";
 import type { PlannerExportOnlineLine } from "@/lib/planner-report-export/types";
 import { onlinePlatformBadgePdfColors } from "@/lib/online/document-platform-badge-export";
@@ -209,7 +208,7 @@ export async function buildPlannerReportPdf(
 
   if (p.kind === "builder" && p.builderSection) {
     const bs = p.builderSection;
-    const copy = campaignBuilderCopy[bs.documentType];
+    const sectionCopy = bs.sectionCopy;
     const subtitle = reportExportCoverSubtitle(isKo, {
       kind: p.kind,
       builderDocumentType: bs.documentType,
@@ -263,22 +262,26 @@ export async function buildPlannerReportPdf(
 
     const drawDigitalTable = (lines: PlannerExportOnlineLine[]) => {
       if (!lines.length) return;
-      sectionTitle(copy.sectionTitles.estimateProducts);
+      sectionTitle(sectionCopy.titles.digital);
       doc.setFont(FONT, "normal");
       doc.setFontSize(8.5);
       setText(GRAY_600);
-      const noticeLines = doc.splitTextToSize(copy.estimateNotice, contentW) as string[];
+      const noticeLines = doc.splitTextToSize(
+        sectionCopy.notices.digitalEstimateNotice,
+        contentW,
+      ) as string[];
       ensure(noticeLines.length * 4.5 + 2);
       doc.text(noticeLines, M, y + 3);
       y += noticeLines.length * 4.5 + 4;
 
       const cols = [
-        { label: isKo ? "매체" : "Media", w: contentW * 0.22 },
-        { label: isKo ? "플랫폼" : "Platform", w: contentW * 0.14 },
-        { label: isKo ? "과금" : "Pricing", w: contentW * 0.16 },
-        { label: isKo ? "예산" : "Budget", w: contentW * 0.16 },
-        { label: isKo ? "예상 도달" : "Est. reach", w: contentW * 0.16 },
-        { label: isKo ? "예상 클릭" : "Est. clicks", w: contentW * 0.16 },
+        { label: isKo ? "매체" : "Media", w: contentW * 0.18 },
+        { label: isKo ? "플랫폼" : "Platform", w: contentW * 0.12 },
+        { label: isKo ? "과금" : "Pricing", w: contentW * 0.14 },
+        { label: isKo ? "예산" : "Budget", w: contentW * 0.14 },
+        { label: isKo ? "예상 도달" : "Est. reach", w: contentW * 0.14 },
+        { label: isKo ? "예상 클릭" : "Est. clicks", w: contentW * 0.14 },
+        { label: isKo ? "비고" : "Notes", w: contentW * 0.14 },
       ];
       drawSimpleTable(
         "",
@@ -290,6 +293,7 @@ export async function buildPlannerReportPdf(
           fmtWon(row.budgetWon),
           row.reachLabel ?? consult,
           row.clicksLabel ?? consult,
+          row.notes ?? "—",
         ]),
       );
     };
@@ -425,18 +429,19 @@ export async function buildPlannerReportPdf(
 
     drawDigitalTable(bs.digitalLines);
     drawMediaRowsTable(
-      isKo ? "OOH 매체" : "OOH media",
+      sectionCopy.titles.ooh,
       bs.oohLines,
+      sectionCopy.notices.oohSectionNotice,
     );
     drawMediaRowsTable(
-      copy.sectionTitles.executionGroup,
+      sectionCopy.titles.custom,
       bs.customLines,
-      copy.executionNotice,
+      sectionCopy.notices.executionNotice,
     );
 
     const budgetSplit = bs.charts.budgetSplit ?? p.charts?.budgetSplit;
     if (budgetSplit?.length) {
-      sectionTitle(isKo ? "채널 예산 구성" : "Channel budget mix", 46);
+      sectionTitle(sectionCopy.titles.donut, 46);
       ensure(46);
       doc.setFontSize(8);
       setText(GRAY_500);
@@ -448,11 +453,14 @@ export async function buildPlannerReportPdf(
     }
 
     if (bs.insights) {
-      sectionTitle(copy.sectionTitles.insightsGroup);
+      sectionTitle(sectionCopy.titles.insights);
       doc.setFont(FONT, "normal");
       doc.setFontSize(8.5);
       setText(GRAY_600);
-      const hintLines = doc.splitTextToSize(copy.insightsHint, contentW) as string[];
+      const hintLines = doc.splitTextToSize(
+        sectionCopy.notices.insightsHint,
+        contentW,
+      ) as string[];
       ensure(hintLines.length * 4.5 + 2);
       doc.text(hintLines, M, y + 3);
       y += hintLines.length * 4.5 + 4;
@@ -460,13 +468,13 @@ export async function buildPlannerReportPdf(
       const pacingLines = bs.insights.pacingPlan.map(
         (ph) => `${ph.label} (${ph.sharePct}%) — ${ph.description}`,
       );
-      drawInsightBullets(isKo ? "소진 페이스" : "Spend pace", pacingLines);
+      drawInsightBullets(sectionCopy.insightSubtitles.pacing, pacingLines);
       drawInsightBullets(
-        isKo ? "소재 방향" : "Creative direction",
+        sectionCopy.insightSubtitles.creative,
         bs.insights.creativeDirections,
       );
       drawInsightBullets(
-        isKo ? "운영 메모" : "Operations notes",
+        sectionCopy.insightSubtitles.operational,
         bs.insights.operationalNotes,
       );
       const disc = doc.splitTextToSize(bs.insights.disclaimer, contentW) as string[];

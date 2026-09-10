@@ -77,5 +77,14 @@ describe("applyInsightsOverride", () => {
     assert.deepEqual(merged.creativeDirections, ["커스텀 카피"]);
     assert.deepEqual(merged.pacingPlan, base.pacingPlan);
     assert.deepEqual(merged.operationalNotes, base.operationalNotes);
+    assert.equal(merged.disclaimer, base.disclaimer);
+  });
+
+  it("overrides disclaimer when provided", () => {
+    const base = buildCampaignBuilderInsights(payload, { views: [view] });
+    const merged = applyInsightsOverride(base, {
+      disclaimer: "커스텀 disclaimer",
+    });
+    assert.equal(merged.disclaimer, "커스텀 disclaimer");
   });
 });
