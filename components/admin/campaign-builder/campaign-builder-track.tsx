@@ -22,6 +22,7 @@ import { CampaignBuilderCustomLinesPanel } from "@/components/admin/campaign-bui
 import { CampaignBuilderInsightsPanel } from "@/components/admin/campaign-builder/campaign-builder-insights-panel";
 import { CampaignBuilderComparePanel } from "@/components/admin/campaign-builder/campaign-builder-compare-panel";
 import { Button } from "@/components/ui/button";
+import { uploadPlannerCreative } from "@/lib/planner/creative-upload";
 
 export type CampaignBuilderCatalogProps = {
   digitalViews: PublicMediaView[];
@@ -70,6 +71,8 @@ export function CampaignBuilderTrack({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const loadGenRef = useRef(0);
+  const coverLogoInputRef = useRef<HTMLInputElement>(null);
+  const [coverLogoUploading, setCoverLogoUploading] = useState(false);
   /** URL id is authoritative while React reportId catches up after loadReport. */
   const persistedReportId = reportId ?? idFromUrl;
 
@@ -187,6 +190,31 @@ export function CampaignBuilderTrack({
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleCoverLogoUpload(file: File) {
+    setCoverLogoUploading(true);
+    setError("");
+    try {
+      const result = await uploadPlannerCreative(file);
+      setPayload((p) => ({ ...p, coverLogoUrl: result.secureUrl }));
+      setMessage(isKo ? "표지 로고를 업로드했습니다." : "Cover logo uploaded.");
+    } catch {
+      setError(
+        isKo ? "표지 로고 업로드에 실패했습니다." : "Cover logo upload failed.",
+      );
+    } finally {
+      setCoverLogoUploading(false);
+    }
+  }
+
+  function clearCoverLogo() {
+    setPayload((p) => {
+      const next = { ...p };
+      delete next.coverLogoUrl;
+      return next;
+    });
+    setMessage(isKo ? "표지 로고를 제거했습니다." : "Cover logo removed.");
   }
 
   function newReport() {
@@ -350,6 +378,70 @@ export function CampaignBuilderTrack({
                 className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2"
               />
             </label>
+            <div className="space-y-2 sm:col-span-2">
+              <p className="text-sm font-medium">
+                {isKo ? "표지 로고" : "Cover logo"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isKo
+                  ? "PDF/PPTX 표지 우측에 표시됩니다. (플래너와 동일 Bunny 업로드)"
+                  : "Shown on the PDF/PPTX cover (same Bunny upload as planner)."}
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  ref={coverLogoInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/svg+xml"
+                  className="hidden"
+                  data-testid="builder-cover-logo-input"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (file) void handleCoverLogoUpload(file);
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={coverLogoUploading || loading}
+                  data-testid="builder-cover-logo-upload"
+                  onClick={() => coverLogoInputRef.current?.click()}
+                >
+                  {coverLogoUploading
+                    ? isKo
+                      ? "업로드 중…"
+                      : "Uploading…"
+                    : payload.coverLogoUrl
+                      ? isKo
+                        ? "표지 로고 변경"
+                        : "Change cover logo"
+                      : isKo
+                        ? "표지 로고 업로드"
+                        : "Upload cover logo"}
+                </Button>
+                {payload.coverLogoUrl ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={payload.coverLogoUrl}
+                      alt=""
+                      data-testid="builder-cover-logo-thumb"
+                      className="h-10 w-10 rounded-md border border-border bg-background object-contain p-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      data-testid="builder-cover-logo-remove"
+                      onClick={clearCoverLogo}
+                    >
+                      {isKo ? "제거" : "Remove"}
+                    </Button>
+                  </>
+                ) : null}
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">

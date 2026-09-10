@@ -4,9 +4,11 @@ import {
   addPdfThumbImage,
   PLANNER_EXPORT_THUMB_BOX_MM,
   loadExportThumbMap,
-  loadExportImageForPdf,
-  dataUrlImageFormat,
 } from "@/lib/export-media-images";
+import {
+  drawPdfCoverLogo,
+  loadCoverLogoExportData,
+} from "@/lib/planner-report-export/cover-logo-export";
 import type {
   PlannerExportMediaRow,
   PlannerReportExportAssets,
@@ -359,6 +361,7 @@ export async function buildPlannerReportPdf(
     }
 
     drawWordmark(M, 50, 26);
+    drawPdfCoverLogo(doc, await loadCoverLogoExportData(p.coverLogoUrl), pageW, M);
     doc.setFont(FONT, "normal");
     setText(COVER_MUTED);
     doc.setFontSize(10);
@@ -506,13 +509,7 @@ export async function buildPlannerReportPdf(
     reportComposition: p.reportComposition,
   });
 
-  const coverLogoData = p.coverLogoUrl?.trim()
-    ? await loadExportImageForPdf(p.coverLogoUrl.trim(), {
-        width: 256,
-        height: 256,
-        quality: 88,
-      })
-    : null;
+  const coverLogoData = await loadCoverLogoExportData(p.coverLogoUrl);
 
   // ── 표지 페이지 ──
   setFill(COVER_BG);
@@ -527,21 +524,7 @@ export async function buildPlannerReportPdf(
   }
 
   drawWordmark(M, 50, 26);
-  if (coverLogoData) {
-    const logoSize = 28;
-    try {
-      doc.addImage(
-        coverLogoData,
-        dataUrlImageFormat(coverLogoData),
-        pageW - M - logoSize,
-        22,
-        logoSize,
-        logoSize,
-      );
-    } catch {
-      /* broken logo */
-    }
-  }
+  drawPdfCoverLogo(doc, coverLogoData, pageW, M);
   doc.setFont(FONT, "normal");
   setText(COVER_MUTED);
   doc.setFontSize(10);

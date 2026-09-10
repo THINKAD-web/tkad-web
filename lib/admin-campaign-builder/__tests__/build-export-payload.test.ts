@@ -180,6 +180,28 @@ describe("buildCampaignBuilderExportPayload", () => {
     assert.ok(!labels.includes("선택 채널"));
   });
 
+  it("passes coverLogoUrl through when set", () => {
+    const logo = "https://cdn.example.com/client-logo.png";
+    const { payload } = buildCampaignBuilderExportPayload(
+      {
+        title: "로고",
+        payload: basePayload({ coverLogoUrl: logo }),
+      },
+      { digitalCatalog: [sampleView("meta-a")], oohCatalog: [] },
+      "brand",
+    );
+    assert.equal(payload.coverLogoUrl, logo);
+  });
+
+  it("omits coverLogoUrl when unset", () => {
+    const { payload } = buildCampaignBuilderExportPayload(
+      { title: "로고 없음", payload: basePayload() },
+      { digitalCatalog: [sampleView("meta-a")], oohCatalog: [] },
+      "brand",
+    );
+    assert.equal(payload.coverLogoUrl, undefined);
+  });
+
   it("builds report KPI cards from custom line actuals", () => {
     const { payload } = buildCampaignBuilderExportPayload(
       {
