@@ -131,6 +131,80 @@ describe("buildCampaignBuilderExportPayload", () => {
     );
 
     assert.equal(payload.builderSection?.documentType, "report");
+    assert.equal(
+      payload.builderSection?.sectionCopy.titles.digital,
+      "① 디지털 채널 (참고)",
+    );
+  });
+
+  it("applies section copy overrides on export payload", () => {
+    const { payload } = buildCampaignBuilderExportPayload(
+      {
+        title: "오버라이드",
+        payload: basePayload({
+          insightsOverride: {
+            sectionTitles: { digital: "커스텀 디지털" },
+            sectionNotices: { insightsHint: "커스텀 힌트" },
+            disclaimer: "커스텀 disclaimer",
+          },
+        }),
+      },
+      { digitalCatalog: [sampleView("meta-a")], oohCatalog: [] },
+      "minimal",
+    );
+
+    assert.equal(payload.builderSection?.sectionCopy.titles.digital, "커스텀 디지털");
+    assert.equal(payload.builderSection?.sectionCopy.notices.insightsHint, "커스텀 힌트");
+    assert.equal(payload.disclaimer, "커스텀 disclaimer");
+  });
+
+  it("applies KPI label override and hide on export payload", () => {
+    const { payload } = buildCampaignBuilderExportPayload(
+      {
+        title: "KPI override",
+        payload: basePayload({
+          insightsOverride: {
+            kpiCards: [
+              { id: "totalBudget", labelOverride: "커스텀 예산 KPI" },
+              { id: "activeChannels", hidden: true },
+            ],
+          },
+        }),
+      },
+      { digitalCatalog: [sampleView("meta-a")], oohCatalog: [] },
+      "minimal",
+    );
+
+    const labels = payload.kpis.map((k) => k.label);
+    assert.ok(labels.includes("커스텀 예산 KPI"));
+    assert.ok(!labels.includes("선택 채널"));
+  });
+
+  it("builds report KPI cards from custom line actuals", () => {
+    const { payload } = buildCampaignBuilderExportPayload(
+      {
+        title: "실측 리포트",
+        payload: basePayload({
+          documentType: "report",
+          customLines: [
+            {
+              id: "c1",
+              mediaName: "네이버 GFA",
+              budgetWon: 2_000_000,
+              actualReach: 120_000,
+              actualClicks: 3_400,
+            },
+          ],
+        }),
+      },
+      { digitalCatalog: [], oohCatalog: [] },
+      "minimal",
+    );
+
+    const labels = payload.kpis.map((k) => k.label);
+    assert.ok(labels.includes("집행 캠페인"));
+    assert.ok(labels.includes("실측 도달 합산"));
+    assert.ok(labels.includes("실측 클릭 합산"));
   });
 });
 
@@ -145,5 +219,52 @@ describe("digitalLineToExportLine", () => {
     assert.equal(line.slug, "meta-a");
     assert.equal(line.hasEstimate, true);
     assert.ok(line.reachLabel);
+  });
+
+  it("maps line note to export notes column", () => {
+    const line = digitalLineToExportLine(
+      { slug: "meta-a", budgetWon: 1_000_000, note: "  테스트 비고  " },
+      sampleView("meta-a"),
+      true,
+    );
+    assert.ok(line);
+    assert.equal(line.notes, "테스트 비고");
+  });
+
+  it("leaves notes undefined when line note is empty", () => {
+    const line = digitalLineToExportLine(
+      { slug: "meta-a", budgetWon: 1_000_000, note: "   " },
+      sampleView("meta-a"),
+      true,
+    );
+    assert.ok(line);
+    assert.equal(line.notes, undefined);
+  });
+});
+
+describe("line notes in export payload", () => {
+  it("maps OOH line note into media row notes", () => {
+    const catalog = [sampleView("meta-a")];
+    const { payload } = buildCampaignBuilderExportPayload(
+      {
+        title: "비고 테스트",
+        payload: basePayload({
+          oohLines: [
+            {
+              mediaId: "ooh-1",
+              name: "강남 빌보드",
+              region: "서울",
+              type: "static",
+              priceWon: 2_000_000,
+              note: "OOH 비고",
+            },
+          ],
+        }),
+      },
+      { digitalCatalog: catalog, oohCatalog: [] },
+      "brand",
+    );
+
+    assert.equal(payload.builderSection?.oohLines[0]?.notes, "OOH 비고");
   });
 });

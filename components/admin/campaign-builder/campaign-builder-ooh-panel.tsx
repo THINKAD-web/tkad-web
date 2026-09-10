@@ -70,6 +70,17 @@ export function CampaignBuilderOohPanel({
     });
   }
 
+  function updateNote(mediaId: string, note: string) {
+    onChange({
+      ...payload,
+      oohLines: payload.oohLines.map((l) =>
+        l.mediaId === mediaId
+          ? { ...l, note: note.trim() || undefined }
+          : l,
+      ),
+    });
+  }
+
   function removeLine(mediaId: string) {
     onChange({
       ...payload,
@@ -173,35 +184,46 @@ export function CampaignBuilderOohPanel({
           {payload.oohLines.map((line) => (
             <li
               key={line.mediaId}
-              className="flex flex-wrap items-center gap-3 rounded-lg border border-border/50 p-3"
+              className="space-y-2 rounded-lg border border-border/50 p-3"
             >
-              <div className="min-w-[160px] flex-1">
-                <p className="font-medium">{line.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {[line.region, line.type, line.location].filter(Boolean).join(" · ")}
-                </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="min-w-[160px] flex-1">
+                  <p className="font-medium">{line.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {[line.region, line.type, line.location].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+                <label className="flex items-center gap-2 text-sm">
+                  {isKo ? "가격" : "Price"}
+                  <input
+                    type="number"
+                    min={0}
+                    step={100_000}
+                    value={line.priceWon ?? 0}
+                    onChange={(e) =>
+                      updatePrice(line.mediaId, Number(e.target.value) || 0)
+                    }
+                    className="w-32 rounded border border-border bg-background px-2 py-1"
+                  />
+                </label>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => removeLine(line.mediaId)}
+                >
+                  {isKo ? "삭제" : "Remove"}
+                </Button>
               </div>
-              <label className="flex items-center gap-2 text-sm">
-                {isKo ? "가격" : "Price"}
+              <label className="block w-full text-sm">
+                {isKo ? "메모" : "Notes"}
                 <input
-                  type="number"
-                  min={0}
-                  step={100_000}
-                  value={line.priceWon ?? 0}
-                  onChange={(e) =>
-                    updatePrice(line.mediaId, Number(e.target.value) || 0)
-                  }
-                  className="w-32 rounded border border-border bg-background px-2 py-1"
+                  value={line.note ?? ""}
+                  onChange={(e) => updateNote(line.mediaId, e.target.value)}
+                  data-testid={`builder-ooh-note-${line.mediaId}`}
+                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 />
               </label>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => removeLine(line.mediaId)}
-              >
-                {isKo ? "삭제" : "Remove"}
-              </Button>
             </li>
           ))}
         </ul>

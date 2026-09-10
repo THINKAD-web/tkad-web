@@ -156,6 +156,7 @@ export type PlannerExportOnlineLine = {
   clicksLabel?: string | null;
   /** calculable CPC/CPM seed — false → inquiry / consultation row */
   hasEstimate: boolean;
+  notes?: string;
 };
 
 /** PR6-b — online report body (onlyOnline or mixed second section) */
@@ -218,6 +219,28 @@ export type PlannerExportPortfolioGroup = {
   }[];
 };
 
+export type PlannerExportBuilderSectionCopy = {
+  titles: {
+    digital: string;
+    ooh: string;
+    custom: string;
+    kpi: string;
+    donut: string;
+    insights: string;
+  };
+  notices: {
+    digitalEstimateNotice: string;
+    oohSectionNotice?: string;
+    executionNotice: string;
+    insightsHint: string;
+  };
+  insightSubtitles: {
+    pacing: string;
+    creative: string;
+    operational: string;
+  };
+};
+
 export type PlannerExportBuilderSection = {
   documentType: "proposal" | "report";
   digitalLines: PlannerExportOnlineLine[];
@@ -226,6 +249,8 @@ export type PlannerExportBuilderSection = {
   customLines: PlannerExportMediaRow[];
   charts: PlannerExportCharts;
   insights?: PlannerExportOnlineInsights;
+  /** Resolved section titles/notices (defaults + insightsOverride). */
+  sectionCopy: PlannerExportBuilderSectionCopy;
 };
 
 export type PlannerReportExportPayload = {

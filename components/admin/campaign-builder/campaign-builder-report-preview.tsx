@@ -9,7 +9,6 @@ import {
 } from "@/components/document/document-layout";
 import { BudgetSplitDonut } from "@/components/planner/budget-split-donut";
 import { buildCampaignBuilderExportPayload } from "@/lib/admin-campaign-builder/build-export-payload";
-import { campaignBuilderCopy } from "@/lib/admin-campaign-builder/copy-ko";
 import type { CampaignBuilderPayload } from "@/lib/admin-campaign-builder/schemas";
 import type { PublicMediaView } from "@/lib/digital/public-media-types";
 import type { MediaCatalogListItem } from "@/lib/media-catalog-list-dto";
@@ -55,7 +54,7 @@ export function CampaignBuilderReportPreview({
   const section = exportPayload.builderSection;
   if (!section) return null;
 
-  const copy = campaignBuilderCopy[section.documentType];
+  const sectionCopy = section.sectionCopy;
   const consult = isKo ? "별도 협의" : "Consultation";
 
   return (
@@ -80,7 +79,7 @@ export function CampaignBuilderReportPreview({
           {exportPayload.kpis.length > 0 ? (
             <section data-testid="builder-preview-kpi">
               <DocumentSectionHeading accentColor={theme.accent}>
-                KPI
+                {sectionCopy.titles.kpi}
               </DocumentSectionHeading>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {exportPayload.kpis.map((kpi) => (
@@ -104,9 +103,11 @@ export function CampaignBuilderReportPreview({
           {section.digitalLines.length > 0 ? (
             <section data-testid="builder-preview-digital">
               <DocumentSectionHeading accentColor={theme.accent}>
-                {copy.sectionTitles.estimateProducts}
+                {sectionCopy.titles.digital}
               </DocumentSectionHeading>
-              <p className="mt-2 text-sm text-gray-600">{copy.estimateNotice}</p>
+              <p className="mt-2 text-sm text-gray-600">
+                {sectionCopy.notices.digitalEstimateNotice}
+              </p>
               <div className="mt-3 overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
@@ -117,6 +118,7 @@ export function CampaignBuilderReportPreview({
                       <th className="px-3 py-2">{isKo ? "예산" : "Budget"}</th>
                       <th className="px-3 py-2">{isKo ? "예상 도달" : "Est. reach"}</th>
                       <th className="px-3 py-2">{isKo ? "예상 클릭" : "Est. clicks"}</th>
+                      <th className="px-3 py-2">{isKo ? "비고" : "Notes"}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -128,6 +130,7 @@ export function CampaignBuilderReportPreview({
                         <td className="px-3 py-2 tabular-nums">{fmtWon(row.budgetWon, isKo)}</td>
                         <td className="px-3 py-2 text-gray-600">{row.reachLabel ?? consult}</td>
                         <td className="px-3 py-2 text-gray-600">{row.clicksLabel ?? consult}</td>
+                        <td className="px-3 py-2 text-gray-600">{row.notes ?? "—"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -139,8 +142,13 @@ export function CampaignBuilderReportPreview({
           {section.oohLines.length > 0 ? (
             <section data-testid="builder-preview-ooh">
               <DocumentSectionHeading accentColor={theme.accent}>
-                {isKo ? "OOH 매체" : "OOH media"}
+                {sectionCopy.titles.ooh}
               </DocumentSectionHeading>
+              {sectionCopy.notices.oohSectionNotice ? (
+                <p className="mt-2 text-sm text-gray-600">
+                  {sectionCopy.notices.oohSectionNotice}
+                </p>
+              ) : null}
               <BuilderMediaTable rows={section.oohLines} isKo={isKo} />
             </section>
           ) : null}
@@ -148,9 +156,11 @@ export function CampaignBuilderReportPreview({
           {section.customLines.length > 0 ? (
             <section data-testid="builder-preview-custom">
               <DocumentSectionHeading accentColor={theme.accent}>
-                {copy.sectionTitles.executionGroup}
+                {sectionCopy.titles.custom}
               </DocumentSectionHeading>
-              <p className="mt-2 text-sm text-gray-600">{copy.executionNotice}</p>
+              <p className="mt-2 text-sm text-gray-600">
+                {sectionCopy.notices.executionNotice}
+              </p>
               <BuilderMediaTable rows={section.customLines} isKo={isKo} />
             </section>
           ) : null}
@@ -158,7 +168,7 @@ export function CampaignBuilderReportPreview({
           {(section.charts.budgetSplit?.length ?? 0) > 0 ? (
             <section data-testid="builder-preview-chart">
               <DocumentSectionHeading accentColor={theme.accent}>
-                {isKo ? "채널 예산 구성" : "Channel budget mix"}
+                {sectionCopy.titles.donut}
               </DocumentSectionHeading>
               <div className="mt-4">
                 <BudgetSplitDonut data={section.charts.budgetSplit!} />
@@ -169,21 +179,23 @@ export function CampaignBuilderReportPreview({
           {section.insights ? (
             <section data-testid="builder-preview-insights">
               <DocumentSectionHeading accentColor={theme.accent}>
-                {copy.sectionTitles.insightsGroup}
+                {sectionCopy.titles.insights}
               </DocumentSectionHeading>
-              <p className="mt-2 text-sm text-gray-600">{copy.insightsHint}</p>
+              <p className="mt-2 text-sm text-gray-600">
+                {sectionCopy.notices.insightsHint}
+              </p>
               <InsightBlock
-                title={isKo ? "소진 페이스" : "Spend pace"}
+                title={sectionCopy.insightSubtitles.pacing}
                 lines={section.insights.pacingPlan.map(
                   (ph) => `${ph.label} (${ph.sharePct}%) — ${ph.description}`,
                 )}
               />
               <InsightBlock
-                title={isKo ? "소재 방향" : "Creative direction"}
+                title={sectionCopy.insightSubtitles.creative}
                 lines={section.insights.creativeDirections}
               />
               <InsightBlock
-                title={isKo ? "운영 메모" : "Operations notes"}
+                title={sectionCopy.insightSubtitles.operational}
                 lines={section.insights.operationalNotes}
               />
               <p className="mt-4 text-xs text-gray-500">{section.insights.disclaimer}</p>

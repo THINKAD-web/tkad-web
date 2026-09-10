@@ -68,4 +68,53 @@ describe("buildPlannerReportPdf builder kind", () => {
     assert.ok(bytes.length > 1000);
     assert.equal(String.fromCharCode(...bytes.slice(0, 4)), "%PDF");
   });
+
+  it("builds PDF when export payload includes line notes and insight subtitles", async () => {
+    const { payload: exportPayload } = buildCampaignBuilderExportPayload(
+      {
+        title: "빌더 PDF 비고",
+        payload: {
+          ...payload,
+          digitalLines: [
+            { slug: "meta-test", budgetWon: 1_000_000, note: "PDF 디지털 비고" },
+          ],
+          oohLines: [
+            {
+              mediaId: "ooh-1",
+              name: "OOH 테스트",
+              region: "서울",
+              type: "static",
+              priceWon: 2_000_000,
+              note: "PDF OOH 비고",
+            },
+          ],
+          insightsOverride: {
+            insightSubtitles: {
+              pacing: "PDF 커스텀 페이스",
+              creative: "PDF 커스텀 소재",
+              operational: "PDF 커스텀 운영",
+            },
+          },
+        },
+      },
+      { digitalCatalog: [view], oohCatalog: [] },
+      "brand",
+    );
+
+    assert.equal(
+      exportPayload.builderSection?.digitalLines[0]?.notes,
+      "PDF 디지털 비고",
+    );
+    assert.equal(
+      exportPayload.builderSection?.oohLines[0]?.notes,
+      "PDF OOH 비고",
+    );
+    assert.equal(
+      exportPayload.builderSection?.sectionCopy.insightSubtitles.pacing,
+      "PDF 커스텀 페이스",
+    );
+
+    const bytes = await buildPlannerReportPdf(exportPayload, { style: "brand" });
+    assert.ok(bytes.length > 1000);
+  });
 });

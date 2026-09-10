@@ -75,6 +75,6 @@ export function applyInsightsOverride(
     pacingPlan: override.pacingPlan ?? base.pacingPlan,
     creativeDirections: override.creativeDirections ?? base.creativeDirections,
     operationalNotes: override.operationalNotes ?? base.operationalNotes,
-    disclaimer: base.disclaimer,
+    disclaimer: override.disclaimer ?? base.disclaimer,
   };
 }

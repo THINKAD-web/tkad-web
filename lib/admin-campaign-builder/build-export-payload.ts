@@ -2,7 +2,6 @@ import {
   applyInsightsOverride,
   buildCampaignBuilderInsights,
 } from "@/lib/admin-campaign-builder/build-insights";
-import { campaignBuilderCopy } from "@/lib/admin-campaign-builder/copy-ko";
 import {
   formatKpiRange,
   formatWon,
@@ -14,12 +13,13 @@ import type {
   DigitalCampaignLine,
   OohCampaignLine,
 } from "@/lib/admin-campaign-builder/schemas";
+import { buildBuilderKpiCards } from "@/lib/admin-campaign-builder/build-kpi-cards";
+import { resolveBuilderSectionCopy } from "@/lib/admin-campaign-builder/resolve-builder-copy";
 import { summarizeBuilderReport } from "@/lib/admin-campaign-builder/summary";
 import type { PublicMediaView } from "@/lib/digital/public-media-types";
 import type { MediaCatalogListItem } from "@/lib/media-catalog-list-dto";
 import type { PlannerReportStyle } from "@/lib/planner-report-export/document-theme";
 import type {
-  PlannerExportKpi,
   PlannerExportMediaRow,
   PlannerExportOnlineLine,
   PlannerReportExportPayload,
@@ -93,6 +93,7 @@ export function digitalLineToExportLine(
     reachLabel,
     clicksLabel,
     hasEstimate: Boolean(reachLabel || clicksLabel),
+    notes: line.note?.trim() || undefined,
   };
 }
 
@@ -111,6 +112,7 @@ function oohLineToExportRow(
       line.priceWon != null && line.priceWon > 0
         ? formatWon(line.priceWon)
         : mediaPriceOnInquiryLabel(isKo ? "ko-KR" : "en-US"),
+    notes: line.note?.trim() || undefined,
   };
 }
 
@@ -144,49 +146,6 @@ function customLineToExportRow(
       ? "카탈로그 외 실집행"
       : "Off-catalog execution",
   };
-}
-
-function buildKpiCards(
-  payload: CampaignBuilderPayload,
-  summary: ReturnType<typeof summarizeBuilderReport>,
-  isKo: boolean,
-): PlannerExportKpi[] {
-  const copy = campaignBuilderCopy[payload.documentType];
-  const avgBudget =
-    summary.digitalLineCount > 0
-      ? Math.round(summary.totalBudgetWon / summary.digitalLineCount)
-      : 0;
-
-  const kpis: PlannerExportKpi[] = [
-    {
-      label: copy.kpiLabels.activeChannels,
-      value: String(summary.lineCount),
-      badge: "estimated",
-    },
-    {
-      label: copy.kpiLabels.totalBudget,
-      value: formatWon(summary.totalBudgetWon),
-      badge: "estimated",
-    },
-  ];
-
-  if (summary.reachLabel) {
-    kpis.push({
-      label: copy.kpiLabels.expectedReach,
-      value: summary.reachLabel,
-      badge: "estimated",
-    });
-  }
-
-  if (summary.digitalLineCount > 0) {
-    kpis.push({
-      label: copy.kpiLabels.avgBudget,
-      value: formatWon(avgBudget),
-      badge: "estimated",
-    });
-  }
-
-  return kpis.slice(0, 4);
 }
 
 export function buildCampaignBuilderExportPayload(
@@ -236,6 +195,11 @@ export function buildCampaignBuilderExportPayload(
   );
 
   const charts = { budgetSplit: summary.budgetChart };
+  const sectionCopy = resolveBuilderSectionCopy(
+    payload.documentType,
+    isKo,
+    payload.insightsOverride,
+  );
   const generatedAt = new Date().toISOString().slice(0, 10);
   const clientName =
     payload.clientName?.trim() || payload.clientCompany?.trim() || undefined;
@@ -254,7 +218,7 @@ export function buildCampaignBuilderExportPayload(
     categoriesText: "—",
     ageText: "—",
     industryText: "—",
-    kpis: buildKpiCards(payload, summary, isKo),
+    kpis: buildBuilderKpiCards(payload, summary, isKo),
     charts,
     portfolio: [],
     builderSection: {
@@ -264,6 +228,7 @@ export function buildCampaignBuilderExportPayload(
       customLines,
       charts,
       insights,
+      sectionCopy,
     },
     disclaimer: insights.disclaimer,
   };

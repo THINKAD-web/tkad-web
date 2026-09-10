@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import {
@@ -64,10 +64,14 @@ export function CampaignBuilderTrack({
   const [reportId, setReportId] = useState<string | null>(null);
   const [payload, setPayload] = useState<CampaignBuilderPayload>(emptyPayload);
   const [reports, setReports] = useState<CampaignBuilderReportListItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  /** When opening ?id=, block edits until loadReport finishes (avoids empty-then-clobber). */
+  const [loading, setLoading] = useState(() => Boolean(idFromUrl));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const loadGenRef = useRef(0);
+  /** URL id is authoritative while React reportId catches up after loadReport. */
+  const persistedReportId = reportId ?? idFromUrl;
 
   const refreshList = useCallback(async () => {
     const res = await fetch("/api/admin/campaign-builder/reports", {
@@ -83,8 +87,10 @@ export function CampaignBuilderTrack({
   }, []);
 
   const loadReport = useCallback(async (id: string) => {
+    const gen = ++loadGenRef.current;
     setLoading(true);
     setError("");
+    setReportId(id);
     try {
       const res = await fetch(`/api/admin/campaign-builder/reports/${id}`, {
         credentials: "include",
@@ -93,42 +99,47 @@ export function CampaignBuilderTrack({
         payload?: CampaignBuilderPayload;
         error?: string;
       };
+      if (loadGenRef.current !== gen) return;
       if (!res.ok || !data.payload) {
         throw new Error(data.error ?? "Not found");
       }
       setPayload(data.payload);
       setReportId(id);
-      const currentStep = searchParams.get("step");
-      const step =
-        currentStep === "1" || currentStep === "2" || currentStep === "3"
-          ? currentStep
-          : 2;
-      const href = buildAdminReportsHubPath({
-        type: "builder",
-        step,
-      });
-      const q = new URLSearchParams(href.split("?")[1] ?? "");
-      q.set("id", id);
-      router.replace(`/${locale}/admin/reports?${q.toString()}`, {
-        scroll: false,
-      });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Load failed");
+      if (loadGenRef.current === gen) {
+        setError(e instanceof Error ? e.message : "Load failed");
+      }
     } finally {
-      setLoading(false);
+      if (loadGenRef.current === gen) setLoading(false);
     }
-  }, [locale, router, searchParams]);
+  }, []);
 
   useEffect(() => {
     void refreshList();
   }, [refreshList]);
 
   useEffect(() => {
-    if (!idFromUrl) return;
+    if (!idFromUrl) {
+      setLoading(false);
+      return;
+    }
+    // After POST save, URL ?id= updates while payload is already in memory — skip redundant fetch.
+    if (reportId === idFromUrl && payload.title.trim()) {
+      setLoading(false);
+      return;
+    }
     void loadReport(idFromUrl);
-  }, [idFromUrl, loadReport]);
+  }, [idFromUrl, loadReport, reportId, payload.title]);
 
   async function saveReport() {
+    if (loading) {
+      setError(
+        isKo
+          ? "리포트를 불러오는 중입니다. 잠시 후 다시 저장하세요."
+          : "Report is still loading. Try again in a moment.",
+      );
+      return;
+    }
     if (!payload.title.trim()) {
       setError(isKo ? "제목을 입력하세요." : "Title is required.");
       return;
@@ -137,26 +148,31 @@ export function CampaignBuilderTrack({
     setError("");
     setMessage("");
     try {
-      const url = reportId
-        ? `/api/admin/campaign-builder/reports/${reportId}`
+      const targetId = persistedReportId;
+      const url = targetId
+        ? `/api/admin/campaign-builder/reports/${targetId}`
         : "/api/admin/campaign-builder/reports";
       const res = await fetch(url, {
-        method: reportId ? "PATCH" : "POST",
+        method: targetId ? "PATCH" : "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       const data = (await res.json()) as {
         id?: string;
+        payload?: CampaignBuilderPayload;
         error?: string;
         details?: unknown;
       };
       if (!res.ok) {
         throw new Error(data.error ?? "Save failed");
       }
-      const nextId = data.id ?? reportId;
-      if (nextId && !reportId) {
-        setReportId(nextId);
+      if (data.payload) {
+        setPayload(data.payload);
+      }
+      const nextId = data.id ?? targetId;
+      if (nextId) setReportId(nextId);
+      if (nextId && !targetId) {
         const href = buildAdminReportsHubPath({ type: "builder", step: 2 });
         const q = new URLSearchParams(href.split("?")[1] ?? "");
         q.set("id", nextId);
@@ -174,6 +190,8 @@ export function CampaignBuilderTrack({
   }
 
   function newReport() {
+    loadGenRef.current += 1;
+    setLoading(false);
     setReportId(null);
     setPayload(emptyPayload());
     setMessage("");
@@ -187,6 +205,7 @@ export function CampaignBuilderTrack({
     <div
       className="grid gap-6 lg:grid-cols-[240px_1fr]"
       data-testid="campaign-builder-track"
+      data-builder-ready={loading ? "false" : "true"}
     >
       <aside className="space-y-3 rounded-2xl border border-border/60 bg-card/40 p-3">
         <div className="flex items-center justify-between gap-2">
@@ -207,7 +226,25 @@ export function CampaignBuilderTrack({
               <li key={r.id}>
                 <button
                   type="button"
-                  onClick={() => void loadReport(r.id)}
+                  onClick={() => {
+                    if (r.id === idFromUrl) return;
+                    const currentStep = searchParams.get("step");
+                    const step =
+                      currentStep === "1" ||
+                      currentStep === "2" ||
+                      currentStep === "3"
+                        ? currentStep
+                        : "2";
+                    const href = buildAdminReportsHubPath({
+                      type: "builder",
+                      step,
+                    });
+                    const q = new URLSearchParams(href.split("?")[1] ?? "");
+                    q.set("id", r.id);
+                    router.replace(`/${locale}/admin/reports?${q.toString()}`, {
+                      scroll: false,
+                    });
+                  }}
                   className={`w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted/50 ${
                     reportId === r.id ? "bg-[color:var(--qp-accent)]/15 font-medium" : ""
                   }`}
@@ -316,29 +353,35 @@ export function CampaignBuilderTrack({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="button" onClick={() => void saveReport()} disabled={saving}>
+            <Button
+              type="button"
+              onClick={() => void saveReport()}
+              disabled={saving || loading}
+            >
               {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {isKo ? "저장 중…" : "Saving…"}
                 </>
-              ) : reportId ? (
-                isKo ? "저장 (PATCH)" : "Save"
+              ) : persistedReportId ? (
+                isKo ? "저장" : "Save"
               ) : (
-                isKo ? "저장 (POST)" : "Create"
+                isKo ? "저장 (신규)" : "Create"
               )}
             </Button>
             <Button
               type="button"
               variant="outline"
-              disabled={!payload.title.trim()}
+              disabled={!payload.title.trim() || loading}
               onClick={onReadyForPreview}
               data-testid="campaign-builder-go-preview"
             >
               {campaignBuilderExportCopy.goToPreview}
             </Button>
-            {reportId ? (
-              <span className="text-xs text-muted-foreground">id: {reportId}</span>
+            {persistedReportId ? (
+              <span className="text-xs text-muted-foreground">
+                id: {persistedReportId}
+              </span>
             ) : null}
             {message ? (
               <span className="text-sm text-[color:var(--qp-accent)]">{message}</span>
@@ -350,11 +393,21 @@ export function CampaignBuilderTrack({
         </section>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">
+          <p
+            className="text-sm text-muted-foreground"
+            data-testid="campaign-builder-loading"
+            aria-live="polite"
+            aria-busy="true"
+          >
             {isKo ? "불러오는 중…" : "Loading report…"}
           </p>
         ) : null}
 
+        <div
+          className={
+            loading ? "pointer-events-none space-y-4 opacity-50" : "space-y-4"
+          }
+        >
         {payload.mode === "digital" ? (
           <CampaignBuilderDigitalPanel
             isKo={isKo}
@@ -389,6 +442,7 @@ export function CampaignBuilderTrack({
           reports={reports}
           digitalViews={digitalViews}
         />
+        </div>
 
         {step >= 3 ? (
           <section
@@ -403,11 +457,11 @@ export function CampaignBuilderTrack({
               style={style}
             />
             <div className="flex flex-wrap items-center gap-2">
-              {reportId ? (
+              {persistedReportId ? (
                 <>
                   <Button type="button" asChild>
                     <a
-                      href={campaignBuilderExportHref(reportId, "pdf", style)}
+                      href={campaignBuilderExportHref(persistedReportId, "pdf", style)}
                       download
                       data-testid="campaign-builder-export-pdf"
                     >
@@ -417,7 +471,7 @@ export function CampaignBuilderTrack({
                   </Button>
                   <Button type="button" variant="outline" asChild>
                     <a
-                      href={campaignBuilderExportHref(reportId, "pptx", style)}
+                      href={campaignBuilderExportHref(persistedReportId, "pptx", style)}
                       download
                       data-testid="campaign-builder-export-pptx"
                     >
