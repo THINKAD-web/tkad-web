@@ -135,7 +135,14 @@ async function main() {
     detail: storedPayload?.coverLogoUrl,
   });
 
-  await goToPreview(page, BASE, save.reportId);
+  await page.goto(
+    `${BASE}/ko/admin/reports?type=builder&step=3&id=${encodeURIComponent(save.reportId)}`,
+    { waitUntil: "networkidle", timeout: 120_000 },
+  );
+  await waitForBuilderReady(page, { timeoutMs: 120_000 });
+  await page.waitForSelector('[data-testid="campaign-builder-report-preview"]', {
+    timeout: 120_000,
+  });
   const previewSrc = await page
     .getByTestId("campaign-builder-report-preview")
     .locator("img")
