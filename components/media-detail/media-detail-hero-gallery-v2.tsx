@@ -126,7 +126,7 @@ export function MediaDetailHeroGalleryV2({
             >
               <BunnyFallbackImage
                 rawSrc={src}
-                alt=""
+                alt={`${altBase} — ${i + 1}/${thumbs.length}`}
                 fill
                 sizes="(max-width: 1024px) 25vw, 12vw"
                 className="object-cover"

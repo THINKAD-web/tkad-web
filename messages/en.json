@@ -1061,7 +1061,7 @@
       "randomFill": "Fill with sample values",
       "randomFillHint": "For inspiration only. Review and edit before starting analysis.",
       "channelTypeLabel": "Channel type",
-      "channelTypeHint": "Your choice is saved. Integrated auto-allocation is not ready yet; results are OOH-channel recommendations.",
+      "channelTypeHint": "Digital and integrated auto-allocation are coming soon. Only OOH-channel recommendations are available for now.",
       "channelTypeOoh": "OOH",
       "channelTypeDigital": "Digital",
       "channelTypeIntegrated": "Integrated"

@@ -221,7 +221,9 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
 
   useEffect(() => {
     const fromUrl = parseRecommendChannelType(searchParams.get("channelType"));
-    const next = fromUrl ?? readStoredRecommendChannelType("ooh");
+    /** digital/integrated 자동 배분은 아직 미구현 — OOH로 강제 고정 */
+    const resolved = fromUrl ?? readStoredRecommendChannelType("ooh");
+    const next = resolved === "ooh" ? resolved : "ooh";
     setChannelType(next);
     writeStoredRecommendChannelType(next);
     if (fromUrl && typeof window !== "undefined") {
@@ -234,6 +236,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   }, [searchParams]);
 
   const selectChannelType = useCallback((value: RecommendChannelType) => {
+    if (value !== "ooh") return;
     setChannelType(value);
     writeStoredRecommendChannelType(value);
   }, []);
@@ -475,11 +478,12 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const channelTypeOptions: {
     value: RecommendChannelType;
     label: string;
+    comingSoon?: boolean;
   }[] = useMemo(
     () => [
       { value: "ooh", label: tr("form.channelTypeOoh") },
-      { value: "digital", label: tr("form.channelTypeDigital") },
-      { value: "integrated", label: tr("form.channelTypeIntegrated") },
+      { value: "digital", label: tr("form.channelTypeDigital"), comingSoon: true },
+      { value: "integrated", label: tr("form.channelTypeIntegrated"), comingSoon: true },
     ],
     [tr],
   );
@@ -639,16 +643,26 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
             {...fieldBadge}
           >
             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={tr("form.channelTypeLabel")}>
-              {channelTypeOptions.map(({ value, label }) => (
+              {channelTypeOptions.map(({ value, label, comingSoon }) => (
                 <button
                   key={value}
                   type="button"
                   role="radio"
                   aria-checked={channelType === value}
+                  disabled={comingSoon}
+                  aria-disabled={comingSoon}
                   onClick={() => selectChannelType(value)}
-                  className={chipClass(channelType === value)}
+                  className={cn(
+                    chipClass(channelType === value),
+                    comingSoon && "cursor-not-allowed opacity-50 hover:border-gray-200 dark:hover:border-white/10",
+                  )}
                 >
                   {label}
+                  {comingSoon ? (
+                    <span className="ml-1.5 inline-flex rounded-full border border-amber-400/50 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+                      {isKo ? "준비 중" : "Coming soon"}
+                    </span>
+                  ) : null}
                 </button>
               ))}
             </div>
