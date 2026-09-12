@@ -4694,6 +4694,13 @@ img {
   .safe-top {
     padding-top: max(1rem, env(safe-area-inset-top));
   }
+
+  /* PWA standalone 모드에서 노치/상태바가 sticky 헤더(.tkad-nav-chrome, top:0)를
+     가려 첫 진입 시 메뉴바가 잘려 보이는 문제. 브라우저 탭 모드에서는
+     safe-area-inset-top 이 0이라 영향 없음. */
+  .tkad-nav-chrome {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
 }
 
 /* prefers-reduced-motion: 전역 감속 */

@@ -35,6 +35,10 @@ export const recommendInputSchema = z.object({
   freetextSource: z.string().max(2000).optional(),
   /** 사용자 슬라이더 override. 미전송 시 goal 기본값 */
   digitalBudgetPct: z.number().min(0).max(100).optional(),
+  /** 자연어 파서가 추출한 매체유형 의도 (예: "지하철" → subway) — 없으면 zod가
+   * 조용히 스트립해 matching-engine 의 노선/유형 가점 로직이 무력화됨. */
+  mediaIntents: z.array(z.enum(["subway", "bus_wrap", "billboard"])).optional(),
+  subwayLine: z.string().max(32).optional(),
 });
 
 export const recommendRequestSchema = z.object({

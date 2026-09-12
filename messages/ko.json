@@ -1062,7 +1062,7 @@
       "randomFill": "조건 무작위 채우기",
       "randomFillHint": "입력이 막막할 때만 사용하세요. 채운 뒤 직접 수정하고 분석을 눌러 주세요.",
       "channelTypeLabel": "채널 타입",
-      "channelTypeHint": "선택은 저장됩니다. 통합 자동 배분은 아직 준비 중이며, 결과는 옥외 채널 추천입니다.",
+      "channelTypeHint": "디지털/통합 자동 배분은 준비 중입니다. 현재는 OOH 채널 추천만 제공합니다.",
       "channelTypeOoh": "OOH",
       "channelTypeDigital": "디지털",
       "channelTypeIntegrated": "통합"

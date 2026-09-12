@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { MediaBrowsePageSkeleton } from "@/components/media/media-card-skeleton";
 import { MediaSearchPage } from "@/components/media/media-search-page";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { fetchDefaultMediaBrowsePage } from "@/lib/media-browse-initial-page";
 
 /** ISR shell — no `searchParams` so filters do not force per-request SSR. */
 export const revalidate = 3600;
@@ -11,16 +12,26 @@ type Props = {
 };
 
 /**
- * `/media` — static app shell (ISR 1h).
- * Filtered catalog loads client-side via `/api/public/media` (see `media-search-page.tsx`).
+ * `/media` — static app shell (ISR 1h) pre-populated with the first (unfiltered,
+ * default-sort) page of results, so SSR HTML/crawlers see real listings instead
+ * of an empty loading skeleton. Filtered/sorted catalog still loads client-side
+ * via `/api/public/media` (see `media-search-page.tsx`).
  * JSON-LD + metadata remain in `media/layout.tsx` / `generateMetadata`.
  */
 export default async function MediaPage({ params }: Props) {
   await resolveLocaleParam(params);
+  const { initialMedia, initialCatalogItems, initialTotal } =
+    await fetchDefaultMediaBrowsePage("offline");
 
   return (
     <Suspense fallback={<MediaBrowsePageSkeleton />}>
-      <MediaSearchPage appShell browseChannel="offline" />
+      <MediaSearchPage
+        appShell
+        browseChannel="offline"
+        initialMedia={initialMedia}
+        initialCatalogItems={initialCatalogItems}
+        initialTotal={initialTotal}
+      />
     </Suspense>
   );
 }

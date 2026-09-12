@@ -444,6 +444,12 @@ export function compareMediaByMonthlyEquivalentPrice(
   b: MediaPriceSortable,
   direction: "asc" | "desc" = "asc",
 ): number {
+  /** 가격 문의(협의가) 매체는 내부적으로 0원 취급이라 정렬 방향과 무관하게
+   * 항상 맨 뒤로 — "낮은순" 정렬 시 0원인 협의가 매체가 최상단에 뜨는 문제 방지. */
+  const aInquiry = isMediaPriceOnInquiry(a);
+  const bInquiry = isMediaPriceOnInquiry(b);
+  if (aInquiry !== bInquiry) return aInquiry ? 1 : -1;
+
   const am = mediaMonthlyEquivalentSortWon(a);
   const bm = mediaMonthlyEquivalentSortWon(b);
   const diff = direction === "asc" ? am - bm : bm - am;
