@@ -171,7 +171,6 @@
 .ooh-home-hero__lead {
   margin: 0.75rem 0 0;
   max-width: 34rem;
-  text-wrap: balance;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.5;
@@ -191,6 +190,12 @@
    *
    * TODO(#378 ④ 머지 후): lead 에 매체 수 라벨이 주입되면 실제 길이를 보고
    * min-height 2줄 확보가 필요한지 다시 판단할 것.
+   *
+   * `text-wrap: balance` 는 의도적으로 안 씀 — `-webkit-line-clamp`(아래)와
+   * 같은 요소에 같이 걸면 WebKit(iOS Safari)에서 줄바꿈 재계산과 clamp 계산이
+   * 충돌해 클램프 경계 부근 텍스트가 겹쳐 보이는 렌더링 버그가 있다. 실기기에서
+   * `{count}` 값에 따라 텍스트 길이가 바뀔 때마다 재현되던 글자 겹침 현상의
+   * 원인으로 추정 — slogan(line-clamp 없음)에는 balance 유지.
    */
   display: -webkit-box;
   -webkit-box-orient: vertical;

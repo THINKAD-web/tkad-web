@@ -152,6 +152,24 @@ export default function RecommendPageClient({
   const [resumeOpen, setResumeOpen] = useState(false);
   const [resumeMediaCount, setResumeMediaCount] = useState(0);
 
+  /**
+   * PWA/iOS Safari 재접속 대부분은 bfcache 복원이라 아래 세션 복원 useLayoutEffect
+   * 가 다시 안 돈다 — sessionRestoredRef 가 이전 방문에서 이미 true 로 굳어 있어
+   * "이어하기/새로 시작" 팝업 없이 곧장 이전 화면만 복원되는 회귀 방지
+   * (상세플래너 brief-flow-client.tsx 와 동일 패턴).
+   */
+  const [bfcacheRestoreTick, setBfcacheRestoreTick] = useState(0);
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (!e.persisted) return;
+      sessionRestoredRef.current = false;
+      resumePromptedRef.current = false;
+      setBfcacheRestoreTick((n) => n + 1);
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
   const [similarBanner, setSimilarBanner] = useState<string | null>(null);
 
   const [phase, setPhase] = useState<Phase>("form");
@@ -602,7 +620,7 @@ export default function RecommendPageClient({
     if (snap) {
       applySessionSnapshot(snap);
     }
-  }, [catalog, skipSessionRestore, applySessionSnapshot]);
+  }, [catalog, skipSessionRestore, applySessionSnapshot, bfcacheRestoreTick]);
 
   const handleRecommendResumeContinue = useCallback(() => {
     const snap = pendingSessionRef.current ?? readRecommendSessionSnapshot();

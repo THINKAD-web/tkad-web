@@ -134,6 +134,26 @@ export function BriefFlowClient({
   const pendingStepRef = useRef<BriefWizardStep | null>(null);
   const resumePromptedRef = useRef(false);
 
+  /**
+   * PWA/iOS Safari 재접속은 대부분 새 mount 가 아니라 bfcache 복원 — 이 경우
+   * 아래 useLayoutEffect 는 다시 안 돈다(페이지가 얼리지 않고 그대로 얼려졌다
+   * 녹는 것뿐이라 React effect 자체가 재실행되지 않음). 그래서 mixUnits 를
+   * 담아두고 탭/앱을 완전히 종료했다가 재접속하면, 이미 resumePromptedRef 가
+   * true 로 굳어 있던 이전 세션이 그대로 복원돼 "이어하기/새로 시작" 팝업 없이
+   * 곧장 이전 화면이 보이는 회귀. `pageshow`(`event.persisted`)로 bfcache
+   * 복원을 감지해 가드를 풀고 재판단시킨다.
+   */
+  const [bfcacheRestoreTick, setBfcacheRestoreTick] = useState(0);
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (!e.persisted) return;
+      resumePromptedRef.current = false;
+      setBfcacheRestoreTick((n) => n + 1);
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
   // ── 딥링크 인계 (매체 상세·비교·찜·내 플랜·챗봇) ──
   const { toast } = useToast();
   const handoff = useMemo(
@@ -196,7 +216,15 @@ export function BriefFlowClient({
     }
     resumePromptedRef.current = true;
     setResumeOpen(true);
-  }, [hydrated, planFromUrl, pendingHandoff, searchParams, reset, stripHandoffQuery]);
+  }, [
+    hydrated,
+    planFromUrl,
+    pendingHandoff,
+    searchParams,
+    reset,
+    stripHandoffQuery,
+    bfcacheRestoreTick,
+  ]);
 
   const noticeMissing = useCallback(
     (missing: readonly string[]) => {
