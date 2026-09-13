@@ -1965,8 +1965,18 @@ html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-dark-surf
   -webkit-text-fill-color: rgb(196 181 253) !important;
 }
 
-/* 보고서·견적 흰 문서 본문 — planner-neon 글자색 재매핑과 격리 */
+/* 보고서·견적 흰 문서 본문 — planner-neon 글자색 재매핑과 격리.
+ * `.tkad-planner-neon` 조상 클래스는 페이지마다 따로 붙는다(/recommend,
+ * /planner/integrated 는 있음). `/planner`(BriefFlowClient 경로)와
+ * `/my/plan/...` 는 이 문서 컴포넌트를 그대로 재사용하면서도 그 조상 클래스가
+ * 전혀 없어서, `.tkad-planner-neon` 을 요구하는 아래 규칙들이 실제로는
+ * 안 걸리는 라우트가 있었다 — 그게 "성과 가이드 박스" 대비 버그가
+ * /recommend 에서는 고쳐진 것처럼 보이고 /planner 에서는 그대로였던 이유.
+ * `.tkad-planner-neon` 유무와 무관하게 걸리도록 무조건 매치되는 선택자를
+ * 각 규칙에 추가한다(기존 조상-스코프 선택자는 다른 무관 leak 여부까지
+ * 몰라 안전하게 남겨둠 — 동일 선언이라 중복 매치돼도 무해). */
 html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface,
+html.dark .tkad-document-light-surface,
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface {
   color: rgb(17 24 39) !important;
   background-color: #ffffff !important;
@@ -1974,29 +1984,36 @@ html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface 
 }
 
 /* 문서는 항상 라이트로 고정(위 규칙)인데, `var(--qp-accent-soft)`/`var(--destructive)`
- * 는 CSS 커스텀 프로퍼티라 위의 `color`/`background-color` 강제와 무관하게 사이트
- * 다크모드 값(html.dark)을 그대로 상속받는다 — 그 결과 성과 가이드 박스가
- * 거의 검정 배경 위 거의 검정 글자로, 예산 초과 경고가 흐린 빨강으로 보이던
- * 대비 문제의 원인. 문서 표면 안에서는 두 토큰을 라이트 값으로 다시 고정. */
+ * /`var(--qp-line)` 는 CSS 커스텀 프로퍼티라 위의 `color`/`background-color` 강제와
+ * 무관하게 사이트 다크모드 값(html.dark)을 그대로 상속받는다 — 그 결과 성과 가이드
+ * 박스가 거의 검정 배경 위 거의 검정 글자로, 예산 초과 경고가 흐린 빨강으로,
+ * 카드 테두리가 거의 안 보이는 흰 12%로 보이던 대비 문제의 원인. 문서 표면
+ * 안에서는 세 토큰을 라이트 값으로 다시 고정. */
+html.dark .tkad-document-light-surface,
 html.dark .tkad-planner-neon .tkad-document-light-surface,
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface {
   --qp-accent-soft: color-mix(in srgb, var(--hermes) 12%, white);
   --destructive: #dc2626;
+  --qp-line: #d8d6d0;
 }
 
 /* 사이트 다크 + 플래너 night: text-foreground·dark:text-* 가 흰 문서 위에서 사라지지 않게 */
+html.dark .tkad-document-light-surface .text-foreground,
 html.dark .tkad-planner-neon .tkad-document-light-surface .text-foreground,
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-foreground {
   color: rgb(17 24 39) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
+html.dark .tkad-document-light-surface [class*="dark:text-white"],
+html.dark .tkad-document-light-surface [class*="dark:text-gray-"],
 html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-white"],
 html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-gray-"] {
   color: rgb(55 65 81) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
+html.dark .tkad-document-light-surface [class*="dark:text-violet"],
 html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-violet"] {
   color: rgb(124 58 237) !important;
   -webkit-text-fill-color: currentColor !important;
@@ -2004,17 +2021,21 @@ html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-vio
 
 /* 협의가·미확정 단가 안내 배지의 `dark:text-amber-200/300` 도 라이트 문서 배경 위에서
  * 씻겨 보이던 문제 — amber-900 상당으로 고정 */
+html.dark .tkad-document-light-surface [class*="dark:text-amber-"],
 html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-amber-"] {
   color: rgb(120 53 15) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"],
+html.dark .tkad-document-light-surface [class*="text-gray-"],
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"] {
   -webkit-text-fill-color: currentColor !important;
 }
 
 /* 보고서 흰 문서 — 발견하기 피드·카드·컴팩트의 tkad 토큰을 라이트 잉크로 (html.dark 포함) */
+html.dark .tkad-document-light-surface .text-tkad-secondary,
+html.dark .tkad-document-light-surface .text-tkad-muted,
 html.dark .tkad-planner-neon .tkad-document-light-surface .text-tkad-secondary,
 html.dark .tkad-planner-neon .tkad-document-light-surface .text-tkad-muted,
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-tkad-secondary,
@@ -2023,12 +2044,15 @@ html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface 
   -webkit-text-fill-color: currentColor !important;
 }
 
+html.dark .tkad-document-light-surface .text-tkad-accent,
 html.dark .tkad-planner-neon .tkad-document-light-surface .text-tkad-accent,
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-tkad-accent {
   color: rgb(124 58 237) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
+html.dark .tkad-document-light-surface .tkad-type-title,
+html.dark .tkad-document-light-surface .tkad-type-label,
 html.dark .tkad-planner-neon .tkad-document-light-surface .tkad-type-title,
 html.dark .tkad-planner-neon .tkad-document-light-surface .tkad-type-label,
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .tkad-type-title,
@@ -2037,6 +2061,7 @@ html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface 
   -webkit-text-fill-color: currentColor !important;
 }
 
+html.dark .tkad-document-light-surface .tkad-home-accent-text,
 html.dark .tkad-planner-neon .tkad-document-light-surface .tkad-home-accent-text,
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .tkad-home-accent-text {
   background-image: none !important;
@@ -2044,6 +2069,7 @@ html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface 
   -webkit-text-fill-color: currentColor !important;
 }
 
+html.dark .tkad-document-light-surface .discovery-media-card-feed,
 html.dark .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-feed,
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-feed {
   background-color: #ffffff !important;
