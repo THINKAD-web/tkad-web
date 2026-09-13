@@ -64,6 +64,24 @@ export function isOohBrowseSub(subId: string): boolean {
   return Boolean(main && OOH_BROWSE_MAIN_IDS.has(main));
 }
 
+/**
+ * subId → 캐노니컬 SEO 페이지 오버라이드. `mediaCategory`/`type`은
+ * `mediaMainCategory`/`mediaSubCategory`와 완전히 독립적으로 관리자가 수동
+ * 입력하는 필드라 자동 동기화가 없으므로(admin-medias-client.tsx,
+ * prisma/schema.prisma), DB 카운트로 안전 확인된 subId만 여기 추가할 것 (#579).
+ *
+ * 2026-09-13 확인 (production, Neon SQL Editor):
+ * - digital_signage → /media/type/dooh: `type != 'dooh'` 불일치 0건 — 완전 일치.
+ * - subway_station → /media/category/subway: `mediaCategory`에 'subway' 없는
+ *   불일치 14/293건(4.8%) — 허용 범위. 이 14건 데이터 정리는 #579에 백로그.
+ *
+ * airport는 세 분류체계 어디에도 대응하는 캐노니컬 페이지가 없어 쿼리스트링 유지.
+ */
+const VERIFIED_CANONICAL_HREF_OVERRIDE: Readonly<Record<string, string>> = {
+  digital_signage: "/media/type/dooh",
+  subway_station: "/media/category/subway",
+};
+
 export function buildOohTile(
   subId: string,
   count: number,
@@ -78,7 +96,9 @@ export function buildOohTile(
     count,
     labelKo: browseCategoryLabel(subId, "ko", "sub", mainId),
     labelEn: browseCategoryLabel(subId, "en", "sub", mainId),
-    href: `/media?mainCategory=${encodeURIComponent(mainId)}&subCategory=${encodeURIComponent(subId)}`,
+    href:
+      VERIFIED_CANONICAL_HREF_OVERRIDE[subId] ??
+      `/media?mainCategory=${encodeURIComponent(mainId)}&subCategory=${encodeURIComponent(subId)}`,
   };
 }
 

@@ -1,11 +1,27 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  buildOohTile,
   pickTopDigitalPlatformsFromItems,
   pickTopOohSubsFromCounts,
   resolveLandingDigitalPlatform,
   FALLBACK_OOH_SUB_IDS,
 } from "./home-landing-media-grid.ts";
+
+test("buildOohTile: DB로 안전 확인된 subId는 캐노니컬 SEO 페이지로 연결 (#579)", () => {
+  assert.equal(buildOohTile("digital_signage", 10)?.href, "/media/type/dooh");
+  assert.equal(
+    buildOohTile("subway_station", 10)?.href,
+    "/media/category/subway",
+  );
+});
+
+test("buildOohTile: 검증 안 된 subId(airport 등)는 기존 쿼리스트링 유지", () => {
+  assert.equal(
+    buildOohTile("airport", 10)?.href,
+    "/media?mainCategory=transit&subCategory=airport",
+  );
+});
 
 test("pickTopOohSubsFromCounts returns catalog top 3", () => {
   const picked = pickTopOohSubsFromCounts({
