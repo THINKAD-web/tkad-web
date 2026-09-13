@@ -80,7 +80,8 @@ function SectionShell({
 
 /**
  * Home landing narrative below explore split:
- * why 5 min → steps → precision → quote path → coverage + popular → insights → close.
+ * speed(why 5 min + 3 steps, merged) → precision → quote path → coverage + popular
+ * → insights → close(lean CTA band, no message repeat).
  */
 export async function HomePlannerLanding({
   mediaCountLabel,
@@ -140,7 +141,7 @@ export async function HomePlannerLanding({
 
   return (
     <div className="tkad-planner-landing">
-      {/* ① Speed */}
+      {/* ① Speed (구 speed+steps 병합 — 같은 "5분 · 3단계" 얘기를 두 섹션에 나눠 반복하던 것 정리) */}
       <SectionShell
         id="home-planner-speed"
         eyebrow={t("speedEyebrow")}
@@ -162,34 +163,7 @@ export async function HomePlannerLanding({
             </div>
           ))}
         </div>
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Link
-            href="/planner"
-            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-hermes px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-hermes/90"
-          >
-            {t("speedCtaPrimary")}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
-          <Link
-            href="/media"
-            className="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
-          >
-            {t("speedCtaSecondary")}
-          </Link>
-        </div>
-        <p className="mt-6 text-sm text-gray-500 dark:text-white/45">
-          {t("speedClose")}
-        </p>
-      </SectionShell>
-
-      {/* ② Steps */}
-      <SectionShell
-        id="home-planner-steps"
-        eyebrow={t("stepsEyebrow")}
-        title={t("stepsTitle")}
-        lead={t("stepsLead")}
-      >
-        <ol className="grid gap-3 md:grid-cols-3 md:gap-4">
+        <ol className="mt-6 grid gap-3 md:grid-cols-3 md:gap-4">
           {steps.map((s) => {
             const Icon = s.icon;
             return (
@@ -217,12 +191,27 @@ export async function HomePlannerLanding({
             );
           })}
         </ol>
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <Link
+            href="/planner"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-hermes px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-hermes/90"
+          >
+            {t("speedCtaPrimary")}
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+          <Link
+            href="/media"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
+          >
+            {t("speedCtaSecondary")}
+          </Link>
+        </div>
         <p className="mt-6 text-sm text-gray-500 dark:text-white/45">
-          {t("stepsClose")}
+          {t("speedClose")}
         </p>
       </SectionShell>
 
-      {/* ③ Precision */}
+      {/* ② Precision */}
       <SectionShell
         id="home-planner-precision"
         eyebrow={t("precisionEyebrow")}
@@ -256,7 +245,7 @@ export async function HomePlannerLanding({
         </p>
       </SectionShell>
 
-      {/* ④ Quote path */}
+      {/* ③ Quote path */}
       <SectionShell
         id="home-planner-quote"
         eyebrow={t("quoteEyebrow")}
@@ -283,7 +272,7 @@ export async function HomePlannerLanding({
         </p>
       </SectionShell>
 
-      {/* ⑤ Coverage + Popular */}
+      {/* ④ Coverage + Popular */}
       <section
         id="home-planner-coverage"
         className="scroll-mt-16 border-t border-gray-100 px-4 py-12 dark:border-white/5 md:px-6 md:py-16 lg:px-8"
@@ -370,7 +359,7 @@ export async function HomePlannerLanding({
         </div>
       </section>
 
-      {/* Insights */}
+      {/* ⑤ Insights */}
       <HomeContentFeed
         reports={reports}
         cases={cases}
@@ -382,14 +371,15 @@ export async function HomePlannerLanding({
         landing
       />
 
-      {/* ⑥ Closing CTA */}
+      {/* 마지막 CTA 밴드 — 위 ①에서 이미 "5분" 메시지를 다뤄서 여기선 재설명 없이 행동
+          유도만 (구 ⑥ 섹션, 시각 비중도 낮춤: 컨텐츠 섹션이 아니라 마무리 배너) */}
       <section
         id="home-planner-close"
-        className="scroll-mt-16 border-t border-gray-100 px-4 py-14 dark:border-white/5 md:px-6 md:py-20 lg:px-8"
+        className="scroll-mt-16 border-t border-gray-100 px-4 py-10 dark:border-white/5 md:px-6 md:py-14 lg:px-8"
         aria-labelledby="home-planner-close-heading"
       >
         <div className="mx-auto max-w-5xl">
-          <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-white to-gray-50 px-6 py-10 dark:border-white/10 dark:from-white/[0.06] dark:to-white/[0.02] md:px-10 md:py-12">
+          <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-white to-gray-50 px-6 py-8 dark:border-white/10 dark:from-white/[0.06] dark:to-white/[0.02] md:px-10 md:py-10">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
               {t("closeEyebrow")}
             </p>
