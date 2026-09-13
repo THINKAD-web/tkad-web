@@ -65,7 +65,7 @@ function SubpageRelatedChipsInner() {
 
   return (
     <div
-      className="sticky top-14 z-20 border-b border-gray-100 bg-white/95 px-4 py-2 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/95 md:top-0"
+      className="sticky top-[var(--nav-safe-height)] z-20 border-b border-gray-100 bg-white/95 px-4 py-2 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/95 md:top-0"
       data-screenshot="subpage-chips"
     >
       <div className="mx-auto flex max-w-6xl gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

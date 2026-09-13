@@ -200,7 +200,7 @@ export function ContextNavAsideShell({ className }: { className?: string }) {
     <aside
       className={cn(
         "tkad-context-nav-aside hidden md:flex md:shrink-0 md:flex-col",
-        "sticky top-14 z-30 h-[calc(100dvh-3.5rem)] border-r border-gray-200 bg-background dark:border-white/10 dark:bg-[#05050a]",
+        "sticky top-[var(--nav-safe-height)] z-30 h-[calc(100dvh-var(--nav-safe-height))] border-r border-gray-200 bg-background dark:border-white/10 dark:bg-[#05050a]",
         collapsed && !hoverExpanded ? "md:w-16" : "md:w-60",
         "transition-[width] duration-200 ease-out",
         className,

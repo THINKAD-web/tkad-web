@@ -1196,13 +1196,13 @@ body:has(.tkad-media-app-shell) .tkad-site-footer {
 .tkad-media-app-shell:not(.tkad-media-list-shell) {
   display: flex;
   flex-direction: column;
-  /* 모바일: 헤더(3.5rem) + 하단 탭바(4.25rem) 차감 */
-  height: calc(100dvh - 3.5rem - 4.25rem - env(safe-area-inset-bottom, 0px));
+  /* 모바일: 헤더(--nav-safe-height, 노치 포함) + 하단 탭바(4.25rem) 차감 */
+  height: calc(100dvh - var(--nav-safe-height, 3.5rem) - 4.25rem - env(safe-area-inset-bottom, 0px));
 }
 @media (min-width: 768px) {
   /* 데스크톱: 하단 탭바 없음 → 헤더만 차감 */
   .tkad-media-app-shell:not(.tkad-media-list-shell) {
-    height: calc(100dvh - 3.5rem);
+    height: calc(100dvh - var(--nav-safe-height, 3.5rem));
   }
 }
 .tkad-media-list-shell {
@@ -1973,6 +1973,17 @@ html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface 
   -webkit-text-fill-color: currentColor !important;
 }
 
+/* 문서는 항상 라이트로 고정(위 규칙)인데, `var(--qp-accent-soft)`/`var(--destructive)`
+ * 는 CSS 커스텀 프로퍼티라 위의 `color`/`background-color` 강제와 무관하게 사이트
+ * 다크모드 값(html.dark)을 그대로 상속받는다 — 그 결과 성과 가이드 박스가
+ * 거의 검정 배경 위 거의 검정 글자로, 예산 초과 경고가 흐린 빨강으로 보이던
+ * 대비 문제의 원인. 문서 표면 안에서는 두 토큰을 라이트 값으로 다시 고정. */
+html.dark .tkad-planner-neon .tkad-document-light-surface,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface {
+  --qp-accent-soft: color-mix(in srgb, var(--hermes) 12%, white);
+  --destructive: #dc2626;
+}
+
 /* 사이트 다크 + 플래너 night: text-foreground·dark:text-* 가 흰 문서 위에서 사라지지 않게 */
 html.dark .tkad-planner-neon .tkad-document-light-surface .text-foreground,
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-foreground {
@@ -1988,6 +1999,13 @@ html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-gra
 
 html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-violet"] {
   color: rgb(124 58 237) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 협의가·미확정 단가 안내 배지의 `dark:text-amber-200/300` 도 라이트 문서 배경 위에서
+ * 씻겨 보이던 문제 — amber-900 상당으로 고정 */
+html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-amber-"] {
+  color: rgb(120 53 15) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
@@ -3745,14 +3763,14 @@ html:not(.dark) .tkad-nav-chrome {
  */
 .tkad-site-header-panel {
   position: fixed;
-  top: 3.5rem;
+  top: var(--nav-safe-height, 3.5rem);
   left: 0;
   right: 0;
   z-index: 45;
   border-top: 1px solid color-mix(in srgb, var(--border, #d8d6d0) 100%, transparent);
   background: inherit;
   padding: 16px 20px 20px;
-  max-height: calc(100dvh - 3.5rem);
+  max-height: calc(100dvh - var(--nav-safe-height, 3.5rem));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -4695,9 +4713,17 @@ img {
     padding-top: max(1rem, env(safe-area-inset-top));
   }
 
-  /* PWA standalone 모드에서 노치/상태바가 sticky 헤더(.tkad-nav-chrome, top:0)를
-     가려 첫 진입 시 메뉴바가 잘려 보이는 문제. 브라우저 탭 모드에서는
-     safe-area-inset-top 이 0이라 영향 없음. */
+  /* 노치/다이나믹아일랜드 기기에서 sticky 헤더(.tkad-nav-chrome, top:0)가 상태바에
+     가려 메뉴바가 잘려 보이는 문제. `viewport-fit=cover` 를 쓰는 한 PWA standalone
+     뿐 아니라 일반 모바일 브라우저 탭에서도 safe-area-inset-top 이 0이 아니므로
+     항상 적용된다 — 그래서 헤더의 실제 렌더 높이가 `--nav-safe-height` 만큼 커진다.
+     헤더 바로 아래 sticky/fixed 로 이어붙는 요소는 반드시 `top-14` 같은 고정값이
+     아니라 `top-[var(--nav-safe-height)]` 를 써야 함 (안 그러면 헤더가 커진 만큼
+     아래 요소가 헤더에 가려짐 — 실제로 SubTabs 의 "패키지" 탭이 이렇게 가려져
+     탭이 안 눌리는 회귀가 있었음). */
+  :root {
+    --nav-safe-height: calc(3.5rem + env(safe-area-inset-top, 0px));
+  }
   .tkad-nav-chrome {
     padding-top: env(safe-area-inset-top, 0px);
   }

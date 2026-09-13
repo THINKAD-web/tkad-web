@@ -12,6 +12,7 @@ import { MediaDetailCard } from "@/components/document/media-detail-card";
 import { DocumentSectionHeading } from "@/components/document/document-layout";
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
+import { CATALOG_CHANNEL_ONLINE } from "@/lib/catalog-channel";
 import {
   MEDIA_CHIP_ACTIVE,
   MEDIA_CHIP_INACTIVE,
@@ -86,6 +87,24 @@ function exportRowToCatalogItem(row: PlannerExportMediaRow, index: number): Home
     impressions:
       row.adjustedDailyReach != null ? row.adjustedDailyReach * 30 : undefined,
     thumbnailUrl: row.thumbUrl ?? undefined,
+    /**
+     * 온라인 채널(유튜브/네이버/틱톡 등)은 실물 사진 대신 플랫폼 배지로 표시된다
+     * (`OnlineCatalogCardThumbnail`). `exportRowToDetail`(상세 보기)은
+     * `onlinePlatform` 을 그대로 넘겨 배지가 뜨지만, 여기(피드·카드·컴팩트 보기)는
+     * `catalogChannel`/`onlineSpec` 을 안 채워서 항상 "—" 로만 보이던 버그 —
+     * 데이터 누락이 아니라 이 매핑 함수의 누락이었음.
+     */
+    catalogChannel: row.onlinePlatform ? CATALOG_CHANNEL_ONLINE : undefined,
+    onlineSpec: row.onlinePlatform
+      ? {
+          platform: row.onlinePlatform,
+          minBudget: 0,
+          cpcMin: null,
+          cpcMax: null,
+          cpmMin: null,
+          cpmMax: null,
+        }
+      : undefined,
   };
 }
 

@@ -5,13 +5,12 @@ import { PUBLIC_NAV_GROUPS } from "@/lib/navigation/public-nav-data";
 import { isPublicNavItemActive } from "@/lib/navigation/public-nav-active";
 import { resolveContextSidebar } from "@/lib/navigation/context-sidebar-config";
 
-test("PLANNING_TABS splits browse vs proposal vs packages", () => {
+test("PLANNING_TABS splits browse vs proposal (no packages — 발견하기 계열이라 기획하기 탭에서 제외, #579 이후 조사)", () => {
   assert.deepEqual(
     PLANNING_TABS.map((t) => [t.label, t.href]),
     [
       ["AI 플래너", "/recommend"],
       ["상세 플래너", "/planner"],
-      ["패키지", "/media/packages"],
     ],
   );
   const browse = PLANNING_TABS[0];

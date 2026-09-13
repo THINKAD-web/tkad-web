@@ -1474,7 +1474,7 @@ export function MediaManualBrowseFilters({
   const mobileStickyControlRow =
     mobileStickyToolbar && unifiedToolbar && !mapMobileImmersiveMode ? (
       <div
-        className="sticky top-14 z-30 -mx-4 space-y-2 border-b border-gray-200/80 bg-gray-50/95 px-4 py-2 backdrop-blur-md md:hidden dark:border-white/10 dark:bg-[#020202]/95"
+        className="sticky top-[var(--nav-safe-height)] z-30 -mx-4 space-y-2 border-b border-gray-200/80 bg-gray-50/95 px-4 py-2 backdrop-blur-md md:hidden dark:border-white/10 dark:bg-[#020202]/95"
         data-screenshot="media-mobile-sticky-controls"
       >
         <div className="flex min-w-0 items-center gap-2">
