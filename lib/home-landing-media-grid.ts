@@ -64,6 +64,14 @@ export function isOohBrowseSub(subId: string): boolean {
   return Boolean(main && OOH_BROWSE_MAIN_IDS.has(main));
 }
 
+/**
+ * 캐노니컬 SEO 페이지(`/media/category/[slug]`, `/media/type/[type]`)로 바로 교체하지
+ * 말 것 — `mediaCategory`/`type`은 `mediaMainCategory`/`mediaSubCategory`와 완전히
+ * 독립적으로 관리자가 수동 입력하는 필드라 자동 동기화가 없다 (admin-medias-client.tsx,
+ * prisma/schema.prisma). subId(예: subway_station, digital_signage)가 캐노니컬 슬러그와
+ * 실제로 같은 집합을 가리키는지 DB 카운트로 먼저 확인 필요. airport 처럼 세 분류체계
+ * 어디에도 대응하는 캐노니컬 페이지가 없는 subId 도 있음. 추적: #579
+ */
 export function buildOohTile(
   subId: string,
   count: number,
