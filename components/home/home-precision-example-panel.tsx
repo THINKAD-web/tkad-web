@@ -1,4 +1,4 @@
-import { MessageSquareQuote } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import type { HomePrecisionExample } from "@/lib/home-precision-examples";
 
 type ColumnLabels = {
@@ -43,7 +43,7 @@ export function HomePrecisionExamplePanel({
     <div className="min-w-0 flex-1">
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm ring-1 ring-black/[0.04] dark:border-white/10 dark:bg-white/[0.03] dark:ring-white/10">
         <div className="flex items-start gap-2.5 border-b border-gray-100 bg-gray-50/90 px-3 py-3 dark:border-white/10 dark:bg-white/[0.05] sm:px-4">
-          <MessageSquareQuote
+          <SlidersHorizontal
             className="mt-0.5 h-4 w-4 shrink-0 text-hermes"
             aria-hidden
           />
@@ -52,7 +52,7 @@ export function HomePrecisionExamplePanel({
               {exampleLabel}
             </p>
             <p className="mt-1 font-medium leading-snug text-gray-900 dark:text-white">
-              &ldquo;{example.query}&rdquo;
+              {example.query}
             </p>
           </div>
         </div>

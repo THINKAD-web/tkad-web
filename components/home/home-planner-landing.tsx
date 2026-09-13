@@ -1,11 +1,5 @@
 import type { ReactNode } from "react";
-import {
-  ArrowRight,
-  CheckSquare,
-  FileText,
-  Sparkles,
-  Timer,
-} from "lucide-react";
+import { ArrowRight, FileText } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -79,9 +73,11 @@ function SectionShell({
 }
 
 /**
- * Home landing narrative below explore split:
- * speed(why 5 min + 3 steps, merged) → precision → quote path → coverage + popular
- * → insights → close(lean CTA band, no message repeat).
+ * Home landing narrative below "매체 찾기":
+ * precision → quote path → coverage + popular → insights → close(lean CTA band).
+ *
+ * 구 "5분"(speed) 섹션은 v9 재구성에서 통째로 삭제됨 — 3단계(브리프→믹스편집→결과)
+ * 다이어그램은 HomeMediaFinder(매체 찾기) 안에 축소된 보조 시각 요소로 옮겨졌다.
  */
 export async function HomePlannerLanding({
   mediaCountLabel,
@@ -98,35 +94,6 @@ export async function HomePlannerLanding({
     namespace: "homePage.plannerLanding",
   });
 
-  const metricCards = [
-    { value: t("speedMetric1Value"), label: t("speedMetric1Label") },
-    {
-      value: t("speedMetric2Value", { count: mediaCountLabel }),
-      label: t("speedMetric2Label"),
-    },
-  ];
-
-  const steps = [
-    {
-      n: "01",
-      title: t("step1Title"),
-      desc: t("step1Desc"),
-      icon: CheckSquare,
-    },
-    {
-      n: "02",
-      title: t("step2Title"),
-      desc: t("step2Desc"),
-      icon: Timer,
-    },
-    {
-      n: "03",
-      title: t("step3Title"),
-      desc: t("step3Desc"),
-      icon: Sparkles,
-    },
-  ];
-
   const quoteSteps = [
     t("quoteStep1"),
     t("quoteStep2"),
@@ -141,77 +108,7 @@ export async function HomePlannerLanding({
 
   return (
     <div className="tkad-planner-landing">
-      {/* ① Speed (구 speed+steps 병합 — 같은 "5분 · 3단계" 얘기를 두 섹션에 나눠 반복하던 것 정리) */}
-      <SectionShell
-        id="home-planner-speed"
-        eyebrow={t("speedEyebrow")}
-        title={t("speedTitle")}
-        lead={t("speedLead")}
-      >
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
-          {metricCards.map((m) => (
-            <div
-              key={m.label}
-              className="rounded-lg border border-gray-200 bg-white px-2 py-3 sm:px-4 sm:py-5 dark:border-white/10 dark:bg-white/[0.04]"
-            >
-              <p className="text-base font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
-                {m.value}
-              </p>
-              <p className="mt-1 tkad-type-meta leading-snug text-gray-600 dark:text-white/60 sm:mt-1.5">
-                {m.label}
-              </p>
-            </div>
-          ))}
-        </div>
-        <ol className="mt-6 grid gap-3 md:grid-cols-3 md:gap-4">
-          {steps.map((s) => {
-            const Icon = s.icon;
-            return (
-              <li
-                key={s.n}
-                className="relative rounded-lg border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/[0.04]"
-              >
-                <span className="text-xs font-semibold tracking-[0.12em] text-hermes">
-                  {s.n}
-                </span>
-                <div className="mt-3 flex items-start gap-3">
-                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-hermes/10 text-hermes">
-                    <Icon className="h-4.5 w-4.5 h-[18px] w-[18px]" aria-hidden />
-                  </span>
-                  <div>
-                    <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                      {s.title}
-                    </h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-white/65">
-                      {s.desc}
-                    </p>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Link
-            href="/planner"
-            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-hermes px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-hermes/90"
-          >
-            {t("speedCtaPrimary")}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
-          <Link
-            href="/media"
-            className="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
-          >
-            {t("speedCtaSecondary")}
-          </Link>
-        </div>
-        <p className="mt-6 text-sm text-gray-500 dark:text-white/45">
-          {t("speedClose")}
-        </p>
-      </SectionShell>
-
-      {/* ② Precision */}
+      {/* ① Precision */}
       <SectionShell
         id="home-planner-precision"
         eyebrow={t("precisionEyebrow")}
@@ -234,7 +131,7 @@ export async function HomePlannerLanding({
           />
           <Link
             href="/planner"
-            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-md border border-hermes/40 bg-hermes/5 px-5 py-2.5 text-sm font-semibold text-hermes transition-colors hover:bg-hermes/10 sm:w-auto lg:self-end"
+            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-hermes underline-offset-2 hover:underline lg:self-end"
           >
             {t("precisionCta")}
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -245,7 +142,7 @@ export async function HomePlannerLanding({
         </p>
       </SectionShell>
 
-      {/* ③ Quote path */}
+      {/* ② Quote path */}
       <SectionShell
         id="home-planner-quote"
         eyebrow={t("quoteEyebrow")}
@@ -272,7 +169,7 @@ export async function HomePlannerLanding({
         </p>
       </SectionShell>
 
-      {/* ④ Coverage + Popular */}
+      {/* ③ Coverage + Popular */}
       <section
         id="home-planner-coverage"
         className="scroll-mt-16 border-t border-gray-100 px-4 py-12 dark:border-white/5 md:px-6 md:py-16 lg:px-8"
@@ -359,7 +256,7 @@ export async function HomePlannerLanding({
         </div>
       </section>
 
-      {/* ⑤ Insights */}
+      {/* ④ Insights */}
       <HomeContentFeed
         reports={reports}
         cases={cases}
@@ -371,8 +268,7 @@ export async function HomePlannerLanding({
         landing
       />
 
-      {/* 마지막 CTA 밴드 — 위 ①에서 이미 "5분" 메시지를 다뤄서 여기선 재설명 없이 행동
-          유도만 (구 ⑥ 섹션, 시각 비중도 낮춤: 컨텐츠 섹션이 아니라 마무리 배너) */}
+      {/* 마지막 CTA 밴드 — 페이지의 유일한 최종 행동 유도 지점 (Begin) */}
       <section
         id="home-planner-close"
         className="scroll-mt-16 border-t border-gray-100 px-4 py-10 dark:border-white/5 md:px-6 md:py-14 lg:px-8"
