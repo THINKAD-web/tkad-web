@@ -32,7 +32,7 @@ export function SubTabs({ tabs, currentPath }: SubTabsProps) {
   return (
     <div
       className={cn(
-        "sticky top-14 z-20 border-b backdrop-blur-md",
+        "sticky top-[var(--nav-safe-height)] z-20 border-b backdrop-blur-md",
         "border-gray-200 bg-white/95 dark:border-white/10 dark:bg-[#020202]/95",
       )}
     >

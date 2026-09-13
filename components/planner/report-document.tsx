@@ -72,7 +72,7 @@ function ShareBarChart({
         const pct = d.pct ?? 0;
         return (
           <div key={d.label} className="flex items-center gap-3 text-sm">
-            <span className="w-20 shrink-0 truncate text-gray-600 sm:w-28">
+            <span className="w-24 shrink-0 break-words text-gray-600 sm:w-28">
               {d.label}
             </span>
             <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-100">
@@ -212,7 +212,7 @@ function BarChart({
     <div className="space-y-2.5">
       {data.map((d, i) => (
         <div key={d.label} className="flex items-center gap-3 text-sm">
-          <span className="w-20 shrink-0 truncate text-gray-600 sm:w-28">{d.label}</span>
+          <span className="w-24 shrink-0 break-words text-gray-600 sm:w-28">{d.label}</span>
           <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-100">
             <div
               className="h-full rounded-full"

@@ -6,7 +6,6 @@ import {
   Map,
   MonitorSmartphone,
   Network,
-  Package,
   Palette,
   RefreshCw,
   Search,
@@ -53,6 +52,14 @@ export const DISCOVERY_TABS: SubTab[] = [
   },
 ];
 
+/**
+ * "패키지"(→ /media/packages)는 여기(기획하기 탭 그룹)에 없다 — 의도적.
+ * 매체 패키지 상품 목록은 플랜을 만드는 도구가 아니라 발견하기(브라우징) 계열
+ * 기능이라 이 그룹 개념과 안 맞고, 실기기에서 이 탭 바로 아래에 배치된 탭이
+ * sticky 헤더에 가려 클릭이 안 되는 회귀도 있었다. `/media/packages`는 메인
+ * nav·홈 사이드바·Cmd+K 퀵링크 등 다른 경로로 이미 노출되고 있어 여기서
+ * 빼도 도달 불가능해지지 않는다.
+ */
 export const PLANNING_TABS: SubTab[] = [
   {
     label: "AI 플래너",
@@ -65,12 +72,6 @@ export const PLANNING_TABS: SubTab[] = [
     href: "/planner",
     icon: BarChart3,
     match: (p) => p === "/planner" || p.startsWith("/planner/"),
-  },
-  {
-    label: "패키지",
-    href: "/media/packages",
-    icon: Package,
-    match: (p) => p === "/media/packages" || p.startsWith("/media/packages/"),
   },
 ];
 
