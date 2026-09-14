@@ -61,6 +61,25 @@ function formatCategoriesValue(cats: PlannerCategory[], isKo: boolean): string {
     .join(isKo ? " · " : ", ");
 }
 
+/** 지하철 의도가 명확할 때 planner 카테고리 대신 사용자 친화 라벨 */
+function formatCategoriesFromField(
+  field: ParsedField<PlannerCategory[]>,
+  isKo: boolean,
+): string {
+  const cats = field.value;
+  if (!cats?.length) return "";
+  const src = field.source ?? "";
+  const isSubwayIntent =
+    field.confidence === "high" &&
+    /지하철|subway|전동차|metro/i.test(src) &&
+    cats.includes("digital") &&
+    cats.includes("mobile");
+  if (isSubwayIntent) {
+    return isKo ? "지하철 (역사·차내)" : "Subway (station & in-train)";
+  }
+  return formatCategoriesValue(cats, isKo);
+}
+
 export type FreetextEvidenceRow = {
   key: string;
   label: string;
@@ -195,7 +214,7 @@ export function buildFreetextEvidenceRows(
     rows.push({
       key: "categories",
       label: isKo ? "매체" : "Media type",
-      valueText: formatCategoriesValue(fields.categories.value, isKo),
+      valueText: formatCategoriesFromField(fields.categories, isKo),
       source: fields.categories.source,
       confidence: fields.categories.confidence,
     });
@@ -333,7 +352,7 @@ export function buildFreetextBriefSummarySentence(
   }
 
   if (fields.categories.value?.length) {
-    const mediaLabel = formatCategoriesValue(fields.categories.value, isKo);
+    const mediaLabel = formatCategoriesFromField(fields.categories, isKo);
     parts.push(isKo ? `${mediaLabel} 매체` : `${mediaLabel} media`);
   }
 

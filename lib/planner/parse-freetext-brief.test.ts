@@ -340,6 +340,25 @@ test("categories: 지하철 차내 → mobile", () => {
   assert.deepEqual(r.fields.categories.value, ["mobile"]);
 });
 
+test("categories: 지하철광고 (붙여쓰기) → subway high, not low", () => {
+  const r = parsePlannerFreetextBrief("강남, 홍대 지하철광고 3,000만원");
+  assert.deepEqual(r.fields.categories.value, ["digital", "mobile"]);
+  assert.equal(r.fields.categories.confidence, "high");
+  assert.match(r.fields.categories.source ?? "", /지하철광고/);
+});
+
+test("categories: 지하철역 → digital+mobile high", () => {
+  const r = parsePlannerFreetextBrief("강남 지하철역 브랜딩 2000만");
+  assert.deepEqual(r.fields.categories.value, ["digital", "mobile"]);
+  assert.equal(r.fields.categories.confidence, "high");
+});
+
+test("categories: 전동차 → digital+mobile high", () => {
+  const r = parsePlannerFreetextBrief("전동차 광고 800만");
+  assert.deepEqual(r.fields.categories.value, ["digital", "mobile"]);
+  assert.equal(r.fields.categories.confidence, "high");
+});
+
 test("categories: 택시 래핑 → mobile", () => {
   const r = parsePlannerFreetextBrief("택시 래핑 500만");
   assert.deepEqual(r.fields.categories.value, ["mobile"]);

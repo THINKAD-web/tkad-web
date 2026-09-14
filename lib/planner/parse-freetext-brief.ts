@@ -709,6 +709,10 @@ const MOBILE_CATEGORY_RE =
 const MOBILE_EXCLUSIVE_RE =
   /(?:버스|택시(?:래핑|광고)?|래핑|차량|트럭|모빌리티|이동형)(?:\s*광고)?\s*만|만\s*(?:버스|택시|래핑|차량|트럭)/i;
 
+/** 지하철 매체 의도가 명확한 표현 (역사·차내·「지하철광고」 등) */
+const SUBWAY_EXPLICIT_RE =
+  /지하철\s*광고|지하철광고|지하철역|전동차|지하철\s*(?:매체|미디어|캠페인)|subway\s*(?:ad(?:vert)?|media|campaign)|metro\s*(?:ad(?:vert)?|media)/i;
+
 /** 매체 유형 키워드 → 플래너 categories (추측 금지·「만」 명시 우선) */
 export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
   const exclusiveSubway = text.match(
@@ -719,6 +723,15 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
       ["digital", "mobile"],
       "high",
       exclusiveSubway[0].trim(),
+    );
+  }
+
+  const explicitSubway = text.match(SUBWAY_EXPLICIT_RE);
+  if (explicitSubway) {
+    return field(
+      ["digital", "mobile"],
+      "high",
+      explicitSubway[0].trim(),
     );
   }
 
@@ -776,9 +789,11 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
     hits.push({ cat: "digital", source: parsedLine.labelKo });
   }
 
-  const subwayAmbiguous = text.match(/지하철|subway/i);
+  const subwayAmbiguous = text.match(/지하철|subway|전동차|metro/i);
   const subwaySpecific =
-    /지하철\s*(?:역|역사|차내|랩핑|열차)/i.test(text) || parsedLine != null;
+    SUBWAY_EXPLICIT_RE.test(text) ||
+    /지하철\s*(?:역|역사|차내|랩핑|열차)/i.test(text) ||
+    parsedLine != null;
 
   if (hits.length === 0 && subwayAmbiguous && !subwaySpecific) {
     return field(
