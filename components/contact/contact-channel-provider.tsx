@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { useLocale } from "next-intl";
-import { X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { SupportAiChatModalLoading } from "@/components/support/support-ai-chat-modal-loading";
 import { useMobileChromeOverlayOptional } from "@/components/mobile/mobile-chrome-overlay-context";
