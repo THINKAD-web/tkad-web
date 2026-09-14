@@ -4,6 +4,7 @@ import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { CategoryExploreHero } from "@/components/category-explore-hero";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { PlanSummaryCard } from "@/components/contact/plan-summary-card";
+import { QuickContactChannels } from "@/components/contact/quick-contact-channels";
 import { ContactInfoSidebar } from "./contact-info-sidebar";
 import { ContactFormLoader } from "./contact-form-loader";
 
@@ -29,7 +30,10 @@ export default async function ContactPage({
         />
 
         <NeonSection tone="qp" className="pt-0">
-          <PlanSummaryCard />
+          <QuickContactChannels />
+          <div className="mt-5">
+            <PlanSummaryCard />
+          </div>
 
           <div className="grid gap-5 lg:grid-cols-5">
             <div className="lg:col-span-3">

@@ -4,27 +4,21 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronDown, MessageSquare, MonitorSmartphone } from "lucide-react";
+import { ChevronDown, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ResolvedPublicNavGroup } from "@/lib/navigation/build-public-nav";
 import { findActiveNavGroupId } from "@/lib/navigation/build-public-nav";
 import { isPublicNavItemActive } from "@/lib/navigation/public-nav-active";
 import type { PublicNavItemId } from "@/lib/navigation/public-nav-data";
-import {
-  MOBILE_DEMOTED_NAV_GROUP_IDS,
-  MOBILE_PRIMARY_NAV_GROUP_IDS,
-} from "@/lib/navigation/public-nav-data";
 import { NavBetaBadge } from "@/components/navigation/nav-beta-badge";
 
+/**
+ * v10 Task J — 모두 접힘이 기본. 예전엔 "발견하기"+"기획하기"를 항상 펼쳐
+ * 둬서(6개 하위 항목 + 4개 그룹 헤더) 패널이 지나치게 길었다. 지금 있는
+ * 페이지와 같은 그룹만 열어 두고, 나머지는 탭해서 펼치게 한다.
+ */
 function defaultMobileOpenIds(activeGroupId: string | null): Set<string> {
-  const ids = new Set<string>(MOBILE_PRIMARY_NAV_GROUP_IDS);
-  if (
-    activeGroupId &&
-    (MOBILE_DEMOTED_NAV_GROUP_IDS as readonly string[]).includes(activeGroupId)
-  ) {
-    ids.add(activeGroupId);
-  }
-  return ids;
+  return activeGroupId ? new Set([activeGroupId]) : new Set();
 }
 
 type Props = {
@@ -78,12 +72,7 @@ export function PublicNavSidebar({
 
   useEffect(() => {
     if (!activeGroupId) return;
-    setOpenIds((cur) => {
-      const next = new Set(cur);
-      next.add(activeGroupId);
-      for (const id of MOBILE_PRIMARY_NAV_GROUP_IDS) next.add(id);
-      return next;
-    });
+    setOpenIds((cur) => new Set(cur).add(activeGroupId));
   }, [activeGroupId]);
 
   const toggle = (id: string) => {
@@ -141,37 +130,6 @@ export function PublicNavSidebar({
             )}
           >
             {t("contact")}
-          </span>
-        </Link>
-        <Link
-          href="/media/online"
-          onClick={onNavigate}
-          className={cn(
-            "flex items-center gap-3 text-gray-900 transition-colors hover:text-gray-950 dark:text-white dark:hover:text-white",
-            isPanel
-              ? "min-h-11 border-b border-gray-200/80 py-3 dark:border-white/10"
-              : "min-h-12",
-          )}
-        >
-          {!isPanel ? (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70">
-              <MonitorSmartphone className="h-4 w-4" aria-hidden />
-            </span>
-          ) : null}
-          <span className="min-w-0 flex-1">
-            <span
-              className={cn(
-                "block font-semibold leading-snug tracking-tight",
-                isPanel ? "text-[0.95rem]" : "text-xl",
-              )}
-            >
-              {t("thinkadOnline")}
-            </span>
-            {!isPanel ? (
-              <span className="mt-0.5 block text-xs text-gray-400 dark:text-white/40">
-                {t("thinkadOnlineDesc")}
-              </span>
-            ) : null}
           </span>
         </Link>
       </div>

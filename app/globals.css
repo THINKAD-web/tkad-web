@@ -3794,7 +3794,15 @@ html:not(.dark) .tkad-nav-chrome {
   right: 0;
   z-index: 45;
   border-top: 1px solid color-mix(in srgb, var(--border, #d8d6d0) 100%, transparent);
-  background: inherit;
+  /*
+   * v10 Task J — 반드시 완전 불투명 색이어야 한다. `background: inherit` 를
+   * 썼을 때는 헤더(`bg-white/95` + backdrop-blur)의 *계산된* background-color
+   * 값(95% 불투명 흰색)만 물려받고 backdrop-blur 는 상속되지 않아, 패널이
+   * blur 없이 5% 투명한 채로 남아 뒤 콘텐츠(히어로 AI 예시 칩 등)가 비쳐
+   * 보였다. 다크 모드는 이미 아래에서 고정 색(#05050a)을 쓰고 있어 문제가
+   * 없었다 — 라이트 모드도 같은 방식으로 고정한다.
+   */
+  background: #ffffff;
   padding: 16px 20px 20px;
   max-height: calc(100dvh - var(--nav-safe-height, 3.5rem));
   overflow-y: auto;

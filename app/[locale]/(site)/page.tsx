@@ -3,7 +3,7 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { HomeHeroBanner } from "@/components/home/home-hero-banner";
 import { HomeTwoAxis } from "@/components/home/home-two-axis";
-import { HomeExploreSplit } from "@/components/home/home-explore-split";
+import { HomeMediaFinder } from "@/components/home/home-media-finder";
 import { HomePlannerLanding } from "@/components/home/home-planner-landing";
 import { fetchPublicMediaCatalog } from "@/lib/media-catalog";
 import { fetchPublishedReports } from "@/lib/report-queries";
@@ -71,7 +71,7 @@ export default async function HomePage({
 
       <HomeTwoAxis />
 
-      <HomeExploreSplit />
+      <HomeMediaFinder />
 
       <HomePlannerLanding
         mediaCountLabel={verifiedMediaLabel}

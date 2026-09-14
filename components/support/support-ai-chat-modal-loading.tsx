@@ -3,22 +3,37 @@
 import { Loader2 } from "lucide-react";
 import { useLocale } from "next-intl";
 
-/** Instant feedback while SupportAiChatModal chunk loads (dynamic import). */
+/**
+ * Instant feedback while SupportAiChatModal chunk loads (dynamic import).
+ *
+ * v10 Task K — this MUST occupy the exact same box (position/size/z-index) as
+ * the real `SupportAiChatModal` shell. It used to be a centered/bottom-sheet
+ * `max-w-lg` dialog while the real modal is a small bottom-right corner card
+ * on desktop and a `inset-x-3 bottom-3` sheet on mobile — two different
+ * layouts. On mobile the dynamic-import chunk almost never finishes loading
+ * before the tap (only `onTouchStart` prefetch, fired a beat before the
+ * click), so this skeleton reliably rendered first, then got swapped for the
+ * real modal at a different position/size — read as the chat window
+ * "shaking"/jumping right after opening. Keep both shells pixel-identical so
+ * the swap is a no-op layout-wise.
+ */
 export function SupportAiChatModalLoading() {
   const locale = useLocale();
   const isKo = locale === "ko";
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-busy="true"
-      aria-label={isKo ? "AI 챗봇 불러오는 중" : "Loading AI chat"}
-      data-screenshot="ai-chat-modal-loading"
+      className="fixed inset-0 z-[54] bg-gray-500/50 dark:bg-white/5 sm:pointer-events-none sm:bg-transparent"
+      role="presentation"
     >
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" aria-hidden />
-      <div className="relative z-10 flex w-full max-w-lg flex-col items-center gap-3 rounded-t-2xl border-t border-gray-200 bg-white px-8 py-10 dark:border-white/10 dark:bg-gray-950 sm:rounded-2xl sm:border sm:py-8">
+      <div
+        className="pointer-events-auto fixed inset-x-3 bottom-3 top-auto z-[56] mx-auto flex max-h-[min(560px,78dvh,82vh)] min-h-[360px] flex-col items-center justify-center gap-3 overflow-hidden rounded-[24px] border border-gray-200 bg-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.7)] backdrop-blur dark:border-white/12 dark:bg-black dark:text-white sm:inset-x-auto sm:bottom-6 sm:left-auto sm:right-6 sm:mx-0 sm:w-[min(400px,calc(100vw-2rem))]"
+        role="dialog"
+        aria-modal="true"
+        aria-busy="true"
+        aria-label={isKo ? "AI 챗봇 불러오는 중" : "Loading AI chat"}
+        data-screenshot="ai-chat-modal-loading"
+      >
         <Loader2
           className="h-8 w-8 animate-spin text-[color:var(--qp-accent)]"
           aria-hidden
