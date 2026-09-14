@@ -201,7 +201,15 @@ export function buildFreetextEvidenceRows(
     });
   }
 
-  if (fields.budgetMan.value != null) {
+  if (fields.budgetUnlimited.value === true) {
+    rows.push({
+      key: "budget",
+      label: isKo ? "예산" : "Budget",
+      valueText: isKo ? "제한 없음" : "Unlimited",
+      source: fields.budgetUnlimited.source,
+      confidence: fields.budgetUnlimited.confidence,
+    });
+  } else if (fields.budgetMan.value != null) {
     rows.push({
       key: "budget",
       label: isKo ? "예산" : "Budget",
@@ -297,7 +305,17 @@ export function buildFreetextBriefSummarySentence(
     true,
     fields.seoulZones.source,
   );
-  if (regionText) parts.push(regionText);
+  if (regionText) {
+    parts.push(regionText);
+  } else if (
+    !(fields.regions.value?.length) &&
+    !(fields.seoulZones.value?.length) &&
+    !(fields.busanZones.value?.length) &&
+    !(fields.gyeonggiZones.value?.length) &&
+    !(fields.incheonZones.value?.length)
+  ) {
+    parts.push(isKo ? "전국 기준" : "Nationwide");
+  }
 
   if (fields.ageKeys.value?.length) {
     const ageText = fields.ageKeys.value
@@ -327,7 +345,9 @@ export function buildFreetextBriefSummarySentence(
     );
   }
 
-  if (fields.budgetMan.value != null) {
+  if (fields.budgetUnlimited.value === true) {
+    parts.push(isKo ? "예산 제한 없음" : "Unlimited budget");
+  } else if (fields.budgetMan.value != null) {
     parts.push(
       isKo
         ? `월 ${fields.budgetMan.value.toLocaleString("ko-KR")}만원`

@@ -60,6 +60,7 @@ export type PlannerFreetextParseResult = {
     ageKeys: ParsedField<PlannerAgeKey[]>;
     industryKey: ParsedField<PlannerIndustryKey>;
     budgetMan: ParsedField<number>;
+    budgetUnlimited: ParsedField<boolean>;
     months: ParsedField<number>;
     durationDays: ParsedField<number>;
     busanZones: ParsedField<PlannerBusanZoneKey[]>;
@@ -92,17 +93,17 @@ const GOAL_PATTERNS: {
     ],
   },
   {
-    goal: "event",
+    goal: "launch",
     patterns: [
-      /프로모션|프로모|이벤트|팝업\s*스토어|팝업스토어|팝업|행사|할인|promotion/i,
+      /그랜드\s*오픈|grand\s*open(?:ing)?|신규\s*오픈|신규\s*opening/i,
+      /런칭|론칭|출시|신제품|launch/i,
+      /새로\s*(?:오픈|출시|런칭|론칭)/i,
     ],
   },
   {
-    goal: "launch",
+    goal: "event",
     patterns: [
-      /런칭|론칭|출시|신제품|신규\s*오픈|그랜드\s*오픈|신규|launch/i,
-      /새로\s*(?:오픈|출시|런칭|론칭)/i,
-      /오픈/i,
+      /프로모션|프로모|이벤트|팝업\s*스토어|팝업스토어|팝업|행사|할인|promotion/i,
     ],
   },
   {
@@ -244,7 +245,20 @@ function parseKoreanManPhrase(text: string): ParsedField<number> {
   return field(Math.min(1_000_000, man), "high", m[0]);
 }
 
+const BUDGET_UNLIMITED_RE =
+  /(?:예산\s*[:：]?\s*)?(?:제한\s*없(?:음|다)?|상관없(?:음|다)?|무관(?:함)?|무제한|budget\s*unlimited)/i;
+
+function parseBudgetUnlimited(text: string): ParsedField<boolean> {
+  const m = text.match(BUDGET_UNLIMITED_RE);
+  if (!m?.[0]) return emptyField();
+  return field(true, "high", m[0].trim());
+}
+
 function parseBudgetMan(text: string): ParsedField<number> {
+  if (parseBudgetUnlimited(text).value === true) {
+    return emptyField();
+  }
+
   const ko = parseKoreanManPhrase(text);
   if (ko.value != null) return ko;
 
@@ -804,6 +818,7 @@ function collectUnmatchedTokens(
     fields.ageKeys.source,
     fields.industryKey.source,
     fields.budgetMan.source,
+    fields.budgetUnlimited.source,
     fields.months.source,
     fields.durationDays.source,
     fields.busanZones.source,
@@ -856,6 +871,7 @@ export function parsePlannerFreetextBrief(
         ageKeys: empty,
         industryKey: empty,
         budgetMan: empty,
+        budgetUnlimited: empty,
         months: empty,
         durationDays: empty,
         busanZones: empty,
@@ -881,6 +897,7 @@ export function parsePlannerFreetextBrief(
     ageKeys: parseAgeKeys(text),
     industryKey: parseIndustryKey(text),
     budgetMan: parseBudgetMan(text),
+    budgetUnlimited: parseBudgetUnlimited(text),
     months: duration.months,
     durationDays: duration.durationDays,
     categories: parseCategories(text),
@@ -921,13 +938,20 @@ export function buildScenarioPatchFromFreetextParse(
   const goalFollowUp =
     durationDays != null ? { eventDurationDays: durationDays } : undefined;
 
+  const regionsUnknown = regions.length === 0;
+
   return {
-    regions: regions.length > 0 ? regions : ["seoul"],
+    regions: regions.length > 0 ? regions : [],
+    regionsUnknown,
     categories:
       fields.categories.value != null && fields.categories.value.length > 0
         ? [...fields.categories.value]
         : [...PLANNER_DEFAULT_CATEGORIES],
-    budgetMan: fields.budgetMan.value ?? PLANNER_BUDGET_MIN,
+    budgetUnlimited: fields.budgetUnlimited.value === true,
+    budgetMan:
+      fields.budgetUnlimited.value === true
+        ? 0
+        : fields.budgetMan.value ?? PLANNER_BUDGET_MIN,
     months: fields.months.value ?? 1,
     ...(fields.campaignGoal.value != null
       ? { campaignGoal: fields.campaignGoal.value }

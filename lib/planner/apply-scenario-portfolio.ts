@@ -30,7 +30,11 @@ export function resolveScenarioPortfolioMediaIds(
   catalog: readonly MediaItem[],
   patch: PlannerScenarioApplyPatch,
 ): string[] {
-  const regions = patch.regions.length > 0 ? [...patch.regions] : ["seoul"];
+  const regions = patch.regionsUnknown
+    ? [...patch.regions]
+    : patch.regions.length > 0
+      ? [...patch.regions]
+      : ["seoul"];
   const categories =
     patch.categories.length > 0
       ? [...patch.categories]

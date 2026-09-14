@@ -115,7 +115,7 @@ function countParsedFields(result: PlannerFreetextParseResult): number {
   if (result.fields.incheonZones.value?.length) n++;
   if (fields.ageKeys.value?.length) n++;
   if (fields.industryKey.value != null) n++;
-  if (fields.budgetMan.value != null) n++;
+  if (fields.budgetMan.value != null || fields.budgetUnlimited.value === true) n++;
   if (fields.months.value != null) n++;
   if (fields.durationDays.value != null) n++;
   if (fields.categories.value?.length) n++;
@@ -158,6 +158,7 @@ function patchToRecommendationContext(
     ageKeys: patch.ageKeys ?? [],
     industryKey: patch.industryKey ?? null,
     budgetMan: patch.budgetMan ?? 0,
+    budgetUnlimited: patch.budgetUnlimited === true,
     months: patch.months ?? 1,
     durationDays: patch.goalFollowUp?.eventDurationDays ?? undefined,
     goalFollowUp: patch.goalFollowUp,

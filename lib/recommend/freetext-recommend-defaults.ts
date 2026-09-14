@@ -29,7 +29,10 @@ export function applyFreetextRecommendDraftDefaults(
     region: draft.region || brief.region || "",
   };
 
-  if (!next.budgetMan || Number(next.budgetMan) <= 0) {
+  if (parseResult.fields.budgetUnlimited.value === true) {
+    next.budgetMan = "0";
+    budgetDefaulted = false;
+  } else if (!next.budgetMan || Number(next.budgetMan) <= 0) {
     next.budgetMan = String(FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN);
     budgetDefaulted = true;
   }

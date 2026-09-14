@@ -451,3 +451,34 @@ test("buildScenarioPatchFromFreetextParse: gyeonggi zone only → gyeonggi regio
   assert.ok(patch.regions.includes("gyeonggi"));
   assert.ok(patch.gyeonggiZones?.includes("goyang"));
 });
+
+test("parsePlannerFreetextBrief: STEP1 2안 — launch·무제한·지역 미상", () => {
+  const raw = `목적: 그랜드 오프닝 신규 오픈 프로모션
+타깃: 내국인 70% + 외국인 30% (조정 가능)
+거점: 주요 생활권 + 관광객 이동 동선
+기간: 2027년 상반기(봄 시즌)
+예산: 제한 없음`;
+  const r = parsePlannerFreetextBrief(raw);
+  assert.equal(r.fields.campaignGoal.value, "launch");
+  assert.equal(r.fields.budgetUnlimited.value, true);
+  assert.equal(r.fields.budgetMan.value, null);
+  assert.equal(r.fields.regions.value, null);
+  const patch = buildScenarioPatchFromFreetextParse(r);
+  assert.deepEqual(patch.regions, []);
+  assert.equal(patch.regionsUnknown, true);
+  assert.equal(patch.budgetUnlimited, true);
+  assert.equal(patch.budgetMan, 0);
+});
+
+test("buildScenarioPatchFromFreetextParse: 지역·상권 없음 → seoul 강제 아님", () => {
+  const r = parsePlannerFreetextBrief("브랜딩 3000만원");
+  const patch = buildScenarioPatchFromFreetextParse(r);
+  assert.deepEqual(patch.regions, []);
+  assert.equal(patch.regionsUnknown, true);
+});
+
+test("parsePlannerFreetextBrief: 예산 제한 없음 패턴", () => {
+  const r = parsePlannerFreetextBrief("강남 브랜딩 예산: 제한 없음");
+  assert.equal(r.fields.budgetUnlimited.value, true);
+  assert.equal(r.fields.budgetMan.value, null);
+});
