@@ -40,6 +40,25 @@ test("buildFreetextEvidenceRows: categories row", () => {
   assert.ok(rows.some((row) => row.key === "categories" && row.source?.includes("지하철")));
 });
 
+test("buildFreetextBriefSummarySentence: 지하철광고 → 지하철 메인 라벨", () => {
+  const r = parsePlannerFreetextBrief("강남, 홍대 지하철광고 3,000만원");
+  const sentence = buildFreetextBriefSummarySentence(r, true);
+  assert.match(sentence, /지하철 매체/);
+  assert.doesNotMatch(sentence, /디지털·전광판/);
+  assert.doesNotMatch(sentence, /약하게/);
+  const rows = buildFreetextEvidenceRows(r, true);
+  const cat = rows.find((row) => row.key === "categories");
+  assert.equal(cat?.valueText, "지하철 (역사·차내)");
+  assert.equal(cat?.confidence, "high");
+});
+
+test("buildFreetextBriefSummarySentence: 전광판 단독 → 지하철 아님", () => {
+  const r = parsePlannerFreetextBrief("전광판 LED 브랜딩 1500만");
+  const sentence = buildFreetextBriefSummarySentence(r, true);
+  assert.match(sentence, /디지털·전광판 매체/);
+  assert.doesNotMatch(sentence, /지하철/);
+});
+
 test("buildFreetextBriefSummarySentence: empty parse fallback", () => {
   const r = parsePlannerFreetextBrief("   ");
   assert.match(buildFreetextBriefSummarySentence(r, true), /인식된 조건이 없습니다/);

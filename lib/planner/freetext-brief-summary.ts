@@ -8,10 +8,13 @@ import {
   PLANNER_SEOUL_ZONE_LABELS,
   type PlannerSeoulZoneKey,
 } from "@/lib/planner/seoul-zones";
+import {
+  resolveFreetextMediaEvidenceLabel,
+  resolveFreetextMediaSummaryLabel,
+} from "@/lib/planner/freetext-media-display-label";
 import type {
   PlannerAgeKey,
   PlannerCampaignGoal,
-  PlannerCategory,
   PlannerIndustryKey,
 } from "@/lib/planner/types";
 
@@ -48,37 +51,6 @@ const AGE_LABELS: Record<PlannerAgeKey, { ko: string; en: string }> = {
   age40s: { ko: "40대", en: "40s" },
   age50plus: { ko: "50대+", en: "50s+" },
 };
-
-const CATEGORY_LABELS: Record<PlannerCategory, { ko: string; en: string }> = {
-  digital: { ko: "디지털·전광판", en: "Digital signage" },
-  static: { ko: "옥외·고정형", en: "Static OOH" },
-  mobile: { ko: "이동형·버스", en: "Mobile transit" },
-};
-
-function formatCategoriesValue(cats: PlannerCategory[], isKo: boolean): string {
-  return cats
-    .map((c) => (isKo ? CATEGORY_LABELS[c].ko : CATEGORY_LABELS[c].en))
-    .join(isKo ? " · " : ", ");
-}
-
-/** 지하철 의도가 명확할 때 planner 카테고리 대신 사용자 친화 라벨 */
-function formatCategoriesFromField(
-  field: ParsedField<PlannerCategory[]>,
-  isKo: boolean,
-): string {
-  const cats = field.value;
-  if (!cats?.length) return "";
-  const src = field.source ?? "";
-  const isSubwayIntent =
-    field.confidence === "high" &&
-    /지하철|subway|전동차|metro/i.test(src) &&
-    cats.includes("digital") &&
-    cats.includes("mobile");
-  if (isSubwayIntent) {
-    return isKo ? "지하철 (역사·차내)" : "Subway (station & in-train)";
-  }
-  return formatCategoriesValue(cats, isKo);
-}
 
 export type FreetextEvidenceRow = {
   key: string;
@@ -210,11 +182,12 @@ export function buildFreetextEvidenceRows(
     });
   }
 
-  if (fields.categories.value?.length) {
+  const mediaEvidence = resolveFreetextMediaEvidenceLabel(result, isKo);
+  if (mediaEvidence) {
     rows.push({
       key: "categories",
       label: isKo ? "매체" : "Media type",
-      valueText: formatCategoriesFromField(fields.categories, isKo),
+      valueText: mediaEvidence,
       source: fields.categories.source,
       confidence: fields.categories.confidence,
     });
@@ -305,6 +278,11 @@ export function buildFreetextBriefSummaryShort(
     );
   }
 
+  const mediaShort = resolveFreetextMediaSummaryLabel(result, isKo);
+  if (mediaShort) {
+    parts.push(mediaShort);
+  }
+
   if (parts.length === 0) return null;
   return parts.join("·");
 }
@@ -351,9 +329,9 @@ export function buildFreetextBriefSummarySentence(
     );
   }
 
-  if (fields.categories.value?.length) {
-    const mediaLabel = formatCategoriesFromField(fields.categories, isKo);
-    parts.push(isKo ? `${mediaLabel} 매체` : `${mediaLabel} media`);
+  const mediaSummary = resolveFreetextMediaSummaryLabel(result, isKo);
+  if (mediaSummary) {
+    parts.push(isKo ? `${mediaSummary} 매체` : `${mediaSummary} media`);
   }
 
   if (fields.campaignGoal.value != null) {
