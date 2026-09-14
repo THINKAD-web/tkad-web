@@ -101,6 +101,9 @@ export function buildAiRecommendInputFromFreetext(
     ...(subwayLine ? { subwayLine } : {}),
     ...(locationKeywords.length > 0 ? { locationKeywords } : {}),
     ...(mediaIntents.length > 0 ? { mediaIntents } : {}),
+    ...(parseResult.fields.targetProfile.value
+      ? { targetProfile: parseResult.fields.targetProfile.value }
+      : {}),
     freetextSource: freetextSource.trim(),
   };
 }

@@ -30,6 +30,17 @@ const INDUSTRY_MAP: Record<PlannerIndustryKey, RecommendIndustry | null> = {
   indOther: null,
 };
 
+const SEGMENT_TARGET_MAP: Record<string, RecommendTarget> = {
+  genz: "genz",
+  millennial: "millennial",
+  family: "family",
+  biz: "biz",
+  mass: "mass",
+  mz: "genz",
+  worker: "biz",
+  tourist: "mass",
+};
+
 function mapAgeToTarget(ageKeys: PlannerAgeKey[]): RecommendTarget | null {
   if (ageKeys.length === 0) return null;
   const has20 = ageKeys.includes("age20s");
@@ -83,7 +94,9 @@ export function plannerFreetextToRecommendBrief(
       : null,
     target: fields.ageKeys.value?.length
       ? mapAgeToTarget(fields.ageKeys.value)
-      : null,
+      : fields.targetProfile.value?.segment
+        ? (SEGMENT_TARGET_MAP[fields.targetProfile.value.segment] ?? null)
+        : null,
     budgetMaxMan: fields.budgetMan.value ?? null,
     region: formatRegionText(result, isKo),
     industry: fields.industryKey.value

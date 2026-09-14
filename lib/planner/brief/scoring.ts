@@ -42,10 +42,16 @@ import {
   industryBonusForTier,
 } from "@/lib/planner/brief/industry-bonus";
 import { sidoCodesToBrowseMainIds, sidoLabel, summarizeSidoCodes } from "@/lib/planner/brief/regions";
+import { computeSharedMatchBonuses } from "@/lib/matching/shared-scoring";
 import type { BriefAgeBand, BriefIndustry, CampaignBriefInput } from "@/lib/planner/brief/types";
 import { totalBudgetWon } from "@/lib/planner/brief/types";
 
-export type ScoreAxisKey = "region" | "budget" | "target" | "industry";
+export type ScoreAxisKey =
+  | "region"
+  | "budget"
+  | "target"
+  | "industry"
+  | "targetProfile";
 
 export type ScoreAxis = {
   key: ScoreAxisKey;
@@ -62,6 +68,8 @@ export type ScoredMedia = {
   /** region·budget·target 축 평균 (업종·예산페널티 제외) */
   baseTotal: number;
   industryBonus: number;
+  /** TargetProfile 공유 보너스 (0~15, industryBonus와 동일 additive) */
+  targetProfileBonus: number;
   budgetPenalty: number;
   lineCostWon: number | null;
   overBudget: boolean;
@@ -308,6 +316,7 @@ export function scoreMediaCandidates(params: {
   const wantedBrowseIds = new Set(sidoCodesToBrowseMainIds(brief.regionCodes));
   const hasTargetBrief =
     brief.genders.length > 0 || brief.ageBands.length > 0;
+  const hasTargetProfile = brief.targetProfile != null;
   const budgetWon = totalBudgetWon(brief);
 
   return candidates
@@ -315,6 +324,7 @@ export function scoreMediaCandidates(params: {
       const axes: ScoreAxis[] = [];
       let targetBasis: MetricBasis | null = null;
       let industryBonus = 0;
+      let targetProfileBonus = 0;
 
       if (wantedBrowseIds.size > 0 && media.regionMain) {
         const hit = wantedBrowseIds.has(media.regionMain);
@@ -384,7 +394,27 @@ export function scoreMediaCandidates(params: {
         });
       }
 
-      const rankingAxes = axes.filter((a) => a.key !== "industry");
+      if (hasTargetProfile && !hasTargetBrief && brief.targetProfile) {
+        const shared = computeSharedMatchBonuses(
+          media,
+          { targetProfile: brief.targetProfile },
+          { engine: "brief", locale: isKo ? "ko" : "en" },
+        );
+        if (shared.targetProfile) {
+          targetProfileBonus = shared.targetProfile.catalogPoints;
+          axes.push({
+            key: "targetProfile",
+            score: shared.targetProfile.briefAxisScore,
+            rationale: isKo
+              ? shared.targetProfile.rationaleKo
+              : shared.targetProfile.rationaleEn,
+          });
+        }
+      }
+
+      const rankingAxes = axes.filter(
+        (a) => a.key !== "industry" && a.key !== "targetProfile",
+      );
       const baseTotal =
         rankingAxes.length > 0
           ? Math.round(
@@ -402,7 +432,10 @@ export function scoreMediaCandidates(params: {
 
       const total = Math.max(
         0,
-        Math.min(100, baseTotal + industryBonus - budgetPenalty),
+        Math.min(
+          100,
+          baseTotal + industryBonus + targetProfileBonus - budgetPenalty,
+        ),
       );
 
       return {
@@ -410,6 +443,7 @@ export function scoreMediaCandidates(params: {
         total,
         baseTotal,
         industryBonus,
+        targetProfileBonus,
         budgetPenalty,
         lineCostWon,
         overBudget,

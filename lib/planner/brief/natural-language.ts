@@ -174,6 +174,7 @@ export function parseBriefFromText(text: string): BriefParseResult {
     goal,
     industry,
     freeText: trimmed,
+    ...(f.targetProfile.value ? { targetProfile: f.targetProfile.value } : {}),
   };
 
   return {

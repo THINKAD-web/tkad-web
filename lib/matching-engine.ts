@@ -21,6 +21,8 @@ import {
 } from "@/lib/planner/subway-line";
 import { scoreTargetAgeForPlanner } from "@/lib/planner/parse-target-age";
 import type { PlannerAgeKey } from "@/lib/planner/types";
+import { computeSharedMatchBonuses } from "@/lib/matching/shared-scoring";
+import type { TargetProfile } from "@/lib/matching/target-profile";
 import { rationaleToMatchReasons } from "@/lib/recommend/recommend-rationale";
 
 /** 월 예산·지역·업종·타겟·기간·목표 기반 매체 매칭 (0–100점, 결정론적) */
@@ -59,6 +61,8 @@ export type MatchingInput = {
   subwayLine?: string;
   /** 예산 무제한 — scoreBudget 중립(22), 예산 초과 필터 없음 */
   budgetUnlimited?: boolean;
+  /** nationality/residency 확장 타깃 — optional, 없으면 기존과 동일 */
+  targetProfile?: TargetProfile;
 };
 
 export type ScoreBreakdown = {
@@ -70,6 +74,8 @@ export type ScoreBreakdown = {
   popularity: number;
   /** 노선 일치 가·감점 (subwayLine 쿼리 시) */
   subwayLine?: number;
+  /** TargetProfile 공유 보너스 (0~15) */
+  targetProfile?: number;
   total: number;
 };
 
@@ -640,6 +646,37 @@ export function matchPrecisionLabel(
   return isKo ? "인근·유사 추천" : "Nearby / related";
 }
 
+function applyTargetProfileBonus(
+  m: MediaItem,
+  input: MatchingInput,
+  breakdown: ScoreBreakdown,
+  linePts: number,
+): void {
+  if (!input.targetProfile) return;
+  const shared = computeSharedMatchBonuses(
+    m,
+    { targetProfile: input.targetProfile },
+    { engine: "catalog" },
+  );
+  if (!shared.targetProfile) return;
+  breakdown.targetProfile = shared.targetProfile.catalogPoints;
+  const scoreCap = input.subwayLine?.trim() ? 120 : 100;
+  breakdown.total = Math.min(
+    scoreCap,
+    Math.max(
+      0,
+      breakdown.budget +
+        breakdown.region +
+        breakdown.industry +
+        breakdown.target +
+        breakdown.category +
+        breakdown.popularity +
+        linePts +
+        breakdown.targetProfile,
+    ),
+  );
+}
+
 function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
   const budgetPts = scoreBudget(
     m,
@@ -683,6 +720,7 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
         linePts,
     ),
   );
+  applyTargetProfileBonus(m, input, breakdown, linePts);
 
   /* 전광판 의도인데 아트래핑·쉘터 등이면 총점 상한 — 폴백 노출은 유지하되 exact 아래로 */
   if (
@@ -754,6 +792,7 @@ export function scoreMediaForRanking(
         linePts,
     ),
   );
+  applyTargetProfileBonus(m, input, breakdown, linePts);
 
   if (
     input.mediaIntents?.includes("billboard") &&
