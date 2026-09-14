@@ -12,6 +12,7 @@
  */
 
 import type { CampaignPlanMixEntry } from "@/lib/campaign-plan-mix-entry";
+import type { TargetProfile } from "@/lib/matching/target-profile";
 import { METRICS_ENGINE_VERSION } from "@/lib/metrics/constants";
 import type { MetricBasis } from "@/lib/metrics/defaults";
 import type { PlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
@@ -51,6 +52,7 @@ export type CampaignPlanBrief = {
   flightStart: string;
   flightEnd: string;
   freeText?: string;
+  targetProfile?: TargetProfile;
 };
 
 export type CampaignPlanMediaLine = {

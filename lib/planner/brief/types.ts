@@ -12,6 +12,7 @@ import type {
   CampaignPlanBrief,
   CampaignPlanGender,
 } from "@/lib/campaign-plan-schema";
+import type { TargetProfile } from "@/lib/matching/target-profile";
 import { normalizeSidoCodes, type SidoCode } from "@/lib/planner/brief/regions";
 
 /** 연령대 — CampaignPlanBrief.ageBands 와 동일 (10대 포함) */
@@ -69,6 +70,8 @@ export type CampaignBriefInput = {
   flightEnd: string | null;
   /** 자연어 원문 (파싱 출처 추적용) */
   freeText: string;
+  /** nationality/residency 확장 타깃 — optional */
+  targetProfile?: TargetProfile;
 };
 
 export const EMPTY_BRIEF: CampaignBriefInput = {
@@ -203,6 +206,11 @@ export function normalizeBriefInput(raw: unknown): CampaignBriefInput {
     flightStart: typeof r.flightStart === "string" ? r.flightStart : null,
     flightEnd: typeof r.flightEnd === "string" ? r.flightEnd : null,
     freeText: typeof r.freeText === "string" ? r.freeText : "",
+    ...(r.targetProfile &&
+    typeof r.targetProfile === "object" &&
+    r.targetProfile !== null
+      ? { targetProfile: r.targetProfile as TargetProfile }
+      : {}),
   };
 }
 
@@ -223,5 +231,6 @@ export function toCampaignPlanBrief(
     flightStart: brief.flightStart ?? "",
     flightEnd: brief.flightEnd ?? "",
     freeText: brief.freeText || undefined,
+    ...(brief.targetProfile ? { targetProfile: brief.targetProfile } : {}),
   };
 }

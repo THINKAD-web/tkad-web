@@ -78,6 +78,8 @@ export type AiRecommendInput = {
   placementHints?: readonly string[] | null;
   /** 사용자 슬라이더 override. 미전송 시 goal 기본값(resolveCrossChannelAllocation) */
   digitalBudgetPct?: number;
+  /** nationality/residency 확장 타깃 — optional */
+  targetProfile?: import("@/lib/matching/target-profile").TargetProfile;
 };
 
 export type MatchReason = { ko: string; en: string };

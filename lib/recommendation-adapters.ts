@@ -105,6 +105,7 @@ export function aiInputToMatching(
     seed,
     ...(input.mediaIntents?.length ? { mediaIntents: [...input.mediaIntents] } : {}),
     ...(input.subwayLine?.trim() ? { subwayLine: input.subwayLine.trim() } : {}),
+    ...(input.targetProfile ? { targetProfile: input.targetProfile } : {}),
   };
 }
 

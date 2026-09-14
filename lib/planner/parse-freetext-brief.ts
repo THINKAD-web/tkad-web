@@ -1,3 +1,5 @@
+import { parseTargetProfile } from "@/lib/matching/parse-target-profile";
+import type { TargetProfile } from "@/lib/matching/target-profile";
 import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
 import { listMediaHotspotRegions } from "@/lib/media-hotspot-regions";
 import { PLANNER_INDUSTRY_HINTS } from "@/lib/planner/industry-match";
@@ -69,6 +71,8 @@ export type PlannerFreetextParseResult = {
     categories: ParsedField<PlannerCategory[]>;
     /** 지하철 노선 — `9`, `arex`, `daegu:3` 등 */
     subwayLine: ParsedField<SubwayLineKey>;
+    /** nationality/residency 확장 타깃 */
+    targetProfile: ParsedField<TargetProfile>;
   };
   /** 인식되지 않은 잔여 토큰·구문 */
   unmatchedTokens: string[];
@@ -894,6 +898,7 @@ export function parsePlannerFreetextBrief(
         incheonZones: empty,
         categories: empty,
         subwayLine: empty,
+        targetProfile: empty,
       },
       unmatchedTokens: [],
     };
@@ -902,6 +907,7 @@ export function parsePlannerFreetextBrief(
   const { regions, seoulZones, busanZones, gyeonggiZones, incheonZones } =
     parseRegions(text);
   const duration = parseDurationFields(text);
+  const targetProfileParsed = parseTargetProfile(text);
   const fields = {
     campaignGoal: parseCampaignGoal(text),
     regions,
@@ -917,6 +923,11 @@ export function parsePlannerFreetextBrief(
     durationDays: duration.durationDays,
     categories: parseCategories(text),
     subwayLine: parseSubwayLine(text),
+    targetProfile: {
+      value: targetProfileParsed.value,
+      confidence: targetProfileParsed.confidence,
+      source: targetProfileParsed.source,
+    },
   };
 
   return {
