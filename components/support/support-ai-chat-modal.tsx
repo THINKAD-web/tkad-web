@@ -179,6 +179,24 @@ export function SupportAiChatModal({ open, onClose }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // v10 Task K — unlike every other modal/sheet in this codebase, this one
+  // never locked background scroll. With a `position: fixed` panel sitting
+  // over a still-scrollable page, an iOS rubber-band bounce (easy to trigger
+  // right after the contact sheet's own tap) visibly drags the page behind
+  // it, which reads as the chat window "shaking" right as it opens. Lock on
+  // `html`, not `body` — see the same note in the contact sheet / desktop nav
+  // for why `body` overflow:hidden sends scrolled sticky/fixed elements
+  // off-screen.
+  useEffect(() => {
+    if (!open) return;
+    const html = document.documentElement;
+    const prevOverflow = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
   const send = useCallback(
     async (textOverride?: string) => {
       const text = (textOverride ?? input).trim();

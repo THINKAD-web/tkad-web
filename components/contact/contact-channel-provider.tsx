@@ -168,31 +168,44 @@ function ContactChannelSheetUI({
             </span>
           </button>
 
-          <Link
-            href="/contact"
-            onClick={onClose}
-            className="flex w-full flex-col rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-5 text-left text-white transition hover:opacity-95 md:rounded-xl md:px-4 md:py-3.5"
-          >
-            <span className="text-base font-semibold md:text-sm">
-              {isKo ? "📋 견적 요청서" : "📋 Quote request form"}
-            </span>
-            <span className="mt-1 text-sm text-white/85 md:mt-0.5 md:text-xs">
-              {isKo ? "상세 문의 · 24시간 내 담당자 연락" : "Detailed inquiry · reply within 24h"}
-            </span>
-          </Link>
+          {showMore ? (
+            <>
+              <Link
+                href="/contact"
+                onClick={onClose}
+                className="flex w-full flex-col rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-5 text-left text-white transition hover:opacity-95 md:rounded-xl md:px-4 md:py-3.5"
+              >
+                <span className="text-base font-semibold md:text-sm">
+                  {isKo ? "📋 견적 요청서" : "📋 Quote request form"}
+                </span>
+                <span className="mt-1 text-sm text-white/85 md:mt-0.5 md:text-xs">
+                  {isKo ? "상세 문의 · 24시간 내 담당자 연락" : "Detailed inquiry · reply within 24h"}
+                </span>
+              </Link>
 
-          <a
-            href="tel:02-515-2772"
-            onClick={onClose}
-            className="flex w-full flex-col rounded-2xl bg-gray-100 px-5 py-5 text-left text-gray-900 transition hover:bg-gray-200 md:rounded-xl md:px-4 md:py-3.5 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
-          >
-            <span className="text-base font-semibold md:text-sm">
-              {isKo ? "📞 전화 상담" : "📞 Phone support"}
-            </span>
-            <span className="mt-1 text-sm opacity-70 md:mt-0.5 md:text-xs">
-              {isKo ? "평일 09:00~18:00" : "Weekdays 09:00–18:00"}
-            </span>
-          </a>
+              <a
+                href="tel:02-515-2772"
+                onClick={onClose}
+                className="flex w-full flex-col rounded-2xl bg-gray-100 px-5 py-5 text-left text-gray-900 transition hover:bg-gray-200 md:rounded-xl md:px-4 md:py-3.5 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+              >
+                <span className="text-base font-semibold md:text-sm">
+                  {isKo ? "📞 전화 상담" : "📞 Phone support"}
+                </span>
+                <span className="mt-1 text-sm opacity-70 md:mt-0.5 md:text-xs">
+                  {isKo ? "평일 09:00~18:00" : "Weekdays 09:00–18:00"}
+                </span>
+              </a>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowMore(true)}
+              className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-gray-200 px-5 py-3.5 text-sm font-semibold text-gray-500 transition hover:bg-gray-50 md:rounded-xl md:py-3 dark:border-white/12 dark:text-white/55 dark:hover:bg-white/5"
+            >
+              {isKo ? "다른 방법으로 문의하기" : "Other ways to contact us"}
+              <ChevronDown className="h-4 w-4" aria-hidden />
+            </button>
+          )}
         </div>
       </div>
     </>

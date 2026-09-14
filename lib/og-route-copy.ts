@@ -12,12 +12,12 @@ const routes = {
     ko: {
       badge: "Korea OOH Platform",
       title: "THINKAD",
-      subtitle: "전국 {count} 검증된 옥외광고 매체 · 데이터 기반 캠페인 컨설팅",
+      subtitle: "OOH·디지털 검증 매체 · 데이터 기반 캠페인 컨설팅",
     },
     en: {
       badge: "Korea OOH Platform",
       title: "THINKAD",
-      subtitle: "{count} verified OOH media nationwide · Data-driven campaign consulting",
+      subtitle: "Verified OOH & digital media · Data-driven campaign consulting",
     },
   },
   about: {
@@ -48,12 +48,12 @@ const routes = {
     ko: {
       badge: "Verified Media",
       title: "옥외광고 매체 검색",
-      subtitle: "전국 {count} 검증된 빌보드·디지털·교통 매체를 한눈에 비교",
+      subtitle: "검증된 빌보드·디지털·교통 매체를 한눈에 비교",
     },
     en: {
       badge: "Verified Media",
       title: "OOH media search",
-      subtitle: "Compare {count} verified billboards, DOOH, and transit media",
+      subtitle: "Compare verified billboards, DOOH, and transit media",
     },
   },
   mediaOnline: {
