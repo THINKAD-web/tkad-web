@@ -166,10 +166,12 @@ export function SupportAiChatModal({ open, onClose }: Props) {
     });
   }, [messages, open, loading]);
 
-  useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
-
+  // v10 — 열리자마자 자동 포커스하지 않는다. iOS Safari 는 포커스가 걸리면
+  // 키보드를 올리면서 그 입력창을 보이게 하려고 문서를 스크롤하는데, 이 입력창이
+  // `position: fixed` 패널 안에 있어도 예외가 아니다 — `html.style.overflow =
+  // "hidden"`(스크롤 잠금) 을 걸어 둬도 이 포커스발 스크롤/뷰포트 리사이즈는
+  // 막히지 않는다. 그 결과 모달을 여는 순간 뒤 페이지가 훅 내려가는 것처럼
+  // 보였다. 사용자가 입력창을 직접 탭할 때만 키보드가 올라오게 둔다.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {

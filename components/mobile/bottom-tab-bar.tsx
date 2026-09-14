@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import { hapticLight } from "@/lib/haptic";
 import { useMobileChromeOverlayOptional } from "@/components/mobile/mobile-chrome-overlay-context";
 import { useMobileTabBadges } from "@/hooks/use-mobile-tab-badges";
-import { openContactChannelSheet } from "@/components/contact/contact-channel-provider";
 import { prefetchOnIdle, prefetchSupportAiChatModal } from "@/lib/lazy-chunk-prefetch";
 
 export type MobileBottomTabDef = {
@@ -28,8 +27,6 @@ export type MobileBottomTabDef = {
   href?: string;
   emphasized?: boolean;
   badgeKey?: "contact" | "my";
-  /** Opens contact channel sheet instead of navigating */
-  action?: "contact-sheet";
 };
 
 /** 모바일 하단 탭 정의 — 항목 추가 시 이 배열만 수정 */
@@ -60,11 +57,11 @@ export const MOBILE_BOTTOM_TABS: MobileBottomTabDef[] = [
   },
   {
     id: "contact",
+    href: "/contact",
     labelKey: "contact",
     icon: MessageCircle,
     match: (p) => p.startsWith("/contact"),
     badgeKey: "contact",
-    action: "contact-sheet",
   },
   {
     id: "my",
@@ -219,32 +216,6 @@ export function BottomTabBar() {
                   </span>
                   <TabLabel active={active}>{label}</TabLabel>
                 </Link>
-              </li>
-            );
-          }
-
-          if (tab.action === "contact-sheet") {
-            return (
-              <li key={tab.id} className="flex min-w-0 flex-1 basis-0">
-                <button
-                  type="button"
-                  onPointerEnter={() => prefetchSupportAiChatModal()}
-                  onTouchStart={() => prefetchSupportAiChatModal()}
-                  onClick={() => {
-                    hapticLight();
-                    prefetchSupportAiChatModal();
-                    openContactChannelSheet();
-                  }}
-                  className="flex w-full min-w-0 flex-col items-center pb-2 pt-1 transition-ui duration-[--motion-fast] active:scale-[0.97]"
-                  aria-current={active ? "page" : undefined}
-                >
-                  <TabNeonIcon
-                    Icon={Icon}
-                    active={active}
-                    badgeCount={badgeCount}
-                  />
-                  <TabLabel active={active}>{label}</TabLabel>
-                </button>
               </li>
             );
           }
