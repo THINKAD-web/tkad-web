@@ -175,6 +175,9 @@ export function parseBriefFromText(text: string): BriefParseResult {
     industry,
     freeText: trimmed,
     ...(f.targetProfile.value ? { targetProfile: f.targetProfile.value } : {}),
+    ...(f.regionHotspots.value.length > 0
+      ? { regionHotspots: f.regionHotspots.value }
+      : {}),
   };
 
   return {

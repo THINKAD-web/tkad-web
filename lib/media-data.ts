@@ -106,6 +106,8 @@ export interface MediaItem {
   targetCategory?: string[];
   /** 검색·표시용 태그 */
   tags?: string[];
+  /** 생활권 hotspot 태그 (DB `hotspot_tags`, 제주 1차) */
+  hotspotTags?: import("@/lib/matching/region-hotspot").MediaHotspotTag[];
   city?: string;
   district?: string;
   /** 가까운 지하철역 요약 */

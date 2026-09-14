@@ -106,6 +106,9 @@ export function aiInputToMatching(
     ...(input.mediaIntents?.length ? { mediaIntents: [...input.mediaIntents] } : {}),
     ...(input.subwayLine?.trim() ? { subwayLine: input.subwayLine.trim() } : {}),
     ...(input.targetProfile ? { targetProfile: input.targetProfile } : {}),
+    ...(input.requestedHotspots?.length
+      ? { requestedHotspots: [...input.requestedHotspots] }
+      : {}),
   };
 }
 
