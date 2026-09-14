@@ -62,8 +62,12 @@ export type AppliedPlannerScenario = Pick<
 /** 시나리오 적용 시 store·자동조합에 필요한 입력 전체 */
 export type PlannerScenarioApplyPatch = {
   regions: string[];
+  /** freetext: 매크로·상권 지역 미파싱 — seoul 기본값 대신 전국 검색 */
+  regionsUnknown?: boolean;
   categories: PlannerCategory[];
   budgetMan: number;
+  /** freetext: "제한 없음" 등 — budgetMan=0, scoreBudget 중립 */
+  budgetUnlimited?: boolean;
   months: number;
   districtHints?: string[];
   seoulZones?: PlannerSeoulZoneKey[];

@@ -39,6 +39,8 @@ export type AiRecommendInput = {
   target: TargetAudience;
   /** 월 예산 상한 (만원). 0 또는 미입력 = 제한 없음 */
   budgetMaxMan: number;
+  /** freetext "제한 없음" — budgetMaxMan=0 과 동일, 명시 플래그 */
+  budgetUnlimited?: boolean;
   region: string;
   industry: Industry;
   /** Media type filter. "all" (default) disables filtering. */

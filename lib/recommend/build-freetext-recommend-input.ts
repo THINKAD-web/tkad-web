@@ -43,9 +43,12 @@ export function buildAiRecommendInputFromFreetext(
     isKo,
   );
 
-  const budget = Math.round(
-    Number(resolved.budgetMan) || FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN,
-  );
+  const budgetUnlimited = parseResult.fields.budgetUnlimited.value === true;
+  const budget = budgetUnlimited
+    ? 0
+    : Math.round(
+        Number(resolved.budgetMan) || FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN,
+      );
   if (!resolved.goal) {
     return null;
   }
@@ -83,6 +86,7 @@ export function buildAiRecommendInputFromFreetext(
     goal: resolved.goal as GoalKey,
     target: resolved.target as TargetKey,
     budgetMaxMan: budget,
+    ...(budgetUnlimited ? { budgetUnlimited: true as const } : {}),
     region:
       regionCodes?.length === 1 ? regionCodes[0]!
       : hasParsedRegion ? resolved.region.trim()
@@ -120,7 +124,10 @@ export function buildAiRecommendInputFromFreetextRaw(
     industry: fields.industry ?? "other",
   };
 
-  if (Number(draft.budgetMan) <= 0) {
+  if (
+    parseResult.fields.budgetUnlimited.value !== true &&
+    Number(draft.budgetMan) <= 0
+  ) {
     draft.budgetMan = "1000";
   }
 

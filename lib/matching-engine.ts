@@ -57,6 +57,8 @@ export type MatchingInput = {
   mediaIntents?: readonly import("@/lib/recommend/freetext-media-intents").FreetextMediaIntent[];
   /** 지하철 노선 — `9`, `arex`, `daegu:3` 등 (자연어 파싱) */
   subwayLine?: string;
+  /** 예산 무제한 — scoreBudget 중립(22), 예산 초과 필터 없음 */
+  budgetUnlimited?: boolean;
 };
 
 export type ScoreBreakdown = {
@@ -263,8 +265,12 @@ function monthlyPriceWon(m: MediaItem): number {
   return resolveMonthlyListPriceWon(m);
 }
 
-function scoreBudget(m: MediaItem, monthlyBudgetWon: number): number {
-  if (!(monthlyBudgetWon > 0)) return 22;
+function scoreBudget(
+  m: MediaItem,
+  monthlyBudgetWon: number,
+  budgetUnlimited = false,
+): number {
+  if (budgetUnlimited || !(monthlyBudgetWon > 0)) return 22;
   const price = monthlyPriceWon(m);
   if (price <= 0) {
     return isNetworkCatalogItem(m) ? 12 : 18;
@@ -635,7 +641,11 @@ export function matchPrecisionLabel(
 }
 
 function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
-  const budgetPts = scoreBudget(m, input.monthlyBudgetWon);
+  const budgetPts = scoreBudget(
+    m,
+    input.monthlyBudgetWon,
+    input.budgetUnlimited,
+  );
   if (budgetPts < 0) return null;
 
   const breakdown: ScoreBreakdown = {
@@ -702,7 +712,11 @@ export function scoreMediaForRanking(
   m: MediaItem,
   input: MatchingInput,
 ): MatchedMedia {
-  const rawBudget = scoreBudget(m, input.monthlyBudgetWon);
+  const rawBudget = scoreBudget(
+    m,
+    input.monthlyBudgetWon,
+    input.budgetUnlimited,
+  );
   const budgetPts = rawBudget < 0 ? 0 : rawBudget;
 
   const breakdown: ScoreBreakdown = {

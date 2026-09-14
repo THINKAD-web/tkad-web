@@ -7,7 +7,7 @@ export function parseFreetextMediaIntents(text: string): FreetextMediaIntent[] {
 
   const intents = new Set<FreetextMediaIntent>();
 
-  if (/지하철|subway/i.test(t)) {
+  if (/지하철|subway|전동차|metro/i.test(t)) {
     intents.add("subway");
   }
 

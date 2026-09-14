@@ -81,9 +81,13 @@ export function aiInputToMatching(
   const durationDays =
     weeks > 0 && weeks < 4 ? Math.max(1, Math.round(weeks * 7)) : undefined;
 
+  const budgetUnlimited =
+    input.budgetUnlimited === true || input.budgetMaxMan <= 0;
+
   return {
     monthlyBudgetWon:
-      input.budgetMaxMan > 0 ? input.budgetMaxMan * 10_000 : 0,
+      budgetUnlimited ? 0 : input.budgetMaxMan * 10_000,
+    ...(budgetUnlimited ? { budgetUnlimited: true as const } : {}),
     regions,
     industry: input.industry,
     targets: [TARGET_MAP[input.target] ?? input.target],
@@ -109,9 +113,11 @@ export function plannerContextToMatching(
   seed = 0,
 ): MatchingInput {
   const monthlyBudgetWon =
-    ctx.budgetMan > 0 && ctx.months > 0 ?
-      (ctx.budgetMan * 10_000) / ctx.months
-    : 0;
+    ctx.budgetUnlimited
+      ? 0
+    : ctx.budgetMan > 0 && ctx.months > 0
+      ? (ctx.budgetMan * 10_000) / ctx.months
+      : 0;
 
   const goalRaw = ctx.goal ?? "brand";
   const baseTags = matchingGoalTagsFromRaw(goalRaw);
@@ -123,6 +129,7 @@ export function plannerContextToMatching(
 
   return {
     monthlyBudgetWon,
+    ...(ctx.budgetUnlimited ? { budgetUnlimited: true as const } : {}),
     regions: mergePlannerMacroMatchingRegions(
       ctx.regions,
       ctx.seoulZones ?? [],

@@ -60,6 +60,7 @@ export type PlannerFreetextParseResult = {
     ageKeys: ParsedField<PlannerAgeKey[]>;
     industryKey: ParsedField<PlannerIndustryKey>;
     budgetMan: ParsedField<number>;
+    budgetUnlimited: ParsedField<boolean>;
     months: ParsedField<number>;
     durationDays: ParsedField<number>;
     busanZones: ParsedField<PlannerBusanZoneKey[]>;
@@ -92,17 +93,17 @@ const GOAL_PATTERNS: {
     ],
   },
   {
-    goal: "event",
+    goal: "launch",
     patterns: [
-      /프로모션|프로모|이벤트|팝업\s*스토어|팝업스토어|팝업|행사|할인|promotion/i,
+      /그랜드\s*오픈|grand\s*open(?:ing)?|신규\s*오픈|신규\s*opening/i,
+      /런칭|론칭|출시|신제품|launch/i,
+      /새로\s*(?:오픈|출시|런칭|론칭)/i,
     ],
   },
   {
-    goal: "launch",
+    goal: "event",
     patterns: [
-      /런칭|론칭|출시|신제품|신규\s*오픈|그랜드\s*오픈|신규|launch/i,
-      /새로\s*(?:오픈|출시|런칭|론칭)/i,
-      /오픈/i,
+      /프로모션|프로모|이벤트|팝업\s*스토어|팝업스토어|팝업|행사|할인|promotion/i,
     ],
   },
   {
@@ -244,7 +245,20 @@ function parseKoreanManPhrase(text: string): ParsedField<number> {
   return field(Math.min(1_000_000, man), "high", m[0]);
 }
 
+const BUDGET_UNLIMITED_RE =
+  /(?:예산\s*[:：]?\s*)?(?:제한\s*없(?:음|다)?|상관없(?:음|다)?|무관(?:함)?|무제한|budget\s*unlimited)/i;
+
+function parseBudgetUnlimited(text: string): ParsedField<boolean> {
+  const m = text.match(BUDGET_UNLIMITED_RE);
+  if (!m?.[0]) return emptyField();
+  return field(true, "high", m[0].trim());
+}
+
 function parseBudgetMan(text: string): ParsedField<number> {
+  if (parseBudgetUnlimited(text).value === true) {
+    return emptyField();
+  }
+
   const ko = parseKoreanManPhrase(text);
   if (ko.value != null) return ko;
 
@@ -695,6 +709,10 @@ const MOBILE_CATEGORY_RE =
 const MOBILE_EXCLUSIVE_RE =
   /(?:버스|택시(?:래핑|광고)?|래핑|차량|트럭|모빌리티|이동형)(?:\s*광고)?\s*만|만\s*(?:버스|택시|래핑|차량|트럭)/i;
 
+/** 지하철 매체 의도가 명확한 표현 (역사·차내·「지하철광고」 등) */
+const SUBWAY_EXPLICIT_RE =
+  /지하철\s*광고|지하철광고|지하철역|전동차|지하철\s*(?:매체|미디어|캠페인)|subway\s*(?:ad(?:vert)?|media|campaign)|metro\s*(?:ad(?:vert)?|media)/i;
+
 /** 매체 유형 키워드 → 플래너 categories (추측 금지·「만」 명시 우선) */
 export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
   const exclusiveSubway = text.match(
@@ -705,6 +723,15 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
       ["digital", "mobile"],
       "high",
       exclusiveSubway[0].trim(),
+    );
+  }
+
+  const explicitSubway = text.match(SUBWAY_EXPLICIT_RE);
+  if (explicitSubway) {
+    return field(
+      ["digital", "mobile"],
+      "high",
+      explicitSubway[0].trim(),
     );
   }
 
@@ -762,9 +789,11 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
     hits.push({ cat: "digital", source: parsedLine.labelKo });
   }
 
-  const subwayAmbiguous = text.match(/지하철|subway/i);
+  const subwayAmbiguous = text.match(/지하철|subway|전동차|metro/i);
   const subwaySpecific =
-    /지하철\s*(?:역|역사|차내|랩핑|열차)/i.test(text) || parsedLine != null;
+    SUBWAY_EXPLICIT_RE.test(text) ||
+    /지하철\s*(?:역|역사|차내|랩핑|열차)/i.test(text) ||
+    parsedLine != null;
 
   if (hits.length === 0 && subwayAmbiguous && !subwaySpecific) {
     return field(
@@ -804,6 +833,7 @@ function collectUnmatchedTokens(
     fields.ageKeys.source,
     fields.industryKey.source,
     fields.budgetMan.source,
+    fields.budgetUnlimited.source,
     fields.months.source,
     fields.durationDays.source,
     fields.busanZones.source,
@@ -856,6 +886,7 @@ export function parsePlannerFreetextBrief(
         ageKeys: empty,
         industryKey: empty,
         budgetMan: empty,
+        budgetUnlimited: empty,
         months: empty,
         durationDays: empty,
         busanZones: empty,
@@ -881,6 +912,7 @@ export function parsePlannerFreetextBrief(
     ageKeys: parseAgeKeys(text),
     industryKey: parseIndustryKey(text),
     budgetMan: parseBudgetMan(text),
+    budgetUnlimited: parseBudgetUnlimited(text),
     months: duration.months,
     durationDays: duration.durationDays,
     categories: parseCategories(text),
@@ -921,13 +953,20 @@ export function buildScenarioPatchFromFreetextParse(
   const goalFollowUp =
     durationDays != null ? { eventDurationDays: durationDays } : undefined;
 
+  const regionsUnknown = regions.length === 0;
+
   return {
-    regions: regions.length > 0 ? regions : ["seoul"],
+    regions: regions.length > 0 ? regions : [],
+    regionsUnknown,
     categories:
       fields.categories.value != null && fields.categories.value.length > 0
         ? [...fields.categories.value]
         : [...PLANNER_DEFAULT_CATEGORIES],
-    budgetMan: fields.budgetMan.value ?? PLANNER_BUDGET_MIN,
+    budgetUnlimited: fields.budgetUnlimited.value === true,
+    budgetMan:
+      fields.budgetUnlimited.value === true
+        ? 0
+        : fields.budgetMan.value ?? PLANNER_BUDGET_MIN,
     months: fields.months.value ?? 1,
     ...(fields.campaignGoal.value != null
       ? { campaignGoal: fields.campaignGoal.value }

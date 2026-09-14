@@ -27,6 +27,8 @@ export type RecommendationContext = {
   industryKey: PlannerIndustryKey | null;
   /** 만원 단위 예산 */
   budgetMan: number;
+  /** 예산 무제한 — monthlyBudgetWon=0 → scoreBudget 중립 */
+  budgetUnlimited?: boolean;
   months: number;
   /** 단기·행사 집행 일수 (freetext 파싱) */
   durationDays?: number;

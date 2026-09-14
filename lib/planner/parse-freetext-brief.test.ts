@@ -340,6 +340,25 @@ test("categories: 지하철 차내 → mobile", () => {
   assert.deepEqual(r.fields.categories.value, ["mobile"]);
 });
 
+test("categories: 지하철광고 (붙여쓰기) → subway high, not low", () => {
+  const r = parsePlannerFreetextBrief("강남, 홍대 지하철광고 3,000만원");
+  assert.deepEqual(r.fields.categories.value, ["digital", "mobile"]);
+  assert.equal(r.fields.categories.confidence, "high");
+  assert.match(r.fields.categories.source ?? "", /지하철광고/);
+});
+
+test("categories: 지하철역 → digital+mobile high", () => {
+  const r = parsePlannerFreetextBrief("강남 지하철역 브랜딩 2000만");
+  assert.deepEqual(r.fields.categories.value, ["digital", "mobile"]);
+  assert.equal(r.fields.categories.confidence, "high");
+});
+
+test("categories: 전동차 → digital+mobile high", () => {
+  const r = parsePlannerFreetextBrief("전동차 광고 800만");
+  assert.deepEqual(r.fields.categories.value, ["digital", "mobile"]);
+  assert.equal(r.fields.categories.confidence, "high");
+});
+
 test("categories: 택시 래핑 → mobile", () => {
   const r = parsePlannerFreetextBrief("택시 래핑 500만");
   assert.deepEqual(r.fields.categories.value, ["mobile"]);
@@ -450,4 +469,35 @@ test("buildScenarioPatchFromFreetextParse: gyeonggi zone only → gyeonggi regio
   const patch = buildScenarioPatchFromFreetextParse(r);
   assert.ok(patch.regions.includes("gyeonggi"));
   assert.ok(patch.gyeonggiZones?.includes("goyang"));
+});
+
+test("parsePlannerFreetextBrief: STEP1 2안 — launch·무제한·지역 미상", () => {
+  const raw = `목적: 그랜드 오프닝 신규 오픈 프로모션
+타깃: 내국인 70% + 외국인 30% (조정 가능)
+거점: 주요 생활권 + 관광객 이동 동선
+기간: 2027년 상반기(봄 시즌)
+예산: 제한 없음`;
+  const r = parsePlannerFreetextBrief(raw);
+  assert.equal(r.fields.campaignGoal.value, "launch");
+  assert.equal(r.fields.budgetUnlimited.value, true);
+  assert.equal(r.fields.budgetMan.value, null);
+  assert.equal(r.fields.regions.value, null);
+  const patch = buildScenarioPatchFromFreetextParse(r);
+  assert.deepEqual(patch.regions, []);
+  assert.equal(patch.regionsUnknown, true);
+  assert.equal(patch.budgetUnlimited, true);
+  assert.equal(patch.budgetMan, 0);
+});
+
+test("buildScenarioPatchFromFreetextParse: 지역·상권 없음 → seoul 강제 아님", () => {
+  const r = parsePlannerFreetextBrief("브랜딩 3000만원");
+  const patch = buildScenarioPatchFromFreetextParse(r);
+  assert.deepEqual(patch.regions, []);
+  assert.equal(patch.regionsUnknown, true);
+});
+
+test("parsePlannerFreetextBrief: 예산 제한 없음 패턴", () => {
+  const r = parsePlannerFreetextBrief("강남 브랜딩 예산: 제한 없음");
+  assert.equal(r.fields.budgetUnlimited.value, true);
+  assert.equal(r.fields.budgetMan.value, null);
 });
