@@ -69,6 +69,8 @@ function ContactChannelSheetUI({
 }) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  /** v10 Task K — 4개 동시 나열 대신 빠른 응답 2개만 기본 노출, 나머지는 접어둔다. */
+  const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -87,6 +89,10 @@ function ContactChannelSheetUI({
       html.style.overflow = prevOverflow;
     };
   }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open) setShowMore(false);
+  }, [open]);
 
   if (!open) return null;
 
