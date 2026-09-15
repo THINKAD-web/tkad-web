@@ -17,7 +17,10 @@ import {
 } from "@/lib/media-network-types";
 import { CATALOG_CHANNEL_OFFLINE } from "@/lib/catalog-channel";
 import { inferBrowseRegionFromMedia } from "@/lib/media-browse-regions";
-import { resolveBrowseRegionIds } from "@/lib/network-location-enrich";
+import {
+  normalizeBrowseRegionMainId,
+  resolveBrowseRegionIds,
+} from "@/lib/network-location-enrich";
 import {
   resolveNetworkBrowseForPublic,
   resolveNetworkTargetForPublic,
@@ -58,9 +61,51 @@ export function mediaItemDetailPath(id: string): string {
   return `/media/${id}`;
 }
 
+/** 네트워크 regions·지점에서 distinct browse `regionMain` 수집 */
+export function collectNetworkBrowseMains(n: {
+  regions: string[];
+  locations: Array<{ regionMain?: string | null }>;
+}): Set<string> {
+  const mains = new Set<string>();
+  for (const label of n.regions) {
+    if (/전국|nationwide/i.test(label)) {
+      mains.add("national");
+      continue;
+    }
+    const id = normalizeBrowseRegionMainId(label);
+    if (id) mains.add(id);
+  }
+  for (const loc of n.locations) {
+    const id = loc.regionMain?.trim();
+    if (id) mains.add(id);
+  }
+  return mains;
+}
+
+/** 다권역·전국 네트워크 — browse·매칭에서 `regionMain=national` 로 통일 */
+export function isNetworkNationwide(n: {
+  regions: string[];
+  locations: Array<{ regionMain?: string | null }>;
+}): boolean {
+  const mains = collectNetworkBrowseMains(n);
+  if (mains.has("national")) return true;
+  return mains.size >= 2;
+}
+
 /** 지역 필터용 코드 (목록에서 대표 region 하나) */
 export function inferRegionCodeFromLabels(labels: string[]): string {
   const j = labels.join(" ");
+  if (/전국|nationwide/i.test(j)) return "national";
+  const mains = new Set<string>();
+  for (const label of labels) {
+    if (/전국|nationwide/i.test(label)) {
+      mains.add("national");
+      continue;
+    }
+    const id = normalizeBrowseRegionMainId(label);
+    if (id && id !== "national") mains.add(id);
+  }
+  if (mains.size >= 2) return "national";
   if (/부산/.test(j)) return "busan";
   if (/제주/.test(j)) return "jeju";
   if (/서울|경기|인천|수도권/.test(j)) return "seoul";
@@ -142,7 +187,10 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
   const imgs = dedupeImageUrls(
     [...(n.image ? [n.image] : []), ...n.galleryImages].filter(Boolean),
   );
-  const region = inferRegionCodeFromLabels(n.regions);
+  const nationwide = isNetworkNationwide(n);
+  const region = nationwide
+    ? "national"
+    : inferRegionCodeFromLabels(n.regions);
   const locSummary =
     n.regions.length > 0 ? n.regions.join(", ") : "전국 네트워크";
   // 가격은 DB·코드 전반에서 원 단위로 통일(일반 매체와 동일). 과거 ×10,000 표시 변환 제거.
@@ -173,17 +221,22 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
 
   let browseMain = n.regionMain?.trim() || browseFromNetwork.main;
   let browseSub = n.regionSub?.trim() || browseFromNetwork.sub;
-  for (const loc of n.locations) {
-    const resolved = resolveBrowseRegionIds({
-      regionMain: loc.regionMain,
-      regionSub: loc.regionSub,
-      address: loc.fullAddress ?? loc.address,
-    });
-    if (resolved.regionMain) {
-      browseMain = browseMain ?? resolved.regionMain;
-      browseSub = browseSub ?? resolved.regionSub;
-      break;
+  if (!nationwide) {
+    for (const loc of n.locations) {
+      const resolved = resolveBrowseRegionIds({
+        regionMain: loc.regionMain,
+        regionSub: loc.regionSub,
+        address: loc.fullAddress ?? loc.address,
+      });
+      if (resolved.regionMain) {
+        browseMain = browseMain ?? resolved.regionMain;
+        browseSub = browseSub ?? resolved.regionSub;
+        break;
+      }
     }
+  } else {
+    browseMain = "national";
+    browseSub = undefined;
   }
 
   const mediaCategory = [

@@ -257,9 +257,15 @@ export function parseNetworkRawId(catalogId: string): string | null {
 
 export function inferRegionCodeFromLabels(labels: string[]): string {
   const j = labels.join(" ");
-  if (/부산/.test(j)) return "busan";
-  if (/제주/.test(j)) return "jeju";
-  if (/서울|경기|인천|수도권/.test(j)) return "seoul";
+  if (/전국|nationwide/i.test(j)) return "national";
+  const sidoHints = [
+    [/부산/, "busan"],
+    [/제주/, "jeju"],
+    [/서울|경기|인천|수도권/, "seoul"],
+  ] as const;
+  const hits = sidoHints.filter(([re]) => re.test(j));
+  if (hits.length >= 2) return "national";
+  if (hits.length === 1) return hits[0]![1];
   return "national";
 }
 
