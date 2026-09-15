@@ -63,6 +63,8 @@ export type BuildOohPayloadArgs = {
   isKo: boolean;
   goalTitle: string;
   budgetMan: number;
+  /** my/plan — 사용자가 입력한 총예산(만원). 있으면 1p 「요청 예산」 SSOT */
+  requestedBudgetMan?: number;
   budgetTbd?: boolean;
   periodDisplay: string;
   regionsText: string;
@@ -535,7 +537,8 @@ export function buildOohReportPayload(
   const budgetHonesty =
     a.budgetHonesty ??
     buildReportBudgetHonesty({
-      requestWon: Math.max(0, a.budgetMan) * 10_000,
+      requestWon:
+        Math.max(0, a.requestedBudgetMan ?? a.budgetMan) * 10_000,
       portfolio: a.portfolio,
       pricing,
       periodCtx: periodCtx ?? { months: 1 },

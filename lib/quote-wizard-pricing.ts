@@ -1,6 +1,7 @@
 import type { MediaItem, MediaPriceOption, MediaPricePeriodKey } from "@/lib/media-data";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import {
+  isPackageTotalPriceOptions,
   isPerUnitGradePriceOptions,
   resolveCatalogLineMonthlyPriceWon,
   resolveMediaQuantity,
@@ -431,7 +432,12 @@ export function buildQuoteWizardLineContext(
         }),
       );
 
-  const pricePeriod = resolveQuoteMediaPricePeriod(media, poIdx, isNw);
+  let pricePeriod = resolveQuoteMediaPricePeriod(media, poIdx, isNw);
+  // 패키지 총액 옵션 — `resolveCatalogLineMonthlyPriceWon` 이 월 패키지가(원)을
+  // 이미 반환하므로, 옵션 period 가 day 로 잘못 태깅돼도 일×단가로 재곱하지 않는다.
+  if (!isNw && isPackageTotalPriceOptions(media)) {
+    pricePeriod = "month";
+  }
   const explicitBundleDays =
     priceOpt != null ? tryResolveExplicitPriceOptionBundleDays(priceOpt) : null;
   const globalCampaignDays =
@@ -486,7 +492,8 @@ export function buildQuoteWizardLineContext(
     !isNw &&
     priceOpt &&
     explicitBundleDays != null &&
-    !isPerUnitGradePriceOptions(media)
+    !isPerUnitGradePriceOptions(media) &&
+    !isPackageTotalPriceOptions(media)
   ) {
     if (usePackagePeriod) {
       campaignUnits = 1;

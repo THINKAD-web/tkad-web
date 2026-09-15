@@ -134,12 +134,12 @@ function resolvePlanCartBudgetMan(
     const sum = computePlannerPortfolioMonthlyMan(portfolio, pricing);
     return sum > 0 ? sum : PLANNER_BUDGET_MIN;
   }
-  if (cart.totalBudget != null && cart.totalBudget > 0) {
-    return Math.max(1, Math.round(cart.totalBudget / 10_000));
-  }
   const monthlyWon = planCartMonthlyTotalWon(cart, catalog);
   if (monthlyWon > 0) {
     return Math.max(1, Math.round(monthlyWon / 10_000));
+  }
+  if (cart.totalBudget != null && cart.totalBudget > 0) {
+    return Math.max(1, Math.round(cart.totalBudget / 10_000));
   }
   const sum = computePlannerPortfolioMonthlyMan(portfolio, pricing);
   return sum > 0 ? sum : PLANNER_BUDGET_MIN;
@@ -276,6 +276,12 @@ export function buildPlanCartReportBundle(args: {
       campaignGoal,
       goalTitle,
       budgetNum: budgetMan,
+      requestedBudgetMan:
+        cart.budgetTbd !== true &&
+        cart.totalBudget != null &&
+        cart.totalBudget > 0
+          ? Math.max(1, Math.round(cart.totalBudget / 10_000))
+          : undefined,
       budgetTbd: cart.budgetTbd === true,
       months,
       regionsText: inferRegionsText(portfolioSorted, isKo),
