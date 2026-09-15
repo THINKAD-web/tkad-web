@@ -221,6 +221,8 @@ model Media {
   /// 적합 캠페인 타겟 slug 배열 (`TargetCategory.slug`)
   targetCategory        String[]  @default([]) @map("target_category")
   tags                  String[]  @default([])
+  /// 제주 1차 — JSON 배열 `MediaHotspotTag[]`. null = hotspot 미적용
+  hotspotTags           Json?     @map("hotspot_tags")
   district              String?
   city                  String?
   /// 이동형(`type=mobile`) 매체 서비스 구역 — 행정구역 5자리 코드 배열 (전국 시·군·구, 예: 서울 강남 `11680`). 공개 지도 폴리곤에 사용.

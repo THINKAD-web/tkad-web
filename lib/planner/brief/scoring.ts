@@ -51,7 +51,8 @@ export type ScoreAxisKey =
   | "budget"
   | "target"
   | "industry"
-  | "targetProfile";
+  | "targetProfile"
+  | "hotspot";
 
 export type ScoreAxis = {
   key: ScoreAxisKey;
@@ -70,6 +71,8 @@ export type ScoredMedia = {
   industryBonus: number;
   /** TargetProfile 공유 보너스 (0~15, industryBonus와 동일 additive) */
   targetProfileBonus: number;
+  /** Hotspot 공유 보너스 (−10~+10) */
+  hotspotBonus: number;
   budgetPenalty: number;
   lineCostWon: number | null;
   overBudget: boolean;
@@ -317,6 +320,7 @@ export function scoreMediaCandidates(params: {
   const hasTargetBrief =
     brief.genders.length > 0 || brief.ageBands.length > 0;
   const hasTargetProfile = brief.targetProfile != null;
+  const hasRegionHotspots = (brief.regionHotspots?.length ?? 0) > 0;
   const budgetWon = totalBudgetWon(brief);
 
   return candidates
@@ -325,6 +329,7 @@ export function scoreMediaCandidates(params: {
       let targetBasis: MetricBasis | null = null;
       let industryBonus = 0;
       let targetProfileBonus = 0;
+      let hotspotBonus = 0;
 
       if (wantedBrowseIds.size > 0 && media.regionMain) {
         const hit = wantedBrowseIds.has(media.regionMain);
@@ -412,8 +417,29 @@ export function scoreMediaCandidates(params: {
         }
       }
 
+      if (hasRegionHotspots && brief.regionHotspots?.length) {
+        const shared = computeSharedMatchBonuses(
+          media,
+          { requestedHotspots: brief.regionHotspots },
+          { engine: "brief", locale: isKo ? "ko" : "en" },
+        );
+        if (shared.hotspot) {
+          hotspotBonus = shared.hotspot.catalogPoints;
+          axes.push({
+            key: "hotspot",
+            score: shared.hotspot.briefAxisScore,
+            rationale: isKo
+              ? shared.hotspot.rationaleKo
+              : shared.hotspot.rationaleEn,
+          });
+        }
+      }
+
       const rankingAxes = axes.filter(
-        (a) => a.key !== "industry" && a.key !== "targetProfile",
+        (a) =>
+          a.key !== "industry" &&
+          a.key !== "targetProfile" &&
+          a.key !== "hotspot",
       );
       const baseTotal =
         rankingAxes.length > 0
@@ -434,7 +460,7 @@ export function scoreMediaCandidates(params: {
         0,
         Math.min(
           100,
-          baseTotal + industryBonus + targetProfileBonus - budgetPenalty,
+          baseTotal + industryBonus + targetProfileBonus + hotspotBonus - budgetPenalty,
         ),
       );
 
@@ -444,6 +470,7 @@ export function scoreMediaCandidates(params: {
         baseTotal,
         industryBonus,
         targetProfileBonus,
+        hotspotBonus,
         budgetPenalty,
         lineCostWon,
         overBudget,

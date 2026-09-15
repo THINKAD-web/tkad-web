@@ -32,6 +32,7 @@ import {
   PUBLIC_BROWSE_CATALOG_EXTRAS,
 } from "@/lib/attach-public-media-catalog-extras";
 import { parseMediaInstallLocations } from "@/lib/media-install-locations";
+import { parseMediaHotspotTags } from "@/lib/matching/region-hotspot";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { formatSizeFromMeters } from "@/lib/format-media-size";
 import {
@@ -368,6 +369,10 @@ export function prismaMediaToMediaItem(
     regionSub: m.regionSub?.trim() || undefined,
     targetCategory: m.targetCategory?.length ? [...m.targetCategory] : undefined,
     tags: m.tags?.length ? [...m.tags] : undefined,
+    hotspotTags: (() => {
+      const row = m as Media & { hotspotTags?: unknown };
+      return parseMediaHotspotTags(row.hotspotTags);
+    })(),
     city: m.city?.trim() || undefined,
     district: m.district?.trim() || undefined,
     nearbyStations: m.nearbyStations?.trim() || undefined,

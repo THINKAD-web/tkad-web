@@ -72,6 +72,8 @@ export type CampaignBriefInput = {
   freeText: string;
   /** nationality/residency 확장 타깃 — optional */
   targetProfile?: TargetProfile;
+  /** 생활권 hotspot 요청 (제주 1차) */
+  regionHotspots?: import("@/lib/matching/region-hotspot").RegionHotspot[];
 };
 
 export const EMPTY_BRIEF: CampaignBriefInput = {
@@ -211,6 +213,11 @@ export function normalizeBriefInput(raw: unknown): CampaignBriefInput {
     r.targetProfile !== null
       ? { targetProfile: r.targetProfile as TargetProfile }
       : {}),
+    ...(Array.isArray(r.regionHotspots) && r.regionHotspots.length > 0
+      ? {
+          regionHotspots: r.regionHotspots as import("@/lib/matching/region-hotspot").RegionHotspot[],
+        }
+      : {}),
   };
 }
 
@@ -232,5 +239,8 @@ export function toCampaignPlanBrief(
     flightEnd: brief.flightEnd ?? "",
     freeText: brief.freeText || undefined,
     ...(brief.targetProfile ? { targetProfile: brief.targetProfile } : {}),
+    ...(brief.regionHotspots?.length
+      ? { regionHotspots: [...brief.regionHotspots] }
+      : {}),
   };
 }

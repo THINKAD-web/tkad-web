@@ -1,5 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import { classifyMedia } from "@/lib/metrics/classify";
+import { computeHotspotBonus, type HotspotBonus } from "@/lib/matching/hotspot-scoring";
 import type { RegionHotspot } from "@/lib/matching/region-hotspot";
 import type { TargetProfile } from "@/lib/matching/target-profile";
 
@@ -10,12 +11,11 @@ export type SharedScoringContext = {
 
 export type SharedScoringInput = {
   targetProfile?: TargetProfile | null;
-  /** 3c에서 사용 — 3b에서는 항상 무시 */
   requestedHotspots?: RegionHotspot[];
 };
 
 export type TargetProfileBonus = {
-  /** catalog 엔진: 0~15 (기존 target 축 max와 동일 스케일) */
+  /** catalog 엔진: −15~+15 */
   catalogPoints: number;
   /** brief 엔진: 0~100 */
   briefAxisScore: number;
@@ -25,8 +25,7 @@ export type TargetProfileBonus = {
 
 export type SharedScoringResult = {
   targetProfile: TargetProfileBonus | null;
-  /** 3c에서 채움 — 이번엔 항상 null */
-  hotspot: null;
+  hotspot: HotspotBonus | null;
   labels: { ko: string[]; en: string[] };
 };
 
@@ -46,18 +45,24 @@ type MediaTargetSignals = {
 
 /**
  * 매체 타깃 신호 — tags[] + classifyMedia airport class.
- * hotspot 데이터(3c) 대신 태그·airport class로 임시 근사 (3c에서 hotspot으로 대체 예정).
+ * hotspotTags(3c)가 있으면 residency 감점은 hotspot 스코어링에 위임.
  */
 export function extractMediaTargetSignals(media: MediaItem): MediaTargetSignals {
   const haystack = [...(media.tags ?? []), media.name, media.subCategory ?? ""]
     .filter(Boolean)
     .join(" ");
   const airportClass = classifyMedia(media) === "airport";
+  const hasHotspotAirport = media.hotspotTags?.some(
+    (t) => t.type === "airport" || t.type === "tourist",
+  );
 
   return {
     local: TAG_SIGNAL_RE.local.test(haystack),
     tourist: TAG_SIGNAL_RE.tourist.test(haystack),
-    airport: airportClass || TAG_SIGNAL_RE.airport.test(haystack),
+    airport:
+      airportClass ||
+      TAG_SIGNAL_RE.airport.test(haystack) ||
+      Boolean(hasHotspotAirport),
     foreign:
       TAG_SIGNAL_RE.foreign.test(haystack) || TAG_SIGNAL_RE.tourist.test(haystack),
   };
@@ -66,6 +71,7 @@ export function extractMediaTargetSignals(media: MediaItem): MediaTargetSignals 
 function residencyPoints(
   residency: TargetProfile["residency"],
   signals: MediaTargetSignals,
+  skipAirportPenalty: boolean,
 ): { points: number; ko: string[]; en: string[] } {
   if (!residency) return { points: 0, ko: [], en: [] };
 
@@ -78,7 +84,7 @@ function residencyPoints(
       ko.push("생활권·로컬 태그 +8");
       en.push("local/resident tag +8");
     }
-    if (signals.airport || signals.tourist) {
+    if (!skipAirportPenalty && (signals.airport || signals.tourist)) {
       points -= 6;
       ko.push("공항·관광 태그 −6");
       en.push("airport/tourist tag −6");
@@ -161,12 +167,19 @@ function nationalityPoints(
 function computeTargetProfileBonus(
   profile: TargetProfile,
   media: MediaItem,
+  skipAirportTagPenalty: boolean,
 ): TargetProfileBonus {
   const signals = extractMediaTargetSignals(media);
-  const res = residencyPoints(profile.residency, signals);
-  const nat = nationalityPoints(profile, signals);
+  const res = residencyPoints(profile.residency, signals, skipAirportTagPenalty);
+  /** hotspot이 residency 감점을 대신할 때 — 공항·관광 매체에 domestic +3 중복 가점 방지 */
+  const skipDomesticBoost =
+    skipAirportTagPenalty &&
+    profile.residency === "resident" &&
+    (signals.airport || signals.tourist);
+  const nat = skipDomesticBoost
+    ? { points: 0, ko: [] as string[], en: [] as string[] }
+    : nationalityPoints(profile, signals);
   const raw = res.points + nat.points;
-  /** 감점(−6 등) 포함 — total 합산용. 상한 +15, 하한 −15 */
   const catalogPoints = Math.max(-15, Math.min(15, Math.round(raw)));
   const briefAxisScore = Math.max(
     0,
@@ -184,17 +197,34 @@ export function computeSharedMatchBonuses(
   input: SharedScoringInput,
   _ctx: SharedScoringContext,
 ): SharedScoringResult {
-  void input.requestedHotspots;
+  const hasHotspotData =
+    Boolean(input.requestedHotspots?.length) &&
+    Boolean(media.hotspotTags?.length);
 
-  if (!input.targetProfile) {
-    return { targetProfile: null, hotspot: null, labels: { ko: [], en: [] } };
+  const hotspot = computeHotspotBonus(media, input.requestedHotspots);
+
+  const targetProfile = input.targetProfile
+    ? computeTargetProfileBonus(
+        input.targetProfile,
+        media,
+        hasHotspotData,
+      )
+    : null;
+
+  const labelsKo: string[] = [];
+  const labelsEn: string[] = [];
+  if (targetProfile && targetProfile.catalogPoints !== 0) {
+    labelsKo.push(targetProfile.rationaleKo);
+    labelsEn.push(targetProfile.rationaleEn);
+  }
+  if (hotspot && hotspot.catalogPoints !== 0) {
+    labelsKo.push(hotspot.rationaleKo);
+    labelsEn.push(hotspot.rationaleEn);
   }
 
-  const bonus = computeTargetProfileBonus(input.targetProfile, media);
-  const labels =
-    bonus.catalogPoints > 0
-      ? { ko: [bonus.rationaleKo], en: [bonus.rationaleEn] }
-      : { ko: [], en: [] };
-
-  return { targetProfile: bonus, hotspot: null, labels };
+  return {
+    targetProfile,
+    hotspot,
+    labels: { ko: labelsKo, en: labelsEn },
+  };
 }

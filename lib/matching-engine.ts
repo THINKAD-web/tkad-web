@@ -37,6 +37,7 @@ import {
 import { scoreTargetAgeForPlanner } from "@/lib/planner/parse-target-age";
 import type { PlannerAgeKey } from "@/lib/planner/types";
 import { computeSharedMatchBonuses } from "@/lib/matching/shared-scoring";
+import type { RegionHotspot } from "@/lib/matching/region-hotspot";
 import type { TargetProfile } from "@/lib/matching/target-profile";
 import { rationaleToMatchReasons } from "@/lib/recommend/recommend-rationale";
 
@@ -78,6 +79,8 @@ export type MatchingInput = {
   budgetUnlimited?: boolean;
   /** nationality/residency 확장 타깃 — optional, 없으면 기존과 동일 */
   targetProfile?: TargetProfile;
+  /** 생활권 hotspot 요청 — optional, 없으면 bonus 0 */
+  requestedHotspots?: RegionHotspot[];
 };
 
 export type ScoreBreakdown = {
@@ -91,6 +94,8 @@ export type ScoreBreakdown = {
   subwayLine?: number;
   /** TargetProfile 공유 보너스 (0~15) */
   targetProfile?: number;
+  /** Hotspot 공유 보너스 (−10~+10) */
+  hotspot?: number;
   total: number;
 };
 
@@ -689,20 +694,34 @@ export function matchPrecisionLabel(
   return isKo ? "인근·유사 추천" : "Nearby / related";
 }
 
-function applyTargetProfileBonus(
+function applySharedMatchBonuses(
   m: MediaItem,
   input: MatchingInput,
   breakdown: ScoreBreakdown,
   linePts: number,
 ): void {
-  if (!input.targetProfile) return;
+  if (!input.targetProfile && !input.requestedHotspots?.length) return;
+
   const shared = computeSharedMatchBonuses(
     m,
-    { targetProfile: input.targetProfile },
+    {
+      targetProfile: input.targetProfile,
+      requestedHotspots: input.requestedHotspots,
+    },
     { engine: "catalog" },
   );
-  if (!shared.targetProfile) return;
-  breakdown.targetProfile = shared.targetProfile.catalogPoints;
+
+  let bonus = 0;
+  if (shared.targetProfile) {
+    breakdown.targetProfile = shared.targetProfile.catalogPoints;
+    bonus += shared.targetProfile.catalogPoints;
+  }
+  if (shared.hotspot) {
+    breakdown.hotspot = shared.hotspot.catalogPoints;
+    bonus += shared.hotspot.catalogPoints;
+  }
+  if (bonus === 0) return;
+
   const scoreCap = input.subwayLine?.trim() ? 120 : 100;
   breakdown.total = Math.min(
     scoreCap,
@@ -715,7 +734,7 @@ function applyTargetProfileBonus(
         breakdown.category +
         breakdown.popularity +
         linePts +
-        breakdown.targetProfile,
+        bonus,
     ),
   );
 }
@@ -763,7 +782,7 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
         linePts,
     ),
   );
-  applyTargetProfileBonus(m, input, breakdown, linePts);
+  applySharedMatchBonuses(m, input, breakdown, linePts);
 
   /* 전광판 의도인데 아트래핑·쉘터 등이면 총점 상한 — 폴백 노출은 유지하되 exact 아래로 */
   if (
@@ -835,7 +854,7 @@ export function scoreMediaForRanking(
         linePts,
     ),
   );
-  applyTargetProfileBonus(m, input, breakdown, linePts);
+  applySharedMatchBonuses(m, input, breakdown, linePts);
 
   if (
     input.mediaIntents?.includes("billboard") &&

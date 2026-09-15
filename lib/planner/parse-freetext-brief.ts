@@ -1,4 +1,6 @@
+import { parseRegionHotspots } from "@/lib/matching/parse-region-hotspots";
 import { parseTargetProfile } from "@/lib/matching/parse-target-profile";
+import type { RegionHotspot } from "@/lib/matching/region-hotspot";
 import type { TargetProfile } from "@/lib/matching/target-profile";
 import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
 import { listMediaHotspotRegions } from "@/lib/media-hotspot-regions";
@@ -79,6 +81,8 @@ export type PlannerFreetextParseResult = {
     subwayLine: ParsedField<SubwayLineKey>;
     /** nationality/residency 확장 타깃 */
     targetProfile: ParsedField<TargetProfile>;
+    /** 생활권 hotspot (제주 1차) */
+    regionHotspots: ParsedField<RegionHotspot[]>;
   };
   /** 인식되지 않은 잔여 토큰·구문 */
   unmatchedTokens: string[];
@@ -934,6 +938,7 @@ export function parsePlannerFreetextBrief(
         categories: empty,
         subwayLine: empty,
         targetProfile: empty,
+        regionHotspots: empty,
       },
       unmatchedTokens: [],
     };
@@ -943,6 +948,7 @@ export function parsePlannerFreetextBrief(
     parseRegions(normalized);
   const duration = parseDurationFields(normalized);
   const targetProfileParsed = parseTargetProfile(normalized);
+  const regionHotspotsParsed = parseRegionHotspots(normalized);
   const fields = {
     campaignGoal: parseCampaignGoal(normalized),
     regions,
@@ -962,6 +968,12 @@ export function parsePlannerFreetextBrief(
       value: targetProfileParsed.value,
       confidence: targetProfileParsed.confidence,
       source: targetProfileParsed.source,
+    },
+    regionHotspots: {
+      value: regionHotspotsParsed.value,
+      confidence:
+        regionHotspotsParsed.value.length > 0 ? ("high" as const) : ("none" as const),
+      source: regionHotspotsParsed.source,
     },
   };
 

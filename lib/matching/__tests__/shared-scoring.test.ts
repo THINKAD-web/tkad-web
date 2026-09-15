@@ -11,13 +11,12 @@ function fixtureMedia(
   overrides: Partial<MediaItem> & { id: string },
 ): MediaItem {
   return {
-    id: overrides.id,
-    name: overrides.name ?? "테스트 매체",
-    regionMain: overrides.regionMain ?? "jeju",
-    type: overrides.type ?? "dooh",
-    price: overrides.price ?? 10_000_000,
-    subCategory: overrides.subCategory ?? "billboard",
-    tags: overrides.tags,
+    name: "테스트 매체",
+    regionMain: "jeju",
+    type: "dooh",
+    price: 10_000_000,
+    subCategory: "billboard",
+    ...overrides,
   } as MediaItem;
 }
 
@@ -88,4 +87,46 @@ test("shared-scoring: targetProfile 없음 → null (회귀)", () => {
   const result = computeSharedMatchBonuses(m, {}, { engine: "catalog" });
   assert.equal(result.targetProfile, null);
   assert.equal(result.hotspot, null);
+});
+
+test("shared-scoring: hotspot only — airport conflict for resident corridor", () => {
+  const airport = fixtureMedia({
+    id: "hs-air",
+    name: "제주공항",
+    hotspotTags: [
+      { regionId: "jeju", zoneId: "jeju_airport", type: "airport", weight: 1.2 },
+    ],
+  });
+  const downtown = fixtureMedia({
+    id: "hs-city",
+    name: "중앙로",
+    hotspotTags: [
+      {
+        regionId: "jeju",
+        zoneId: "jeju_downtown",
+        type: "residential",
+        weight: 1,
+      },
+    ],
+  });
+  const requested = [
+    { regionId: "jeju" as const, type: "residential" as const, weight: 1 },
+    { regionId: "jeju" as const, type: "transit_corridor" as const, weight: 1 },
+  ];
+
+  const air = computeSharedMatchBonuses(
+    airport,
+    { requestedHotspots: requested },
+    { engine: "catalog" },
+  );
+  const city = computeSharedMatchBonuses(
+    downtown,
+    { requestedHotspots: requested },
+    { engine: "catalog" },
+  );
+
+  assert.ok(air.hotspot);
+  assert.ok(city.hotspot);
+  assert.ok(air.hotspot!.catalogPoints < city.hotspot!.catalogPoints);
+  assert.equal(air.targetProfile, null);
 });

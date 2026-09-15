@@ -80,6 +80,8 @@ export type AiRecommendInput = {
   digitalBudgetPct?: number;
   /** nationality/residency 확장 타깃 — optional */
   targetProfile?: import("@/lib/matching/target-profile").TargetProfile;
+  /** 생활권 hotspot 요청 — optional */
+  requestedHotspots?: import("@/lib/matching/region-hotspot").RegionHotspot[];
 };
 
 export type MatchReason = { ko: string; en: string };
