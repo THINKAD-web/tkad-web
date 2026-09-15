@@ -467,6 +467,15 @@ export const PlannerReportDocument = forwardRef<
           </p>
         ) : null}
 
+        {p.budgetHonesty?.requestBudgetOverrideNotice ? (
+          <p
+            className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-2.5 text-[12px] leading-snug text-amber-900 dark:text-amber-200"
+            data-testid="report-request-budget-override-notice"
+          >
+            {p.budgetHonesty.requestBudgetOverrideNotice}
+          </p>
+        ) : null}
+
         {p.budgetHonesty?.overBudgetBanner ? (
           <p
             className="rounded-xl border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-[12px] font-medium text-destructive"

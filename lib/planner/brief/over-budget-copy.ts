@@ -73,6 +73,8 @@ export type PlannerExportBudgetHonesty = {
   /** 협의가 매체 각주 (1p·매체구성) */
   quoteOnlyFootnote?: string;
   quoteOnlyCount?: number;
+  /** my/plan 요청 예산 display override 안내 */
+  requestBudgetOverrideNotice?: string;
 };
 
 export function buildExportBudgetHonesty(args: {
@@ -83,6 +85,7 @@ export function buildExportBudgetHonesty(args: {
   isKo: boolean;
   quoteOnlyCount?: number;
   quoteOnlyFootnote?: string;
+  requestBudgetOverrideNotice?: string;
 }): PlannerExportBudgetHonesty | undefined {
   if (args.requestWon <= 0) return undefined;
   const hasQuoteOnly = (args.quoteOnlyCount ?? 0) > 0;
@@ -107,5 +110,6 @@ export function buildExportBudgetHonesty(args: {
     }),
     quoteOnlyFootnote: args.quoteOnlyFootnote,
     quoteOnlyCount: args.quoteOnlyCount,
+    requestBudgetOverrideNotice: args.requestBudgetOverrideNotice,
   };
 }

@@ -160,6 +160,7 @@ export function MyPlanReportPageClient() {
               ) : null}
               <PlannerReportStep
                 {...bundle.reportProps}
+                planCartUpdatedAt={cart.updatedAt}
                 regionBreakdown={bundle.regionalBreakdown}
                 regionBudgetCharts={bundle.regionBudgetCharts}
                 regionImpressionCharts={bundle.regionImpressionCharts}

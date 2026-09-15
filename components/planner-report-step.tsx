@@ -23,6 +23,13 @@ import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildReportPayload } from "@/lib/planner-report-export/build-report-payload";
 import { planCartPortfolioPricing } from "@/lib/plan-cart-pricing";
+import { buildReportBudgetHonesty } from "@/lib/planner/report-budget-honesty";
+import {
+  planCartRequestBudgetOverrideNotice,
+  resolveEffectiveRequestedBudgetMan,
+} from "@/lib/plan-cart-report/request-budget-override";
+import { usePlanCartReportRequestBudgetOverride } from "@/hooks/use-plan-cart-report-request-budget-override";
+import { PlanCartReportBudgetPanel } from "@/components/my/plan-cart-report-budget-panel";
 import { splitPortfolioByCatalogChannel } from "@/lib/plan-cart-report/split-portfolio-by-channel";
 import {
   buildDefaultExecutiveSummaryLines,
@@ -94,6 +101,10 @@ export type PlannerReportSharedProps = {
   campaignGoal: PlannerCampaignGoal | null;
   goalTitle: string;
   budgetNum: number;
+  /** my/plan 카트 — 사용자 입력 총예산(만원). 「요청 예산」 표시용 */
+  requestedBudgetMan?: number;
+  /** my/plan 카트 updatedAt — 요청 예산 override 스코프 */
+  planCartUpdatedAt?: string;
   budgetTbd?: boolean;
   months: number;
   regionsText: string;
@@ -463,6 +474,75 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
 
   const isPlanCartReport = props.activitySource === "plan_cart_report";
 
+  const { overrideMan, setOverrideMan } = usePlanCartReportRequestBudgetOverride(
+    isPlanCartReport ? props.planCartUpdatedAt : undefined,
+  );
+
+  const effectiveRequestedBudgetMan = useMemo(
+    () =>
+      resolveEffectiveRequestedBudgetMan({
+        cartRequestedBudgetMan: props.requestedBudgetMan,
+        budgetMan: props.budgetNum,
+        overrideMan: isPlanCartReport ? overrideMan : null,
+      }),
+    [
+      props.requestedBudgetMan,
+      props.budgetNum,
+      overrideMan,
+      isPlanCartReport,
+    ],
+  );
+
+  const planCartBudgetHonesty = useMemo(() => {
+    if (!isPlanCartReport || props.budgetTbd) return undefined;
+    const pricing = {
+      quantities: props.campaignMediaQuantities,
+      priceOptionIndex: props.campaignMediaPriceOptionIndex,
+    };
+    const periodCtx =
+      props.months > 0 ? { months: props.months } : { months: 1 };
+    const confirmedFromAllocation = derived.budgetAllocation.reduce(
+      (sum, s) => sum + (s.actualWon ?? s.valueWon),
+      0,
+    );
+    const requestWon = Math.max(0, effectiveRequestedBudgetMan) * 10_000;
+    const honesty = buildReportBudgetHonesty({
+      requestWon,
+      portfolio: props.portfolio,
+      pricing,
+      periodCtx,
+      isKo: props.isKo,
+      confirmedMixWon:
+        confirmedFromAllocation > 0 ? confirmedFromAllocation : undefined,
+      planMetrics: { totalCostWon: confirmedFromAllocation },
+    });
+    if (!honesty) return undefined;
+    const showOverrideNotice =
+      overrideMan != null &&
+      props.requestedBudgetMan != null &&
+      Math.round(overrideMan) !== Math.round(props.requestedBudgetMan);
+    return showOverrideNotice
+      ? {
+          ...honesty,
+          requestBudgetOverrideNotice: planCartRequestBudgetOverrideNotice(
+            props.isKo,
+          ),
+        }
+      : honesty;
+  }, [
+    isPlanCartReport,
+    props.budgetTbd,
+    props.campaignMediaQuantities,
+    props.campaignMediaPriceOptionIndex,
+    props.months,
+    props.portfolio,
+    props.isKo,
+    props.requestedBudgetMan,
+    derived.budgetAllocation,
+    effectiveRequestedBudgetMan,
+    overrideMan,
+  ]);
+
   const copyFingerprintCurrent = useMemo(() => {
     const cartPricing =
       props.planCartItems?.length != null && props.planCartItems.length > 0
@@ -638,6 +718,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         isKo: props.isKo,
         goalTitle: props.goalTitle,
         budgetMan: props.budgetNum,
+        requestedBudgetMan: effectiveRequestedBudgetMan,
+        budgetHonesty: planCartBudgetHonesty,
         periodDisplay: derived.periodDisplay,
         regionsText: props.regionsText,
         categoriesText: props.categoriesText,
@@ -672,6 +754,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       portfolioForExport,
       reportGreeting,
       executiveSummaryLines,
+      effectiveRequestedBudgetMan,
+      planCartBudgetHonesty,
     ],
   );
 
@@ -780,6 +864,18 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       </div>
 
       <PlannerReportInfoCard isKo={props.isKo} />
+
+      {isPlanCartReport && !props.budgetTbd ? (
+        <PlanCartReportBudgetPanel
+          isKo={props.isKo}
+          cartUpdatedAt={props.planCartUpdatedAt}
+          cartRequestedBudgetMan={props.requestedBudgetMan}
+          budgetMan={props.budgetNum}
+          budgetHonesty={planCartBudgetHonesty}
+          overrideMan={overrideMan}
+          onOverrideManChange={setOverrideMan}
+        />
+      ) : null}
 
       {props.appliedScenario && props.scenarioVariantLabels ? (
         <PlannerScenarioContextBanner

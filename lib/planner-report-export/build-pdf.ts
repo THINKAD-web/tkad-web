@@ -636,6 +636,19 @@ export async function buildPlannerReportPdf(
     if (col === 1 || i === summary.length - 1) y += thisRowH;
   });
 
+  if (p.budgetHonesty?.requestBudgetOverrideNotice) {
+    ensure(8);
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(PDF_LAYOUT.summaryLabelPt);
+    setText(GRAY_500);
+    const noteLines = doc.splitTextToSize(
+      p.budgetHonesty.requestBudgetOverrideNotice,
+      contentW,
+    ) as string[];
+    doc.text(noteLines.slice(0, 2), M, y + 4);
+    y += 8;
+  }
+
   y += 2;
   setDraw(GRAY_200);
   doc.setLineWidth(0.3);
