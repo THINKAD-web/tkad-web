@@ -15,6 +15,7 @@ import {
   type NetworkTypeCode,
   type NetworkPackageTier,
 } from "@/lib/media-network-types";
+import { CATALOG_CHANNEL_OFFLINE } from "@/lib/catalog-channel";
 import { inferBrowseRegionFromMedia } from "@/lib/media-browse-regions";
 import { resolveBrowseRegionIds } from "@/lib/network-location-enrich";
 import {
@@ -247,6 +248,7 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
     })),
     sampleImages: imgs.length > 0 ? imgs : [],
     catalogSource: "network",
+    catalogChannel: CATALOG_CHANNEL_OFFLINE,
     networkSubtype: n.type,
     networkTotalLocations: n.totalLocations,
     networkMinUnits: n.minUnits,

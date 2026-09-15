@@ -5,6 +5,7 @@ import {
   CATALOG_CHANNEL_ONLINE,
 } from "./catalog-channel.ts";
 import {
+  mediaItemMatchesBrowseCatalogChannel,
   resolveBrowseCatalogChannelFilter,
   sanitizeBrowseMainForChannel,
 } from "./browse-catalog-channel.ts";
@@ -69,4 +70,29 @@ test("sanitizeBrowseMainForChannel — online route rejects offline mains", () =
 test("sanitizeBrowseMainForChannel — offline route keeps legacy online mains", () => {
   assert.equal(sanitizeBrowseMainForChannel("offline", "search"), "search");
   assert.equal(sanitizeBrowseMainForChannel("offline", "ooh"), "ooh");
+});
+
+test("mediaItemMatchesBrowseCatalogChannel — network inventory is offline browse", () => {
+  assert.equal(
+    mediaItemMatchesBrowseCatalogChannel(
+      { catalogSource: "network" },
+      CATALOG_CHANNEL_OFFLINE,
+    ),
+    true,
+  );
+  assert.equal(
+    mediaItemMatchesBrowseCatalogChannel(
+      { catalogSource: "network" },
+      CATALOG_CHANNEL_ONLINE,
+    ),
+    false,
+  );
+  assert.equal(
+    mediaItemMatchesBrowseCatalogChannel(
+      { catalogSource: "network", catalogChannel: undefined },
+      CATALOG_CHANNEL_OFFLINE,
+    ),
+    true,
+    "network rows without catalogChannel must not be dropped from /media",
+  );
 });

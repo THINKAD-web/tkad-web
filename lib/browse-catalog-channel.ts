@@ -5,6 +5,7 @@
 import {
   CATALOG_CHANNEL_OFFLINE,
   CATALOG_CHANNEL_ONLINE,
+  canonicalCatalogChannel,
   normalizeCatalogChannel,
   type CatalogChannel,
 } from "@/lib/catalog-channel";
@@ -72,10 +73,13 @@ export function sanitizeBrowseMainForChannel(
 }
 
 export function mediaItemMatchesBrowseCatalogChannel(
-  item: { catalogChannel?: string | null },
+  item: { catalogChannel?: string | null; catalogSource?: string | null },
   channel: CatalogChannel | null,
 ): boolean {
   if (!channel) return true;
-  const row = normalizeCatalogChannel(item.catalogChannel ?? null);
-  return row === channel;
+  // MediaNetwork rows have no catalog_channel column — always offline browse inventory.
+  if (item.catalogSource === "network") {
+    return channel === CATALOG_CHANNEL_OFFLINE;
+  }
+  return canonicalCatalogChannel(item.catalogChannel) === channel;
 }
