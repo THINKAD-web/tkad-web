@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  filterMergedBrowseCatalog,
   sortMergedBrowseCatalog,
 } from "./merged-media-browse.ts";
 import {
@@ -203,4 +204,27 @@ test("filter + sortBrowseCandidates pagination matches global order", () => {
     [...page1, ...page2].map((m) => m.id),
     sorted.map((m) => m.id),
   );
+});
+
+test("filterMergedBrowseCatalog — network rows survive offline channel guard", () => {
+  const network = stubMedia({
+    id: "nw_taxi",
+    name: "택시 래핑 네트워크",
+    price: 5_000_000,
+  });
+  network.catalogSource = "network";
+  network.type = "network";
+
+  const offline = stubMedia({
+    id: "ooh-1",
+    name: "강남 빌보드",
+    price: 3_000_000,
+  });
+  offline.catalogChannel = "offline";
+
+  const hits = filterMergedBrowseCatalog([network, offline], {
+    browseChannel: "offline",
+  });
+  assert.equal(hits.length, 2);
+  assert.ok(hits.some((m) => m.id === "nw_taxi"));
 });
