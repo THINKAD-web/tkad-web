@@ -27,7 +27,10 @@ import {
   planReportRegionSortOrder,
   resolvePlanCartItemRegionKey,
 } from "@/lib/plan-cart-report/regional-breakdown";
-import { planCartPortfolioPricing } from "@/lib/plan-cart-pricing";
+import {
+  planCartMonthlyTotalWon,
+  planCartPortfolioPricing,
+} from "@/lib/plan-cart-pricing";
 import {
   groupPlanCartReportPortfolio,
   reportPortfolioOrderOpts,
@@ -123,9 +126,14 @@ export function resolvePlanCartPortfolio(
 
 function resolvePlanCartBudgetMan(
   cart: PlanCart,
+  catalog: readonly MediaItem[],
   portfolio: readonly MediaItem[],
   pricing?: PlannerPortfolioPricing,
 ): number {
+  const monthlyWon = planCartMonthlyTotalWon(cart, catalog);
+  if (monthlyWon > 0) {
+    return Math.max(1, Math.round(monthlyWon / 10_000));
+  }
   if (cart.totalBudget != null && cart.totalBudget > 0) {
     return Math.max(1, Math.round(cart.totalBudget / 10_000));
   }
@@ -180,6 +188,8 @@ export function buildPlanCartReportBundle(args: {
     orderOpts,
   );
   const pricing = planCartPortfolioPricing(cart);
+  const campaignMediaQuantities = pricing.quantities;
+  const campaignMediaPriceOptionIndex = pricing.priceOptionIndex;
 
   const channelSplit = splitPortfolioByCatalogChannel(
     portfolioSorted,
@@ -197,7 +207,12 @@ export function buildPlanCartReportBundle(args: {
   // 1 로 올림하면 「내 플랜」 보고서가 지역 표와 같은 금액 왜곡을 일으킨다.
   const months =
     cart.duration != null && cart.duration > 0 ? cart.duration : 1;
-  const budgetMan = resolvePlanCartBudgetMan(cart, portfolioSorted, pricing);
+  const budgetMan = resolvePlanCartBudgetMan(
+    cart,
+    catalog,
+    portfolioSorted,
+    pricing,
+  );
   const campaignGoal = mapPlanCartGoalToPlanner(cart.campaignGoal) ?? "brand";
   const goalTitle = isKo
     ? GOAL_TITLES_KO[campaignGoal]
@@ -264,6 +279,8 @@ export function buildPlanCartReportBundle(args: {
       industryText,
       industryKey,
       portfolio: portfolioSorted,
+      campaignMediaQuantities,
+      campaignMediaPriceOptionIndex,
       matchedCount: portfolio.length,
       monthCompare: comparePlansByDuration(portfolioSorted, budgetMan, [1, 3, 6]),
       metrics,

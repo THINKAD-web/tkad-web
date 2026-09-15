@@ -7,6 +7,7 @@ import {
   planCartMaxItems,
   type PlanCartItem,
 } from "@/lib/plan-cart";
+import { resolveSyncedPlanCartItems } from "@/lib/plan-cart-sync-merge";
 import {
   apiError,
   apiOk,
@@ -78,44 +79,6 @@ function parseItems(raw: unknown): PlanCartItem[] {
   return parsed.success ? parsed.data : [];
 }
 
-/** 동일 시각 충돌 시에만 합집합 (다른 탭에서 동시 추가 등) */
-function mergeItemsUnion(
-  local: PlanCartItem[],
-  remote: PlanCartItem[],
-  maxItems: number,
-): PlanCartItem[] {
-  const seen = new Set<string>();
-  const out: PlanCartItem[] = [];
-
-  for (const item of local) {
-    if (seen.has(item.mediaId)) continue;
-    seen.add(item.mediaId);
-    out.push(item);
-  }
-  for (const item of remote) {
-    if (seen.has(item.mediaId)) continue;
-    seen.add(item.mediaId);
-    out.push(item);
-  }
-  return out.slice(0, maxItems);
-}
-
-function resolveSyncedItems(
-  local: PlanCartItem[],
-  remote: PlanCartItem[],
-  maxItems: number,
-  localUpdated: number,
-  remoteUpdated: number,
-): PlanCartItem[] {
-  if (remote.length === 0) return local.slice(0, maxItems);
-  if (local.length === 0 && localUpdated === 0) {
-    return remote.slice(0, maxItems);
-  }
-  if (localUpdated > remoteUpdated) return local.slice(0, maxItems);
-  if (remoteUpdated > localUpdated) return remote.slice(0, maxItems);
-  return mergeItemsUnion(local, remote, maxItems);
-}
-
 export async function GET() {
   try {
     const user = await getCurrentUser();
@@ -174,7 +137,7 @@ export async function POST(req: Request) {
     const remoteUpdated = existing ? existing.updatedAt.getTime() : 0;
     const useLocalMeta = localUpdated >= remoteUpdated;
 
-    const mergedItems = resolveSyncedItems(
+    const mergedItems = resolveSyncedPlanCartItems(
       parsed.data.items,
       remoteItems,
       maxItems,
