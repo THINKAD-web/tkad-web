@@ -5,6 +5,7 @@
  *   npx tsx scripts/dry-run-r02-price-x10.mts
  *   npx tsx scripts/dry-run-r02-price-x10.mts --out=reports/dry-run-r02-price-x10.json
  */
+import { config } from "dotenv";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,9 +22,10 @@ import {
   estimateCatalogCpmWon,
   resolveDisplayCpmWon,
 } from "../lib/media-metrics.ts";
-import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
+config({ path: resolve(root, ".env") });
+config({ path: resolve(root, ".env.local"), override: true });
 
 type ClassificationEntry = {
   id: string;
@@ -110,12 +112,13 @@ async function main() {
     classData.classificationSamples?.A_scale_error?.map((c) => c.id) ?? [];
   const candidates = r02Ids.length > 0 ? r02Ids : sampleIds;
 
-  const dbCtx = assertScriptDatabaseAccess({
-    scriptName: "dry-run-r02-price-x10.mts",
-    write: false,
-  });
+  const dbUrl = normalizePgDatabaseUrl(process.env.DATABASE_URL);
+  if (!dbUrl) {
+    console.error("DATABASE_URL required");
+    process.exit(1);
+  }
 
-  const pool = new Pool({ connectionString: normalizePgDatabaseUrl(dbCtx.databaseUrl) });
+  const pool = new Pool({ connectionString: dbUrl });
   const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
   const rows = (await prisma.media.findMany({

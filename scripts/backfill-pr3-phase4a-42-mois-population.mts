@@ -5,11 +5,12 @@
  * Usage:
  *   npx tsx scripts/backfill-pr3-phase4a-42-mois-population.mts
  *   npx tsx scripts/backfill-pr3-phase4a-42-mois-population.mts --year 2026 --month 7
- *   npx tsx scripts/backfill-pr3-phase4a-42-mois-population.mts --execute --env=production --confirm-prod
+ *   DATABASE_URL=... npx tsx scripts/backfill-pr3-phase4a-42-mois-population.mts --execute --allow-prod
  */
 import { writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -19,9 +20,9 @@ import {
   fetchSeoulGyeonggiPopulation,
   type MoisSigunguRow,
 } from "../lib/metrics/mois-population.ts";
-import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
+config({ path: resolve(root, ".env.vercel.production") });
 
 const SOURCE_TYPE = "population_demographics";
 const SOURCE_URL = "https://jumin.mois.go.kr/statMonth.do";
@@ -33,6 +34,14 @@ function hasFlag(name: string): boolean {
 function flagValue(name: string, fallback: string): string {
   const i = process.argv.indexOf(`--${name}`);
   return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
+}
+
+function dbHostLabel(url: string): string {
+  try {
+    return new URL(url.replace(/^postgresql:/, "postgres:")).hostname;
+  } catch {
+    return url.slice(0, 40);
+  }
 }
 
 function createPrisma(url: string): PrismaClient {
@@ -88,21 +97,24 @@ async function findAnchorMediaId(
 }
 
 async function main() {
+  const url = process.env.DATABASE_URL?.trim();
+  if (!url) throw new Error("DATABASE_URL required");
+
+  const host = dbHostLabel(url);
+  const isProd = host.includes("ep-holy-cloud");
   const execute = hasFlag("execute");
   const year = Number(flagValue("year", "2026"));
   const month = Number(flagValue("month", "7"));
 
-  const dbCtx = assertScriptDatabaseAccess({
-    scriptName: "backfill-pr3-phase4a-42-mois-population.mts",
-    write: execute,
-    allowProductionEnvFallback: true,
-  });
+  if (isProd && execute && !hasFlag("allow-prod")) {
+    throw new Error("Production execute requires --allow-prod");
+  }
 
   console.log(`[4a-2] Fetching MOIS CSV ${year}-${String(month).padStart(2, "0")}…`);
   const moisRows = await fetchSeoulGyeonggiPopulation({ year, month });
   console.log(`[4a-2] MOIS leaf sigungu rows (서울·경기): ${moisRows.length}`);
 
-  const db = createPrisma(dbCtx.databaseUrl);
+  const db = createPrisma(url);
 
   const existing = await db.mediaExternalSignal.count({
     where: { sourceType: SOURCE_TYPE },

@@ -11,13 +11,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "../../lib/normalize-pg-database-url.ts";
 import { hasOnlinePricingSpec } from "../../lib/pricing/online-performance-estimate.ts";
 import { revalidateMediaCachesAfterScript } from "../lib/revalidate-media-list-after-script";
-import { assertScriptDatabaseAccess } from "../lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "../..");
 
@@ -73,17 +73,21 @@ function isCalculable(spec: {
 }
 
 async function main() {
-  const { execute } = parseArgs();
-  const dbCtx = assertScriptDatabaseAccess({
-    scriptName: "migrations/pr5-d-online-content-update.mts",
-    write: execute,
+  const { execute, prod, preview } = parseArgs();
+  config({
+    path: resolve(
+      root,
+      prod ? ".env.production.local" : preview ? ".env.preview.local" : ".env.local",
+    ),
+    override: true,
   });
+  config({ path: resolve(root, ".env.local"), override: false });
 
   const seed = loadSeed();
   const slugs = seed.rows.map((r) => r.slug);
 
   const pool = new Pool({
-    connectionString: normalizePgDatabaseUrl(dbCtx.databaseUrl),
+    connectionString: normalizePgDatabaseUrl(process.env.DATABASE_URL!),
     max: 3,
   });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });

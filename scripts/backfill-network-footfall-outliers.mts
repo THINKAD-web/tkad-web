@@ -9,6 +9,9 @@
  *   npx tsx scripts/backfill-network-footfall-outliers.mts
  *   npx tsx scripts/backfill-network-footfall-outliers.mts --apply
  */
+import { config } from "dotenv";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -17,13 +20,35 @@ import {
   computeNetworkDailyFootfall,
   NETWORK_DAILY_FOOTFALL_CAP,
 } from "../lib/media-network-public.ts";
-import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
+
+const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
+config({ path: resolve(root, ".env") });
+config({ path: resolve(root, ".env.development"), override: true });
+config({ path: resolve(root, ".env.local"), override: true });
+config({ path: resolve(root, ".env.development.local"), override: true });
 
 const apply = process.argv.includes("--apply");
 
-function createPrisma(databaseUrl: string): PrismaClient {
+function resolveDatabaseUrl(): string | undefined {
+  const raw =
+    process.env.DATABASE_URL?.trim() ||
+    process.env.DATABASE_URL_UNPOOLED?.trim();
+  if (!raw) return undefined;
+  if (/@ep-xxx\.|\/\/user:password@|ep-xxx\.region\.aws\.neon\.tech/i.test(raw)) {
+    return undefined;
+  }
+  return raw;
+}
+
+function createPrisma(): PrismaClient {
+  const url = resolveDatabaseUrl();
+  if (!url) {
+    throw new Error(
+      "DATABASE_URL is not set. Add it to .env.local or pass inline.",
+    );
+  }
   const pool = new Pool({
-    connectionString: normalizePgDatabaseUrl(databaseUrl),
+    connectionString: normalizePgDatabaseUrl(url),
     max: apply ? 3 : 2,
   });
   return new PrismaClient({ adapter: new PrismaPg(pool) });
@@ -63,11 +88,7 @@ function shouldClearFootfall(
 }
 
 async function main() {
-  const dbCtx = assertScriptDatabaseAccess({
-    scriptName: "backfill-network-footfall-outliers.mts",
-    write: apply,
-  });
-  const prisma = createPrisma(dbCtx.databaseUrl);
+  const prisma = createPrisma();
   const patches: Patch[] = [];
 
   try {

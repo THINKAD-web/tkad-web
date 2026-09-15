@@ -143,7 +143,6 @@ test("mediaDbRowToQuickAddJson + alias round-trip includes installs", () => {
     engagementRate: null,
     visibilityScore: 0,
     effectMemo: null,
-    image: null,
     extractedImages: [],
     nearbyFacilities: null,
     nearbyStations: null,

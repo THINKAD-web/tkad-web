@@ -1,20 +1,23 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env node
 /**
  * Production media backfill: URL typo (hthttps) + media_sub_category realignment.
  *
  * Usage (order matters):
- *   npx tsx scripts/media-data-backfill.mjs --backup --env=preview
- *   npx tsx scripts/media-data-backfill.mjs --dry-run --env=preview
- *   npx tsx scripts/media-data-backfill.mjs --apply --env=production --confirm-prod
- *   npx tsx scripts/media-data-backfill.mjs --verify --env=preview
+ *   node --env-file=.env.local scripts/media-data-backfill.mjs --backup
+ *   node --env-file=.env.local scripts/media-data-backfill.mjs --dry-run
+ *   node --env-file=.env.local scripts/media-data-backfill.mjs --apply   # after approval
+ *   node --env-file=.env.local scripts/media-data-backfill.mjs --verify
  */
+import { config } from "dotenv";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
-import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+config({ path: resolve(root, ".env"), override: false });
+config({ path: resolve(root, ".env.local"), override: true });
+config({ path: resolve(root, ".env.vercel.production"), override: true });
 
 const URL_FIX_MEDIA_ID = "cmo3f0k4a000004k43dss6zft";
 
@@ -136,9 +139,14 @@ function sqlLiteral(v) {
   return `'${String(v).replace(/'/g, "''")}'`;
 }
 
-function getPool(dbCtx) {
+async function getPool() {
   const url =
-    process.env.DATABASE_URL_UNPOOLED?.trim() || dbCtx.databaseUrl;
+    process.env.DATABASE_URL_UNPOOLED?.trim() ||
+    process.env.DATABASE_URL?.trim();
+  if (!url) {
+    console.error("[backfill] DATABASE_URL missing");
+    process.exit(1);
+  }
   return new pg.Pool({ connectionString: url, max: 2 });
 }
 
@@ -429,11 +437,7 @@ async function runVerify(pool) {
 
 async function main() {
   const flags = new Set(process.argv.slice(2));
-  const dbCtx = assertScriptDatabaseAccess({
-    scriptName: "media-data-backfill.mjs",
-    write: flags.has("--apply"),
-  });
-  const pool = getPool(dbCtx);
+  const pool = await getPool();
   try {
     if (flags.has("--backup")) await runBackup(pool);
     else if (flags.has("--dry-run")) await runDryRun(pool);

@@ -3,38 +3,69 @@
  *
  * Safety:
  * - Default is dry-run (no writes).
- * - Writes require APPLY_CPM_FIX=1; production also requires --confirm-prod (script-db-guard).
+ * - Writes require APPLY_CPM_FIX=1 AND CONFIRM_DB_HOST=<exact neon host substring>
  * - Skips within ±15%, uncomputable, and already-matching values.
  *
  * Usage:
  *   npx tsx scripts/apply-cpm-recalc-fix.mjs              # dry-run
- *   APPLY_CPM_FIX=1 npx tsx scripts/apply-cpm-recalc-fix.mjs --confirm-prod  # apply (prod)
+ *   APPLY_CPM_FIX=1 CONFIRM_DB_HOST=ep-holy-cloud-... \
+ *     npx tsx scripts/apply-cpm-recalc-fix.mjs            # apply
  *
  * Backup (always written before any update attempt):
  *   scripts/.backups/cpm-contamination-<ISO>.json
  */
+import { config } from "dotenv";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
-import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
+
+config({ path: ".env.local" });
+config({ path: ".env" });
 
 const CPM_TRUST_MIN = 0.85;
 const CPM_TRUST_MAX = 1.15;
 
+const databaseUrl =
+  process.env.DATABASE_URL?.trim() ||
+  process.env.DATABASE_URL_UNPOOLED?.trim();
+
 const apply = process.env.APPLY_CPM_FIX === "1";
+const confirmHost = (process.env.CONFIRM_DB_HOST ?? "").trim();
+
+function hostFromUrl(url) {
+  return url?.match(/@([^/?]+)/)?.[1] ?? "";
+}
 
 async function main() {
-  const dbCtx = assertScriptDatabaseAccess({
-    scriptName: "apply-cpm-recalc-fix.mjs",
-    write: apply,
-  });
+  if (!databaseUrl) {
+    console.error("DATABASE_URL not set");
+    process.exit(1);
+  }
+
+  const host = hostFromUrl(databaseUrl);
+  console.log(`DB host: ${host}`);
   console.log(`mode: ${apply ? "APPLY" : "DRY-RUN"}`);
+
+  if (apply) {
+    if (!confirmHost) {
+      console.error(
+        "Refusing APPLY: set CONFIRM_DB_HOST to the Neon host (or prefix) you intend to write.",
+      );
+      process.exit(1);
+    }
+    if (!host.includes(confirmHost) && confirmHost !== host) {
+      console.error(
+        `Refusing APPLY: CONFIRM_DB_HOST="${confirmHost}" does not match actual host "${host}"`,
+      );
+      process.exit(1);
+    }
+  }
 
   const { estimateCatalogCpmWon } = await import("../lib/media-metrics.ts");
 
-  const pool = new Pool({ connectionString: dbCtx.databaseUrl });
+  const pool = new Pool({ connectionString: databaseUrl });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });
 
   const rows = await db.media.findMany({

@@ -84,24 +84,14 @@ export function galleryFormSnapshot(
   return { image, extractedImagesText };
 }
 
-/** Stable key for touched detection — merged URL order, not raw form text. */
-export function gallerySnapshotCanonicalKey(
-  snapshot: GalleryFormSnapshot,
-): string {
-  return galleryUrlsFromFormParts(
-    snapshot.image,
-    snapshot.extractedImagesText,
-  ).join("\n");
-}
-
-/** `initial === null` + POST → send gallery; PATCH with missing baseline → omit (safe). */
+/** `initial === null` → new media POST; always send gallery fields. */
 export function galleryFormSnapshotTouched(
   current: GalleryFormSnapshot,
   initial: GalleryFormSnapshot | null,
-  opts?: { isNewMedia?: boolean },
 ): boolean {
-  if (initial === null) return opts?.isNewMedia === true;
+  if (initial === null) return true;
   return (
-    gallerySnapshotCanonicalKey(current) !== gallerySnapshotCanonicalKey(initial)
+    current.image !== initial.image ||
+    current.extractedImagesText !== initial.extractedImagesText
   );
 }
