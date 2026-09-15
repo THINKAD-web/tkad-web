@@ -78,7 +78,10 @@ export function matchesBrowseRegion(
       return true;
     }
   } else if (regionMain.trim()) {
-    if (m.regionMain === regionMain.trim()) return true;
+    const main = regionMain.trim();
+    if (m.regionMain === main) return true;
+    // 전국 상품 — 어느 광역 필터에도 노출 (planner matchesPlannerRegion 과 동치)
+    if (m.regionMain === "national" && main !== "national") return true;
   } else if (!legacyRegion.trim()) {
     return true;
   }
