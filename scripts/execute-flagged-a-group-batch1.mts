@@ -4,9 +4,8 @@
  *
  * Usage:
  *   npx tsx scripts/execute-flagged-a-group-batch1.mts           # dry-run
- *   npx tsx scripts/execute-flagged-a-group-batch1.mts --execute # production write
+ *   npx tsx scripts/execute-flagged-a-group-batch1.mts --execute --confirm-prod
  */
-import { config } from "dotenv";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PrismaClient } from "@prisma/client";
@@ -32,9 +31,9 @@ import {
   writeBatchExecuteReport,
 } from "./lib/batch-execute-report.mts";
 import { revalidateMediaListAfterScript } from "./lib/revalidate-media-list-after-script";
+import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
-config({ path: resolve(root, ".env.vercel.production"), override: true });
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -112,8 +111,14 @@ function tier(name: string, flags: string[], priceWon: number): string {
 }
 
 async function main() {
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "execute-flagged-a-group-batch1.mts",
+    write: EXECUTE,
+    allowProductionEnvFallback: true,
+  });
+
   const pool = new Pool({
-    connectionString: normalizePgDatabaseUrl(process.env.DATABASE_URL!),
+    connectionString: normalizePgDatabaseUrl(dbCtx.databaseUrl),
     max: 3,
   });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });

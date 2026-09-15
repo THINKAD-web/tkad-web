@@ -4,9 +4,8 @@
  *
  * Usage:
  *   npx tsx scripts/execute-r02-price-x10.mts --sample-review=25
- *   npx tsx scripts/execute-r02-price-x10.mts --execute
+ *   npx tsx scripts/execute-r02-price-x10.mts --execute --confirm-prod
  */
-import { config } from "dotenv";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,9 +18,9 @@ import {
   batchReportMeta,
   writeBatchExecuteReport,
 } from "./lib/batch-execute-report.mts";
+import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
-config({ path: resolve(root, ".env.vercel.production"), override: true });
 
 type DryRunRow = {
   id: string;
@@ -116,8 +115,14 @@ async function main() {
     return;
   }
 
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "execute-r02-price-x10.mts",
+    write: true,
+    allowProductionEnvFallback: true,
+  });
+
   const pool = new Pool({
-    connectionString: normalizePgDatabaseUrl(process.env.DATABASE_URL!),
+    connectionString: normalizePgDatabaseUrl(dbCtx.databaseUrl),
     max: 3,
   });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });

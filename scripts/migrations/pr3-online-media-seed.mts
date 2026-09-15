@@ -10,27 +10,14 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "../../lib/normalize-pg-database-url.ts";
 import { revalidateMediaCachesAfterScript } from "../lib/revalidate-media-list-after-script";
+import { assertScriptDatabaseAccess } from "../lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "../..");
-const usePreview = process.argv.includes("--preview") || (process.argv.includes("--execute") && !process.argv.includes("--prod"));
-config({
-  path: resolve(
-    root,
-    process.argv.includes("--prod")
-      ? ".env.vercel.production"
-      : usePreview
-        ? ".env.preview.local"
-        : ".env.local",
-  ),
-  override: true,
-});
-config({ path: resolve(root, ".env.local"), override: false });
 
 type SeedRow = {
   id: string;
@@ -82,12 +69,16 @@ function loadSeed(): SeedFile {
 
 async function main() {
   const { execute, rollback } = parseArgs();
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "migrations/pr3-online-media-seed.mts",
+    write: execute,
+  });
   const seed = loadSeed();
   const ids = seed.rows.map((r) => r.id);
   const slugs = seed.rows.map((r) => r.slug);
 
   const pool = new Pool({
-    connectionString: normalizePgDatabaseUrl(process.env.DATABASE_URL!),
+    connectionString: normalizePgDatabaseUrl(dbCtx.databaseUrl),
     max: 3,
   });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });

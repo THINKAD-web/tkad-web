@@ -4,12 +4,11 @@
  *
  * Usage:
  *   npx tsx scripts/execute-pr3-phase1b-override.mts              # dry-run
- *   npx tsx scripts/execute-pr3-phase1b-override.mts --execute --allow-prod
+ *   npx tsx scripts/execute-pr3-phase1b-override.mts --execute --confirm-prod
  */
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -18,26 +17,20 @@ import {
   PHASE1B_EXECUTE_MEDIA_IDS,
   PHASE1B_DEFERRED_MEDIA_IDS,
 } from "../lib/metrics/phase1b-min-ids.ts";
+import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
-config({ path: resolve(root, ".env.vercel.production"), override: true });
-
-function dbHostLabel(url: string): string {
-  return url.match(/@([^/?]+)/)?.[1] ?? "(unknown)";
-}
 
 async function main() {
   const execute = process.argv.includes("--execute");
-  const dbUrl = process.env.DATABASE_URL?.trim();
-  if (!dbUrl) throw new Error("DATABASE_URL required (.env.vercel.production)");
-
-  const host = dbHostLabel(dbUrl);
-  if (host.includes("ep-holy-cloud") && execute && !process.argv.includes("--allow-prod")) {
-    throw new Error("Production execute requires --allow-prod");
-  }
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "execute-pr3-phase1b-override.mts",
+    write: execute,
+    allowProductionEnvFallback: true,
+  });
 
   const pool = new Pool({
-    connectionString: normalizePgDatabaseUrl(dbUrl),
+    connectionString: normalizePgDatabaseUrl(dbCtx.databaseUrl),
     max: 3,
   });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });
@@ -86,7 +79,7 @@ async function main() {
   console.log(JSON.stringify(log, null, 2));
 
   if (!execute) {
-    console.log("\n[dry-run] --execute --allow-prod 로 prod UPDATE");
+    console.log("\n[dry-run] --execute --env=production --confirm-prod 로 prod UPDATE");
     await db.$disconnect();
     await pool.end();
     return;

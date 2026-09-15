@@ -3,13 +3,11 @@
  * Phase B 2단계 — Prisma 플래그 적용 (값 미변경).
  *
  * Preview:
- *   npx tsx scripts/apply-pr3-phase-b-review-flags.mts --dry-run
- *   npx tsx scripts/apply-pr3-phase-b-review-flags.mts --apply --confirm=phase-b-6
+ *   npx tsx scripts/apply-pr3-phase-b-review-flags.mts --env=preview
+ *   npx tsx scripts/apply-pr3-phase-b-review-flags.mts --apply --confirm=phase-b-6 --env=preview
  *
- * Production 은 사장님 승인 후 별도 PR + --allow-prod 필수.
- * `.env.vercel.production` 은 --allow-prod 없이 로드하지 않음.
+ * Production: --apply --confirm=phase-b-6 --env=production --confirm-prod
  */
-import { config } from "dotenv";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PrismaClient } from "@prisma/client";
@@ -21,45 +19,26 @@ import {
   PHASE_B_ABC_FLAG_TARGETS,
 } from "../lib/media-review-status.ts";
 import { revalidateMediaListAfterScript } from "./lib/revalidate-media-list-after-script";
+import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
-config({ path: resolve(root, ".env") });
-config({ path: resolve(root, ".env.local"), override: true });
 
 const apply = process.argv.includes("--apply");
-const allowProd = process.argv.includes("--allow-prod");
 const confirmed = process.argv.includes("--confirm=phase-b-6");
-
-if (allowProd) {
-  config({ path: resolve(root, ".env.vercel.production"), override: true });
-}
-
-function resolveDatabaseUrl(): string | undefined {
-  const raw =
-    process.env.DATABASE_URL?.trim() ||
-    process.env.DATABASE_URL_UNPOOLED?.trim();
-  if (!raw) return undefined;
-  if (/@ep-xxx\.|\/\/user:password@|ep-xxx\.region\.aws\.neon\.tech/i.test(raw)) {
-    return undefined;
-  }
-  return raw;
-}
 
 async function main() {
   if (apply && !confirmed) {
     throw new Error("--apply 는 --confirm=phase-b-6 과 함께 써야 합니다");
   }
 
-  const url = resolveDatabaseUrl();
-  if (!url) throw new Error("DATABASE_URL missing");
-
-  if (apply && allowProd) {
-    console.warn("[apply] --allow-prod: production URL 로드됨");
-  }
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "apply-pr3-phase-b-review-flags.mts",
+    write: apply,
+  });
 
   const ids = PHASE_B_ABC_FLAG_TARGETS.map((t) => t.mediaId);
   const pool = new Pool({
-    connectionString: normalizePgDatabaseUrl(url),
+    connectionString: normalizePgDatabaseUrl(dbCtx.databaseUrl),
     max: 2,
   });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });
@@ -135,8 +114,6 @@ async function main() {
     }
     console.log("[apply] 6건 flagged. impressions/dailyFootfall 불변 확인");
 
-    // reviewStatus:"flagged" hides these from the public catalog
-    // (publicNotFlaggedMediaWhere) — list cache needs invalidating.
     await revalidateMediaListAfterScript();
   } finally {
     await db.$disconnect();

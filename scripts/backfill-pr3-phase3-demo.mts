@@ -4,12 +4,11 @@
  *
  * Usage:
  *   npx tsx scripts/backfill-pr3-phase3-demo.mts
- *   DATABASE_URL=... npx tsx scripts/backfill-pr3-phase3-demo.mts --execute --allow-prod
+ *   npx tsx scripts/backfill-pr3-phase3-demo.mts --execute --env=production --confirm-prod
  */
 import { writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -24,20 +23,12 @@ import { classifyMedia } from "../lib/metrics/classify.ts";
 import type { MediaMetricClass } from "../lib/metrics/types.ts";
 import { parseTargetAge } from "../lib/planner/parse-target-age.ts";
 import { targetAgeToAgeSplit } from "../lib/metrics/demo-age-bridge.ts";
+import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
-config({ path: resolve(root, ".env.vercel.production") });
 
 function hasFlag(name: string): boolean {
   return process.argv.includes(`--${name}`);
-}
-
-function dbHostLabel(url: string): string {
-  try {
-    return new URL(url.replace(/^postgresql:/, "postgres:")).hostname;
-  } catch {
-    return url.slice(0, 40);
-  }
 }
 
 function createPrisma(url: string): PrismaClient {
@@ -77,18 +68,14 @@ function bump(map: Record<string, number>, key: string, n = 1) {
 }
 
 async function main() {
-  const url = process.env.DATABASE_URL?.trim();
-  if (!url) throw new Error("DATABASE_URL required");
-
-  const host = dbHostLabel(url);
-  const isProd = host.includes("ep-holy-cloud");
   const execute = hasFlag("execute");
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "backfill-pr3-phase3-demo.mts",
+    write: execute,
+    allowProductionEnvFallback: true,
+  });
 
-  if (isProd && execute && !hasFlag("allow-prod")) {
-    throw new Error("Production execute requires --allow-prod");
-  }
-
-  const db = createPrisma(url);
+  const db = createPrisma(dbCtx.databaseUrl);
 
   const rows = await db.mediaComputedMetric.findMany({
     select: {

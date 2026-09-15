@@ -38,6 +38,7 @@
     "test:shadow-recommend-golden": "node --import tsx --test lib/inquiry-auto-proposal/shadow-recommend.test.ts",
     "test:recommend-online-mix": "node --import tsx --test lib/recommend/__tests__/*.test.ts lib/inquiry-auto-proposal/*.test.ts",
     "test:import-csv": "node --experimental-test-module-mocks --import tsx --test app/api/admin/medias/import-csv/route.test.ts",
+    "test:admin-media-gallery": "tsx --test lib/admin-media-gallery-urls.test.ts lib/media-quick-add-gallery.test.ts",
     "build:metro-geo": "tsx scripts/build-metro-geojson.mts",
     "build:metro-geo:capital": "tsx scripts/build-seoul-metro-geojson.mts",
     "build:ktx-srt-geo": "tsx scripts/build-ktx-srt-geojson.mts",

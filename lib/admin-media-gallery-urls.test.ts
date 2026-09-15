@@ -5,6 +5,7 @@ import {
   dedupeUrlsPreserveOrder,
   galleryFormSnapshot,
   galleryFormSnapshotTouched,
+  gallerySnapshotCanonicalKey,
   galleryUrlsFromFormParts,
   imageFieldsForApiBody,
   mergePrimaryAndExtracted,
@@ -57,9 +58,14 @@ test("gallery form round-trip", () => {
   assert.equal(parts.extractedImagesText, "b\nc");
 });
 
-test("galleryFormSnapshotTouched — null initial means POST (always touched)", () => {
+test("galleryFormSnapshotTouched — null initial on POST (always touched)", () => {
   const snap = galleryFormSnapshot("a", "b");
-  assert.equal(galleryFormSnapshotTouched(snap, null), true);
+  assert.equal(galleryFormSnapshotTouched(snap, null, { isNewMedia: true }), true);
+});
+
+test("galleryFormSnapshotTouched — null initial on PATCH omits gallery (safe)", () => {
+  const snap = galleryFormSnapshot("a", "b\nc");
+  assert.equal(galleryFormSnapshotTouched(snap, null, { isNewMedia: false }), false);
 });
 
 test("galleryFormSnapshotTouched — unchanged gallery is not touched", () => {
@@ -83,4 +89,18 @@ test("galleryFormSnapshotTouched — reorder or edit marks touched", () => {
     galleryFormSnapshotTouched(galleryFormSnapshot("b", "a\nc"), initial),
     true,
   );
+});
+
+test("galleryFormSnapshotTouched — dup-primary raw text vs canonical split is not touched", () => {
+  const initial = galleryFormSnapshot("p", "p\ne1\ne2");
+  const canonical = galleryFormSnapshot("p", "e1\ne2");
+  assert.equal(gallerySnapshotCanonicalKey(initial), "p\ne1\ne2");
+  assert.equal(gallerySnapshotCanonicalKey(canonical), "p\ne1\ne2");
+  assert.equal(galleryFormSnapshotTouched(canonical, initial), false);
+});
+
+test("galleryFormSnapshotTouched — name-only edit with dup-primary DB stays untouched", () => {
+  const initial = galleryFormSnapshot("p", "p\ne1\ne2");
+  const current = galleryFormSnapshot("p", "p\ne1\ne2");
+  assert.equal(galleryFormSnapshotTouched(current, initial), false);
 });

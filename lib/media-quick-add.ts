@@ -23,6 +23,10 @@ import {
   type MediaInstallLocation,
 } from "@/lib/media-install-locations";
 import { coercePriceOptionPeriodForWrite } from "@/lib/media-price-period-write";
+import {
+  mergePrimaryAndExtracted,
+  splitPrimaryAndExtracted,
+} from "@/lib/admin-media-gallery-urls";
 
 export type QuickAddMediaJson = {
   media_name: string;
@@ -501,6 +505,7 @@ export function mediaDbRowToQuickAddJson(m: {
   engagementRate: number | null;
   visibilityScore: number;
   effectMemo: string | null;
+  image: string | null;
   extractedImages: string[];
   nearbyFacilities: string | null;
   nearbyStations: string | null;
@@ -539,7 +544,7 @@ export function mediaDbRowToQuickAddJson(m: {
     engagement_rate: m.engagementRate,
     visibility_score: m.visibilityScore,
     effect_memo: m.effectMemo ?? "",
-    extracted_images: [...(m.extractedImages ?? [])],
+    extracted_images: mergePrimaryAndExtracted(m.image, m.extractedImages),
     nearby_facilities: m.nearbyFacilities ?? "",
     nearby_stations: m.nearbyStations ?? "",
     nearby_landmarks: m.nearbyLandmarks ?? "",
@@ -592,7 +597,9 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
   const subNormalized = normalizeSubCategory(subRaw) || subRaw;
   const region = deriveRegionFromAddress(city, district, location);
   const price = Math.round(row.price_per_month);
-  const imgs = row.extracted_images.filter(Boolean);
+  const { image, extractedImages } = splitPrimaryAndExtracted(
+    mergePrimaryAndExtracted(null, row.extracted_images),
+  );
 
   const autoTags = extractAutoTags({
     name: row.media_name,
@@ -643,7 +650,7 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
     region,
     type,
     price: Number.isFinite(price) ? price : 0,
-    image: imgs[0] ?? null,
+    image,
     width: row.width_m != null ? String(row.width_m) : null,
     height: row.height_m != null ? String(row.height_m) : null,
     description: row.description.trim() || null,
@@ -669,7 +676,7 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
     engagementRate: row.engagement_rate,
     visibilityScore: row.visibility_score,
     effectMemo: row.effect_memo.trim() || null,
-    extractedImages: imgs,
+    extractedImages,
     nearbyFacilities: row.nearby_facilities.trim() || null,
     nearbyStations: row.nearby_stations.trim() || null,
     nearbyLandmarks: row.nearby_landmarks.trim() || null,

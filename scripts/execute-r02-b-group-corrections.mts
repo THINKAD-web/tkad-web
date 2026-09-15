@@ -31,11 +31,10 @@
  *
  * Usage:
  *   npx tsx scripts/execute-r02-b-group-corrections.mts                  # dry-run (미리보기만)
- *   npx tsx scripts/execute-r02-b-group-corrections.mts --execute        # 실제 반영
+ *   npx tsx scripts/execute-r02-b-group-corrections.mts --execute --confirm-prod
  *   npx tsx scripts/execute-r02-b-group-corrections.mts --execute --commit
  *     # 반영 + 실행 리포트를 그 자리에서 git commit까지 (요청하신 "실행 흔적 남기기")
  */
-import { config } from "dotenv";
 import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { userInfo } from "node:os";
@@ -46,9 +45,9 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "../lib/normalize-pg-database-url";
 import { revalidateMediaCachesAfterScript } from "./lib/revalidate-media-list-after-script";
+import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
-config({ path: resolve(root, ".env.vercel.production"), override: true });
 
 // Inlined rather than imported from ./lib/batch-execute-report.mts — bare
 // specifiers don't resolve to .mts targets under this tsconfig (TS2307),
@@ -121,8 +120,14 @@ async function main() {
     return;
   }
 
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "execute-r02-b-group-corrections.mts",
+    write: true,
+    allowProductionEnvFallback: true,
+  });
+
   const pool = new Pool({
-    connectionString: normalizePgDatabaseUrl(process.env.DATABASE_URL!),
+    connectionString: normalizePgDatabaseUrl(dbCtx.databaseUrl),
     max: 3,
   });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });

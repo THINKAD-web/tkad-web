@@ -11,13 +11,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "../../lib/normalize-pg-database-url.ts";
 import { hasOnlinePricingSpec } from "../../lib/pricing/online-performance-estimate.ts";
 import { revalidateMediaCachesAfterScript } from "../lib/revalidate-media-list-after-script";
+import { assertScriptDatabaseAccess } from "../lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "../..");
 
@@ -83,23 +83,18 @@ function pickNewRows(seed: SeedFile): SeedRow[] {
 }
 
 async function main() {
-  const { execute, rollback, prod, preview } = parseArgs();
+  const { execute, rollback } = parseArgs();
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "migrations/pr5-e-online-media-add.mts",
+    write: execute,
+  });
   const seed = loadSeed();
   const newRows = pickNewRows(seed);
   const ids = newRows.map((r) => r.id);
   const slugs = newRows.map((r) => r.slug);
 
-  config({
-    path: resolve(
-      root,
-      prod ? ".env.production.local" : preview ? ".env.preview.local" : ".env.local",
-    ),
-    override: true,
-  });
-  config({ path: resolve(root, ".env.local"), override: false });
-
   const pool = new Pool({
-    connectionString: normalizePgDatabaseUrl(process.env.DATABASE_URL!),
+    connectionString: normalizePgDatabaseUrl(dbCtx.databaseUrl),
     max: 3,
   });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });

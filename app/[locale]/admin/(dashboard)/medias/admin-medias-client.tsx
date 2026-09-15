@@ -624,8 +624,15 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     priceOptionsJson:
       m.priceOptions != null ? JSON.stringify(m.priceOptions, null, 2) : "",
     partialPeriodRates: partialPeriodRatesDraftFromMap(m.partialPeriodRates),
-    image: m.image ?? "",
-    extractedImagesText: (m.extractedImages ?? []).join("\n"),
+    ...(() => {
+      const parts = applyGalleryUrlsToFormParts(
+        mergePrimaryAndExtracted(m.image, m.extractedImages),
+      );
+      return {
+        image: parts.image,
+        extractedImagesText: parts.extractedImagesText,
+      };
+    })(),
     targetAge: m.targetAge ?? "",
     impressions: m.impressions != null ? String(m.impressions) : "",
     reach: m.reach != null ? String(m.reach) : "",
@@ -1620,6 +1627,7 @@ export default function AdminMediasClient({
     const galleryTouched = galleryFormSnapshotTouched(
       galleryFormSnapshot(form.image, form.extractedImagesText),
       editing ? initialGallerySnapshotRef.current : null,
+      { isNewMedia: !editing },
     );
     const rawBody = formToApiBody(form, {
       includeGalleryFields: galleryTouched,

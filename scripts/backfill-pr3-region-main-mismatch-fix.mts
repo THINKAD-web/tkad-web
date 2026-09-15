@@ -4,13 +4,12 @@
  *
  * Usage:
  *   npx tsx scripts/backfill-pr3-region-main-mismatch-fix.mts
- *   npx tsx scripts/backfill-pr3-region-main-mismatch-fix.mts --execute --allow-prod
- *   npx tsx scripts/backfill-pr3-region-main-mismatch-fix.mts --execute --allow-prod --with-coverage
+ *   npx tsx scripts/backfill-pr3-region-main-mismatch-fix.mts --execute --env=production --confirm-prod
+ *   npx tsx scripts/backfill-pr3-region-main-mismatch-fix.mts --execute --env=production --confirm-prod --with-coverage
  */
 import { writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -24,22 +23,14 @@ import {
 import type { MoisSigunguRow } from "../lib/metrics/mois-population.ts";
 import { matchesPlannerRegion } from "../lib/planner/planner-regions.ts";
 import type { MediaItem } from "../lib/media-data.ts";
+import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
-config({ path: resolve(root, ".env.vercel.production") });
 
 const SOURCE_TYPE = "population_demographics";
 
 function hasFlag(name: string): boolean {
   return process.argv.includes(`--${name}`);
-}
-
-function dbHostLabel(url: string): string {
-  try {
-    return new URL(url.replace(/^postgresql:/, "postgres:")).hostname;
-  } catch {
-    return url.slice(0, 40);
-  }
 }
 
 function createPrisma(url: string): PrismaClient {
@@ -65,19 +56,15 @@ function rawToMoisRow(
 }
 
 async function main() {
-  const url = process.env.DATABASE_URL?.trim();
-  if (!url) throw new Error("DATABASE_URL required");
-
-  const host = dbHostLabel(url);
-  const isProd = host.includes("ep-holy-cloud");
   const execute = hasFlag("execute");
   const withCoverage = hasFlag("with-coverage");
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "backfill-pr3-region-main-mismatch-fix.mts",
+    write: execute,
+    allowProductionEnvFallback: true,
+  });
 
-  if (isProd && execute && !hasFlag("allow-prod")) {
-    throw new Error("Production execute requires --allow-prod");
-  }
-
-  const db = createPrisma(url);
+  const db = createPrisma(dbCtx.databaseUrl);
 
   const signals = await db.mediaExternalSignal.findMany({
     where: { sourceType: SOURCE_TYPE },

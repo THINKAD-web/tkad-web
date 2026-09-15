@@ -4,16 +4,12 @@
  * Dry-run: npx tsx scripts/backfill-media-legacy-region.mts
  * Apply:    npx tsx scripts/backfill-media-legacy-region.mts --apply
  */
-import { config } from "dotenv";
-import { resolve } from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "../lib/normalize-pg-database-url.ts";
 import type { MediaRegionMacro } from "../lib/media-regions.ts";
-
-config({ path: resolve(".env") });
-config({ path: resolve(".env.local"), override: true });
+import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const apply = process.argv.includes("--apply");
 
@@ -25,8 +21,12 @@ function legacyRegionFromMain(main: string): MediaRegionMacro {
 }
 
 async function main() {
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "backfill-media-legacy-region.mts",
+    write: apply,
+  });
   const pool = new Pool({
-    connectionString: normalizePgDatabaseUrl(process.env.DATABASE_URL!),
+    connectionString: normalizePgDatabaseUrl(dbCtx.databaseUrl),
   });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });
 
