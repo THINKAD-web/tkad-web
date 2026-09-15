@@ -1,5 +1,12 @@
 /** 자연어에서 추출한 매체 유형 의도 — scoreCategory 가점·감점 */
-export type FreetextMediaIntent = "subway" | "bus_wrap" | "billboard";
+export type FreetextMediaIntent =
+  | "subway"
+  | "bus_wrap"
+  | "billboard"
+  | "bus_shelter";
+
+const SHELTER_INTENT_RE =
+  /쉘터|shelter|버스\s*쉘터|버스쉘터|스마트\s*쉘터|스마트쉘터|bus\s*shelter|smart\s*shelter/i;
 
 export function parseFreetextMediaIntents(text: string): FreetextMediaIntent[] {
   const t = text.trim();
@@ -32,6 +39,10 @@ export function parseFreetextMediaIntents(text: string): FreetextMediaIntent[] {
     )
   ) {
     intents.add("billboard");
+  }
+
+  if (SHELTER_INTENT_RE.test(t)) {
+    intents.add("bus_shelter");
   }
 
   return [...intents];

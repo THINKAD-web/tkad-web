@@ -28,3 +28,12 @@ test("isSubwayPrimaryMediaDisplay: 전광판 → false", () => {
   assert.equal(isSubwayPrimaryMediaDisplay(r), false);
   assert.equal(resolveFreetextMediaSummaryLabel(r, true), "디지털·전광판");
 });
+
+test("isShelterPrimaryMediaDisplay: 서울 쉘터 → 버스·쉘터", () => {
+  const r = parsePlannerFreetextBrief("서울 쉘터 3000만원");
+  assert.equal(resolveFreetextMediaSummaryLabel(r, true), "버스·쉘터");
+  assert.equal(
+    resolveFreetextMediaEvidenceLabel(r, true),
+    "버스·쉘터 (정류장·스마트쉘터)",
+  );
+});

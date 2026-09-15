@@ -13,7 +13,14 @@ import {
   getMediaCategoryBySlug,
 } from "@/lib/media-categories";
 import { plannerIndustryHintScore } from "@/lib/planner/industry-match";
-import { matchesPlannerCategory, mediaMatchesPlannerMobileIntent, mediaMatchesPlannerSubwayIntent, mediaMatchesPlannerBusWrapIntent, mediaMatchesBillboardIntent } from "@/lib/planner-logic";
+import {
+  matchesPlannerCategory,
+  mediaMatchesPlannerMobileIntent,
+  mediaMatchesPlannerSubwayIntent,
+  mediaMatchesPlannerBusWrapIntent,
+  mediaMatchesPlannerBusShelterIntent,
+  mediaMatchesBillboardIntent,
+} from "@/lib/planner-logic";
 import { matchesPlannerRegion } from "@/lib/planner/planner-regions";
 import {
   detectMediaSubwayLine,
@@ -428,7 +435,12 @@ function scoreCategory(
   categories: string[] | undefined,
   goal: string,
   goalTags: string[] | undefined,
-  mediaIntents?: readonly ("subway" | "bus_wrap" | "billboard")[],
+  mediaIntents?: readonly (
+    | "subway"
+    | "bus_wrap"
+    | "billboard"
+    | "bus_shelter"
+  )[],
   subwayLine?: string,
 ): number {
   const inputCats = (categories ?? []).map((c) => c.trim()).filter(Boolean);
@@ -523,6 +535,14 @@ function scoreCategory(
     } else {
       /* 아트래핑·역사 digital 등 — 풀에는 남기되 순위 하락 */
       best = Math.min(best, 3);
+    }
+  }
+
+  if (mediaIntents?.includes("bus_shelter")) {
+    if (mediaMatchesPlannerBusShelterIntent(m)) {
+      best = Math.max(best, 15);
+    } else {
+      best = Math.min(best, 2);
     }
   }
 
@@ -629,6 +649,8 @@ function resolveMatchPrecision(
     typeExact = mediaMatchesPlannerSubwayIntent(m);
   } else if (intents.includes("bus_wrap")) {
     typeExact = mediaMatchesPlannerBusWrapIntent(m);
+  } else if (intents.includes("bus_shelter")) {
+    typeExact = mediaMatchesPlannerBusShelterIntent(m);
   } else if ((input.categories?.length ?? 0) > 0) {
     typeExact = breakdown.category >= 12;
   }

@@ -41,7 +41,20 @@ export function isSubwayPrimaryMediaDisplay(
   return hasDoohLikeCategory(keys) && keys.includes("mobile");
 }
 
-/** 요약 문장·배너용 — "지하철" 메인 라벨 */
+/** high-confidence 쉘터 의도 — static category + bus_shelter intent */
+export function isShelterPrimaryMediaDisplay(
+  result: PlannerFreetextParseResult,
+): boolean {
+  const cats = result.fields.categories.value;
+  if (!cats?.length) return false;
+  if (result.fields.categories.confidence !== "high") return false;
+  if (!parseFreetextMediaIntents(result.raw).includes("bus_shelter")) return false;
+  if (isSubwayPrimaryMediaDisplay(result)) return false;
+
+  return cats.map(String).includes("static");
+}
+
+/** 요약 문장·배너용 — "지하철" / "버스·쉘터" 메인 라벨 */
 export function resolveFreetextMediaSummaryLabel(
   result: PlannerFreetextParseResult,
   isKo: boolean,
@@ -50,6 +63,9 @@ export function resolveFreetextMediaSummaryLabel(
   if (!cats?.length) return null;
   if (isSubwayPrimaryMediaDisplay(result)) {
     return isKo ? "지하철" : "Subway";
+  }
+  if (isShelterPrimaryMediaDisplay(result)) {
+    return isKo ? "버스·쉘터" : "Bus shelter";
   }
   return formatPlannerCategoriesLabel(cats, isKo);
 }
@@ -63,6 +79,9 @@ export function resolveFreetextMediaEvidenceLabel(
   if (!cats?.length) return null;
   if (isSubwayPrimaryMediaDisplay(result)) {
     return isKo ? "지하철 (역사·차내)" : "Subway (station & in-train)";
+  }
+  if (isShelterPrimaryMediaDisplay(result)) {
+    return isKo ? "버스·쉘터 (정류장·스마트쉘터)" : "Bus shelter (stop & smart shelter)";
   }
   return formatPlannerCategoriesLabel(cats, isKo);
 }

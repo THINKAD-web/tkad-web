@@ -66,6 +66,19 @@ test("parseFreetextMediaIntents: subway and bus wrap", () => {
   ]);
 });
 
+test("buildAiRecommendInputFromFreetext: 서울 쉘터 carries bus_shelter intent", () => {
+  const raw = "서울 쉘터 3000만원";
+  const parsed = parsePlannerFreetextBrief(raw);
+  const input = buildAiRecommendInputFromFreetext(
+    parsed,
+    fieldsToDraft(plannerFreetextToRecommendBrief(parsed, true)),
+    raw,
+    true,
+  );
+  assert.ok(input?.mediaIntents?.includes("bus_shelter"));
+  assert.ok(input?.plannerCategories?.includes("static"));
+});
+
 test("extractFreetextLocationKeywords: 을지로·명동", () => {
   assert.ok(extractFreetextLocationKeywords("을지로 F&B").includes("을지로"));
   assert.ok(extractFreetextLocationKeywords("명동 로컬").includes("명동"));

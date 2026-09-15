@@ -717,6 +717,10 @@ const MOBILE_EXCLUSIVE_RE =
 const SUBWAY_EXPLICIT_RE =
   /지하철\s*광고|지하철광고|지하철역|전동차|지하철\s*(?:매체|미디어|캠페인)|subway\s*(?:ad(?:vert)?|media|campaign)|metro\s*(?:ad(?:vert)?|media)/i;
 
+/** 버스·스마트 쉘터 — static OOH (지하철과 별도 intent) */
+const SHELTER_EXPLICIT_RE =
+  /쉘터|shelter|버스\s*쉘터|버스쉘터|스마트\s*쉘터|스마트쉘터|bus\s*shelter|smart\s*shelter/i;
+
 /** 매체 유형 키워드 → 플래너 categories (추측 금지·「만」 명시 우선) */
 export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
   const exclusiveSubway = text.match(
@@ -737,6 +741,18 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
       "high",
       explicitSubway[0].trim(),
     );
+  }
+
+  const exclusiveShelter = text.match(
+    /(?:버스\s*)?쉘터(?:\s*광고)?\s*만|만\s*(?:버스\s*)?쉘터/i,
+  );
+  if (exclusiveShelter) {
+    return field(["static"], "high", exclusiveShelter[0].trim());
+  }
+
+  const explicitShelter = text.match(SHELTER_EXPLICIT_RE);
+  if (explicitShelter && !SUBWAY_EXPLICIT_RE.test(text)) {
+    return field(["static"], "high", explicitShelter[0].trim());
   }
 
   const exclusiveMobile = text.match(MOBILE_EXCLUSIVE_RE);
@@ -767,6 +783,7 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
       cat: "static",
       re: /옥외|빌보드|고정형|billboard|outdoor(?!\s*digital)/i,
     },
+    { cat: "static", re: SHELTER_EXPLICIT_RE },
     {
       cat: "digital",
       re: /전광판|led|디지털(?:\s*사이니지)?|사이니지|dooh|signage/i,
