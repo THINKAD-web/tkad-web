@@ -7,6 +7,7 @@ import {
   type MediaPricePeriodKey,
 } from "@/lib/media-data";
 import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
+import type { MediaHotspotTag } from "@/lib/matching/region-hotspot";
 import type { MediaTrustBadge } from "@/lib/media-trust";
 
 /** Slim price option — enough for list-card cheapest-price logic */
@@ -53,6 +54,8 @@ export type MediaCatalogListItem = {
   targetCategory?: string[];
   operatingHours?: string;
   tags?: string[];
+  /** 3c hotspot scoring — planner·recommend matching */
+  hotspotTags?: MediaHotspotTag[];
   isVerified?: boolean;
   averageRating?: number;
   reviewCount?: number;
@@ -105,6 +108,7 @@ export const MEDIA_CATALOG_LIST_ITEM_KEYS = [
   "targetCategory",
   "operatingHours",
   "tags",
+  "hotspotTags",
   "isVerified",
   "averageRating",
   "reviewCount",
@@ -180,6 +184,7 @@ export function mediaItemToCatalogListItem(item: MediaItem): MediaCatalogListIte
     targetCategory: item.targetCategory?.length ? item.targetCategory : undefined,
     operatingHours: item.operatingHours,
     tags: item.tags?.length ? item.tags : undefined,
+    hotspotTags: item.hotspotTags?.length ? item.hotspotTags : undefined,
     isVerified: item.isVerified === true ? true : undefined,
     averageRating: positiveOrUndefined(item.averageRating),
     reviewCount: positiveOrUndefined(item.reviewCount),
@@ -256,6 +261,7 @@ export function catalogListItemToMediaItem(
     targetCategory: item.targetCategory,
     operatingHours: item.operatingHours,
     tags: item.tags,
+    hotspotTags: item.hotspotTags,
     isVerified: item.isVerified,
     averageRating: item.averageRating,
     reviewCount: item.reviewCount,

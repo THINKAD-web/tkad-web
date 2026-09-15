@@ -128,13 +128,13 @@ test("matchesBrowseRegion — blocks nationwide 금호 for seoul_gangnam", () =>
   );
 });
 
-test("matchesBrowseRegion — blocks 교보문고 for seoul_gangnam (광주 primary)", () => {
+test("matchesBrowseRegion — blocks nationwide 교보문고 for seoul_gangnam", () => {
   const kyobo = mockMedia({
     id: "nw_kyobo",
     name: "교보문고 디앱스 영상보드광고",
-    location: "광주광역시 동구",
-    regionMain: "seoul",
-    regionSub: "seoul_cbd",
+    location: "서울, 경기, 부산, 광주, 전국",
+    regionMain: "national",
+    region: "national",
     type: "network",
     networkLocations: [
       {
@@ -149,6 +149,7 @@ test("matchesBrowseRegion — blocks 교보문고 for seoul_gangnam (광주 prim
     matchesBrowseRegion(kyobo, "seoul", "seoul_gangnam", ""),
     false,
   );
+  assert.equal(matchesBrowseRegion(kyobo, "busan", "", ""), true);
 });
 
 test("matchesBrowseRegion — national regionMain matches any browse regionMain", () => {

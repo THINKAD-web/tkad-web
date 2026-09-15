@@ -43,6 +43,23 @@ test("list DTO round-trip drops detail blobs but keeps filter fields", () => {
   assert.equal(item.trafficPattern, undefined);
 });
 
+test("list DTO round-trip preserves hotspotTags for matching", () => {
+  const tags = [
+    {
+      regionId: "jeju",
+      zoneId: "jeju_downtown",
+      type: "residential" as const,
+      weight: 1,
+    },
+  ];
+  const items = catalogListItemsToMediaItems(
+    mediaItemsToCatalogListItems([
+      stubMedia({ regionMain: "jeju", hotspotTags: tags }),
+    ]),
+  );
+  assert.deepEqual(items[0]?.hotspotTags, tags);
+});
+
 test("857-item slim JSON stays under 2MB Data Cache limit", () => {
   const items = catalogListItemsToMediaItems(
     mediaItemsToCatalogListItems(
