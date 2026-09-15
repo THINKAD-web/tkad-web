@@ -24,9 +24,9 @@ export function isPlannerSeoulZoneKey(v: unknown): v is PlannerSeoulZoneKey {
   );
 }
 
-type ZoneDef = { exact: RegExp; adjacent: RegExp };
+export type PlannerSeoulZoneRegionDef = { exact: RegExp; adjacent: RegExp };
 
-const SEOUL_ZONE_DEFS: Record<PlannerSeoulZoneKey, ZoneDef> = {
+const SEOUL_ZONE_DEFS: Record<PlannerSeoulZoneKey, PlannerSeoulZoneRegionDef> = {
   gangnam: {
     exact: /강남|서초|역삼|삼성|청담|논현|테헤란|coex|선릉|신논현/i,
     adjacent: /양재|대치|도곡|개포|관악|동작|사당|신림|봉천/i,
@@ -65,6 +65,12 @@ const SEOUL_ZONE_DEFS: Record<PlannerSeoulZoneKey, ZoneDef> = {
     adjacent: /영등포|구로/i,
   },
 };
+
+/** matching-engine `REGION_DEFS` — seoulZones SSOT 재사용 */
+export const PLANNER_SEOUL_ZONE_REGION_DEFS: Record<
+  PlannerSeoulZoneKey,
+  PlannerSeoulZoneRegionDef
+> = SEOUL_ZONE_DEFS;
 
 export const PLANNER_SEOUL_ZONE_LABELS: Record<
   PlannerSeoulZoneKey,
@@ -111,7 +117,7 @@ export const SEOUL_ZONE_REGEX: { zone: PlannerSeoulZoneKey; re: RegExp }[] = [
   },
   {
     zone: "seongsu",
-    re: /성수(?:동|역)?(?:\s*(?:근처|일대|주변))?|성수\s*일대|뚝섬|건대|왕십리/i,
+    re: /성수(?:동|역)?(?:\s*(?:근처|일대|주변))?|성수\s*일대|성동(?:구)?|뚝섬|건대|왕십리/i,
   },
   {
     zone: "myeongdong",
@@ -135,7 +141,7 @@ export const SEOUL_ZONE_REGEX: { zone: PlannerSeoulZoneKey; re: RegExp }[] = [
   },
   {
     zone: "jamsil",
-    re: /잠실|송파|강동|천호|롯데월드/i,
+    re: /잠실(?:역)?|송파|강동|천호|롯데월드/i,
   },
   {
     zone: "gangbuk",

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { OOH_KEYWORD_INTENTS } from "@/lib/planner/keyword-intent-map";
 import { PLANNER_BUSAN_ZONE_KEYS } from "@/lib/planner/busan-zones";
 import { PLANNER_GYEONGGI_ZONE_KEYS } from "@/lib/planner/gyeonggi-zones";
 import { PLANNER_INCHEON_ZONE_KEYS } from "@/lib/planner/incheon-zones";
@@ -37,7 +38,16 @@ export const recommendInputSchema = z.object({
   digitalBudgetPct: z.number().min(0).max(100).optional(),
   /** 자연어 파서가 추출한 매체유형 의도 (예: "지하철" → subway) — 없으면 zod가
    * 조용히 스트립해 matching-engine 의 노선/유형 가점 로직이 무력화됨. */
-  mediaIntents: z.array(z.enum(["subway", "bus_wrap", "billboard"])).optional(),
+  mediaIntents: z
+    .array(
+      z.enum(
+        [...new Set(OOH_KEYWORD_INTENTS.map((e) => e.intent))] as [
+          (typeof OOH_KEYWORD_INTENTS)[number]["intent"],
+          ...(typeof OOH_KEYWORD_INTENTS)[number]["intent"][],
+        ],
+      ),
+    )
+    .optional(),
   subwayLine: z.string().max(32).optional(),
 });
 

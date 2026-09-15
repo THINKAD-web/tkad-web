@@ -349,6 +349,28 @@ export function mediaMatchesPlannerSubwayIntent(item: MediaItem): boolean {
 const PLANNER_BUS_WRAP_RE =
   /(?:버스|bus)(?:\s*(?:래핑|랩핑|wrap|외부|exterior))|(?:래핑|랩핑|wrap).*(?:버스|bus)|vehicle\s*wrap|bus_wrap/i;
 
+const PLANNER_BUS_SHELTER_PRIMARY_RE =
+  /쉘터|shelter|버스\s*쉘터|버스쉘터|스마트\s*쉘터|스마트쉘터|bus\s*shelter|smart\s*shelter|정류장\s*(?:디지털\s*)?쉘터/i;
+
+/** 버스·스마트·택시 쉘터 — 지하철 역사 DOOH 제외 */
+export function mediaMatchesPlannerBusShelterIntent(item: MediaItem): boolean {
+  const primary = plannerMobilePrimaryHaystack(item);
+  if (!primary.trim()) return false;
+
+  const sub = `${item.mediaSubCategory ?? ""} ${item.subCategory ?? ""}`;
+  const hay = `${primary} ${sub}`;
+
+  if (
+    /지하철|subway|역사[\s_(]|platform|screendoor|cm보드/i.test(hay) &&
+    !PLANNER_BUS_SHELTER_PRIMARY_RE.test(hay)
+  ) {
+    return false;
+  }
+
+  if (/bus_shelter/i.test(sub)) return true;
+  return PLANNER_BUS_SHELTER_PRIMARY_RE.test(hay);
+}
+
 /** 버스·차량 래핑 — 터미널 LED·전광판 제외 */
 export function mediaMatchesPlannerBusWrapIntent(item: MediaItem): boolean {
   const primary = plannerMobilePrimaryHaystack(item);

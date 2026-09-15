@@ -13,8 +13,23 @@ import {
   getMediaCategoryBySlug,
 } from "@/lib/media-categories";
 import { plannerIndustryHintScore } from "@/lib/planner/industry-match";
-import { matchesPlannerCategory, mediaMatchesPlannerMobileIntent, mediaMatchesPlannerSubwayIntent, mediaMatchesPlannerBusWrapIntent, mediaMatchesBillboardIntent } from "@/lib/planner-logic";
+import {
+  mediaMatchesOohIntent,
+  type OohKeywordIntent,
+} from "@/lib/planner/keyword-intent-map";
+import {
+  matchesPlannerCategory,
+  mediaMatchesPlannerMobileIntent,
+  mediaMatchesPlannerSubwayIntent,
+  mediaMatchesPlannerBusWrapIntent,
+  mediaMatchesPlannerBusShelterIntent,
+  mediaMatchesBillboardIntent,
+} from "@/lib/planner-logic";
 import { matchesPlannerRegion } from "@/lib/planner/planner-regions";
+import { PLANNER_BUSAN_ZONE_REGION_DEFS } from "@/lib/planner/busan-zones";
+import { PLANNER_GYEONGGI_ZONE_REGION_DEFS } from "@/lib/planner/gyeonggi-zones";
+import { PLANNER_INCHEON_ZONE_REGION_DEFS } from "@/lib/planner/incheon-zones";
+import { PLANNER_SEOUL_ZONE_REGION_DEFS } from "@/lib/planner/seoul-zones";
 import {
   detectMediaSubwayLine,
   subwayLinesMatch,
@@ -106,50 +121,22 @@ export type MatchedMedia = {
 type RegionDef = { exact: RegExp; adjacent: RegExp };
 
 const REGION_DEFS: Record<string, RegionDef> = {
-  gangnam: {
-    exact: /강남|서초|역삼|삼성|청담|논현|테헤란|coex|선릉|신논현/i,
-    adjacent: /송파|잠실|양재|대치|도곡|개포/i,
-  },
-  hongdae: {
-    /* 홍대 코어 상권(도보권). 신촌·공덕·서강은 adjacent(인근). */
-    exact: /홍대|합정|상수|연남|망원|홍익/i,
-    adjacent: /신촌|서강|공덕|마포|용산|이태원|서대문|은평/i,
-  },
-  seongsu: {
-    exact: /성수|뚝섬|건대|왕십리|성동|연무장/i,
-    adjacent: /송정|군자|광진|동대문/i,
-  },
-  myeongdong: {
-    exact: /명동|중구|을지로|충무로|동대문|시청|남대문/i,
-    adjacent: /종로|광화문|필동|회현/i,
-  },
-  yeouido: {
-    exact: /여의도|영등포|당산|문래|국회|ifc/i,
-    adjacent: /마포|용산|강서/i,
-  },
+  ...PLANNER_SEOUL_ZONE_REGION_DEFS,
+  ...PLANNER_BUSAN_ZONE_REGION_DEFS,
+  ...PLANNER_GYEONGGI_ZONE_REGION_DEFS,
+  ...PLANNER_INCHEON_ZONE_REGION_DEFS,
   busan: {
     exact: /부산|해운대|센텀|광안|서면|남포/i,
     adjacent: /김해|양산|기장/i,
   },
-  centum: {
-    exact: /센텀|벡스코|bexco|centum|마린시티|센텀시티/i,
-    adjacent: /해운대|우동|동천/i,
+  gyeonggi: {
+    exact:
+      /경기|판교|분당|수원|일산|고양|부천|김포|하남|용인|안양|화성|동탄|광명|성남|킨텍스|위례/i,
+    adjacent: /서울|인천|수도권/i,
   },
-  haeundae: {
-    exact: /해운대|동백|송정|마린|해수욕/i,
-    adjacent: /센텀|반송|재송/i,
-  },
-  seomyeon: {
-    exact: /서면|부전|전포|범천|양정/i,
-    adjacent: /부산진|연산|망미/i,
-  },
-  nampo: {
-    exact: /남포|광복|자갈치|보수동/i,
-    adjacent: /영도|동광|부산역/i,
-  },
-  downtown: {
-    exact: /부산\s*시내|부산역|초량|참전/i,
-    adjacent: /중구|영도|부암/i,
+  incheon: {
+    exact: /인천|송도|부평|주안|공항|영종|구월|계양|미추홀/i,
+    adjacent: /경기|서울|김포/i,
   },
   jeju: {
     exact: /제주|중문|서귀|애월/i,
@@ -175,12 +162,44 @@ const REGION_ALIASES: Record<string, string> = {
   성수: "seongsu",
   명동: "myeongdong",
   여의도: "yeouido",
+  구로: "guro",
+  가산: "guro",
+  잠실: "jamsil",
+  송파: "jamsil",
+  노원: "gangbuk",
+  상봉: "gangbuk",
+  강서: "gangseo",
+  목동: "gangseo",
   부산: "busan",
   센텀: "centum",
   벡스코: "centum",
   해운대: "haeundae",
   서면: "seomyeon",
   남포: "nampo",
+  "부산 시내": "downtown",
+  분당: "seongnam",
+  판교: "seongnam",
+  수원: "suwon",
+  일산: "goyang",
+  고양: "goyang",
+  부천: "bucheon",
+  김포: "gimpo",
+  하남: "hanam",
+  위례: "hanam",
+  용인: "yongin",
+  안양: "anyang",
+  군포: "anyang",
+  화성: "hwaseong",
+  동탄: "hwaseong",
+  광명: "gwangmyeong",
+  경기: "gyeonggi",
+  인천: "incheon",
+  송도: "incheon_songdo",
+  인천공항: "incheon_airport",
+  "인천 국제공항": "incheon_airport",
+  부평: "incheon_downtown",
+  주안: "incheon_downtown",
+  "인천 시내": "incheon_downtown",
   제주: "jeju",
   전국: "national",
   서울: "seoul",
@@ -189,6 +208,9 @@ const REGION_ALIASES: Record<string, string> = {
   seoul_myeongdong: "myeongdong",
   seoul_yeouido: "yeouido",
   seoul_etc: "seoul",
+  incheon_airport: "incheon_airport",
+  incheon_songdo: "incheon_songdo",
+  incheon_downtown: "incheon_downtown",
 };
 
 const INDUSTRY_DEFS: Record<
@@ -433,7 +455,7 @@ function scoreCategory(
   categories: string[] | undefined,
   goal: string,
   goalTags: string[] | undefined,
-  mediaIntents?: readonly ("subway" | "bus_wrap" | "billboard")[],
+  mediaIntents?: readonly OohKeywordIntent[],
   subwayLine?: string,
 ): number {
   const inputCats = (categories ?? []).map((c) => c.trim()).filter(Boolean);
@@ -496,38 +518,57 @@ function scoreCategory(
     }
   }
 
-  if (mediaIntents?.includes("subway")) {
-    const queryLine = subwayLine?.trim();
-    const mediaLine = queryLine ? detectMediaSubwayLine(m) : null;
+  for (const intent of mediaIntents ?? []) {
+    if (intent === "subway") {
+      const queryLine = subwayLine?.trim();
+      const mediaLine = queryLine ? detectMediaSubwayLine(m) : null;
 
-    if (queryLine && mediaLine && !subwayLinesMatch(queryLine, mediaLine.key)) {
-      best = Math.min(best, 2);
-    } else if (mediaMatchesPlannerSubwayIntent(m)) {
+      if (queryLine && mediaLine && !subwayLinesMatch(queryLine, mediaLine.key)) {
+        best = Math.min(best, 2);
+      } else if (mediaMatchesPlannerSubwayIntent(m)) {
+        best = Math.max(best, 15);
+      } else {
+        best = Math.min(best, 2);
+      }
+      continue;
+    }
+
+    if (intent === "bus_wrap") {
+      if (mediaMatchesPlannerBusWrapIntent(m)) {
+        best = Math.max(best, 15);
+      } else if (
+        /터미널|terminal|전광판|led|dooh|미디어타워/i.test(plannerCategoryHaystack(m)) &&
+        !/래핑|wrap|외부/i.test(plannerCategoryHaystack(m))
+      ) {
+        best = Math.min(best, 2);
+      } else {
+        best = Math.min(best, 4);
+      }
+      continue;
+    }
+
+    if (intent === "billboard") {
+      if (mediaMatchesBillboardIntent(m)) {
+        best = Math.max(best, 15);
+      } else {
+        best = Math.min(best, 3);
+      }
+      continue;
+    }
+
+    if (intent === "bus_shelter") {
+      if (mediaMatchesPlannerBusShelterIntent(m)) {
+        best = Math.max(best, 15);
+      } else {
+        best = Math.min(best, 2);
+      }
+      continue;
+    }
+
+    if (mediaMatchesOohIntent(m, intent)) {
       best = Math.max(best, 15);
     } else {
       best = Math.min(best, 2);
-    }
-  }
-
-  if (mediaIntents?.includes("bus_wrap")) {
-    if (mediaMatchesPlannerBusWrapIntent(m)) {
-      best = Math.max(best, 15);
-    } else if (
-      /터미널|terminal|전광판|led|dooh|미디어타워/i.test(plannerCategoryHaystack(m)) &&
-      !/래핑|wrap|외부/i.test(plannerCategoryHaystack(m))
-    ) {
-      best = Math.min(best, 2);
-    } else if (!mediaMatchesPlannerBusWrapIntent(m)) {
-      best = Math.min(best, 4);
-    }
-  }
-
-  if (mediaIntents?.includes("billboard")) {
-    if (mediaMatchesBillboardIntent(m)) {
-      best = Math.max(best, 15);
-    } else {
-      /* 아트래핑·역사 digital 등 — 풀에는 남기되 순위 하락 */
-      best = Math.min(best, 3);
     }
   }
 
@@ -634,6 +675,8 @@ function resolveMatchPrecision(
     typeExact = mediaMatchesPlannerSubwayIntent(m);
   } else if (intents.includes("bus_wrap")) {
     typeExact = mediaMatchesPlannerBusWrapIntent(m);
+  } else if (intents.includes("bus_shelter")) {
+    typeExact = mediaMatchesPlannerBusShelterIntent(m);
   } else if ((input.categories?.length ?? 0) > 0) {
     typeExact = breakdown.category >= 12;
   }

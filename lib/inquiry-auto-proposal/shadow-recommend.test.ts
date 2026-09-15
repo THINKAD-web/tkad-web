@@ -188,7 +188,7 @@ const PILOT_SHADOW_GOLDEN = {
   recommendCount: 5,
   recommendTopIds: ["welcome", "t2", "t1", "checkin", "pkg"],
   recommendTopScores: [
-    { id: "welcome", score: 100 },
+    { id: "welcome", score: 92 },
     { id: "t2", score: 72 },
     { id: "t1", score: 72 },
     { id: "checkin", score: 72 },

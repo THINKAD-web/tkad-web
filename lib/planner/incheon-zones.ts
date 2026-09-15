@@ -20,9 +20,12 @@ export function isPlannerIncheonZoneKey(
   );
 }
 
-type ZoneDef = { exact: RegExp; adjacent: RegExp };
+export type PlannerIncheonZoneRegionDef = { exact: RegExp; adjacent: RegExp };
 
-const INCHEON_ZONE_DEFS: Record<PlannerIncheonZoneKey, ZoneDef> = {
+const INCHEON_ZONE_DEFS: Record<
+  PlannerIncheonZoneKey,
+  PlannerIncheonZoneRegionDef
+> = {
   airport: {
     exact:
       /인천국제공항|인천공항|제[12]터미널|공항철도|키로뷰\s*인천|영종|운서|공항로/i,
@@ -37,6 +40,22 @@ const INCHEON_ZONE_DEFS: Record<PlannerIncheonZoneKey, ZoneDef> = {
     adjacent: /남동|동구|중구(?!.*공항)/i,
   },
 };
+
+/** matching-engine `REGION_DEFS` — incheonZones SSOT (`downtown` → `incheon_downtown` 키) */
+export const PLANNER_INCHEON_ZONE_REGION_DEFS: Record<
+  `incheon_${PlannerIncheonZoneKey}`,
+  PlannerIncheonZoneRegionDef
+> = {
+  incheon_airport: INCHEON_ZONE_DEFS.airport,
+  incheon_songdo: INCHEON_ZONE_DEFS.songdo,
+  incheon_downtown: INCHEON_ZONE_DEFS.downtown,
+};
+
+export function incheonZoneToMatchingRegionKey(
+  zone: PlannerIncheonZoneKey,
+): keyof typeof PLANNER_INCHEON_ZONE_REGION_DEFS {
+  return `incheon_${zone}`;
+}
 
 export const PLANNER_INCHEON_ZONE_LABELS: Record<
   PlannerIncheonZoneKey,
@@ -138,7 +157,7 @@ export function incheonZonesToMatchingRegions(
   }
   if (hasIncheon) {
     if (zones.length > 0) {
-      for (const z of zones) out.push(z);
+      for (const z of zones) out.push(incheonZoneToMatchingRegionKey(z));
     } else {
       out.push("incheon");
     }
