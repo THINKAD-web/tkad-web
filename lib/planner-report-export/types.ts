@@ -273,6 +273,7 @@ export type PlannerReportExportPayload = {
   goalTitle: string;
   /** 총 캠페인 예산 (만원 단위) */
   budgetMan: number;
+  budgetTbd?: boolean;
   periodDisplay: string;
   regionsText: string;
   categoriesText: string;

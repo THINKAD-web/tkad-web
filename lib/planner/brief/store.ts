@@ -119,6 +119,7 @@ export type BriefStoreState = CampaignBriefInput & {
 
 export type BriefStoreActions = {
   setBudgetInputWon: (won: number) => void;
+  setBudgetTbd: (tbd: boolean) => void;
   setBudgetMode: (mode: BudgetMode) => void;
   setRegionCodes: (codes: SidoCode[]) => void;
   toggleRegion: (code: SidoCode) => void;
@@ -254,7 +255,15 @@ export const useBriefStore = create<BriefStore>()(
       ...INITIAL,
 
       setBudgetInputWon: (won) =>
-        set({ budgetInputWon: Math.max(0, Math.round(won)) }),
+        set({
+          budgetInputWon: Math.max(0, Math.round(won)),
+          budgetTbd: false,
+        }),
+      setBudgetTbd: (tbd) =>
+        set((s) => ({
+          budgetTbd: tbd ? true : undefined,
+          budgetInputWon: tbd ? 0 : s.budgetInputWon,
+        })),
       setBudgetMode: (mode) => set({ budgetMode: mode }),
       setRegionCodes: (codes) =>
         set({ regionCodes: normalizeSidoCodes(codes) }),

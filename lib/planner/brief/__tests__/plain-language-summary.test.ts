@@ -8,6 +8,20 @@ import {
 import { formatReach } from "@/components/planner/brief/metrics-panel";
 import { EMPTY_BRIEF } from "@/lib/planner/brief/types";
 
+test("예산 미정(TBD)이면 금액 대신 예산 미정 문구를 쓴다", () => {
+  const s = buildPlainLanguageSummary({
+    isKo: true,
+    budgetWon: 0,
+    budgetTbd: true,
+    totalImpressions: 9_198,
+    netReach: null,
+    formatCompact: formatReach,
+  });
+  assert.match(s, /예산 미정/);
+  assert.doesNotMatch(s, /0만원/);
+  assert.doesNotMatch(s, /₩0/);
+});
+
 test("도달이 산정됐으면 노출·도달 두 숫자를 다 문장에 담는다", () => {
   const s = buildPlainLanguageSummary({
     isKo: true,

@@ -23,6 +23,7 @@ import {
 } from "@/lib/recommend/freetext-recommend-defaults";
 import { FreetextExampleChips } from "@/components/planner/freetext-example-chips";
 import { cn } from "@/lib/utils";
+import { budgetTbdLabel } from "@/lib/budget-tbd";
 
 /**
  * AI 자연어 입력 — 규칙 파서(0토큰).
@@ -75,6 +76,7 @@ type Draft = {
   goal: string;
   target: string;
   budgetMan: string;
+  budgetTbd?: boolean;
   region: string;
   industry: string;
 };
@@ -343,25 +345,50 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
             </select>
           </label>
 
-          <label className="space-y-1">
+          <div className="space-y-2">
             <span className="text-xs font-medium text-gray-600 dark:text-white/60">
               {isKo ? "월 예산 상한 (만원)" : "Monthly budget (10K KRW)"}
             </span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min={0}
-              value={draft.budgetMan}
-              onChange={(e) =>
-                setDraft((d) => ({ ...d, budgetMan: e.target.value }))
-              }
-              placeholder={isKo ? "예: 500" : "e.g. 500"}
-              className={cn(
-                selCls,
-                Number(draft.budgetMan) > 0 ? filledRing : emptyRing,
-              )}
-            />
-          </label>
+            {draft.budgetTbd ? (
+              <p className={cn(selCls, "flex items-center font-medium")}>
+                {budgetTbdLabel(isKo)}
+              </p>
+            ) : (
+              <input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                value={draft.budgetMan}
+                onChange={(e) =>
+                  setDraft((d) => ({
+                    ...d,
+                    budgetMan: e.target.value,
+                    budgetTbd: false,
+                  }))
+                }
+                placeholder={isKo ? "예: 500" : "e.g. 500"}
+                className={cn(
+                  selCls,
+                  Number(draft.budgetMan) > 0 ? filledRing : emptyRing,
+                )}
+              />
+            )}
+            <label className="flex cursor-pointer items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={draft.budgetTbd === true}
+                onChange={(e) =>
+                  setDraft((d) => ({
+                    ...d,
+                    budgetTbd: e.target.checked,
+                    budgetMan: e.target.checked ? "" : d.budgetMan,
+                  }))
+                }
+                className="size-4 rounded accent-[color:var(--qp-accent)]"
+              />
+              {budgetTbdLabel(isKo)}
+            </label>
+          </div>
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600 dark:text-white/60">

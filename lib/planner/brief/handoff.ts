@@ -179,7 +179,11 @@ export function planCartToBriefHandoff(
 ): { patch: Partial<CampaignBriefInput>; mix: HandoffMixResult } {
   const patch: Partial<CampaignBriefInput> = {};
 
-  if (cart.totalBudget != null && cart.totalBudget > 0) {
+  if (cart.budgetTbd === true) {
+    patch.budgetTbd = true;
+    patch.budgetInputWon = 0;
+    patch.budgetMode = "monthly";
+  } else if (cart.totalBudget != null && cart.totalBudget > 0) {
     // 카트의 totalBudget 은 원 단위 월예산으로 쓰인다 (plan-cart-planner-bridge 와 동일 해석)
     patch.budgetInputWon = Math.round(cart.totalBudget);
     patch.budgetMode = "monthly";

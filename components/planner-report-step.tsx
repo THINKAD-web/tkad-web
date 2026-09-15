@@ -94,6 +94,7 @@ export type PlannerReportSharedProps = {
   campaignGoal: PlannerCampaignGoal | null;
   goalTitle: string;
   budgetNum: number;
+  budgetTbd?: boolean;
   months: number;
   regionsText: string;
   categoriesText: string;
@@ -794,6 +795,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         campaignGoal={props.campaignGoal}
         goalFollowUp={props.goalFollowUp}
         budgetNum={props.budgetNum}
+        budgetTbd={props.budgetTbd}
         periodDisplay={derived.periodDisplay}
         regionsText={props.regionsText}
         categoriesText={props.categoriesText}

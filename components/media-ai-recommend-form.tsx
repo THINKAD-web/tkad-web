@@ -17,6 +17,7 @@ import { PlannerBusanZoneChips } from "@/components/planner/planner-busan-zone-c
 import { PlannerGyeonggiZoneChips } from "@/components/planner/planner-gyeonggi-zone-chips";
 import { PlannerIncheonZoneChips } from "@/components/planner/planner-incheon-zone-chips";
 import { cn } from "@/lib/utils";
+import { BUDGET_TBD_MATCHING_FALLBACK_MAN, budgetTbdLabel } from "@/lib/budget-tbd";
 import {
   PLACEMENT_HINT_KEYS,
   type AiRecommendInput,
@@ -173,6 +174,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   );
   const [ageBands, setAgeBands] = useState<Set<AgeBand>>(() => new Set());
   const [budgetMan, setBudgetMan] = useState(1000);
+  const [budgetTbd, setBudgetTbd] = useState(false);
   const [digitalBudgetPct, setDigitalBudgetPct] = useState(30);
   const [digitalBudgetTouched, setDigitalBudgetTouched] = useState(false);
   const [campaignGoal, setCampaignGoal] = useState<CampaignGoal | null>(null);
@@ -506,6 +508,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       channel: RecommendChannelType,
       digitalPct: number,
       digitalTouched: boolean,
+      tbd: boolean,
     ): MediaAiRecommendFormSubmit => {
       const regionCodes = [...regionSet];
       let regionCode: AiRecommendInput["region"] = "all";
@@ -516,7 +519,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       const input: AiRecommendInput = {
         goal,
         target: mapAgeBands(ageSet),
-        budgetMaxMan: Math.round(budget),
+        budgetMaxMan: tbd
+          ? BUDGET_TBD_MATCHING_FALLBACK_MAN
+          : Math.round(budget),
+        ...(tbd ? { budgetTbd: true as const } : {}),
         region: regionCode,
         industry: industryVal ?? "other",
         preferredPeriodWeeks: period ?? 4,
@@ -571,6 +577,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         channelType,
         digitalBudgetPct,
         digitalBudgetTouched,
+        budgetTbd,
       ),
     );
   };
@@ -771,41 +778,56 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
 
           <FormField
             label={tr("form.budgetLabel")}
-            required
+            required={!budgetTbd}
             hint={tr("form.budgetHint")}
             {...fieldBadge}
           >
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-white/5">
-              <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
-                <span>
-                  {isKo
-                    ? `${budgetMin.toLocaleString()}만원`
-                    : `${budgetMin.toLocaleString()}`}
-                </span>
-                <span className="text-sm font-bold text-[color:var(--qp-accent)]">
-                  {isKo
-                    ? `${budgetMan.toLocaleString()}만원`
-                    : `${budgetMan.toLocaleString()}`}
-                </span>
-                <span>
-                  {isKo
-                    ? `${budgetMax.toLocaleString()}만원`
-                    : `${budgetMax.toLocaleString()}`}
-                </span>
+            {budgetTbd ? (
+              <p className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium dark:border-white/15 dark:bg-white/5">
+                {budgetTbdLabel(isKo)}
+              </p>
+            ) : (
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-white/5">
+                <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
+                  <span>
+                    {isKo
+                      ? `${budgetMin.toLocaleString()}만원`
+                      : `${budgetMin.toLocaleString()}`}
+                  </span>
+                  <span className="text-sm font-bold text-[color:var(--qp-accent)]">
+                    {isKo
+                      ? `${budgetMan.toLocaleString()}만원`
+                      : `${budgetMan.toLocaleString()}`}
+                  </span>
+                  <span>
+                    {isKo
+                      ? `${budgetMax.toLocaleString()}만원`
+                      : `${budgetMax.toLocaleString()}`}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={budgetMin}
+                  max={budgetMax}
+                  step={100}
+                  value={budgetMan}
+                  onChange={(e) => setBudgetMan(Number(e.target.value))}
+                  className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-[color:var(--qp-accent)] dark:bg-white/10"
+                  aria-valuemin={budgetMin}
+                  aria-valuemax={budgetMax}
+                  aria-valuenow={budgetMan}
+                />
               </div>
+            )}
+            <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-white/80">
               <input
-                type="range"
-                min={budgetMin}
-                max={budgetMax}
-                step={100}
-                value={budgetMan}
-                onChange={(e) => setBudgetMan(Number(e.target.value))}
-                className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-[color:var(--qp-accent)] dark:bg-white/10"
-                aria-valuemin={budgetMin}
-                aria-valuemax={budgetMax}
-                aria-valuenow={budgetMan}
+                type="checkbox"
+                checked={budgetTbd}
+                onChange={(e) => setBudgetTbd(e.target.checked)}
+                className="size-4 rounded border-gray-300 accent-[color:var(--qp-accent)]"
               />
-            </div>
+              {budgetTbdLabel(isKo)}
+            </label>
           </FormField>
 
           {campaignGoal ? (

@@ -48,6 +48,7 @@ import {
 } from "@/lib/planner/brief/brief-integrated-adapters";
 import { BriefQuickRankPanel } from "@/components/planner/brief/brief-quick-rank";
 import { countMixUnits } from "@/lib/planner/brief/brief-fingerprint";
+import { budgetTbdLabel } from "@/lib/budget-tbd";
 
 const GOAL_LABELS: Record<BriefGoal, { ko: string; en: string }> = {
   awareness: { ko: "인지", en: "Awareness" },
@@ -240,22 +241,37 @@ export function BriefStepOne({
             <SectionLabel required>
               {isKo ? "예산" : "Budget"}
             </SectionLabel>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1">
-                <Input
-                  inputMode="numeric"
-                  value={budgetManInput}
-                  onChange={(e) => {
-                    const n = Number(e.target.value.replace(/[^0-9]/g, ""));
-                    store.setBudgetInputWon(Number.isFinite(n) ? n * 10_000 : 0);
-                  }}
-                  placeholder="3000"
-                  className="w-32 text-right"
-                />
-                <span className="text-sm text-muted-foreground">
-                  {isKo ? "만원" : "0k KRW"}
+            <div className="flex flex-wrap items-center gap-3">
+              {store.budgetTbd ? (
+                <span className="rounded-lg border border-dashed border-border px-3 py-2 text-sm font-medium">
+                  {budgetTbdLabel(isKo)}
                 </span>
-              </div>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <Input
+                    inputMode="numeric"
+                    value={budgetManInput}
+                    onChange={(e) => {
+                      const n = Number(e.target.value.replace(/[^0-9]/g, ""));
+                      store.setBudgetInputWon(Number.isFinite(n) ? n * 10_000 : 0);
+                    }}
+                    placeholder="3000"
+                    className="w-32 text-right"
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    {isKo ? "만원" : "0k KRW"}
+                  </span>
+                </div>
+              )}
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={store.budgetTbd === true}
+                  onChange={(e) => store.setBudgetTbd(e.target.checked)}
+                  className="size-4 rounded border-gray-300 accent-primary"
+                />
+                {budgetTbdLabel(isKo)}
+              </label>
             </div>
             <div className="mt-3">
               <BriefPresetPicker
@@ -434,22 +450,37 @@ export function BriefStepOne({
         <SectionLabel required>
           {isKo ? "예산" : "Budget"}
         </SectionLabel>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1">
-            <Input
-              inputMode="numeric"
-              value={budgetManInput}
-              onChange={(e) => {
-                const n = Number(e.target.value.replace(/[^0-9]/g, ""));
-                store.setBudgetInputWon(Number.isFinite(n) ? n * 10_000 : 0);
-              }}
-              placeholder="3000"
-              className="w-32 text-right"
-            />
-            <span className="text-sm text-muted-foreground">
-              {isKo ? "만원" : "0k KRW"}
+        <div className="flex flex-wrap items-center gap-3">
+          {store.budgetTbd ? (
+            <span className="rounded-lg border border-dashed border-border px-3 py-2 text-sm font-medium">
+              {budgetTbdLabel(isKo)}
             </span>
-          </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <Input
+                inputMode="numeric"
+                value={budgetManInput}
+                onChange={(e) => {
+                  const n = Number(e.target.value.replace(/[^0-9]/g, ""));
+                  store.setBudgetInputWon(Number.isFinite(n) ? n * 10_000 : 0);
+                }}
+                placeholder="3000"
+                className="w-32 text-right"
+              />
+              <span className="text-sm text-muted-foreground">
+                {isKo ? "만원" : "0k KRW"}
+              </span>
+            </div>
+          )}
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={store.budgetTbd === true}
+              onChange={(e) => store.setBudgetTbd(e.target.checked)}
+              className="size-4 rounded border-gray-300 accent-primary"
+            />
+            {budgetTbdLabel(isKo)}
+          </label>
           <div className="inline-flex overflow-hidden rounded-lg border border-border">
             {(["total", "monthly"] as const).map((mode) => (
               <button

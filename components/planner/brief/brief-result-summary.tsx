@@ -23,6 +23,7 @@ import { buildPlainLanguageSummary } from "@/lib/planner/brief/plain-language-su
 export function BriefResultSummary({
   isKo,
   budgetWon,
+  budgetTbd = false,
   totalImpressions,
   netReach,
   mediaCount,
@@ -32,6 +33,7 @@ export function BriefResultSummary({
 }: {
   isKo: boolean;
   budgetWon: number;
+  budgetTbd?: boolean;
   totalImpressions: number;
   /** null = 도달 산정 중(커버리지 데이터 없음) — MetricsPanel 의 pending 처리와 동일 */
   netReach: number | null;
@@ -43,6 +45,7 @@ export function BriefResultSummary({
   const sentence = buildPlainLanguageSummary({
     isKo,
     budgetWon,
+    budgetTbd,
     totalImpressions,
     netReach,
     formatCompact: formatReach,

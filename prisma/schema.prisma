@@ -2297,6 +2297,7 @@ model UserSavedPlan {
   items     Json     @default("[]")
   goal      String?  @map("campaign_goal")
   budget    Int?     @map("total_budget")
+  budgetTbd Boolean? @default(false) @map("budget_tbd")
   duration  Int?
   updatedAt DateTime @updatedAt @map("updated_at")
   createdAt DateTime @default(now()) @map("created_at")

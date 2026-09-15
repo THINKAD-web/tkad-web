@@ -26,6 +26,7 @@ import {
   applyCustomLinesToMixMetrics,
   hasBriefMixContent,
 } from "@/lib/planner/brief/custom-mix-metrics";
+import { budgetTbdLabel, isBudgetTbd } from "@/lib/budget-tbd";
 import { BriefResultSummary } from "@/components/planner/brief/brief-result-summary";
 import { useBriefStore } from "@/lib/planner/brief/store";
 import {
@@ -156,7 +157,11 @@ export function BriefSummary({
       <dl className="grid gap-2 text-sm">
         <div className="flex justify-between gap-3">
           <dt className="text-muted-foreground">{isKo ? "예산" : "Budget"}</dt>
-          <dd className="font-semibold tabular-nums">{won(budget)}</dd>
+          <dd className="font-semibold tabular-nums">
+            {isBudgetTbd(brief.budgetTbd)
+              ? budgetTbdLabel(isKo)
+              : won(budget)}
+          </dd>
         </div>
         <div className="flex justify-between gap-3">
           <dt className="text-muted-foreground">{isKo ? "기간" : "Flight"}</dt>
@@ -250,15 +255,17 @@ function BriefStepThreeOohFlow({
     [liveCatalogMetrics, store.customLines],
   );
 
+  const budgetTbd = store.budgetTbd === true;
+
   const overBudgetChoice = useMemo(() => {
-    if (budgetWon <= 0 || lines.length === 0) return null;
+    if (budgetTbd || budgetWon <= 0 || lines.length === 0) return null;
     return resolveOverBudgetChoice({
       brief: store,
       catalog,
       mixUnits: store.mixUnits,
       isKo,
     });
-  }, [budgetWon, lines.length, store, catalog, isKo, store.mixUnits]);
+  }, [budgetTbd, budgetWon, lines.length, store, catalog, isKo, store.mixUnits]);
 
   const showOverBudgetPanel =
     overBudgetChoice != null && !store.overBudgetChoiceDismissed;
@@ -405,6 +412,7 @@ function BriefStepThreeOohFlow({
         body: JSON.stringify({
           brief: {
             budgetInputWon: store.budgetInputWon,
+            budgetTbd: store.budgetTbd === true ? true : undefined,
             budgetMode: store.budgetMode,
             regionCodes: store.regionCodes,
             genders: store.genders,
@@ -630,6 +638,7 @@ function BriefStepThreeOohFlow({
       <BriefResultSummary
         isKo={isKo}
         budgetWon={displayMetrics.budgetWon}
+        budgetTbd={budgetTbd}
         totalImpressions={displayMetrics.totalImpressions.value}
         netReach={displayMetrics.netReach?.value ?? null}
         mediaCount={summaryMediaCount}
@@ -750,6 +759,7 @@ function BriefStepThreeOohFlow({
         <MetricsPanel
           metrics={displayMetrics}
           isKo={isKo}
+          budgetTbd={budgetTbd}
           customLineCount={customLineCount}
           listingSourceText={store.freeText}
         />

@@ -82,7 +82,8 @@ export function aiInputToMatching(
     weeks > 0 && weeks < 4 ? Math.max(1, Math.round(weeks * 7)) : undefined;
 
   const budgetUnlimited =
-    input.budgetUnlimited === true || input.budgetMaxMan <= 0;
+    input.budgetUnlimited === true ||
+    (input.budgetMaxMan <= 0 && input.budgetTbd !== true);
 
   return {
     monthlyBudgetWon:
