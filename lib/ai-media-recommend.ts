@@ -41,6 +41,8 @@ export type AiRecommendInput = {
   budgetMaxMan: number;
   /** freetext "제한 없음" — budgetMaxMan=0 과 동일, 명시 플래그 */
   budgetUnlimited?: boolean;
+  /** 사용자 "예산 미정" — unlimited 와 구분, 매칭에는 보수적 기본값 사용 */
+  budgetTbd?: boolean;
   region: string;
   industry: Industry;
   /** Media type filter. "all" (default) disables filtering. */
@@ -83,6 +85,17 @@ export type AiRecommendInput = {
   /** 생활권 hotspot 요청 — optional */
   requestedHotspots?: import("@/lib/matching/region-hotspot").RegionHotspot[];
 };
+
+/** budgetUnlimited·0 = 상한 없음. budgetTbd 는 fallback 만원으로 cap 유지 */
+function resolveRecommendBudgetCapMan(input: AiRecommendInput): number | null {
+  if (
+    input.budgetUnlimited === true ||
+    (input.budgetMaxMan <= 0 && input.budgetTbd !== true)
+  ) {
+    return null;
+  }
+  return input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
+}
 
 export type MatchReason = { ko: string; en: string };
 
@@ -558,7 +571,7 @@ function buildRecommendPool(
   input: AiRecommendInput,
   opts: RecommendPoolOpts,
 ): MediaItem[] {
-  const budgetCap = input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
+  const budgetCap = resolveRecommendBudgetCapMan(input);
   let pool = [...valid];
   if (budgetCap != null && !opts.skipBudget) {
     pool = pool.filter(
@@ -604,7 +617,7 @@ export function pickRecommendPool(
   valid: readonly MediaItem[],
   input: AiRecommendInput,
 ): MediaItem[] {
-  const budgetCap = input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
+  const budgetCap = resolveRecommendBudgetCapMan(input);
   const steps: RecommendPoolOpts[] = [{}];
   if (budgetCap != null) steps.push({ skipBudget: true });
   steps.push({ skipPlacement: true });
@@ -722,7 +735,7 @@ function recommendMediaCore(
 
   const sourceForPad =
     padValid.length > 0 ? padValid : valid;
-  const budgetCap = input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
+  const budgetCap = resolveRecommendBudgetCapMan(input);
   let pool = pickRecommendPool(valid, input);
   if (pool.length === 0) {
     pool = deterministicSample(

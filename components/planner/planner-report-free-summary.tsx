@@ -7,6 +7,7 @@ import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import { buildGoalFollowUpReportLines } from "@/lib/planner/goal-follow-up";
 import { PlannerNeonLabel, plannerNeon } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
+import { formatBudgetManDisplay } from "@/lib/budget-tbd";
 
 type Props = {
   isKo: boolean;
@@ -14,6 +15,7 @@ type Props = {
   campaignGoal?: PlannerCampaignGoal | null;
   goalFollowUp?: PlannerGoalFollowUp;
   budgetNum: number;
+  budgetTbd?: boolean;
   periodDisplay: string;
   regionsText: string;
   categoriesText: string;
@@ -30,6 +32,7 @@ export function PlannerReportFreeSummary({
   campaignGoal = null,
   goalFollowUp = {},
   budgetNum,
+  budgetTbd = false,
   periodDisplay,
   regionsText,
   categoriesText,
@@ -72,8 +75,9 @@ export function PlannerReportFreeSummary({
           </ul>
         ) : null}
         <p className="mt-2 text-sm text-gray-700 dark:text-white/85">
-          {isKo ? "예산" : "Budget"}: ₩{budgetNum.toLocaleString()}
-          {isKo ? "만" : "M"} · {periodDisplay}
+          {isKo ? "예산" : "Budget"}:{" "}
+          {formatBudgetManDisplay(budgetNum, isKo, { tbd: budgetTbd })} ·{" "}
+          {periodDisplay}
         </p>
         <p className="mt-1 text-sm text-gray-700 dark:text-white/85">
           {regionsText} · {categoriesText}

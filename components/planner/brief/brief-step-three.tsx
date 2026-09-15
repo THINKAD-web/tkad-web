@@ -405,6 +405,7 @@ function BriefStepThreeOohFlow({
         body: JSON.stringify({
           brief: {
             budgetInputWon: store.budgetInputWon,
+            budgetTbd: store.budgetTbd === true ? true : undefined,
             budgetMode: store.budgetMode,
             regionCodes: store.regionCodes,
             genders: store.genders,

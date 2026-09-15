@@ -17,6 +17,7 @@ import {
   parseFreetextMediaIntents,
 } from "@/lib/recommend/freetext-media-intents";
 import { plannerFreetextToRecommendBrief } from "@/lib/recommend/planner-freetext-to-recommend-brief";
+import { BUDGET_TBD_MATCHING_FALLBACK_MAN } from "@/lib/budget-tbd";
 
 type GoalKey = CampaignGoal;
 type TargetKey = TargetAudience;
@@ -26,6 +27,7 @@ export type FreetextRecommendDraft = {
   goal: string;
   target: string;
   budgetMan: string;
+  budgetTbd?: boolean;
   region: string;
   industry: string;
 };
@@ -44,11 +46,14 @@ export function buildAiRecommendInputFromFreetext(
   );
 
   const budgetUnlimited = parseResult.fields.budgetUnlimited.value === true;
+  const budgetTbd = resolved.budgetTbd === true;
   const budget = budgetUnlimited
     ? 0
-    : Math.round(
-        Number(resolved.budgetMan) || FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN,
-      );
+    : budgetTbd
+      ? BUDGET_TBD_MATCHING_FALLBACK_MAN
+      : Math.round(
+          Number(resolved.budgetMan) || FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN,
+        );
   if (!resolved.goal) {
     return null;
   }
@@ -87,6 +92,7 @@ export function buildAiRecommendInputFromFreetext(
     target: resolved.target as TargetKey,
     budgetMaxMan: budget,
     ...(budgetUnlimited ? { budgetUnlimited: true as const } : {}),
+    ...(budgetTbd ? { budgetTbd: true as const } : {}),
     region:
       regionCodes?.length === 1 ? regionCodes[0]!
       : hasParsedRegion ? resolved.region.trim()

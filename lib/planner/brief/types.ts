@@ -56,6 +56,8 @@ export const BRIEF_ENTRY_MODES: readonly BriefEntryMode[] = [
 export type CampaignBriefInput = {
   /** 사용자가 입력한 예산 원값(원). budgetMode 에 따라 총액 또는 월예산 */
   budgetInputWon: number;
+  /** true = 아직 예산 미정 (budgetUnlimited·0원과 구분) */
+  budgetTbd?: boolean;
   budgetMode: BudgetMode;
   /** 17개 시도 코드. 빈 배열 = 전국 */
   regionCodes: SidoCode[];
@@ -128,7 +130,7 @@ export function briefRequiredStatus(brief: CampaignBriefInput): {
   flight: boolean;
   ok: boolean;
 } {
-  const budget = brief.budgetInputWon > 0;
+  const budget = brief.budgetTbd === true || brief.budgetInputWon > 0;
   const flight = flightDays(brief) != null;
   return { budget, flight, ok: budget && flight };
 }
@@ -138,7 +140,7 @@ export function briefQuickRequiredStatus(brief: CampaignBriefInput): {
   budget: boolean;
   ok: boolean;
 } {
-  const budget = brief.budgetInputWon > 0;
+  const budget = brief.budgetTbd === true || brief.budgetInputWon > 0;
   return { budget, ok: budget };
 }
 
@@ -199,6 +201,7 @@ export function normalizeBriefInput(raw: unknown): CampaignBriefInput {
       typeof r.budgetInputWon === "number" && r.budgetInputWon >= 0
         ? Math.round(r.budgetInputWon)
         : 0,
+    budgetTbd: r.budgetTbd === true ? true : undefined,
     budgetMode: r.budgetMode === "monthly" ? "monthly" : "total",
     regionCodes: normalizeSidoCodes(r.regionCodes),
     genders,
@@ -230,6 +233,7 @@ export function toCampaignPlanBrief(
 ): CampaignPlanBrief {
   return {
     budgetWon: totalBudgetWon(brief),
+    ...(brief.budgetTbd === true ? { budgetTbd: true } : {}),
     regionCodes: [...brief.regionCodes],
     genders: brief.genders.length > 0 ? [...brief.genders] : undefined,
     ageBands: brief.ageBands.length > 0 ? [...brief.ageBands] : undefined,

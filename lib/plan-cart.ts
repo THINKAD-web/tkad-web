@@ -76,6 +76,8 @@ export interface PlanCart {
   addonLines?: PlanCartAddonLine[];
   campaignGoal?: string;
   totalBudget?: number;
+  /** true = 아직 예산 미정 (0원과 unlimited 와 구분) */
+  budgetTbd?: boolean;
   duration?: number;
   industryKey?: string;
   updatedAt: string;
@@ -317,6 +319,7 @@ export function getPlanCart(): PlanCart {
           : undefined,
       totalBudget:
         typeof parsed.totalBudget === "number" ? parsed.totalBudget : undefined,
+      budgetTbd: parsed.budgetTbd === true ? true : undefined,
       duration:
         typeof parsed.duration === "number" ? parsed.duration : undefined,
       industryKey:
@@ -333,7 +336,10 @@ export function getPlanCart(): PlanCart {
 
 export function savePlanCartMeta(
   patch: Partial<
-    Pick<PlanCart, "campaignGoal" | "totalBudget" | "duration" | "industryKey">
+    Pick<
+      PlanCart,
+      "campaignGoal" | "totalBudget" | "budgetTbd" | "duration" | "industryKey"
+    >
   >,
 ): PlanCart {
   return runPlanCartMutation((cart) => {

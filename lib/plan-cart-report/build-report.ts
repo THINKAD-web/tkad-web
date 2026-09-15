@@ -130,12 +130,16 @@ function resolvePlanCartBudgetMan(
   portfolio: readonly MediaItem[],
   pricing?: PlannerPortfolioPricing,
 ): number {
-  const monthlyWon = planCartMonthlyTotalWon(cart, catalog);
-  if (monthlyWon > 0) {
-    return Math.max(1, Math.round(monthlyWon / 10_000));
+  if (cart.budgetTbd === true) {
+    const sum = computePlannerPortfolioMonthlyMan(portfolio, pricing);
+    return sum > 0 ? sum : PLANNER_BUDGET_MIN;
   }
   if (cart.totalBudget != null && cart.totalBudget > 0) {
     return Math.max(1, Math.round(cart.totalBudget / 10_000));
+  }
+  const monthlyWon = planCartMonthlyTotalWon(cart, catalog);
+  if (monthlyWon > 0) {
+    return Math.max(1, Math.round(monthlyWon / 10_000));
   }
   const sum = computePlannerPortfolioMonthlyMan(portfolio, pricing);
   return sum > 0 ? sum : PLANNER_BUDGET_MIN;
@@ -272,6 +276,7 @@ export function buildPlanCartReportBundle(args: {
       campaignGoal,
       goalTitle,
       budgetNum: budgetMan,
+      budgetTbd: cart.budgetTbd === true,
       months,
       regionsText: inferRegionsText(portfolioSorted, isKo),
       categoriesText: inferCategoriesText(portfolioSorted, isKo),
@@ -287,7 +292,8 @@ export function buildPlanCartReportBundle(args: {
       reachCorePct: 0,
       reachExtendedPct: 0,
       selectedMediaCount: cart.items.length,
-      portfolioOverBudget: monthlyTotalMan > budgetMan + 0.01,
+      portfolioOverBudget:
+        cart.budgetTbd !== true && monthlyTotalMan > budgetMan + 0.01,
       portfolioMonthlyTotalMan: monthlyTotalMan,
       portfolioMonthlyBudgetMan: budgetMan,
       isAutoPortfolio: false,

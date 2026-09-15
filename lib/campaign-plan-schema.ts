@@ -43,6 +43,7 @@ export type CampaignPlanAgeBand = "10s" | "20s" | "30s" | "40s" | "50s+";
 
 export type CampaignPlanBrief = {
   budgetWon: number;
+  budgetTbd?: boolean;
   /** 시도 코드(2자리) 배열 */
   regionCodes: string[];
   genders?: CampaignPlanGender[];

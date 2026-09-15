@@ -63,6 +63,7 @@ export type BuildOohPayloadArgs = {
   isKo: boolean;
   goalTitle: string;
   budgetMan: number;
+  budgetTbd?: boolean;
   periodDisplay: string;
   regionsText: string;
   categoriesText: string;
@@ -544,8 +545,14 @@ export function buildOohReportPayload(
       planMetrics: plan.metrics,
     });
 
+  const mixWonForQuote =
+    budgetHonesty?.mixWon ??
+    (confirmedFromAllocation > 0
+      ? confirmedFromAllocation
+      : (plan.metrics?.totalCostWon ?? 0));
+
   const quoteSummary = buildPlannerQuoteSummary({
-    mixWon: budgetHonesty.mixWon,
+    mixWon: mixWonForQuote,
     productionCostWon: a.productionCostWon,
     quoteOnlyNotice: quoteOnlyNotice
       ? {
@@ -579,6 +586,7 @@ export function buildOohReportPayload(
     generatedAt: a.generatedAt,
     goalTitle: a.goalTitle,
     budgetMan: a.budgetMan,
+    budgetTbd: a.budgetTbd === true ? true : undefined,
     periodDisplay: a.periodDisplay,
     regionsText: a.regionsText,
     categoriesText: a.categoriesText,

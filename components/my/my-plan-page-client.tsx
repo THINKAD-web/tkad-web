@@ -35,6 +35,7 @@ import { formatCatalogPriceFieldWon, mediaPriceOnInquiryLabel } from "@/lib/medi
 import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
+import { BudgetTbdFields } from "@/components/budget/budget-tbd-fields";
 
 export function MyPlanPageClient() {
   const tPlan = useTranslations("planNav");
@@ -91,12 +92,16 @@ export function MyPlanPageClient() {
 
   useEffect(() => {
     if (budgetEditingRef.current) return;
+    if (cart.budgetTbd) {
+      setBudgetInput("");
+      return;
+    }
     setBudgetInput(
       cart.totalBudget != null && cart.totalBudget > 0
         ? String(Math.round(cart.totalBudget / 10_000))
         : "",
     );
-  }, [cart.totalBudget]);
+  }, [cart.totalBudget, cart.budgetTbd]);
 
   const catalogById = useMemo(() => planCartCatalogById(catalog), [catalog]);
   const monthlyTotal = useMemo(
@@ -247,9 +252,9 @@ export function MyPlanPageClient() {
                     <label className="mb-2 block text-xs font-semibold text-gray-600 dark:text-white/60">
                       {isKo ? "예산 (만원/월)" : "Budget (10K KRW/mo)"}
                     </label>
-                    <input
-                      type="number"
-                      min={0}
+                    <BudgetTbdFields
+                      isKo={isKo}
+                      tbd={cart.budgetTbd === true}
                       value={budgetInput}
                       onFocus={() => {
                         budgetEditingRef.current = true;
@@ -259,15 +264,22 @@ export function MyPlanPageClient() {
                         budgetEditingRef.current = false;
                         setPlanCartUserEditing(false);
                       }}
-                      onChange={(e) => {
-                        setBudgetInput(e.target.value);
-                        const n = Number(e.target.value);
+                      onTbdChange={(tbd) => {
                         updateMeta({
-                          totalBudget: Number.isFinite(n) && n > 0 ? n * 10_000 : undefined,
+                          budgetTbd: tbd ? true : undefined,
+                          totalBudget: tbd ? undefined : cart.totalBudget,
+                        });
+                        if (tbd) setBudgetInput("");
+                      }}
+                      onValueChange={(raw) => {
+                        setBudgetInput(raw);
+                        const n = Number(raw);
+                        updateMeta({
+                          budgetTbd: undefined,
+                          totalBudget:
+                            Number.isFinite(n) && n > 0 ? n * 10_000 : undefined,
                         });
                       }}
-                      className="h-11 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 text-sm dark:text-white text-gray-900"
-                      placeholder={isKo ? "예: 4800" : "e.g. 4800"}
                     />
                   </div>
                   <div>
@@ -342,6 +354,21 @@ export function MyPlanPageClient() {
                     </span>
                     <span className="font-bold dark:text-white text-gray-900">
                       {formatWon(addonTotal)}
+                    </span>
+                  </div>
+                ) : null}
+                {cart.budgetTbd ||
+                (cart.totalBudget != null && cart.totalBudget > 0) ? (
+                  <div className="flex justify-between py-1">
+                    <span className="text-gray-500 dark:text-white/55">
+                      {isKo ? "입력 예산 (월)" : "Entered budget (mo)"}
+                    </span>
+                    <span className="font-bold dark:text-white text-gray-900">
+                      {cart.budgetTbd
+                        ? isKo
+                          ? "예산 미정"
+                          : "Budget TBD"
+                        : formatWon(cart.totalBudget!)}
                     </span>
                   </div>
                 ) : null}

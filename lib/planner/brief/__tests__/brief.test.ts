@@ -345,4 +345,8 @@ test("O-2 빠른 추천 — 예산만 필수", () => {
     briefQuickRequiredStatus({ ...EMPTY_BRIEF, budgetInputWon: 30_000_000 }),
     { budget: true, ok: true },
   );
+  assert.deepEqual(
+    briefQuickRequiredStatus({ ...EMPTY_BRIEF, budgetTbd: true }),
+    { budget: true, ok: true },
+  );
 });

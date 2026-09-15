@@ -68,6 +68,7 @@ function syncBodySchema(maxItems: number) {
     addonLines: z.array(PlanCartAddonLineSchema).max(20).optional(),
     campaignGoal: z.string().optional(),
     totalBudget: z.number().optional(),
+    budgetTbd: z.boolean().optional(),
     duration: z.number().int().positive().optional(),
     updatedAt: z.string().optional(),
   });
@@ -95,6 +96,7 @@ export async function GET() {
         items: [],
         campaignGoal: undefined,
         totalBudget: undefined,
+        budgetTbd: undefined,
         duration: undefined,
         updatedAt: new Date().toISOString(),
       });
@@ -104,6 +106,7 @@ export async function GET() {
       items: parseItems(row.items),
       campaignGoal: row.goal ?? undefined,
       totalBudget: row.budget ?? undefined,
+      budgetTbd: row.budgetTbd === true ? true : undefined,
       duration: row.duration ?? undefined,
       updatedAt: row.updatedAt.toISOString(),
     });
@@ -151,6 +154,9 @@ export async function POST(req: Request) {
     const budget = useLocalMeta
       ? parsed.data.totalBudget ?? existing?.budget ?? null
       : existing?.budget ?? parsed.data.totalBudget ?? null;
+    const budgetTbd = useLocalMeta
+      ? parsed.data.budgetTbd ?? existing?.budgetTbd ?? false
+      : existing?.budgetTbd ?? parsed.data.budgetTbd ?? false;
     const duration = useLocalMeta
       ? parsed.data.duration ?? existing?.duration ?? null
       : existing?.duration ?? parsed.data.duration ?? null;
@@ -162,12 +168,14 @@ export async function POST(req: Request) {
         items: mergedItems as unknown as Prisma.InputJsonValue,
         goal,
         budget,
+        budgetTbd: budgetTbd === true,
         duration,
       },
       update: {
         items: mergedItems as unknown as Prisma.InputJsonValue,
         goal,
         budget,
+        budgetTbd: budgetTbd === true,
         duration,
       },
     });
@@ -176,6 +184,7 @@ export async function POST(req: Request) {
       items: parseItems(row.items),
       campaignGoal: row.goal ?? undefined,
       totalBudget: row.budget ?? undefined,
+      budgetTbd: row.budgetTbd === true ? true : undefined,
       duration: row.duration ?? undefined,
       updatedAt: row.updatedAt.toISOString(),
     });

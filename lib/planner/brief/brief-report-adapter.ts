@@ -173,6 +173,7 @@ function briefFromPlan(plan: BriefReportPlan): CampaignBriefInput {
   const b = plan.brief;
   return {
     budgetInputWon: b.budgetWon,
+    budgetTbd: b.budgetTbd === true ? true : undefined,
     budgetMode: "total",
     regionCodes: b.regionCodes as CampaignBriefInput["regionCodes"],
     genders: b.genders ?? [],
@@ -761,6 +762,7 @@ export function buildBriefReportPayload(
     !!brief.flightStart &&
     !!brief.flightEnd;
   const budgetMan = Math.max(0, Math.round(plan.brief.budgetWon / 10_000));
+  const budgetTbd = plan.brief.budgetTbd === true;
   const campaignGoal = briefGoalToPlanner(brief.goal);
   const industryKey = briefIndustryToPlanner(brief.industry);
   const exportMetrics = snapshotMetricsToExportMetrics(plan.metrics, months);
@@ -877,6 +879,7 @@ export function buildBriefReportPayload(
     isKo,
     goalTitle: cover.goalTitle,
     budgetMan,
+    budgetTbd: budgetTbd ? true : undefined,
     periodDisplay,
     regionsText: cover.regionsText,
     categoriesText: inferBriefCategoriesText(portfolio, isKo),

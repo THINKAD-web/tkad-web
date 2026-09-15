@@ -13,6 +13,7 @@ export async function pushPlanCartToServer(
         items: cart.items,
         campaignGoal: cart.campaignGoal,
         totalBudget: cart.totalBudget,
+        budgetTbd: cart.budgetTbd,
         duration: cart.duration,
         updatedAt: cart.updatedAt,
       }),
@@ -25,6 +26,7 @@ export async function pushPlanCartToServer(
         items: PlanCart["items"];
         campaignGoal?: string;
         totalBudget?: number;
+        budgetTbd?: boolean;
         duration?: number;
         updatedAt: string;
       };
@@ -35,6 +37,7 @@ export async function pushPlanCartToServer(
       items: data.data.items,
       campaignGoal: data.data.campaignGoal,
       totalBudget: data.data.totalBudget,
+      budgetTbd: data.data.budgetTbd,
       duration: data.data.duration,
       updatedAt: data.data.updatedAt,
     };
