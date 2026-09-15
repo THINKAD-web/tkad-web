@@ -81,7 +81,8 @@ export function normalizePlanCartRegionKey(raw: string): string | null {
   if (!trimmed) return null;
 
   const lowered = trimmed.toLowerCase();
-  if (lowered !== "national" && isKnownRegionKey(lowered)) return lowered;
+  if (lowered === "national") return "national";
+  if (isKnownRegionKey(lowered)) return lowered;
 
   const fromNetwork = normalizeNetworkRegionKey(trimmed, "");
   if (fromNetwork !== "other") return fromNetwork;
@@ -111,11 +112,21 @@ function resolveRegionFromCatalogGeography(catalog: MediaItem): string | null {
   return null;
 }
 
+function isCatalogNationwide(catalog: MediaItem): boolean {
+  const regionMainRaw = catalog.regionMain?.trim().toLowerCase();
+  if (regionMainRaw === "national") return true;
+  if (catalog.region?.trim().toLowerCase() === "national") return true;
+  return /전국|nationwide/i.test(mediaGeographicHaystack(catalog));
+}
+
 /** 플랜 카트 항목 + 카탈로그 → 보고서용 단일 지역 키 (매체명은 사용하지 않음) */
 export function resolvePlanCartItemRegionKey(
   cartRegion: string,
   catalog: MediaItem,
 ): string {
+  // regionMain=national — location 다중 도시 파싱·legacy region 오염 무시
+  if (isCatalogNationwide(catalog)) return "national";
+
   // 주소·regionMain 우선 — cart.region 은 DB legacy `seoul` 오염이 흔함
   const fromGeography = resolveRegionFromCatalogGeography(catalog);
   if (fromGeography) return fromGeography;
