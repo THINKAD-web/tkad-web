@@ -36,6 +36,12 @@ import {
   type SubwayLineKey,
 } from "@/lib/planner/subway-line";
 import {
+  categoriesFromOohIntents,
+  parseOohKeywordIntentsFromText,
+  STANDALONE_BUS_RE,
+} from "@/lib/planner/keyword-intent-map";
+import { effectiveFreetextForMediaParsing } from "@/lib/planner/strip-query-modifiers";
+import {
   PLANNER_DEFAULT_CATEGORIES,
   PLANNER_BUDGET_MIN,
   type PlannerAgeKey,
@@ -209,7 +215,7 @@ function field<T>(
 function normalizeInput(raw: string): string {
   return raw
     .replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xff10 + 48))
-    .replace(/(\d),(\d)/g, "$1$2")
+    .replace(/(\d)[,，︐︑](\d)/g, "$1$2")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -706,9 +712,9 @@ function parseIndustryKey(text: string): ParsedField<PlannerIndustryKey> {
 
 const CATEGORY_ORDER: PlannerCategory[] = ["digital", "static", "mobile"];
 
-/** 이동형 매체 키워드 — 버스·택시·래핑·차량·트럭·모빌리티 등 */
+/** 이동형 매체 키워드 — 버스(standalone)·택시·래핑·차량·트럭·모빌리티 등 */
 const MOBILE_CATEGORY_RE =
-  /버스|택시(?:\s*(?:래핑|광고|광고차))?|택시래핑|택시광고|래핑|차량|트럭|모빌리티|이동형|bus\b|taxi|vehicle\s*wrap|truck|mobility/i;
+  /택시(?:\s*(?:래핑|광고|광고차))?|택시래핑|택시광고|래핑|차량|트럭|모빌리티|이동형|bus\b(?!way)|taxi|vehicle\s*wrap|truck|mobility/i;
 
 const MOBILE_EXCLUSIVE_RE =
   /(?:버스|택시(?:래핑|광고)?|래핑|차량|트럭|모빌리티|이동형)(?:\s*광고)?\s*만|만\s*(?:버스|택시|래핑|차량|트럭)/i;
@@ -805,6 +811,17 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
     if (m?.[0]) hits.push({ cat, source: m[0].trim() });
   }
 
+  if (STANDALONE_BUS_RE.test(text)) {
+    hits.push({ cat: "mobile", source: "버스" });
+  }
+
+  const tableIntents = parseOohKeywordIntentsFromText(text);
+  if (tableIntents.length > 0) {
+    for (const cat of categoriesFromOohIntents(tableIntents)) {
+      hits.push({ cat, source: tableIntents.join("+") });
+    }
+  }
+
   const parsedLine = parseSubwayLineFromText(text);
   if (parsedLine) {
     hits.push({ cat: "digital", source: parsedLine.labelKo });
@@ -895,8 +912,9 @@ function collectUnmatchedTokens(
 export function parsePlannerFreetextBrief(
   raw: string,
 ): PlannerFreetextParseResult {
-  const text = normalizeInput(raw);
-  if (!text) {
+  const normalized = normalizeInput(raw);
+  const mediaText = effectiveFreetextForMediaParsing(normalized);
+  if (!normalized) {
     const empty = emptyField();
     return {
       raw,
@@ -922,24 +940,24 @@ export function parsePlannerFreetextBrief(
   }
 
   const { regions, seoulZones, busanZones, gyeonggiZones, incheonZones } =
-    parseRegions(text);
-  const duration = parseDurationFields(text);
-  const targetProfileParsed = parseTargetProfile(text);
+    parseRegions(normalized);
+  const duration = parseDurationFields(normalized);
+  const targetProfileParsed = parseTargetProfile(normalized);
   const fields = {
-    campaignGoal: parseCampaignGoal(text),
+    campaignGoal: parseCampaignGoal(normalized),
     regions,
     seoulZones,
     busanZones,
     gyeonggiZones,
     incheonZones,
-    ageKeys: parseAgeKeys(text),
-    industryKey: parseIndustryKey(text),
-    budgetMan: parseBudgetMan(text),
-    budgetUnlimited: parseBudgetUnlimited(text),
+    ageKeys: parseAgeKeys(normalized),
+    industryKey: parseIndustryKey(normalized),
+    budgetMan: parseBudgetMan(normalized),
+    budgetUnlimited: parseBudgetUnlimited(normalized),
     months: duration.months,
     durationDays: duration.durationDays,
-    categories: parseCategories(text),
-    subwayLine: parseSubwayLine(text),
+    categories: parseCategories(mediaText || normalized),
+    subwayLine: parseSubwayLine(mediaText || normalized),
     targetProfile: {
       value: targetProfileParsed.value,
       confidence: targetProfileParsed.confidence,
@@ -948,9 +966,9 @@ export function parsePlannerFreetextBrief(
   };
 
   return {
-    raw: text,
+    raw,
     fields,
-    unmatchedTokens: collectUnmatchedTokens(text, fields),
+    unmatchedTokens: collectUnmatchedTokens(normalized, fields),
   };
 }
 

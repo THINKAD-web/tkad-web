@@ -20,9 +20,9 @@ export function isPlannerBusanZoneKey(v: unknown): v is PlannerBusanZoneKey {
   );
 }
 
-type ZoneDef = { exact: RegExp; adjacent: RegExp };
+export type PlannerBusanZoneRegionDef = { exact: RegExp; adjacent: RegExp };
 
-const BUSAN_ZONE_DEFS: Record<PlannerBusanZoneKey, ZoneDef> = {
+const BUSAN_ZONE_DEFS: Record<PlannerBusanZoneKey, PlannerBusanZoneRegionDef> = {
   centum: {
     exact: /센텀|벡스코|bexco|centum|마린시티|센텀시티|시립미술/i,
     adjacent: /해운대|우동|동천/i,
@@ -40,10 +40,16 @@ const BUSAN_ZONE_DEFS: Record<PlannerBusanZoneKey, ZoneDef> = {
     adjacent: /영도|동광|부산역/i,
   },
   downtown: {
-    exact: /부산\s*시내|부산역|초량|참전|동구|서구/i,
+    exact: /부산\s*시내|부산역|초량|참전|(?<!성)동구|서구/i,
     adjacent: /중구|영도|부암/i,
   },
 };
+
+/** matching-engine `REGION_DEFS` — busanZones SSOT 재사용 */
+export const PLANNER_BUSAN_ZONE_REGION_DEFS: Record<
+  PlannerBusanZoneKey,
+  PlannerBusanZoneRegionDef
+> = BUSAN_ZONE_DEFS;
 
 export const PLANNER_BUSAN_ZONE_LABELS: Record<
   PlannerBusanZoneKey,

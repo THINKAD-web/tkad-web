@@ -239,6 +239,20 @@ test("variant budget: 3,000만 약 3000만 정도", () => {
   assert.equal(r2.fields.budgetMan.value, 3000);
 });
 
+test("parsePlannerFreetextBrief: 2030 잠실 팝업 3,000만원", () => {
+  const r = parsePlannerFreetextBrief("2030 잠실 팝업 3,000만원");
+  assert.equal(r.fields.budgetMan.value, 3000);
+  assert.ok(r.fields.seoulZones.value?.includes("jamsil"));
+  assert.ok(r.fields.regions.value?.includes("seoul"));
+  assert.deepEqual(r.fields.ageKeys.value, ["age20s", "age30s"]);
+  assert.equal(r.fields.campaignGoal.value, "event");
+});
+
+test("variant budget: fullwidth comma 3，000만원", () => {
+  const r = parsePlannerFreetextBrief("2030 잠실 팝업 3，000만원");
+  assert.equal(r.fields.budgetMan.value, 3000);
+});
+
 test("variant budget: 오백만", () => {
   const r = parsePlannerFreetextBrief("오백만 명동");
   assert.equal(r.fields.budgetMan.value, 500);

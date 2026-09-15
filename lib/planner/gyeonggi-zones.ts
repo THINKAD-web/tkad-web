@@ -1,5 +1,9 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
+import {
+  incheonZoneToMatchingRegionKey,
+  type PlannerIncheonZoneKey,
+} from "@/lib/planner/incheon-zones";
 import type { PlannerIndustryKey } from "@/lib/planner/types";
 
 /** matching-engine 경기 하위 상권 (플래너·추천 칩) */
@@ -27,9 +31,12 @@ export function isPlannerGyeonggiZoneKey(
   );
 }
 
-type ZoneDef = { exact: RegExp; adjacent: RegExp };
+export type PlannerGyeonggiZoneRegionDef = { exact: RegExp; adjacent: RegExp };
 
-const GYEONGGI_ZONE_DEFS: Record<PlannerGyeonggiZoneKey, ZoneDef> = {
+const GYEONGGI_ZONE_DEFS: Record<
+  PlannerGyeonggiZoneKey,
+  PlannerGyeonggiZoneRegionDef
+> = {
   seongnam: {
     exact: /분당|판교|성남|정자|서현|야탑|수내|삼평|이매|백현|운중|판교역|서현역/i,
     adjacent: /수지|위례|중원|모란/i,
@@ -71,6 +78,12 @@ const GYEONGGI_ZONE_DEFS: Record<PlannerGyeonggiZoneKey, ZoneDef> = {
     adjacent: /부천|구로/i,
   },
 };
+
+/** matching-engine `REGION_DEFS` — gyeonggiZones SSOT 재사용 */
+export const PLANNER_GYEONGGI_ZONE_REGION_DEFS: Record<
+  PlannerGyeonggiZoneKey,
+  PlannerGyeonggiZoneRegionDef
+> = GYEONGGI_ZONE_DEFS;
 
 export const PLANNER_GYEONGGI_ZONE_LABELS: Record<
   PlannerGyeonggiZoneKey,
@@ -254,7 +267,11 @@ export function mergePlannerMacroMatchingRegions(
   }
   if (macroRegions.includes("incheon")) {
     if (incheonZones.length > 0) {
-      out.push(...incheonZones);
+      for (const z of incheonZones) {
+        out.push(
+          incheonZoneToMatchingRegionKey(z as PlannerIncheonZoneKey),
+        );
+      }
     } else {
       out.push("incheon");
     }
