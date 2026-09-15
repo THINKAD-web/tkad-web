@@ -88,6 +88,8 @@ export function matchesPlannerRegion(
 
   if (regionMain) {
     if (regionMain === id) return true;
+    // 전국 상품 — 어느 광역 필터에도 노출
+    if (regionMain === "national" && id !== "national") return true;
     // regionMain이 다른 광역이면 haystack 별칭(중구 등) 오매칭·레거시 통과 차단
     return false;
   }

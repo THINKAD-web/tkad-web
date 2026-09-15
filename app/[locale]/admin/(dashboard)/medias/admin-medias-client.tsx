@@ -3921,7 +3921,9 @@ export default function AdminMediasClient({
                         longitude: c.lng.toFixed(6),
                         city:
                           f.city.trim() ||
-                          inferShortRegionLabelFromCodes(form.coverageDistrictCodes),
+                          inferShortRegionLabelFromCodes(form.coverageDistrictCodes, {
+                            regionMain: f.regionMain,
+                          }),
                       }));
                     }}
                   >

@@ -163,7 +163,13 @@ function shortSigunguName(nameKo: string): string {
 }
 
 /** 시도명을 짧은 지역 라벨로 (도시 필드 자동 채움용) */
-export function inferShortRegionLabelFromCodes(codes: string[]): string {
+export function inferShortRegionLabelFromCodes(
+  codes: string[],
+  opts?: { regionMain?: string | null },
+): string {
+  if (opts?.regionMain?.trim().toLowerCase() === "national") {
+    return "전국";
+  }
   const first = codes.map((c) => getSigunguCoverage(c)).find(Boolean);
   if (!first) return "";
   return shortSidoName(first.sidoName);

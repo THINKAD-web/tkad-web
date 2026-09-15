@@ -1,0 +1,205 @@
+{
+  "generatedAt": "2026-09-15T06:43:49.827Z",
+  "mode": "execute",
+  "host": "ep-holy-cloud-ah6w4cml-pooler.c-3.us-east-1.aws.neon.tech",
+  "scannedNationalActive": 25,
+  "plannedCount": 18,
+  "planned": [
+    {
+      "id": "cms40wyaq000t04l7scpmikbg",
+      "name": "45인승 2층 버스 래핑 광고",
+      "changes": {
+        "regionZone": {
+          "from": "gyeonggi",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmptklfa7000104jxmftxlrt7",
+      "name": "45인승 리무진 버스 래핑 광고",
+      "changes": {
+        "regionZone": {
+          "from": "gyeonggi",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmo6ix9wa000004kzq4dfvo5n",
+      "name": "경부고속도로 신갈IC K-pad 전광판 광고",
+      "changes": {
+        "regionZone": {
+          "from": "gyeonggi",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmp3v92yy000004jr7i6ykgy1",
+      "name": "골프장 미디어바 광고",
+      "changes": {
+        "regionZone": {
+          "from": "gyeonggi",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmpde6uwe000004la5s2hnywv",
+      "name": "대구 효신네거리 전광판 광고",
+      "changes": {
+        "regionZone": {
+          "from": "daegu",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmoy5hg79000004ld0q3z2bnb",
+      "name": "동대구 복합환승센터 전광판 광고",
+      "changes": {
+        "regionZone": {
+          "from": "daegu",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cms4xck8e000g04ldltcj34al",
+      "name": "모바일FLEX 대형 차량 광고",
+      "changes": {
+        "region": {
+          "from": "seoul",
+          "to": "national"
+        },
+        "regionZone": {
+          "from": "gangseo",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cms4x6xqo000004jr9umgjtmf",
+      "name": "무빙플렉스 (Moving-Flex) 대형 차량 광고",
+      "changes": {
+        "region": {
+          "from": "seoul",
+          "to": "national"
+        },
+        "regionZone": {
+          "from": "gangseo",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmtmx371i000204l2akx79o5p",
+      "name": "소노 호텔&리조트 전광판 광고",
+      "changes": {
+        "regionZone": {
+          "from": "other",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmokcw7on000204jso0xml0r3",
+      "name": "스타필드 고양점 미디어타워 & 파노라마 스크린 광고",
+      "changes": {
+        "regionZone": {
+          "from": "gyeonggi",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmokchyi4000004js484675yf",
+      "name": "스타필드 수원점 미디어타워 광고",
+      "changes": {
+        "regionZone": {
+          "from": "gyeonggi",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmp02df4n000c04l108l21ra9",
+      "name": "스타필드 안성점 미디어타워 광고",
+      "changes": {
+        "regionZone": {
+          "from": "gyeonggi",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmokcok1s000204l1rtbt1scz",
+      "name": "스타필드 하남 주차장 파노라마 광고",
+      "changes": {
+        "regionZone": {
+          "from": "gyeonggi",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmocx14zb000004l05j30gdrc",
+      "name": "스타필드 하남점 미디어타워 & 파노라마 스크린 광고",
+      "changes": {
+        "regionZone": {
+          "from": "gyeonggi",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmp0gbdnu000404l534qeaulo",
+      "name": "인천 부평역 KB국민은행 전광판 광고",
+      "changes": {
+        "regionZone": {
+          "from": "incheon",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmo7fx6j8000004l5f62rwqzk",
+      "name": "전주 경기장네거리 덕천빌딩 전광판 광고",
+      "changes": {
+        "regionZone": {
+          "from": "other",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmoy0vzij000204jy17lysdd2",
+      "name": "창원 LG베스트샵 전광판 광고",
+      "changes": {
+        "regionZone": {
+          "from": "other",
+          "to": null
+        }
+      }
+    },
+    {
+      "id": "cmp3v7v99000204l1gdoodg2q",
+      "name": "택시 미디어바 광고",
+      "changes": {
+        "region": {
+          "from": "jeju",
+          "to": "national"
+        },
+        "regionZone": {
+          "from": "daejeon",
+          "to": null
+        },
+        "location": {
+          "from": "서울, 제주, 전주, 춘천, 포항, 경주, 목포, 청주, 세종 전역 택시 노선",
+          "to": "서울·경기·부산·포항·제주 전역 택시 노선"
+        }
+      }
+    }
+  ]
+}

@@ -18,6 +18,7 @@ import {
   planCartLineUnitMonthlyWon,
   planCartResolvedUnits,
 } from "@/lib/plan-cart-pricing";
+import { planReportRegionLabel } from "@/lib/plan-cart-report/regional-breakdown";
 import { QuoteMediaQuantityFields } from "@/components/quote/quote-media-quantity-fields";
 import { PlanCartGradeSelectionsEditor } from "@/components/plan/plan-cart-grade-selections";
 import {
@@ -202,7 +203,14 @@ export function PlanCartLineCard({
                 {item.mediaName}
               </p>
               <p className="text-xs text-gray-500 dark:text-white/50">
-                {[item.region, item.mediaType].filter(Boolean).join(" · ")}
+                {[
+                  item.region
+                    ? planReportRegionLabel(item.region, isKo)
+                    : null,
+                  item.mediaType,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
             </div>
             <button

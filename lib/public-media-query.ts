@@ -97,7 +97,15 @@ export function buildPublicMediaWhere(
   }
 
   if (params.regionMain?.trim()) {
-    and.push({ regionMain: params.regionMain.trim() });
+    const main = params.regionMain.trim();
+    // regionMain=national 매체는 모든 광역 필터에 노출 (matchesBrowseRegion·planner 와 동치)
+    if (main === "national") {
+      and.push({ regionMain: "national" });
+    } else {
+      and.push({
+        OR: [{ regionMain: main }, { regionMain: "national" }],
+      });
+    }
   }
   if (params.regionSub?.trim()) {
     and.push({ regionSub: params.regionSub.trim() });

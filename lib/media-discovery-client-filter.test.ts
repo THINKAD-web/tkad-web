@@ -151,6 +151,32 @@ test("matchesBrowseRegion — blocks 교보문고 for seoul_gangnam (광주 prim
   );
 });
 
+test("matchesBrowseRegion — national regionMain matches any browse regionMain", () => {
+  const nationwide = mockMedia({
+    name: "택시 미디어바 광고",
+    location: "서울·경기·부산 전역",
+    regionMain: "national",
+    region: "national",
+    type: "mobile",
+  });
+  assert.equal(matchesBrowseRegion(nationwide, "busan", "", ""), true);
+  assert.equal(matchesBrowseRegion(nationwide, "seoul", "", ""), true);
+  assert.equal(matchesBrowseRegion(nationwide, "jeju", "", ""), true);
+  assert.equal(matchesBrowseRegion(nationwide, "national", "", ""), true);
+});
+
+test("matchesBrowseRegion — seoul-only media does not match busan", () => {
+  const seoulOnly = mockMedia({
+    name: "KTX 서울역 파노라마",
+    location: "서울역",
+    regionMain: "seoul",
+    region: "seoul",
+    type: "billboard",
+  });
+  assert.equal(matchesBrowseRegion(seoulOnly, "seoul", "", ""), true);
+  assert.equal(matchesBrowseRegion(seoulOnly, "busan", "", ""), false);
+});
+
 test("matchesBrowseRegion — seoul_gangnam mobile with gangnam coverage", () => {
   const mobile = mockMedia({
     name: "서울 버스",
