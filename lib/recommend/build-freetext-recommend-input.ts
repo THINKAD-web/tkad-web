@@ -104,6 +104,9 @@ export function buildAiRecommendInputFromFreetext(
     ...(parseResult.fields.targetProfile.value
       ? { targetProfile: parseResult.fields.targetProfile.value }
       : {}),
+    ...(parseResult.fields.regionHotspots.value.length > 0
+      ? { requestedHotspots: parseResult.fields.regionHotspots.value }
+      : {}),
     freetextSource: freetextSource.trim(),
   };
 }

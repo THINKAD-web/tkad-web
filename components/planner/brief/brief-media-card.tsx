@@ -19,6 +19,8 @@ const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
   budget: { ko: "예산 효율", en: "Budget efficiency" },
   region: { ko: "지역 적합", en: "Region fit" },
   industry: { ko: "업종 적합", en: "Industry fit" },
+  targetProfile: { ko: "타깃 프로필", en: "Target profile" },
+  hotspot: { ko: "생활권·동선", en: "Hotspot fit" },
 };
 
 export function BriefMediaCard({

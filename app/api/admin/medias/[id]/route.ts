@@ -57,6 +57,15 @@ import {
   normalizeMediaCountry,
   applyOverseasMediaRegionFieldsOnSave,
 } from "@/lib/media-country";
+import {
+  isHotspotType,
+  normalizeHotspotTagsForSave,
+  type MediaHotspotTag,
+} from "@/lib/matching/region-hotspot";
+import {
+  ADMIN_MEDIA_LAYER_INCLUDE,
+  prismaMediaToAdminDto,
+} from "@/lib/admin-media-dto";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +79,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   const media = await db.media.findUnique({
     where: { id },
     include: {
+      ...ADMIN_MEDIA_LAYER_INCLUDE,
       priceSnapshots: { orderBy: { effectiveFrom: "desc" }, take: 30 },
       bookings: { orderBy: { startsAt: "asc" }, take: 60 },
       advertiserExecutions: { orderBy: { createdAt: "desc" }, take: 50 },
@@ -80,7 +90,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   const [mediaWithExtras] = await attachInstallLocationsById(db, [
     mediaWithCoverage,
   ]);
-  return json({ media: mediaWithExtras });
+  return json({ media: prismaMediaToAdminDto(mediaWithExtras) });
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {
@@ -215,6 +225,39 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return json({ error: "targetCategory must be string[]" }, 400);
     }
     data.targetCategory = body.targetCategory;
+  }
+  if (body.hotspotTags !== undefined) {
+    if (body.hotspotTags === null) {
+      data.hotspotTags = null;
+    } else if (!Array.isArray(body.hotspotTags)) {
+      return json({ error: "hotspotTags must be array or null" }, 400);
+    } else {
+      const parsed: MediaHotspotTag[] = [];
+      for (const item of body.hotspotTags) {
+        if (!item || typeof item !== "object") {
+          return json({ error: "hotspotTags: invalid item" }, 400);
+        }
+        const row = item as Record<string, unknown>;
+        const regionId = row.regionId;
+        const type = row.type;
+        if (regionId !== "jeju" || typeof type !== "string" || !isHotspotType(type)) {
+          return json({ error: "hotspotTags: jeju regionId + valid type required" }, 400);
+        }
+        const weight =
+          typeof row.weight === "number" && Number.isFinite(row.weight)
+            ? row.weight
+            : 1;
+        parsed.push({
+          regionId: "jeju",
+          type,
+          weight,
+          ...(typeof row.zoneId === "string" && row.zoneId.trim()
+            ? { zoneId: row.zoneId.trim() }
+            : {}),
+        });
+      }
+      data.hotspotTags = normalizeHotspotTagsForSave(parsed);
+    }
   }
   if (body.coverageDistrictCodes !== undefined) {
     const normalized = normalizeCoverageDistrictCodesInput(

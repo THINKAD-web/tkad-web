@@ -14,6 +14,7 @@ import {
   type MediaInstallLocation,
 } from "@/lib/media-install-locations";
 import { normalizeCatalogChannel } from "@/lib/catalog-channel";
+import { parseMediaHotspotTags } from "@/lib/matching/region-hotspot";
 
 export type MediaAvailability = "available" | "reserved" | "maintenance";
 
@@ -60,6 +61,8 @@ export type AdminMediaDto = {
   subCategory: string | null;
   mediaCategory: string[];
   targetCategory: string[];
+  /** 생활권 hotspot 태그 (제주 1차) */
+  hotspotTags: import("@/lib/matching/region-hotspot").MediaHotspotTag[];
   tags: string[];
   district: string | null;
   city: string | null;
@@ -329,6 +332,7 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     subCategory: pickStr(r, "subCategory", "sub_category"),
     mediaCategory: pickStrArr(r, "mediaCategory", "media_category"),
     targetCategory: pickStrArr(r, "targetCategory", "target_category"),
+    hotspotTags: parseMediaHotspotTags(r.hotspotTags ?? r.hotspot_tags) ?? [],
     tags: pickStrArr(r, "tags", "tags"),
     district: pickStr(r, "district", "district"),
     city: pickStr(r, "city", "city"),
@@ -488,6 +492,10 @@ export function prismaMediaToAdminDto(
     subCategory: m.subCategory,
     mediaCategory: m.mediaCategory ?? [],
     targetCategory: m.targetCategory ?? [],
+    hotspotTags:
+      parseMediaHotspotTags(
+        (m as Media & { hotspotTags?: unknown }).hotspotTags,
+      ) ?? [],
     tags: m.tags ?? [],
     district: m.district,
     city: m.city,

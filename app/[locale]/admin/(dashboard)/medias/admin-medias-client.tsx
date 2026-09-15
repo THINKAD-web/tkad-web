@@ -77,6 +77,12 @@ import {
   splitMediaCategoryForm,
   validateBrowseFields,
 } from "@/components/admin/admin-media-category-fields";
+import {
+  AdminMediaHotspotTagsEditor,
+  adminHotspotDraftsFromTags,
+  adminHotspotDraftsToTags,
+  type HotspotTagDraft,
+} from "@/components/admin/admin-media-hotspot-tags-editor";
 import type { MediaEngagementMap } from "@/lib/admin-media-engagement";
 import {
   normalizeAdminMediaRow,
@@ -339,6 +345,7 @@ type AdminMediaForm = {
   mediaCategoryParent: string;
   mediaCategorySubs: string[];
   targetCategories: string[];
+  hotspotTagDrafts: HotspotTagDraft[];
   tags: string;
   priceNote: string;
   priceOptionsJson: string;
@@ -417,6 +424,7 @@ const emptyForm: AdminMediaForm = {
   mediaCategoryParent: "",
   mediaCategorySubs: [],
   targetCategories: [],
+  hotspotTagDrafts: [],
   tags: "",
   priceNote: "",
   priceOptionsJson: "",
@@ -619,6 +627,7 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     mediaCategoryParent: parentSlug,
     mediaCategorySubs: subSlugs,
     targetCategories: [...(m.targetCategory ?? [])],
+    hotspotTagDrafts: adminHotspotDraftsFromTags(m.hotspotTags),
     tags: (m.tags ?? []).join(", "),
     priceNote: m.priceNote ?? "",
     priceOptionsJson:
@@ -725,6 +734,10 @@ function formToApiBody(
       form.browseSubCategory.trim() || undefined,
     ),
     targetCategory: [...form.targetCategories],
+    hotspotTags:
+      form.browseRegionMain.trim() === "jeju" && form.hotspotTagDrafts.length > 0
+        ? adminHotspotDraftsToTags(form.hotspotTagDrafts)
+        : null,
     tags,
     city: form.city.trim() || null,
     district: form.district.trim() || null,
@@ -4170,6 +4183,14 @@ export default function AdminMediasClient({
                   placeholder="강남, 역세권"
                 />
               </div>
+              {form.browseRegionMain.trim() === "jeju" ? (
+                <AdminMediaHotspotTagsEditor
+                  tags={form.hotspotTagDrafts}
+                  onChange={(hotspotTagDrafts) =>
+                    setForm((f) => ({ ...f, hotspotTagDrafts }))
+                  }
+                />
+              ) : null}
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   가격 비고
