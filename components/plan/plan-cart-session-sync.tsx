@@ -6,6 +6,7 @@ import {
   applySyncedPlanCart,
   getPlanCart,
   PLAN_CART_CHANGE_EVENT,
+  type PlanCart,
 } from "@/lib/plan-cart";
 import {
   msUntilPlanCartApplyAllowed,
@@ -19,6 +20,12 @@ function parseUpdatedAt(iso: string | undefined): number {
   return Number.isFinite(ms) ? ms : 0;
 }
 
+function wouldResurrectDeletedItems(local: PlanCart, merged: PlanCart): boolean {
+  if (merged.items.length <= local.items.length) return false;
+  const localIds = new Set(local.items.map((i) => i.mediaId));
+  return merged.items.some((i) => !localIds.has(i.mediaId));
+}
+
 /** 로그인 시 localStorage 플랜 ↔ DB 동기화 (삭제·추가·순서 반영) */
 export function PlanCartSessionSync() {
   const { user, loading } = useAuthSession();
@@ -26,6 +33,7 @@ export function PlanCartSessionSync() {
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const syncGenerationRef = useRef(0);
   const applyingFromServerRef = useRef(false);
+  const prevItemCountRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -70,6 +78,14 @@ export function PlanCartSessionSync() {
         return;
       }
 
+      if (
+        wouldResurrectDeletedItems(cartNow, merged) &&
+        (shouldDeferServerPlanCartApply() || nowUpdatedMs >= sentUpdatedMs)
+      ) {
+        void syncCart();
+        return;
+      }
+
       applyingFromServerRef.current = true;
       applySyncedPlanCart(merged);
       queueMicrotask(() => {
@@ -78,12 +94,19 @@ export function PlanCartSessionSync() {
     }
 
     if (loggedIn) {
+      prevItemCountRef.current = getPlanCart().items.length;
       void syncCart();
     }
 
-    const onCartChange = () => {
+    const onCartChange = (event: Event) => {
       if (!loggedIn || applyingFromServerRef.current) return;
-      scheduleSync(400);
+      const detail = (event as CustomEvent<PlanCart>).detail;
+      const cart = detail ?? getPlanCart();
+      const prevCount = prevItemCountRef.current;
+      prevItemCountRef.current = cart.items.length;
+      const removed =
+        prevCount != null && cart.items.length < prevCount;
+      scheduleSync(removed || cart.items.length === 0 ? 0 : 400);
     };
 
     window.addEventListener(PLAN_CART_CHANGE_EVENT, onCartChange);

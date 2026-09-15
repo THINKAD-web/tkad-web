@@ -163,6 +163,7 @@ export function MyPlanReportPageClient() {
                 regionBreakdown={bundle.regionalBreakdown}
                 regionBudgetCharts={bundle.regionBudgetCharts}
                 regionImpressionCharts={bundle.regionImpressionCharts}
+                unlockReportPreview
                 activitySource="plan_cart_report"
                 sectionVisibility={sectionVisibility}
                 onSectionVisibilityChange={setSectionVisibility}

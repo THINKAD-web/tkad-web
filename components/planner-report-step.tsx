@@ -22,6 +22,7 @@ import type {
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildReportPayload } from "@/lib/planner-report-export/build-report-payload";
+import { planCartPortfolioPricing } from "@/lib/plan-cart-pricing";
 import { splitPortfolioByCatalogChannel } from "@/lib/plan-cart-report/split-portfolio-by-channel";
 import {
   buildDefaultExecutiveSummaryLines,
@@ -130,6 +131,8 @@ export type PlannerReportSharedProps = {
   regionBreakdown?: PlannerExportRegionBreakdown[];
   regionBudgetCharts?: PlannerExportChartDatum[];
   regionImpressionCharts?: PlannerExportChartDatum[];
+  /** 내 플랜 보고서 등 — PRO 없이도 미리보기·시뮬 텍스트 선명 표시 */
+  unlockReportPreview?: boolean;
   /** 보고서 활동 로그 출처 (PDF/PPT 다운로드 추적) */
   activitySource?: PlanReportActivitySource;
   /** 제안 논리(Claude) API 요청용 — 미전달 시 블록 숨김 */
@@ -395,6 +398,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     loading: plannerResultLoading,
     access: plannerResultAccess,
   } = useFeatureAccess("planner_result");
+  const previewUnlocked = props.unlockReportPreview === true;
+  const showProPreview = previewUnlocked || plannerResultAllowed;
   const derived = usePlannerReportDerived(props);
 
   const ageTargetMatchCount = useMemo(() => {
@@ -455,19 +460,29 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   );
   const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
 
-  const copyFingerprintCurrent = useMemo(
-    () =>
-      computeReportCopyFingerprint({
-        mediaIds: portfolioForExport.map((m) => m.id),
-        quantities: props.campaignMediaQuantities,
-        priceOptionIndex: props.campaignMediaPriceOptionIndex,
-      }),
-    [
-      portfolioForExport,
-      props.campaignMediaQuantities,
-      props.campaignMediaPriceOptionIndex,
-    ],
-  );
+  const isPlanCartReport = props.activitySource === "plan_cart_report";
+
+  const copyFingerprintCurrent = useMemo(() => {
+    const cartPricing =
+      props.planCartItems?.length != null && props.planCartItems.length > 0
+        ? planCartPortfolioPricing({
+            items: props.planCartItems,
+            updatedAt: "",
+          })
+        : null;
+    return computeReportCopyFingerprint({
+      mediaIds: portfolioForExport.map((m) => m.id),
+      quantities:
+        props.campaignMediaQuantities ?? cartPricing?.quantities,
+      priceOptionIndex:
+        props.campaignMediaPriceOptionIndex ?? cartPricing?.priceOptionIndex,
+    });
+  }, [
+    portfolioForExport,
+    props.campaignMediaQuantities,
+    props.campaignMediaPriceOptionIndex,
+    props.planCartItems,
+  ]);
 
   const executiveSummaryLines = useMemo(
     () => splitReportCopyParagraphs(reportExecutiveSummary),
@@ -526,7 +541,12 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   );
 
   useEffect(() => {
-    if (reportGreetingTouched || reportExecutiveSummaryTouched) return;
+    if (
+      !isPlanCartReport &&
+      (reportGreetingTouched || reportExecutiveSummaryTouched)
+    ) {
+      return;
+    }
     if (portfolioForExport.length === 0) return;
 
     if (channelSplit.composition === "onlyOnline") {
@@ -555,6 +575,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       fingerprint: copyFingerprintCurrent,
     });
   }, [
+    isPlanCartReport,
     reportGreetingTouched,
     reportExecutiveSummaryTouched,
     portfolioForExport.length,
@@ -822,8 +843,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       {/* PRO — 미리보기·PDF (시뮬레이션은 Step 7 전용) */}
       <section className="space-y-3" data-screenshot="planner-pro-blur">
         <PlannerProGate
-          isPro={plannerResultAllowed}
-          loading={plannerResultLoading}
+          isPro={showProPreview}
+          loading={plannerResultLoading && !previewUnlocked}
           isKo={props.isKo}
           access={plannerResultAccess}
           feature="planner_result"
@@ -845,7 +866,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             ) : null
           }
         >
-          {plannerResultAllowed ? (
+          {showProPreview ? (
             <div className="space-y-6">
               {copyStale ? (
                 <ReportCopyStaleBanner
