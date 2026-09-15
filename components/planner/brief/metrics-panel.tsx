@@ -10,6 +10,7 @@
 import type { MixMetrics } from "@/lib/planner/brief/mix-metrics";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import type { MetricBasis } from "@/lib/metrics/defaults";
+import { isBudgetTbd } from "@/lib/budget-tbd";
 import { overBudgetBannerLine } from "@/lib/planner/brief/over-budget-copy";
 import {
   footfallVsReachFootnote,
@@ -88,11 +89,14 @@ export function formatReach(n: number, isKo: boolean): string {
 export function MetricsPanel({
   metrics,
   isKo,
+  budgetTbd = false,
   customLineCount = 0,
   listingSourceText = "",
 }: {
   metrics: MixMetrics;
   isKo: boolean;
+  /** true면 예산 초과 경고·비교를 숨긴다 */
+  budgetTbd?: boolean;
   /** 커스텀 라인 — CPM·노출 집계 제외 안내 */
   customLineCount?: number;
   /** 브리프 자유문장 — 입점대기 안내 */
@@ -180,7 +184,7 @@ export function MetricsPanel({
         ) : null}
       </div>
 
-      {metrics.isOverBudget ? (
+      {metrics.isOverBudget && !isBudgetTbd(budgetTbd) ? (
         <p className="mt-2 rounded-lg border border-destructive/40 bg-destructive/10 p-2 tkad-type-caption font-medium text-destructive">
           {overBudgetBannerLine(metrics.overBudgetWon, isKo)}
         </p>

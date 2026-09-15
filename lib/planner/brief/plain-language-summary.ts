@@ -8,6 +8,7 @@
  * 않고 노출 수만으로 문장을 만든다.
  */
 
+import { budgetTbdLabel, isBudgetTbd } from "@/lib/budget-tbd";
 import { summarizeSidoCodes } from "@/lib/planner/brief/regions";
 import { briefUsesDefaults, type CampaignBriefInput } from "@/lib/planner/brief/types";
 
@@ -21,13 +22,17 @@ function formatManwon(won: number, isKo: boolean): string {
 export function buildPlainLanguageSummary(params: {
   isKo: boolean;
   budgetWon: number;
+  budgetTbd?: boolean;
   totalImpressions: number;
   /** null = 도달 산정 중(커버리지 데이터 없음) */
   netReach: number | null;
   formatCompact: (n: number, isKo: boolean) => string;
 }): string {
-  const { isKo, budgetWon, totalImpressions, netReach, formatCompact } = params;
-  const budget = formatManwon(budgetWon, isKo);
+  const { isKo, budgetWon, budgetTbd, totalImpressions, netReach, formatCompact } =
+    params;
+  const budget = isBudgetTbd(budgetTbd)
+    ? budgetTbdLabel(isKo)
+    : formatManwon(budgetWon, isKo);
   const impressions = formatCompact(totalImpressions, isKo);
 
   if (netReach != null && netReach > 0) {
