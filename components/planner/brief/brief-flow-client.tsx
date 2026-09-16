@@ -182,7 +182,7 @@ export function BriefFlowClient({
 
   // L-2: hydration 직후 1회만 — mixCount를 effect deps에 넣지 않는다.
   // `?new=1` 은 제목·광고주명 포함 전체 세션 리셋 (사이드바 「새 플랜」).
-  useLayoutEffect(() => {
+  const evaluateResumePrompt = useCallback(() => {
     if (!hydrated) return;
     if (
       searchParams.get("new") === "1" &&
@@ -202,13 +202,15 @@ export function BriefFlowClient({
       planFromUrl,
       alreadyPrompted: resumePromptedRef.current,
       mixUnits: state.mixUnits,
+      customLines: state.customLines,
       handoffActive: pendingHandoff != null,
     });
     if (!shouldOpen) {
       if (
         pendingHandoff == null &&
         !planFromUrl &&
-        countMixUnits(state.mixUnits) === 0
+        countMixUnits(state.mixUnits) === 0 &&
+        state.customLines.length === 0
       ) {
         resetPlannerReportCopy();
       }
@@ -223,7 +225,24 @@ export function BriefFlowClient({
     searchParams,
     reset,
     stripHandoffQuery,
+  ]);
+
+  useLayoutEffect(() => {
+    if (!hydrated) return;
+    evaluateResumePrompt();
+    // persist merge 직후 1틱 지연 재판단 — mixUnits hydration 레이스 방지
+    if (!resumePromptedRef.current) {
+      queueMicrotask(() => evaluateResumePrompt());
+    }
+  }, [
+    hydrated,
+    planFromUrl,
+    pendingHandoff,
+    searchParams,
+    reset,
+    stripHandoffQuery,
     bfcacheRestoreTick,
+    evaluateResumePrompt,
   ]);
 
   const noticeMissing = useCallback(

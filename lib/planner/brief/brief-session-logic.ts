@@ -7,6 +7,8 @@ import {
   countMixUnits,
   isMixBriefStale,
 } from "@/lib/planner/brief/brief-fingerprint";
+import { hasBriefMixContent } from "@/lib/planner/brief/custom-mix-metrics";
+import type { BriefCustomLine } from "@/lib/planner/brief/custom-lines";
 import type { BriefWizardStep } from "@/lib/planner/brief/types";
 
 /** L-2: 재진입 시 이어하기 모달을 띄울지 */
@@ -15,6 +17,7 @@ export function shouldPromptResumeSession(params: {
   planFromUrl: string | null;
   alreadyPrompted: boolean;
   mixUnits: Record<string, number>;
+  customLines?: readonly BriefCustomLine[];
   /**
    * 딥링크 인계가 진행 중이면 묻지 않는다. 사용자는 이미 "이 매체로 시작"을
    * 눌러 의사를 밝혔고, 여기서 "새로 시작"을 고르면 방금 넘어온 값이 사라진다.
@@ -25,7 +28,15 @@ export function shouldPromptResumeSession(params: {
   if (params.planFromUrl) return false;
   if (params.handoffActive) return false;
   if (params.alreadyPrompted) return false;
-  return countMixUnits(params.mixUnits) >= 1;
+  return hasBriefMixContent(params.mixUnits, params.customLines ?? []);
+}
+
+/** resume 모달에 표시할 담긴 매체·커스텀 라인 수 */
+export function countBriefMixContent(params: {
+  mixUnits: Record<string, number>;
+  customLines: readonly BriefCustomLine[];
+}): number {
+  return countMixUnits(params.mixUnits) + params.customLines.length;
 }
 
 /** L-1: Step 2/3 진입 전 stale mix 확인 모달 */
@@ -78,7 +89,10 @@ export function selectMixIsStale(s: BriefStoreState): boolean {
 }
 
 export function selectMixCount(s: BriefStoreState): number {
-  return countMixUnits(s.mixUnits);
+  return countBriefMixContent({
+    mixUnits: s.mixUnits,
+    customLines: s.customLines,
+  });
 }
 
 /** Q-1: React 19 — 원시 enum 값만 반환 */
