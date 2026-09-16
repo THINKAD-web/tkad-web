@@ -162,6 +162,27 @@ function shortSigunguName(nameKo: string): string {
   return nameKo.replace(/(특별|광역)?(시|군|구)$/g, "").trim() || nameKo;
 }
 
+/** Admin `city` 자유입력 → 행정 시·도명 (구·군 picker용) */
+export function resolveSidoNameFromCityInput(city: string): string | null {
+  const trimmed = city.trim();
+  if (!trimmed) return null;
+  for (const sido of KOREA_SIDO_ORDERED) {
+    if (trimmed === sido || shortSidoName(sido) === trimmed) return sido;
+  }
+  const compact = trimmed.replace(/\s+/g, "");
+  for (const sido of KOREA_SIDO_ORDERED) {
+    const short = shortSidoName(sido);
+    if (
+      sido.startsWith(compact) ||
+      short.startsWith(compact) ||
+      compact.startsWith(short)
+    ) {
+      return sido;
+    }
+  }
+  return null;
+}
+
 /** 시도명을 짧은 지역 라벨로 (도시 필드 자동 채움용) */
 export function inferShortRegionLabelFromCodes(
   codes: string[],

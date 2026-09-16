@@ -61,8 +61,8 @@ export const MEDIA_REGION_ZONES: MediaRegionZoneDef[] = [
     id: "seongdong",
     labelKo: "성동권",
     labelEn: "Seongdong",
-    districts: ["성동구", "광진구", "동대문구"],
-    aliases: ["성수", "건대", "광진", "뚝섬", "왕십리"],
+    districts: ["성동구", "광진구", "동대문구", "중랑구"],
+    aliases: ["성수", "건대", "광진", "뚝섬", "왕십리", "중랑"],
   },
   {
     id: "gangseo",
@@ -90,7 +90,20 @@ export const MEDIA_REGION_ZONES: MediaRegionZoneDef[] = [
     labelKo: "경기",
     labelEn: "Gyeonggi",
     districts: [],
-    aliases: ["경기", "수원", "성남", "분당", "판교", "용인", "고양", "일산", "부천", "안양"],
+    aliases: [
+      "경기",
+      "수원",
+      "성남",
+      "분당",
+      "판교",
+      "용인",
+      "고양",
+      "일산",
+      "부천",
+      "안양",
+      "광명",
+      "하남",
+    ],
   },
   {
     id: "incheon",
@@ -162,7 +175,7 @@ function metroZoneFromBlob(blob: string): MediaRegionZoneId | null {
   if (/광주/.test(blob)) return "gwangju";
   if (/대전|세종/.test(blob)) return "daejeon";
   if (/인천/.test(blob)) return "incheon";
-  if (/경기|수원|성남|분당|판교|용인|고양|일산|부천|안양|하남/.test(blob)) {
+  if (/경기|수원|성남|분당|판교|용인|고양|일산|부천|안양|하남|광명/.test(blob)) {
     return "gyeonggi";
   }
   if (/울산|창원|청주|전주|춘천|강원/.test(blob)) return "other";
@@ -272,7 +285,7 @@ export function normalizeMediaLocationFields(input: {
   let district = (input.district ?? "").trim();
 
   if (!district && location) {
-    const gu = location.match(/([가-힣]{2,8}(?:구|군))/);
+    const gu = location.match(/([가-힣]{2,8}(?:구|군|시))/);
     if (gu) district = gu[1]!;
   }
   if (!city && location) {
@@ -285,11 +298,12 @@ export function normalizeMediaLocationFields(input: {
     if (!city && /제주|서귀포/.test(location)) city = "제주";
   }
 
+  const derivedZone = mapDistrictToRegionZone(district, { location, city });
   let regionZone: MediaRegionZoneId | null = null;
-  if (input.regionZone && isValidRegionZoneId(input.regionZone)) {
+  if (derivedZone) {
+    regionZone = derivedZone;
+  } else if (input.regionZone && isValidRegionZoneId(input.regionZone)) {
     regionZone = input.regionZone;
-  } else {
-    regionZone = mapDistrictToRegionZone(district, { location, city });
   }
 
   let region: MediaRegionMacro = "national";

@@ -25,20 +25,58 @@ export const MEDIA_BROWSE_REGIONS: BrowseRegionMain[] = [
     labelEn: "Seoul",
     sub: [
       { id: "seoul_gangnam", label: "강남/서초", aliases: ["강남", "서초", "역삼", "삼성", "코엑스", "테헤란", "강남구", "서초구"] },
-      { id: "seoul_hongdae", label: "홍대/마포", aliases: ["홍대", "마포", "합정", "연남", "상수", "망원"] },
-      { id: "seoul_seongsu", label: "성수/왕십리", aliases: ["성수", "왕십리", "성동", "연무장"] },
+      {
+        id: "seoul_hongdae",
+        label: "홍대/마포",
+        aliases: ["홍대", "마포", "마포구", "합정", "연남", "상수", "망원", "은평", "은평구"],
+      },
+      {
+        id: "seoul_seongsu",
+        label: "성수/왕십리",
+        aliases: ["성수", "왕십리", "성동", "성동구", "광진", "광진구", "연무장"],
+      },
       { id: "seoul_cbd", label: "광화문/도심", aliases: ["광화문", "도심", "명동", "시청", "세종", "중구", "종로"] },
-      { id: "seoul_jongno", label: "종로/을지로", aliases: ["종로", "을지로", "동대문"] },
+      {
+        id: "seoul_jongno",
+        label: "종로/을지로",
+        aliases: ["종로", "종로구", "을지로", "동대문", "동대문구"],
+      },
       { id: "seoul_itaewon", label: "이태원/한남", aliases: ["이태원", "한남", "용산"] },
       { id: "seoul_sinchon", label: "신촌/이대", aliases: ["신촌", "이대", "서대문"] },
-      { id: "seoul_gangbuk", label: "강북/노원", aliases: ["강북", "노원", "도봉", "성북", "미아"] },
+      {
+        id: "seoul_gangbuk",
+        label: "강북/노원",
+        aliases: [
+          "강북",
+          "강북구",
+          "노원",
+          "노원구",
+          "도봉",
+          "도봉구",
+          "성북",
+          "성북구",
+          "미아",
+          "중랑",
+          "중랑구",
+        ],
+      },
       { id: "seoul_yeongdeungpo", label: "영등포/여의도", aliases: ["영등포", "여의도", "당산"] },
-      { id: "seoul_guro", label: "구로/신도림", aliases: ["구로", "신도림", "가산", "금천"] },
+      {
+        id: "seoul_guro",
+        label: "구로/신도림",
+        aliases: ["구로", "구로구", "신도림", "가산", "금천", "금천구"],
+      },
+      {
+        id: "seoul_gangseo_yangcheon",
+        label: "강서/양천/목동",
+        labelEn: "Gangseo / Yangcheon / Mokdong",
+        aliases: ["강서", "강서구", "양천", "양천구", "목동", "오목교", "화곡", "마곡", "발산"],
+      },
       {
         id: "seoul_gwanak",
         label: "관악/서울대입구",
         labelEn: "Gwanak / Seoul Nat'l Univ.",
-        aliases: ["관악", "관악구", "서울대입구", "봉천", "신림", "남현"],
+        aliases: ["관악", "관악구", "동작", "동작구", "서울대입구", "봉천", "신림", "남현"],
       },
       { id: "seoul_jamsil", label: "잠실/송파", aliases: ["잠실", "송파", "강동", "롯데월드"] },
       { id: "seoul_coex", label: "코엑스/삼성", aliases: ["코엑스", "삼성", "선릉", "삼성역"] },
@@ -320,7 +358,10 @@ export function inferBrowseRegionFromMedia(input: {
   if (zone === "mapo") return { main: "seoul", sub: "seoul_hongdae" };
   if (zone === "seongdong") return { main: "seoul", sub: "seoul_seongsu" };
   if (zone === "downtown") return { main: "seoul", sub: "seoul_cbd" };
-  if (zone === "gyeonggi") return { main: "gyeonggi", sub: "gyeonggi_seongnam" };
+  if (zone === "nowon") return { main: "seoul", sub: "seoul_gangbuk" };
+  if (zone === "gangseo") return { main: "seoul", sub: "seoul_gangseo_yangcheon" };
+  if (zone === "gwanak") return { main: "seoul", sub: "seoul_gwanak" };
+  if (zone === "gyeonggi") return { main: "gyeonggi", sub: "gyeonggi_gwangmyeong" };
   if (zone === "incheon") return { main: "incheon", sub: "incheon_downtown" };
   if (zone === "busan") return { main: "busan", sub: "busan_seomyeon" };
   if (zone === "daegu") return { main: "daegu", sub: "daegu_dongseongno" };

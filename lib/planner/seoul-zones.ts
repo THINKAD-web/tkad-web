@@ -101,6 +101,8 @@ export const BROWSE_SUB_TO_SEOUL_ZONE: Record<string, PlannerSeoulZoneKey> = {
   seoul_yeongdeungpo: "yeouido",
   seoul_jamsil: "jamsil",
   seoul_guro: "guro",
+  seoul_gwanak: "gangnam",
+  seoul_gangseo_yangcheon: "gangseo",
   seoul_gangbuk: "gangbuk",
   seoul_nowon: "gangbuk",
 };
