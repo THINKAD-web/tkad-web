@@ -25,7 +25,7 @@ test("inferBrowseRegionFromMedia — 관악구 district → seoul_gwanak", () =>
   assert.equal(r.sub, "seoul_gwanak");
 });
 
-test("inferBrowseRegionFromMedia — gwanak zone without 관악 hint does not default to seoul_gwanak", () => {
+test("inferBrowseRegionFromMedia — gwanak zone + 동작구 → seoul_gwanak", () => {
   const r = inferBrowseRegionFromMedia({
     region: "seoul",
     regionZone: "gwanak",
@@ -33,7 +33,7 @@ test("inferBrowseRegionFromMedia — gwanak zone without 관악 hint does not de
     district: "동작구",
     location: "노량진",
   });
-  assert.notEqual(r.sub, "seoul_gwanak");
+  assert.equal(r.sub, "seoul_gwanak");
 });
 
 test("inferBrowseRegionFromMedia — null sub 서울 macro tie-break is not seoul_gangnam when 관악 in haystack", () => {

@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { inferBrowseRegionFromMedia } from "@/lib/media-browse-regions";
 import { normalizeMediaLocationFields, regionZoneLabel } from "@/lib/media-regions";
 import { normalizeMediaTags } from "@/lib/media-tags";
 import { getPrisma } from "@/lib/prisma";
@@ -29,6 +30,8 @@ export async function normalizeAllMediaRegions(opts?: {
       location: true,
       region: true,
       regionZone: true,
+      regionMain: true,
+      regionSub: true,
       tags: true,
     },
     ...(limit ? { take: limit } : {}),
@@ -47,6 +50,16 @@ export async function normalizeAllMediaRegions(opts?: {
       regionZone: row.regionZone,
     });
 
+    const browse = inferBrowseRegionFromMedia({
+      region: loc.region,
+      regionZone: loc.regionZone,
+      city: loc.city || row.city,
+      district: loc.district || row.district,
+      location: row.location,
+    });
+    const nextRegionMain = browse.main ?? row.regionMain;
+    const nextRegionSub = browse.sub ?? row.regionSub;
+
     const zoneLabel = regionZoneLabel(loc.regionZone, "ko");
     const baseTags = (row.tags ?? []).filter((t) => t !== zoneLabel);
     const nextTags =
@@ -58,7 +71,9 @@ export async function normalizeAllMediaRegions(opts?: {
       row.region !== loc.region ||
       row.regionZone !== loc.regionZone ||
       (row.district ?? "") !== loc.district ||
-      (row.city ?? "") !== loc.city;
+      (row.city ?? "") !== loc.city ||
+      row.regionMain !== nextRegionMain ||
+      row.regionSub !== nextRegionSub;
 
     if (!changed) {
       unchanged += 1;
@@ -72,6 +87,8 @@ export async function normalizeAllMediaRegions(opts?: {
         regionZone: loc.regionZone,
         district: loc.district || row.district,
         city: loc.city || row.city,
+        regionMain: nextRegionMain,
+        regionSub: nextRegionSub,
         tags: nextTags,
       } satisfies Prisma.MediaUpdateInput,
     });
