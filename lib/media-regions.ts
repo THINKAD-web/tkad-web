@@ -61,8 +61,8 @@ export const MEDIA_REGION_ZONES: MediaRegionZoneDef[] = [
     id: "seongdong",
     labelKo: "성동권",
     labelEn: "Seongdong",
-    districts: ["성동구", "광진구", "동대문구"],
-    aliases: ["성수", "건대", "광진", "뚝섬", "왕십리"],
+    districts: ["성동구", "광진구", "동대문구", "중랑구"],
+    aliases: ["성수", "건대", "광진", "뚝섬", "왕십리", "중랑"],
   },
   {
     id: "gangseo",
