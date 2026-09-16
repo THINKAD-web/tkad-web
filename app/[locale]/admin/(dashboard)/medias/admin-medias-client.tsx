@@ -111,6 +111,7 @@ import {
   KOREA_SIGUNGU_COVERAGE,
   centroidOfCoverageCodes,
   inferShortRegionLabelFromCodes,
+  resolveSidoNameFromCityInput,
   sigunguListForSido,
 } from "@/lib/geo/korea-sgg-coverage";
 import {
@@ -977,6 +978,12 @@ export default function AdminMediasClient({
     () => [...sigunguListForSido(coverageSidoFilter)],
     [coverageSidoFilter],
   );
+
+  const districtSigunguOptions = useMemo(() => {
+    const sido = resolveSidoNameFromCityInput(form.city);
+    if (!sido) return [];
+    return [...sigunguListForSido(sido)];
+  }, [form.city]);
 
   const coverageSidoShortLabel = useMemo(
     () =>
@@ -3667,7 +3674,25 @@ export default function AdminMediasClient({
                       setForm((f) => ({ ...f, district: e.target.value }))
                     }
                     placeholder="강남구"
+                    list={
+                      districtSigunguOptions.length > 0
+                        ? "admin-media-district-sigungu"
+                        : undefined
+                    }
                   />
+                  {districtSigunguOptions.length > 0 ? (
+                    <datalist id="admin-media-district-sigungu">
+                      {districtSigunguOptions.map((row) => (
+                        <option key={row.code} value={row.nameKo} />
+                      ))}
+                    </datalist>
+                  ) : null}
+                  {districtSigunguOptions.length > 0 ? (
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      {form.city.trim() || "시·도"} 기준 {districtSigunguOptions.length}개
+                      구·군에서 선택하거나 직접 입력할 수 있습니다.
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
