@@ -2,7 +2,10 @@
 
 import { getPlanCart, replacePlanCart } from "@/lib/plan-cart";
 import { resetAllPlannerReportCopyFields } from "@/lib/planner/reset-planner-session";
-import { clearRecommendSessionSnapshot } from "@/lib/recommend/recommend-session-persist";
+import {
+  clearRecommendSessionSnapshot,
+  markRecommendResumeFreshStart,
+} from "@/lib/recommend/recommend-session-persist";
 
 /** AI 플래너에서 담은 매체만 제거 — 다른 경로(map/search) 카트는 유지 */
 export function clearRecommendAiPlanCartItems(): void {
@@ -19,6 +22,7 @@ export function clearRecommendAiPlanCartItems(): void {
 /** 「새로 시작」 — 세션·report copy·AI 카트 항목 초기화 */
 export function resetRecommendSessionState(): void {
   clearRecommendSessionSnapshot();
+  markRecommendResumeFreshStart();
   resetAllPlannerReportCopyFields();
   clearRecommendAiPlanCartItems();
 }

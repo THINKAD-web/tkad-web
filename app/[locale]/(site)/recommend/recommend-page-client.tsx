@@ -82,11 +82,13 @@ import {
   clearRecommendSessionSnapshot,
   hydrateScoredList,
   readRecommendSessionSnapshot,
+  readRecommendResumeFreshStartAt,
   serializeScoredList,
   writeRecommendSessionSnapshot,
   type RecommendSessionSnapshot,
 } from "@/lib/recommend/recommend-session-persist";
 import {
+  countAiRecommendPlanCartItems,
   recommendResumeMediaCount,
   shouldPromptRecommendResumeSession,
 } from "@/lib/recommend/recommend-session-logic";
@@ -595,25 +597,30 @@ export default function RecommendPageClient({
     if (skipSessionRestore) return;
 
     const snap = readRecommendSessionSnapshot();
-    const planCartCount = getPlanCart().items.length;
+    const planCart = getPlanCart();
+    const aiRecommendPlanCartCount = countAiRecommendPlanCartItems(planCart);
     const shouldOpen = shouldPromptRecommendResumeSession({
       alreadyPrompted: resumePromptedRef.current,
       skipSessionRestore: false,
       sessionSnapshot: snap,
-      planCartCount,
+      aiRecommendPlanCartCount,
+      resumeFreshStartAt: readRecommendResumeFreshStartAt(),
     });
 
     if (shouldOpen) {
       resumePromptedRef.current = true;
       pendingSessionRef.current = snap;
       setResumeMediaCount(
-        recommendResumeMediaCount({ planCartCount, sessionSnapshot: snap }),
+        recommendResumeMediaCount({
+          aiRecommendPlanCartCount,
+          sessionSnapshot: snap,
+        }),
       );
       setResumeOpen(true);
       return;
     }
 
-    if (planCartCount === 0 && !snap) {
+    if (aiRecommendPlanCartCount === 0 && !snap) {
       resetAllPlannerReportCopyFields();
     }
 

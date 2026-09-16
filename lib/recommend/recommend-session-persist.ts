@@ -9,6 +9,8 @@ import type { MediaItem } from "@/lib/media-data";
 /** v2: rationaleLines 포함 스키마 — v1 세션은 복원하지 않음 */
 export const RECOMMEND_SESSION_STORAGE_KEY = "tkad_recommend_session_v2";
 const LEGACY_RECOMMEND_SESSION_STORAGE_KEY = "tkad_recommend_session_v1";
+/** 「새로 시작」 후 재진입 팝업 억제 — AI 세션·카트가 다시 생기면 해제 */
+export const RECOMMEND_FRESH_START_KEY = "tkad_recommend_fresh_start_v1";
 
 export type RecommendPersistPhase =
   | "dashboard"
@@ -105,6 +107,7 @@ export function writeRecommendSessionSnapshot(
 ): void {
   if (!isBrowser()) return;
   try {
+    clearRecommendResumeFreshStart();
     window.sessionStorage.setItem(
       RECOMMEND_SESSION_STORAGE_KEY,
       JSON.stringify({ ...snapshot, v: 2 as const }),
@@ -119,6 +122,36 @@ export function clearRecommendSessionSnapshot(): void {
   try {
     window.sessionStorage.removeItem(RECOMMEND_SESSION_STORAGE_KEY);
     window.sessionStorage.removeItem(LEGACY_RECOMMEND_SESSION_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function markRecommendResumeFreshStart(): void {
+  if (!isBrowser()) return;
+  try {
+    window.sessionStorage.setItem(RECOMMEND_FRESH_START_KEY, String(Date.now()));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function readRecommendResumeFreshStartAt(): number | null {
+  if (!isBrowser()) return null;
+  try {
+    const raw = window.sessionStorage.getItem(RECOMMEND_FRESH_START_KEY);
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearRecommendResumeFreshStart(): void {
+  if (!isBrowser()) return;
+  try {
+    window.sessionStorage.removeItem(RECOMMEND_FRESH_START_KEY);
   } catch {
     /* ignore */
   }

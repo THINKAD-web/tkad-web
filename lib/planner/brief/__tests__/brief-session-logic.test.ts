@@ -81,6 +81,26 @@ test("resume effect 시뮬: mix 없으면 setState 0회", () => {
 
 // ── N-2: mix 있는 재진입 ──
 
+test("resume prompt: customLines only → prompt", () => {
+  assert.equal(
+    shouldPromptResumeSession({
+      hydrated: true,
+      planFromUrl: null,
+      alreadyPrompted: false,
+      mixUnits: {},
+      customLines: [
+        {
+          lineId: "custom-1",
+          name: "협의 매체",
+          quantity: 1,
+          unitPriceWon: 1_000_000,
+        },
+      ],
+    }),
+    true,
+  );
+});
+
 test("resume prompt: mix 있으면 1회만 true", () => {
   const params = {
     hydrated: true,
