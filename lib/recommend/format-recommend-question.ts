@@ -1,5 +1,7 @@
 import type { AiRecommendInput } from "@/lib/ai-media-recommend";
 import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
+import { recommendRegionLabel } from "@/lib/recommend/recommend-sido-regions";
+import { isSidoCode } from "@/lib/planner/brief/regions";
 import { plannerRegionLabel } from "@/lib/planner/planner-regions";
 import { PLANNER_INDUSTRY_LABELS } from "@/lib/planner/types";
 import { recommendIndustryToPlannerIndustryKey } from "@/lib/recommend/recommend-report-adapter";
@@ -45,7 +47,11 @@ export function formatRecommendQuestionLine(args: {
         : [];
   if (codes.length > 0) {
     const regionText = codes
-      .map((c) => plannerRegionLabel(String(c), isKo ? "ko" : "en"))
+      .map((c) =>
+        isSidoCode(String(c))
+          ? recommendRegionLabel(String(c), isKo)
+          : plannerRegionLabel(String(c), isKo ? "ko" : "en"),
+      )
       .filter(Boolean)
       .join(isKo ? "·" : ", ");
     if (regionText) parts.push(regionText);

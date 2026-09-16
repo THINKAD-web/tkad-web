@@ -54,14 +54,16 @@ import {
   recommendGoalToPlannerCampaignGoal,
   recommendIndustryToPlannerIndustryKey as recommendIndustryToPlanner,
 } from "@/lib/recommend/recommend-report-adapter";
+import {
+  recommendRegionCodesToPlannerIds,
+  recommendSelectionHasSido,
+  summarizeRecommendRegionCodes,
+  type RecommendRegionCode,
+} from "@/lib/recommend/recommend-sido-regions";
+import { SIDO_REGIONS, type SidoCode } from "@/lib/planner/brief/regions";
 
-export type RegionCheckboxCode =
-  | "seoul"
-  | "capital"
-  | "incheon"
-  | "busan"
-  | "jeju"
-  | "national";
+/** @deprecated Prefer `RecommendRegionCode` — kept for existing imports */
+export type RegionCheckboxCode = RecommendRegionCode;
 
 type AgeBand = "teens" | "twenties" | "thirties" | "forties";
 type PeriodWeeks = 1 | 2 | 4 | 12;
@@ -243,33 +245,56 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     writeStoredRecommendChannelType(value);
   }, []);
 
-  const toggleRegion = useCallback((code: RegionCheckboxCode) => {
-    setRegions((prev) => {
-      const next = new Set(prev);
-      if (next.has(code)) {
-        next.delete(code);
-        if (code === "seoul") {
+  const clearZonesForSido = useCallback((code: SidoCode) => {
+    if (code === "11") {
+      setSeoulZones([]);
+      setSeoulZonesTouched(false);
+    }
+    if (code === "26") {
+      setBusanZones([]);
+      setBusanZonesTouched(false);
+    }
+    if (code === "41") {
+      setGyeonggiZones([]);
+      setGyeonggiZonesTouched(false);
+    }
+    if (code === "28") {
+      setIncheonZones([]);
+      setIncheonZonesTouched(false);
+    }
+  }, []);
+
+  const toggleRegion = useCallback(
+    (code: RecommendRegionCode) => {
+      setRegions((prev) => {
+        if (code === "national") {
+          if (prev.has("national") && prev.size === 1) {
+            return new Set();
+          }
           setSeoulZones([]);
           setSeoulZonesTouched(false);
-        }
-        if (code === "busan") {
           setBusanZones([]);
           setBusanZonesTouched(false);
-        }
-        if (code === "capital") {
           setGyeonggiZones([]);
           setGyeonggiZonesTouched(false);
-        }
-        if (code === "incheon") {
           setIncheonZones([]);
           setIncheonZonesTouched(false);
+          return new Set(["national"]);
         }
-      } else {
-        next.add(code);
-      }
-      return next;
-    });
-  }, []);
+
+        const next = new Set(prev);
+        next.delete("national");
+        if (next.has(code)) {
+          next.delete(code);
+          clearZonesForSido(code);
+        } else {
+          next.add(code);
+        }
+        return next;
+      });
+    },
+    [clearZonesForSido],
+  );
 
   const suggestedSeoulZones = useMemo(() => {
     if (!campaignGoal) return [] as PlannerSeoulZoneKey[];
@@ -280,7 +305,13 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   }, [campaignGoal, industry]);
 
   useEffect(() => {
-    if (!regions.has("seoul") || seoulZonesTouched || !campaignGoal) return;
+    if (
+      !recommendSelectionHasSido(regions, "11") ||
+      seoulZonesTouched ||
+      !campaignGoal
+    ) {
+      return;
+    }
     setSeoulZones(suggestedSeoulZones);
   }, [regions, seoulZonesTouched, campaignGoal, suggestedSeoulZones]);
 
@@ -293,7 +324,13 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   }, [campaignGoal, industry]);
 
   useEffect(() => {
-    if (!regions.has("busan") || busanZonesTouched || !campaignGoal) return;
+    if (
+      !recommendSelectionHasSido(regions, "26") ||
+      busanZonesTouched ||
+      !campaignGoal
+    ) {
+      return;
+    }
     setBusanZones(suggestedBusanZones);
   }, [regions, busanZonesTouched, campaignGoal, suggestedBusanZones]);
 
@@ -306,7 +343,13 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   }, [campaignGoal, industry]);
 
   useEffect(() => {
-    if (!regions.has("capital") || gyeonggiZonesTouched || !campaignGoal) return;
+    if (
+      !recommendSelectionHasSido(regions, "41") ||
+      gyeonggiZonesTouched ||
+      !campaignGoal
+    ) {
+      return;
+    }
     setGyeonggiZones(suggestedGyeonggiZones);
   }, [regions, gyeonggiZonesTouched, campaignGoal, suggestedGyeonggiZones]);
 
@@ -319,7 +362,13 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   }, [campaignGoal, industry]);
 
   useEffect(() => {
-    if (!regions.has("incheon") || incheonZonesTouched || !campaignGoal) return;
+    if (
+      !recommendSelectionHasSido(regions, "28") ||
+      incheonZonesTouched ||
+      !campaignGoal
+    ) {
+      return;
+    }
     setIncheonZones(suggestedIncheonZones);
   }, [regions, incheonZonesTouched, campaignGoal, suggestedIncheonZones]);
 
@@ -409,18 +458,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     });
   }, []);
 
-  const regionDef = useMemo(
-    () =>
-      [
-        { code: "seoul" as const, label: tr("form.regionSeoul") },
-        { code: "capital" as const, label: tr("form.regionGyeonggi") },
-        { code: "incheon" as const, label: tr("form.regionIncheon") },
-        { code: "busan" as const, label: tr("form.regionBusan") },
-        { code: "jeju" as const, label: tr("form.regionJeju") },
-        { code: "national" as const, label: tr("form.regionNational") },
-      ] as const,
-    [tr],
-  );
+  const regionNationwideOnly =
+    regions.size === 0 || (regions.size === 1 && regions.has("national"));
 
   const ageDef = useMemo(
     () =>
@@ -493,7 +532,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const buildPayload = useCallback(
     (
       goal: CampaignGoal,
-      regionSet: Set<RegionCheckboxCode>,
+      regionSet: Set<RecommendRegionCode>,
       ageSet: Set<AgeBand>,
       industryVal: Industry | null,
       period: PeriodWeeks | null,
@@ -511,9 +550,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       tbd: boolean,
     ): MediaAiRecommendFormSubmit => {
       const regionCodes = [...regionSet];
+      const plannerIds = recommendRegionCodesToPlannerIds(regionCodes);
       let regionCode: AiRecommendInput["region"] = "all";
-      if (regionCodes.length === 1) {
-        regionCode = regionCodes[0];
+      if (plannerIds?.length === 1) {
+        regionCode = plannerIds[0]!;
       }
 
       const input: AiRecommendInput = {
@@ -530,17 +570,19 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         placementHints: hints.size > 0 ? [...hints] : undefined,
         regionCodes: regionCodes.length > 0 ? regionCodes : undefined,
         seoulZones:
-          regionSet.has("seoul") && zoneList.length > 0 ? [...zoneList] : undefined,
+          recommendSelectionHasSido(regionSet, "11") && zoneList.length > 0
+            ? [...zoneList]
+            : undefined,
         busanZones:
-          regionSet.has("busan") && busanZoneList.length > 0
+          recommendSelectionHasSido(regionSet, "26") && busanZoneList.length > 0
             ? [...busanZoneList]
             : undefined,
         gyeonggiZones:
-          regionSet.has("capital") && gyeonggiZoneList.length > 0
+          recommendSelectionHasSido(regionSet, "41") && gyeonggiZoneList.length > 0
             ? [...gyeonggiZoneList]
             : undefined,
         incheonZones:
-          regionSet.has("incheon") && incheonZoneList.length > 0
+          recommendSelectionHasSido(regionSet, "28") && incheonZoneList.length > 0
             ? [...incheonZoneList]
             : undefined,
         ...(digitalTouched ? { digitalBudgetPct: digitalPct } : {}),
@@ -589,9 +631,9 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       arr[Math.floor(Math.random() * arr.length)];
 
     const randomRegionCodes = (() => {
-      const codes = regionDef.map((r) => r.code);
+      const codes = SIDO_REGIONS.map((r) => r.code);
       const count = Math.max(1, Math.min(2, Math.floor(Math.random() * 3)));
-      const picked = new Set<RegionCheckboxCode>();
+      const picked = new Set<RecommendRegionCode>();
       while (picked.size < count) {
         picked.add(pickRandom(codes));
       }
@@ -702,19 +744,35 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
             {...fieldBadge}
           >
             <div className="flex flex-wrap gap-2">
-              {regionDef.map(({ code, label }) => (
-                <label key={code} className={chipClass(regions.has(code))}>
+              {SIDO_REGIONS.map((r) => (
+                <label key={r.code} className={chipClass(regions.has(r.code))}>
                   <input
                     type="checkbox"
                     className="sr-only"
-                    checked={regions.has(code)}
-                    onChange={() => toggleRegion(code)}
+                    checked={regions.has(r.code)}
+                    onChange={() => toggleRegion(r.code)}
                   />
-                  {label}
+                  {isKo ? r.ko : r.en}
                 </label>
               ))}
+              <label className={chipClass(regions.has("national"))}>
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={regions.has("national")}
+                  onChange={() => toggleRegion("national")}
+                />
+                {tr("form.regionNational")}
+              </label>
             </div>
-            {regions.has("seoul") ? (
+            {regionNationwideOnly ? (
+              <p className="text-xs text-muted-foreground">{tr("form.regionHint")}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                {summarizeRecommendRegionCodes([...regions], isKo, 4)}
+              </p>
+            )}
+            {recommendSelectionHasSido(regions, "11") ? (
               <PlannerSeoulZoneChips
                 embedded
                 selected={seoulZones}
@@ -725,7 +783,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 onApplySuggested={applySuggestedSeoulZones}
               />
             ) : null}
-            {regions.has("busan") ? (
+            {recommendSelectionHasSido(regions, "26") ? (
               <PlannerBusanZoneChips
                 embedded
                 selected={busanZones}
@@ -736,7 +794,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 onApplySuggested={applySuggestedBusanZones}
               />
             ) : null}
-            {regions.has("capital") ? (
+            {recommendSelectionHasSido(regions, "41") ? (
               <PlannerGyeonggiZoneChips
                 embedded
                 selected={gyeonggiZones}
@@ -747,7 +805,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 onApplySuggested={applySuggestedGyeonggiZones}
               />
             ) : null}
-            {regions.has("incheon") ? (
+            {recommendSelectionHasSido(regions, "28") ? (
               <PlannerIncheonZoneChips
                 embedded
                 selected={incheonZones}

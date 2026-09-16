@@ -39,6 +39,108 @@ function mockMedia(
   } as MediaItem;
 }
 
+test("resolveAiRecommendPlannerRegionIds: sido code daegu (27)", () => {
+  const ids = resolveAiRecommendPlannerRegionIds({
+    goal: "awareness",
+    target: "mass",
+    budgetMaxMan: 500,
+    region: "all",
+    industry: "other",
+    regionCodes: ["27"],
+  });
+  assert.deepEqual(ids, ["daegu"]);
+});
+
+test("resolveAiRecommendPlannerRegionIds: sido code gangwon (42)", () => {
+  const ids = resolveAiRecommendPlannerRegionIds({
+    goal: "awareness",
+    target: "mass",
+    budgetMaxMan: 500,
+    region: "all",
+    industry: "other",
+    regionCodes: ["42"],
+  });
+  assert.deepEqual(ids, ["gangwon"]);
+});
+
+test("resolveAiRecommendPlannerRegionIds: legacy seoul macro → seoul browse id", () => {
+  const ids = resolveAiRecommendPlannerRegionIds({
+    goal: "awareness",
+    target: "mass",
+    budgetMaxMan: 500,
+    region: "seoul",
+    industry: "other",
+    regionCodes: ["seoul"],
+  });
+  assert.deepEqual(ids, ["seoul"]);
+});
+
+test("resolveAiRecommendPlannerRegionIds: legacy capital macro → metro trio", () => {
+  const ids = resolveAiRecommendPlannerRegionIds({
+    goal: "awareness",
+    target: "mass",
+    budgetMaxMan: 500,
+    region: "all",
+    industry: "other",
+    regionCodes: ["capital"],
+  });
+  assert.deepEqual(new Set(ids), new Set(["seoul", "gyeonggi", "incheon"]));
+});
+
+test("integration: daegu sido filters daegu catalog only", () => {
+  const input: AiRecommendInput = {
+    goal: "awareness",
+    target: "mass",
+    budgetMaxMan: 1000,
+    region: "daegu",
+    industry: "other",
+    regionCodes: ["27"],
+  };
+  const catalog = [
+    mockMedia("d1", "daegu", "동성로"),
+    mockMedia("d2", "daegu", "대구 시내"),
+    mockMedia("d3", "daegu", "수성"),
+    mockMedia("d4", "daegu", "달서"),
+    mockMedia("d5", "daegu", "북구"),
+    mockMedia("s1", "seoul", "강남"),
+  ];
+  const matching = aiInputToMatching(input, 0);
+  const { recommendations } = runRecommendMatchFromCatalog(
+    catalog,
+    matching,
+    5,
+    input,
+  );
+  assert.ok(recommendations.every((r) => r.media.regionMain === "daegu"));
+});
+
+test("integration: gwangju sido filters gwangju catalog only", () => {
+  const input: AiRecommendInput = {
+    goal: "awareness",
+    target: "mass",
+    budgetMaxMan: 1000,
+    region: "gwangju",
+    industry: "other",
+    regionCodes: ["29"],
+  };
+  const catalog = [
+    mockMedia("g1", "gwangju", "광주 시내"),
+    mockMedia("g2", "gwangju", "상무"),
+    mockMedia("g3", "gwangju", "첨단"),
+    mockMedia("g4", "gwangju", "빛고을"),
+    mockMedia("g5", "gwangju", "동구"),
+    mockMedia("b1", "busan", "서면"),
+  ];
+  const matching = aiInputToMatching(input, 0);
+  const { recommendations } = runRecommendMatchFromCatalog(
+    catalog,
+    matching,
+    5,
+    input,
+  );
+  assert.ok(recommendations.every((r) => r.media.regionMain === "gwangju"));
+});
+
 test("resolveAiRecommendPlannerRegionIds: regionCodes busan", () => {
   const ids = resolveAiRecommendPlannerRegionIds({
     goal: "awareness",

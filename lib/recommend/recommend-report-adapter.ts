@@ -8,6 +8,11 @@ import type { MediaItem } from "@/lib/media-data";
 import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
 import {
+  normalizeRecommendRegionCodes,
+  recommendRegionLabel,
+} from "@/lib/recommend/recommend-sido-regions";
+import { isSidoCode } from "@/lib/planner/brief/regions";
+import {
   comparePlansByDuration,
   computePlannerMetrics,
   computePlannerPortfolioBudgetStatus,
@@ -112,9 +117,14 @@ export function buildRecommendRegionsText(args: {
   nationalShort: string;
 }): string {
   const parts = args.regionCodes.map((code) =>
-    plannerRegionLabel(code, args.locale, args.nationalShort),
+    isSidoCode(code)
+      ? recommendRegionLabel(code, args.locale === "ko")
+      : plannerRegionLabel(code, args.locale, args.nationalShort),
   );
-  if (args.regionCodes.includes("seoul") && args.seoulZones?.length) {
+  if (
+    normalizeRecommendRegionCodes(args.regionCodes).includes("11") &&
+    args.seoulZones?.length
+  ) {
     parts.push(formatSeoulZonesText(args.seoulZones, args.locale === "ko"));
   }
   if (parts.length === 0) {
