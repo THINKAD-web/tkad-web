@@ -12,7 +12,15 @@ import {
   msUntilPlanCartApplyAllowed,
   shouldDeferServerPlanCartApply,
 } from "@/lib/plan-cart-local-guard";
-import { pushPlanCartToServer } from "@/lib/plan-cart-server-sync";
+import {
+  fetchPlanCartFromServer,
+  pushPlanCartToServer,
+} from "@/lib/plan-cart-server-sync";
+import {
+  getPlanCartBoundUserId,
+  isPlanCartAccountSwitch,
+  setPlanCartBoundUserId,
+} from "@/lib/plan-cart-session-owner";
 
 function parseUpdatedAt(iso: string | undefined): number {
   if (!iso) return 0;
@@ -29,7 +37,8 @@ function wouldResurrectDeletedItems(local: PlanCart, merged: PlanCart): boolean 
 /** 로그인 시 localStorage 플랜 ↔ DB 동기화 (삭제·추가·순서 반영) */
 export function PlanCartSessionSync() {
   const { user, loading } = useAuthSession();
-  const loggedIn = Boolean(user?.id);
+  const userId = user?.id ?? null;
+  const loggedIn = Boolean(userId);
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const syncGenerationRef = useRef(0);
   const applyingFromServerRef = useRef(false);
@@ -48,7 +57,24 @@ export function PlanCartSessionSync() {
     }
 
     async function syncCart(): Promise<void> {
-      if (!loggedIn || cancelled) return;
+      if (!loggedIn || !userId || cancelled) return;
+
+      const boundUserId = getPlanCartBoundUserId();
+      if (isPlanCartAccountSwitch(boundUserId, userId)) {
+        const generation = ++syncGenerationRef.current;
+        const serverCart = await fetchPlanCartFromServer();
+        if (cancelled || generation !== syncGenerationRef.current) return;
+        if (serverCart) {
+          applyingFromServerRef.current = true;
+          applySyncedPlanCart(serverCart);
+          setPlanCartBoundUserId(userId);
+          prevItemCountRef.current = serverCart.items.length;
+          queueMicrotask(() => {
+            applyingFromServerRef.current = false;
+          });
+        }
+        return;
+      }
 
       const cartAtStart = getPlanCart();
       const sentUpdatedAt = cartAtStart.updatedAt;
@@ -88,6 +114,7 @@ export function PlanCartSessionSync() {
 
       applyingFromServerRef.current = true;
       applySyncedPlanCart(merged);
+      setPlanCartBoundUserId(userId);
       queueMicrotask(() => {
         applyingFromServerRef.current = false;
       });
@@ -116,7 +143,7 @@ export function PlanCartSessionSync() {
       if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
       window.removeEventListener(PLAN_CART_CHANGE_EVENT, onCartChange);
     };
-  }, [loading, loggedIn]);
+  }, [loading, loggedIn, userId]);
 
   return null;
 }

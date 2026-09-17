@@ -76,8 +76,8 @@ export function MyHubShell({ children }: Props) {
   }, [pathname, router, loading, user]);
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
-    window.location.href = `/${locale}/login`;
+    const { performUserLogout } = await import("@/lib/auth-logout-client");
+    await performUserLogout(`/${locale}/login`);
   }
 
   if (!isMyHubPath(pathname)) {

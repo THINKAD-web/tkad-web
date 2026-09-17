@@ -34,8 +34,13 @@ export function msUntilPlanCartApplyAllowed(): number {
   return remaining > 0 ? remaining : 0;
 }
 
-/** 테스트 전용 */
-export function resetPlanCartLocalGuardForTests(): void {
+/** 로그아웃·계정 전환 직후 — stale “의도적 빈 카트” merge 방지 */
+export function resetPlanCartLocalGuard(): void {
   localEditGraceUntil = 0;
   userEditingCount = 0;
+}
+
+/** 테스트 전용 */
+export function resetPlanCartLocalGuardForTests(): void {
+  resetPlanCartLocalGuard();
 }
