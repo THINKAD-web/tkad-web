@@ -59,40 +59,51 @@ function Stepper({
   onJump: (s: BriefWizardStep) => void;
 }) {
   return (
-    <ol className="mx-auto mb-8 flex min-w-0 max-w-3xl items-center gap-1 text-xs sm:gap-2 sm:text-sm">
-      {([1, 2, 3] as const).map((s, i) => {
-        const active = s === step;
-        const done = s < step;
-        return (
-          <li key={s} className="flex flex-1 items-center gap-2">
-            <button
-              type="button"
-              onClick={() => (s <= step ? onJump(s) : undefined)}
-              disabled={s > step}
-              className={`flex min-w-0 items-center gap-1.5 sm:gap-2 ${s > step ? "opacity-50" : ""}`}
-            >
-              <span
-                className={`flex size-6 items-center justify-center rounded-full text-xs font-semibold ${
-                  active
-                    ? "bg-primary text-primary-foreground"
-                    : done
-                      ? "bg-primary/20 text-primary"
-                      : "bg-muted text-muted-foreground"
-                }`}
+    <nav
+      className="mx-auto mb-8 flex w-full max-w-lg justify-center px-1"
+      aria-label={isKo ? "플래너 단계" : "Planner steps"}
+    >
+      <ol className="flex min-w-0 items-center justify-center gap-0.5 text-xs sm:gap-1 sm:text-sm">
+        {([1, 2, 3] as const).map((s, i) => {
+          const active = s === step;
+          const done = s < step;
+          const label = STEP_LABELS[s][isKo ? "ko" : "en"];
+          return (
+            <li key={s} className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+              <button
+                type="button"
+                onClick={() => (s <= step ? onJump(s) : undefined)}
+                disabled={s > step}
+                className={`flex max-w-[7.5rem] min-w-0 items-center gap-1 sm:max-w-none sm:gap-1.5 ${s > step ? "opacity-50" : ""}`}
               >
-                {s}
-              </span>
-              <span
-                className={`hidden truncate sm:inline ${active ? "font-semibold" : "text-muted-foreground"}`}
-              >
-                {STEP_LABELS[s][isKo ? "ko" : "en"]}
-              </span>
-            </button>
-            {i < 2 ? <span className="h-px flex-1 bg-border" /> : null}
-          </li>
-        );
-      })}
-    </ol>
+                <span
+                  className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : done
+                        ? "bg-primary/20 text-primary"
+                        : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {s}
+                </span>
+                <span
+                  className={`truncate sm:whitespace-nowrap ${active ? "font-semibold" : "text-muted-foreground"}`}
+                >
+                  {label}
+                </span>
+              </button>
+              {i < 2 ? (
+                <span
+                  className="mx-0.5 h-px w-4 shrink-0 bg-border sm:mx-1 sm:w-8"
+                  aria-hidden
+                />
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }
 

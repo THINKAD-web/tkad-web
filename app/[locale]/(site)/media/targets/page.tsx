@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/layout/page-hero";
+import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
 import { MediaCampaignTargetsGrid } from "@/components/media/media-campaign-targets-grid";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { Link } from "@/i18n/navigation";
@@ -59,6 +60,7 @@ export default async function MediaTargetsPage({ params }: Props) {
               : `${verifiedCountLabel} verified placements — pick a goal to jump into media filters.`
           }
         />
+        <SubTabsBar group="discovery" currentPath="/media/targets" />
 
         <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1">

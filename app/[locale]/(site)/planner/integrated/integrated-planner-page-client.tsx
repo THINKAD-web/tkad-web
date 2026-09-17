@@ -815,7 +815,11 @@ export default function IntegratedPlannerPageClient({
         highlight="통합 플래너"
         description="온·오프라인 통합 캠페인을 한 번에 설계하세요"
       />
-      <SubTabs tabs={PLANNING_TABS} currentPath="/planner/integrated" />
+      <SubTabs
+        tabs={PLANNING_TABS}
+        currentPath="/planner/integrated"
+        layout="planning-cards"
+      />
 
       <IntegratedPlannerPageBody
         className="mx-auto w-full min-w-0 max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
