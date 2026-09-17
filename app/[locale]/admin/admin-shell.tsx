@@ -43,6 +43,7 @@ import {
   Gift,
   Shield,
   FileSignature,
+  Percent,
   type LucideIcon,
 } from "lucide-react";
 
@@ -92,6 +93,11 @@ const navDefs: NavDef[] = [
   { href: "/admin/quotes?tab=booking", key: "quotesBooking", icon: CalendarCheck },
   { href: "/admin/quotes/new", key: "quotesNew", icon: Calculator },
   { href: "/admin/quote-templates", key: "quoteTemplates", icon: FileText },
+  {
+    href: "/admin/settings/package-discounts",
+    key: "packageDiscountRules",
+    icon: Percent,
+  },
   { href: "/admin/campaigns", key: "campaigns", icon: Megaphone },
   { href: "/admin/calendar", key: "campaignCalendar", icon: CalendarCheck },
   { href: "/admin/community", key: "community", icon: MessageSquareText },

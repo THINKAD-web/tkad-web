@@ -26,6 +26,7 @@ export type AdminNavKey =
   | "quotesBooking"
   | "quotesNew"
   | "quoteTemplates"
+  | "packageDiscountRules"
   | "campaigns"
   | "campaignCalendar"
   | "community"
@@ -147,6 +148,7 @@ export const adminNavGroupDefs: {
       "quotesBooking",
       "quotesNew",
       "quoteTemplates",
+      "packageDiscountRules",
       "biddings",
       "forecast",
     ],
