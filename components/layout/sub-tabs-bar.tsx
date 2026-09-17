@@ -45,5 +45,11 @@ export function SubTabsBar({ group, currentPath }: SubTabsBarProps) {
   const pathname = usePathname() ?? "";
   const resolvedPath = currentPath ?? stripLocalePrefix(pathname);
 
-  return <SubTabs tabs={TABS_BY_GROUP[group]} currentPath={resolvedPath} />;
+  return (
+    <SubTabs
+      tabs={TABS_BY_GROUP[group]}
+      currentPath={resolvedPath}
+      layout={group === "planning" ? "planning-cards" : "scroll-pill"}
+    />
+  );
 }

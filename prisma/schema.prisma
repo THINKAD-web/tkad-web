@@ -1169,6 +1169,30 @@ model QuoteRequest {
   @@map("quote_requests")
 }
 
+/// 동시 집행 매체 수·매체비 구간별 패키지 할인 규칙 (STEP3a — admin CRUD·3b 엔진)
+model PackageDiscountRule {
+  id              String    @id @default(cuid())
+  active          Boolean   @default(true)
+  priority        Int       @default(100)
+  labelKo         String    @map("label_ko")
+  labelEn         String?   @map("label_en")
+  minMediaCount   Int?      @map("min_media_count")
+  maxMediaCount   Int?      @map("max_media_count")
+  minSupplyWon    Int?      @map("min_supply_won")
+  maxSupplyWon    Int?      @map("max_supply_won")
+  discountPercent Float     @map("discount_percent")
+  stackable       Boolean   @default(false)
+  validFrom       DateTime? @map("valid_from")
+  validTo         DateTime? @map("valid_to")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  oohQuotes OoHQuote[]
+
+  @@index([active, priority])
+  @@map("package_discount_rules")
+}
+
 /// 공개 견적·부킹·계약 파이프라인 (`/quote`, `/quote/[id]`)
 model OoHQuote {
   id     String         @id @default(cuid())
@@ -1233,6 +1257,12 @@ model OoHQuote {
   quoteBreakdown     Json?     @map("quote_breakdown")
   validUntil         DateTime? @map("valid_until")
   discountRate       Float     @default(0) @map("discount_rate")
+  /// 패키지 자동 할인 스냅샷 (STEP3a — 3b에서 채움)
+  packageDiscountRuleId   String?              @map("package_discount_rule_id")
+  packageDiscountRule     PackageDiscountRule? @relation(fields: [packageDiscountRuleId], references: [id], onDelete: SetNull)
+  packageDiscountPercent  Float                @default(0) @map("package_discount_percent")
+  packageDiscountWon      Int                  @default(0) @map("package_discount_won")
+  packageDiscountSource   String               @default("none") @map("package_discount_source")
   /// 만료 D-3 알림톡 발송 시각
   expiryNoticeSentAt DateTime? @map("expiry_notice_sent_at")
 
