@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { SubTabs } from "@/components/layout/sub-tabs";
+import { SubTabs, type SubTabsLayout } from "@/components/layout/sub-tabs";
 import { routing } from "@/i18n/routing";
 import {
   CONTENT_TABS,
@@ -26,6 +26,14 @@ const TABS_BY_GROUP = {
   policy: POLICY_TABS,
 } as const;
 
+const LAYOUT_BY_GROUP: Record<SubPageTabGroup, SubTabsLayout> = {
+  planning: "planning-cards",
+  discovery: "scroll-cards",
+  content: "scroll-cards",
+  studio: "scroll-cards",
+  policy: "scroll-cards",
+};
+
 function stripLocalePrefix(pathname: string): string {
   for (const locale of routing.locales) {
     if (pathname === `/${locale}`) return "/";
@@ -49,7 +57,7 @@ export function SubTabsBar({ group, currentPath }: SubTabsBarProps) {
     <SubTabs
       tabs={TABS_BY_GROUP[group]}
       currentPath={resolvedPath}
-      layout={group === "planning" ? "planning-cards" : "scroll-pill"}
+      layout={LAYOUT_BY_GROUP[group]}
     />
   );
 }

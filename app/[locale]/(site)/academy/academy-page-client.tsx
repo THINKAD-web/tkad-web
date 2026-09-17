@@ -267,7 +267,7 @@ export default function AcademyPageClient({
           highlight="제대로 배우다"
           description="광고 초보자도 쉽게 이해하는 OOH 교육 콘텐츠"
         />
-        <SubTabs tabs={CONTENT_TABS} currentPath="/academy" />
+        <SubTabs tabs={CONTENT_TABS} currentPath="/academy" layout="scroll-cards" />
 
         <section className="bg-card py-8 text-foreground">
           <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-6 lg:px-8">

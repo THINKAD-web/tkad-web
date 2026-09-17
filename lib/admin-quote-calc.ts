@@ -1,4 +1,12 @@
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import {
+  applyPackageDiscount,
+  type PackageDiscountInput,
+  type PackageDiscountResult,
+  type PackageDiscountRuleDTO,
+  type PackageDiscountSource,
+} from "@/lib/pricing/package-discount";
+import { shouldSkipAutoPackageDiscount } from "@/lib/pricing/package-discount-ui-policy";
 
 /** 앱에서 가격·견적 합산의 공개 진입점은 `@/lib/pricing`. */
 
@@ -49,21 +57,63 @@ export type AdminQuoteTotals = {
   supplyWon: number;
   vatWon: number;
   totalWon: number;
+  /** 패키지 할인 단계 결과 (미적용 시 undefined) */
+  packageDiscount?: PackageDiscountResult;
 };
 
-export function computeAdminQuoteTotals(opts: {
+export type ComputeAdminQuoteTotalsOpts = {
   lineWons: number[];
   discountPercent: number;
   discountWon: number;
   vatIncluded: boolean;
-}): AdminQuoteTotals {
+  /** 미전달 시 기존과 동일 — 패키지 할인 단계 없음 */
+  packageDiscount?: {
+    rules: readonly PackageDiscountRuleDTO[];
+    asOf?: Date;
+    forced?: PackageDiscountInput["forced"];
+    packageDiscountSource?: PackageDiscountSource;
+    skipAuto?: boolean;
+  };
+};
+
+export function computeAdminQuoteTotals(
+  opts: ComputeAdminQuoteTotalsOpts,
+): AdminQuoteTotals {
   const linesSubtotalWon = opts.lineWons.reduce((a, b) => a + b, 0);
   const pct = Math.min(100, Math.max(0, opts.discountPercent));
-  const afterPct = linesSubtotalWon * (1 - pct / 100);
-  const afterDiscountWon = Math.max(
-    0,
-    Math.round(afterPct - Math.max(0, opts.discountWon)),
-  );
+  const manualWon = Math.max(0, opts.discountWon);
+
+  let manualBaseWon = linesSubtotalWon;
+  let packageDiscount: PackageDiscountResult | undefined;
+
+  if (opts.packageDiscount) {
+    const source = opts.packageDiscount.packageDiscountSource ?? "none";
+    const skipAuto =
+      opts.packageDiscount.skipAuto ??
+      shouldSkipAutoPackageDiscount({
+        packageDiscountSource: source,
+        manualDiscountPercent: pct,
+        manualDiscountWon: manualWon,
+      });
+    const applyAutoRules =
+      opts.packageDiscount.forced != null ||
+      (source === "auto" && !skipAuto);
+    if (applyAutoRules) {
+      const rulesForApply = opts.packageDiscount.rules;
+      packageDiscount = applyPackageDiscount(
+        {
+          lineSupplyWons: opts.lineWons,
+          asOf: opts.packageDiscount.asOf,
+          forced: opts.packageDiscount.forced,
+        },
+        rulesForApply,
+      );
+      manualBaseWon = packageDiscount.supplyAfterPackageWon;
+    }
+  }
+
+  const afterPct = manualBaseWon * (1 - pct / 100);
+  const afterDiscountWon = Math.max(0, Math.round(afterPct - manualWon));
 
   const discountTotalWon = Math.max(0, linesSubtotalWon - afterDiscountWon);
 
@@ -78,6 +128,7 @@ export function computeAdminQuoteTotals(opts: {
       supplyWon,
       vatWon,
       totalWon,
+      packageDiscount,
     };
   }
 
@@ -91,6 +142,7 @@ export function computeAdminQuoteTotals(opts: {
     supplyWon,
     vatWon,
     totalWon,
+    packageDiscount,
   };
 }
 

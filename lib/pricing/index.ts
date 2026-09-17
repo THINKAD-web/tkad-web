@@ -26,4 +26,23 @@ export {
   formatAdminQuoteDiscountSummary,
   formatQuoteValidUntilLabel,
 } from "@/lib/admin-quote-calc";
-export type { AdminQuoteTotals } from "@/lib/admin-quote-calc";
+export type {
+  AdminQuoteTotals,
+  ComputeAdminQuoteTotalsOpts,
+} from "@/lib/admin-quote-calc";
+export {
+  applyPackageDiscount,
+  countBillableMediaLines,
+  findFirstMatchingPackageDiscountRule,
+} from "@/lib/pricing/package-discount";
+export type {
+  PackageDiscountInput,
+  PackageDiscountResult,
+  PackageDiscountRuleDTO,
+  PackageDiscountSource,
+} from "@/lib/pricing/package-discount";
+export {
+  isAutoPackageDiscountDisabled,
+  isManualDiscountInputDisabled,
+  shouldSkipAutoPackageDiscount,
+} from "@/lib/pricing/package-discount-ui-policy";

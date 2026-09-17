@@ -19,6 +19,7 @@ import {
   formatAdminQuoteDiscountSummary,
   inclusiveCampaignDays,
   monthFactorFromDays,
+  type PackageDiscountRuleDTO,
 } from "@/lib/pricing";
 import {
   ADMIN_DAY_PRESET_OPTIONS,
@@ -144,6 +145,9 @@ export default function AdminQuoteNewClient({
   const [discountPercent, setDiscountPercent] = useState("0");
   const [discountWon, setDiscountWon] = useState("0");
   const [vatIncluded, setVatIncluded] = useState(false);
+  const [packageRules, setPackageRules] = useState<PackageDiscountRuleDTO[]>(
+    [],
+  );
 
   const [quoteNumber, setQuoteNumber] = useState("");
   const draftQuoteLabel = `DRAFT-${todayISODate().replace(/-/g, "")}`;
@@ -170,6 +174,22 @@ export default function AdminQuoteNewClient({
   const [existingOohQuoteId, setExistingOohQuoteId] = useState<string | null>(
     null,
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/package-discount-rules?scope=active");
+        const data = (await res.json()) as { rules?: PackageDiscountRuleDTO[] };
+        if (!cancelled) setPackageRules(data.rules ?? []);
+      } catch {
+        if (!cancelled) setPackageRules([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -418,9 +438,21 @@ export default function AdminQuoteNewClient({
         discountPercent: dpct,
         discountWon: dwon,
         vatIncluded,
+        ...(dpct > 0 || dwon > 0 || packageRules.length === 0
+          ? {}
+          : {
+              packageDiscount: {
+                rules: packageRules,
+                packageDiscountSource: "auto" as const,
+                asOf: new Date(`${issueDatePdf}T12:00:00.000Z`),
+              },
+            }),
       }),
-    [lineWons, dpct, dwon, vatIncluded],
+    [lineWons, dpct, dwon, vatIncluded, packageRules, issueDatePdf],
   );
+
+  const packageDiscountWon = totals.packageDiscount?.packageDiscountWon ?? 0;
+  const packageDiscountLabel = totals.packageDiscount?.matchedRule?.labelKo;
 
   const discountSummary = useMemo(
     () =>
@@ -1478,6 +1510,17 @@ export default function AdminQuoteNewClient({
                   {formatWon(totals.linesSubtotalWon)}
                 </dd>
               </div>
+              {packageDiscountWon > 0 ? (
+                <div className="flex justify-between gap-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 px-3 py-2">
+                  <dt className="text-muted-foreground">
+                    패키지 할인
+                    {packageDiscountLabel ? ` (${packageDiscountLabel})` : ""}
+                  </dt>
+                  <dd className="font-semibold tabular-nums text-emerald-700">
+                    −{formatWon(packageDiscountWon)}
+                  </dd>
+                </div>
+              ) : null}
               {totals.discountTotalWon > 0 ? (
                 <div className="flex justify-between gap-4 rounded-2xl border dark:bg-white/8 bg-gray-100 px-3 py-2">
                   <dt className="text-muted-foreground">{t("sumDiscount")}</dt>

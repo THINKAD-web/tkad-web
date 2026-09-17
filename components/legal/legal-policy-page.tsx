@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { CategoryExploreHero } from "@/components/category-explore-hero";
+import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
 import dynamic from "next/dynamic";
 import type { LegalSection } from "@/lib/legal/launch-policy-templates";
 
@@ -35,6 +36,7 @@ export function LegalPolicyPage({
         headlineGradient={headlineGradient}
         subtitle={subtitle}
       />
+      <SubTabsBar group="policy" />
       <section className="bg-card py-16 sm:py-24">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
