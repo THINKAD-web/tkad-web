@@ -534,6 +534,7 @@ export default function MediaAiRecommendDashboard({
           quantities={recommendQuantities}
           priceOptionIndex={recommendPriceOptionIndex}
           matchedPool={poolForReport}
+          benchmarkCatalog={catalog}
         />
 
         {/* 하단 액션 — 견적·플랜·탐색 */}

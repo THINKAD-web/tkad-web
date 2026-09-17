@@ -701,6 +701,18 @@ export async function buildPlannerReportPptx(
     });
   }
 
+  if (p.seoulBenchmarkFootnote) {
+    s2.addText(p.seoulBenchmarkFootnote, {
+      x: 0.6,
+      y: p.cpmFootnote ? 6.48 : 6.15,
+      w: 12.1,
+      h: 0.4,
+      fontFace: face,
+      fontSize: 8,
+      color: GRAY,
+    });
+  }
+
   if (p.budgetHonesty?.overBudgetBanner) {
     s2.addShape(pptx.ShapeType.roundRect, {
       x: 0.6,

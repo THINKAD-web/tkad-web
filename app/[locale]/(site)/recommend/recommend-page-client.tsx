@@ -13,7 +13,7 @@ import MediaAiRecommendForm, {
   type MediaAiRecommendFormSubmit,
 } from "@/components/media-ai-recommend-form";
 import RecommendAiFreetext from "@/components/recommend/recommend-ai-freetext";
-import { Sparkles, SlidersHorizontal } from "lucide-react";
+import { RecommendInputModeToggle } from "@/components/recommend/recommend-input-mode-toggle";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendDashboard from "@/components/media-ai-recommend-dashboard";
 import type { MediaItem } from "@/lib/media-data";
@@ -1125,38 +1125,11 @@ export default function RecommendPageClient({
           ) : null}
           {phase === "form" && autoFromUrl !== "1" && (
             <>
-              {/* 입력 방식 토글: 구조화 입력 / AI 자연어 입력 */}
-              <div className="mx-auto mb-4 flex max-w-xl gap-1 rounded-2xl border border-gray-200 bg-gray-50 p-1 text-sm font-medium dark:border-white/10 dark:bg-white/5">
-                <button
-                  type="button"
-                  onClick={() => setInputMode("structured")}
-                  className={cn(
-                    "flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 transition-colors",
-                    inputMode === "structured"
-                      ? "bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white"
-                      : "text-gray-500 dark:text-white/55",
-                  )}
-                >
-                  <SlidersHorizontal className="h-4 w-4" />
-                  {isKo ? "구조화 입력" : "Structured"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setInputMode("ai")}
-                  className={cn(
-                    "flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 transition-colors",
-                    inputMode === "ai"
-                      ? "bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white"
-                      : "text-gray-500 dark:text-white/55",
-                  )}
-                >
-                  <Sparkles className="h-4 w-4 text-[color:var(--qp-accent)]" />
-                  {isKo ? "AI 자연어 입력" : "AI natural language"}
-                  <span className="rounded border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-1 text-[9px] font-bold uppercase text-[color:var(--qp-accent)]">
-                    {isKo ? "무료" : "Free"}
-                  </span>
-                </button>
-              </div>
+              <RecommendInputModeToggle
+                isKo={isKo}
+                mode={inputMode}
+                onModeChange={setInputMode}
+              />
 
               {inputMode === "ai" ? (
                 <div className="mx-auto max-w-xl space-y-3">

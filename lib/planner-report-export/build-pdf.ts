@@ -721,6 +721,19 @@ export async function buildPlannerReportPdf(
       y += cpmLines.length * 4 + 4;
     }
 
+    if (p.seoulBenchmarkFootnote) {
+      const benchLines = doc.splitTextToSize(
+        p.seoulBenchmarkFootnote,
+        contentW,
+      ) as string[];
+      ensure(benchLines.length * 4 + 4);
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(7.5);
+      setText(GRAY_500);
+      doc.text(benchLines, M, y + 2);
+      y += benchLines.length * 4 + 4;
+    }
+
     if (p.budgetHonesty?.overBudgetBanner) {
       const banner = p.budgetHonesty.overBudgetBanner;
       const bannerLines = doc.splitTextToSize(banner, contentW - 8) as string[];
