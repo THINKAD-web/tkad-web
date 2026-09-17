@@ -30,6 +30,11 @@ import {
   QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE,
 } from "@/lib/pricing/fixed-period-pricing";
 import { BUDGET_PRICING_NOT_IMPLEMENTED } from "@/lib/pricing/budget-pricing";
+import type {
+  PackageDiscountInput,
+  PackageDiscountRuleDTO,
+  PackageDiscountSource,
+} from "@/lib/pricing/package-discount";
 
 export { QUOTE_CALCULATOR_MISSING_DISPLAY_TYPE, assertQuoteCalculatorDisplayType };
 export { BUDGET_PRICING_NOT_IMPLEMENTED };
@@ -47,6 +52,10 @@ export type QuoteBreakdown = {
   totalWon: number;
   validUntil: string;
   issuedAt: string;
+  packageDiscountRuleId?: string | null;
+  packageDiscountPercent?: number;
+  packageDiscountWon?: number;
+  packageDiscountSource?: PackageDiscountSource;
 };
 
 export type CalculateQuoteInput = {
@@ -59,6 +68,10 @@ export type CalculateQuoteInput = {
   periodKey?: string;
   mediaPriceOptionIndex?: Record<string, number>;
   mediaSelections?: QuoteMediaSelectionSnapshot[];
+  /** STEP3b — 미전달·빈 배열이면 패키지 할인 0% (프로덕션 회귀 동일) */
+  packageDiscountRules?: readonly PackageDiscountRuleDTO[];
+  packageDiscountSource?: PackageDiscountSource;
+  forcedPackageDiscount?: PackageDiscountInput["forced"];
 };
 
 /** DB 조회 기반 API — `calculateQuote({ mediaIds, startDate, endDate, discountRate })` */
@@ -236,12 +249,21 @@ export function calculateQuote(input: CalculateQuoteInput): CalculateQuoteResult
   );
 
   const lineWons = lines.map((l) => l.lineSupplyWon);
+  const packageDiscountSource = input.packageDiscountSource ?? "none";
+  const packageRules = input.packageDiscountRules ?? [];
   const totals = computeAdminQuoteTotals({
     lineWons,
     discountPercent: discountRate,
     discountWon: 0,
     vatIncluded: false,
+    packageDiscount: {
+      rules: packageRules,
+      asOf: issuedAt,
+      forced: input.forcedPackageDiscount,
+      packageDiscountSource,
+    },
   });
+  const pkg = totals.packageDiscount;
 
   const validUntil = new Date(issuedAt.getTime());
   validUntil.setDate(validUntil.getDate() + QUOTE_VALIDITY_DAYS);
@@ -256,6 +278,10 @@ export function calculateQuote(input: CalculateQuoteInput): CalculateQuoteResult
     totalWon: totals.totalWon,
     validUntil: validUntil.toISOString(),
     issuedAt: issuedAt.toISOString(),
+    packageDiscountRuleId: pkg?.matchedRule?.id ?? null,
+    packageDiscountPercent: pkg?.packageDiscountPercent ?? 0,
+    packageDiscountWon: pkg?.packageDiscountWon ?? 0,
+    packageDiscountSource,
   };
 
   return {
@@ -268,6 +294,10 @@ export function calculateQuote(input: CalculateQuoteInput): CalculateQuoteResult
     totalWon: breakdown.totalWon,
     validUntil: breakdown.validUntil,
     issuedAt: breakdown.issuedAt,
+    packageDiscountRuleId: breakdown.packageDiscountRuleId,
+    packageDiscountPercent: breakdown.packageDiscountPercent,
+    packageDiscountWon: breakdown.packageDiscountWon,
+    packageDiscountSource: breakdown.packageDiscountSource,
     totalAmountManwon: Math.max(1, Math.round(totals.totalWon / 10_000)),
     startDate: start,
     endDate: end,
