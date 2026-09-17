@@ -78,7 +78,12 @@ export async function POST(request: NextRequest) {
   const { enrichPlannerExportPayloadWithPatternStats } = await import(
     "@/lib/recommend/pattern-stats-enrich-export"
   );
-  const enrichedPayload = await enrichPlannerExportPayloadWithPatternStats(payload);
+  const { enrichPlannerExportPayloadWithSeoulBenchmarks } = await import(
+    "@/lib/planner-report-export/enrich-seoul-benchmarks"
+  );
+  let enrichedPayload = await enrichPlannerExportPayloadWithPatternStats(payload);
+  enrichedPayload =
+    await enrichPlannerExportPayloadWithSeoulBenchmarks(enrichedPayload);
 
   const base = plannerReportFileBase(enrichedPayload);
 

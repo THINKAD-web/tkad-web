@@ -73,6 +73,8 @@ type Props = {
   quantities: CampaignMediaQuantities;
   priceOptionIndex: CampaignMediaPriceOptionIndex;
   matchedPool: MediaItem[];
+  /** 서울 유형 CPM·유동 벤치마크 집계용 공개 카탈로그 */
+  benchmarkCatalog: readonly MediaItem[];
 };
 
 function RecommendMediaRationale({
@@ -133,6 +135,7 @@ export function RecommendReportSection({
   quantities,
   priceOptionIndex,
   matchedPool,
+  benchmarkCatalog,
 }: Props) {
   const tPlanner = useTranslations("planner");
   const tr = useTranslations("recommend");
@@ -414,6 +417,7 @@ export function RecommendReportSection({
         campaignMediaQuantities: quantities,
         campaignMediaPriceOptionIndex: priceOptionIndex,
         patternStatsQuery,
+        benchmarkCatalog,
       }),
     [
       isKo,
@@ -433,6 +437,7 @@ export function RecommendReportSection({
       quantities,
       priceOptionIndex,
       patternStatsQuery,
+      benchmarkCatalog,
     ],
   );
 

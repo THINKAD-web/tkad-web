@@ -58,6 +58,18 @@ export function collectMediaCardSpecs(
   if (row.broadcastLabel) {
     specs.push({ label: isKo ? "송출" : "Spot", value: row.broadcastLabel });
   }
+  if (row.cpmBenchmarkLabel) {
+    specs.push({
+      label: isKo ? "CPM 벤치마크" : "CPM benchmark",
+      value: row.cpmBenchmarkLabel,
+    });
+  }
+  if (row.footfallBenchmarkLabel) {
+    specs.push({
+      label: isKo ? "유동 벤치마크" : "Footfall benchmark",
+      value: row.footfallBenchmarkLabel,
+    });
+  }
   return specs;
 }
 

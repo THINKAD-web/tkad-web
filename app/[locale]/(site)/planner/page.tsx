@@ -22,7 +22,7 @@ export default async function PlannerPage({ params }: Props) {
     <PlanningPageShell
       currentPath="/planner"
       header={
-        <header className="mx-auto mb-8 max-w-3xl border-b border-border pb-6 text-center">
+        <header className="mx-auto mb-6 max-w-3xl border-b border-border/70 pb-5 text-center">
           <p className="tkad-type-label text-primary">
             {isKo ? "상세 플래너 · 3단계" : "Detailed planner · 3 steps"}
           </p>

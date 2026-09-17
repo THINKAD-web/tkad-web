@@ -57,6 +57,10 @@ export type PlannerExportMediaRow = {
   quantityLabel?: string;
   /** digital_only / online catalog — 실물 사진 대신 플랫폼 배지 */
   onlinePlatform?: string | null;
+  /** 서울 유형 CPM 벤치마크 (OOH export) */
+  cpmBenchmarkLabel?: string;
+  /** 서울 유형 일 유동 벤치마크 (OOH export) */
+  footfallBenchmarkLabel?: string;
 };
 
 export type PlannerExportDigitalRow = {
@@ -318,6 +322,10 @@ export type PlannerReportExportPayload = {
   cpmExcludesQuoteOnly?: boolean;
   /** 협의가 제외 CPM 분모 노출 명시 (검산용) */
   cpmFootnote?: string;
+  /** 서울 유형 CPM·유동 벤치마크 기준 안내 */
+  seoulBenchmarkFootnote?: string;
+  /** PDF export enrich — 매체별 CPM (서버에서 catalog와 조합) */
+  _benchmarkPlanCpms?: { id: string; cpmWon: number | null }[];
   /** JP 매체 포함 시 ¥ 환산 각주 (합계·차트는 KRW 유지) */
   currencyFootnote?: string;
   /** 제작·설치 협의 고지 — VAT는 quoteSummary 표에서만 */

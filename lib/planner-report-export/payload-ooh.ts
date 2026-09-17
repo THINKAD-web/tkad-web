@@ -58,6 +58,10 @@ import {
 } from "@/lib/planner-report-export/export-kpi";
 import type { PlannerExportBadgeKind } from "@/lib/planner-report-export/export-badge";
 import type { PatternComboDimensions } from "@/lib/recommend/pattern-stats-types";
+import {
+  attachSeoulBenchmarksToPortfolioRows,
+  seoulBenchmarkFootnote,
+} from "@/lib/planner/seoul-media-benchmark";
 
 export type BuildOohPayloadArgs = {
   isKo: boolean;
@@ -137,6 +141,8 @@ export type BuildOohPayloadArgs = {
   /** 카탈로그 외 커스텀 mix — portfolio 카드 뒤에 append */
   customPortfolioRows?: import("@/lib/planner-report-export/types").PlannerExportMediaRow[];
   customLineCount?: number;
+  /** 서울 유형 벤치마크 집계용 — 공개 카탈로그 전체 (미전달 시 export enrich) */
+  benchmarkCatalog?: readonly MediaItem[];
 };
 
 export function buildOohReportPayload(
@@ -468,7 +474,7 @@ export function buildOohReportPayload(
   const adjustedDailyReachById = Object.fromEntries(
     plan.mediaItems.map((mi) => [mi.id, Math.round(mi.dailyImpressions)]),
   );
-  const portfolioRows = [
+  let portfolioRows = [
     ...orderedPortfolio.map((m) =>
       mediaItemToExportRow(m, isKo, {
         months,
@@ -481,6 +487,20 @@ export function buildOohReportPayload(
     ),
     ...(a.customPortfolioRows ?? []),
   ];
+
+  const benchmarkPlanCpms = plan.mediaItems.map((mi) => ({
+    id: mi.id,
+    cpmWon: mi.cpmWon,
+  }));
+
+  if (a.benchmarkCatalog?.length) {
+    portfolioRows = attachSeoulBenchmarksToPortfolioRows({
+      portfolioRows,
+      catalog: a.benchmarkCatalog,
+      planItems: plan.mediaItems,
+      isKo,
+    });
+  }
 
   const recommendRationale = buildPlannerRecommendRationale({
     portfolio: orderedPortfolio,
@@ -621,6 +641,13 @@ export function buildOohReportPayload(
     unpricedMediaNotice: quoteOnlyNotice?.text,
     cpmExcludesQuoteOnly: cpmExcludesQuoteOnly || undefined,
     cpmFootnote,
+    seoulBenchmarkFootnote:
+      a.benchmarkCatalog?.length || portfolioRows.some(
+        (r) => r.cpmBenchmarkLabel || r.footfallBenchmarkLabel,
+      )
+        ? seoulBenchmarkFootnote(isKo)
+        : undefined,
+    _benchmarkPlanCpms: benchmarkPlanCpms,
     currencyFootnote: portfolioHasJapanMedia(orderedPortfolio)
       ? formatReportJpyExchangeFootnote(isKo)
       : undefined,

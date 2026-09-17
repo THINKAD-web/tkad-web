@@ -929,6 +929,7 @@ export function buildBriefReportPayload(
     customLineCount: customEntries.length,
     appendixSectionTitle,
     appendixMediaSpecs: plannerAppendixSpecs,
+    benchmarkCatalog: args.catalog,
   });
 
   const titled = copy?.documentTitle?.trim()

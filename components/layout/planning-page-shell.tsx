@@ -14,7 +14,7 @@ export function PlanningPageShell({
   return (
     <main className="mx-auto w-full min-w-0 max-w-5xl overflow-x-clip px-4 py-10">
       {header}
-      <div className="-mx-4 mb-8 sm:-mx-0">
+      <div className="-mx-4 mb-5 sm:-mx-0 sm:mb-6">
         <SubTabsBar group="planning" currentPath={currentPath} />
       </div>
       {children}
