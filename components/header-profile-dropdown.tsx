@@ -78,8 +78,8 @@ export function HeaderProfileDropdown({
   const logout = async () => {
     setOpen(false);
     onNavigate?.();
-    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
-    window.location.href = `/${locale}/login`;
+    const { performUserLogout } = await import("@/lib/auth-logout-client");
+    await performUserLogout(`/${locale}/login`);
   };
 
   useEffect(() => {
