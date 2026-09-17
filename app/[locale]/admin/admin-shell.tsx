@@ -94,7 +94,7 @@ const navDefs: NavDef[] = [
   { href: "/admin/quotes/new", key: "quotesNew", icon: Calculator },
   { href: "/admin/quote-templates", key: "quoteTemplates", icon: FileText },
   {
-    href: "/admin/settings/package-discounts",
+    href: "/admin/package-discounts",
     key: "packageDiscountRules",
     icon: Percent,
   },
