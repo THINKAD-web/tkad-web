@@ -622,10 +622,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   );
 
   useEffect(() => {
-    if (
-      !isPlanCartReport &&
-      (reportGreetingTouched || reportExecutiveSummaryTouched)
-    ) {
+    if (reportGreetingTouched || reportExecutiveSummaryTouched) {
       return;
     }
     if (portfolioForExport.length === 0) return;
