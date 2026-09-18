@@ -339,6 +339,8 @@ model Media {
   externalSignals MediaExternalSignal[]
   computedMetric  MediaComputedMetric?
   onlineSpec      MediaOnlineSpec?
+  /// ja/zh 등 컬럼 미확장 언어의 번역 — ko(`name`/`description`/`location`)·en(`nameEn` 등) 기존 컬럼은 그대로 유지
+  translations    MediaTranslation[]
 
   @@index([isFeatured, featuredOrder])
   @@index([isPopular, popularOrder])
@@ -383,6 +385,32 @@ enum SellingUnit {
   site
   network_package
   screen
+}
+
+/// PR1(다국어 확장) — ko/en은 `Media`의 기존 컬럼(name/description/location, nameEn 등)을 그대로 쓰고,
+/// 이후 추가되는 언어(ja/zh, 향후 5번째 언어 포함)만 이 테이블에 저장한다. 폴백 순서는
+/// `lib/media-i18n.ts`의 `resolveMediaText()`에서 처리 (ja/zh → en → ko).
+model MediaTranslation {
+  id      String @id @default(cuid())
+  mediaId String @map("media_id")
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  /// "ja" | "zh" (향후 추가 언어도 여기 값만 늘어남 — 스키마 변경 불필요)
+  locale String
+
+  name        String?
+  description String? @db.Text
+  location    String?
+
+  /// AI 초안("ai") vs 사람 검수 완료("reviewed") — 어드민 상태 뱃지용
+  source String @default("ai") @map("source")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([mediaId, locale])
+  @@index([locale])
+  @@map("media_translations")
 }
 
 model MediaFactSheet {
