@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
-import { BtnBlock } from "@/components/brutalist";
+import { AppButton } from "@/components/ds/app-button";
+import { AppLoading } from "@/components/ds/app-loading";
 import type { CampaignPlanListItem } from "@/lib/campaign-plan-list-item";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
@@ -104,9 +105,7 @@ export function MyCampaignPlansPageClient() {
         </p>
 
         {loading ? (
-          <div className="mt-12 flex justify-center text-gray-500 dark:text-white/55">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
+          <AppLoading mode="section" className="mt-12" label={isKo ? "목록 불러오는 중" : "Loading list"} />
         ) : items.length === 0 ? (
           <div className="mt-10 rounded-[28px] border border-gray-200 bg-gray-50 p-10 text-center dark:border-white/12 dark:bg-white/5">
             <p className="text-sm font-semibold text-gray-700 dark:text-white/80">
@@ -117,9 +116,9 @@ export function MyCampaignPlansPageClient() {
                 ? "플래너 브리프 3단계에서 로그인 후 「플랜 저장」을 누르면 여기에 표시됩니다."
                 : "Sign in and use Save plan on brief step 3 to list plans here."}
             </p>
-            <BtnBlock href="/planner" variant="accent" className="mt-6">
+            <AppButton href="/planner" variant="primary" className="mt-6">
               {isKo ? "플래너로 이동" : "Go to planner"}
-            </BtnBlock>
+            </AppButton>
           </div>
         ) : (
           <ul className="mt-8 space-y-4">
@@ -152,15 +151,15 @@ export function MyCampaignPlansPageClient() {
                         : null}
                     </p>
                   </div>
-                  <BtnBlock
+                  <AppButton
                     href={`/planner?plan=${encodeURIComponent(item.id)}`}
-                    variant="accent"
+                    variant="primary"
                     size="sm"
                     className="inline-flex items-center gap-1.5"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
                     {isKo ? "플랜 열기" : "Open plan"}
-                  </BtnBlock>
+                  </AppButton>
                 </div>
               </li>
             ))}
