@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Bell,
+  BookOpen,
   CreditCard,
   FileText,
   LayoutDashboard,
@@ -59,6 +60,14 @@ const planWorkItems: ContextSidebarItem[] = [
     href: "/my/plan/saved",
     icon: FileText,
     activeMatch: exactOrPrefix("/my/plan/saved"),
+  },
+  {
+    id: "plan-campaigns",
+    labelKo: PLAN_NAV_LABELS.campaigns.ko,
+    labelEn: PLAN_NAV_LABELS.campaigns.en,
+    href: "/my/plan/campaigns",
+    icon: BookOpen,
+    activeMatch: exactOrPrefix("/my/plan/campaigns"),
   },
   {
     id: "planner-results",

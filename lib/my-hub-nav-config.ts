@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Bell,
+  BookOpen,
   Clock,
   FileText,
   Heart,
@@ -128,6 +129,16 @@ export const MY_HUB_NAV_GROUPS: MyHubNavGroup[] = [
         descriptionEn: "Backed-up cart snapshots",
         href: "/my/plan/saved",
         icon: FileText,
+        priority: 2,
+      },
+      {
+        id: "plan-campaigns",
+        labelKo: "저장 플랜",
+        labelEn: "Saved plans",
+        descriptionKo: "브리프 위저드에서 저장한 캠페인 설계",
+        descriptionEn: "Campaign designs saved from the brief wizard",
+        href: "/my/plan/campaigns",
+        icon: BookOpen,
         priority: 2,
       },
       {

@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import type { MediaItem } from "@/lib/media-data";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import {
@@ -734,6 +735,12 @@ function BriefStepThreeOohFlow({
                 ? "재접속 시 이 URL의 숫자는 저장 스냅샷 기준입니다."
                 : "Revisiting this URL shows the saved snapshot."}
             </p>
+            <Link
+              href="/my/plan/campaigns"
+              className="mt-3 inline-block text-xs font-semibold text-[color:var(--qp-accent)] hover:opacity-90"
+            >
+              {isKo ? "저장 플랜 목록에서 보기 →" : "View in saved plans list →"}
+            </Link>
           </div>
         ) : null}
 
