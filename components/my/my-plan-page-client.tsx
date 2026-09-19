@@ -197,12 +197,18 @@ export function MyPlanPageClient() {
                 ? "담은 매체로 보고서를 만들거나 견적을 요청하세요. 저장 후에는 「저장 스냅샷」에서 확인할 수 있습니다."
                 : "Generate a report or request a quote. After saving, find it under Plan snapshots."}
             </p>
-            <div className="mt-3">
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
               <Link
                 href="/my/plan/saved"
                 className="text-xs font-semibold text-[color:var(--qp-accent)] hover:opacity-90"
               >
                 {isKo ? `${tPlan("saved")} 보기 →` : `View ${tPlan("saved")} →`}
+              </Link>
+              <Link
+                href="/my/plan/campaigns"
+                className="text-xs font-semibold text-[color:var(--qp-accent)] hover:opacity-90"
+              >
+                {isKo ? `${tPlan("campaigns")} 보기 →` : `View ${tPlan("campaigns")} →`}
               </Link>
             </div>
           </div>

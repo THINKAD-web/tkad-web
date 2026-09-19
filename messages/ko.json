@@ -314,6 +314,7 @@
   "planNav": {
     "cart": "담은 매체",
     "saved": "저장 스냅샷",
+    "campaigns": "저장 플랜",
     "plannerResults": "플래너·제안서",
     "newPlan": "새 플랜",
     "legacyMigrateSuccess": "견적함 매체 {count}개를 담은 매체로 옮겼습니다.",
