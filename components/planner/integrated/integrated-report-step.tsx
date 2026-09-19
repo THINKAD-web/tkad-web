@@ -16,8 +16,9 @@ import type { PlannerReportExportFormat } from "@/lib/planner-report-export/type
 import { useToast } from "@/components/toast-provider";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { plannerResultGateHint } from "@/lib/entitlements/tier-copy";
-import { ReportStylePicker } from "@/components/planner/report-style-picker";
-import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
+import { ReportExportSettingsPanel } from "@/components/planner/report-export-settings-panel";
+import { usePlannerReportDocumentType } from "@/hooks/use-planner-report-document-type";
+import { applyPlannerDocumentTypeToPayload } from "@/lib/planner-report-export/enrich-export-payload";
 import { PlannerReportDocument } from "@/components/planner/report-document";
 import { IntegratedReportInfoCard } from "@/components/planner/integrated/integrated-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
@@ -41,12 +42,13 @@ import {
   enrichPlannerPortfolioForExport,
 } from "@/lib/planner/planner-portfolio-rationale";
 import { PlannerMediaRationaleBlock } from "@/components/planner-report-step";
+import { PlannerScenarioContextBanner } from "@/components/planner/planner-scenario-context-banner";
 import type {
   AppliedPlannerScenario,
   ScenarioVariant,
 } from "@/lib/planner/scenario-types";
-import { ReportSectionVisibilityPanel } from "@/components/planner/report-section-visibility-panel";
 import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
+import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
 import {
   lineupViewModeForExport,
   readPlannerReportViewMode,
@@ -91,6 +93,7 @@ export function IntegratedReportStep(props: Props) {
     null,
   );
   const [reportStyle, setReportStyle] = usePlannerReportStyle();
+  const [documentType, setDocumentType] = usePlannerReportDocumentType();
 
   const generatedAt = new Intl.DateTimeFormat(props.isKo ? "ko-KR" : "en-US", {
     timeZone: "Asia/Seoul",
@@ -151,12 +154,21 @@ export function IntegratedReportStep(props: Props) {
   const [sectionVisibility, setSectionVisibility] =
     usePlannerReportSectionVisibility();
 
+  const exportPayload = useMemo(
+    () =>
+      applyPlannerDocumentTypeToPayload(payload, {
+        isKo: props.isKo,
+        documentType,
+      }),
+    [payload, props.isKo, documentType],
+  );
+
   const handleDownload = useCallback(
     async (format: PlannerReportExportFormat) => {
       if (!pdfAllowed || downloading || pdfAccessLoading) return;
       setDownloading(format);
       try {
-        await downloadPlannerReport(format, payload, {
+        await downloadPlannerReport(format, exportPayload, {
           activitySource: "integrated_planner",
           sectionVisibility,
           lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
@@ -171,7 +183,7 @@ export function IntegratedReportStep(props: Props) {
         setDownloading(null);
       }
     },
-    [pdfAllowed, pdfAccessLoading, downloading, payload, sectionVisibility, toast, t, reportStyle],
+    [pdfAllowed, pdfAccessLoading, downloading, exportPayload, sectionVisibility, toast, t, reportStyle],
   );
 
   const reachSplit = reachSplitForGoal(props.campaignGoal);
@@ -243,14 +255,9 @@ export function IntegratedReportStep(props: Props) {
         >
           {plannerResultAllowed ? (
             <div className="space-y-6">
-              <ReportStylePicker
-                isKo={props.isKo}
-                value={reportStyle}
-                onChange={setReportStyle}
-              />
               <div className="rounded-2xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7">
                 <PlannerReportDocument
-                  payload={payload}
+                  payload={exportPayload}
                   mapPortfolio={props.portfolio}
                   sectionVisibility={sectionVisibility}
                   reportStyle={reportStyle}
@@ -270,15 +277,17 @@ export function IntegratedReportStep(props: Props) {
         </PlannerProGate>
 
           <PlannerNeonCard>
-            <div className="flex flex-col gap-4 border-b border-gray-100 p-5 dark:border-white/10 sm:p-6">
-              <ReportSectionVisibilityPanel
-                isKo={props.isKo}
-                payload={payload}
-                mapPortfolio={props.portfolio}
-                visibility={sectionVisibility}
-                onChange={setSectionVisibility}
-              />
-            </div>
+            <ReportExportSettingsPanel
+              isKo={props.isKo}
+              exportPayload={exportPayload}
+              mapPortfolio={props.portfolio}
+              documentType={documentType}
+              onDocumentTypeChange={setDocumentType}
+              reportStyle={reportStyle}
+              onReportStyleChange={setReportStyle}
+              sectionVisibility={sectionVisibility}
+              onSectionVisibilityChange={setSectionVisibility}
+            />
             <div className="flex flex-col gap-4 border-b border-gray-100 p-5 dark:border-white/10 sm:flex-row sm:items-start sm:justify-between sm:p-6">
               <div>
                 <PlannerNeonLabel>{t("reportEyebrow")}</PlannerNeonLabel>
