@@ -6,6 +6,13 @@ import { industryStrategyLine } from "@/lib/planner/industry-match";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import { buildGoalFollowUpReportLines } from "@/lib/planner/goal-follow-up";
 
+export type ReportStrategyMediaHint = {
+  name: string;
+  location?: string;
+  budgetPct: number;
+  cpmWon: number | null;
+};
+
 export type ReportStrategyInput = {
   isKo: boolean;
   campaignGoal: PlannerCampaignGoal | null;
@@ -16,6 +23,7 @@ export type ReportStrategyInput = {
   seoulZones: readonly PlannerSeoulZoneKey[];
   followUp: PlannerGoalFollowUp;
   portfolioCount: number;
+  mediaHints?: readonly ReportStrategyMediaHint[];
 };
 
 function zoneLine(input: ReportStrategyInput): string | null {
@@ -73,10 +81,15 @@ export function buildReportStrategyLines(
   const gi = goalIndustryLine(input);
   if (gi) lines.push(gi);
 
+  const mediaLocations = input.mediaHints
+    ?.map((h) => h.location)
+    .filter((l): l is string => !!l);
+
   const ind = industryStrategyLine(
     input.isKo,
     input.industryKey,
     input.industryText,
+    mediaLocations,
   );
   if (ind && !gi?.includes(input.industryText)) lines.push(ind);
 
@@ -104,14 +117,50 @@ export function buildReportWhyLine(input: ReportStrategyInput): string {
 
   const goalKnown = !isUnspecifiedReportLabel(input.goalTitle);
 
+  const efficiencyPhrase = resolveEfficiencyPhrase(input);
+
   if (input.isKo) {
     if (goalKnown) {
-      return `왜 이 구성인가 · ${zoneSuffix} 핵심 동선의 ${input.portfolioCount}개 매체로 ${input.goalTitle} 목표에 맞춰 노출 효율과 도달을 균형 있게 설계했습니다.`;
+      return `왜 이 구성인가 · ${zoneSuffix} 핵심 동선의 ${input.portfolioCount}개 매체로 ${input.goalTitle} 목표에 맞춰 ${efficiencyPhrase.ko}.`;
     }
-    return `왜 이 구성인가 · ${zoneSuffix} 핵심 동선의 ${input.portfolioCount}개 매체로 노출 효율과 도달을 균형 있게 설계했습니다.`;
+    return `왜 이 구성인가 · ${zoneSuffix} 핵심 동선의 ${input.portfolioCount}개 매체로 ${efficiencyPhrase.ko}.`;
   }
   if (goalKnown) {
-    return `Why · ${input.portfolioCount} media across ${zoneSuffix} balance reach and efficiency for the "${input.goalTitle}" objective.`;
+    return `Why · ${input.portfolioCount} media across ${zoneSuffix} ${efficiencyPhrase.en} for the "${input.goalTitle}" objective.`;
   }
-  return `Why · ${input.portfolioCount} media across ${zoneSuffix} balance reach and efficiency.`;
+  return `Why · ${input.portfolioCount} media across ${zoneSuffix} ${efficiencyPhrase.en}.`;
+}
+
+function resolveEfficiencyPhrase(input: ReportStrategyInput): {
+  ko: string;
+  en: string;
+} {
+  const hints = input.mediaHints;
+  if (!hints || hints.length < 2) {
+    return {
+      ko: "노출 효율과 도달을 균형 있게 설계했습니다",
+      en: "balance reach and efficiency",
+    };
+  }
+  const withCpm = hints.filter((h) => h.cpmWon != null && h.cpmWon > 0);
+  if (withCpm.length < 2) {
+    return {
+      ko: "도달 범위를 중심으로 구성했습니다",
+      en: "prioritize reach coverage",
+    };
+  }
+  const cpms = withCpm.map((h) => h.cpmWon!);
+  const maxCpm = Math.max(...cpms);
+  const minCpm = Math.min(...cpms);
+  const ratio = maxCpm / minCpm;
+  if (ratio > 5) {
+    return {
+      ko: "CPM 격차가 큰 매체를 조합해 도달과 비용 효율을 설계했습니다",
+      en: "combine high- and low-CPM media to balance reach and cost",
+    };
+  }
+  return {
+    ko: "노출 효율과 도달을 균형 있게 설계했습니다",
+    en: "balance reach and efficiency",
+  };
 }

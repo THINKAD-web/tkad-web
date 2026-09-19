@@ -150,8 +150,25 @@ export function industryStrategyLine(
   isKo: boolean,
   industryKey: PlannerIndustryKey | null | undefined,
   industryText: string,
+  mediaLocations?: readonly string[],
 ): string | null {
   const key = industryKey ?? "indOther";
+  if (key === "indOther") return null;
+
+  if (mediaLocations && mediaLocations.length > 0) {
+    const hints = PLANNER_INDUSTRY_HINTS[key as Exclude<PlannerIndustryKey, "indOther">];
+    if (hints) {
+      const haystack = mediaLocations.join(" ").toLowerCase();
+      const matched = hints.some((h) => haystack.includes(h.toLowerCase()));
+      if (!matched) {
+        if (isKo) {
+          return `${industryText} 업종에 맞춘 매체를 구성했습니다.`;
+        }
+        return `Media selected for the ${industryText} sector.`;
+      }
+    }
+  }
+
   if (isKo) {
     const map: Record<PlannerIndustryKey, string> = {
       indFb: `${industryText} 업종 특성상 식음·상권 동선과 인접한 매체를 우선 반영했습니다.`,
