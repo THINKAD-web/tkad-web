@@ -37,10 +37,21 @@ export type ReportDocumentTheme = {
   coverText: string;
   coverMuted: string;
   coverMode: ReportCoverMode;
+  /** 표지 상단 띠 — accent 와 다를 수 있음 (기업형 골드 등) */
+  coverTopBar: string;
   topAccentBar: boolean;
   sectionAccentBar: boolean;
   heroRadius: string;
+  /** 미리보기 본문 섹션 간격 (Tailwind space-y-*) */
+  previewContentGapClass: string;
+  /** 미리보기 표 — plain | bordered */
+  previewTableVariant: "plain" | "bordered";
   pdf: {
+    marginMm: number;
+    sectionGapMm: number;
+    kpiCardFilled: boolean;
+    kpiCardBorder: boolean;
+    tableHeaderFillRgb: readonly [number, number, number] | null;
     accentRgb: readonly [number, number, number];
     accentSoftRgb: readonly [number, number, number];
     onAccentMutedRgb: readonly [number, number, number];
@@ -48,6 +59,7 @@ export type ReportDocumentTheme = {
     coverBgRgb: readonly [number, number, number];
     coverTextRgb: readonly [number, number, number];
     coverMutedRgb: readonly [number, number, number];
+    coverTopBarRgb: readonly [number, number, number];
   };
   pptx: {
     accent: string;
@@ -83,13 +95,22 @@ function buildTheme(
     coverBg: string;
     coverText: string;
     coverMuted: string;
+    coverTopBar?: string;
     coverMode: ReportCoverMode;
     topAccentBar: boolean;
     sectionAccentBar: boolean;
     heroRadius: string;
     onAccentMuted: string;
+    previewContentGapClass: string;
+    previewTableVariant: "plain" | "bordered";
+    pdfMarginMm: number;
+    pdfSectionGapMm: number;
+    kpiCardFilled: boolean;
+    kpiCardBorder: boolean;
+    tableHeaderFill: string | null;
   },
 ): ReportDocumentTheme {
+  const coverTopBar = opts.coverTopBar ?? opts.accent;
   return {
     style,
     accent: opts.accent,
@@ -99,10 +120,20 @@ function buildTheme(
     coverText: opts.coverText,
     coverMuted: opts.coverMuted,
     coverMode: opts.coverMode,
+    coverTopBar,
     topAccentBar: opts.topAccentBar,
     sectionAccentBar: opts.sectionAccentBar,
     heroRadius: opts.heroRadius,
+    previewContentGapClass: opts.previewContentGapClass,
+    previewTableVariant: opts.previewTableVariant,
     pdf: {
+      marginMm: opts.pdfMarginMm,
+      sectionGapMm: opts.pdfSectionGapMm,
+      kpiCardFilled: opts.kpiCardFilled,
+      kpiCardBorder: opts.kpiCardBorder,
+      tableHeaderFillRgb: opts.tableHeaderFill
+        ? hexToRgb(opts.tableHeaderFill)
+        : null,
       accentRgb: hexToRgb(opts.accent),
       accentSoftRgb: hexToRgb(opts.accentSoft),
       onAccentMutedRgb: hexToRgb(opts.onAccentMuted),
@@ -110,6 +141,7 @@ function buildTheme(
       coverBgRgb: hexToRgb(opts.coverBg),
       coverTextRgb: hexToRgb(opts.coverText),
       coverMutedRgb: hexToRgb(opts.coverMuted),
+      coverTopBarRgb: hexToRgb(coverTopBar),
     },
     pptx: {
       accent: hexToPptx(opts.accent),
@@ -127,17 +159,25 @@ function buildTheme(
 const THEMES: Record<PlannerReportStyle, ReportDocumentTheme> = {
   /** 미니멀 — 흰 표지, 얇은 틸 룰, 여백 중심 */
   minimal: buildTheme("minimal", {
-    accent: REPORT_BRAND.teal,
-    accentSoft: REPORT_BRAND.tealSoft,
+    accent: "#94A3B8",
+    accentSoft: REPORT_BRAND.paperMuted,
     ink: REPORT_BRAND.ink,
     coverBg: REPORT_BRAND.paper,
     coverText: REPORT_BRAND.ink,
     coverMuted: REPORT_BRAND.slate,
+    coverTopBar: "#CBD5E1",
     coverMode: "minimal",
     topAccentBar: true,
-    sectionAccentBar: true,
+    sectionAccentBar: false,
     heroRadius: "1rem",
     onAccentMuted: REPORT_BRAND.slate,
+    previewContentGapClass: "space-y-12",
+    previewTableVariant: "plain",
+    pdfMarginMm: 18,
+    pdfSectionGapMm: 10,
+    kpiCardFilled: false,
+    kpiCardBorder: false,
+    tableHeaderFill: null,
   }),
   /** 브랜드 — 딥 잉크 표지 + 틸 액센트 (기본) */
   brand: buildTheme("brand", {
@@ -152,20 +192,35 @@ const THEMES: Record<PlannerReportStyle, ReportDocumentTheme> = {
     sectionAccentBar: true,
     heroRadius: "0",
     onAccentMuted: "#CBD5E1",
+    previewContentGapClass: "space-y-9",
+    previewTableVariant: "plain",
+    pdfMarginMm: 13,
+    pdfSectionGapMm: 8,
+    kpiCardFilled: true,
+    kpiCardBorder: false,
+    tableHeaderFill: null,
   }),
   /** 격식 기업형 — 밝은 표지, 네이비 타이포, 골드·틸 라인 */
   corporate: buildTheme("corporate", {
-    accent: REPORT_BRAND.teal,
+    accent: REPORT_BRAND.ink,
     accentSoft: REPORT_BRAND.paperMuted,
     ink: REPORT_BRAND.ink,
     coverBg: REPORT_BRAND.paperMuted,
     coverText: REPORT_BRAND.ink,
     coverMuted: REPORT_BRAND.slate,
+    coverTopBar: REPORT_BRAND.gold,
     coverMode: "formal",
-    topAccentBar: false,
+    topAccentBar: true,
     sectionAccentBar: true,
     heroRadius: "0.5rem",
     onAccentMuted: REPORT_BRAND.slate,
+    previewContentGapClass: "space-y-7",
+    previewTableVariant: "bordered",
+    pdfMarginMm: 14,
+    pdfSectionGapMm: 7,
+    kpiCardFilled: false,
+    kpiCardBorder: true,
+    tableHeaderFill: "#E2E8F0",
   }),
 };
 

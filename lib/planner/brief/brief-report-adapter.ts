@@ -152,6 +152,7 @@ export type BuildBriefReportPayloadArgs = {
   mixSource?: "inquiry_match";
   /** C-lite/C-full — 표지·인사말·요약 (useReportCopyStore) */
   reportCopy?: PlannerReportCopyState | null;
+  documentTypeKey?: import("@/lib/planner-report-export/document-type").PlannerDocumentTypeKey;
 };
 
 function isBriefGoal(v: string | undefined): v is BriefGoal {
@@ -370,6 +371,44 @@ export function buildBriefReportCopyStrategyInput(
   const portfolioCount = portfolio.length + customEntries.length;
   const campaignGoal = briefGoalToPlanner(brief.goal);
   const industryKey = briefIndustryToPlanner(brief.industry);
+  const quantities = briefMixQuantities(plan.mediaMix);
+  const priceOptionIndex = briefPriceOptionIndex(plan.mediaMix, catalog);
+  const pricing = { quantities, priceOptionIndex };
+  const resolvedPeriod = resolveBriefPeriodDays(plan);
+  const months = resolvedPeriod.days / MEDIA_DAYS_PER_MONTH;
+  const useFlightPeriod =
+    resolvedPeriod.flightMatchesStored &&
+    !!brief.flightStart &&
+    !!brief.flightEnd;
+  const exportCalcPlan = buildBriefExportCalcPlan({
+    portfolio,
+    pricing,
+    months,
+    campaignMediaImpressions: briefMixImpressions(plan.mediaMix),
+    budgetWon: plan.brief.budgetWon,
+    campaignGoal,
+    industryKey,
+    isKo,
+    flightStart: useFlightPeriod ? brief.flightStart : undefined,
+    flightEnd: useFlightPeriod ? brief.flightEnd : undefined,
+  });
+  const mediaHints = exportCalcPlan.mediaItems.map((mi) => {
+    const media = portfolio.find((m) => m.id === mi.id);
+    return {
+      name: mi.name,
+      location: media?.location ?? undefined,
+      budgetPct: mi.budgetShare,
+      cpmWon: mi.cpmWon,
+    };
+  });
+  const topByBudget = mediaHints
+    .filter((h) => h.budgetPct > 0)
+    .sort((a, b) => b.budgetPct - a.budgetPct)[0];
+  const fallbackTop =
+    portfolio[0]?.name ??
+    customEntries[0]?.name ??
+    (isKo ? "핵심 매체" : "key media");
+
   return {
     isKo,
     campaignGoal,
@@ -380,10 +419,9 @@ export function buildBriefReportCopyStrategyInput(
     seoulZones: [],
     followUp: {},
     portfolioCount,
-    topMediaName:
-      portfolio[0]?.name ??
-      customEntries[0]?.name ??
-      (isKo ? "핵심 매체" : "key media"),
+    mediaHints,
+    topMediaName: topByBudget?.name ?? fallbackTop,
+    topMediaBudgetPct: topByBudget?.budgetPct,
   };
 }
 
@@ -930,6 +968,7 @@ export function buildBriefReportPayload(
     appendixSectionTitle,
     appendixMediaSpecs: plannerAppendixSpecs,
     benchmarkCatalog: args.catalog,
+    documentTypeKey: args.documentTypeKey,
   });
 
   const titled = copy?.documentTitle?.trim()

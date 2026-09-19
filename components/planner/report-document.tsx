@@ -271,6 +271,12 @@ export const PlannerReportDocument = forwardRef<
   const patternStatsNote = usePatternStatsNote(p.patternStatsQuery, isKo);
   const theme = getReportDocumentTheme(reportStyle);
   const vis = sectionVisibility;
+  const sectionHeadingBar = theme.sectionAccentBar;
+  const sectionAccent = theme.sectionAccentBar ? theme.accent : undefined;
+  const headingProps = {
+    accentColor: sectionAccent,
+    showAccentBar: sectionHeadingBar,
+  };
   const visibleSections = filterExportSections(p.sections, vis)
     ?.filter(
       (sec) =>
@@ -329,11 +335,16 @@ export const PlannerReportDocument = forwardRef<
         titleAriaLabel={isKo ? "보고서 제목" : "Report title"}
       />
 
-      <div className="space-y-9 px-4 py-6 sm:px-6 sm:py-8 lg:px-9">
+      <div
+        className={cn(
+          theme.previewContentGapClass,
+          "px-4 py-6 sm:px-6 sm:py-8 lg:px-9",
+        )}
+      >
         {sectionVisible(vis, "greeting") ? (
           editableGreeting && onGreetingChange ? (
             <section className="space-y-2" data-testid="report-greeting-edit">
-              <DocumentSectionHeading>
+              <DocumentSectionHeading {...headingProps}>
                 {isKo ? "인사말" : "Greeting"}
               </DocumentSectionHeading>
               <textarea
@@ -350,7 +361,7 @@ export const PlannerReportDocument = forwardRef<
             </section>
           ) : p.greetingText?.trim() ? (
             <section className="space-y-2">
-              <DocumentSectionHeading>
+              <DocumentSectionHeading {...headingProps}>
                 {isKo ? "인사말" : "Greeting"}
               </DocumentSectionHeading>
               <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50/60 p-4 text-sm leading-relaxed text-gray-800">
@@ -365,7 +376,7 @@ export const PlannerReportDocument = forwardRef<
         {sectionVisible(vis, "executiveSummary") ? (
           editableExecutiveSummary && onExecutiveSummaryChange ? (
             <section className="space-y-2" data-testid="report-executive-edit">
-              <DocumentSectionHeading>
+              <DocumentSectionHeading {...headingProps}>
                 {isKo ? "전략 요약" : "Strategy summary"}
               </DocumentSectionHeading>
               <textarea
@@ -382,7 +393,7 @@ export const PlannerReportDocument = forwardRef<
             </section>
           ) : p.executiveSummaryLines && p.executiveSummaryLines.length > 0 ? (
             <section className="space-y-3">
-              <DocumentSectionHeading>
+              <DocumentSectionHeading {...headingProps}>
                 {isKo ? "전략 요약" : "Strategy summary"}
               </DocumentSectionHeading>
               <ul className="space-y-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
@@ -396,7 +407,7 @@ export const PlannerReportDocument = forwardRef<
 
         {/* 캠페인 개요 */}
         <section className="space-y-4">
-          <DocumentSectionHeading>{isKo ? "캠페인 개요" : "Campaign overview"}</DocumentSectionHeading>
+          <DocumentSectionHeading {...headingProps}>{isKo ? "캠페인 개요" : "Campaign overview"}</DocumentSectionHeading>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
             {summary.map(([label, value]) => (
               <div key={label} className="min-w-0">
@@ -516,7 +527,7 @@ export const PlannerReportDocument = forwardRef<
           (p.charts.reachSummary?.length ?? 0) > 0 ||
           Boolean(p.charts.performanceGuide)) ? (
           <section className="space-y-4">
-            <DocumentSectionHeading>{isKo ? "성과 요약" : "Performance summary"}</DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>{isKo ? "성과 요약" : "Performance summary"}</DocumentSectionHeading>
             {(p.charts.budgetSplit?.length ?? 0) > 0 ||
             (p.charts.browseBudgetSplit?.length ?? 0) > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2">
@@ -601,7 +612,7 @@ export const PlannerReportDocument = forwardRef<
         p.regionBreakdown &&
         p.regionBreakdown.length > 0 ? (
           <section className="space-y-4">
-            <DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>
               {isKo ? "지역별 예산 · 효과" : "Budget & impact by region"}
             </DocumentSectionHeading>
             <div className="grid gap-6 sm:grid-cols-2">
@@ -666,7 +677,7 @@ export const PlannerReportDocument = forwardRef<
         p.regionSubdivision &&
         p.regionSubdivision.breakdown.length >= 2 ? (
           <section className="space-y-4">
-            <DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>
               {isKo ? "상권 · 권역 세분화" : "District & zone detail"}
             </DocumentSectionHeading>
             <p className="text-xs text-gray-500">
@@ -742,7 +753,7 @@ export const PlannerReportDocument = forwardRef<
 
         {sectionVisible(vis, "recommend") && p.recommendRationale ? (
           <section className="space-y-4">
-            <DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>
               {isKo ? "추천 근거" : "Recommendation rationale"}
             </DocumentSectionHeading>
             <div className="space-y-3 rounded-xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-4 sm:p-5">
@@ -777,7 +788,7 @@ export const PlannerReportDocument = forwardRef<
 
         {p.onlineSection && p.onlineSection.lines.length > 0 ? (
           <section className="space-y-3">
-            <DocumentSectionHeading>{p.onlineSection.title}</DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>{p.onlineSection.title}</DocumentSectionHeading>
             <p className="text-sm text-gray-600">{p.onlineSection.estimationNotice}</p>
             {p.onlineSection.consultationNotice ? (
               <p className="text-sm font-semibold text-amber-800">
@@ -854,7 +865,7 @@ export const PlannerReportDocument = forwardRef<
         {/* 디지털 예산 배분 */}
         {p.digital && p.digital.length ? (
           <section className="space-y-3">
-            <DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>
               {isKo ? "디지털 예산 배분" : "Digital budget allocation"}
             </DocumentSectionHeading>
             {p.digitalSummary ? (
@@ -894,7 +905,7 @@ export const PlannerReportDocument = forwardRef<
         {(visibleSections ?? []).map((sec) =>
           sec.lines.length ? (
             <section key={sec.title} className="space-y-3">
-              <DocumentSectionHeading>{sec.title}</DocumentSectionHeading>
+              <DocumentSectionHeading {...headingProps}>{sec.title}</DocumentSectionHeading>
               <ul className="space-y-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
                 {sec.lines.map((line, i) => (
                   <ReportScanLine key={i} text={line} />
