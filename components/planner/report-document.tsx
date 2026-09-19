@@ -108,8 +108,8 @@ function DonutChart({
     (_, i) => fracs.slice(0, i).reduce((a, b) => a + b, 0) * C,
   );
   return (
-    <div className="flex items-center gap-4">
-      <svg width="140" height="140" viewBox="0 0 140 140" className="shrink-0">
+    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+      <svg viewBox="0 0 140 140" className="h-28 w-28 shrink-0 sm:h-[140px] sm:w-[140px]">
         <g transform="translate(70,70) rotate(-90)">
           <circle r={R} fill="none" stroke="#EEF0F4" strokeWidth="20" />
           {data.map((d, i) => (
@@ -330,64 +330,68 @@ export const PlannerReportDocument = forwardRef<
       />
 
       <div className="space-y-9 px-6 py-8 sm:px-9">
-        {editableGreeting && onGreetingChange ? (
-          <section className="space-y-2" data-testid="report-greeting-edit">
-            <DocumentSectionHeading>
-              {isKo ? "인사말" : "Greeting"}
-            </DocumentSectionHeading>
-            <textarea
-              value={p.greetingText ?? ""}
-              onChange={(e) => onGreetingChange(e.target.value)}
-              rows={4}
-              placeholder={
-                isKo
-                  ? "광고주에게 전달할 인사말 (비우면 PDF에서 생략)"
-                  : "Greeting to the client (leave empty to omit)"
-              }
-              className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-[color:var(--qp-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/30"
-            />
-          </section>
-        ) : p.greetingText?.trim() ? (
-          <section className="space-y-2">
-            <DocumentSectionHeading>
-              {isKo ? "인사말" : "Greeting"}
-            </DocumentSectionHeading>
-            <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50/60 p-4 text-sm leading-relaxed text-gray-800">
-              {p.greetingText.split(/\n+/).map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
-            </div>
-          </section>
+        {sectionVisible(vis, "greeting") ? (
+          editableGreeting && onGreetingChange ? (
+            <section className="space-y-2" data-testid="report-greeting-edit">
+              <DocumentSectionHeading>
+                {isKo ? "인사말" : "Greeting"}
+              </DocumentSectionHeading>
+              <textarea
+                value={p.greetingText ?? ""}
+                onChange={(e) => onGreetingChange(e.target.value)}
+                rows={4}
+                placeholder={
+                  isKo
+                    ? "광고주에게 전달할 인사말 (비우면 PDF에서 생략)"
+                    : "Greeting to the client (leave empty to omit)"
+                }
+                className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-[color:var(--qp-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/30"
+              />
+            </section>
+          ) : p.greetingText?.trim() ? (
+            <section className="space-y-2">
+              <DocumentSectionHeading>
+                {isKo ? "인사말" : "Greeting"}
+              </DocumentSectionHeading>
+              <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50/60 p-4 text-sm leading-relaxed text-gray-800">
+                {p.greetingText.split(/\n+/).map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))}
+              </div>
+            </section>
+          ) : null
         ) : null}
 
-        {editableExecutiveSummary && onExecutiveSummaryChange ? (
-          <section className="space-y-2" data-testid="report-executive-edit">
-            <DocumentSectionHeading>
-              {isKo ? "전략 요약" : "Strategy summary"}
-            </DocumentSectionHeading>
-            <textarea
-              value={(p.executiveSummaryLines ?? []).join("\n\n")}
-              onChange={(e) => onExecutiveSummaryChange(e.target.value)}
-              rows={8}
-              placeholder={
-                isKo
-                  ? "제안 배경·전략·다음 액션 (비우면 PDF에서 생략)"
-                  : "Proposal context and strategy (leave empty to omit)"
-              }
-              className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-[color:var(--qp-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/30"
-            />
-          </section>
-        ) : p.executiveSummaryLines && p.executiveSummaryLines.length > 0 ? (
-          <section className="space-y-3">
-            <DocumentSectionHeading>
-              {isKo ? "전략 요약" : "Strategy summary"}
-            </DocumentSectionHeading>
-            <ul className="space-y-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
-              {p.executiveSummaryLines.map((line, i) => (
-                <ReportScanLine key={i} text={line} />
-              ))}
-            </ul>
-          </section>
+        {sectionVisible(vis, "executiveSummary") ? (
+          editableExecutiveSummary && onExecutiveSummaryChange ? (
+            <section className="space-y-2" data-testid="report-executive-edit">
+              <DocumentSectionHeading>
+                {isKo ? "전략 요약" : "Strategy summary"}
+              </DocumentSectionHeading>
+              <textarea
+                value={(p.executiveSummaryLines ?? []).join("\n\n")}
+                onChange={(e) => onExecutiveSummaryChange(e.target.value)}
+                rows={8}
+                placeholder={
+                  isKo
+                    ? "제안 배경·전략·다음 액션 (비우면 PDF에서 생략)"
+                    : "Proposal context and strategy (leave empty to omit)"
+                }
+                className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-[color:var(--qp-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/30"
+              />
+            </section>
+          ) : p.executiveSummaryLines && p.executiveSummaryLines.length > 0 ? (
+            <section className="space-y-3">
+              <DocumentSectionHeading>
+                {isKo ? "전략 요약" : "Strategy summary"}
+              </DocumentSectionHeading>
+              <ul className="space-y-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
+                {p.executiveSummaryLines.map((line, i) => (
+                  <ReportScanLine key={i} text={line} />
+                ))}
+              </ul>
+            </section>
+          ) : null
         ) : null}
 
         {/* 캠페인 개요 */}
