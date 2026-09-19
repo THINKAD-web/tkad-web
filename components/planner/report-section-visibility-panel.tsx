@@ -17,6 +17,8 @@ const SECTION_LABELS: Record<
   PlannerReportSectionKey,
   { ko: string; en: string }
 > = {
+  greeting: { ko: "인사말", en: "Greeting" },
+  executiveSummary: { ko: "전략 요약", en: "Executive summary" },
   map: { ko: "지도", en: "Map" },
   recommend: { ko: "추천 근거", en: "Recommendation rationale" },
   subdivision: { ko: "상권·권역 세분화", en: "District & zone detail" },

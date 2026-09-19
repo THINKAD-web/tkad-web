@@ -1,11 +1,14 @@
 import type { CampaignBuilderDocumentType } from "@/lib/admin-campaign-builder/schemas";
 import { campaignBuilderCopy } from "@/lib/admin-campaign-builder/copy-ko";
 import type { PlannerReportComposition } from "@/lib/planner-report-export/types";
+import type { PlannerDocumentTypeKey } from "@/lib/planner-report-export/document-type";
+import { getPlannerDocumentTypeConfig } from "@/lib/planner-report-export/document-type";
 
 type CoverSubtitleInput = {
   kind?: "ooh" | "integrated" | "builder";
   reportComposition?: PlannerReportComposition;
   builderDocumentType?: CampaignBuilderDocumentType;
+  plannerDocumentType?: PlannerDocumentTypeKey;
 };
 
 /** HTML 미리보기 표지 부제 (날짜는 호출측에서 ` · ${generatedAt}` 붙임) */
@@ -25,8 +28,13 @@ export function reportCoverSubtitle(
       return isKo ? "온라인 매체 플랜" : "Online media plan";
     case "mixed":
       return isKo ? "OOH + 온라인 통합 제안" : "OOH + Online integrated";
-    default:
+    default: {
+      if (input.plannerDocumentType) {
+        const cfg = getPlannerDocumentTypeConfig(input.plannerDocumentType);
+        return isKo ? cfg.coverBadgeKo : cfg.coverBadgeEn;
+      }
       return isKo ? "OOH 미디어 플랜" : "OOH media plan";
+    }
   }
 }
 
@@ -53,7 +61,12 @@ export function reportExportCoverSubtitle(
       return isKo
         ? "OOH + 온라인 통합 캠페인 제안"
         : "OOH + Online integrated campaign";
-    default:
+    default: {
+      if (input.plannerDocumentType) {
+        const cfg = getPlannerDocumentTypeConfig(input.plannerDocumentType);
+        return isKo ? cfg.titleKo : cfg.titleEn;
+      }
       return isKo ? "OOH 미디어 캠페인 플랜" : "OOH media campaign plan";
+    }
   }
 }

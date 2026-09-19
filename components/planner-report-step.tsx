@@ -91,6 +91,12 @@ import { ReportSectionVisibilityPanel } from "@/components/planner/report-sectio
 import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
 import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
 import { ReportStylePicker } from "@/components/planner/report-style-picker";
+import { ReportDocumentTypePicker } from "@/components/planner/report-document-type-picker";
+import {
+  getPlannerDocumentTypeConfig,
+  parsePlannerDocumentType,
+  type PlannerDocumentTypeKey,
+} from "@/lib/planner-report-export/document-type";
 import {
   lineupViewModeForExport,
   readPlannerReportViewMode,
@@ -388,6 +394,7 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       cpmBars,
       effectSummaryLines,
       contact,
+      planMediaItems: plan.mediaItems,
     }),
     [
       periodDisplay,
@@ -397,6 +404,7 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       cpmBars,
       effectSummaryLines,
       contact,
+      plan.mediaItems,
     ],
   );
 }
@@ -471,6 +479,10 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     (s) => s.acknowledgeReportCopyFingerprint,
   );
   const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
+  const reportDocumentType = parsePlannerDocumentType(
+    usePlannerStore((s) => s.reportDocumentType),
+  );
+  const setReportDocumentType = usePlannerStore((s) => s.setReportDocumentType);
 
   const isPlanCartReport = props.activitySource === "plan_cart_report";
 
@@ -603,6 +615,26 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     props.narrativeContext?.industryKey,
   ]);
 
+  const mediaHintsForStrategy = useMemo(() => {
+    if (portfolioForExport.length === 0) return [];
+    return derived.planMediaItems.map((mi) => {
+      const media = portfolioForExport.find((m) => m.id === mi.id);
+      return {
+        name: mi.name,
+        location: media?.location ?? undefined,
+        budgetPct: mi.budgetShare,
+        cpmWon: mi.cpmWon,
+      };
+    });
+  }, [derived.planMediaItems, portfolioForExport]);
+
+  const topBudgetMedia = useMemo(() => {
+    const withBudget = mediaHintsForStrategy
+      .filter((h) => h.budgetPct > 0)
+      .sort((a, b) => b.budgetPct - a.budgetPct);
+    return withBudget[0] ?? null;
+  }, [mediaHintsForStrategy]);
+
   const copyStrategyInput = useMemo(
     () => ({
       isKo: props.isKo,
@@ -614,11 +646,13 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       seoulZones: props.seoulZones ?? [],
       followUp: props.goalFollowUp ?? {},
       portfolioCount: portfolioForExport.length,
+      mediaHints: mediaHintsForStrategy,
       topMediaName:
-        portfolioForExport[0]?.name ??
+        topBudgetMedia?.name ??
         (props.isKo ? "핵심 매체" : "key media"),
+      topMediaBudgetPct: topBudgetMedia?.budgetPct,
     }),
-    [props, portfolioForExport],
+    [props, portfolioForExport, mediaHintsForStrategy, topBudgetMedia],
   );
 
   useEffect(() => {
@@ -646,6 +680,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     const greeting = buildDefaultReportGreeting(
       props.isKo,
       reportClientName.trim() || undefined,
+      reportDocumentType,
     );
     const executive = joinReportCopyLines(
       buildDefaultExecutiveSummaryLines(copyStrategyInput),
@@ -665,6 +700,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     copyFingerprintCurrent,
     copyStrategyInput,
     reportClientName,
+    reportDocumentType,
     props.isKo,
     applyReportCopyDraft,
   ]);
@@ -693,6 +729,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     const greeting = buildDefaultReportGreeting(
       props.isKo,
       reportClientName.trim() || undefined,
+      reportDocumentType,
     );
     const executive = joinReportCopyLines(
       buildDefaultExecutiveSummaryLines(copyStrategyInput),
@@ -707,6 +744,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     onlineCopyStrategyInput,
     props.isKo,
     reportClientName,
+    reportDocumentType,
     copyStrategyInput,
     copyFingerprintCurrent,
     applyReportCopyDraft,
@@ -759,6 +797,11 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     ],
   );
 
+  const documentTypeConfig = useMemo(
+    () => getPlannerDocumentTypeConfig(reportDocumentType),
+    [reportDocumentType],
+  );
+
   const exportPayload = useMemo(() => {
     const compositionTitle =
       payload.reportComposition === "mixed" ||
@@ -775,14 +818,19 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 : payload.executiveSummaryLines,
           }
         : {};
+    const dtTitle = props.isKo
+      ? documentTypeConfig.titleKo
+      : documentTypeConfig.titleEn;
     return {
       ...payload,
       ...onlyOnlineCopy,
       documentTitle:
         compositionTitle ??
-        (reportDocumentTitle.trim() || payload.documentTitle),
+        (reportDocumentTitle.trim() || dtTitle),
+      documentTypeWord: props.isKo
+        ? documentTypeConfig.fileNameWordKo
+        : documentTypeConfig.fileNameWordEn,
       clientName: reportClientName.trim() || undefined,
-      // C-lite: creativeUploadedUrl(소재) → 표지 로고 임시 재사용. 전용 coverLogo 분리 예정.
       coverLogoUrl:
         (creativeUploadedUrl ?? props.logoUrl)?.trim() || undefined,
     };
@@ -794,6 +842,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     executiveSummaryLines,
     creativeUploadedUrl,
     props.logoUrl,
+    props.isKo,
+    documentTypeConfig,
   ]);
 
   const [internalSectionVisibility, setInternalSectionVisibility] =
@@ -1004,6 +1054,11 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
 
               <PlannerNeonCard>
                 <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:p-6">
+                  <ReportDocumentTypePicker
+                    isKo={props.isKo}
+                    value={reportDocumentType}
+                    onChange={(next) => setReportDocumentType(next)}
+                  />
                   <ReportStylePicker
                     isKo={props.isKo}
                     value={reportStyle}

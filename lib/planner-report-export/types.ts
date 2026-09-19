@@ -344,6 +344,8 @@ export type PlannerReportExportPayload = {
   reportComposition?: PlannerReportComposition;
   /** 캠페인 빌더 export — kind === "builder" 일 때 본문 SSOT */
   builderSection?: PlannerExportBuilderSection;
+  /** 파일명에 쓸 문서 유형 단어 (document-type.ts 의 fileNameWordKo/En) */
+  documentTypeWord?: string;
   disclaimer: string;
 };
 
@@ -419,18 +421,15 @@ function resolveReportFileCampName(p: PlannerReportExportPayload): string | null
  */
 export function plannerReportFileBase(p: PlannerReportExportPayload): string {
   const date = new Date().toISOString().slice(0, 10);
-  const word =
-    p.kind === "builder"
-      ? p.builderSection?.documentType === "report"
-        ? p.isKo
-          ? "리포트"
-          : "report"
-        : p.isKo
-          ? "제안서"
-          : "proposal"
-      : p.isKo
-        ? "제안서"
-        : "proposal";
+  const word = (() => {
+    if (p.kind === "builder") {
+      return p.builderSection?.documentType === "report"
+        ? p.isKo ? "리포트" : "report"
+        : p.isKo ? "제안서" : "proposal";
+    }
+    if (p.documentTypeWord) return p.documentTypeWord;
+    return p.isKo ? "제안서" : "proposal";
+  })();
   const camp = resolveReportFileCampName(p);
   if (camp) {
     return `THINKAD_${camp}_${word}_${date}`;
