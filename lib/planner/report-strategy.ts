@@ -2,7 +2,10 @@ import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { PlannerIndustryKey } from "@/lib/planner/types";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import { formatSeoulZonesText } from "@/lib/planner/seoul-zones";
-import { industryStrategyLine } from "@/lib/planner/industry-match";
+import {
+  industryStrategyLine,
+  PLANNER_INDUSTRY_HINTS,
+} from "@/lib/planner/industry-match";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import { buildGoalFollowUpReportLines } from "@/lib/planner/goal-follow-up";
 
@@ -37,9 +40,36 @@ function zoneLine(input: ReportStrategyInput): string | null {
   return `Districts · Prioritized placements along ${zoneText}.`;
 }
 
-function goalIndustryLine(input: ReportStrategyInput): string | null {
+function goalIndustryLine(
+  input: ReportStrategyInput,
+  mediaLocations?: readonly string[],
+): string | null {
   const g = input.campaignGoal;
   const ind = input.industryKey ?? "indOther";
+  const line = goalIndustryLineText(input, g, ind);
+  if (!line) return null;
+  /**
+   * 표에 실린 문구는 업종별 고정 동선(강남·성수, 매장 인근 상권 등)을 단정한다.
+   * 실제 선택 매체 위치가 해당 업종 힌트와 무관하면(예: KTX·지하철만 있는데
+   * "쇼핑·유통 동선" 을 주장) 허위 클레임이 되므로 industryStrategyLine 과
+   * 동일한 근거로 검증한다.
+   */
+  if (ind !== "indOther" && mediaLocations && mediaLocations.length > 0) {
+    const hints = PLANNER_INDUSTRY_HINTS[ind as Exclude<PlannerIndustryKey, "indOther">];
+    if (hints) {
+      const haystack = mediaLocations.join(" ").toLowerCase();
+      const matched = hints.some((h) => haystack.includes(h.toLowerCase()));
+      if (!matched) return null;
+    }
+  }
+  return line;
+}
+
+function goalIndustryLineText(
+  input: ReportStrategyInput,
+  g: PlannerCampaignGoal | null,
+  ind: PlannerIndustryKey,
+): string | null {
   if (input.isKo) {
     const table: Partial<Record<`${PlannerCampaignGoal}:${PlannerIndustryKey}`, string>> = {
       "launch:indRetail": `${input.goalTitle} × ${input.industryText} — 강남·성수 트렌드 동선에 집중 노출해 인지도를 빠르게 끌어올립니다.`,
@@ -78,12 +108,12 @@ export function buildReportStrategyLines(
 ): string[] {
   const lines: string[] = [];
 
-  const gi = goalIndustryLine(input);
-  if (gi) lines.push(gi);
-
   const mediaLocations = input.mediaHints
     ?.map((h) => h.location)
     .filter((l): l is string => !!l);
+
+  const gi = goalIndustryLine(input, mediaLocations);
+  if (gi) lines.push(gi);
 
   const ind = industryStrategyLine(
     input.isKo,

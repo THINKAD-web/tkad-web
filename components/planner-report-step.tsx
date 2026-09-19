@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { FileDown, Loader2, Lock, Mail, RefreshCw } from "lucide-react";
+import { FileDown, Loader2, Lock, Mail, RefreshCw, Settings2 } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -1042,6 +1042,25 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 />
               </DocumentPreviewFrame>
 
+              <button
+                type="button"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm dark:border-white/12 dark:bg-white/5 dark:text-white/90 sm:hidden"
+                onClick={() => {
+                  const target = document.getElementById(
+                    "planner-report-settings",
+                  );
+                  target?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  target
+                    ?.querySelectorAll("details")
+                    .forEach((el) => (el.open = true));
+                }}
+              >
+                <Settings2 className="h-4 w-4" aria-hidden />
+                {props.isKo
+                  ? "문서 유형·스타일·섹션 설정"
+                  : "Document type, style & section settings"}
+              </button>
+
               <PlannerReportPremiumBlock
                 isKo={props.isKo}
                 portfolio={props.portfolio}
@@ -1053,7 +1072,10 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
               />
 
               <PlannerNeonCard>
-                <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:p-6">
+                <div
+                  id="planner-report-settings"
+                  className="flex scroll-mt-4 flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:p-6"
+                >
                   <ReportDocumentTypePicker
                     isKo={props.isKo}
                     value={reportDocumentType}
