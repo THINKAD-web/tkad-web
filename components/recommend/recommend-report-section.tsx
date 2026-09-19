@@ -17,7 +17,12 @@ import { usePlannerStore } from "@/lib/planner/store";
 import { useReportCopyStore } from "@/lib/planner-report-export/report-copy-store";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
-import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
+import { buildReportPayload } from "@/lib/planner-report-export/build-report-payload";
+import { splitReportCopyParagraphs } from "@/lib/planner-report-export/report-copy";
+import { useReportCopyAutoDraft } from "@/lib/planner-report-export/use-report-copy-auto-draft";
+import { applyPlannerDocumentTypeToPayload } from "@/lib/planner-report-export/enrich-export-payload";
+import { ReportExportSettingsPanel } from "@/components/planner/report-export-settings-panel";
+import { usePlannerReportDocumentType } from "@/hooks/use-planner-report-document-type";
 import { PLANNER_TOTAL_REACH_LABEL } from "@/lib/planner-report-performance-guide";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import {
@@ -39,7 +44,6 @@ import { PLANNER_INDUSTRY_LABELS } from "@/lib/planner/types";
 import { useToast } from "@/components/toast-provider";
 import { DocumentPreviewFrame } from "@/components/document/document-layout";
 import { PlannerReportDocument } from "@/components/planner/report-document";
-import { ReportStylePicker } from "@/components/planner/report-style-picker";
 import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
@@ -150,8 +154,10 @@ export function RecommendReportSection({
   } = useFeatureAccess("planner_result");
   const [downloading, setDownloading] =
     useState<PlannerReportExportFormat | null>(null);
-  const [sectionVisibility] = usePlannerReportSectionVisibility();
+  const [sectionVisibility, setSectionVisibility] =
+    usePlannerReportSectionVisibility();
   const [reportStyle, setReportStyle] = usePlannerReportStyle();
+  const [documentType, setDocumentType] = usePlannerReportDocumentType();
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(isKo ? "ko-KR" : "en-US"),
   );
@@ -390,9 +396,70 @@ export function RecommendReportSection({
     });
   }, [portfolio, scoredPortfolio, isKo]);
 
+  const reportClientName = useReportCopyStore((s) => s.clientName);
+  const setReportClientName = useReportCopyStore((s) => s.setClientName);
+  const reportDocumentTitle = useReportCopyStore((s) => s.documentTitle);
+  const setReportDocumentTitle = useReportCopyStore((s) => s.setDocumentTitle);
+  const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
+
+  const copyStrategyInput = useMemo(() => {
+    const mediaHints = plan.mediaItems.map((mi) => {
+      const media = portfolioForExport.find((m) => m.id === mi.id);
+      return {
+        name: mi.name,
+        location: media?.location ?? undefined,
+        budgetPct: mi.budgetShare,
+        cpmWon: mi.cpmWon,
+      };
+    });
+    const topByBudget = mediaHints
+      .filter((h) => h.budgetPct > 0)
+      .sort((a, b) => b.budgetPct - a.budgetPct)[0];
+    return {
+      isKo,
+      campaignGoal: reportContext.campaignGoal,
+      goalTitle,
+      industryKey: reportContext.industryKey,
+      industryText,
+      regionsText: reportContext.regionsText,
+      seoulZones: input.seoulZones ?? [],
+      followUp: {},
+      portfolioCount: portfolioForExport.length,
+      mediaHints,
+      topMediaName:
+        topByBudget?.name ?? (isKo ? "핵심 매체" : "key media"),
+      topMediaBudgetPct: topByBudget?.budgetPct,
+    };
+  }, [
+    plan.mediaItems,
+    portfolioForExport,
+    isKo,
+    reportContext,
+    goalTitle,
+    industryText,
+    input.seoulZones,
+  ]);
+
+  const {
+    greeting,
+    executiveSummaryLines,
+    setGreeting,
+    setExecutiveSummary,
+  } = useReportCopyAutoDraft({
+    isKo,
+    enabled: portfolio.length > 0,
+    fingerprint: {
+      mediaIds: portfolio.map((m) => m.id),
+      quantities,
+      priceOptionIndex,
+    },
+    strategyInput: copyStrategyInput,
+    documentType,
+  });
+
   const payload = useMemo(
     () =>
-      buildOohReportPayload({
+      buildReportPayload({
         isKo,
         goalTitle,
         budgetMan: reportContext.budgetNum,
@@ -418,6 +485,9 @@ export function RecommendReportSection({
         campaignMediaPriceOptionIndex: priceOptionIndex,
         patternStatsQuery,
         benchmarkCatalog,
+        documentTypeKey: documentType,
+        reportGreeting: greeting,
+        reportExecutiveSummaryLines: executiveSummaryLines,
       }),
     [
       isKo,
@@ -438,23 +508,41 @@ export function RecommendReportSection({
       priceOptionIndex,
       patternStatsQuery,
       benchmarkCatalog,
+      documentType,
+      greeting,
+      executiveSummaryLines,
     ],
   );
 
-  const reportClientName = useReportCopyStore((s) => s.clientName);
-  const setReportClientName = useReportCopyStore((s) => s.setClientName);
-  const reportDocumentTitle = useReportCopyStore((s) => s.documentTitle);
-  const setReportDocumentTitle = useReportCopyStore((s) => s.setDocumentTitle);
-  const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
-
   const exportPayload = useMemo(
-    () => ({
-      ...payload,
-      documentTitle: reportDocumentTitle.trim() || payload.documentTitle,
-      clientName: reportClientName.trim() || undefined,
-      coverLogoUrl: creativeUploadedUrl?.trim() || undefined,
-    }),
-    [payload, reportDocumentTitle, reportClientName, creativeUploadedUrl],
+    () =>
+      applyPlannerDocumentTypeToPayload(
+        {
+          ...payload,
+          clientName: reportClientName.trim() || undefined,
+          coverLogoUrl: creativeUploadedUrl?.trim() || undefined,
+          greetingText: greeting.trim() || payload.greetingText,
+          executiveSummaryLines:
+            executiveSummaryLines.length > 0
+              ? executiveSummaryLines
+              : payload.executiveSummaryLines,
+        },
+        {
+          isKo,
+          documentType,
+          documentTitleOverride: reportDocumentTitle,
+        },
+      ),
+    [
+      payload,
+      reportDocumentTitle,
+      reportClientName,
+      creativeUploadedUrl,
+      greeting,
+      executiveSummaryLines,
+      isKo,
+      documentType,
+    ],
   );
 
   const handleExport = useCallback(
@@ -621,10 +709,17 @@ export function RecommendReportSection({
             >
               {plannerResultAllowed ? (
                 <div className="space-y-6">
-                  <ReportStylePicker
+                  <ReportExportSettingsPanel
                     isKo={isKo}
-                    value={reportStyle}
-                    onChange={setReportStyle}
+                    exportPayload={exportPayload}
+                    mapPortfolio={portfolio}
+                    documentType={documentType}
+                    onDocumentTypeChange={setDocumentType}
+                    reportStyle={reportStyle}
+                    onReportStyleChange={setReportStyle}
+                    sectionVisibility={sectionVisibility}
+                    onSectionVisibilityChange={setSectionVisibility}
+                    className="rounded-2xl border-2 border-border bg-card"
                   />
                   <DocumentPreviewFrame>
                     <PlannerReportDocument
@@ -636,6 +731,12 @@ export function RecommendReportSection({
                       onDocumentTitleChange={setReportDocumentTitle}
                       editableClientName
                       onClientNameChange={setReportClientName}
+                      editableGreeting
+                      onGreetingChange={setGreeting}
+                      editableExecutiveSummary
+                      onExecutiveSummaryChange={(text) =>
+                        setExecutiveSummary(text)
+                      }
                     />
                   </DocumentPreviewFrame>
 
