@@ -54,7 +54,10 @@ async function main() {
     description: media.description,
     country: media.country,
   });
-  console.log(`(model: ${result.model}, ${Date.now() - t0}ms)\n`);
+  console.log(
+    `(model: ${result.model}, ${Date.now() - t0}ms, ` +
+      `input_tokens=${result.usage.inputTokens}, output_tokens=${result.usage.outputTokens})\n`,
+  );
 
   console.log("=== Generated: en ===");
   console.log(result.en);
