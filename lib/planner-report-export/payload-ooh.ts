@@ -372,7 +372,20 @@ export function buildOohReportPayload(
   }
 
   if (a.portfolio.length) {
-    const topMedia = a.portfolio[0]?.name ?? (isKo ? "핵심 매체" : "key media");
+    const mediaHints = plan.mediaItems.map((mi) => {
+      const media = a.portfolio.find((m) => m.id === mi.id);
+      return {
+        name: mi.name,
+        location: media?.location ?? undefined,
+        budgetPct: mi.budgetShare,
+        cpmWon: mi.cpmWon,
+      };
+    });
+    const topByBudget = mediaHints
+      .filter((h) => h.budgetPct > 0)
+      .sort((a, b) => b.budgetPct - a.budgetPct)[0];
+    const topMedia = topByBudget?.name ?? (isKo ? "핵심 매체" : "key media");
+    const topMediaBudgetPct = topByBudget?.budgetPct ?? 0;
     const strategyCtx = {
       isKo,
       campaignGoal: a.campaignGoal ?? null,
@@ -383,6 +396,7 @@ export function buildOohReportPayload(
       seoulZones: a.seoulZones ?? [],
       followUp: a.goalFollowUp ?? {},
       portfolioCount: a.portfolio.length,
+      mediaHints,
     };
     const hasExecutiveOverride = a.reportExecutiveSummaryLines !== undefined;
     if (!hasExecutiveOverride) {
@@ -395,6 +409,9 @@ export function buildOohReportPayload(
                 : (a.metrics?.estimatedTotalImpressions ?? 0),
             )
           : null;
+      const budgetPctStr = topMediaBudgetPct > 0
+        ? ` (${Math.round(topMediaBudgetPct)}%)`
+        : "";
       const strategyLines = [
         buildReportWhyLine(strategyCtx),
         ...extraLines,
@@ -406,8 +423,8 @@ export function buildOohReportPayload(
             ? "예상 효과 · 핵심 타깃 도달률·ROI는 행정동 인구 데이터 연동 후 제공됩니다."
             : "Impact · Core reach and ROI will be available after dong-level population data is connected.",
         isKo
-          ? `다음 액션 · ${topMedia} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
-          : `Next · Lock ${topMedia} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
+          ? `다음 액션 · 예산 비중 1위 ${topMedia}${budgetPctStr} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
+          : `Next · Lock ${topMedia}${budgetPctStr} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
       ];
       sections.push({
         title: isKo ? "전략 요약" : "Strategy summary",

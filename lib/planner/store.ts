@@ -127,6 +127,10 @@ export type PlannerStoreState = {
   reportExecutiveSummaryTouched: boolean;
   /** 인사말·요약이 마지막으로 맞춰진 매체 구성 지문 */
   reportCopyFingerprint: string | null;
+  /** 문서 유형 — proposal | report | plan */
+  reportDocumentType: string;
+  /** 서술 섹션(인사말·전략요약·다음액션) on/off */
+  reportNarrativeEnabled: boolean;
 };
 
 export type PlannerStoreActions = {
@@ -170,6 +174,8 @@ export type PlannerStoreActions = {
   setCreativeUploadedUrl: (url: string | null) => void;
   setReportClientName: (name: string) => void;
   setReportDocumentTitle: (title: string) => void;
+  setReportDocumentType: (type: string) => void;
+  setReportNarrativeEnabled: (enabled: boolean) => void;
   setReportGreeting: (text: string) => void;
   setReportExecutiveSummary: (text: string) => void;
   applyReportCopyDraft: (draft: {
@@ -229,6 +235,8 @@ const INITIAL_STATE: PlannerStoreState = {
   reportGreetingTouched: false,
   reportExecutiveSummaryTouched: false,
   reportCopyFingerprint: null,
+  reportDocumentType: "proposal",
+  reportNarrativeEnabled: true,
 };
 
 function clampWizardStep(n: number): PlannerWizardStep {
@@ -601,6 +609,12 @@ export const usePlannerStore = create<PlannerStore>()(
       setReportDocumentTitle: (title) =>
         set({ reportDocumentTitle: title.slice(0, 120) }),
 
+      setReportDocumentType: (type) =>
+        set({ reportDocumentType: type }),
+
+      setReportNarrativeEnabled: (enabled) =>
+        set({ reportNarrativeEnabled: enabled }),
+
       setReportGreeting: (text) =>
         set({
           reportGreeting: text.slice(0, 2000),
@@ -800,6 +814,8 @@ export const usePlannerStore = create<PlannerStore>()(
         reportGreetingTouched: state.reportGreetingTouched,
         reportExecutiveSummaryTouched: state.reportExecutiveSummaryTouched,
         reportCopyFingerprint: state.reportCopyFingerprint,
+        reportDocumentType: state.reportDocumentType,
+        reportNarrativeEnabled: state.reportNarrativeEnabled,
       }),
       /**
        * 레거시 포맷:
@@ -1004,6 +1020,12 @@ export const usePlannerStore = create<PlannerStore>()(
         }
         if (typeof raw.reportCopyFingerprint === "string") {
           merged.reportCopyFingerprint = raw.reportCopyFingerprint;
+        }
+        if (typeof raw.reportDocumentType === "string") {
+          merged.reportDocumentType = raw.reportDocumentType;
+        }
+        if (typeof raw.reportNarrativeEnabled === "boolean") {
+          merged.reportNarrativeEnabled = raw.reportNarrativeEnabled;
         }
 
         return merged as unknown as PlannerStore;

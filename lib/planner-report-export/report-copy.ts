@@ -8,6 +8,10 @@ import {
   buildReportWhyLine,
   type ReportStrategyInput,
 } from "@/lib/planner/report-strategy";
+import {
+  getPlannerDocumentTypeConfig,
+  type PlannerDocumentTypeKey,
+} from "@/lib/planner-report-export/document-type";
 
 export type ReportCopyFingerprintInput = {
   mediaIds: readonly string[];
@@ -45,22 +49,17 @@ export function isReportCopyStale(params: {
 export function buildDefaultReportGreeting(
   isKo: boolean,
   clientName?: string,
+  documentType?: PlannerDocumentTypeKey,
 ): string {
-  const name = clientName?.trim();
-  if (isKo) {
-    if (name) {
-      return `${name}님, 안녕하세요.\n\n아래와 같이 OOH 미디어 캠페인 제안을 드립니다.`;
-    }
-    return "안녕하세요.\n\n아래와 같이 OOH 미디어 캠페인 제안을 드립니다.";
-  }
-  if (name) {
-    return `Dear ${name},\n\nPlease find our OOH media campaign proposal below.`;
-  }
-  return "Please find our OOH media campaign proposal below.";
+  const config = getPlannerDocumentTypeConfig(documentType ?? "proposal");
+  return isKo
+    ? config.greetingToneKo(clientName)
+    : config.greetingToneEn(clientName);
 }
 
 export type DefaultExecutiveSummaryInput = ReportStrategyInput & {
   topMediaName: string;
+  topMediaBudgetPct?: number;
 };
 
 /** 편집 가능 Executive summary 초안 — 노출·CPM 수치 없음 */
@@ -68,13 +67,30 @@ export function buildDefaultExecutiveSummaryLines(
   input: DefaultExecutiveSummaryInput,
 ): string[] {
   const extra = buildReportStrategyLines(input);
+  const topName = input.topMediaName;
+  const budgetPctStr = input.topMediaBudgetPct != null
+    ? ` (${Math.round(input.topMediaBudgetPct)}%)`
+    : "";
   return [
     buildReportWhyLine(input),
     ...extra,
     input.isKo
-      ? `다음 액션 · ${input.topMediaName} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
-      : `Next · Lock ${input.topMediaName} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
+      ? `다음 액션 · 예산 비중 1위 ${topName}${budgetPctStr} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
+      : `Next · Lock ${topName}${budgetPctStr} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
   ].filter((line) => line.trim().length > 0);
+}
+
+export function findTopBudgetMediaName(
+  items: readonly { name: string; budgetPct: number }[],
+  fallbackKo: string,
+  fallbackEn: string,
+  isKo: boolean,
+): { name: string; budgetPct: number } {
+  if (items.length === 0) {
+    return { name: isKo ? fallbackKo : fallbackEn, budgetPct: 0 };
+  }
+  const sorted = [...items].sort((a, b) => b.budgetPct - a.budgetPct);
+  return { name: sorted[0]!.name, budgetPct: sorted[0]!.budgetPct };
 }
 
 export function splitReportCopyParagraphs(text: string): string[] {
