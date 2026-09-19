@@ -44,18 +44,18 @@ const DELAY_MS = Number(arg("delay-ms") ?? "2000");
 const LIMIT = arg("limit") ? Number(arg("limit")) : undefined;
 
 /**
- * Placeholder per-call token estimate — override with real numbers once you have
- * them (see file header). Pricing below is current Claude Sonnet 5 list pricing
- * ($2/1M input, $10/1M output); this codebase's AI_MODELS.contentGen currently
- * resolves to a dated claude-sonnet-4-5-20250929 snapshot (not claude-sonnet-5),
- * which isn't in the current public pricing table — re-check the actual
- * configured model (ANTHROPIC_MODEL env override) before treating this as a
- * real budget number, not just a ballpark.
+ * Placeholder per-call TOKEN COUNT — override with real numbers once you have
+ * them (see file header): --est-input-tokens / --est-output-tokens.
+ *
+ * The PRICE below is not a placeholder — $3/1M input, $15/1M output is the
+ * actual rate for claude-sonnet-4-5-20250929, the dated snapshot this codebase's
+ * AI_MODELS.contentGen resolves to (lib/ai-models.ts). If ANTHROPIC_MODEL is set
+ * to override that, re-check pricing for whatever model is actually configured.
  */
 const EST_INPUT_TOKENS_PER_CALL = Number(arg("est-input-tokens") ?? "700");
 const EST_OUTPUT_TOKENS_PER_CALL = Number(arg("est-output-tokens") ?? "450");
-const PRICE_PER_1M_INPUT_USD = 2.0;
-const PRICE_PER_1M_OUTPUT_USD = 10.0;
+const PRICE_PER_1M_INPUT_USD = 3.0;
+const PRICE_PER_1M_OUTPUT_USD = 15.0;
 const EST_LATENCY_MS_PER_CALL = 4000;
 
 type Fail = { mediaId: string; name: string; error: string };
@@ -120,7 +120,8 @@ async function main() {
     console.log(
       `Estimated cost: $${(estInputCost + estOutputCost).toFixed(2)}` +
         ` (input $${estInputCost.toFixed(2)} + output $${estOutputCost.toFixed(2)}, ` +
-        `at $${PRICE_PER_1M_INPUT_USD}/1M in + $${PRICE_PER_1M_OUTPUT_USD}/1M out — ROUGH, see file header)`,
+        `at $${PRICE_PER_1M_INPUT_USD}/1M in + $${PRICE_PER_1M_OUTPUT_USD}/1M out (actual rate) — ` +
+        `token counts are a rough placeholder unless --est-input-tokens/--est-output-tokens set, see file header)`,
     );
     console.log(
       `Estimated wall time: ~${Math.round(estMs / 60000)} min (${batches} batches, sequential)`,
