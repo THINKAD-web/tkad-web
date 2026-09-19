@@ -98,6 +98,8 @@ export type GenerateMediaTranslationsResult = {
   ja: MediaTranslationLangResult;
   zh: MediaTranslationLangResult;
   model: string;
+  /** For calibrating batch-job cost estimates (PR2-b dry-run). */
+  usage: { inputTokens: number; outputTokens: number };
 };
 
 function normalizeLangResult(raw: MediaTranslationLangInput | undefined): MediaTranslationLangResult {
@@ -147,11 +149,14 @@ export async function generateMediaTranslations(
     messages: [{ role: "user", content: user }],
   });
 
+  const inputTokens = message.usage?.input_tokens ?? 0;
+  const outputTokens = message.usage?.output_tokens ?? 0;
+
   void recordAiUsage({
     feature: "media_translate_en_ja_zh",
     model,
-    inputTokens: message.usage?.input_tokens ?? 0,
-    outputTokens: message.usage?.output_tokens ?? 0,
+    inputTokens,
+    outputTokens,
   });
 
   const raw = extractToolInput<MediaTranslationsToolInput>(message, TOOL);
@@ -161,6 +166,7 @@ export async function generateMediaTranslations(
     ja: normalizeLangResult(raw.ja),
     zh: normalizeLangResult(raw.zh),
     model,
+    usage: { inputTokens, outputTokens },
   };
 }
 
