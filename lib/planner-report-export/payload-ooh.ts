@@ -59,6 +59,15 @@ import {
 import type { PlannerExportBadgeKind } from "@/lib/planner-report-export/export-badge";
 import type { PatternComboDimensions } from "@/lib/recommend/pattern-stats-types";
 import {
+  DEFAULT_PLANNER_DOCUMENT_TYPE,
+  getPlannerDocumentTypeConfig,
+  type PlannerDocumentTypeKey,
+} from "@/lib/planner-report-export/document-type";
+import {
+  buildDefaultExecutiveSummaryLines,
+  buildDefaultReportGreeting,
+} from "@/lib/planner-report-export/report-copy";
+import {
   attachSeoulBenchmarksToPortfolioRows,
   seoulBenchmarkFootnote,
 } from "@/lib/planner/seoul-media-benchmark";
@@ -143,12 +152,16 @@ export type BuildOohPayloadArgs = {
   customLineCount?: number;
   /** 서울 유형 벤치마크 집계용 — 공개 카탈로그 전체 (미전달 시 export enrich) */
   benchmarkCatalog?: readonly MediaItem[];
+  /** 문서유형 — 제목·인사 톤 SSOT (기본 proposal) */
+  documentTypeKey?: PlannerDocumentTypeKey;
 };
 
 export function buildOohReportPayload(
   a: BuildOohPayloadArgs,
 ): PlannerReportExportPayload {
   const isKo = a.isKo;
+  const documentTypeKey = a.documentTypeKey ?? DEFAULT_PLANNER_DOCUMENT_TYPE;
+  const documentTypeConfig = getPlannerDocumentTypeConfig(documentTypeKey);
   const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
   const pricing: PlannerPortfolioPricing = {
     quantities: a.campaignMediaQuantities,
@@ -359,6 +372,12 @@ export function buildOohReportPayload(
   // ── 전략 요약 (왜 / 효과 / 다음 액션) ──
   const sections: PlannerExportSection[] = [];
 
+  let resolvedReportGreeting = a.reportGreeting?.trim() || undefined;
+  let resolvedExecutiveSummaryLines =
+    a.reportExecutiveSummaryLines && a.reportExecutiveSummaryLines.length > 0
+      ? a.reportExecutiveSummaryLines
+      : undefined;
+
   const goalContextLines = buildGoalFollowUpReportLines(
     a.campaignGoal ?? null,
     a.goalFollowUp ?? {},
@@ -398,7 +417,24 @@ export function buildOohReportPayload(
       portfolioCount: a.portfolio.length,
       mediaHints,
     };
-    const hasExecutiveOverride = a.reportExecutiveSummaryLines !== undefined;
+    if (resolvedReportGreeting === undefined) {
+      resolvedReportGreeting = buildDefaultReportGreeting(
+        isKo,
+        a.clientName?.trim() || undefined,
+        documentTypeKey,
+      );
+    }
+    if (a.reportExecutiveSummaryLines === undefined) {
+      resolvedExecutiveSummaryLines = buildDefaultExecutiveSummaryLines({
+        ...strategyCtx,
+        topMediaName: topMedia,
+        topMediaBudgetPct:
+          topMediaBudgetPct > 0 ? topMediaBudgetPct : undefined,
+      });
+    }
+    const hasExecutiveOverride =
+      resolvedExecutiveSummaryLines !== undefined &&
+      resolvedExecutiveSummaryLines.length > 0;
     if (!hasExecutiveOverride) {
       const extraLines = buildReportStrategyLines(strategyCtx);
       const impressionTotal =
@@ -607,22 +643,17 @@ export function buildOohReportPayload(
   return {
     kind: "ooh",
     isKo,
-    documentTitle:
-      a.regionBreakdown && a.regionBreakdown.length > 0
-        ? isKo
-          ? "내 플랜 매체 제안 보고서"
-          : "My plan media report"
-        : isKo
-          ? "OOH 옥외광고 플래너 보고서"
-          : "OOH Media Plan Report",
+    documentTitle: isKo
+      ? documentTypeConfig.titleKo
+      : documentTypeConfig.titleEn,
+    documentTypeWord: isKo
+      ? documentTypeConfig.fileNameWordKo
+      : documentTypeConfig.fileNameWordEn,
     campaignName: a.goalTitle,
     clientName: a.clientName?.trim() || undefined,
     coverLogoUrl: a.coverLogoUrl?.trim() || undefined,
-    greetingText: a.reportGreeting?.trim() || undefined,
-    executiveSummaryLines:
-      a.reportExecutiveSummaryLines && a.reportExecutiveSummaryLines.length > 0
-        ? a.reportExecutiveSummaryLines
-        : undefined,
+    greetingText: resolvedReportGreeting,
+    executiveSummaryLines: resolvedExecutiveSummaryLines,
     generatedAt: a.generatedAt,
     goalTitle: a.goalTitle,
     budgetMan: a.budgetMan,
