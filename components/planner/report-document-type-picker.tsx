@@ -27,7 +27,7 @@ export function ReportDocumentTypePicker({
       <p className="text-sm font-semibold text-gray-800 dark:text-white/90">
         {isKo ? "문서 유형" : "Document type"}
       </p>
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {PLANNER_DOCUMENT_TYPES.map((dt) => {
           const selected = value === dt.key;
           return (

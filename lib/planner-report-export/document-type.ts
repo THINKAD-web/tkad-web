@@ -4,7 +4,7 @@
  * 새 타입 추가는 PLANNER_DOCUMENT_TYPES 배열에 항목 추가로 완료.
  */
 
-export type PlannerDocumentTypeKey = "proposal" | "report" | "plan";
+export type PlannerDocumentTypeKey = "proposal" | "report" | "plan" | "forecast";
 
 export type PlannerDocumentTypeConfig = {
   key: PlannerDocumentTypeKey;
@@ -103,6 +103,33 @@ export const PLANNER_DOCUMENT_TYPES: readonly PlannerDocumentTypeConfig[] = [
     },
     fileNameWordKo: "미디어플랜",
     fileNameWordEn: "media-plan",
+  },
+  {
+    key: "forecast",
+    labelKo: "예측 보고서",
+    labelEn: "Forecast Report",
+    descKo: "캠페인 예상 성과를 예측·시뮬레이션한 보고서",
+    descEn: "A report forecasting expected campaign performance",
+    titleKo: "OOH 미디어 캠페인 예측 보고서",
+    titleEn: "OOH Media Campaign Forecast Report",
+    coverBadgeKo: "예측 보고서",
+    coverBadgeEn: "FORECAST",
+    greetingToneKo: (clientName?: string) => {
+      const name = clientName?.trim();
+      if (name) {
+        return `${name}님, 안녕하세요.\n\n아래 OOH 미디어 캠페인 예측 분석 결과를 공유드립니다.`;
+      }
+      return "안녕하세요.\n\n아래 OOH 미디어 캠페인 예측 분석 결과를 공유드립니다.";
+    },
+    greetingToneEn: (clientName?: string) => {
+      const name = clientName?.trim();
+      if (name) {
+        return `Dear ${name},\n\nPlease find the OOH media campaign performance forecast below.`;
+      }
+      return "Please find the OOH media campaign performance forecast below.";
+    },
+    fileNameWordKo: "예측보고서",
+    fileNameWordEn: "forecast",
   },
 ];
 

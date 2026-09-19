@@ -71,8 +71,8 @@ function ShareBarChart({
       {data.map((d, i) => {
         const pct = d.pct ?? 0;
         return (
-          <div key={d.label} className="flex items-center gap-3 text-sm">
-            <span className="w-24 shrink-0 break-words text-gray-600 sm:w-28">
+          <div key={d.label} className="flex items-center gap-2 text-sm sm:gap-3">
+            <span className="w-20 shrink-0 break-words text-gray-600 sm:w-28">
               {d.label}
             </span>
             <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-100">
@@ -211,8 +211,8 @@ function BarChart({
   return (
     <div className="space-y-2.5">
       {data.map((d, i) => (
-        <div key={d.label} className="flex items-center gap-3 text-sm">
-          <span className="w-24 shrink-0 break-words text-gray-600 sm:w-28">{d.label}</span>
+        <div key={d.label} className="flex items-center gap-2 text-sm sm:gap-3">
+          <span className="w-20 shrink-0 break-words text-gray-600 sm:w-28">{d.label}</span>
           <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-100">
             <div
               className="h-full rounded-full"
@@ -222,7 +222,7 @@ function BarChart({
               }}
             />
           </div>
-          <span className="w-24 shrink-0 text-right font-semibold tabular-nums text-gray-900">
+          <span className="w-20 shrink-0 text-right font-semibold tabular-nums text-gray-900 sm:w-24">
             {d.value.toLocaleString(isKo ? "ko-KR" : "en-US")}
           </span>
         </div>
@@ -329,7 +329,7 @@ export const PlannerReportDocument = forwardRef<
         titleAriaLabel={isKo ? "보고서 제목" : "Report title"}
       />
 
-      <div className="space-y-9 px-6 py-8 sm:px-9">
+      <div className="space-y-9 px-4 py-6 sm:px-6 sm:py-8 lg:px-9">
         {sectionVisible(vis, "greeting") ? (
           editableGreeting && onGreetingChange ? (
             <section className="space-y-2" data-testid="report-greeting-edit">
@@ -411,11 +411,11 @@ export const PlannerReportDocument = forwardRef<
 
         {/* KPI 카드 */}
         {p.kpis.length ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
             {p.kpis.slice(0, 4).map((k) => (
               <div
                 key={k.label}
-                className="rounded-xl border border-gray-200 bg-gray-50 p-3.5"
+                className="rounded-xl border border-gray-200 bg-gray-50 p-2.5 sm:p-3.5"
                 data-testid={
                   k.status === "pending" ? "report-kpi-pending" : "report-kpi-value"
                 }
