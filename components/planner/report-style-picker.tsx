@@ -21,9 +21,16 @@ export function ReportStylePicker({ isKo, value, onChange, className }: Props) {
       className={cn("space-y-2", className)}
       data-screenshot="planner-report-style-picker"
     >
-      <p className="text-sm font-semibold text-gray-800 dark:text-white/90">
-        {isKo ? "제안서 스타일" : "Proposal style"}
-      </p>
+      <div>
+        <p className="text-sm font-semibold text-gray-800 dark:text-white/90">
+          {isKo ? "디자인 스타일" : "Design style"}
+        </p>
+        <p className="text-[11px] leading-snug text-gray-500 dark:text-white/50">
+          {isKo
+            ? "표지 색상과 레이아웃 톤 — 문서 유형과 별개로 적용됩니다"
+            : "Cover color and layout tone — applies independently of document type"}
+        </p>
+      </div>
       <div className="grid gap-2 sm:grid-cols-3">
         {PLANNER_REPORT_STYLES.map((style) => {
           const theme = getReportDocumentTheme(style);

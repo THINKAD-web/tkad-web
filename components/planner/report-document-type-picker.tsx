@@ -24,9 +24,16 @@ export function ReportDocumentTypePicker({
       className={cn("space-y-2", className)}
       data-screenshot="planner-report-document-type-picker"
     >
-      <p className="text-sm font-semibold text-gray-800 dark:text-white/90">
-        {isKo ? "문서 유형" : "Document type"}
-      </p>
+      <div>
+        <p className="text-sm font-semibold text-gray-800 dark:text-white/90">
+          {isKo ? "문서 유형" : "Document type"}
+        </p>
+        <p className="text-[11px] leading-snug text-gray-500 dark:text-white/50">
+          {isKo
+            ? "제목·인사말 톤·표지 문구 — 문서의 내용과 성격을 정합니다"
+            : "Title, greeting tone, cover copy — sets the document's content and purpose"}
+        </p>
+      </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {PLANNER_DOCUMENT_TYPES.map((dt) => {
           const selected = value === dt.key;
