@@ -24,7 +24,7 @@ export const MAP_TOOLBAR_SEARCH = cn(
   "box-border w-full min-h-9 max-h-9 rounded-xl border border-gray-200 bg-white pl-9 pr-8",
   "tkad-type-meta text-sm leading-none text-gray-900 placeholder-gray-400",
   "focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/35",
-  "dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-white/30",
+  "dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-white/55",
   MAP_TOOLBAR_CTRL_H,
   "py-0",
 );
@@ -42,7 +42,7 @@ export const MAP_TOOLBAR_ROW = "hidden min-w-0 items-center gap-1.5 md:flex";
 export const MAP_TOOLBAR_SEARCH_WRAP = "relative min-w-[8.5rem] max-w-[11rem] flex-1 sm:max-w-[12rem]";
 
 export const MAP_TOOLBAR_SEARCH_ICON =
-  "pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-white/35";
+  "pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-white/55";
 
 export const MAP_TOOLBAR_VIEW_TOGGLE = cn(
   "scrollbar-hide flex min-w-0 shrink-0 overflow-hidden rounded-xl ring-1 ring-inset ring-gray-200 dark:ring-white/10",

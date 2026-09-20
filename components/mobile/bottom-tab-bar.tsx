@@ -76,7 +76,7 @@ export const MOBILE_BOTTOM_TABS: MobileBottomTabDef[] = [
 const TAB_LABEL_ACTIVE = "font-semibold text-[color:var(--qp-accent)]";
 
 const TAB_LABEL_INACTIVE =
-  "text-[color:var(--qp-fg-muted)]/70 dark:text-white/40";
+  "text-[color:var(--qp-fg-muted)] dark:text-white/62";
 
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;

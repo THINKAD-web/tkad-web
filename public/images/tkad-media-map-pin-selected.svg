@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="44" height="52" viewBox="0 0 44 52" role="img" aria-label="Selected location">
   <defs>
-    <linearGradient id="pinSelOrange" x1="30%" y1="15%" x2="70%" y2="85%">
-      <stop offset="0%" stop-color="#ff9347"/>
-      <stop offset="45%" stop-color="#ff6200"/>
-      <stop offset="100%" stop-color="#ea580c"/>
+    <linearGradient id="pinSelTeal" x1="30%" y1="15%" x2="70%" y2="85%">
+      <stop offset="0%" stop-color="#14746c"/>
+      <stop offset="45%" stop-color="#0f5f5c"/>
+      <stop offset="100%" stop-color="#0b4f4a"/>
     </linearGradient>
   </defs>
-  <ellipse cx="22" cy="21" rx="19" ry="20" fill="none" stroke="#ff6200" stroke-width="2.5"/>
+  <ellipse cx="22" cy="21" rx="19" ry="20" fill="none" stroke="#0f5f5c" stroke-width="2.5"/>
   <path
     fill="#ffffff"
     stroke="#0a0a0c"
@@ -14,6 +14,6 @@
     stroke-linejoin="round"
     d="M22 4.85c-8.65 0-15.7 6.72-15.7 15 0 5.98 5.08 15 15.7 29.1 10.62-14.1 15.7-23.12 15.7-29.1 0-8.28-7.05-15-15.7-15z"
   />
-  <circle cx="22" cy="17.85" r="5.6" fill="url(#pinSelOrange)" stroke="#0a0a0c" stroke-width="1.15"/>
+  <circle cx="22" cy="17.85" r="5.6" fill="url(#pinSelTeal)" stroke="#0a0a0c" stroke-width="1.15"/>
   <circle cx="22" cy="17.35" r="1.75" fill="#ffffff" opacity="0.6"/>
 </svg>

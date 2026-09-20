@@ -3300,8 +3300,8 @@ html.dark .tkad-home-appearance .tkad-planner-neon .tkad-media-map-sheet-cta * {
 }
 
 html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-media-map-sheet-cta {
-  border-color: rgb(91 33 182 / 0.45) !important;
-  background: rgb(109 40 217) !important;
+  border-color: color-mix(in srgb, var(--hermes) 45%, transparent) !important;
+  background: var(--hermes) !important;
 }
 
 html.dark .tkad-home-appearance .tkad-media-main-tabs {
@@ -4873,6 +4873,11 @@ img {
   scrollbar-width: none;
 }
 
+.dark [data-discovery-media-card="horizontal"] .text-tkad-muted,
+.dark [data-discovery-media-card="horizontal"] .text-tkad-secondary {
+  color: rgb(255 255 255 / 0.72);
+}
+
 /* ── PR F-1 — /media/map Leaflet 지도 비주얼 ── */
 .tkad-dark-map-root .leaflet-control-zoom {
   margin: 0 12px 12px 0 !important;
@@ -4884,13 +4889,18 @@ img {
   height: 2.5rem !important;
   line-height: 2.5rem !important;
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent) !important;
-  background: color-mix(in srgb, var(--card) 92%, transparent) !important;
-  color: var(--foreground) !important;
+  background: rgb(255 255 255 / 0.94) !important;
+  color: rgb(15 23 42) !important;
   backdrop-filter: blur(12px);
   box-shadow:
     0 4px 14px color-mix(in srgb, var(--foreground) 12%, transparent),
     0 1px 2px color-mix(in srgb, var(--foreground) 8%, transparent);
   transition: background-color 0.2s ease, transform 0.15s ease;
+}
+.dark .tkad-dark-map-root .leaflet-control-zoom a {
+  border-color: rgb(255 255 255 / 0.18) !important;
+  background: rgb(15 15 18 / 0.88) !important;
+  color: rgb(255 255 255 / 0.92) !important;
 }
 .tkad-dark-map-root .leaflet-control-zoom a:hover {
   background: var(--card) !important;
