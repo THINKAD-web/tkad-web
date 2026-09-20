@@ -1,3 +1,8 @@
+import {
+  intlLocaleTag,
+  normalizeMediaDetailTextLocale,
+  resolveMediaDisplayName,
+} from "@/lib/media-i18n";
 import type { ReactNode } from "react";
 import { ArrowLeft, Eye, MapPin } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -33,7 +38,7 @@ type Labels = {
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale: string;
   typeLabel: string;
   locationShort: string;
   heroTags: string[];
@@ -67,7 +72,7 @@ function KpiChip({
 /** 히어로 h1·가격·KPI — 서버 렌더 (초기 HTML heading-order) */
 export function MediaDetailHeroInfo({
   media,
-  isKo,
+  locale,
   typeLabel,
   locationShort,
   heroTags,
@@ -78,8 +83,9 @@ export function MediaDetailHeroInfo({
   actions,
   className,
 }: Props) {
-  const displayName = isKo ? media.name : media.nameEn || media.name;
-  const locale = isKo ? "ko-KR" : "en-US";
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const displayName = resolveMediaDisplayName(media, locale);
+  const intlTag = intlLocaleTag(locale);
   const displayPrice = resolveMediaDisplayPrice(media);
   const multiPriceOptions = (media.priceOptions?.length ?? 0) >= 2;
   /**
@@ -91,7 +97,7 @@ export function MediaDetailHeroInfo({
     locale,
     media.country,
   );
-  const impressionsLabel = formatMonthlyImpressionsLabel(media, isKo);
+  const impressionsLabel = formatMonthlyImpressionsLabel(media, (bucket === "ko"));
   /** 크기·유형·타깃만 — 해상도/시인성 등은 집행 탭에서 노출 */
   const summaryTags = heroTags.slice(0, 3);
 
@@ -109,13 +115,13 @@ export function MediaDetailHeroInfo({
     )
   ) : (
     <span className="font-sans text-[1.75rem] font-black tabular-nums leading-none text-[color:var(--qp-accent)]">
-      {!isKo && multiPriceOptions ? (
+      {!(bucket === "ko") && multiPriceOptions ? (
         <span className="text-[length:var(--qp-text-meta)] font-bold text-gray-600 dark:text-white/70">
           from{" "}
         </span>
       ) : null}
       {formatCatalogPriceFieldWon(displayPrice.priceWon, locale, media.country)}
-      {multiPriceOptions && isKo ? "~" : null}
+      {multiPriceOptions && (bucket === "ko") ? "~" : null}
     </span>
   );
 
@@ -157,14 +163,14 @@ export function MediaDetailHeroInfo({
           <MediaTrustBadgesLive
             mediaId={media.id}
             baseBadges={media.trustBadges ?? []}
-            isKo={isKo}
+            locale={locale}
           />
           {media.trustScore != null || media.executionCount != null ? (
             <div className="space-y-1.5">
               {media.trustScore != null ? (
                 <MediaTrustScoreBadge
                   score={media.trustScore}
-                  isKo={isKo}
+                  locale={locale}
                   className="!text-[length:var(--qp-text-meta)]"
                 />
               ) : null}
@@ -172,7 +178,7 @@ export function MediaDetailHeroInfo({
                 <MediaExecutionSummary
                   count={media.executionCount}
                   monthsAgo={media.lastExecutionMonthsAgo ?? null}
-                  isKo={isKo}
+                  locale={locale}
                 />
               ) : null}
             </div>
@@ -193,7 +199,7 @@ export function MediaDetailHeroInfo({
         <p className="mt-2 text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
           {labels.periodLabel}
         </p>
-        <MediaPriceExclNote isKo={isKo} className="mt-1" />
+        <MediaPriceExclNote locale={locale} className="mt-1" />
       </div>
 
       {/* 그룹 4: KPI */}

@@ -9,6 +9,7 @@ import { TierGatePanel } from "@/components/entitlements/tier-gate-panel";
 import { plannerProGateTrialHint, plannerTrialBannerText } from "@/lib/entitlements/gate-ui";
 import { cn } from "@/lib/utils";
 import { BRAND_ACCENT } from "@/lib/brand-palette";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 
 /** 플래너 Quiet Professional UI 공통 클래스 (legacy export name 유지) */
 export const plannerNeon = {
@@ -195,6 +196,7 @@ export function PlannerProTeaserStats({
 
 export function PlannerProGate({
   isPro,
+  locale,
   isKo,
   children,
   className,
@@ -205,7 +207,9 @@ export function PlannerProGate({
   lockedPlaceholder,
 }: {
   isPro: boolean;
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   children: ReactNode;
   className?: string;
   minHeightClass?: string;
@@ -217,12 +221,16 @@ export function PlannerProGate({
   /** 비PRO — 무거운 children 대신 경량 요약·잠금 안내만 표시 (children 미마운트) */
   lockedPlaceholder?: ReactNode;
 }) {
+  const useKo =
+    locale != null
+      ? normalizeMediaDetailTextLocale(locale) === "ko"
+      : (isKo ?? true);
   if (loading) {
     return (
       <div
         className={cn("relative", minHeightClass, className)}
         aria-busy="true"
-        aria-label={isKo ? "접근 권한 확인 중" : "Checking access"}
+        aria-label={useKo ? "접근 권한 확인 중" : "Checking access"}
       >
         <div className="h-full min-h-[inherit] animate-pulse rounded-2xl border dark:border-white/8 border-gray-100 dark:bg-white/5 bg-gray-100/80" />
       </div>
@@ -243,11 +251,15 @@ export function PlannerProGate({
       reason: "upgrade",
     } satisfies AccessCheckResult);
 
-  const message = buildFeatureGateMessage({ feature, access: gateAccess, isKo });
+  const message = buildFeatureGateMessage({
+    feature,
+    access: gateAccess,
+    isKo: useKo,
+  });
 
   return (
     <div className={cn("relative space-y-4", minHeightClass, className)}>
-      {lockedPlaceholder ?? <PlannerProLockedSkeleton isKo={isKo} />}
+      {lockedPlaceholder ?? <PlannerProLockedSkeleton isKo={useKo} />}
       <TierGatePanel message={message} className="mx-auto" />
     </div>
   );

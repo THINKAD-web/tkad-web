@@ -218,7 +218,6 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
         media={media}
         similarSortCatalog={similarSortCatalog}
         locale={locale}
-        isKo={isKo}
         typeLabel={typeLabel}
         heroTags={heroTags}
         galleryImages={galleryImages}
@@ -282,7 +281,7 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
             <MediaDetailOverviewSection
               title={t("overviewAccordion")}
               body={overviewBody}
-              isKo={isKo}
+              locale={locale}
             />
           ) : undefined
         }

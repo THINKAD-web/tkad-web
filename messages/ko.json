@@ -3325,6 +3325,60 @@
       "quote": "견적받기",
       "quoteShort": "견적",
       "instantBook": "즉시 예약하기"
+    },
+    "overview": {
+      "showMore": "더 보기",
+      "showLess": "접기"
+    },
+    "caseStudyGallery": {
+      "altBase": "캠페인 사진"
+    },
+    "priceTransparency": {
+      "eyebrow": "실시간 시세",
+      "title": "가격 투명성",
+      "zoneAverage": "{zone} 평균 단가",
+      "monthPrefix": "월 ",
+      "thisMedia": "이 매체",
+      "belowAvg": "평균보다 {pct}% 저렴",
+      "aboveAvg": "평균보다 {pct}% 높음",
+      "nearAverage": "평균 수준",
+      "similarRange": "유사 매체 시세 범위",
+      "placesSuffix": "곳",
+      "negotiationHint": "협상 가능 폭은 보통 표시가의 {pct}% 전후입니다. 「가격 제안하기」로 매체사에 익명 제안할 수 있습니다."
+    },
+    "reviews": {
+      "title": "광고주 리뷰",
+      "writeReview": "리뷰 작성",
+      "loading": "불러오는 중…",
+      "signInRequired": "로그인이 필요합니다.",
+      "emptyNoReviews": "아직 등록된 리뷰가 없습니다.",
+      "emptyBeFirst": "첫 리뷰를 남겨 보세요.",
+      "verifiedExecution": "실집행 인증",
+      "helpful": "도움이 됐어요"
+    },
+    "stickyQuote": {
+      "priceOption": "가격 옵션",
+      "flightDates": "집행 기간",
+      "start": "시작",
+      "end": "종료",
+      "estCost": "예상 비용",
+      "estMonthlyReach": "월 예상 노출",
+      "estImpressions": "예상 노출",
+      "timesUnit": "회",
+      "getQuote": "견적 받기",
+      "savePlannerShare": "담기 · 플래너 · 공유",
+      "planner": "플래너",
+      "share": "공유"
+    },
+    "onlineSticky": {
+      "referenceRates": "참고 단가 (CPC/CPM 시드 범위)",
+      "monthlyBudget": "월 예산",
+      "estSpend": "예상 집행 비용",
+      "estReach": "예상 도달",
+      "estClicks": "예상 클릭",
+      "contact": "문의하기",
+      "budgetHint": "예산을 입력하면 범위를 보여줍니다.",
+      "basis": "근거:"
     }
   },
   "instantBooking": {

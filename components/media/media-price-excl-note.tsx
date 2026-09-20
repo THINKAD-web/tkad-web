@@ -1,7 +1,10 @@
 import { mediaPriceExclNoteText } from "@/lib/media-price-format";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 import { cn } from "@/lib/utils";
 
 type Props = {
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
   className?: string;
   /** 한 줄 메타(컴팩트 행)용 */
@@ -10,11 +13,16 @@ type Props = {
 
 /** 매체·광고 단가 아래 — 제작비·부가세 별도 안내 */
 export function MediaPriceExclNote({
-  isKo = true,
+  locale,
+  isKo,
   className,
   inline = false,
 }: Props) {
-  const text = mediaPriceExclNoteText(isKo);
+  const useKo =
+    locale != null
+      ? normalizeMediaDetailTextLocale(locale) === "ko"
+      : (isKo ?? true);
+  const text = mediaPriceExclNoteText(useKo);
   if (inline) {
     return (
       <span

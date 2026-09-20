@@ -1,3 +1,4 @@
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -17,7 +18,6 @@ type Props = {
   media: MediaItem;
   similarSortCatalog?: readonly MediaItem[];
   locale: string;
-  isKo: boolean;
   typeLabel: string;
   similar: SimilarItem[];
   periodLabel: string;
@@ -49,20 +49,20 @@ export function OnlineMediaDetailPageView({
   media,
   similarSortCatalog,
   locale,
-  isKo,
   typeLabel,
   similar,
   periodLabel,
   labels,
   belowFold,
 }: Props) {
-  const displayName = isKo ? media.name : media.nameEn || media.name;
-  const shareDescription = isKo
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const displayName = (bucket === "ko") ? media.name : media.nameEn || media.name;
+  const shareDescription = (bucket === "ko")
     ? `${displayName} — THINKAD 온라인 매체 상세`
     : `${displayName} — THINKAD online media detail`;
   const spec = media.onlineSpec;
   const description = (
-    isKo ? media.description : media.descriptionEn || media.description
+    (bucket === "ko") ? media.description : media.descriptionEn || media.description
   )?.trim();
   const bestFor = spec?.bestFor ?? [];
   const strengths = spec?.strengths ?? [];
@@ -108,7 +108,7 @@ export function OnlineMediaDetailPageView({
                   {displayName}
                 </h1>
                 <p className="mt-1 text-sm text-gray-600 dark:text-white/65">
-                  {spec?.platform ?? (isKo ? "온라인" : "Online")}
+                  {spec?.platform ?? ((bucket === "ko") ? "온라인" : "Online")}
                 </p>
                 <OnlineCardRecommendTags
                   slug={media.slug}
@@ -118,10 +118,10 @@ export function OnlineMediaDetailPageView({
               </div>
             </header>
 
-            <OnlineMediaSpecTable media={media} typeLabel={typeLabel} isKo={isKo} />
+            <OnlineMediaSpecTable media={media} typeLabel={typeLabel} locale={locale} />
 
             {bestFor.length > 0 ? (
-              <OnlineContentSection title={isKo ? "이럴 때 좋아요" : "Best for"}>
+              <OnlineContentSection title={(bucket === "ko") ? "이럴 때 좋아요" : "Best for"}>
                 <ul className="list-disc space-y-1.5 pl-5">
                   {bestFor.map((item) => (
                     <li key={item}>{item}</li>
@@ -131,13 +131,13 @@ export function OnlineMediaDetailPageView({
             ) : null}
 
             {description ? (
-              <OnlineContentSection title={isKo ? "소개" : "Overview"}>
+              <OnlineContentSection title={(bucket === "ko") ? "소개" : "Overview"}>
                 <p className="whitespace-pre-wrap">{description}</p>
               </OnlineContentSection>
             ) : null}
 
             {strengths.length > 0 ? (
-              <OnlineContentSection title={isKo ? "강점" : "Strengths"}>
+              <OnlineContentSection title={(bucket === "ko") ? "강점" : "Strengths"}>
                 <ul className="list-disc space-y-1.5 pl-5">
                   {strengths.map((item) => (
                     <li key={item}>{item}</li>
@@ -146,11 +146,11 @@ export function OnlineMediaDetailPageView({
               </OnlineContentSection>
             ) : null}
 
-            <OnlineMediaPerformancePanel media={media} isKo={isKo} />
+            <OnlineMediaPerformancePanel media={media} locale={locale} />
 
             {kpiHints.length > 0 ? (
               <OnlineContentSection
-                title={isKo ? "참고 성과지표" : "Reference KPI hints"}
+                title={(bucket === "ko") ? "참고 성과지표" : "Reference KPI hints"}
               >
                 <ul className="list-disc space-y-1.5 pl-5">
                   {kpiHints.map((item) => (
@@ -164,7 +164,7 @@ export function OnlineMediaDetailPageView({
               <div className="border-t border-gray-200 pt-[length:var(--qp-space-section)] dark:border-white/10">
                 <MediaSimilarCarousel
                   items={similar}
-                  isKo={isKo}
+                  locale={locale}
                   title={labels.similarTitle}
                   sortable={
                     similarSortCatalog && similarSortCatalog.length > 0
@@ -186,8 +186,7 @@ export function OnlineMediaDetailPageView({
             <div className="sticky top-[72px] z-10">
               <MediaDetailStickyQuotePanel
                 media={media}
-                isKo={isKo}
-                pageLocale={locale}
+                locale={locale}
                 displayName={displayName}
                 periodLabel={periodLabel}
               />
@@ -196,7 +195,7 @@ export function OnlineMediaDetailPageView({
         </div>
       </section>
 
-      <OnlineMediaDetailMobileBar media={media} isKo={isKo} />
+      <OnlineMediaDetailMobileBar media={media} locale={locale} />
     </div>
   );
 }

@@ -1,10 +1,13 @@
 import { cn } from "@/lib/utils";
 import type { MediaTrustBadge } from "@/lib/media-trust";
 import { trustBadgeLabel } from "@/lib/media-trust";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 
 type Props = {
   badges: MediaTrustBadge[];
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   /** 썸네일 오버레이용 작은 칩 */
   compact?: boolean;
   className?: string;
@@ -12,10 +15,15 @@ type Props = {
 
 export function MediaTrustBadges({
   badges,
+  locale,
   isKo,
   compact = false,
   className,
 }: Props) {
+  const useKo =
+    locale != null
+      ? normalizeMediaDetailTextLocale(locale) === "ko"
+      : (isKo ?? true);
   if (badges.length === 0) return null;
 
   return (
@@ -30,7 +38,7 @@ export function MediaTrustBadges({
               : "border-border/60 bg-muted/50 px-2.5 py-1 text-xs",
           )}
         >
-          {trustBadgeLabel(b, isKo)}
+          {trustBadgeLabel(b, useKo)}
         </span>
       ))}
     </div>

@@ -16,6 +16,11 @@ import {
 import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatMediaDisplayPrice } from "@/lib/media-price-format";
+import {
+  intlLocaleTag,
+  normalizeMediaDetailTextLocale,
+  resolveMediaDisplayName,
+} from "@/lib/media-i18n";
 
 type SortableContext = {
   catalog: readonly MediaItem[];
@@ -25,16 +30,22 @@ type SortableContext = {
 
 export default function MediaSimilarCarousel({
   items,
+  locale,
   isKo,
   title,
   sortable,
 }: {
   items: readonly MediaItem[];
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   title: string;
   /** 옵션. 제공 시 정렬 토글 노출 + 내부에서 재정렬. */
   sortable?: SortableContext;
 }) {
+  const textLocale =
+    locale != null ? normalizeMediaDetailTextLocale(locale) : isKo ? "ko" : "en";
+  const intlTag = locale != null ? intlLocaleTag(locale) : isKo ? "ko-KR" : "en-US";
   const t = useTranslations("media.detail");
   const tMedia = useTranslations("media");
   const [sortBy, setSortBy] = useState<SimilarSortKey>("score");
@@ -167,7 +178,10 @@ export default function MediaSimilarCarousel({
         )}
       >
         {displayItems.map((m) => {
-          const typeLabel = resolveMediaDisplayPill(m, isKo ? "ko" : "en");
+          const typeLabel = resolveMediaDisplayPill(
+            m,
+            textLocale === "ko" ? "ko" : "en",
+          );
           const distanceKm =
             sortable && sortBy === "distance"
               ? haversineKm(sortable.currentMedia, m)
@@ -200,12 +214,12 @@ export default function MediaSimilarCarousel({
                   </span>
                 ) : null}
                 <p className="line-clamp-2 min-h-[2.35rem] text-sm font-bold leading-snug tracking-tight text-foreground group-hover:text-accent">
-                  {isKo ? m.name : (m.nameEn || m.name)}
+                  {resolveMediaDisplayName(m, locale ?? textLocale)}
                 </p>
                 <p className="mt-1 font-display text-sm font-bold tabular-nums text-foreground">
-                  {formatMediaDisplayPrice(m, isKo ? "ko-KR" : "en-US")}
+                  {formatMediaDisplayPrice(m, intlTag)}
                 </p>
-                <MediaPriceExclNote isKo={isKo} />
+                <MediaPriceExclNote locale={locale} isKo={isKo} />
                 {distanceKm != null && Number.isFinite(distanceKm) ? (
                   <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                     {t("similarDistance", {

@@ -1,22 +1,26 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import type { MediaCaseStudyPhoto } from "@/lib/media-data";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 import MediaLightbox, { type MediaLightboxLabels } from "@/components/media-lightbox";
 import { cn } from "@/lib/utils";
 
 type Props = {
   photos: MediaCaseStudyPhoto[];
-  isKo: boolean;
+  locale: string;
   labels: MediaLightboxLabels & { clickHint: string };
 };
 
 export default function MediaCaseStudyGallery({
   photos,
-  isKo,
+  locale,
   labels,
 }: Props) {
+  const t = useTranslations("mediaDetail.caseStudyGallery");
+  const bucket = normalizeMediaDetailTextLocale(locale);
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const useHorizontalScroller = photos.length > 2;
@@ -26,15 +30,18 @@ export default function MediaCaseStudyGallery({
   const [canNext, setCanNext] = useState(false);
 
   const urls = photos.map((p) => p.url);
-  const altBase = isKo ? "캠페인 사진" : "Campaign photo";
+  const altBase = t("altBase");
 
   const caption = useCallback(
     (i: number) => {
       const p = photos[i];
       if (!p) return "";
-      return isKo ? p.captionKo || p.captionEn || "" : p.captionEn || p.captionKo || "";
+      // Option A: captions are ko/en only in DB; ja/zh show image without caption.
+      if (bucket === "ja" || bucket === "zh") return "";
+      if (bucket === "ko") return p.captionKo || p.captionEn || "";
+      return p.captionEn || p.captionKo || "";
     },
-    [photos, isKo],
+    [photos, bucket],
   );
 
   const updateScrollerState = useCallback(() => {

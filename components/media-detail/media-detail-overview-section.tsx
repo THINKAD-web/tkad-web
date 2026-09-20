@@ -1,6 +1,9 @@
 "use client";
 
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 const PREVIEW_CHAR_LIMIT = 220;
@@ -8,7 +11,7 @@ const PREVIEW_CHAR_LIMIT = 220;
 type Props = {
   title: string;
   body: string;
-  isKo: boolean;
+  locale: string;
   className?: string;
 };
 
@@ -32,9 +35,10 @@ function ProseParagraphs({ text }: { text: string }) {
 export function MediaDetailOverviewSection({
   title,
   body,
-  isKo,
+  locale,
   className,
 }: Props) {
+  const t = useTranslations("mediaDetail.overview");
   const normalized = body.trim();
   const isLong = useMemo(
     () => normalized.length > PREVIEW_CHAR_LIMIT || normalized.split(/\n/).length > 4,
@@ -66,13 +70,7 @@ export function MediaDetailOverviewSection({
           onClick={() => setExpanded((v) => !v)}
           className="mt-3 text-xs font-semibold text-[color:var(--qp-accent)] hover:text-[color:var(--qp-accent-hover)] dark:text-[color:var(--qp-accent)] dark:hover:text-[color:var(--qp-accent)]"
         >
-          {expanded
-            ? isKo
-              ? "접기"
-              : "Show less"
-            : isKo
-              ? "더 보기"
-              : "Show more"}
+          {expanded ? t("showLess") : t("showMore")}
         </button>
       ) : null}
     </section>

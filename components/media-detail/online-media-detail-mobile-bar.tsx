@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
@@ -21,17 +23,18 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale: string;
   className?: string;
 };
 
-export function OnlineMediaDetailMobileBar({ media, isKo, className }: Props) {
+export function OnlineMediaDetailMobileBar({ media, locale, className }: Props) {
+  const bucket = normalizeMediaDetailTextLocale(locale);
   const spec = media.onlineSpec;
   const calculable = hasOnlinePricingSpec(media);
   const headline =
     calculable && spec
       ? onlinePricingLabel(spec)
-      : mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
+      : mediaPriceOnInquiryLabel((bucket === "ko") ? "ko" : "en");
 
   return (
     <StickyActionBar
@@ -41,7 +44,7 @@ export function OnlineMediaDetailMobileBar({ media, isKo, className }: Props) {
       compact
       aboveMobileChrome
       respectFooter
-      ariaLabel={isKo ? "빠른 문의" : "Quick contact"}
+      ariaLabel={(bucket === "ko") ? "빠른 문의" : "Quick contact"}
       className={cn("lg:hidden", className)}
     >
       <div className={STICKY_ACTION_BAR_ROW}>
@@ -51,7 +54,7 @@ export function OnlineMediaDetailMobileBar({ media, isKo, className }: Props) {
           </p>
           {calculable ? (
             <p className="truncate text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
-              {isKo ? "참고 단가 · /월" : "Reference rate · /mo"}
+              {(bucket === "ko") ? "참고 단가 · /월" : "Reference rate · /mo"}
             </p>
           ) : null}
         </div>

@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 
 type Props = {
   lat: number;
   lng: number;
   address: string;
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   className?: string;
 };
 
@@ -15,7 +18,16 @@ type LoadState = "loading" | "ready" | "empty" | "error";
 
 const FETCH_TIMEOUT_MS = 15_000;
 
-export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) {
+export function NearbyPoiSection({
+  lat,
+  lng,
+  address,
+  locale,
+  isKo,
+  className,
+}: Props) {
+  const textLocale =
+    locale != null ? normalizeMediaDetailTextLocale(locale) : isKo ? "ko" : "en";
   const [items, setItems] = useState<string[]>([]);
   const [loadState, setLoadState] = useState<LoadState>("loading");
 
@@ -27,7 +39,7 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
         const q = new URLSearchParams({
           lat: String(lat),
           lng: String(lng),
-          locale: isKo ? "ko" : "en",
+          locale: textLocale,
           address,
         });
         const res = await fetch(`/api/public/nearby-pois?${q}`, {
@@ -54,7 +66,7 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
     return () => {
       cancelled = true;
     };
-  }, [lat, lng, address, isKo]);
+  }, [lat, lng, address, textLocale]);
 
   const cardClass = cn(
     "rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4",
@@ -65,10 +77,10 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
     return (
       <div className={cardClass}>
         <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
-          {isKo ? "주변 POI" : "Nearby POI"}
+          {textLocale === "ko" ? "주변 POI" : "Nearby POI"}
         </p>
         <p className="text-sm dark:text-white/40 text-gray-400">
-          {isKo ? "주변 시설 조회 중…" : "Loading nearby places…"}
+          {textLocale === "ko" ? "주변 시설 조회 중…" : "Loading nearby places…"}
         </p>
       </div>
     );
@@ -78,14 +90,14 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
     return (
       <div className={cardClass} data-screenshot="media-nearby-poi-empty">
         <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
-          {isKo ? "주변 POI" : "Nearby POI"}
+          {textLocale === "ko" ? "주변 POI" : "Nearby POI"}
         </p>
         <p className="text-sm dark:text-white/50 text-gray-500">
           {loadState === "error"
-            ? isKo
+            ? textLocale === "ko"
               ? "주변 시설 정보를 불러오지 못했습니다."
               : "Could not load nearby places."
-            : isKo
+            : textLocale === "ko"
               ? "표시할 주변 시설 정보가 없습니다."
               : "No nearby places to show."}
         </p>
@@ -96,7 +108,7 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
   return (
     <div className={cardClass} data-screenshot="media-nearby-poi">
       <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
-        {isKo ? "주변 POI" : "Nearby POI"}
+        {textLocale === "ko" ? "주변 POI" : "Nearby POI"}
       </p>
       <ul className="space-y-1.5 text-sm dark:text-white/75 text-gray-700">
         {items.map((item) => (

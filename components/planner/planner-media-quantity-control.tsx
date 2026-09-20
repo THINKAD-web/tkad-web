@@ -11,10 +11,13 @@ import {
   type CampaignMediaQuantities,
 } from "@/lib/planner/planner-media-quantity";
 import { cn } from "@/lib/utils";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   quantities: CampaignMediaQuantities;
   priceOptionIndex: CampaignMediaPriceOptionIndex;
   onQuantityChange: (units: number) => void;
@@ -26,6 +29,7 @@ type Props = {
 
 export function PlannerMediaQuantityControl({
   media,
+  locale,
   isKo,
   quantities,
   priceOptionIndex,
@@ -35,6 +39,10 @@ export function PlannerMediaQuantityControl({
   quantityEditable = false,
   className,
 }: Props) {
+  const useKo =
+    locale != null
+      ? normalizeMediaDetailTextLocale(locale) === "ko"
+      : (isKo ?? true);
   if (!shouldShowPlannerQuantityControl(media)) return null;
 
   if (isPerUnitGradePriceOptions(media)) {
@@ -42,7 +50,7 @@ export function PlannerMediaQuantityControl({
       <div className={cn(compact ? "min-w-0 space-y-1.5" : "space-y-2", className)}>
         <PlannerMediaPackagePicker
           media={media}
-          isKo={isKo}
+          isKo={useKo}
           quantities={quantities}
           priceOptionIndex={priceOptionIndex}
           onQuantityChange={onQuantityChange}
@@ -53,7 +61,7 @@ export function PlannerMediaQuantityControl({
           media={media}
           units={plannerUnitsForMedia(media, quantities)}
           onChange={onQuantityChange}
-          isKo={isKo}
+          isKo={useKo}
           compact={compact}
           editable={quantityEditable}
         />
@@ -65,7 +73,7 @@ export function PlannerMediaQuantityControl({
     return (
       <PlannerMediaPackagePicker
         media={media}
-        isKo={isKo}
+        isKo={useKo}
         quantities={quantities}
         priceOptionIndex={priceOptionIndex}
         onQuantityChange={onQuantityChange}
@@ -81,7 +89,7 @@ export function PlannerMediaQuantityControl({
       media={media}
       units={plannerUnitsForMedia(media, quantities)}
       onChange={onQuantityChange}
-      isKo={isKo}
+      isKo={useKo}
       compact={compact}
       editable={quantityEditable}
       className={cn(className)}

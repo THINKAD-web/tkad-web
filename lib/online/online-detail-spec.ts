@@ -1,4 +1,5 @@
 import type { MediaOnlineSpecView } from "@/lib/media-data";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 import { onlineBillingTypeLabel } from "@/lib/online/online-billing-label";
 import { formatTargetingSummary } from "@/lib/online/online-targeting-tags";
 
@@ -41,16 +42,17 @@ export function buildOnlineDetailSpecRows(input: {
   platform: string | null | undefined;
   spec: MediaOnlineSpecView | null | undefined;
   slug: string | undefined;
-  isKo: boolean;
+  locale: string;
 }): OnlineDetailSpecRow[] {
-  const locale = input.isKo ? "ko-KR" : "en-US";
+  const useKo = normalizeMediaDetailTextLocale(input.locale) === "ko";
+  const intlTag = useKo ? "ko-KR" : "en-US";
   const platform = input.platform?.trim() || "—";
-  const billing = onlineBillingTypeLabel(input.spec, input.slug, input.isKo);
-  const targeting = onlineTargetingLabel(input.spec, input.isKo);
-  const minBudget = formatOnlineMinBudgetWon(input.spec, locale);
-  const device = input.isKo ? "PC/모바일 동일" : "PC & mobile";
+  const billing = onlineBillingTypeLabel(input.spec, input.slug, useKo);
+  const targeting = onlineTargetingLabel(input.spec, useKo);
+  const minBudget = formatOnlineMinBudgetWon(input.spec, intlTag);
+  const device = useKo ? "PC/모바일 동일" : "PC & mobile";
 
-  if (input.isKo) {
+  if (useKo) {
     return [
       { label: "유형", value: input.typeLabel },
       { label: "플랫폼", value: platform },

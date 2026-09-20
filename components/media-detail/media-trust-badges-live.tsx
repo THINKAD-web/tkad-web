@@ -10,7 +10,7 @@ type Props = {
    * includes popular/hot_week, since the detail page's catalog fetch skips
    * fetchTrustBadgeContext() to stay off the 3600s revalidate floor. */
   baseBadges: MediaTrustBadge[];
-  isKo: boolean;
+  locale: string;
   compact?: boolean;
   className?: string;
 };
@@ -25,7 +25,7 @@ type Props = {
 export function MediaTrustBadgesLive({
   mediaId,
   baseBadges,
-  isKo,
+  locale,
   compact,
   className,
 }: Props) {
@@ -57,7 +57,7 @@ export function MediaTrustBadgesLive({
   return (
     <MediaTrustBadges
       badges={badges}
-      isKo={isKo}
+      locale={locale}
       compact={compact}
       className={className}
     />

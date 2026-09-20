@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
@@ -18,6 +20,9 @@ import { cn } from "@/lib/utils";
 import {
   buildInsights,
   resolveTrafficPattern,
+  trafficMonthAxisLabel,
+  trafficMonthTooltipSuffix,
+  trafficWeekdayChartLabel,
   type StoredTrafficPattern,
 } from "@/lib/media-traffic-estimate";
 import type { DataSourceAttribution } from "@/lib/data-source-types";
@@ -39,7 +44,7 @@ type Props = {
   stored: StoredTrafficPattern | null;
   /** 절대값 환산용. 시간당/요일별/월별 평균 노출 = base × pattern[i] × N */
   dailyFootfall?: number | null;
-  isKo: boolean;
+  locale: string;
   /** data-fusion 출처 (있으면 추정 뱃지 대신 표시) */
   attributions?: DataSourceAttribution[];
   /** fusion 패턴이 있으면 stored 대신 사용 */
@@ -51,22 +56,6 @@ type Props = {
 };
 
 const HOUR_TICKS = [0, 6, 12, 18, 23];
-const WEEKDAY_LABELS_KO = ["월", "화", "수", "목", "금", "토", "일"];
-const WEEKDAY_LABELS_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const MONTH_LABELS_KO = [
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "11",
-  "12",
-];
 
 function peakIndex(arr: number[]): number {
   let idx = 0;
@@ -79,12 +68,13 @@ export function TrafficCharts({
   region,
   stored,
   dailyFootfall,
-  isKo,
+  locale,
   attributions,
   fusedStored,
   chartHeightClass = "h-56",
   hourlyOnly = false,
 }: Props) {
+  const bucket = normalizeMediaDetailTextLocale(locale);
   const t = useTranslations("mediaDetail.traffic");
   const [tab, setTab] = useState<Tab>("hourly");
 
@@ -98,8 +88,8 @@ export function TrafficCharts({
   const showEstimatedBadge = isEstimated && !attributions?.length;
 
   const insights = useMemo(
-    () => buildInsights(pattern, isKo),
-    [pattern, isKo],
+    () => buildInsights(pattern, locale),
+    [pattern, locale],
   );
 
   const baseDaily = Math.max(1, dailyFootfall ?? 0);
@@ -117,21 +107,21 @@ export function TrafficCharts({
   const weeklyData = useMemo(
     () =>
       pattern.weekly.map((p, i) => ({
-        label: isKo ? WEEKDAY_LABELS_KO[i] : WEEKDAY_LABELS_EN[i],
+        label: trafficWeekdayChartLabel(i, locale),
         idx: i,
         value: Math.round(baseDaily * p * 7),
       })),
-    [pattern.weekly, baseDaily, isKo],
+    [pattern.weekly, baseDaily, locale],
   );
 
   const monthlyData = useMemo(
     () =>
       pattern.monthly.map((p, i) => ({
-        label: MONTH_LABELS_KO[i],
+        label: trafficMonthAxisLabel(i, locale),
         idx: i,
         value: Math.round(baseDaily * p * 30),
       })),
-    [pattern.monthly, baseDaily],
+    [pattern.monthly, baseDaily, locale],
   );
 
   const hourlyPeak = peakIndex(pattern.hourly);
@@ -158,7 +148,7 @@ export function TrafficCharts({
             </span>
           ) : null}
           {attributions?.length ? (
-            <DataAttributionList attributions={attributions} isKo={isKo} />
+            <DataAttributionList attributions={attributions} locale={locale} />
           ) : null}
           <div
             role="tablist"
@@ -280,7 +270,9 @@ export function TrafficCharts({
                 <YAxis tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }} />
                 <Tooltip
                   formatter={(v: number) => [v.toLocaleString(), t("axisMonthly")]}
-                  labelFormatter={(m) => `${m}${isKo ? "월" : ""}`}
+                  labelFormatter={(m) =>
+                    `${m}${trafficMonthTooltipSuffix(locale)}`
+                  }
                 />
                 <Bar dataKey="value" radius={[0, 0, 0, 0]} fill={CHART_PRIMARY} />
               </BarChart>

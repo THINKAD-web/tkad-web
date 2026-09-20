@@ -103,7 +103,7 @@ const kumhoBus = {
 
 test("금호 고속버스 — service_region, 전국 안내, 핀 없음", () => {
   assert.equal(resolveMapDisplayMode(kumhoBus), "service_region");
-  const notice = resolveMediaDetailMapNotice(kumhoBus, true);
+  const notice = resolveMediaDetailMapNotice(kumhoBus, "ko");
   assert.ok(notice);
   assert.equal(notice!.mode, "service_region");
   assert.equal(notice!.title, "전국 서비스 매체");
