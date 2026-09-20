@@ -15,16 +15,19 @@ test("normalizeMediaDetailTextLocale", () => {
   assert.equal(normalizeMediaDetailTextLocale("zh-CN"), "zh");
 });
 
-test("resolveMediaText — ko locale", () => {
+test("resolveMediaText — ko locale uses ko column", () => {
   assert.equal(
     resolveMediaText({ locale: "ko", ko: "한국", en: "Korea" }),
     "한국",
   );
+  assert.equal(resolveMediaText({ locale: "ko", ko: "한국", en: "" }), "한국");
+});
+
+test("resolveMediaText — ko→en is defensive (not observed in DB catalog rows)", () => {
   assert.equal(
     resolveMediaText({ locale: "ko", ko: "", en: "Korea" }),
     "Korea",
   );
-  assert.equal(resolveMediaText({ locale: "ko", ko: "한국", en: "" }), "한국");
 });
 
 test("resolveMediaText — en locale", () => {
