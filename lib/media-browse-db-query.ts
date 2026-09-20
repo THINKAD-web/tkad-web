@@ -18,6 +18,7 @@ import {
 import { buildPublicNetworkWhere } from "@/lib/public-network-query";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { publicActiveMediaWhere } from "@/lib/media-review-status";
+import { MEDIA_TRANSLATIONS_FOR_MEDIA_SELECT } from "@/lib/media-i18n";
 import {
   buildPublicMediaOrderBy,
   buildPublicMediaWhere,
@@ -33,6 +34,7 @@ import {
 
 /** Browse list/sort·chip refine — relations·이미지 제외 scalar */
 export const MEDIA_BROWSE_CANDIDATE_SELECT = {
+  ...MEDIA_TRANSLATIONS_FOR_MEDIA_SELECT,
   id: true,
   slug: true,
   name: true,
