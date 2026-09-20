@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { routing } from "@/i18n/routing";
 import { getPublishedSuccessCases } from "@/lib/public-content-queries";
+import {
+  buildHreflangLanguageMap,
+  openGraphLocaleTag,
+} from "@/lib/seo-locale";
 
 export const OG_DIM = { width: 1200, height: 630 } as const;
 
@@ -189,14 +193,9 @@ export function pageAlternates(
   path: string,
 ): NonNullable<Metadata["alternates"]> {
   const p = path === "" ? "" : path.startsWith("/") ? path : `/${path}`;
-  const origin = siteUrl.replace(/\/$/, "");
   return {
     canonical: `/${locale}${p}`,
-    languages: {
-      ko: `${origin}/ko${p}`,
-      en: `${origin}/en${p}`,
-      "x-default": `${origin}/ko${p}`,
-    },
+    languages: buildHreflangLanguageMap(siteUrl, p),
   };
 }
 
@@ -371,7 +370,6 @@ export function buildShareMetadata(opts: {
   /** 계산된 images가 있으면 image 소스보다 우선 */
   images?: OgImageList;
 }): Pick<Metadata, "openGraph" | "twitter"> {
-  const isKo = opts.locale === "ko" || opts.locale.startsWith("ko");
   const alt = opts.alt ?? { ko: opts.title, en: opts.title };
   const images =
     opts.images ?? resolveShareImages(opts.locale, alt, opts.image);
@@ -384,7 +382,7 @@ export function buildShareMetadata(opts: {
   return {
     openGraph: {
       type: opts.type ?? "website",
-      locale: isKo ? "ko_KR" : "en_US",
+      locale: openGraphLocaleTag(opts.locale),
       siteName: siteNameForLocale(opts.locale),
       ...(path ? { url: `/${opts.locale}${path}` } : {}),
       title: opts.title,

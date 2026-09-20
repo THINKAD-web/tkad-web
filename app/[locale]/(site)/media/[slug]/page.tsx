@@ -19,6 +19,7 @@ import {
   resolveMediaOgImageUrl,
 } from "@/lib/media-og-metadata";
 import { pageAlternates, siteNameForLocale } from "@/lib/seo";
+import { openGraphLocaleTag } from "@/lib/seo-locale";
 import {
   buildMediaDetailSeoLinks,
   SeoContextualLinks,
@@ -131,10 +132,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const keywords = buildMediaMetaKeywordsList(media, locale, 28);
   const imageAlt = buildMediaImageAlt(media, locale);
   const canonicalPath = mediaItemDetailPath(media);
-  const displayName =
-    locale === "ko" || locale.startsWith("ko")
-      ? media.name
-      : media.nameEn || media.name;
+  const displayName = resolveMediaDisplayName(
+    {
+      name: media.name,
+      nameEn: media.nameEn,
+      location: media.location,
+      locationEn: media.locationEn,
+      description: media.description,
+      descriptionEn: media.descriptionEn,
+      translations: media.translations,
+    },
+    locale,
+  );
 
   return {
     title,
@@ -142,6 +151,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords,
     alternates: pageAlternates(locale, canonicalPath),
     openGraph: {
+      locale: openGraphLocaleTag(locale),
       title: displayName,
       description: ogDescription,
       images: [
