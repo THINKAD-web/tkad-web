@@ -42,9 +42,9 @@ assert.equal(basicDark.fill, "#9A3412", "tier1 muted on dark tiles");
 assert.notEqual(basicDark.fill, "#FFEDD5", "dark must not use cream");
 
 const top = pinColorForVisibilityScore(98);
-assert.equal(top.fill, "#ff6200", "top fill");
+assert.equal(top.fill, "#0f5f5c", "top fill");
 
 const topDark = pinColorForVisibilityScore(98, false);
-assert.equal(topDark.fill, "#ff6200", "top fill dark");
+assert.equal(topDark.fill, "#0f5f5c", "top fill dark");
 
 console.log("test-map-pin-visibility-tiers: ok");

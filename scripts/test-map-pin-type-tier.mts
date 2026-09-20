@@ -40,7 +40,7 @@ assert.notEqual(staticHigh, networkHigh, "network vs static");
 
 const svgDigital = decodeSvg(digitalHigh);
 assert.doesNotMatch(svgDigital, /<text[\s>]/, "no letter text on pin");
-assert.match(svgDigital, /fill="#ff6200"/, "digital fill");
+assert.match(svgDigital, /fill="#0f5f5c"/, "digital fill");
 assert.match(svgDigital, /<circle cx="16"/, "digital circle shape");
 assert.match(
   svgDigital,
@@ -62,7 +62,7 @@ assert.match(svgNetwork, /points="16,5 27,16 16,27 5,16"/, "network diamond shap
 
 const selected = pinDataUrl("digital", true, true, 95);
 assert.notEqual(selected, digitalHigh, "selected variant");
-assert.match(decodeSvg(selected), /#ff6200/, "selection ring");
+assert.match(decodeSvg(selected), /#0f5f5c/, "selection ring");
 
 assert.ok(mapPinDataUrlCacheSize() >= 5, "cache populated");
 

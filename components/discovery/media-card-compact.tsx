@@ -568,7 +568,7 @@ export function DiscoveryMediaCardCatalogTile({
   const contentBlock = (
       <div className="flex min-h-0 flex-1 flex-col p-2">
       {item.type ? (
-        <span className="tkad-type-note mb-1 inline-block max-w-full truncate rounded-md bg-gray-100 px-1.5 py-0.5 font-medium capitalize text-tkad-muted dark:bg-white/10">
+        <span className="tkad-type-note mb-1 inline-block max-w-full truncate rounded-md bg-gray-100 px-1.5 py-0.5 font-medium capitalize text-gray-600 dark:bg-white/10 dark:text-white/72">
           {item.type}
         </span>
       ) : null}
@@ -576,7 +576,7 @@ export function DiscoveryMediaCardCatalogTile({
         {item.name}
       </p>
       {locationLine ? (
-        <p className="tkad-type-meta mt-0.5 line-clamp-1 text-tkad-secondary">
+        <p className="tkad-type-meta mt-0.5 line-clamp-1 text-gray-600 dark:text-white/72">
           {locationLine}
         </p>
       ) : null}
@@ -807,14 +807,14 @@ export const DiscoveryMediaCardMapTile = forwardRef<
 
       <div className="p-2.5">
         {item.type ? (
-          <span className="tkad-type-note mb-1 inline-block max-w-full truncate rounded-md bg-gray-100 px-1.5 py-0.5 font-medium capitalize text-tkad-muted dark:bg-white/10">
+          <span className="tkad-type-note mb-1 inline-block max-w-full truncate rounded-md bg-gray-100 px-1.5 py-0.5 font-medium capitalize text-gray-600 dark:bg-white/10 dark:text-white/72">
             {item.type}
           </span>
         ) : null}
         <p className="tkad-type-title line-clamp-2 leading-snug text-foreground">
           {item.name}
         </p>
-        <p className="tkad-type-meta mt-0.5 line-clamp-1 text-tkad-secondary">
+        <p className="tkad-type-meta mt-0.5 line-clamp-1 text-gray-600 dark:text-white/72">
           {locationLine}
         </p>
         <MapTileThumbnailBadges
