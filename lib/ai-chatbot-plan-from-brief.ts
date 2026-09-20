@@ -1,6 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
-import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
+import { chatbotCardPriceFieldsFromMedia } from "@/lib/ai-chatbot-media-adapter";
 import { buildFreetextBriefApply } from "@/lib/planner/freetext-brief-apply";
 import {
   buildPlannerBriefPath,
@@ -91,13 +91,14 @@ export function formatRecommendReasonLabels(
 }
 
 function compactMediaCard(m: MediaItem): AiChatbotMediaCard {
+  const { priceMan, pricePeriod } = chatbotCardPriceFieldsFromMedia(m);
   return {
     id: m.id,
     name: m.name,
     nameEn: m.nameEn,
     location: m.location,
-    price: catalogPriceFieldToPriceMan(m.price),
-    pricePeriod: m.pricePeriod,
+    price: priceMan,
+    pricePeriod,
     type: m.type,
     region: m.region,
     imageUrl: getPrimaryMediaImageUrl(m),

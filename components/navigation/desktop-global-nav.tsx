@@ -380,12 +380,6 @@ export function DesktopGlobalNav() {
               </NavDropdown>
             );
           })}
-          <Link
-            href="/media/online"
-            className={navItemClass(false, false)}
-          >
-            {t("nav.thinkadOnline")}
-          </Link>
         </nav>
 
         <div className="relative z-10 ml-auto flex shrink-0 items-center gap-1">

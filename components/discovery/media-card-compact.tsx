@@ -767,6 +767,7 @@ export const DiscoveryMediaCardMapTile = forwardRef<
       ref={ref}
       role="button"
       tabIndex={0}
+      data-discovery-media-card="map-tile"
       className={cn(
         "relative list-none cursor-pointer overflow-hidden rounded-2xl border bg-white transition-ui hover:shadow-md active:scale-[0.99] dark:bg-white/5",
         selected
@@ -825,7 +826,7 @@ export const DiscoveryMediaCardMapTile = forwardRef<
           className="mt-1"
         />
         <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
-          <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
+          <p className="tkad-type-price-accent tkad-map-tile-price tabular-nums">
             {model.priceLabel}
           </p>
           {model.showPeriodSuffix && model.periodLabel ? (

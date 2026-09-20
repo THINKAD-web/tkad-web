@@ -66,7 +66,12 @@ export function DiscoveryMediaCardActions({
     "inline-flex h-9 min-h-9 min-w-0 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white px-2 text-[11px] font-semibold leading-none text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12";
 
   const contactLinkClass =
-    "tkad-media-map-sheet-cta inline-flex h-9 min-h-9 min-w-0 items-center justify-center gap-1 rounded-lg border border-violet-700/30 bg-violet-700 px-2 text-[11px] font-semibold leading-none text-white shadow-sm shadow-violet-900/20 transition-colors hover:bg-violet-800";
+    "tkad-media-map-sheet-cta tkad-qp-cta inline-flex h-9 min-h-9 min-w-0 items-center justify-center gap-1 rounded-lg px-2 text-[11px] font-semibold leading-none shadow-sm transition-opacity hover:opacity-95";
+
+  const contactLinkProps = {
+    className: contactLinkClass,
+    "data-accent-keep": "true" as const,
+  };
 
   if (layout === "preview") {
     return (
@@ -88,7 +93,8 @@ export function DiscoveryMediaCardActions({
         <Link
           href={contactHref}
           onClick={guardCardClick(stopPropagation)}
-          className={cn(contactLinkClass, "col-span-1")}
+          {...contactLinkProps}
+          className={cn(contactLinkProps.className, "col-span-1")}
         >
           <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
           <span className="truncate">{isKo ? "문의하기" : "Contact"}</span>
@@ -114,7 +120,8 @@ export function DiscoveryMediaCardActions({
           <Link
             href={contactHref}
             onClick={guardCardClick(stopPropagation)}
-            className={cn(shortBtn, contactLinkClass, "!h-8")}
+            {...contactLinkProps}
+            className={cn(shortBtn, contactLinkProps.className, "!h-8")}
           >
             <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
             {isKo ? "문의" : "Contact"}
@@ -184,7 +191,8 @@ export function DiscoveryMediaCardActions({
           <Link
             href={contactHref}
             onClick={guardCardClick(stopPropagation)}
-            className={cn(contactLinkClass, "!h-8 !min-h-8 !text-[11px]")}
+            {...contactLinkProps}
+            className={cn(contactLinkProps.className, "!h-8 !min-h-8 !text-[11px]")}
           >
             <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
             <span className="whitespace-nowrap">{isKo ? "문의" : "Contact"}</span>
@@ -228,7 +236,7 @@ export function DiscoveryMediaCardActions({
         <Link
           href={contactHref}
           onClick={guardCardClick(stopPropagation)}
-          className={contactLinkClass}
+          {...contactLinkProps}
         >
           <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
           {isKo ? "문의하기" : "Contact"}
