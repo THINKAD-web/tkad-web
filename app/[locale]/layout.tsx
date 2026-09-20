@@ -5,8 +5,6 @@ import { PublicOnlyMount } from "@/components/public-only-mount";
 import { notFound } from "next/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
-import { openGraphLocaleTag } from "@/lib/seo-locale";
-import { isLocaleIndexingAllowed } from "@/lib/locale-indexing";
 import {
   defaultOgImages,
   pageAlternates,
@@ -63,7 +61,6 @@ export async function generateMetadata({
   /** 앱 실제 origin (app.tkad.co.kr). tkad.co.kr 은 Cafe24 — OG 이미지 404 원인이었음 */
   const metadataBase = new URL(siteUrl);
   const verifiedMediaLabel = await getPublicMediaCountLabel("verified");
-  const allowIndex = isLocaleIndexingAllowed(locale);
 
   const titleDefault = homePageMetadataTitle(locale, verifiedMediaLabel);
   const description =
@@ -103,10 +100,10 @@ export async function generateMetadata({
     },
     alternates: pageAlternates(locale, ""),
     robots: {
-      index: allowIndex,
+      index: true,
       follow: true,
       googleBot: {
-        index: allowIndex,
+        index: true,
         follow: true,
         "max-image-preview": "large",
         "max-snippet": -1,
@@ -116,7 +113,7 @@ export async function generateMetadata({
     ...(googleVer ? { verification: { google: googleVer } } : {}),
     openGraph: {
       type: "website",
-      locale: openGraphLocaleTag(locale),
+      locale: locale === "ko" ? "ko_KR" : "en_US",
       alternateLocale: locale === "ko" ? ["en_US"] : ["ko_KR"],
       siteName: locale === "ko" ? "THINKAD 싱커드" : "THINKAD",
       url: `/${locale}`,
