@@ -1,14 +1,24 @@
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
+import type { MediaItem, MediaPricePeriodKey } from "@/lib/media-data";
 import {
   formatMediaPriceWithPeriodSuffix,
   mediaPriceOnInquiryLabel,
+  resolveMediaDisplayPrice,
 } from "@/lib/media-price-format";
 
-/** Chatbot tool card price is monthly 만원; catalog/plan-cart use DB won field. */
+/** Chatbot card `price` is display 만원 (list/map SSOT via `resolveMediaDisplayPrice`). */
 export function chatbotCardPriceToCatalogWon(priceMan: number): number {
   if (!Number.isFinite(priceMan) || priceMan <= 0) return 0;
   return Math.round(priceMan * 10_000);
+}
+
+/** List/map display SSOT → chatbot card price fields. */
+export function chatbotCardPriceFieldsFromMedia(
+  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
+): { priceMan: number; pricePeriod: MediaPricePeriodKey } {
+  const { priceWon, period } = resolveMediaDisplayPrice(media);
+  return { priceMan: priceWon / 10_000, pricePeriod: period };
 }
 
 export function chatbotCardToCatalogItem(

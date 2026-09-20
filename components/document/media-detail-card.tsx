@@ -46,16 +46,32 @@ function SpecRow({
   icon: Icon,
   label,
   value,
+  stackOnNarrow = false,
 }: {
   icon: typeof MapPin;
   label: string;
   value: string;
+  stackOnNarrow?: boolean;
 }) {
   return (
-    <div className="flex items-start gap-2 text-sm text-[#374151]">
-      <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" aria-hidden />
-      <span className="text-[#6B7280]">{label}</span>
-      <span className="min-w-0 flex-1 font-medium tabular-nums text-[#111827] line-clamp-2">
+    <div
+      className={cn(
+        "gap-1 text-sm text-[#374151]",
+        stackOnNarrow
+          ? "flex flex-col sm:flex-row sm:items-start sm:gap-2"
+          : "flex items-start gap-2",
+      )}
+    >
+      <div className="flex min-w-0 items-start gap-2">
+        <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" aria-hidden />
+        <span className="shrink-0 text-[#6B7280]">{label}</span>
+      </div>
+      <span
+        className={cn(
+          "min-w-0 font-medium tabular-nums text-[#111827]",
+          stackOnNarrow ? "break-words pl-5 sm:pl-0 sm:flex-1" : "flex-1 break-words",
+        )}
+      >
         {value}
       </span>
     </div>
@@ -104,7 +120,8 @@ export function MediaDetailCard({
       detail.budgetContributionPct !== undefined);
 
   const cardClassName = cn(
-    "flex gap-3 overflow-hidden rounded-xl border bg-white p-4 shadow-sm sm:gap-4 sm:p-5",
+    "gap-3 overflow-hidden rounded-xl border bg-white p-4 shadow-sm sm:gap-4 sm:p-5",
+    largeThumb ? "flex flex-col sm:flex-row" : "flex",
     className,
   );
 
@@ -114,7 +131,7 @@ export function MediaDetailCard({
         className={cn(
           // 고정 4:3 비율 박스 — 폭만 반응형, 세로 늘어남 불가
           "relative aspect-[4/3] shrink-0 self-start overflow-hidden rounded-xl shadow-sm",
-          compact ? "w-24 sm:w-28" : largeThumb ? "w-48 sm:w-64" : "w-28 sm:w-40",
+          compact ? "w-24 sm:w-28" : largeThumb ? "w-full sm:w-52 md:w-64" : "w-28 sm:w-40",
         )}
         style={{ background: LIGHT.bgAlt }}
       >
@@ -153,9 +170,9 @@ export function MediaDetailCard({
             ) : null}
           </h4>
           {detail.location ? (
-            <p className="mt-1 flex items-center gap-1.5 text-sm text-[#6B7280]">
-              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              <span className="line-clamp-2">{detail.location}</span>
+            <p className="mt-1 flex items-start gap-1.5 text-sm text-[#6B7280]">
+              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="min-w-0 break-words">{detail.location}</span>
             </p>
           ) : null}
           {detail.categoryLabel ? (
@@ -167,17 +184,26 @@ export function MediaDetailCard({
         </div>
 
         <div
-          className="grid grid-cols-1 gap-1.5 border-t pt-3 sm:grid-cols-2"
+          className={cn(
+            "grid grid-cols-1 gap-2 border-t pt-3",
+            largeThumb ? "md:grid-cols-2 md:gap-1.5" : "sm:grid-cols-2 sm:gap-1.5",
+          )}
           style={{ borderColor: LIGHT.divider }}
         >
           {detail.size ? (
-            <SpecRow icon={Ruler} label={isKo ? "규격" : "Size"} value={detail.size} />
+            <SpecRow
+              icon={Ruler}
+              label={isKo ? "규격" : "Size"}
+              value={detail.size}
+              stackOnNarrow={largeThumb}
+            />
           ) : null}
           {detail.operatingHours ? (
             <SpecRow
               icon={Clock}
               label={isKo ? "운영시간" : "Hours"}
               value={detail.operatingHours}
+              stackOnNarrow={largeThumb}
             />
           ) : null}
           {detail.dailyTraffic != null && detail.dailyTraffic > 0 ? (
@@ -185,6 +211,7 @@ export function MediaDetailCard({
               icon={Users}
               label={isKo ? "일 유동인구" : "Daily footfall"}
               value={`${detail.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "회" : ""}`}
+              stackOnNarrow={largeThumb}
             />
           ) : null}
           {detail.adjustedDailyReach != null && detail.adjustedDailyReach > 0 ? (
@@ -192,10 +219,16 @@ export function MediaDetailCard({
               icon={Eye}
               label={isKo ? "일 실노출(추정)" : "Daily reach (est.)"}
               value={`${detail.adjustedDailyReach.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "회" : ""}`}
+              stackOnNarrow={largeThumb}
             />
           ) : null}
           {detail.broadcastLabel ? (
-            <SpecRow icon={Radio} label={isKo ? "송출" : "Spot"} value={detail.broadcastLabel} />
+            <SpecRow
+              icon={Radio}
+              label={isKo ? "송출" : "Spot"}
+              value={detail.broadcastLabel}
+              stackOnNarrow={largeThumb}
+            />
           ) : null}
         </div>
 

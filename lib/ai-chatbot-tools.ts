@@ -11,6 +11,8 @@ import {
   type PlannerCategory,
 } from "@/lib/planner-logic";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
+import { resolveMonthlyListPriceWon } from "@/lib/media-metrics";
+import { chatbotCardPriceFieldsFromMedia } from "@/lib/ai-chatbot-media-adapter";
 
 /** JSON Schema object for tool `parameters` (OpenAI / xAI 호환) */
 export type AiChatbotToolInputSchema = {
@@ -30,6 +32,7 @@ export type AiChatbotMediaCard = {
   name: string;
   nameEn: string;
   location: string;
+  /** 월·일 등 표시 단가 — 만원 단위 (`resolveMediaDisplayPrice` SSOT) */
   price: number;
   pricePeriod?: MediaPricePeriodKey;
   type: string;
@@ -39,17 +42,22 @@ export type AiChatbotMediaCard = {
 };
 
 function compact(m: MediaItem): AiChatbotMediaCard {
+  const { priceMan, pricePeriod } = chatbotCardPriceFieldsFromMedia(m);
   return {
     id: m.id,
     name: m.name,
     nameEn: m.nameEn,
     location: m.location,
-    price: catalogPriceFieldToPriceMan(m.price),
-    pricePeriod: m.pricePeriod,
+    price: priceMan,
+    pricePeriod,
     type: m.type,
     region: m.region,
     imageUrl: getPrimaryMediaImageUrl(m),
   };
+}
+
+function monthlyListPriceMan(m: MediaItem): number {
+  return resolveMonthlyListPriceWon(m) / 10_000;
 }
 
 function clampLimit(n: unknown, fallback: number, cap: number): number {
@@ -246,11 +254,11 @@ export function executeChatbotTool(
     const lo = Number.isFinite(minPrice) && minPrice >= 0 ? minPrice : 0;
     const limit = clampLimit(input.limit, 15, 25);
     const matched = catalog.filter((m) => {
-      const p = catalogPriceFieldToPriceMan(m.price);
+      const p = monthlyListPriceMan(m);
       return p >= lo && p <= maxPrice;
     });
     const sorted = [...matched].sort(
-      (a, b) => catalogPriceFieldToPriceMan(a.price) - catalogPriceFieldToPriceMan(b.price),
+      (a, b) => monthlyListPriceMan(a) - monthlyListPriceMan(b),
     );
     const items = sorted.slice(0, limit).map(compact);
     return {

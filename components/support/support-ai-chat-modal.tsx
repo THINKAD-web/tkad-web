@@ -59,7 +59,7 @@ function ChatReplyText({ content }: { content: string }) {
         <Link
           key={`lnk-${key++}`}
           href={href}
-          className="font-semibold text-violet-600 underline underline-offset-2 dark:text-violet-300"
+          className="font-semibold text-[color:var(--hermes-shade)] underline underline-offset-2 dark:text-[color:var(--hermes-on-dark)]"
         >
           {label}
         </Link>,
@@ -91,7 +91,7 @@ function Bubble({
       className={cn(
         "max-w-[92%] rounded-2xl border px-3 py-2.5 text-sm leading-relaxed",
         isUser
-          ? "ml-auto border-violet-400/30 bg-violet-500/20 dark:text-white text-gray-900"
+          ? "ml-auto border-[color:var(--hermes)]/30 bg-[color:color-mix(in_srgb,var(--hermes)_18%,white)] dark:text-white text-gray-900"
           : "mr-auto dark:border-white/12 border-gray-200 dark:bg-black bg-white/35 dark:text-white text-gray-800",
       )}
     >
@@ -387,7 +387,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
                     ))}
                     <Link
                       href="/contact"
-                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#22d3ee]/35 bg-[#22d3ee]/15 px-3 py-2.5 text-xs font-bold text-[#0e7490] transition-colors hover:bg-[#22d3ee]/20 dark:text-[#22d3ee]"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-[color:var(--hermes)]/35 bg-[color:color-mix(in_srgb,var(--hermes)_12%,white)] px-3 py-2.5 text-xs font-bold text-[color:var(--hermes-shade)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--hermes)_18%,white)] dark:text-[color:var(--hermes-on-dark)]"
                     >
                       {t("contactCta")}
                       <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -395,7 +395,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
                     {recommendHref ? (
                       <Link
                         href={recommendHref}
-                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-violet-400/35 bg-gradient-to-r from-violet-600/90 to-cyan-500/90 px-3 py-2.5 text-xs font-bold text-white transition-opacity hover:opacity-95"
+                        className="tkad-qp-cta flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition-opacity hover:opacity-95"
                       >
                         {t("recommendCta")}
                         <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -426,13 +426,13 @@ export function SupportAiChatModal({ open, onClose }: Props) {
           })}
           {loading ? (
             <div className="mr-auto max-w-[92%] space-y-2 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black/40 bg-white/60 px-3 py-2.5">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-violet-200 text-violet-700">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-[color:var(--hermes-shade)] dark:text-[color:var(--hermes-on-dark)]">
                 {t("analyzing")}
               </p>
               <div className="flex gap-1 pt-1" aria-hidden>
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-violet-400 [animation-delay:0ms]" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-violet-400 [animation-delay:120ms]" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-violet-400 [animation-delay:240ms]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[color:var(--hermes)] [animation-delay:0ms]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[color:var(--hermes)] [animation-delay:120ms]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[color:var(--hermes)] [animation-delay:240ms]" />
               </div>
             </div>
           ) : null}
@@ -483,7 +483,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
               disabled={loading || !input.trim()}
               onClick={() => void send()}
               aria-label={t("send")}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95))] dark:text-white text-gray-900 disabled:opacity-40"
+              className="tkad-qp-cta flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] disabled:opacity-40"
             >
               <Send className="h-4 w-4" />
             </button>

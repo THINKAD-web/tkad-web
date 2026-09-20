@@ -1488,6 +1488,8 @@ body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] [data
 /* KEEP — page primary conversion CTA (1 per page) */
 .media-detail-accent-option-a [data-accent-keep].bg-\[color\:var\(--qp-accent\)\],
 .media-detail-accent-option-a [data-accent-keep].bg-accent,
+.media-accent-option-a [data-accent-keep].tkad-qp-cta,
+.media-accent-option-a [data-accent-keep].tkad-media-map-sheet-cta,
 .recommend-accent-option-a [data-accent-keep].bg-\[color\:var\(--qp-accent\)\],
 .recommend-accent-option-a [data-accent-keep].tkad-qp-cta {
   background: var(--qp-accent, var(--hermes)) !important;
@@ -1495,6 +1497,8 @@ body:has(.media-accent-option-a) [data-screenshot="quick-actions-desktop"] [data
   border-color: var(--qp-accent, var(--hermes)) !important;
   -webkit-text-fill-color: white !important;
 }
+.media-accent-option-a [data-accent-keep].tkad-qp-cta:hover:not(:disabled),
+.media-accent-option-a [data-accent-keep].tkad-media-map-sheet-cta:hover:not(:disabled),
 .recommend-accent-option-a [data-accent-keep].tkad-qp-cta:hover:not(:disabled) {
   background: var(--qp-accent-hover, color-mix(in srgb, var(--qp-accent, var(--hermes)) 88%, black)) !important;
   border-color: var(--qp-accent-hover, color-mix(in srgb, var(--qp-accent, var(--hermes)) 88%, black)) !important;
@@ -1511,6 +1515,38 @@ body:has(.tkad-media-map-shell) .tkad-media-app-shell.tkad-media-map-shell {
   background-image: none !important;
   -webkit-text-fill-color: currentColor !important;
   color: var(--qp-accent, var(--hermes)) !important;
+}
+
+/* `/media/map` 목록 타일 — 흰 카드 위 가격: neon/planner-neon 글자색 재매핑과 분리 */
+.tkad-media-map-shell .tkad-map-tile-price {
+  color: var(--hermes-shade) !important;
+  -webkit-text-fill-color: var(--hermes-shade) !important;
+}
+html.dark .tkad-media-map-shell .tkad-map-tile-price {
+  color: var(--hermes-on-dark) !important;
+  -webkit-text-fill-color: var(--hermes-on-dark) !important;
+}
+
+/* 플래너 보고서 — 추천 근거(사이트 다크 + 흰 문서 겹침 시 대비) */
+.tkad-document-light-surface .planner-report-rationale-box {
+  border-color: var(--qp-line, #d8d6d0) !important;
+  background: var(--qp-accent-soft, color-mix(in srgb, var(--hermes) 12%, white)) !important;
+}
+.tkad-document-light-surface .planner-report-rationale-box,
+.tkad-document-light-surface .planner-report-rationale-box p,
+.tkad-document-light-surface .planner-report-rationale-box li,
+.tkad-document-light-surface .planner-report-rationale-box span {
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-document-light-surface .planner-report-rationale-box .text-gray-800 {
+  color: rgb(31 41 55) !important;
+}
+.tkad-document-light-surface .planner-report-rationale-box .text-gray-700 {
+  color: rgb(55 65 81) !important;
+}
+.tkad-document-light-surface .planner-report-rationale-box .text-gray-900,
+.tkad-document-light-surface .planner-report-rationale-box .font-semibold {
+  color: rgb(17 24 39) !important;
 }
 
 /* ── PR A — 역할 기반 타이포 유틸 (발견하기·기획하기 공통) ──
@@ -2031,6 +2067,30 @@ html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-document-light-su
 html.dark .tkad-document-light-surface [class*="text-gray-"],
 html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"] {
   -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-document-light-surface .text-gray-900,
+html.dark .tkad-planner-neon .tkad-document-light-surface .text-gray-900,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-gray-900 {
+  color: rgb(17 24 39) !important;
+}
+
+html.dark .tkad-document-light-surface .text-gray-800,
+html.dark .tkad-planner-neon .tkad-document-light-surface .text-gray-800,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-gray-800 {
+  color: rgb(31 41 55) !important;
+}
+
+html.dark .tkad-document-light-surface .text-gray-700,
+html.dark .tkad-planner-neon .tkad-document-light-surface .text-gray-700,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-gray-700 {
+  color: rgb(55 65 81) !important;
+}
+
+html.dark .tkad-document-light-surface .text-gray-600,
+html.dark .tkad-planner-neon .tkad-document-light-surface .text-gray-600,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-gray-600 {
+  color: rgb(75 85 99) !important;
 }
 
 /* 보고서 흰 문서 — 발견하기 피드·카드·컴팩트의 tkad 토큰을 라이트 잉크로 (html.dark 포함) */
@@ -3304,6 +3364,15 @@ html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-media-map-sheet-c
   background: var(--hermes) !important;
 }
 
+/* 지도 타일·썸네일 뱃지 — day planner-neon text-white→ink 재매핑 예외 */
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon [data-media-thumbnail-badge-stack] span[class*="text-white"],
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon [data-media-thumbnail-badge-stack] span[class*="bg-emerald"],
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon [data-media-thumbnail-badge-stack] span[class*="bg-slate"],
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon [data-media-thumbnail-badge-stack] span[class*="bg-black"] {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
 html.dark .tkad-home-appearance .tkad-media-main-tabs {
   border-color: rgb(255 255 255 / 0.12) !important;
   background: rgb(255 255 255 / 0.06) !important;
@@ -3754,7 +3823,6 @@ html:not(.dark) .tkad-nav-chrome {
 
 /* Digital-style mobile menu button + drop-down panel (no full-screen overlay) */
 .tkad-site-header-menu-btn {
-  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 40px;
@@ -3764,11 +3832,17 @@ html:not(.dark) .tkad-nav-chrome {
   background: transparent;
   color: inherit;
   cursor: pointer;
-  display: grid;
   place-items: center;
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease;
+}
+
+/* Tailwind `md:hidden` — display must not be re-forced here (was `display: grid`). */
+@media (max-width: 767px) {
+  .tkad-site-header-menu-btn {
+    display: grid;
+  }
 }
 
 .tkad-site-header-menu-btn:hover {

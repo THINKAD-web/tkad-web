@@ -756,20 +756,20 @@ export const PlannerReportDocument = forwardRef<
             <DocumentSectionHeading {...headingProps}>
               {isKo ? "추천 근거" : "Recommendation rationale"}
             </DocumentSectionHeading>
-            <div className="space-y-3 rounded-xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-4 sm:p-5">
+            <div className="space-y-3 rounded-xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-4 sm:p-5 planner-report-rationale-box">
               {p.recommendRationale.summaryLines.map((line) => (
-                <p key={line} className="text-sm leading-relaxed text-gray-700">
+                <p key={line} className="text-sm leading-relaxed text-gray-800">
                   {line}
                 </p>
               ))}
               {p.recommendRationale.mediaReasons.length > 0 ? (
                 <ul className="space-y-2 border-t border-[color:var(--qp-line)] pt-3">
                   {p.recommendRationale.mediaReasons.map((item) => (
-                    <li key={`${item.name}-${item.reason}`} className="text-sm">
+                    <li key={`${item.name}-${item.reason}`} className="text-sm text-gray-800">
                       <span className="font-semibold text-gray-900">
                         {item.name}
                       </span>
-                      <span className="text-gray-600"> — {item.reason}</span>
+                      <span className="text-gray-700"> — {item.reason}</span>
                     </li>
                   ))}
                 </ul>

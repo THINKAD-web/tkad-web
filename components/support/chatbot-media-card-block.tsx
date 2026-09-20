@@ -71,7 +71,7 @@ export function ChatbotMediaCardBlock({ card, isKo, className }: Props) {
               {metaLine}
             </p>
           ) : null}
-          <p className="mt-1 text-xs font-medium text-violet-600 dark:text-violet-300">
+          <p className="mt-1 text-xs font-medium text-[color:var(--hermes-shade)] dark:text-[color:var(--hermes-on-dark)]">
             {priceLabel}
           </p>
         </div>

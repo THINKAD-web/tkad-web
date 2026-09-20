@@ -19,7 +19,7 @@ export function mapMarkersForPlottableMedia(
   isKo: boolean,
 ): MapMarker[] {
   if (!mediaItemHasPlottableMapCoordinates(media)) return [];
-  return mapMarkersForMediaDetail(media, isKo).filter((m) =>
+  return mapMarkersForMediaDetail(media, isKo ? "ko" : "en").filter((m) =>
     isValidPlotCoordinate(m.lat, m.lng),
   );
 }
