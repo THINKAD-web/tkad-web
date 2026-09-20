@@ -132,8 +132,23 @@ export function AdminMediaEnTranslateFields({
   );
 }
 
+type AiTranslationLocaleSlice = {
+  name?: string;
+  description?: string | null;
+  location?: string | null;
+};
+
 export async function fetchMediaEnTranslation(form: AdminMediaEnFormSlice): Promise<
-  | { ok: true; data: { nameEn?: string; descriptionEn?: string | null; locationEn?: string | null } }
+  | {
+      ok: true;
+      data: {
+        nameEn?: string;
+        descriptionEn?: string | null;
+        locationEn?: string | null;
+        ja?: AiTranslationLocaleSlice;
+        zh?: AiTranslationLocaleSlice;
+      };
+    }
   | { ok: false; message: string }
 > {
   const name = form.name.trim();
@@ -153,5 +168,21 @@ export async function fetchMediaEnTranslation(form: AdminMediaEnFormSlice): Prom
     }),
   });
   if (!res.ok) return { ok: false, message: res.message || "AI 번역 생성 실패" };
-  return { ok: true, data: res.data as Record<string, unknown> };
+  const data = res.data as Record<string, unknown>;
+  return {
+    ok: true,
+    data: {
+      nameEn: typeof data.nameEn === "string" ? data.nameEn : undefined,
+      descriptionEn:
+        typeof data.descriptionEn === "string" || data.descriptionEn === null
+          ? data.descriptionEn
+          : undefined,
+      locationEn:
+        typeof data.locationEn === "string" || data.locationEn === null
+          ? data.locationEn
+          : undefined,
+      ja: data.ja as { name?: string; description?: string | null; location?: string | null },
+      zh: data.zh as { name?: string; description?: string | null; location?: string | null },
+    },
+  };
 }
