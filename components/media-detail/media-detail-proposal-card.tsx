@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 import { Download, FileText, Loader2, Lock } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { trackEvent } from "@/lib/ga-events";
@@ -9,7 +11,6 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
   locale: string;
   className?: string;
   /** 사이드바 — 단일 버튼 행 */
@@ -24,13 +25,13 @@ type Props = {
  */
 export function MediaDetailProposalCard({
   media,
-  isKo,
   locale,
   className,
   variant = "card",
   compactSecondary = false,
 }: Props) {
-  const downloadName = mediaProposalDownloadFilename(media, isKo);
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const downloadName = mediaProposalDownloadFilename(media, (bucket === "ko"));
   const proposalHref = `/api/media/${encodeURIComponent(media.id)}/proposal?locale=${encodeURIComponent(locale)}`;
 
   const triggerDownload = () => {
@@ -46,7 +47,7 @@ export function MediaDetailProposalCard({
 
   if (variant === "inline") {
     return (
-      <PlannerPdfDownloadGate isKo={isKo} onAllowedDownload={triggerDownload}>
+      <PlannerPdfDownloadGate locale={locale} onAllowedDownload={triggerDownload}>
         {({ onDownloadClick, pdfAllowed, checking }) => (
           <button
             type="button"
@@ -68,14 +69,14 @@ export function MediaDetailProposalCard({
             )}
             <span className="truncate">
               {compactSecondary
-                ? isKo
+                ? (bucket === "ko")
                   ? "PRO"
                   : "PRO"
                 : pdfAllowed
-                  ? isKo
+                  ? (bucket === "ko")
                     ? "제안서 다운로드"
                     : "Download proposal"
-                  : isKo
+                  : (bucket === "ko")
                     ? "PRO 제안서"
                     : "PRO proposal"}
             </span>
@@ -103,18 +104,18 @@ export function MediaDetailProposalCard({
         </div>
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
-            {isKo ? "매체 제안서" : "Media proposal"}
+            {(bucket === "ko") ? "매체 제안서" : "Media proposal"}
             <span className="rounded-md bg-[color:var(--qp-accent)]/15 px-1.5 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
               PRO
             </span>
           </p>
           <p className="mt-0.5 text-xs leading-relaxed text-gray-400 dark:text-white/50">
-            {isKo ? "PDF · 이미지 형식" : "PDF · image format"}
+            {(bucket === "ko") ? "PDF · 이미지 형식" : "PDF · image format"}
           </p>
         </div>
       </div>
 
-      <PlannerPdfDownloadGate isKo={isKo} onAllowedDownload={triggerDownload}>
+      <PlannerPdfDownloadGate locale={locale} onAllowedDownload={triggerDownload}>
         {({ onDownloadClick, pdfAllowed, checking }) => (
           <button
             type="button"
@@ -130,10 +131,10 @@ export function MediaDetailProposalCard({
               <Lock className="h-4 w-4" aria-hidden />
             )}
             {pdfAllowed
-              ? isKo
+              ? (bucket === "ko")
                 ? "제안서 다운로드"
                 : "Download"
-              : isKo
+              : (bucket === "ko")
                 ? "PRO 제안서"
                 : "PRO proposal"}
           </button>

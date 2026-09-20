@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Layers, Monitor, Ruler } from "lucide-react";
@@ -32,7 +34,7 @@ type Labels = {
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale: string;
   labels: Labels;
   hasPriceOptions: boolean;
   priceOptions?: MediaItem["priceOptions"];
@@ -115,7 +117,7 @@ function IconSpec({
 
 export function MediaDetailExecutionPanel({
   media,
-  isKo,
+  locale,
   labels,
   hasPriceOptions,
   priceOptions,
@@ -123,7 +125,8 @@ export function MediaDetailExecutionPanel({
   featuresText,
   className,
 }: Props) {
-  const processSteps = isKo
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const processSteps = (bucket === "ko")
     ? [
         "1. 매체·기간 선택 후 견적 요청",
         "2. 담당자 확인 및 가용성 확정",
@@ -137,7 +140,7 @@ export function MediaDetailExecutionPanel({
         "4. Flight & monitoring report",
       ];
 
-  const notices = isKo
+  const notices = (bucket === "ko")
     ? [
         "최종 단가는 시즌·옵션에 따라 변동될 수 있습니다.",
         "소재 규격 미준수 시 재제작 비용이 발생할 수 있습니다.",
@@ -155,7 +158,7 @@ export function MediaDetailExecutionPanel({
       : null;
 
   const operatingHoursValue = !media.keywordFilter
-    ? isKo
+    ? (bucket === "ko")
       ? media.operatingHours
       : media.operatingHoursEn
     : undefined;
@@ -163,7 +166,7 @@ export function MediaDetailExecutionPanel({
     media.brightness?.trim() ||
       operatingHoursValue?.trim() ||
       media.installYear ||
-      (isKo && media.targetAge?.trim()),
+      ((bucket === "ko") && media.targetAge?.trim()),
   );
 
   return (
@@ -194,7 +197,7 @@ export function MediaDetailExecutionPanel({
           <IconSpec
             icon={Layers}
             label={labels.creativeSpec}
-            value={formatCreativeSpecLine(media, isKo) ?? labels.empty}
+            value={formatCreativeSpecLine(media, (bucket === "ko")) ?? labels.empty}
             className="sm:col-span-2"
           />
         </div>
@@ -202,7 +205,7 @@ export function MediaDetailExecutionPanel({
           <details className="group mt-5 rounded-2xl border border-gray-200 bg-[color:var(--qp-surface-2)] dark:border-white/10 dark:bg-white/[0.03]">
             <summary className="cursor-pointer list-none px-4 py-3 text-[length:var(--qp-text-meta)] font-semibold text-gray-700 dark:text-white/80 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center justify-between gap-2">
-                {isKo ? "추가 스펙 보기" : "More specs"}
+                {(bucket === "ko") ? "추가 스펙 보기" : "More specs"}
                 <span className="text-gray-500 transition group-open:rotate-180 dark:text-white/45">
                   ▾
                 </span>
@@ -222,7 +225,7 @@ export function MediaDetailExecutionPanel({
               />
               <SpecRow
                 label={labels.targetAge}
-                value={isKo ? media.targetAge : undefined}
+                value={(bucket === "ko") ? media.targetAge : undefined}
               />
             </dl>
           </details>
@@ -232,17 +235,17 @@ export function MediaDetailExecutionPanel({
       {hasPriceOptions && priceOptions?.length ? (
         <div className="rounded-2xl border dark:border-white/10 border-gray-200 p-4">
           <p className="mb-3 text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
-            {isKo ? "가격 옵션" : "Price options"}
+            {(bucket === "ko") ? "가격 옵션" : "Price options"}
           </p>
           {uniformPriceSummary ? (
             <div className="rounded-xl border dark:border-white/8 border-gray-100 dark:bg-black/15 bg-gray-50/80 px-3 py-2.5">
               <p className="text-[length:var(--qp-text-body)] font-medium dark:text-white/85 text-gray-800">
-                {isKo
+                {(bucket === "ko")
                   ? `${uniformPriceSummary.labelsJoined} 동일 단가`
                   : `${uniformPriceSummary.labelsJoined} — same rate`}
               </p>
               <p className="mt-1 font-sans text-[length:var(--qp-text-body)] font-bold tabular-nums dark:text-white text-gray-900">
-                {formatCatalogPriceFieldWon(uniformPriceSummary.priceWon, isKo ? "ko-KR" : "en-US", media.country)}
+                {formatCatalogPriceFieldWon(uniformPriceSummary.priceWon, (bucket === "ko") ? "ko-KR" : "en-US", media.country)}
               </p>
             </div>
           ) : (
@@ -251,16 +254,16 @@ export function MediaDetailExecutionPanel({
               const periodLabel = resolveMediaPriceOptionPeriodLabel(
                 opt,
                 media.pricePeriod,
-                isKo ? "ko" : "en",
+                (bucket === "ko") ? "ko" : "en",
               );
               const unitSuffix = networkInventoryUnitSuffix(
                 media.networkSubtype ?? media.type,
-                isKo,
+                locale,
                 media.tags,
               );
               const unitsLine =
                 opt.units != null && opt.units > 0
-                  ? isKo
+                  ? (bucket === "ko")
                     ? `${opt.units.toLocaleString("ko-KR")}${unitSuffix || "대"}`
                     : `${opt.units.toLocaleString("en-US")} units`
                   : null;
@@ -279,7 +282,7 @@ export function MediaDetailExecutionPanel({
                       {opt.label}
                     </span>
                     <span className="font-sans font-bold tabular-nums dark:text-white text-gray-900">
-                      {formatCatalogPriceFieldWon(opt.price, isKo ? "ko-KR" : "en-US", media.country)}
+                      {formatCatalogPriceFieldWon(opt.price, (bucket === "ko") ? "ko-KR" : "en-US", media.country)}
                     </span>
                   </div>
                   {metaLine ? (
@@ -296,7 +299,7 @@ export function MediaDetailExecutionPanel({
                         )}
                       >
                         <span className="inline-flex items-center gap-1">
-                          {isKo ? "포함 지점 보기" : "View locations"}
+                          {(bucket === "ko") ? "포함 지점 보기" : "View locations"}
                           <span className="transition group-open/stores:rotate-180">▾</span>
                         </span>
                       </summary>
@@ -310,7 +313,7 @@ export function MediaDetailExecutionPanel({
             })}
           </ul>
           )}
-          <MediaPriceExclNote isKo={isKo} className="mt-2" />
+          <MediaPriceExclNote locale={locale} className="mt-2" />
         </div>
       ) : null}
 

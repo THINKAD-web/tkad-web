@@ -1,5 +1,7 @@
 "use client";
 
+import { intlLocaleTag, normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Share2, Sparkles } from "lucide-react";
@@ -45,8 +47,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
-  pageLocale: string;
+  locale: string;
   displayName: string;
   periodLabel: string;
   className?: string;
@@ -54,14 +55,13 @@ type Props = {
 
 export function MediaDetailStickyQuotePanel({
   media,
-  isKo,
-  pageLocale,
+  locale,
   displayName,
   periodLabel,
   className,
 }: Props) {
-  const locale = isKo ? "ko-KR" : "en-US";
-  const localeTag = isKo ? "ko" : "en";
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const intlTag = intlLocaleTag(locale);
   const priceOptions = media.priceOptions ?? [];
   const hasPriceOptions = priceOptions.length > 0;
   const showQuantity = shouldShowMediaDetailQuantityControl(media);
@@ -156,7 +156,7 @@ export function MediaDetailStickyQuotePanel({
     ? resolveMediaPriceOptionPeriodLabel(
         selectedOption,
         media.pricePeriod,
-        localeTag,
+        intlTag,
       ) ?? periodLabel
     : periodLabel;
 
@@ -194,7 +194,7 @@ export function MediaDetailStickyQuotePanel({
       >
         <OnlineMediaStickyQuoteSection
           media={media}
-          isKo={isKo}
+          locale={locale}
           displayName={displayName}
           contactHref={contactHref}
           inputCls={inputCls}
@@ -219,13 +219,13 @@ export function MediaDetailStickyQuotePanel({
       <p className="text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
         {headlinePeriod}
       </p>
-      <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+      <MediaPriceExclNote locale={locale} className="mt-0.5" />
 
       {showQuantity ? (
         <div className="mt-3">
           <PlannerMediaQuantityControl
             media={media}
-            isKo={isKo}
+            locale={locale}
             quantities={quantities}
             priceOptionIndex={priceOptionIndex}
             compact
@@ -251,7 +251,7 @@ export function MediaDetailStickyQuotePanel({
             htmlFor="sticky-quote-price-option"
             className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70"
           >
-            {isKo ? "가격 옵션" : "Price option"}
+            {(bucket === "ko") ? "가격 옵션" : "Price option"}
           </label>
           <select
             id="sticky-quote-price-option"
@@ -281,12 +281,12 @@ export function MediaDetailStickyQuotePanel({
 
       <div className="mt-5 space-y-3 border-t dark:border-white/10 border-gray-100 pt-5">
         <p className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
-          {isKo ? "집행 기간" : "Flight dates"}
+          {(bucket === "ko") ? "집행 기간" : "Flight dates"}
         </p>
         <div className="grid grid-cols-2 gap-2">
           <label className="space-y-1">
             <span className="text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
-              {isKo ? "시작" : "Start"}
+              {(bucket === "ko") ? "시작" : "Start"}
             </span>
             <input
               type="date"
@@ -297,7 +297,7 @@ export function MediaDetailStickyQuotePanel({
           </label>
           <label className="space-y-1">
             <span className="text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
-              {isKo ? "종료" : "End"}
+              {(bucket === "ko") ? "종료" : "End"}
             </span>
             <input
               type="date"
@@ -310,7 +310,7 @@ export function MediaDetailStickyQuotePanel({
 
         <div className="rounded-xl border dark:border-white/10 border-gray-100 dark:bg-black/20 bg-gray-50 p-3 text-[length:var(--qp-text-body)]">
           <p className="flex justify-between gap-2 dark:text-white/80 text-gray-700">
-            <span>{isKo ? "예상 비용" : "Est. cost"}</span>
+            <span>{(bucket === "ko") ? "예상 비용" : "Est. cost"}</span>
             <span className="font-bold tabular-nums dark:text-white text-gray-900">
               {formatMediaCostEstimateShort(
                 quote.costWon,
@@ -322,18 +322,18 @@ export function MediaDetailStickyQuotePanel({
           </p>
           {monthlyImpressions > 0 ? (
             <p className="mt-1 flex justify-between gap-2 dark:text-white/60 text-gray-500">
-              <span>{isKo ? "월 예상 노출" : "Est. monthly reach"}</span>
+              <span>{(bucket === "ko") ? "월 예상 노출" : "Est. monthly reach"}</span>
               <span className="tabular-nums">
                 {monthlyImpressions.toLocaleString(locale)}
-                {isKo ? "회" : ""}
+                {(bucket === "ko") ? "회" : ""}
               </span>
             </p>
           ) : quote.impressions > 0 ? (
             <p className="mt-1 flex justify-between gap-2 dark:text-white/60 text-gray-500">
-              <span>{isKo ? "예상 노출" : "Est. impressions"}</span>
+              <span>{(bucket === "ko") ? "예상 노출" : "Est. impressions"}</span>
               <span className="tabular-nums">
                 {quote.impressions.toLocaleString(locale)}
-                {isKo ? "회" : ""}
+                {(bucket === "ko") ? "회" : ""}
               </span>
             </p>
           ) : null}
@@ -346,13 +346,13 @@ export function MediaDetailStickyQuotePanel({
                 data-accent-keep="true"
                 className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-3 text-center text-sm font-bold text-white"
               >
-                {isKo ? "견적 받기" : "Get quote"}
+                {(bucket === "ko") ? "견적 받기" : "Get quote"}
               </Link>
 
               <details className="group rounded-xl border border-gray-100 dark:border-white/10">
                 <summary className="cursor-pointer list-none px-3 py-2 text-center text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/65 [&::-webkit-details-marker]:hidden">
                   <span className="inline-flex items-center gap-1">
-                    {isKo ? "담기 · 플래너 · 공유" : "Save · Planner · Share"}
+                    {(bucket === "ko") ? "담기 · 플래너 · 공유" : "Save · Planner · Share"}
                     <span className="transition group-open:rotate-180">▾</span>
                   </span>
                 </summary>
@@ -370,12 +370,11 @@ export function MediaDetailStickyQuotePanel({
                       className="inline-flex h-8 flex-1 min-w-[4.5rem] items-center justify-center gap-1 rounded-lg border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/8 px-2 tkad-type-note font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
                     >
                       <Sparkles className="h-3 w-3 shrink-0" aria-hidden />
-                      {isKo ? "플래너" : "Planner"}
+                      {(bucket === "ko") ? "플래너" : "Planner"}
                     </Link>
                     <MediaDetailProposalCard
                       media={media}
-                      isKo={isKo}
-                      locale={pageLocale}
+                      locale={locale}
                       variant="inline"
                       compactSecondary
                       className="min-w-0 flex-1"
@@ -395,7 +394,7 @@ export function MediaDetailStickyQuotePanel({
                   className="inline-flex h-8 flex-1 min-w-[3.5rem] items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2 tkad-type-note font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:bg-white/6 dark:text-white/80 dark:hover:bg-white/10"
                 >
                   <Share2 className="h-3 w-3 shrink-0" aria-hidden />
-                  {isKo ? "공유" : "Share"}
+                  {(bucket === "ko") ? "공유" : "Share"}
                 </button>
                 <MediaFavoriteButton
                   mediaId={media.id}

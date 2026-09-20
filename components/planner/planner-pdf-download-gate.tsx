@@ -5,9 +5,12 @@ import { useRouter } from "@/i18n/navigation";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { useAppToast } from "@/lib/use-toast";
 import { buildFeatureGateMessage } from "@/lib/entitlements/gate-messages";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 
 type Props = {
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   onAllowedDownload: () => void;
   children: (opts: {
     onDownloadClick: () => void;
@@ -18,10 +21,15 @@ type Props = {
 
 /** PDF 다운로드 PRO 전용 — entitlements `planner_pdf` 와 서버 게이트 동기 */
 export function PlannerPdfDownloadGate({
+  locale,
   isKo,
   onAllowedDownload,
   children,
 }: Props) {
+  const useKo =
+    locale != null
+      ? normalizeMediaDetailTextLocale(locale) === "ko"
+      : (isKo ?? true);
   const router = useRouter();
   const toast = useAppToast();
   const {
@@ -39,7 +47,7 @@ export function PlannerPdfDownloadGate({
     const msg = buildFeatureGateMessage({
       feature: "planner_pdf",
       access,
-      isKo,
+      isKo: useKo,
     });
     toast.show({
       variant: "warning",
@@ -47,7 +55,7 @@ export function PlannerPdfDownloadGate({
       description: msg.description,
     });
     router.push(msg.primaryCta.href);
-  }, [checking, pdfAllowed, onAllowedDownload, router, access, isKo, toast]);
+  }, [checking, pdfAllowed, onAllowedDownload, router, access, useKo, toast]);
 
   return (
     <>

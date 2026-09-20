@@ -219,6 +219,8 @@ export interface MediaItem {
   /** DB `description` 원문 — catalog·long이 비었을 때 매체 소개 최종 폴백 */
   description?: string;
   descriptionEn?: string;
+  /** ja/zh from `MediaTranslation` when loaded (PR3 include). */
+  translations?: import("@/lib/media-i18n").MediaTranslationRow[];
   /** 시간대(24)·요일(7)·월(12) 유동인구 패턴 — DB `traffic_pattern`. nullable, 미입력 시 추정. */
   trafficPattern?: {
     hourly?: number[];

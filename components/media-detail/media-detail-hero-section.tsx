@@ -1,3 +1,4 @@
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 import { MediaDetailHeroGalleryV2 } from "@/components/media-detail/media-detail-hero-gallery-v2";
 import { MediaDetailHeroActions } from "@/components/media-detail/media-detail-hero-actions";
 import { MediaDetailHeroChrome } from "@/components/media-detail/media-detail-hero-chrome";
@@ -39,7 +40,7 @@ type Labels = {
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale: string;
   typeLabel: string;
   locationShort: string;
   heroTags: string[];
@@ -56,7 +57,7 @@ type Props = {
 
 export function MediaDetailHeroSection({
   media,
-  isKo,
+  locale,
   typeLabel,
   locationShort,
   heroTags,
@@ -70,8 +71,9 @@ export function MediaDetailHeroSection({
   seoulCpmBenchmarkBadge = null,
   className,
 }: Props) {
-  const displayName = isKo ? media.name : media.nameEn || media.name;
-  const shareDescription = isKo
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const displayName = (bucket === "ko") ? media.name : media.nameEn || media.name;
+  const shareDescription = (bucket === "ko")
     ? `${displayName} — THINKAD 매체 상세`
     : `${displayName} — THINKAD media detail`;
 
@@ -86,7 +88,7 @@ export function MediaDetailHeroSection({
           type: media.type,
         }
       : null;
-  const mapNotice = resolveMediaDetailMapNotice(media, isKo);
+  const mapNotice = resolveMediaDetailMapNotice(media, locale);
 
   return (
     <>
@@ -114,7 +116,7 @@ export function MediaDetailHeroSection({
 
           <MediaDetailHeroInfo
             media={media}
-            isKo={isKo}
+            locale={locale}
             typeLabel={typeLabel}
             locationShort={locationShort}
             heroTags={heroTags}

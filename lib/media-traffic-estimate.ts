@@ -1,3 +1,5 @@
+import { intlLocaleTag, normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 /**
  * 매체 시간대·요일·월별 유동인구 추정 헬퍼.
  *
@@ -178,37 +180,68 @@ export type TrafficInsights = {
   peakMonthLabel: string;
 };
 
+const HOUR_LABELS_EN = [
+  "Morning rush (7-9)",
+  "Lunch (12-13)",
+  "Evening rush (18-20)",
+  "Night (21-23)",
+] as const;
+
+/** Mon=0 … Sun=6 (2024-01-01 is Monday). */
+export function trafficWeekdayChartLabel(index: number, locale: string): string {
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  if (bucket === "ko") return WEEKDAY_LABELS_KO[index] ?? "";
+  if (bucket === "en") return WEEKDAY_LABELS_EN[index] ?? "";
+  const d = new Date(2024, 0, 1 + index);
+  return d.toLocaleDateString(intlLocaleTag(locale), { weekday: "short" });
+}
+
+export function trafficMonthAxisLabel(monthIndex: number, locale: string): string {
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  if (bucket === "ko") return String(monthIndex + 1);
+  return new Date(2000, monthIndex, 1).toLocaleString(intlLocaleTag(locale), {
+    month: "short",
+  });
+}
+
+export function trafficMonthTooltipSuffix(locale: string): string {
+  return normalizeMediaDetailTextLocale(locale) === "ko" ? "월" : "";
+}
+
 export function buildInsights(
   pattern: TrafficPattern,
-  isKo: boolean,
+  locale: string,
 ): TrafficInsights {
+  const bucket = normalizeMediaDetailTextLocale(locale);
   // 시간대 — 4개 구간 중 평균 가장 높은 라벨
   const slotAvgs = HOUR_RANGES.map(([s, e]) => rangeAvg(pattern.hourly, s, e));
   const peakSlotIdx = indexOfMax(slotAvgs);
   const peakHourLabelKo = HOUR_LABELS_KO[peakSlotIdx];
-  const peakHourLabelEn = [
-    "Morning rush (7-9)",
-    "Lunch (12-13)",
-    "Evening rush (18-20)",
-    "Night (21-23)",
-  ][peakSlotIdx];
+  const peakHourLabelEn = HOUR_LABELS_EN[peakSlotIdx];
 
   // 요일
   const peakWdIdx = indexOfMax(pattern.weekly);
-  const peakWeekdayLabel = isKo
-    ? `${WEEKDAY_LABELS_KO[peakWdIdx]}요일`
-    : WEEKDAY_LABELS_EN[peakWdIdx];
+  const peakWeekdayLabel =
+    bucket === "ko"
+      ? `${WEEKDAY_LABELS_KO[peakWdIdx]}요일`
+      : bucket === "en"
+        ? WEEKDAY_LABELS_EN[peakWdIdx]
+        : new Date(2024, 0, 1 + peakWdIdx).toLocaleDateString(
+            intlLocaleTag(locale),
+            { weekday: "long" },
+          );
 
   // 월
   const peakMonthIdx = indexOfMax(pattern.monthly);
-  const peakMonthLabel = isKo
-    ? MONTH_LABELS_KO[peakMonthIdx]
-    : new Date(2000, peakMonthIdx, 1).toLocaleString("en-US", {
-        month: "long",
-      });
+  const peakMonthLabel =
+    bucket === "ko"
+      ? MONTH_LABELS_KO[peakMonthIdx]
+      : new Date(2000, peakMonthIdx, 1).toLocaleString(intlLocaleTag(locale), {
+          month: "long",
+        });
 
   return {
-    peakHourLabel: isKo ? peakHourLabelKo : peakHourLabelEn,
+    peakHourLabel: bucket === "ko" ? peakHourLabelKo : peakHourLabelEn,
     peakWeekdayLabel,
     peakMonthLabel,
   };

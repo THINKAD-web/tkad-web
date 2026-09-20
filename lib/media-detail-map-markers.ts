@@ -1,5 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { MapMarker } from "@/components/public-map/map-types";
+import { resolveMediaDisplayName } from "@/lib/media-i18n";
 import {
   mapItemShowsOnMap,
   resolveMapDisplayMode,
@@ -147,10 +148,10 @@ function buildMapMarker(
 /** 공개 매체 상세 — 핀 모드만 좌표 마커. 이동형은 `/media/map` 과 같이 빈 배열 */
 export function mapMarkersForMediaDetail(
   media: MediaItem,
-  isKo: boolean,
+  locale: string,
 ): MapMarker[] {
   if (!mapItemShowsOnMap(resolveMapDisplayMode(media))) return [];
-  const baseName = isKo ? media.name : media.nameEn || media.name;
+  const baseName = resolveMediaDisplayName(media, locale);
   const points = mapPointsForMediaItem(media);
   const price = Number(media.price ?? 0);
   return points.map((p, i) =>

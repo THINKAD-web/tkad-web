@@ -6,6 +6,7 @@ import { HandCoins, Loader2, ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import Modal from "@/components/ui/modal";
 import { getOrCreateTrackingSessionId } from "@/lib/tracking/client";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 
 type Props = {
   mediaId: string;
@@ -15,7 +16,8 @@ type Props = {
 
 export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props) {
   const locale = useLocale();
-  const isKo = locale.startsWith("ko");
+  const bucket = normalizeMediaDetailTextLocale(locale);
+
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -40,7 +42,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
     try {
       const proposedPriceWon = Math.round(Number(priceMan) * 10_000);
       if (!email.trim() || !phone.trim() || proposedPriceWon <= 0) {
-        setError(isKo ? "필수 항목을 입력해 주세요." : "Fill required fields.");
+        setError((bucket === "ko") ? "필수 항목을 입력해 주세요." : "Fill required fields.");
         return;
       }
       const res = await fetch(`/api/media/${mediaId}/price-proposal`, {
@@ -62,7 +64,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
         negotiationId?: string;
       };
       if (!res.ok || !json.ok) {
-        setError(isKo ? "제출에 실패했습니다." : "Submission failed.");
+        setError((bucket === "ko") ? "제출에 실패했습니다." : "Submission failed.");
         return;
       }
       setDone(true);
@@ -123,7 +125,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
         className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-foreground bg-card px-4 text-sm font-bold text-foreground transition-colors hover:bg-muted sm:w-auto"
       >
         <HandCoins className="h-4 w-4" aria-hidden />
-        {isKo ? "가격 제안하기" : "Propose a price"}
+        {(bucket === "ko") ? "가격 제안하기" : "Propose a price"}
       </button>
 
       <Modal
@@ -135,15 +137,15 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
             setError(null);
           }
         }}
-        ariaLabel={isKo ? "가격 제안" : "Price proposal"}
+        ariaLabel={(bucket === "ko") ? "가격 제안" : "Price proposal"}
         className="max-w-md border-border"
       >
         <div className="p-6">
           <h2 className="text-lg font-bold">
-            {isKo ? "가격 제안하기" : "Propose a price"}
+            {(bucket === "ko") ? "가격 제안하기" : "Propose a price"}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isKo
+            {(bucket === "ko")
               ? `「${mediaName}」에 희망 단가를 익명으로 전달합니다. 매체사가 24시간 내 회신합니다.`
               : `Your offer for “${mediaName}” is shared anonymously. Owners reply within 24h.`}
           </p>
@@ -153,7 +155,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
               {accepted ? (
                 <>
                   <p className="text-sm font-semibold text-emerald-600">
-                    {isKo
+                    {(bucket === "ko")
                       ? "제안이 수락되었습니다. 아래에서 견적 확인 후 전자계약을 진행하세요."
                       : "Accepted. Review the quote and sign the e-contract below."}
                   </p>
@@ -162,21 +164,21 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
                       href={accepted.previewUrl}
                       className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-border px-4 py-2.5 text-sm font-bold"
                     >
-                      {isKo ? "견적 미리보기" : "View quote"}
+                      {(bucket === "ko") ? "견적 미리보기" : "View quote"}
                       <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                     </Link>
                     <Link
                       href={accepted.contractUrl}
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-foreground px-4 py-2.5 text-sm font-bold text-background"
                     >
-                      {isKo ? "전자계약 진행" : "Sign contract"}
+                      {(bucket === "ko") ? "전자계약 진행" : "Sign contract"}
                       <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                     </Link>
                   </div>
                 </>
               ) : (
                 <p className="text-sm font-semibold text-emerald-600">
-                  {isKo
+                  {(bucket === "ko")
                     ? "제안이 접수되었습니다. 수락 시 이 화면과 이메일로 계약 링크가 열립니다."
                     : "Submitted. If accepted, contract links appear here and by email."}
                 </p>
@@ -191,7 +193,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
               }}
             >
               <label className="block text-xs font-semibold">
-                {isKo ? "희망 월 단가 (만원)" : "Target monthly (×10K KRW)"}
+                {(bucket === "ko") ? "희망 월 단가 (만원)" : "Target monthly (×10K KRW)"}
                 <input
                   type="number"
                   required
@@ -212,7 +214,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
                 />
               </label>
               <label className="block text-xs font-semibold">
-                {isKo ? "연락처" : "Phone"}
+                {(bucket === "ko") ? "연락처" : "Phone"}
                 <input
                   type="tel"
                   required
@@ -222,7 +224,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
                 />
               </label>
               <label className="block text-xs font-semibold">
-                {isKo ? "회사명 (선택)" : "Company (optional)"}
+                {(bucket === "ko") ? "회사명 (선택)" : "Company (optional)"}
                 <input
                   type="text"
                   value={company}
@@ -231,7 +233,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
                 />
               </label>
               <label className="block text-xs font-semibold">
-                {isKo ? "메모 (선택)" : "Note (optional)"}
+                {(bucket === "ko") ? "메모 (선택)" : "Note (optional)"}
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -247,7 +249,7 @@ export function PriceProposalButton({ mediaId, mediaName, listPriceWon }: Props)
               >
                 {loading ? (
                   <Loader2 className="mx-auto h-4 w-4 animate-spin" />
-                ) : isKo ? (
+                ) : (bucket === "ko") ? (
                   "익명 제안 보내기"
                 ) : (
                   "Send offer"

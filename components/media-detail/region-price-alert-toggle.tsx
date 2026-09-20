@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Bell, BellOff, Loader2 } from "lucide-react";
 import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { useAppToast } from "@/lib/use-toast";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 
 export function RegionPriceAlertToggle({
   regionZone,
@@ -14,7 +15,7 @@ export function RegionPriceAlertToggle({
   zoneLabel: string;
   locale: string;
 }) {
-  const isKo = locale.startsWith("ko");
+  const bucket = normalizeMediaDetailTextLocale(locale);
   const toast = useAppToast();
   const { user, loading: authLoading } = useAuthSession();
   const [subscribed, setSubscribed] = useState<boolean | null>(null);
@@ -45,7 +46,7 @@ export function RegionPriceAlertToggle({
 
   async function toggle() {
     if (subscribed === null) {
-      toast.error(isKo ? "로그인 후 이용할 수 있습니다." : "Sign in required.");
+      toast.error((bucket === "ko") ? "로그인 후 이용할 수 있습니다." : "Sign in required.");
       return;
     }
     setPending(true);
@@ -60,16 +61,16 @@ export function RegionPriceAlertToggle({
       });
       const json = await res.json();
       if (!res.ok || !json.ok) {
-        toast.error(isKo ? "저장에 실패했습니다." : "Could not save.");
+        toast.error((bucket === "ko") ? "저장에 실패했습니다." : "Could not save.");
         return;
       }
       setSubscribed(!subscribed);
       toast.success(
         !subscribed
-          ? isKo
+          ? (bucket === "ko")
             ? `${zoneLabel} 가격 트렌드 알림을 켰습니다.`
             : `Price trend alerts on for ${zoneLabel}.`
-          : isKo
+          : (bucket === "ko")
             ? "알림을 해제했습니다."
             : "Alerts turned off.",
       );
@@ -93,14 +94,14 @@ export function RegionPriceAlertToggle({
         <BellOff className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
       )}
       {subscribed === null
-        ? isKo
+        ? (bucket === "ko")
           ? `${zoneLabel} 가격 트렌드 알림 (로그인)`
           : `${zoneLabel} trend alerts (sign in)`
         : subscribed
-          ? isKo
+          ? (bucket === "ko")
             ? `${zoneLabel} 트렌드 알림 켜짐`
             : `${zoneLabel} alerts on`
-          : isKo
+          : (bucket === "ko")
             ? `${zoneLabel} 가격 트렌드 알림 받기`
             : `Alert me on ${zoneLabel} trends`}
     </button>

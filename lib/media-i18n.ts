@@ -109,3 +109,69 @@ export function resolveMediaText(input: ResolveMediaTextInput): string {
   if (bucket === "en") return en || ko;
   return tr || en || ko;
 }
+
+/** BCP 47 tag for `Intl` / `toLocaleString`. */
+export function intlLocaleTag(locale: string): string {
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  if (bucket === "ko") return "ko-KR";
+  if (bucket === "ja") return "ja-JP";
+  if (bucket === "zh") return "zh-CN";
+  return "en-US";
+}
+
+export type MediaTextSource = {
+  name: string;
+  nameEn?: string | null;
+  location: string;
+  locationEn?: string | null;
+  description?: string | null;
+  descriptionEn?: string | null;
+  translations?: readonly MediaTranslationRow[] | null;
+};
+
+export function resolveMediaField(
+  locale: string,
+  field: MediaTextField,
+  media: MediaTextSource,
+): string {
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const ko =
+    field === "name"
+      ? media.name
+      : field === "location"
+        ? media.location
+        : media.description;
+  const en =
+    field === "name"
+      ? media.nameEn
+      : field === "location"
+        ? media.locationEn
+        : media.descriptionEn;
+  const translation =
+    bucket === "ja" || bucket === "zh"
+      ? pickMediaTranslationField(media.translations, bucket, field)
+      : undefined;
+  return resolveMediaText({ locale, ko, en, translation });
+}
+
+export function resolveMediaDisplayName(
+  media: MediaTextSource,
+  locale: string,
+): string {
+  return resolveMediaField(locale, "name", media);
+}
+
+/** Success cases: `summaryKo` only in schema — en/ja/zh use PR3 fallback chain. */
+export function resolveSuccessCaseTitle(
+  item: { titleKo: string; titleEn?: string | null },
+  locale: string,
+): string {
+  return resolveMediaText({ locale, ko: item.titleKo, en: item.titleEn });
+}
+
+export function resolveSuccessCaseSummary(
+  item: { summaryKo: string },
+  locale: string,
+): string {
+  return resolveMediaText({ locale, ko: item.summaryKo, en: undefined });
+}

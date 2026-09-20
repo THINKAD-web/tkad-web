@@ -3348,6 +3348,60 @@
       "quote": "Request quote",
       "quoteShort": "Quote",
       "instantBook": "Book instantly"
+    },
+    "overview": {
+      "showMore": "Show more",
+      "showLess": "Show less"
+    },
+    "caseStudyGallery": {
+      "altBase": "Campaign photo"
+    },
+    "priceTransparency": {
+      "eyebrow": "Market rate",
+      "title": "Price transparency",
+      "zoneAverage": "{zone} average",
+      "monthPrefix": "",
+      "thisMedia": "This media",
+      "belowAvg": "{pct}% below avg",
+      "aboveAvg": "{pct}% above avg",
+      "nearAverage": "Near average",
+      "similarRange": "Similar media range",
+      "placesSuffix": "",
+      "negotiationHint": "Negotiation room is often around {pct}% off list. Use “Propose a price” to reach the owner anonymously."
+    },
+    "reviews": {
+      "title": "Advertiser reviews",
+      "writeReview": "Write a review",
+      "loading": "Loading…",
+      "signInRequired": "Please sign in to continue.",
+      "emptyNoReviews": "No reviews yet.",
+      "emptyBeFirst": "Be the first to review.",
+      "verifiedExecution": "Verified execution",
+      "helpful": "Helpful"
+    },
+    "stickyQuote": {
+      "priceOption": "Price option",
+      "flightDates": "Flight dates",
+      "start": "Start",
+      "end": "End",
+      "estCost": "Est. cost",
+      "estMonthlyReach": "Est. monthly reach",
+      "estImpressions": "Est. impressions",
+      "timesUnit": "",
+      "getQuote": "Get quote",
+      "savePlannerShare": "Save · Planner · Share",
+      "planner": "Planner",
+      "share": "Share"
+    },
+    "onlineSticky": {
+      "referenceRates": "Reference rates (seeded CPC/CPM range)",
+      "monthlyBudget": "Monthly budget",
+      "estSpend": "Est. spend",
+      "estReach": "Est. reach",
+      "estClicks": "Est. clicks",
+      "contact": "Contact us",
+      "budgetHint": "Enter a budget to see ranges.",
+      "basis": "Basis:"
     }
   },
   "contentNotify": {

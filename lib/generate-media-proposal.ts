@@ -531,7 +531,7 @@ export async function generateMediaProposalPdf(
     media.type,
     region,
   );
-  const insights = buildInsights(pattern, isKo);
+  const insights = buildInsights(pattern, isKo ? "ko" : "en");
   y = sectionTitle(
     doc,
     fam,

@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  resolveSuccessCaseSummary,
+  resolveSuccessCaseTitle,
+} from "@/lib/media-i18n";
+
 import { useTranslations } from "next-intl";
 import { ArrowRight, Briefcase } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -8,14 +13,14 @@ import { stripMarkdown } from "@/lib/strip-markdown";
 
 type Props = {
   cases: PublicSuccessCaseListItem[];
-  isKo: boolean;
+  locale: string;
 };
 
 /**
  * 매체 상세에서 "이 매체로 진행한 캠페인" 사례 카드 그리드.
  * cases 가 0 건이면 컴포넌트는 null 반환 (호출처에서 검사하지 않아도 됨).
  */
-export function RelatedCases({ cases, isKo }: Props) {
+export function RelatedCases({ cases, locale }: Props) {
   const t = useTranslations("mediaDetail.relatedCases");
   if (cases.length === 0) return null;
 
@@ -39,7 +44,8 @@ export function RelatedCases({ cases, isKo }: Props) {
       <div className="p-6">
         <ul className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-3">
           {cases.map((c) => {
-            const title = isKo ? c.titleKo : c.titleEn || c.titleKo;
+            const title = resolveSuccessCaseTitle(c, locale);
+            const summary = resolveSuccessCaseSummary(c, locale);
             return (
               <li key={c.id} className="-mt-[2px] -ml-[2px]">
                 <Link
@@ -59,7 +65,7 @@ export function RelatedCases({ cases, isKo }: Props) {
                     {title}
                   </p>
                   <p className="line-clamp-3 tkad-type-caption leading-relaxed tracking-tight text-muted-foreground">
-                    {stripMarkdown(c.summaryKo)}
+                    {stripMarkdown(summary)}
                   </p>
                   {c.isExampleScenario ? (
                     <p className="mt-auto tkad-type-label text-amber-800 dark:text-amber-200">

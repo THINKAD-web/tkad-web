@@ -13,6 +13,7 @@ import {
   type MediaPriceOption,
   type MediaPricePeriodKey,
 } from "@/lib/media-data";
+import type { MediaTranslationRow } from "@/lib/media-i18n";
 import {
   filterDisplayableMediaImageUrls,
   optimizeHeroMarqueeUrl,
@@ -489,6 +490,17 @@ export function prismaMediaToMediaItem(
           modelVersion: cm.modelVersion ?? null,
         }
       : undefined,
+    translations: (() => {
+      const raw = (m as Media & { translations?: MediaTranslationRow[] })
+        .translations;
+      if (!Array.isArray(raw) || raw.length === 0) return undefined;
+      return raw.map((row) => ({
+        locale: row.locale,
+        name: row.name ?? null,
+        description: row.description ?? null,
+        location: row.location ?? null,
+      }));
+    })(),
   };
 }
 
