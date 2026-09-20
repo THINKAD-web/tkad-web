@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { FavoritesSessionSync } from "@/components/favorites-session-sync";
 import { HeaderAccountActions } from "@/components/header-account-actions";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { HeaderCartLink } from "@/components/header-cart-link";
 import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { headerChromeIconGhostClass } from "@/components/public-chrome/header-chrome-buttons";
@@ -44,6 +45,7 @@ export function HeaderDesktopChrome({ isKo }: Props) {
       >
         <MessageSquare className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
       </Link>
+      <LocaleSwitcher compact className="max-md:hidden" />
       <HeaderAccountActions />
     </div>
   );
