@@ -1,5 +1,11 @@
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { siteUrl } from "@/lib/seo";
+import { jsonLdInLanguage } from "@/lib/seo-locale";
+import {
+  normalizeMediaDetailTextLocale,
+  resolveMediaDisplayName,
+  resolveMediaField,
+} from "@/lib/media-i18n";
 import {
   buildMediaSeoJsonDescription,
   collectMediaSeoKeywordStrings,
@@ -27,10 +33,10 @@ const ORG_DESCRIPTION_EN =
  * WebApplication is typed for crawlers/LLMs; no aggregateRating (no verified public ratings).
  */
 export function buildStructuredDataGraph(locale: string) {
-  const isKo = locale === "ko";
+  const koreanUi = normalizeMediaDetailTextLocale(locale) === "ko";
   const localizedSiteUrl = `${siteUrl}/${locale}`;
-  const description = isKo ? ORG_DESCRIPTION_KO : ORG_DESCRIPTION_EN;
-  const brandName = isKo ? "THINKAD 싱커드" : "THINKAD";
+  const description = koreanUi ? ORG_DESCRIPTION_KO : ORG_DESCRIPTION_EN;
+  const brandName = koreanUi ? "THINKAD 싱커드" : "THINKAD";
 
   return {
     "@context": "https://schema.org",
@@ -110,7 +116,7 @@ export function buildStructuredDataGraph(locale: string) {
         url: siteUrl,
         name: brandName,
         publisher: { "@id": ORG_ID },
-        inLanguage: isKo ? "ko-KR" : "en-US",
+        inLanguage: jsonLdInLanguage(locale),
         potentialAction: {
           "@type": "SearchAction",
           target: {
@@ -129,7 +135,7 @@ export function buildStructuredDataGraph(locale: string) {
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web browser",
         browserRequirements: "Requires JavaScript. Requires HTML5.",
-        inLanguage: isKo ? "ko-KR" : "en-US",
+        inLanguage: jsonLdInLanguage(locale),
         image: `${siteUrl}/pwa-icon/512`,
         provider: { "@id": ORG_ID },
         offers: {
@@ -151,11 +157,20 @@ export function buildMediaPlaceJsonLd(
   media: MediaItem,
   locale: string,
 ): Record<string, unknown> {
-  const isKo = locale === "ko";
-  const name = isKo ? media.name : media.nameEn || media.name;
+  const src = {
+    name: media.name,
+    nameEn: media.nameEn,
+    location: media.location,
+    locationEn: media.locationEn,
+    description: media.description,
+    descriptionEn: media.descriptionEn,
+    translations: media.translations,
+  };
+  const name = resolveMediaDisplayName(src, locale);
   const description = buildMediaSeoJsonDescription(media, locale, 1100);
   const image = getPrimaryMediaImageUrl(media);
   const url = `${siteUrl}/${locale}${mediaItemDetailPath(media)}`;
+  const streetAddress = resolveMediaField(locale, "location", src);
 
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -164,9 +179,10 @@ export function buildMediaPlaceJsonLd(
     name,
     description,
     url,
+    inLanguage: jsonLdInLanguage(locale),
     address: {
       "@type": "PostalAddress",
-      streetAddress: isKo ? media.location : media.locationEn || media.location,
+      streetAddress,
       addressCountry: "KR",
     },
   };
@@ -193,12 +209,12 @@ export function buildSuccessCaseArticleJsonLd(
   row: PublicSuccessCaseDetail,
   locale: string,
 ): Record<string, unknown> {
-  const isKo = locale === "ko";
+  const koreanUi = normalizeMediaDetailTextLocale(locale) === "ko";
   const url = `${siteUrl}/${locale}/cases/${row.id}`;
-  const headline = (isKo ? row.titleKo : row.titleEn?.trim() || row.titleKo).slice(
-    0,
-    110,
-  );
+  const headline = (koreanUi
+    ? row.titleKo
+    : row.titleEn?.trim() || row.titleKo
+  ).slice(0, 110);
   const description = row.summaryKo.slice(0, 280);
 
   const data: Record<string, unknown> = {
@@ -208,11 +224,11 @@ export function buildSuccessCaseArticleJsonLd(
     headline,
     description,
     url,
-    inLanguage: isKo ? "ko-KR" : "en-US",
+    inLanguage: jsonLdInLanguage(locale),
     author: { "@id": ORG_ID },
     publisher: { "@id": ORG_ID },
     mainEntityOfPage: url,
-    articleSection: isKo ? "OOH 성공 사례" : "OOH Case Studies",
+    articleSection: koreanUi ? "OOH 성공 사례" : "OOH Case Studies",
     about: row.industry,
   };
 
@@ -229,22 +245,34 @@ export function buildMediaBreadcrumbJsonLd(
   media: MediaItem,
   locale: string,
 ): Record<string, unknown> {
-  const isKo = locale === "ko";
-  const name = isKo ? media.name : media.nameEn || media.name;
+  const koreanUi = normalizeMediaDetailTextLocale(locale) === "ko";
+  const name = resolveMediaDisplayName(
+    {
+      name: media.name,
+      nameEn: media.nameEn,
+      location: media.location,
+      locationEn: media.locationEn,
+      description: media.description,
+      descriptionEn: media.descriptionEn,
+      translations: media.translations,
+    },
+    locale,
+  );
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
+    inLanguage: jsonLdInLanguage(locale),
     itemListElement: [
       {
         "@type": "ListItem",
         position: 1,
-        name: isKo ? "홈" : "Home",
+        name: koreanUi ? "홈" : "Home",
         item: `${siteUrl}/${locale}`,
       },
       {
         "@type": "ListItem",
         position: 2,
-        name: isKo ? "옥외광고 매체" : "OOH media",
+        name: koreanUi ? "옥외광고 매체" : "OOH media",
         item: `${siteUrl}/${locale}/media`,
       },
       {
@@ -274,12 +302,12 @@ export function buildInsightArticleJsonLd(
   },
   locale: string,
 ): Record<string, unknown> {
-  const isKo = locale === "ko";
+  const koreanUi = normalizeMediaDetailTextLocale(locale) === "ko";
   const url = `${siteUrl}/${locale}/insights/${report.slug}`;
-  const headline = isKo
+  const headline = koreanUi
     ? report.titleKo
     : report.titleEn?.trim() || report.titleKo;
-  const summary = isKo
+  const summary = koreanUi
     ? report.summaryKo
     : report.summaryEn?.filter(Boolean).length
       ? report.summaryEn
@@ -294,7 +322,7 @@ export function buildInsightArticleJsonLd(
     url,
     datePublished: report.publishedIso,
     dateModified: report.publishedIso,
-    inLanguage: locale === "ko" ? "ko-KR" : "en-US",
+    inLanguage: jsonLdInLanguage(locale),
     author: { "@id": ORG_ID },
     publisher: { "@id": ORG_ID },
     mainEntityOfPage: url,
@@ -313,7 +341,7 @@ export function buildInsightBreadcrumbJsonLd(
   report: { titleKo: string; titleEn?: string; slug: string },
   locale: string,
 ): Record<string, unknown> {
-  const isKo = locale === "ko";
+  const koreanUi = normalizeMediaDetailTextLocale(locale) === "ko";
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -321,22 +349,22 @@ export function buildInsightBreadcrumbJsonLd(
       {
         "@type": "ListItem",
         position: 1,
-        name: isKo ? "홈" : "Home",
+        name: koreanUi ? "홈" : "Home",
         item: `${siteUrl}/${locale}`,
       },
       {
         "@type": "ListItem",
         position: 2,
-        name: isKo ? "OOH 인사이트" : "OOH Insights",
+        name: koreanUi ? "OOH 인사이트" : "OOH Insights",
         item: `${siteUrl}/${locale}/insights`,
       },
       {
         "@type": "ListItem",
         position: 3,
-        name: (isKo ? report.titleKo : report.titleEn?.trim() || report.titleKo).slice(
-          0,
-          110,
-        ),
+        name: (koreanUi
+          ? report.titleKo
+          : report.titleEn?.trim() || report.titleKo
+        ).slice(0, 110),
         item: `${siteUrl}/${locale}/insights/${report.slug}`,
       },
     ],
@@ -365,7 +393,6 @@ export function buildCollectionPageJsonLd(
     items?: CollectionPageItem[];
   },
 ): Record<string, unknown> {
-  const isKo = locale === "ko";
   const origin = siteUrl.replace(/\/$/, "");
   const pageUrl = `${origin}/${locale}${path}`;
 
@@ -376,7 +403,7 @@ export function buildCollectionPageJsonLd(
     url: pageUrl,
     name,
     description,
-    inLanguage: isKo ? "ko-KR" : "en-US",
+    inLanguage: jsonLdInLanguage(locale),
     isPartOf: { "@id": WEBSITE_ID },
     ...(items.length > 0
       ? {
@@ -442,28 +469,39 @@ export function buildMediaCatalogItemListJsonLd(
     nameEn?: string;
     location: string;
     locationEn?: string;
+    translations?: import("@/lib/media-i18n").MediaTranslationRow[];
   }[],
   limit = 30,
 ): Record<string, unknown> {
   const origin = siteUrl.replace(/\/$/, "");
-  const isKo = locale === "ko";
   const listed = items.slice(0, limit);
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
     numberOfItems: listed.length,
-    itemListElement: listed.map((m, idx) => ({
+    itemListElement: listed.map((m, idx) => {
+      const src = {
+        name: m.name,
+        nameEn: m.nameEn,
+        location: m.location,
+        locationEn: m.locationEn,
+        translations: m.translations,
+      };
+      const displayName = resolveMediaDisplayName(src, locale);
+      const address = resolveMediaField(locale, "location", src);
+      return {
       "@type": "ListItem",
       position: idx + 1,
       url: `${origin}/${locale}${mediaItemDetailPath(m)}`,
-      name: isKo ? m.name : (m.nameEn || m.name),
+      name: displayName,
       ...(m.location && {
         item: {
           "@type": "Place",
-          name: isKo ? m.name : (m.nameEn || m.name),
-          address: isKo ? m.location : (m.locationEn || m.location),
+          name: displayName,
+          address,
         },
       }),
-    })),
+    };
+    }),
   };
 }

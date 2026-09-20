@@ -1,6 +1,11 @@
 import type { MediaItem } from "@/lib/media-data";
 import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import {
+  normalizeMediaDetailTextLocale,
+  resolveMediaDisplayName,
+  resolveMediaField,
+} from "@/lib/media-i18n";
+import {
   buildMediaPageTitle,
   formatMediaSeoMonthlyPriceLabel,
 } from "@/lib/media-seo";
@@ -14,6 +19,22 @@ type MediaWithOptionalThumb = MediaItem & {
   thumbnailUrl?: string | null;
   images?: string[] | null;
 };
+
+function mediaTextSource(media: MediaItem) {
+  return {
+    name: media.name,
+    nameEn: media.nameEn,
+    location: media.location,
+    locationEn: media.locationEn,
+    description: media.description,
+    descriptionEn: media.descriptionEn,
+    translations: media.translations,
+  };
+}
+
+function koreanUi(locale: string): boolean {
+  return normalizeMediaDetailTextLocale(locale) === "ko";
+}
 
 function pickRawMediaImageUrl(media: MediaWithOptionalThumb): string | null {
   const thumb = media.thumbnailUrl?.trim();
@@ -44,22 +65,31 @@ export function resolveMediaOgImageUrl(media: MediaItem): string {
 }
 
 export function buildMediaOgTitle(media: MediaItem, locale: string): string {
-  const isKo = locale === "ko" || locale.startsWith("ko");
-  return buildMediaPageTitle(media, locale, isKo ? "옥외광고" : "OOH pricing");
+  return buildMediaPageTitle(
+    media,
+    locale,
+    koreanUi(locale) ? "옥외광고" : "OOH pricing",
+  );
 }
 
 export function buildMediaOgDescription(media: MediaItem, locale: string): string {
-  const isKo = locale === "ko" || locale.startsWith("ko");
+  const koUi = koreanUi(locale);
+  const pillLocale = normalizeMediaDetailTextLocale(locale);
   const region = media.region || media.city || "";
-  const typeStr = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
-  const address = isKo
-    ? media.location
-    : media.locationEn || media.location || "";
+  const typeStr = resolveMediaDisplayPill(
+    media,
+    pillLocale === "ko" ? "ko" : "en",
+  );
+  const address = resolveMediaField(
+    locale,
+    "location",
+    mediaTextSource(media),
+  );
   const pricePart =
     formatMediaSeoMonthlyPriceLabel(media, locale) ||
     mediaPriceOnInquiryLabel(locale);
 
-  const parts = [region, typeStr, isKo ? "광고 매체" : "OOH media", address, pricePart]
+  const parts = [region, typeStr, koUi ? "광고 매체" : "OOH media", address, pricePart]
     .map((p) => p.trim())
     .filter(Boolean);
   return parts.join(" · ");
@@ -69,8 +99,12 @@ export function buildMediaOgShortDescription(
   media: MediaItem,
   locale: string,
 ): string {
-  const isKo = locale === "ko" || locale.startsWith("ko");
+  const koUi = koreanUi(locale);
+  const pillLocale = normalizeMediaDetailTextLocale(locale);
   const region = media.region || media.city || "";
-  const typeStr = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
-  return `${region} ${typeStr} ${isKo ? "광고 매체" : "OOH media"}`.trim();
+  const typeStr = resolveMediaDisplayPill(
+    media,
+    pillLocale === "ko" ? "ko" : "en",
+  );
+  return `${region} ${typeStr} ${koUi ? "광고 매체" : "OOH media"}`.trim();
 }

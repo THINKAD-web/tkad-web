@@ -5,6 +5,8 @@ import { INDUSTRY_SLUGS } from "@/lib/industry-landing";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { publicActiveMediaWhere } from "@/lib/media-review-status";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
+import { buildHreflangLanguageMap } from "@/lib/seo-locale";
+import { routing } from "@/i18n/routing";
 import { listGuideMeta } from "@/lib/guides-data";
 import { BLOG_SEO_POSTS } from "@/lib/blog-seo-posts";
 import { LOCAL_SEO_LANDINGS, localSeoPath } from "@/lib/local-seo-landings";
@@ -133,19 +135,15 @@ export function sitemapEntry(
   >,
 ): MetadataRoute.Sitemap[number] {
   const suffix = path === "" ? "" : path;
-  const ko = `${ctx.origin}/ko${suffix}`;
-  const en = `${ctx.origin}/en${suffix}`;
+  const defaultLocale = routing.defaultLocale;
+  const defaultUrl = `${ctx.origin}/${defaultLocale}${suffix}`;
   return {
-    url: ko,
+    url: defaultUrl,
     lastModified,
     changeFrequency: overrides?.changeFrequency ?? sitemapChangeFrequency(path),
     priority: overrides?.priority ?? sitemapPriority(path),
     alternates: {
-      languages: {
-        ko,
-        en,
-        "x-default": ko,
-      },
+      languages: buildHreflangLanguageMap(ctx.origin, suffix),
     },
   };
 }
