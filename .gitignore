@@ -79,6 +79,7 @@ scripts/print-admin-*.ts
 !reports/design-tone-audit-20260826/screenshots/option-a-media/
 !reports/design-tone-audit-20260826/screenshots/option-a-media/*.png
 scripts/fix-*.ts
+scripts/.backfill-media-translations-calibration.json
 
 # 매체 지표 감사 리포트 (scripts/audit-media-metrics.ts 출력물)
 audit-report.json
