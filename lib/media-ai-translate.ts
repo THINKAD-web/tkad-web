@@ -180,13 +180,19 @@ export async function upsertMediaTranslationDrafts(
   result: Pick<GenerateMediaTranslationsResult, "ja" | "zh">,
 ): Promise<void> {
   const prisma = getPrisma();
+  const mediaTranslation = prisma.mediaTranslation;
+  if (!mediaTranslation) {
+    throw new Error(
+      "Prisma client has no mediaTranslation delegate. Run `npx prisma generate`, then retry (restart the process if a dev server already cached an old client).",
+    );
+  }
   const entries: { locale: "ja" | "zh"; value: MediaTranslationLangResult }[] = [
     { locale: "ja", value: result.ja },
     { locale: "zh", value: result.zh },
   ];
 
   for (const { locale, value } of entries) {
-    await prisma.mediaTranslation.upsert({
+    await mediaTranslation.upsert({
       where: { mediaId_locale: { mediaId, locale } },
       create: {
         mediaId,

@@ -3,6 +3,8 @@
  * PR2-b — batch backfill of ja/zh translations for all existing media (~865).
  *
  * Defaults to dry-run (no API calls, no DB writes). Pass --execute to actually run.
+ * Scope: same as public catalog (`publicActiveMediaWhere` — isActive + not reviewStatus flagged).
+ * Pass --include-non-public to backfill every `media` row (legacy / admin-only).
  * Idempotent: skips any media that already has BOTH a ja and a zh MediaTranslation
  * row, unless --force is passed (then it regenerates and overwrites those rows).
  * Fully sequential (one Claude call at a time) — a delay is inserted between
@@ -19,6 +21,12 @@
  * input_tokens/output_tokens for one real record:
  *   npx tsx scripts/backfill-media-translations.mts --est-input-tokens=NNN --est-output-tokens=NNN
  *
+ * Wall time (--execute) is estimated as:
+ *   targets × (est-call-ms + est-upsert-ms) + (batches − 1) × delay-ms
+ * Override latency with --est-call-ms / --est-upsert-ms, or run
+ * scripts/test-media-translation-once.mts once — it writes
+ * scripts/.backfill-media-translations-calibration.json (auto-loaded when flags omitted).
+ *
  * Does NOT run automatically — dry-run output must be reviewed and --execute
  * approved by a human before any real API/DB call happens (per project policy
  * for a ~865-record job with real API cost).
@@ -28,6 +36,11 @@ import {
   generateMediaTranslations,
   upsertMediaTranslationDrafts,
 } from "../lib/media-ai-translate";
+import {
+  BACKFILL_TRANSLATION_CALIBRATION_PATH,
+  loadBackfillTranslationCalibration,
+} from "./backfill-media-translations-calibration";
+import { publicActiveMediaWhere } from "../lib/media-review-status";
 
 function arg(name: string): string | undefined {
   const prefix = `--${name}=`;
@@ -39,6 +52,8 @@ function flag(name: string): boolean {
 
 const EXECUTE = flag("execute");
 const FORCE = flag("force");
+/** Public-catalog scope (isActive + not flagged). Pass to include deactivated/flagged rows. */
+const INCLUDE_NON_PUBLIC = flag("include-non-public");
 const BATCH_SIZE = Number(arg("batch-size") ?? "8");
 const DELAY_MS = Number(arg("delay-ms") ?? "2000");
 const LIMIT = arg("limit") ? Number(arg("limit")) : undefined;
@@ -52,11 +67,29 @@ const LIMIT = arg("limit") ? Number(arg("limit")) : undefined;
  * AI_MODELS.contentGen resolves to (lib/ai-models.ts). If ANTHROPIC_MODEL is set
  * to override that, re-check pricing for whatever model is actually configured.
  */
-const EST_INPUT_TOKENS_PER_CALL = Number(arg("est-input-tokens") ?? "700");
-const EST_OUTPUT_TOKENS_PER_CALL = Number(arg("est-output-tokens") ?? "450");
+const calibration = loadBackfillTranslationCalibration();
+const hasArg = (name: string) => process.argv.some((a) => a.startsWith(`--${name}=`));
+
+const EST_INPUT_TOKENS_PER_CALL = Number(
+  arg("est-input-tokens") ?? calibration?.inputTokens ?? "700",
+);
+const EST_OUTPUT_TOKENS_PER_CALL = Number(
+  arg("est-output-tokens") ?? calibration?.outputTokens ?? "450",
+);
+const EST_CALL_MS = Number(arg("est-call-ms") ?? calibration?.callMs ?? "4000");
+const EST_UPSERT_MS = Number(
+  arg("est-upsert-ms") ?? calibration?.upsertMs ?? "1500",
+);
 const PRICE_PER_1M_INPUT_USD = 3.0;
 const PRICE_PER_1M_OUTPUT_USD = 15.0;
-const EST_LATENCY_MS_PER_CALL = 4000;
+
+function formatDurationMs(ms: number): string {
+  if (ms < 60_000) return `${Math.round(ms / 1000)}s`;
+  const min = ms / 60_000;
+  if (min < 120) return `~${Math.round(min)} min`;
+  const hours = min / 60;
+  return `~${hours.toFixed(1)} h (${Math.round(min)} min)`;
+}
 
 type Fail = { mediaId: string; name: string; error: string };
 
@@ -67,16 +100,29 @@ function sleep(ms: number): Promise<void> {
 async function main() {
   const prisma = getPrisma();
 
-  const allMedia = await prisma.media.findMany({
-    select: {
-      id: true,
-      name: true,
-      location: true,
-      description: true,
-      country: true,
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  const mediaWhere = INCLUDE_NON_PUBLIC ? {} : publicActiveMediaWhere();
+
+  const [allMediaRows, totalInDb, inactiveCount, flaggedActiveCount] =
+    await Promise.all([
+      prisma.media.findMany({
+        where: mediaWhere,
+        select: {
+          id: true,
+          name: true,
+          location: true,
+          description: true,
+          country: true,
+        },
+        orderBy: { createdAt: "asc" },
+      }),
+      prisma.media.count(),
+      prisma.media.count({ where: { isActive: false } }),
+      prisma.media.count({
+        where: { isActive: true, reviewStatus: "flagged" },
+      }),
+    ]);
+
+  const allMedia = allMediaRows;
 
   const existingCounts = await prisma.mediaTranslation.groupBy({
     by: ["mediaId"],
@@ -93,7 +139,18 @@ async function main() {
   const skippedAlreadyDone = allMedia.length - targets.length;
   if (LIMIT != null) targets = targets.slice(0, LIMIT);
 
-  console.log(`Total media: ${allMedia.length}`);
+  console.log(`Total media rows in DB: ${totalInDb}`);
+  if (!INCLUDE_NON_PUBLIC) {
+    console.log(
+      `Scope: public catalog (isActive=true, reviewStatus≠flagged) — ${allMedia.length} media`,
+    );
+    console.log(
+      `Excluded from scope: ${inactiveCount} inactive, ${flaggedActiveCount} active+flagged`,
+    );
+  } else {
+    console.log(`Scope: --include-non-public (all media rows) — ${allMedia.length} media`);
+  }
+  console.log(`In-scope media this run: ${allMedia.length}`);
   console.log(
     `Already translated (ja+zh present, skipped unless --force): ${skippedAlreadyDone}`,
   );
@@ -101,7 +158,7 @@ async function main() {
     `Target this run: ${targets.length}${LIMIT != null ? ` (--limit=${LIMIT})` : ""}`,
   );
   console.log(
-    `Batch size: ${BATCH_SIZE} (logging only, calls are sequential), delay between batches: ${DELAY_MS}ms, force: ${FORCE}`,
+    `Batch size: ${BATCH_SIZE} (logging only, calls are sequential), delay between batches: ${DELAY_MS}ms, force: ${FORCE}, include-non-public: ${INCLUDE_NON_PUBLIC}`,
   );
 
   if (!EXECUTE) {
@@ -112,19 +169,30 @@ async function main() {
       ((targets.length * EST_OUTPUT_TOKENS_PER_CALL) / 1_000_000) *
       PRICE_PER_1M_OUTPUT_USD;
     const batches = Math.ceil(targets.length / BATCH_SIZE);
-    const estMs =
-      targets.length * EST_LATENCY_MS_PER_CALL +
-      Math.max(0, batches - 1) * DELAY_MS;
+    const batchDelayMs = Math.max(0, batches - 1) * DELAY_MS;
+    const apiMs = targets.length * EST_CALL_MS;
+    const upsertMs = targets.length * EST_UPSERT_MS;
+    const estMs = apiMs + upsertMs + batchDelayMs;
+
+    const calNote =
+      calibration && !hasArg("est-input-tokens") && !hasArg("est-output-tokens") && !hasArg("est-call-ms") && !hasArg("est-upsert-ms")
+        ? `Using calibration file ${BACKFILL_TRANSLATION_CALIBRATION_PATH} (recorded ${calibration.recordedAt}).`
+        : calibration
+          ? `Partial overrides via CLI; file ${BACKFILL_TRANSLATION_CALIBRATION_PATH} fills unset --est-* flags.`
+          : "No calibration file — pass --est-* or run scripts/test-media-translation-once.mts first.";
 
     console.log("\n=== DRY RUN — no API calls, no DB writes ===");
+    console.log(calNote);
     console.log(
       `Estimated cost: $${(estInputCost + estOutputCost).toFixed(2)}` +
         ` (input $${estInputCost.toFixed(2)} + output $${estOutputCost.toFixed(2)}, ` +
-        `at $${PRICE_PER_1M_INPUT_USD}/1M in + $${PRICE_PER_1M_OUTPUT_USD}/1M out (actual rate) — ` +
-        `token counts are a rough placeholder unless --est-input-tokens/--est-output-tokens set, see file header)`,
+        `at $${PRICE_PER_1M_INPUT_USD}/1M in + $${PRICE_PER_1M_OUTPUT_USD}/1M out; ` +
+        `${EST_INPUT_TOKENS_PER_CALL} in + ${EST_OUTPUT_TOKENS_PER_CALL} out tokens/call)`,
     );
     console.log(
-      `Estimated wall time: ~${Math.round(estMs / 60000)} min (${batches} batches, sequential)`,
+      `Estimated wall time if --execute: ${formatDurationMs(estMs)} — ` +
+        `${targets.length}×(${EST_CALL_MS}ms API + ${EST_UPSERT_MS}ms upsert) + ` +
+        `${Math.max(0, batches - 1)}×${DELAY_MS}ms batch delay (${batches} batches, sequential)`,
     );
     console.log("\nSample targets (first 5):");
     for (const m of targets.slice(0, 5)) {

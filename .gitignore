@@ -88,6 +88,7 @@ scripts/print-admin-*.ts
 !reports/trust-credibility-urgent/
 !reports/trust-credibility-urgent/*.png
 scripts/fix-*.ts
+scripts/.backfill-media-translations-calibration.json
 
 # 매체 지표 감사 리포트 (scripts/audit-media-metrics.ts 출력물)
 audit-report.json

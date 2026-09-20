@@ -11,18 +11,42 @@
  *   npx tsx scripts/test-media-translation-once.mts            # picks one active media
  *
  * Needs ANTHROPIC_API_KEY + DATABASE_URL in .env.local (or whatever dotenv lib/prisma.ts loads).
+ * Before first run on this branch:
+ *   npx prisma generate
+ *   npx prisma migrate deploy   # creates media_translations (migration 20260918052604)
  * Does NOT touch the 865-media backfill — that's a separate script (PR2-b, next).
  */
-import { getPrisma } from "../lib/prisma";
+import { getPrisma, refreshPrismaClient } from "../lib/prisma";
 import { generateMediaTranslations, upsertMediaTranslationDrafts } from "../lib/media-ai-translate";
+import {
+  BACKFILL_TRANSLATION_CALIBRATION_PATH,
+  saveBackfillTranslationCalibration,
+} from "./backfill-media-translations-calibration";
 
 function arg(name: string): string | undefined {
   const prefix = `--${name}=`;
   return process.argv.find((a) => a.startsWith(prefix))?.slice(prefix.length);
 }
 
+function requirePrismaWithMediaTranslation() {
+  let prisma = getPrisma();
+  if (!prisma.mediaTranslation) {
+    prisma = refreshPrismaClient();
+  }
+  if (!prisma.mediaTranslation) {
+    console.error(
+      "Prisma client has no `mediaTranslation` delegate (stale generate or wrong branch).\n" +
+        "  npx prisma generate\n" +
+        "  npx prisma migrate deploy   # local DB must have media_translations table\n" +
+        "Then re-run this script.",
+    );
+    process.exit(1);
+  }
+  return prisma;
+}
+
 async function main() {
-  const prisma = getPrisma();
+  const prisma = requirePrismaWithMediaTranslation();
   const mediaId = arg("media-id");
 
   const media = mediaId
@@ -54,8 +78,9 @@ async function main() {
     description: media.description,
     country: media.country,
   });
+  const callMs = Date.now() - t0;
   console.log(
-    `(model: ${result.model}, ${Date.now() - t0}ms, ` +
+    `(model: ${result.model}, ${callMs}ms, ` +
       `input_tokens=${result.usage.inputTokens}, output_tokens=${result.usage.outputTokens})\n`,
   );
 
@@ -67,7 +92,21 @@ async function main() {
   console.log(result.zh);
 
   console.log("\n=== Upserting ja/zh into MediaTranslation (source: ai) ===");
+  const upsertT0 = Date.now();
   await upsertMediaTranslationDrafts(media.id, { ja: result.ja, zh: result.zh });
+  const upsertMs = Date.now() - upsertT0;
+  saveBackfillTranslationCalibration({
+    callMs,
+    inputTokens: result.usage.inputTokens,
+    outputTokens: result.usage.outputTokens,
+    upsertMs,
+    recordedAt: new Date().toISOString(),
+    mediaId: media.id,
+  });
+  console.log(
+    `\nCalibration for backfill dry-run → ${BACKFILL_TRANSLATION_CALIBRATION_PATH}\n` +
+      `(callMs=${callMs}, upsertMs=${upsertMs}, input_tokens=${result.usage.inputTokens}, output_tokens=${result.usage.outputTokens})`,
+  );
 
   const rows = await prisma.mediaTranslation.findMany({
     where: { mediaId: media.id },
@@ -92,9 +131,8 @@ async function main() {
   );
 }
 
-main()
-  .catch((e) => {
-    console.error("\n❌ Failed:", e instanceof Error ? e.message : e);
-    process.exit(1);
-  })
-  .finally(() => process.exit(0));
+main().catch((e) => {
+  console.error("\n❌ Failed:", e instanceof Error ? e.message : e);
+  if (e instanceof Error && e.stack) console.error(e.stack);
+  process.exit(1);
+});
