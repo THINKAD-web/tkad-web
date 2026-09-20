@@ -6,9 +6,19 @@
  * - ja / zh on `MediaTranslation`
  *
  * Fallback (schema SSOT):
- * - ko: ko → en
+ * - ko: ko → en  (see below — production DB never hits this for ko today)
  * - en: en → ko
  * - ja | zh: translation → en → ko
+ *
+ * Schema (`Media`): `name` / `location` are required `String`; `description` is
+ * `String?`. Callers may still pass `null`/`undefined` (partial DTOs) or
+ * whitespace-only strings after trim.
+ *
+ * DB audit (2026-09-20, connected Neon): among 1066 `media` rows and 1047
+ * `publicActiveMediaWhere()` rows, zero rows with trim-empty `name`, `location`,
+ * or `description`, and zero `description IS NULL`. So ko→en on locale `ko` does
+ * not trigger for current catalog data — it mirrors `mediaLocalizedText` and
+ * guards API/edge input. en→ko remains meaningful when `nameEn` is unset.
  *
  * Component wiring (`mediaLocalizedText`, cards, detail) is PR4 — use this helper there.
  */
@@ -92,7 +102,10 @@ export function resolveMediaText(input: ResolveMediaTextInput): string {
   const en = trimText(input.en);
   const tr = trimText(input.translation);
 
-  if (bucket === "ko") return ko || en;
+  if (bucket === "ko") {
+    // Defensive: DB always has non-empty ko today; mirrors mediaLocalizedText.
+    return ko || en;
+  }
   if (bucket === "en") return en || ko;
   return tr || en || ko;
 }
