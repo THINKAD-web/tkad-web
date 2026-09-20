@@ -47,7 +47,14 @@ import {
   normalizeMediaCountry,
   applyOverseasMediaRegionFieldsOnSave,
 } from "@/lib/media-country";
-import { ADMIN_MEDIA_LAYER_INCLUDE } from "@/lib/admin-media-dto";
+import {
+  ADMIN_MEDIA_LAYER_INCLUDE,
+  prismaMediaToAdminDto,
+} from "@/lib/admin-media-dto";
+import {
+  parseAdminMediaTranslationsBody,
+  persistAdminMediaTranslations,
+} from "@/lib/admin-media-translations";
 
 export const dynamic = "force-dynamic";
 
@@ -183,6 +190,8 @@ export async function POST(request: NextRequest) {
   if (!name || !location || !region) {
     return json({ error: "name, location, region required" }, 400);
   }
+
+  const translationsInput = parseAdminMediaTranslationsBody(body);
 
   const catalogChannelResolved = resolveCatalogChannelForMediaWrite({
     catalogChannel: optStr(body.catalogChannel),
@@ -492,9 +501,16 @@ export async function POST(request: NextRequest) {
       if (installLocationsToPersist !== undefined) {
         await persistMediaInstallLocations(tx, m.id, installLocationsToPersist);
       }
+      await persistAdminMediaTranslations(tx, m.id, translationsInput);
       return m;
     });
-    const [withCov] = await attachCoverageDistrictCodesById(db, [media]);
+    const refreshed = await db.media.findUnique({
+      where: { id: media.id },
+      include: ADMIN_MEDIA_LAYER_INCLUDE,
+    });
+    const [withCov] = await attachCoverageDistrictCodesById(db, [
+      refreshed ?? media,
+    ]);
     const [mediaForClient] = await attachInstallLocationsById(db, [withCov]);
 
     if (media.price != null) {
@@ -519,7 +535,7 @@ export async function POST(request: NextRequest) {
 
     return jsonWithHeaders(
       {
-        media: mediaForClient,
+        media: prismaMediaToAdminDto(mediaForClient),
         ...(metricsWarnings.length > 0 ? { warnings: metricsWarnings } : {}),
       },
       201,

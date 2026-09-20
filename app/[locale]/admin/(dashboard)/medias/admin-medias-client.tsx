@@ -137,16 +137,22 @@ import {
   isKoreaMediaCountry,
   MEDIA_COUNTRY_OPTIONS,
   mediaNameEnPlaceholder,
-  mediaNameKoPlaceholder,
   normalizeMediaCountry,
   overseasRegionDefaults,
   OVERSEAS_BROWSE_REGION_MAIN,
 } from "@/lib/media-country";
 import { formatMediaPriceJpyPreview } from "@/lib/media-display-currency";
 import {
-  AdminMediaEnTranslateFields,
-  fetchMediaEnTranslation,
-} from "@/components/admin/admin-media-en-translate-fields";
+  adminTranslationFormFieldsFromDto,
+  adminTranslationsBodyFromForm,
+  formatAdminTranslationStatusLabel,
+} from "@/lib/admin-media-translations";
+import {
+  AdminMediaLocaleTabs,
+  type AdminMediaTranslationSource,
+  type AiDraftFieldFlags,
+} from "@/components/admin/admin-media-locale-tabs";
+import { fetchMediaEnTranslation } from "@/components/admin/admin-media-en-translate-fields";
 
 const AdminMediaInstallLocationsMap = dynamic(
   () => import("@/components/admin-media-install-locations-map"),
@@ -371,6 +377,12 @@ type AdminMediaForm = {
   browseRegionMain: string;
   browseRegionSub: string;
   pricingMode: MediaPricingMode;
+  translationJaName: string;
+  translationJaLocation: string;
+  translationJaDescription: string;
+  translationZhName: string;
+  translationZhLocation: string;
+  translationZhDescription: string;
 };
 
 function galleryUrlsFromForm(form: AdminMediaForm): string[] {
@@ -447,6 +459,12 @@ const emptyForm: AdminMediaForm = {
   browseRegionMain: "",
   browseRegionSub: "",
   pricingMode: "fixed",
+  translationJaName: "",
+  translationJaLocation: "",
+  translationJaDescription: "",
+  translationZhName: "",
+  translationZhLocation: "",
+  translationZhDescription: "",
 };
 
 type PriceOptDraft = {
@@ -656,6 +674,33 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
       ? browse.regionSub || OVERSEAS_BROWSE_REGION_MAIN
       : browse.regionSub,
     pricingMode: m.pricingMode ?? defaultPricingModeForBrowseSub(browse.browseSub),
+    ...(() => {
+      const { translationSourceJa: _ja, translationSourceZh: _zh, ...txFields } =
+        adminTranslationFormFieldsFromDto(m.translations ?? []);
+      return txFields;
+    })(),
+  };
+}
+
+const EMPTY_AI_DRAFT_FIELDS: AiDraftFieldFlags = {
+  nameEn: false,
+  locationEn: false,
+  descriptionEn: false,
+  translationJaName: false,
+  translationJaLocation: false,
+  translationJaDescription: false,
+  translationZhName: false,
+  translationZhLocation: false,
+  translationZhDescription: false,
+};
+
+function translationSourcesFromDto(
+  translations: AdminMediaDto["translations"] | undefined,
+): { ja: AdminMediaTranslationSource; zh: AdminMediaTranslationSource } {
+  const parsed = adminTranslationFormFieldsFromDto(translations ?? []);
+  return {
+    ja: parsed.translationSourceJa,
+    zh: parsed.translationSourceZh,
   };
 }
 
@@ -781,6 +826,7 @@ function formToApiBody(
     pastAdvertisers: form.pastAdvertisers.trim() || null,
     coverageDistrictCodes:
       form.type.trim() === "mobile" ? form.coverageDistrictCodes : [],
+    translations: adminTranslationsBodyFromForm(form),
   };
 }
 
@@ -966,11 +1012,12 @@ export default function AdminMediasClient({
   const [activeInstallKey, setActiveInstallKey] = useState<string | null>(null);
   const [aiTranslateLoading, setAiTranslateLoading] = useState(false);
   const [aiTranslateError, setAiTranslateError] = useState<string | null>(null);
-  const [aiDraftFields, setAiDraftFields] = useState({
-    nameEn: false,
-    locationEn: false,
-    descriptionEn: false,
-  });
+  const [aiDraftFields, setAiDraftFields] =
+    useState<AiDraftFieldFlags>(EMPTY_AI_DRAFT_FIELDS);
+  const [translationSourceJa, setTranslationSourceJa] =
+    useState<AdminMediaTranslationSource>(null);
+  const [translationSourceZh, setTranslationSourceZh] =
+    useState<AdminMediaTranslationSource>(null);
   const [coverageSidoFilter, setCoverageSidoFilter] = useState("서울특별시");
   const [coverageSigunguSearch, setCoverageSigunguSearch] = useState("");
 
@@ -1178,16 +1225,38 @@ export default function AdminMediasClient({
         return;
       }
       const j = result.data;
+      const jaName = j.ja?.name?.trim();
+      const jaLoc = j.ja?.location?.trim();
+      const jaDesc =
+        j.ja?.description != null ? String(j.ja.description).trim() : "";
+      const zhName = j.zh?.name?.trim();
+      const zhLoc = j.zh?.location?.trim();
+      const zhDesc =
+        j.zh?.description != null ? String(j.zh.description).trim() : "";
       setForm((f) => ({
         ...f,
         nameEn: j.nameEn?.trim() || f.nameEn,
         locationEn: j.locationEn?.trim() || f.locationEn,
         descriptionEn: j.descriptionEn?.trim() || f.descriptionEn,
+        translationJaName: jaName || f.translationJaName,
+        translationJaLocation: jaLoc || f.translationJaLocation,
+        translationJaDescription: jaDesc || f.translationJaDescription,
+        translationZhName: zhName || f.translationZhName,
+        translationZhLocation: zhLoc || f.translationZhLocation,
+        translationZhDescription: zhDesc || f.translationZhDescription,
       }));
+      if (jaName || jaLoc || jaDesc) setTranslationSourceJa("ai");
+      if (zhName || zhLoc || zhDesc) setTranslationSourceZh("ai");
       setAiDraftFields({
         nameEn: Boolean(j.nameEn?.trim()),
         locationEn: Boolean(j.locationEn?.trim()),
         descriptionEn: Boolean(j.descriptionEn?.trim()),
+        translationJaName: Boolean(jaName),
+        translationJaLocation: Boolean(jaLoc),
+        translationJaDescription: Boolean(jaDesc),
+        translationZhName: Boolean(zhName),
+        translationZhLocation: Boolean(zhLoc),
+        translationZhDescription: Boolean(zhDesc),
       });
     } catch {
       setAiTranslateError("AI 요청 실패");
@@ -1404,7 +1473,9 @@ export default function AdminMediasClient({
     setPriceOptDrafts([]);
     intentionalPurgeUrlsRef.current = [];
     setSaveError(null);
-    setAiDraftFields({ nameEn: false, locationEn: false, descriptionEn: false });
+    setAiDraftFields(EMPTY_AI_DRAFT_FIELDS);
+    setTranslationSourceJa(null);
+    setTranslationSourceZh(null);
     setAiTranslateError(null);
     setModalOpen(true);
   }, []);
@@ -1413,7 +1484,9 @@ export default function AdminMediasClient({
     const gen = ++editDetailLoadGenRef.current;
     setEditing(media);
     setSaveError(null);
-    setAiDraftFields({ nameEn: false, locationEn: false, descriptionEn: false });
+    setAiDraftFields(EMPTY_AI_DRAFT_FIELDS);
+    setTranslationSourceJa(null);
+    setTranslationSourceZh(null);
     setAiTranslateError(null);
     intentionalPurgeUrlsRef.current = [];
     initialGallerySnapshotRef.current = null;
@@ -1432,6 +1505,9 @@ export default function AdminMediasClient({
       if (!detail.ok) {
         const f = apiToForm(media);
         setForm(f);
+        const src = translationSourcesFromDto(media.translations);
+        setTranslationSourceJa(src.ja);
+        setTranslationSourceZh(src.zh);
         setPriceOptDrafts(priceOptDraftsFromJson(f.priceOptionsJson));
         initialGallerySnapshotRef.current = galleryFormSnapshot(
           f.image,
@@ -1448,6 +1524,9 @@ export default function AdminMediasClient({
       if (!row) {
         const f = apiToForm(media);
         setForm(f);
+        const src = translationSourcesFromDto(media.translations);
+        setTranslationSourceJa(src.ja);
+        setTranslationSourceZh(src.zh);
         setPriceOptDrafts(priceOptDraftsFromJson(f.priceOptionsJson));
         initialGallerySnapshotRef.current = galleryFormSnapshot(
           f.image,
@@ -1461,6 +1540,9 @@ export default function AdminMediasClient({
       setEditing(row);
       const f = apiToForm(row);
       setForm(f);
+      const src = translationSourcesFromDto(row.translations);
+      setTranslationSourceJa(src.ja);
+      setTranslationSourceZh(src.zh);
       setPriceOptDrafts(priceOptDraftsFromJson(f.priceOptionsJson));
       initialGallerySnapshotRef.current = galleryFormSnapshot(
         f.image,
@@ -1704,7 +1786,7 @@ export default function AdminMediasClient({
       intentionalPurgeUrlsRef.current = [];
       clearAdminMediaFormDraft();
       setDraftSavedAt(null);
-      setAiDraftFields({ nameEn: false, locationEn: false, descriptionEn: false });
+      setAiDraftFields(EMPTY_AI_DRAFT_FIELDS);
       setModalOpen(false);
     } catch (e) {
       setSaveError(
@@ -2981,13 +3063,14 @@ export default function AdminMediasClient({
                     <th className="w-[5.5rem] px-2 py-2.5">유형</th>
                     <th className="w-14 px-2 py-2.5 text-center">품질</th>
                     <th className="w-28 px-2 py-2.5">가격</th>
+                    <th className="w-[7.5rem] px-2 py-2.5">번역</th>
                   </tr>
                 </thead>
                 <tbody>
                   {listLoading ? (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="px-3 py-8 text-center text-muted-foreground"
                       >
                         <Loader2 className="mx-auto h-7 w-7 animate-spin text-muted-foreground" />
@@ -2997,7 +3080,7 @@ export default function AdminMediasClient({
                   ) : paginated.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="px-3 py-8 text-center text-muted-foreground"
                       >
                         {medias.length === 0
@@ -3007,6 +3090,9 @@ export default function AdminMediasClient({
                     </tr>
                   ) : (
                     paginated.map((media) => {
+                      const translationStatus = formatAdminTranslationStatusLabel(
+                        media.translations ?? [],
+                      );
                       const metaLine = mediaListMetaLine(media);
                       const nameLine = mediaListNameLine(media);
                       const rowClass = `border-l-[3px] transition-colors ${
@@ -3079,9 +3165,15 @@ export default function AdminMediasClient({
                                 {formatAdminListPrice(media.price)}
                               </div>
                             </td>
+                            <td
+                              className="px-2 py-2.5 align-middle text-[10px] tabular-nums text-muted-foreground"
+                              title={translationStatus}
+                            >
+                              {translationStatus}
+                            </td>
                           </tr>
                           <tr className={`${rowClass} border-b last:border-0`}>
-                            <td colSpan={4} className="px-3 py-2 align-middle">
+                            <td colSpan={5} className="px-3 py-2 align-middle">
                               <div className="mb-2">
                                 <MediaLayerBadges badges={media.layerBadges} />
                               </div>
@@ -3267,21 +3359,11 @@ export default function AdminMediasClient({
                   </p>
                 ) : null}
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  매체명 (한국어) *
-                </label>
-                <Input
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, name: e.target.value }))
-                  }
-                  placeholder={mediaNameKoPlaceholder(form.country)}
-                />
-              </div>
-              <AdminMediaEnTranslateFields
+              <AdminMediaLocaleTabs
                 form={form}
                 setForm={setForm}
+                translationSourceJa={translationSourceJa}
+                translationSourceZh={translationSourceZh}
                 aiDraftFields={aiDraftFields}
                 setAiDraftFields={setAiDraftFields}
                 aiTranslateLoading={aiTranslateLoading}
@@ -3289,26 +3371,10 @@ export default function AdminMediasClient({
                 editDetailLoading={editDetailLoading}
                 onTranslate={runAiEnTranslation}
               />
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  위치(주소) *
-                </label>
-                <Input
-                  value={form.location}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, location: e.target.value }))
-                  }
-                  placeholder={
-                    isOverseasMedia
-                      ? "예: 1-2-3 Dogenzaka, Shibuya, Tokyo"
-                      : "경기도 가평군 설악면 미사리로540번길 51"
-                  }
-                />
-                <p className="mt-1 text-[10px] text-muted-foreground">
-                  카탈로그·검색에 쓰는 대표 주소입니다. 실제 설치 좌표는 아래
-                  「설치 지점」에서 방향별로 넣습니다.
-                </p>
-              </div>
+              <p className="-mt-1 text-[10px] text-muted-foreground">
+                한국어 탭의 위치(주소)는 카탈로그·검색 대표 주소입니다. 실제 설치 좌표는 아래
+                「설치 지점」에서 방향별로 넣습니다.
+              </p>
 
               <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -4461,18 +4527,6 @@ export default function AdminMediasClient({
                   }}
                 />
               ) : null}
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  설명
-                </label>
-                <Textarea
-                  rows={3}
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, description: e.target.value }))
-                  }
-                />
-              </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">

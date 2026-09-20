@@ -66,6 +66,10 @@ import {
   ADMIN_MEDIA_LAYER_INCLUDE,
   prismaMediaToAdminDto,
 } from "@/lib/admin-media-dto";
+import {
+  parseAdminMediaTranslationsBody,
+  persistAdminMediaTranslations,
+} from "@/lib/admin-media-translations";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +130,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
   const strippedHeader =
     stripped.length > 0 ? stripped.join(",") : "";
+
+  const translationsInput = parseAdminMediaTranslationsBody(body);
 
   const data: Prisma.MediaUpdateInput = {};
   let installLocationsToPersist: MediaInstallLocation[] | null | undefined;
@@ -893,9 +899,16 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       if (installLocationsToPersist !== undefined) {
         await persistMediaInstallLocations(tx, id, installLocationsToPersist);
       }
+      await persistAdminMediaTranslations(tx, id, translationsInput);
       return updated;
     });
-    const [withCov] = await attachCoverageDistrictCodesById(db, [media]);
+    const refreshed = await db.media.findUnique({
+      where: { id: media.id },
+      include: ADMIN_MEDIA_LAYER_INCLUDE,
+    });
+    const [withCov] = await attachCoverageDistrictCodesById(db, [
+      refreshed ?? media,
+    ]);
     const [mediaForClient] = await attachInstallLocationsById(db, [withCov]);
     if (isAdminAuthDebugEnabled()) {
       console.log("[admin-api] media PATCH persisted", {
@@ -934,7 +947,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
     return jsonWithHeaders(
       {
-        media: mediaForClient,
+        media: prismaMediaToAdminDto(mediaForClient),
         ...(metricsWarnings.length > 0 ? { warnings: metricsWarnings } : {}),
       },
       200,

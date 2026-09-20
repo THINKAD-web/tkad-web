@@ -15,6 +15,13 @@ import {
 } from "@/lib/media-install-locations";
 import { normalizeCatalogChannel } from "@/lib/catalog-channel";
 import { parseMediaHotspotTags } from "@/lib/matching/region-hotspot";
+import {
+  ADMIN_MEDIA_TRANSLATIONS_INCLUDE,
+  normalizeAdminTranslationRows,
+  type AdminMediaTranslationDto,
+} from "@/lib/admin-media-translations";
+
+export type { AdminMediaTranslationDto };
 
 export type MediaAvailability = "available" | "reserved" | "maintenance";
 
@@ -35,6 +42,7 @@ export const ADMIN_MEDIA_LAYER_INCLUDE = {
       legacyCpm: true,
     },
   },
+  ...ADMIN_MEDIA_TRANSLATIONS_INCLUDE,
 } as const;
 
 /** Admin 매체 관리 / API 공통 DTO (클라이언트·서버 직렬화용) */
@@ -133,6 +141,8 @@ export type AdminMediaDto = {
   regionSub: string | null;
   /** PR4: 3-layer badge data (admin list/modal only) */
   layerBadges: AdminMediaLayerBadges | null;
+  /** ja/zh from `MediaTranslation`. */
+  translations: AdminMediaTranslationDto[];
 };
 
 const AVAIL: MediaAvailability[] = ["available", "reserved", "maintenance"];
@@ -425,6 +435,17 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     regionMain: pickStr(r, "regionMain", "region_main"),
     regionSub: pickStr(r, "regionSub", "region_sub"),
     layerBadges: pickLayerBadges(r),
+    translations: normalizeAdminTranslationRows(
+      Array.isArray(r.translations)
+        ? (r.translations as {
+            locale: string;
+            name: string | null;
+            description: string | null;
+            location: string | null;
+            source: string;
+          }[])
+        : [],
+    ),
   };
 }
 
@@ -457,6 +478,13 @@ export function prismaMediaToAdminDto(
       modelVersion: string;
       legacyCpm: number | null;
     } | null;
+    translations?: readonly {
+      locale: string;
+      name: string | null;
+      description: string | null;
+      location: string | null;
+      source: string;
+    }[];
   },
 ): AdminMediaDto {
   const grade = m.computedMetric?.reliabilityGrade;
@@ -564,6 +592,7 @@ export function prismaMediaToAdminDto(
     regionMain: m.regionMain,
     regionSub: m.regionSub,
     layerBadges,
+    translations: normalizeAdminTranslationRows(m.translations ?? []),
   };
 }
 
