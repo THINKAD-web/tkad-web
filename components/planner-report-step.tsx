@@ -116,6 +116,8 @@ export type PlannerReportSharedProps = {
   seoulZones?: readonly PlannerSeoulZoneKey[];
   goalFollowUp?: PlannerGoalFollowUp;
   portfolio: MediaItem[];
+  /** 서울 CPM·유동 벤치마크 — 공개 카탈로그 SSOT (my/plan 보고서 등) */
+  benchmarkCatalog?: readonly MediaItem[];
   /** Step 4 선택 매체 수량 — 예산·노출·보고서 반영 */
   campaignMediaQuantities?: Record<string, number>;
   campaignMediaPriceOptionIndex?: Record<string, number>;
@@ -775,6 +777,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         campaignMediaQuantities: props.campaignMediaQuantities,
         campaignMediaPriceOptionIndex: props.campaignMediaPriceOptionIndex,
         planCartItems: props.planCartItems,
+        benchmarkCatalog: props.benchmarkCatalog,
         reportGreeting,
         reportExecutiveSummaryLines: executiveSummaryLines,
         documentTypeKey: reportDocumentType,

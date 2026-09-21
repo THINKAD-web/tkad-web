@@ -1128,8 +1128,29 @@ export async function buildPlannerReportPdf(
     let contentH = 5;
     if (row.location) contentH += 4.2;
     if (row.categoryLabel) contentH += 4.2;
-    // 라벨·값 2줄 스택(일 실노출(추정) 등 긴 라벨 겹침 방지)
-    if (specs.length > 0) contentH += 3 + Math.ceil(specs.length / 2) * 7.8;
+    const specLabelValueGap = 3.2;
+    const specRowGap = 1.5;
+    const specLineH = 3.6;
+    if (specs.length > 0) {
+      contentH += 3;
+      doc.setFontSize(PDF_LAYOUT.detailSpecPt);
+      for (let i = 0; i < specs.length; i += 2) {
+        const hLeft =
+          specLabelValueGap +
+          ((
+            doc.splitTextToSize(specs[i]!.value, colW) as string[]
+          ).length || 1) *
+            specLineH;
+        const hRight = specs[i + 1]
+          ? specLabelValueGap +
+            ((
+              doc.splitTextToSize(specs[i + 1]!.value, colW) as string[]
+            ).length || 1) *
+              specLineH
+          : 0;
+        contentH += Math.max(hLeft, hRight) + specRowGap;
+      }
+    }
     if (row.monthlyPriceLabel || row.lineTotalLabel) contentH += 11;
     if (row.recommendReason?.trim()) {
       const reasonLines = doc.splitTextToSize(
@@ -1218,18 +1239,15 @@ export async function buildPlannerReportPdf(
       doc.line(textX, ty, textX + textW, ty);
       ty += 3;
       doc.setFontSize(PDF_LAYOUT.detailSpecPt);
-      const specLabelValueGap = 3.2;
-      const specRowGap = 1.5;
       for (let i = 0; i < specs.length; i += 2) {
         const drawSpec = (spec: MediaCardSpec, sx: number): number => {
           setText(GRAY_500);
           doc.text(`${spec.label}`, sx, ty);
           setText(INK);
           doc.setFont(FONT, "normal");
-          const val =
-            (doc.splitTextToSize(spec.value, colW) as string[])[0] ?? spec.value;
-          doc.text(val, sx, ty + specLabelValueGap);
-          return specLabelValueGap + 3.6;
+          const valLines = doc.splitTextToSize(spec.value, colW) as string[];
+          doc.text(valLines, sx, ty + specLabelValueGap);
+          return specLabelValueGap + valLines.length * specLineH;
         };
         let rowH = drawSpec(specs[i]!, textX);
         if (specs[i + 1]) {
