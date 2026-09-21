@@ -1,0 +1,192 @@
+{
+  "generatedAt": "2026-09-21T02:01:18.394Z",
+  "apply": true,
+  "dbTarget": "production",
+  "hostname": "ep-holy-cloud-ah6w4cml-pooler.c-3.us-east-1.aws.neon.tech",
+  "rowsScanned": 788,
+  "toClear": 26,
+  "plan": [
+    {
+      "id": "cmp7wcek4000204jvupgubwwz",
+      "slug": "dosandaero-sseonaenbil-jeongwangpan-gwanggo",
+      "name": "도산대로 썬앤빌 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cms3ls8d3000p04jv57gkwlel",
+      "slug": "hongdae-oteupasadeu-e-display-ateuwol-gwanggo-bokje",
+      "name": "홍대 오트파사드 베가 (VAGA) 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmq99js80000204l7kldgf4a1",
+      "slug": null,
+      "name": "스타필드 하남점 스탠딩&E.V홀 스크린 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp027fo0000a04l16p2swiio",
+      "slug": "gangnam-raendeumakeubilding-jeongwangpan-gwanggo",
+      "name": "강남 랜드마크빌딩 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp0fsg94000e04l2tjtr1rir",
+      "slug": "dosandaero-eseujiepeutawo-jeongwangpan-gwanggo",
+      "name": "도산대로 SGF타워 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmpbcufq0000004l4kl2vh2no",
+      "slug": "sadangyeok-samjinbilding-jeongwangpan-gwanggo",
+      "name": "사당역 삼진빌딩 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cms4vx7fe000904jo2kzchcof",
+      "slug": null,
+      "name": "김해국제공항 진입로 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmpb9r2hy000204iiy1rpsr6f",
+      "slug": "cheonhodaero-gangdongbilding-jeongwangpan-gwanggo",
+      "name": "천호대로 강동빌딩 전광판 광고",
+      "engagementRate": 0.64,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp8p00j9000004l4z5iwwkf0",
+      "slug": "gwangju-sangmujigu-aitawo-jeongwangpan-gwanggo",
+      "name": "광주 상무지구 아이타워 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp0fmd42000a04l2h8i63c9a",
+      "slug": "sinsa-hyumeontawo-jeongwangpan-gwanggo",
+      "name": "신사 휴먼타워 H-STATION 전광판 광고",
+      "engagementRate": 0.64,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp02lm2d000c04kzu8wo3e6z",
+      "slug": "gangnam-senteureolsiti-imateu24sangdan-raiteubakseu-gwanggo",
+      "name": "강남 센트럴시티 이마트24상단 라이트박스 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmqhz0v45000104jii9gfjnfh",
+      "slug": null,
+      "name": "신세계백화점 대전점 미디어 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp7yyiau000004jqp8bqmfhc",
+      "slug": "gangnamdaero-jiem-raibeu-jeongwangpan-gwanggo",
+      "name": "강남대로 GM-LIVE 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp85wzre000004jo20fg632s",
+      "slug": "teheranro-dieibilding-jeongwangpan-gwanggo",
+      "name": "테헤란로 DA빌딩 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmpayba5g000204jusf607yzp",
+      "slug": "chungmuro-gukjebilding-jeongwangpan-gwanggo",
+      "name": "충무로 국제빌딩 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cms4mlmkj000l04k0pqvlmlop",
+      "slug": "namsanteoneolbilding-oebyeok-ateuwol-gwanggo-bokje",
+      "name": "고파스빌딩 외벽 아트월 광고",
+      "engagementRate": 0.66,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmo61zsuy000004l550h1bjvu",
+      "slug": "namsanteoneolbilding-bilbodeu-gwanggo",
+      "name": "남산터널빌딩 외벽 아트월 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp0fmxl0000004l5u5uyxetd",
+      "slug": "dosandaero-baekyeongbilding-jeongwangpan-gwanggo",
+      "name": "도산대로 백영빌딩 전광판 광고",
+      "engagementRate": 0.66,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmo6lp8m6000004l2gwox9kgi",
+      "slug": "gwangju-eodeungsancc-jeongwangpan-gwanggo",
+      "name": "광주 어등산CC 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmqjeji35000104jy8yz3inre",
+      "slug": null,
+      "name": "부산 지하철 2호선 사각기둥 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmpa2y6rs000104jls9rl0wjh",
+      "slug": "jongro-kyubeubilding-jeongwangpan-gwanggo",
+      "name": "종로 큐브빌딩 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cms3p572i000204l7j1bvqn87",
+      "slug": "sinsa-mega-senteuro-hwakjang-raepping-gwanggo-bokje",
+      "name": "신사역 K-Tower 외벽 아트월 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp69eour000004jfak485hgz",
+      "slug": "yeongdongdaegyo-riberahotel-jeongwangpan-gwanggo",
+      "name": "영동대교 리베라호텔 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp65rrot000004jx2o87isb3",
+      "slug": "sicheong-geunwonbilding-jeongwangpan-gwanggo",
+      "name": "시청 근원빌딩 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmp87ybb1000004jrw92ua6bz",
+      "slug": "sicheong-daeungbilding-jeongwangpan-gwanggo",
+      "name": "시청 대웅빌딩 전광판 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    },
+    {
+      "id": "cmqizh08z000404laszysuo5x",
+      "slug": null,
+      "name": "KTX 차내 액자 광고",
+      "engagementRate": 0.65,
+      "reason": "placeholder_no_source"
+    }
+  ]
+}
