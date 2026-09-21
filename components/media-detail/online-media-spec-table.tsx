@@ -1,3 +1,4 @@
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 import type { MediaItem } from "@/lib/media-data";
 import { buildOnlineDetailSpecRows } from "@/lib/online/online-detail-spec";
 import { onlinePricingLabel } from "@/lib/pricing/online-performance-estimate";
@@ -8,29 +9,30 @@ import { cn } from "@/lib/utils";
 type Props = {
   media: MediaItem;
   typeLabel: string;
-  isKo: boolean;
+  locale: string;
   className?: string;
 };
 
-export function OnlineMediaSpecTable({ media, typeLabel, isKo, className }: Props) {
+export function OnlineMediaSpecTable({ media, typeLabel, locale, className }: Props) {
+  const bucket = normalizeMediaDetailTextLocale(locale);
   const spec = media.onlineSpec;
   const rows = buildOnlineDetailSpecRows({
     typeLabel,
     platform: spec?.platform,
     spec,
     slug: media.slug,
-    isKo,
+    locale,
   });
 
   const pricingHint =
     spec && hasOnlinePricingSpec(media)
       ? onlinePricingLabel(spec)
-      : mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
+      : mediaPriceOnInquiryLabel((bucket === "ko") ? "ko" : "en");
 
   return (
     <section
       className={cn("rounded-2xl border dark:border-white/10 border-gray-200 p-4 sm:p-5", className)}
-      aria-label={isKo ? "매체 스펙 요약" : "Media spec summary"}
+      aria-label={(bucket === "ko") ? "매체 스펙 요약" : "Media spec summary"}
     >
       <table className="w-full text-sm">
         <tbody>
@@ -57,7 +59,7 @@ export function OnlineMediaSpecTable({ media, typeLabel, isKo, className }: Prop
       </p>
       {hasOnlinePricingSpec(media) ? (
         <p className="mt-1 text-xs text-gray-500 dark:text-white/55">
-          {isKo
+          {(bucket === "ko")
             ? "참고 단가 (CPC/CPM 시드 범위)"
             : "Reference rates (seeded CPC/CPM range)"}
         </p>

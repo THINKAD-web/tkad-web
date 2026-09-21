@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale } from "next-intl";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 import { Link } from "@/i18n/navigation";
 import { BadgeCheck, ThumbsUp } from "lucide-react";
 import { MediaStarRating } from "@/components/media/media-star-rating";
@@ -37,7 +38,7 @@ export function MediaReviewsSection({
   initialStats,
 }: Props) {
   const locale = useLocale();
-  const isKo = locale === "ko";
+  const bucket = normalizeMediaDetailTextLocale(locale);
   const toast = useAppToast();
 
   const [stats, setStats] = useState<MediaReviewStats>(
@@ -156,7 +157,7 @@ export function MediaReviewsSection({
     );
     if (res.status === 401) {
       toast.error(
-        isKo ? "로그인이 필요합니다." : "Please sign in to continue.",
+        (bucket === "ko") ? "로그인이 필요합니다." : "Please sign in to continue.",
       );
       return;
     }
@@ -193,29 +194,29 @@ export function MediaReviewsSection({
           id="media-reviews-heading"
           className="text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground"
         >
-          {isKo ? "광고주 리뷰" : "Advertiser reviews"}
+          {(bucket === "ko") ? "광고주 리뷰" : "Advertiser reviews"}
         </h2>
         {canReview ? (
           <Link
             href={`/media/${mediaId}/review`}
             className="inline-flex rounded-xl border-2 border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
           >
-            {isKo ? "리뷰 작성" : "Write a review"}
+            {(bucket === "ko") ? "리뷰 작성" : "Write a review"}
           </Link>
         ) : null}
       </div>
 
       {loadState === "loading" ? (
         <p className="mt-6 text-sm text-muted-foreground">
-          {isKo ? "불러오는 중…" : "Loading…"}
+          {(bucket === "ko") ? "불러오는 중…" : "Loading…"}
         </p>
       ) : showEmpty ? (
         <p className="mt-6 rounded-2xl border border-dashed border-border/80 bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
           {loadState === "error"
-            ? isKo
+            ? (bucket === "ko")
               ? "리뷰를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
               : "Could not load reviews. Please try again later."
-            : isKo
+            : (bucket === "ko")
               ? `아직 ${mediaName}에 대한 리뷰가 없습니다. 집행 경험이 있으시면 첫 리뷰를 남겨 주세요.`
               : `No reviews for ${mediaName} yet. Be the first to share your experience.`}
         </p>
@@ -230,7 +231,7 @@ export function MediaReviewsSection({
               />
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {isKo
+              {(bucket === "ko")
                 ? `${stats.reviewCount}개 리뷰`
                 : `${stats.reviewCount} reviews`}
             </p>
@@ -260,11 +261,11 @@ export function MediaReviewsSection({
 
           {itemsLoadState === "loading" ? (
             <p className="text-sm text-muted-foreground">
-              {isKo ? "불러오는 중…" : "Loading…"}
+              {(bucket === "ko") ? "불러오는 중…" : "Loading…"}
             </p>
           ) : itemsLoadState === "error" ? (
             <p className="text-sm text-muted-foreground">
-              {isKo
+              {(bucket === "ko")
                 ? "리뷰를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
                 : "Could not load reviews. Please try again later."}
             </p>
@@ -282,7 +283,7 @@ export function MediaReviewsSection({
                     {review.isVerified ? (
                       <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 tkad-type-note font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
                         <BadgeCheck className="h-3 w-3" />
-                        {isKo ? "실집행 인증" : "Verified execution"}
+                        {(bucket === "ko") ? "실집행 인증" : "Verified execution"}
                       </span>
                     ) : null}
                   </div>
@@ -318,7 +319,7 @@ export function MediaReviewsSection({
                     )}
                   >
                     <ThumbsUp className="h-3.5 w-3.5" />
-                    {isKo ? "도움이 됐어요" : "Helpful"}
+                    {(bucket === "ko") ? "도움이 됐어요" : "Helpful"}
                     <span className="tabular-nums">({review.helpfulCount})</span>
                   </button>
                 </li>

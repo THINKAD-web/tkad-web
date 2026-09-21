@@ -1,5 +1,7 @@
 "use client";
 
+import { intlLocaleTag, normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 import { useMemo, useState } from "react";
 import { Calculator } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -11,15 +13,15 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale: string;
   className?: string;
 };
 
 const DAY_PRESETS = [1, 3, 5, 7, 15, 30];
 
-export function MediaQuoteCalculator({ media, isKo, className }: Props) {
-  const locale = isKo ? "ko" : "en";
-  const localeTag = isKo ? "ko-KR" : "en-US";
+export function MediaQuoteCalculator({ media, locale, className }: Props) {
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const intlTag = intlLocaleTag(locale);
   const [days, setDays] = useState(30);
   const [includeVat, setIncludeVat] = useState(false);
 
@@ -34,21 +36,21 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
 
   const contactHref = useMemo(() => {
     const vatNote = includeVat
-      ? isKo
+      ? (bucket === "ko")
         ? "VAT 포함"
         : "VAT incl."
-      : isKo
+      : (bucket === "ko")
         ? "VAT 별도"
         : "excl. VAT";
     const summary = [
-      isKo ? "[매체 상세 · 인스턴트 견적]" : "[Media detail · instant quote]",
-      isKo ? `매체: ${media.name} (${media.id})` : `Media: ${media.name} (${media.id})`,
-      isKo ? `집행 기간: ${days}일` : `Duration: ${days} days`,
-      isKo
+      (bucket === "ko") ? "[매체 상세 · 인스턴트 견적]" : "[Media detail · instant quote]",
+      (bucket === "ko") ? `매체: ${media.name} (${media.id})` : `Media: ${media.name} (${media.id})`,
+      (bucket === "ko") ? `집행 기간: ${days}일` : `Duration: ${days} days`,
+      (bucket === "ko")
         ? `예상 비용(${vatNote}): ${formatWonShort(displayCost, locale)}`
         : `Est. cost (${vatNote}): ${formatWonShort(displayCost, locale)}`,
       quote.impressions > 0
-        ? isKo
+        ? (bucket === "ko")
           ? `예상 노출: ${quote.impressions.toLocaleString("ko-KR")}회`
           : `Est. impressions: ${quote.impressions.toLocaleString("en-US")}`
         : null,
@@ -60,7 +62,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
     q.set("media", media.id);
     q.set("quote", summary);
     return `/contact?${q.toString()}`;
-  }, [days, displayCost, includeVat, isKo, locale, media, quote.impressions]);
+  }, [days, displayCost, includeVat, locale, locale, media, quote.impressions]);
 
   const inputCls =
     "h-10 rounded-xl border border-border bg-background px-3  text-sm text-foreground outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15";
@@ -75,17 +77,17 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
     >
       <p className="inline-flex items-center gap-2 tkad-type-label text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/90">
         <Calculator className="h-3.5 w-3.5" aria-hidden />
-        {isKo ? "간편 견적" : "Quick estimate"}
+        {(bucket === "ko") ? "간편 견적" : "Quick estimate"}
       </p>
       <h2 className="mt-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground">
-        {isKo ? "집행 기간별 예상 비용" : "Cost by flight length"}
+        {(bucket === "ko") ? "집행 기간별 예상 비용" : "Cost by flight length"}
       </h2>
       <p className="mt-1 text-xs text-muted-foreground">
-        {isKo
-          ? `기준 단가 ${formatCatalogPriceFieldWon(media.price, localeTag)} · 실제 견적은 옵션·시즌에 따라 달라질 수 있습니다.`
-          : `List ${formatCatalogPriceFieldWon(media.price, localeTag)} · Final quote may vary by option and season.`}
+        {(bucket === "ko")
+          ? `기준 단가 ${formatCatalogPriceFieldWon(media.price, intlTag)} · 실제 견적은 옵션·시즌에 따라 달라질 수 있습니다.`
+          : `List ${formatCatalogPriceFieldWon(media.price, intlTag)} · Final quote may vary by option and season.`}
       </p>
-      <MediaPriceExclNote isKo={isKo} className="mt-1" />
+      <MediaPriceExclNote locale={locale} className="mt-1" />
 
       <div className="mt-4 flex flex-wrap gap-2">
         {DAY_PRESETS.map((d) => (
@@ -101,7 +103,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
             )}
           >
             {d}
-            {isKo ? "일" : "d"}
+            {(bucket === "ko") ? "일" : "d"}
           </button>
         ))}
         <label className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 tkad-type-caption text-muted-foreground">
@@ -113,7 +115,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
             onChange={(e) => setDays(Math.max(1, Number(e.target.value) || 1))}
             className={cn(inputCls, "h-8 w-16 border-0 bg-transparent p-0")}
           />
-          <span>{isKo ? "일" : "days"}</span>
+          <span>{(bucket === "ko") ? "일" : "days"}</span>
         </label>
       </div>
 
@@ -124,29 +126,29 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
           onChange={(e) => setIncludeVat(e.target.checked)}
           className="rounded dark:border-white/20 border-gray-300"
         />
-        {isKo ? "VAT 포함 금액 표시" : "Show price including VAT (10%)"}
+        {(bucket === "ko") ? "VAT 포함 금액 표시" : "Show price including VAT (10%)"}
       </label>
 
       <p className="mt-5 text-2xl font-black tabular-nums text-foreground sm:text-3xl">
-        {isKo ? "집행 기간: " : "Duration: "}
+        {(bucket === "ko") ? "집행 기간: " : "Duration: "}
         <span className="text-[color:var(--qp-accent)]">{days}</span>
-        {isKo ? "일 → " : "d → "}
+        {(bucket === "ko") ? "일 → " : "d → "}
         <span className="text-[color:var(--qp-accent)]">
-          {isKo ? "예상 비용 " : "Est. "}
+          {(bucket === "ko") ? "예상 비용 " : "Est. "}
           {formatWonShort(displayCost, locale)}
         </span>
       </p>
 
       {quote.impressions > 0 && (
         <p className="mt-2 tkad-type-meta text-muted-foreground">
-          {isKo ? "예상 노출 " : "Est. reach "}
-          {quote.impressions.toLocaleString(localeTag)}
-          {isKo ? "회" : ""}
+          {(bucket === "ko") ? "예상 노출 " : "Est. reach "}
+          {quote.impressions.toLocaleString(intlTag)}
+          {(bucket === "ko") ? "회" : ""}
           {quote.cpm ? (
             <>
               {" · CPM "}
               <span className="text-emerald-300">
-                ₩{quote.cpm.toLocaleString(localeTag)}
+                ₩{quote.cpm.toLocaleString(intlTag)}
               </span>
             </>
           ) : null}
@@ -157,7 +159,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
         href={contactHref}
         className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-muted px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/80"
       >
-        {isKo ? "이 견적으로 문의하기" : "Inquire with this estimate"}
+        {(bucket === "ko") ? "이 견적으로 문의하기" : "Inquire with this estimate"}
       </Link>
     </section>
   );

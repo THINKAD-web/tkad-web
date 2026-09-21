@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { MapPin } from "lucide-react";
@@ -46,25 +48,26 @@ function markerIdForLocationRow(
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale: string;
   regionDisplay: string;
   className?: string;
 };
 
 export function MediaDetailLocationPanel({
   media,
-  isKo,
+  locale,
   regionDisplay,
   className,
 }: Props) {
+  const bucket = normalizeMediaDetailTextLocale(locale);
   const t = useTranslations("media.detail");
   const mapMarkers = useMemo(
-    () => mapMarkersForMediaDetail(media, isKo),
-    [media, isKo],
+    () => mapMarkersForMediaDetail(media, locale),
+    [media, locale],
   );
   const mapNotice = useMemo(
-    () => resolveMediaDetailMapNotice(media, isKo),
-    [media, isKo],
+    () => resolveMediaDetailMapNotice(media, locale),
+    [media, locale],
   );
   const showMapPins = mapItemShowsOnMap(resolveMapDisplayMode(media));
   const mapCenter = useMemo(
@@ -167,14 +170,14 @@ export function MediaDetailLocationPanel({
       !(media.lat === 0 && media.lng === 0);
     return [
       {
-        name: isKo ? media.name : media.nameEn || media.name,
+        name: (bucket === "ko") ? media.name : media.nameEn || media.name,
         region: regionDisplay,
-        address: isKo ? media.location : media.locationEn || media.location,
+        address: (bucket === "ko") ? media.location : media.locationEn || media.location,
         lat: hasCoord ? media.lat : undefined,
         lng: hasCoord ? media.lng : undefined,
       },
     ];
-  }, [netLocations, media, isKo, regionDisplay, showMapPins]);
+  }, [netLocations, media, locale, regionDisplay, showMapPins]);
 
   // media 변경(다른 매체 보기)에만 반응 — mapMarkers 객체 identity 의존 제거(상위 리렌더 취약성 차단).
   useEffect(() => {
@@ -216,11 +219,11 @@ export function MediaDetailLocationPanel({
 
   const mapLat = selectedMarker?.lat ?? media.lat;
   const mapLng = selectedMarker?.lng ?? media.lng;
-  const spotName = selectedMarker?.name ?? (isKo ? media.name : media.nameEn || media.name);
+  const spotName = selectedMarker?.name ?? ((bucket === "ko") ? media.name : media.nameEn || media.name);
 
   const unitSuffix = networkInventoryUnitSuffix(
     media.networkSubtype ?? media.type,
-    isKo,
+    locale,
     media.tags,
   );
   /** 단일 사이트 매체는 아래 "주소" 카드와 완전 중복 — 복수 지점(네트워크 포함)일 때만 목록 표시 */
@@ -230,7 +233,7 @@ export function MediaDetailLocationPanel({
   const useLeafletMap = mediaDetailUsesLeafletMap(media.country);
   const addressText =
     selectedInstall?.location?.trim() ||
-    (isKo ? media.location : media.locationEn || media.location);
+    ((bucket === "ko") ? media.location : media.locationEn || media.location);
 
   return (
     <div className={cn("space-y-6", className)}>
@@ -258,11 +261,11 @@ export function MediaDetailLocationPanel({
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b dark:border-white/10 border-gray-200 px-4 py-3">
             <p className="flex items-center gap-2 text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
               <MapPin className="h-3.5 w-3.5" aria-hidden />
-              {isNetwork ? (isKo ? "설치 지점" : "Locations") : isKo ? "위치" : "Location"}
+              {isNetwork ? ((bucket === "ko") ? "설치 지점" : "Locations") : (bucket === "ko") ? "위치" : "Location"}
             </p>
             {isNetwork ? (
               <p className="text-[length:var(--qp-text-body)] font-bold tabular-nums dark:text-white text-gray-900">
-                {isKo
+                {(bucket === "ko")
                   ? `전국 ${netLocations.length.toLocaleString("ko-KR")}개 지점 · 총 ${totalUnits.toLocaleString("ko-KR")}${unitSuffix}`
                   : `${netLocations.length.toLocaleString("en-US")} sites · ${totalUnits.toLocaleString("en-US")} units`}
               </p>
@@ -298,25 +301,25 @@ export function MediaDetailLocationPanel({
                       </p>
                       <p className="mt-0.5 truncate text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
                         {loc.region ? `${loc.region} · ` : ""}
-                        {loc.address ?? (isKo ? "주소 미등록" : "No address")}
+                        {loc.address ?? ((bucket === "ko") ? "주소 미등록" : "No address")}
                       </p>
                     </div>
                     <div className="shrink-0 text-right">
                       {loc.unitCount != null ? (
                         <p className="text-xs font-bold tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
-                          {loc.unitCount.toLocaleString(isKo ? "ko-KR" : "en-US")}
-                          {isKo ? unitSuffix : "u"}
+                          {loc.unitCount.toLocaleString((bucket === "ko") ? "ko-KR" : "en-US")}
+                          {(bucket === "ko") ? unitSuffix : "u"}
                         </p>
                       ) : null}
                       {loc.dailyFootfall ? (
                         <p className="tkad-type-caption dark:text-white/45 text-gray-400">
-                          {isKo ? "일 " : ""}
-                          {loc.dailyFootfall.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                          {(bucket === "ko") ? "일 " : ""}
+                          {loc.dailyFootfall.toLocaleString((bucket === "ko") ? "ko-KR" : "en-US")}
                         </p>
                       ) : null}
                       {!hasCoord ? (
                         <p className="tkad-type-note text-amber-500">
-                          {isKo ? "지도 미표시" : "no map"}
+                          {(bucket === "ko") ? "지도 미표시" : "no map"}
                         </p>
                       ) : null}
                     </div>
@@ -369,7 +372,7 @@ export function MediaDetailLocationPanel({
             lat={mapLat}
             lng={mapLng}
             address={addressText}
-            isKo={isKo}
+            locale={locale}
           />
         )}
       </div>

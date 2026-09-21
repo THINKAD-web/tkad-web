@@ -2,6 +2,7 @@
 
 import type { AccessCheckResult, ReportFeature } from "@/lib/report-access-shared";
 import { buildFeatureGateMessage } from "@/lib/entitlements/gate-messages";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 import {
   TierGateOverlay,
   TierGatePanel,
@@ -10,7 +11,9 @@ import {
 type Props = {
   access: AccessCheckResult;
   feature: ReportFeature;
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   children: React.ReactNode;
   /** When true, show content blurred behind overlay */
   gated?: boolean;
@@ -22,18 +25,23 @@ type Props = {
 export function ReportAccessGate({
   access,
   feature,
+  locale,
   isKo,
   children,
   gated = true,
   className = "",
   loading = false,
 }: Props) {
+  const useKo =
+    locale != null
+      ? normalizeMediaDetailTextLocale(locale) === "ko"
+      : (isKo ?? true);
   if (loading) {
     return (
       <div
         className={`relative ${className}`}
         aria-busy="true"
-        aria-label={isKo ? "접근 권한 확인 중" : "Checking access"}
+        aria-label={useKo ? "접근 권한 확인 중" : "Checking access"}
       >
         <div className="min-h-[12rem] animate-pulse rounded-2xl border border-gray-100 bg-gray-100/80 dark:border-white/8 dark:bg-white/5" />
       </div>
@@ -44,10 +52,10 @@ export function ReportAccessGate({
     return <div className={className}>{children}</div>;
   }
 
-  const message = buildFeatureGateMessage({ feature, access, isKo });
+  const message = buildFeatureGateMessage({ feature, access, isKo: useKo });
   const trialHint =
     access.trialDaysLeft != null && access.trialDaysLeft > 0
-      ? isKo
+      ? useKo
         ? `${message.hint ? `${message.hint} · ` : ""}PRO 체험 ${access.trialDaysLeft}일 남음`
         : `${message.hint ? `${message.hint} · ` : ""}${access.trialDaysLeft} days left in PRO trial`
       : message.hint;

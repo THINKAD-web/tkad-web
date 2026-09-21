@@ -1,3 +1,4 @@
+import { resolveMediaDisplayName } from "@/lib/media-i18n";
 import type { ReactNode } from "react";
 import type { MediaAnalyticsReport } from "@/lib/media-report-analytics";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
@@ -23,7 +24,6 @@ type Props = {
   /** Capped peer list for client-side similar sorting (not the full catalog). */
   similarSortCatalog?: readonly MediaItem[];
   locale: string;
-  isKo: boolean;
   typeLabel: string;
   heroTags: string[];
   galleryImages: string[];
@@ -90,7 +90,6 @@ export function MediaDetailPageView({
   media,
   similarSortCatalog,
   locale,
-  isKo,
   typeLabel,
   heroTags,
   galleryImages,
@@ -113,7 +112,7 @@ export function MediaDetailPageView({
   overview,
   belowFold,
 }: Props) {
-  const displayName = isKo ? media.name : media.nameEn || media.name;
+  const displayName = resolveMediaDisplayName(media, locale);
 
   return (
     <div
@@ -122,10 +121,10 @@ export function MediaDetailPageView({
     >
         <MediaDetailHeroSection
           media={media}
+          locale={locale}
           seoulCpmBenchmarkBadge={seoulCpmBenchmarkBadge}
-          isKo={isKo}
           typeLabel={typeLabel}
-          locationShort={formatMediaLocationShort(media, isKo)}
+          locationShort={formatMediaLocationShort(media, locale)}
           heroTags={heroTags}
           galleryImages={galleryImages}
           heroImage={heroImage}
@@ -162,7 +161,7 @@ export function MediaDetailPageView({
             location: (
               <MediaDetailLocationPanel
                 media={media}
-                isKo={isKo}
+                locale={locale}
                 regionDisplay={regionDisplay}
               />
             ),
@@ -176,7 +175,7 @@ export function MediaDetailPageView({
                   analyticsReport.fusedDailyFootfall ?? media.dailyFootTraffic ?? null
                 }
                 attributions={analyticsReport.attributions}
-                isKo={isKo}
+                locale={locale}
                 performanceMetrics={performanceMetrics}
                 analyticsReport={analyticsReport}
                 recentBrands={recentBrands}
@@ -195,7 +194,7 @@ export function MediaDetailPageView({
             execution: (
               <MediaDetailExecutionPanel
                 media={media}
-                isKo={isKo}
+                locale={locale}
                 labels={{
                   ...labels.execution,
                   periodLabel,
@@ -210,8 +209,7 @@ export function MediaDetailPageView({
           sidebar={
             <MediaDetailStickyQuotePanel
               media={media}
-              isKo={isKo}
-              pageLocale={locale}
+              locale={locale}
               displayName={displayName}
               periodLabel={periodLabel}
             />
@@ -219,7 +217,6 @@ export function MediaDetailPageView({
           mobileProposal={
             <MediaDetailProposalCard
               media={media}
-              isKo={isKo}
               locale={locale}
               className="lg:hidden"
             />
@@ -227,7 +224,7 @@ export function MediaDetailPageView({
           similarSection={
             <MediaSimilarCarousel
               items={similar}
-              isKo={isKo}
+              locale={locale}
               title={labels.similarTitle}
               sortable={
                 similarSortCatalog && similarSortCatalog.length > 0
@@ -241,7 +238,7 @@ export function MediaDetailPageView({
 
         <MediaDetailMobileBar
           media={media}
-          isKo={isKo}
+          locale={locale}
           displayName={displayName}
           periodLabel={periodLabel}
         />

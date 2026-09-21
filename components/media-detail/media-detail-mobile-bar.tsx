@@ -1,5 +1,7 @@
 "use client";
 
+import { intlLocaleTag, normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
@@ -21,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale: string;
   displayName: string;
   periodLabel: string;
   className?: string;
@@ -29,15 +31,16 @@ type Props = {
 
 export function MediaDetailMobileBar({
   media,
-  isKo,
+  locale,
   className,
 }: Props) {
-  const locale = isKo ? "ko-KR" : "en-US";
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const intlTag = intlLocaleTag(locale);
   const displayPrice = resolveMediaDisplayPrice(media);
   const multiPriceOptions = (media.priceOptions?.length ?? 0) >= 2;
   const displayPeriodLabel = formatPricePeriodShortLabel(
     displayPrice.period,
-    isKo ? "ko" : "en",
+    (bucket === "ko") ? "ko" : "en",
   );
 
   return (
@@ -48,7 +51,7 @@ export function MediaDetailMobileBar({
       compact
       aboveMobileChrome
       respectFooter
-      ariaLabel={isKo ? "빠른 견적" : "Quick quote"}
+      ariaLabel={(bucket === "ko") ? "빠른 견적" : "Quick quote"}
       className={cn("lg:hidden", className)}
     >
       <div className={STICKY_ACTION_BAR_ROW}>
@@ -56,7 +59,7 @@ export function MediaDetailMobileBar({
           <p className="truncate font-sans text-[length:var(--qp-text-body)] font-bold leading-tight tabular-nums text-[color:var(--qp-accent)]">
             <span className="whitespace-nowrap">
               {formatCatalogPriceFieldWon(displayPrice.priceWon, locale, media.country)}
-              {multiPriceOptions && isKo ? "~" : null}
+              {multiPriceOptions && (bucket === "ko") ? "~" : null}
             </span>
             <span className="ml-1 text-[length:var(--qp-text-meta)] font-medium text-gray-600 dark:text-white/65">
               / {displayPeriodLabel}

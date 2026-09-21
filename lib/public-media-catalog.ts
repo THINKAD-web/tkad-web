@@ -13,6 +13,7 @@ import {
   type MediaPriceOption,
   type MediaPricePeriodKey,
 } from "@/lib/media-data";
+import type { MediaTranslationRow } from "@/lib/media-i18n";
 import {
   filterDisplayableMediaImageUrls,
   optimizeHeroMarqueeUrl,
@@ -42,6 +43,7 @@ import {
 import { parseCoverageDongsWithPopulation } from "@/lib/planner/brief/reach-adapter";
 import { fetchMoisPopulationIndex } from "@/lib/metrics/mois-population-index";
 import { publicActiveMediaWhere } from "@/lib/media-review-status";
+import { MEDIA_TRANSLATIONS_FOR_MEDIA_INCLUDE } from "@/lib/media-i18n";
 import {
   PUBLIC_MEDIA_CATALOG_DETAIL_CACHE_TAG,
   PUBLIC_MEDIA_CATALOG_LIST_CACHE_TAG,
@@ -81,6 +83,12 @@ export type MediaWithAdvertiserExecutions = Media & {
     kpiHints: string[];
     bestFor: string[];
   } | null;
+  translations?: Array<{
+    locale: string;
+    name: string | null;
+    description: string | null;
+    location: string | null;
+  }>;
 };
 
 function buildPastAdvertisersFromExecutions(
@@ -482,6 +490,17 @@ export function prismaMediaToMediaItem(
           modelVersion: cm.modelVersion ?? null,
         }
       : undefined,
+    translations: (() => {
+      const raw = (m as Media & { translations?: MediaTranslationRow[] })
+        .translations;
+      if (!Array.isArray(raw) || raw.length === 0) return undefined;
+      return raw.map((row) => ({
+        locale: row.locale,
+        name: row.name ?? null,
+        description: row.description ?? null,
+        location: row.location ?? null,
+      }));
+    })(),
   };
 }
 
@@ -495,6 +514,7 @@ function normalizePricePeriod(
 }
 
 export const PUBLIC_MEDIA_CATALOG_INCLUDE = {
+  ...MEDIA_TRANSLATIONS_FOR_MEDIA_INCLUDE,
   advertiserExecutions: {
     select: { advertiserName: true } as const,
     orderBy: { createdAt: "desc" as const },

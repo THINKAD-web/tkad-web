@@ -99,8 +99,10 @@ export function resolveMediaDetailMapNotice(
     | "region"
     | "regionMain"
   >,
-  isKo: boolean,
+  locale: string,
 ): MediaDetailMapNotice | null {
+  const isKo =
+    locale.toLowerCase().split("-")[0] === "ko";
   const mode = resolveMapDisplayMode(media);
   if (mode === "pin") return null;
 

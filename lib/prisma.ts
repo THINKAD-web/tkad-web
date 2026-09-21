@@ -2,8 +2,15 @@ import type { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config as loadEnv } from "dotenv";
 import { statSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
 import { Pool } from "pg";
+
+/** Next/webpack provides `require`; tsx ESM scripts do not — use createRequire. */
+const nodeRequire =
+  typeof require !== "undefined"
+    ? require
+    : createRequire(import.meta.url);
 import {
   ensureDatabaseUrlEnv,
   isDatabaseUrlConfigured,
@@ -51,17 +58,16 @@ function bustPrismaClientModuleCache(): void {
     join(process.cwd(), "node_modules", "@prisma", "client"),
     join(process.cwd(), "node_modules", ".prisma", "client"),
   ];
-  for (const key of Object.keys(require.cache)) {
+  for (const key of Object.keys(nodeRequire.cache)) {
     if (roots.some((root) => key.startsWith(root))) {
-      delete require.cache[key];
+      delete nodeRequire.cache[key];
     }
   }
 }
 
 function loadPrismaClientCtor(): typeof PrismaClient {
   // prisma generate 후 dev HMR 없이도 최신 delegate 로드
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const mod = require("@prisma/client") as typeof import("@prisma/client");
+  const mod = nodeRequire("@prisma/client") as typeof import("@prisma/client");
   return mod.PrismaClient;
 }
 

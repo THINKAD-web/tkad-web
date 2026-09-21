@@ -19,6 +19,7 @@ import {
   resolveMediaOgImageUrl,
 } from "@/lib/media-og-metadata";
 import { pageAlternates, siteNameForLocale } from "@/lib/seo";
+import { openGraphLocaleTag } from "@/lib/seo-locale";
 import {
   buildMediaDetailSeoLinks,
   SeoContextualLinks,
@@ -34,6 +35,11 @@ import {
   pickSearchKeywordHints,
 } from "@/lib/keyword-filter-media-detail";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
+import {
+  normalizeMediaDetailTextLocale,
+  resolveMediaDisplayName,
+  resolveMediaField,
+} from "@/lib/media-i18n";
 import { mediaDetailPricePeriodTranslationKey } from "@/lib/media-price-format";
 import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import { RelatedCases } from "@/components/media-detail/related-cases";
@@ -128,10 +134,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const keywords = buildMediaMetaKeywordsList(media, locale, 28);
   const imageAlt = buildMediaImageAlt(media, locale);
   const canonicalPath = mediaItemDetailPath(media);
-  const displayName =
-    locale === "ko" || locale.startsWith("ko")
-      ? media.name
-      : media.nameEn || media.name;
+  const displayName = resolveMediaDisplayName(
+    {
+      name: media.name,
+      nameEn: media.nameEn,
+      location: media.location,
+      locationEn: media.locationEn,
+      description: media.description,
+      descriptionEn: media.descriptionEn,
+      translations: media.translations,
+    },
+    locale,
+  );
 
   return {
     title,
@@ -139,6 +153,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords,
     alternates: pageAlternates(locale, canonicalPath),
     openGraph: {
+      locale: openGraphLocaleTag(locale),
       title: displayName,
       description: ogDescription,
       images: [
@@ -223,7 +238,7 @@ export default async function MediaDetailPage({ params }: Props) {
   }
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const tMedia = await getTranslations({ locale, namespace: "media" });
-  const isKo = locale === "ko";
+  const textLocale = normalizeMediaDetailTextLocale(locale);
   let seoulCpmBenchmarkBadge: ReturnType<
     typeof seoulCpmBenchmarkBadgeForMedia
   > = null;
@@ -233,13 +248,17 @@ export default async function MediaDetailPage({ params }: Props) {
       seoulCpmBenchmarkBadge = seoulCpmBenchmarkBadgeForMedia(
         media,
         benchmarkCatalog,
-        isKo,
+        textLocale === "ko",
       );
     } catch (e) {
       console.error("[media-detail] seoul cpm benchmark failed", media.id, e);
     }
   }
-  const recentBrands = await getMediaRecentBrands(media.id, media.region, isKo);
+  const recentBrands = await getMediaRecentBrands(
+    media.id,
+    media.region,
+    textLocale === "ko",
+  );
   const periodLabel = t(
     mediaDetailPricePeriodTranslationKey(media.pricePeriod),
   );
@@ -284,8 +303,13 @@ export default async function MediaDetailPage({ params }: Props) {
   const galleryImages = getMediaDetailGalleryUrls(media);
   const heroImage = galleryImages[0] ?? "";
   const caseStudyItems = buildCaseStudyGalleryItems(media);
-  const typeLabel = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
-  const featuresText = isKo ? media.features : media.featuresEn;
+  const typeLabel = resolveMediaDisplayPill(
+    media,
+    textLocale === "ja" || textLocale === "zh" ? "en" : textLocale,
+  );
+  const featuresText =
+    textLocale === "ko" ? media.features : media.featuresEn;
+  const displayName = resolveMediaDisplayName(media, locale);
   const performanceMetrics = resolvePerformanceMetrics(media);
 
   const regionDisplay = (() => {
@@ -327,15 +351,18 @@ export default async function MediaDetailPage({ params }: Props) {
 
   const overviewBody = (() => {
     const cat = (
-      isKo ? media.catalogDescription : media.catalogDescriptionEn
+      textLocale === "ko"
+        ? media.catalogDescription
+        : media.catalogDescriptionEn
     )?.trim();
     if (cat) return cat;
     const long = (
-      isKo ? media.longDescriptionKo : media.longDescriptionEn
+      textLocale === "ko"
+        ? media.longDescriptionKo
+        : media.longDescriptionEn
     )?.trim();
     if (long) return long;
-    const desc = (isKo ? media.description : (media.descriptionEn || media.description))?.trim();
-    return desc ?? "";
+    return resolveMediaField(locale, "description", media).trim();
   })();
 
   const imageAlt = buildMediaImageAlt(media, locale);
@@ -351,13 +378,13 @@ export default async function MediaDetailPage({ params }: Props) {
         {!media.keywordFilter ? (
           <MediaReviewsSection
             mediaId={media.id}
-            mediaName={isKo ? media.name : media.nameEn || media.name}
+            mediaName={displayName}
             initialStats={reviewInitialStats ?? undefined}
           />
         ) : null}
         {seoContextPills.length > 0 ? (
           <SeoContextualLinks
-            title={isKo ? "관련 SEO 가이드" : "Related guides"}
+            title={textLocale === "ko" ? "관련 SEO 가이드" : "Related guides"}
             pills={seoContextPills}
           />
         ) : null}
@@ -377,7 +404,6 @@ export default async function MediaDetailPage({ params }: Props) {
           media={media}
           similarSortCatalog={similarSortCatalog}
           locale={locale}
-          isKo={isKo}
           typeLabel={typeLabel}
           similar={similar}
           periodLabel={periodLabel}
@@ -388,19 +414,21 @@ export default async function MediaDetailPage({ params }: Props) {
           belowFold={onlineBelowFold}
         />
         <TrackMediaView
-          record={mediaItemToRecentlyViewedRecord(media, { isKo })}
+          record={mediaItemToRecentlyViewedRecord(media, {
+            isKo: textLocale === "ko",
+          })}
           offlineCard={{
             id: media.id,
-            name: isKo ? media.name : media.nameEn || media.name,
-            location: formatMediaLocationShort(media, isKo),
+            name: displayName,
+            location: formatMediaLocationShort(media, locale),
             type: typeLabel,
-            price: media.price,
+            price: media.price ?? undefined,
             imageUrl: heroImage || undefined,
           }}
         />
         <EventOnMount
           event="view_media"
-          params={{ media_id: media.id, media_name: media.name, media_type: media.type }}
+          params={{ media_id: media.id, media_name: media.name, media_type: media.type ?? undefined }}
         />
         <ExitSurveyBanner surface="media_detail" />
       </>
@@ -421,7 +449,6 @@ export default async function MediaDetailPage({ params }: Props) {
         seoulCpmBenchmarkBadge={seoulCpmBenchmarkBadge}
         similarSortCatalog={similarSortCatalog}
         locale={locale}
-        isKo={isKo}
         typeLabel={typeLabel}
         heroTags={heroTags}
         galleryImages={galleryImages}
@@ -484,7 +511,7 @@ export default async function MediaDetailPage({ params }: Props) {
             <MediaDetailOverviewSection
               title={t("overviewAccordion")}
               body={overviewBody}
-              isKo={isKo}
+              locale={locale}
             />
           ) : undefined
         }
@@ -511,13 +538,13 @@ export default async function MediaDetailPage({ params }: Props) {
             ) : null}
 
             {relatedCases.length > 0 ? (
-              <RelatedCases cases={relatedCases} isKo={isKo} />
+              <RelatedCases cases={relatedCases} locale={locale} />
             ) : null}
 
             {caseStudyItems.length > 0 ? (
               <MediaCaseStudyGallery
                 photos={caseStudyItems}
-                isKo={isKo}
+                locale={locale}
                 labels={{
                   close: t("galleryLightboxClose"),
                   prev: t("galleryLightboxPrev"),
@@ -531,14 +558,14 @@ export default async function MediaDetailPage({ params }: Props) {
             {!media.keywordFilter ? (
               <MediaReviewsSection
                 mediaId={media.id}
-                mediaName={isKo ? media.name : media.nameEn || media.name}
+                mediaName={displayName}
                 initialStats={reviewInitialStats ?? undefined}
               />
             ) : null}
 
             {seoContextPills.length > 0 ? (
               <SeoContextualLinks
-                title={isKo ? "관련 SEO 가이드" : "Related guides"}
+                title={textLocale === "ko" ? "관련 SEO 가이드" : "Related guides"}
                 pills={seoContextPills}
               />
             ) : null}
@@ -546,19 +573,21 @@ export default async function MediaDetailPage({ params }: Props) {
         }
       />
       <TrackMediaView
-        record={mediaItemToRecentlyViewedRecord(media, { isKo })}
+        record={mediaItemToRecentlyViewedRecord(media, {
+          isKo: textLocale === "ko",
+        })}
         offlineCard={{
           id: media.id,
-          name: isKo ? media.name : media.nameEn || media.name,
-          location: formatMediaLocationShort(media, isKo),
+          name: displayName,
+          location: formatMediaLocationShort(media, locale),
           type: typeLabel,
-          price: media.price,
+          price: media.price ?? undefined,
           imageUrl: heroImage || undefined,
         }}
       />
       <EventOnMount
         event="view_media"
-        params={{ media_id: media.id, media_name: media.name, media_type: media.type }}
+        params={{ media_id: media.id, media_name: media.name, media_type: media.type ?? undefined }}
       />
       <ExitSurveyBanner surface="media_detail" />
     </>

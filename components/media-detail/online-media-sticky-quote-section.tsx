@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  intlLocaleTag,
+  normalizeMediaDetailTextLocale,
+} from "@/lib/media-i18n";
+
 import { useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { MediaItem } from "@/lib/media-data";
@@ -13,7 +18,7 @@ import { hasOnlinePricingSpec } from "@/lib/pricing-unavailable";
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale: string;
   displayName: string;
   contactHref: string;
   inputCls: string;
@@ -21,12 +26,13 @@ type Props = {
 
 export function OnlineMediaStickyQuoteSection({
   media,
-  isKo,
+  locale,
   displayName,
   contactHref,
   inputCls,
 }: Props) {
-  const locale = isKo ? "ko-KR" : "en-US";
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const intlTag = intlLocaleTag(locale);
   const spec = media.onlineSpec;
   const calculable = hasOnlinePricingSpec(media);
   const defaultBudget = spec?.minBudget ?? 1_000_000;
@@ -46,7 +52,7 @@ export function OnlineMediaStickyQuoteSection({
 
   const headline = calculable && spec
     ? onlinePricingLabel(spec)
-    : mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
+    : mediaPriceOnInquiryLabel((bucket === "ko") ? "ko" : "en");
 
   return (
     <>
@@ -58,7 +64,7 @@ export function OnlineMediaStickyQuoteSection({
       </p>
       {calculable ? (
         <p className="text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
-          {isKo ? "참고 단가 (CPC/CPM 시드 범위)" : "Reference rates (seeded CPC/CPM range)"}
+          {(bucket === "ko") ? "참고 단가 (CPC/CPM 시드 범위)" : "Reference rates (seeded CPC/CPM range)"}
         </p>
       ) : null}
 
@@ -67,7 +73,7 @@ export function OnlineMediaStickyQuoteSection({
           <>
             <label className="block space-y-1.5">
               <span className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
-                {isKo ? "월 예산" : "Monthly budget"}
+                {(bucket === "ko") ? "월 예산" : "Monthly budget"}
               </span>
               <input
                 type="number"
@@ -84,7 +90,7 @@ export function OnlineMediaStickyQuoteSection({
 
             {belowMin ? (
               <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[length:var(--qp-text-meta)] text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
-                {isKo
+                {(bucket === "ko")
                   ? `최소 집행금액 ${spec!.minBudget.toLocaleString("ko-KR")}원 이상 입력해 주세요.`
                   : `Enter at least ₩${spec!.minBudget.toLocaleString("en-US")} (minimum budget).`}
               </p>
@@ -92,10 +98,10 @@ export function OnlineMediaStickyQuoteSection({
 
             <div className="rounded-xl border dark:border-white/10 border-gray-100 dark:bg-black/20 bg-gray-50 p-3 text-[length:var(--qp-text-body)]">
               <p className="flex justify-between gap-2 dark:text-white/80 text-gray-700">
-                <span>{isKo ? "예상 집행 비용" : "Est. spend"}</span>
+                <span>{(bucket === "ko") ? "예상 집행 비용" : "Est. spend"}</span>
                 <span className="font-bold tabular-nums dark:text-white text-gray-900">
                   {belowMin
-                    ? mediaPriceOnInquiryLabel(isKo ? "ko" : "en")
+                    ? mediaPriceOnInquiryLabel((bucket === "ko") ? "ko" : "en")
                     : formatMediaCostEstimateShort(
                         budgetWon,
                         media.country,
@@ -106,7 +112,7 @@ export function OnlineMediaStickyQuoteSection({
               </p>
               {!belowMin && estimate?.reachMin != null && estimate.reachMax != null ? (
                 <p className="mt-1 flex justify-between gap-2 dark:text-white/60 text-gray-500">
-                  <span>{isKo ? "예상 도달" : "Est. reach"}</span>
+                  <span>{(bucket === "ko") ? "예상 도달" : "Est. reach"}</span>
                   <span className="tabular-nums">
                     {estimate.reachMin.toLocaleString(locale)}~
                     {estimate.reachMax.toLocaleString(locale)}
@@ -115,7 +121,7 @@ export function OnlineMediaStickyQuoteSection({
               ) : null}
               {!belowMin && estimate?.clicksMin != null && estimate.clicksMax != null ? (
                 <p className="mt-1 flex justify-between gap-2 dark:text-white/60 text-gray-500">
-                  <span>{isKo ? "예상 클릭" : "Est. clicks"}</span>
+                  <span>{(bucket === "ko") ? "예상 클릭" : "Est. clicks"}</span>
                   <span className="tabular-nums">
                     {estimate.clicksMin.toLocaleString(locale)}~
                     {estimate.clicksMax.toLocaleString(locale)}
@@ -124,7 +130,7 @@ export function OnlineMediaStickyQuoteSection({
               ) : null}
             </div>
             <p className="text-[length:var(--qp-text-meta)] text-gray-500 dark:text-white/55">
-              {isKo
+              {(bucket === "ko")
                 ? "시드 CPC/CPM 범위로만 계산합니다. 전환율은 추정하지 않습니다."
                 : "Based on seeded CPC/CPM ranges only — no invented conversion rates."}
             </p>
@@ -136,7 +142,7 @@ export function OnlineMediaStickyQuoteSection({
           data-accent-keep="true"
           className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-3 text-center text-sm font-bold text-white"
         >
-          {isKo ? "문의하기" : "Contact us"}
+          {(bucket === "ko") ? "문의하기" : "Contact us"}
         </Link>
       </div>
     </>

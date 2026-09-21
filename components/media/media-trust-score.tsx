@@ -6,24 +6,32 @@ import {
   trustScoreToGrade,
 } from "@/lib/media-trust";
 import { cn } from "@/lib/utils";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 
 type Props = {
   score: number;
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   className?: string;
   compact?: boolean;
 };
 
 export function MediaTrustScoreBadge({
   score,
+  locale,
   isKo,
   className,
   compact = false,
 }: Props) {
+  const useKo =
+    locale != null
+      ? normalizeMediaDetailTextLocale(locale) === "ko"
+      : (isKo ?? true);
   const grade = trustScoreToGrade(score);
   const tone = trustGradeToneClass(grade);
-  const gradeLabel = trustGradeLabel(grade, isKo);
-  const explanation = trustScoreExplanation(isKo);
+  const gradeLabel = trustGradeLabel(grade, useKo);
+  const explanation = trustScoreExplanation(useKo);
 
   return (
     <span
@@ -37,7 +45,7 @@ export function MediaTrustScoreBadge({
     >
       <ShieldCheck className={cn(compact ? "h-3 w-3" : "h-3.5 w-3.5")} aria-hidden />
       <span>
-        {isKo ? `${gradeLabel} · ${score}점` : `${gradeLabel} · ${score}`}
+        {useKo ? `${gradeLabel} · ${score}점` : `${gradeLabel} · ${score}`}
       </span>
       <span className="sr-only">{explanation}</span>
     </span>
@@ -47,26 +55,33 @@ export function MediaTrustScoreBadge({
 type ExecutionProps = {
   count: number;
   monthsAgo: number | null;
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   className?: string;
 };
 
 export function MediaExecutionSummary({
   count,
   monthsAgo,
+  locale,
   isKo,
   className,
 }: ExecutionProps) {
+  const useKo =
+    locale != null
+      ? normalizeMediaDetailTextLocale(locale) === "ko"
+      : (isKo ?? true);
   const recentLabel =
     monthsAgo == null
-      ? isKo
+      ? useKo
         ? "최근 집행 이력 없음"
         : "No recent flights"
       : monthsAgo <= 0
-        ? isKo
+        ? useKo
           ? "최근 집행 1개월 이내"
           : "Flights within 1 month"
-        : isKo
+        : useKo
           ? `최근 집행 ${monthsAgo}개월 전`
           : `Last flight ${monthsAgo} mo ago`;
 
@@ -77,7 +92,7 @@ export function MediaExecutionSummary({
         className,
       )}
     >
-      {isKo
+      {useKo
         ? `누적 집행 ${count}회 · ${recentLabel}`
         : `${count} flights · ${recentLabel}`}
     </p>

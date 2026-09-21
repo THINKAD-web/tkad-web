@@ -31,11 +31,11 @@ const gangnamLed: MediaItem = {
 };
 
 test("mapMarkersForMediaDetail — 금호 고속버스(mobile) 핀 0개", () => {
-  assert.deepEqual(mapMarkersForMediaDetail(kumho, true), []);
+  assert.deepEqual(mapMarkersForMediaDetail(kumho, "ko"), []);
 });
 
 test("mapMarkersForMediaDetail — 고정 디지털은 핀 유지", () => {
-  const pins = mapMarkersForMediaDetail(gangnamLed, true);
+  const pins = mapMarkersForMediaDetail(gangnamLed, "ko");
   assert.equal(pins.length, 1);
   assert.equal(pins[0]!.lat, 37.501);
   assert.equal(pins[0]!.lng, 127.026);

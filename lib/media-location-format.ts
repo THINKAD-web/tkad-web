@@ -1,4 +1,8 @@
 import type { MediaItem } from "@/lib/media-data";
+import {
+  normalizeMediaDetailTextLocale,
+  resolveMediaField,
+} from "@/lib/media-i18n";
 
 /** 시·도 접두어 제거 후 상세 번지·건물명 등 축약 (목록·카드용) */
 const KO_PROVINCE_PREFIX =
@@ -26,13 +30,32 @@ export function formatLocationShortEn(raw: string): string {
   return s.trim() || input;
 }
 
-export function formatMediaLocationShort(media: MediaItem, isKo: boolean): string {
-  if (isKo) {
-    return formatLocationShortKo(media.location);
+function formatMediaLocationShortImpl(
+  media: MediaItem,
+  locale: string,
+): string {
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const resolved = resolveMediaField(locale, "location", media);
+  if (bucket === "ko") {
+    return formatLocationShortKo(resolved || media.location);
   }
   const d = media.district?.trim();
   const c = media.city?.trim();
   if (d && c) return `${d}, ${c}`;
   if (d) return d;
-  return formatLocationShortEn(media.locationEn || media.location);
+  return formatLocationShortEn(resolved || media.locationEn || media.location);
+}
+
+/** @param locale App locale (`ko` / `en` / `ja` / `zh`) or legacy boolean (ko vs en). */
+export function formatMediaLocationShort(
+  media: MediaItem,
+  localeOrIsKo: string | boolean,
+): string {
+  const locale =
+    typeof localeOrIsKo === "boolean"
+      ? localeOrIsKo
+        ? "ko"
+        : "en"
+      : localeOrIsKo;
+  return formatMediaLocationShortImpl(media, locale);
 }

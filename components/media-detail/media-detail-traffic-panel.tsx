@@ -23,7 +23,7 @@ type Props = {
   fusedStored: StoredTrafficPattern | null;
   dailyFootfall: number | null;
   attributions?: DataSourceAttribution[];
-  isKo: boolean;
+  locale: string;
   performanceMetrics: MediaPerformanceMetrics;
   analyticsReport: MediaAnalyticsReport;
   recentBrands: MediaRecentBrandsData;
@@ -36,7 +36,7 @@ export function MediaDetailTrafficPanel({
   fusedStored,
   dailyFootfall,
   attributions,
-  isKo,
+  locale,
   performanceMetrics,
   analyticsReport,
   recentBrands,
@@ -55,7 +55,7 @@ export function MediaDetailTrafficPanel({
         fusedStored={fusedStored}
         dailyFootfall={dailyFootfall}
         attributions={attributions}
-        isKo={isKo}
+        locale={locale}
         chartHeightClass="h-80 sm:h-96"
         hourlyOnly={!detailProLoading && !detailPro}
       />
@@ -63,7 +63,7 @@ export function MediaDetailTrafficPanel({
       <PlannerProGate
         isPro={detailPro}
         loading={detailProLoading}
-        isKo={isKo}
+        locale={locale}
         access={detailAccessGate}
         feature="detail_data"
       >
@@ -71,21 +71,21 @@ export function MediaDetailTrafficPanel({
           <MediaDetailPerformance metrics={performanceMetrics} />
           <MediaAnalyticsReportSection
             report={analyticsReport}
-            isKo={isKo}
+            locale={locale}
             access={detailAccessGate}
           />
           <CompetitorOohSection
             report={analyticsReport}
-            isKo={isKo}
+            locale={locale}
             access={competitorAccess}
           />
           <MediaRecentBrandsPanel
             data={recentBrands}
-            isKo={isKo}
+            locale={locale}
             access={competitorAccess}
           />
           {!competitorAllowed ? (
-            <MediaRecentBrandsTeaser data={recentBrands} isKo={isKo} />
+            <MediaRecentBrandsTeaser data={recentBrands} locale={locale} />
           ) : null}
         </div>
       </PlannerProGate>
