@@ -1,12 +1,9 @@
 /**
  * seed 성공 사례 — audit 규칙에 걸리는 resultsKo·본문 과장 수치 제거.
  *
- *   npx tsx scripts/sanitize-seed-success-cases.mts          # dry-run
- *   npx tsx scripts/sanitize-seed-success-cases.mts --apply
+ *   npx tsx scripts/sanitize-seed-success-cases.mts
+ *   npx tsx scripts/sanitize-seed-success-cases.mts --apply --confirm-prod
  */
-import { config } from "dotenv";
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { PrismaClient, type Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -15,9 +12,7 @@ import {
   extractTrustClaimHitsFromSuccessCaseFields,
   isSeedSuccessCaseMetrics,
 } from "../lib/success-case-trust-claims.ts";
-
-const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
-config({ path: resolve(root, ".env.local"), override: true });
+import { assertScriptDatabaseAccess } from "./lib/script-db-guard.mts";
 
 const apply = process.argv.includes("--apply");
 
@@ -40,7 +35,10 @@ function stripClaimLines(text: string, hitFields: Set<string>, field: string): s
 }
 
 async function main() {
-  const url = normalizePgDatabaseUrl(process.env.DATABASE_URL);
+  const dbCtx = assertScriptDatabaseAccess({
+    scriptName: "sanitize-seed-success-cases.mts",
+  });
+  const url = normalizePgDatabaseUrl(dbCtx.databaseUrl);
   if (!url) throw new Error("DATABASE_URL required");
   const pool = new Pool({ connectionString: url });
   const db = new PrismaClient({ adapter: new PrismaPg(pool) });
