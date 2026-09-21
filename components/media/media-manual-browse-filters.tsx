@@ -57,6 +57,7 @@ import {
 } from "@/components/media-map/map-toolbar-control-styles";
 import { MapToolbarSortDropdown } from "@/components/media-map/map-toolbar-sort-dropdown";
 import { MapOnboardingCoachmark } from "@/components/media-map/map-onboarding-coachmark";
+import { MapAreaSearchModeToggle } from "@/components/media-map/map-area-search-mode-toggle";
 import {
   MediaFilterVaulSheet,
   MediaSortVaulSheet,
@@ -239,6 +240,9 @@ export type MediaManualBrowseFiltersProps = {
   /** `/media/map` 3-step 온보딩 — 1단계 검색 코치마크 */
   mapThreeStepSearchCoachmarkOpen?: boolean;
   onMapThreeStepSearchCoachmarkDismiss?: () => void;
+  /** `/media/map` — 지역 재조회 자동/수동 */
+  mapAreaSearchMode?: "auto" | "manual";
+  onMapAreaSearchModeChange?: (mode: "auto" | "manual") => void;
 };
 
 export function MediaManualBrowseFilters({
@@ -299,6 +303,8 @@ export function MediaManualBrowseFilters({
   browseChannel = "offline",
   mapThreeStepSearchCoachmarkOpen = false,
   onMapThreeStepSearchCoachmarkDismiss,
+  mapAreaSearchMode = "auto",
+  onMapAreaSearchModeChange,
 }: MediaManualBrowseFiltersProps) {
   const isOnlineBrowse = browseChannel === "online";
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -1483,6 +1489,14 @@ export function MediaManualBrowseFilters({
       {mobileFilterButtonIcon}
       {mobileSortButtonIcon}
       {showHotspotRegions ? renderHotspotControl({ compact: true }) : null}
+      {mapPageViewModes && onMapAreaSearchModeChange ? (
+        <MapAreaSearchModeToggle
+          isKo={isKo}
+          mode={mapAreaSearchMode}
+          onChange={onMapAreaSearchModeChange}
+          compact
+        />
+      ) : null}
       {mapPageViewModes ? mapToolbarSummaryChips : null}
     </div>
   ) : null;
@@ -1660,6 +1674,13 @@ export function MediaManualBrowseFilters({
             {showHotspotRegions && mapPageViewModes
               ? renderHotspotControl({ compact: true })
               : null}
+            {mapPageViewModes && onMapAreaSearchModeChange ? (
+              <MapAreaSearchModeToggle
+                isKo={isKo}
+                mode={mapAreaSearchMode}
+                onChange={onMapAreaSearchModeChange}
+              />
+            ) : null}
             {viewModeToggle}
             {mapPageViewModes ? mapToolbarSummaryChips : null}
             {mapNavButton}
