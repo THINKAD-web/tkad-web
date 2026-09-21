@@ -19,12 +19,12 @@ export const v0FallbackEngine: MetricEngine = {
 
   compute(input: EngineInput): EngineOutput {
     const storedMonthly = input.media.impressions;
-    const dailyImpressions =
-      input.legacy.dailyImpressions ??
-      input.current?.dailyImpressions ??
-      (storedMonthly != null && storedMonthly > 0
+    const fromLegacy = input.legacy.dailyImpressions ?? input.current?.dailyImpressions;
+    const fromStoredMonthly =
+      storedMonthly != null && storedMonthly > 0
         ? Math.round(storedMonthly / 30)
-        : 0);
+        : 0;
+    const dailyImpressions = fromLegacy ?? fromStoredMonthly;
     const cpm =
       input.legacy.cpm ??
       input.current?.cpm ??
