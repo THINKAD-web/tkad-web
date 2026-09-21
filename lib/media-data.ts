@@ -159,6 +159,11 @@ export interface MediaItem {
   cpm?: number;
   /** 참여율 0–1 — DB `engagement_rate` */
   engagementRate?: number;
+  /** Metric engine snapshot (detail/catalog when included) */
+  computedMetric?: {
+    dailyImpressions: number | null;
+    modelVersion: string | null;
+  } | null;
   /** 가로·세로(m) — DB `width_m` / `height_m` */
   widthM?: number;
   heightM?: number;

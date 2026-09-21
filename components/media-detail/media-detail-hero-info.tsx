@@ -88,7 +88,24 @@ export function MediaDetailHeroInfo({
     locale,
     media.country,
   );
-  const impressionsLabel = formatMonthlyImpressionsLabel(media, isKo);
+  const impressionsLabel = formatMonthlyImpressionsLabel(
+    {
+      ...media,
+      engineDailyImpressions: media.computedMetric?.dailyImpressions ?? undefined,
+      impressionModelVersion: media.computedMetric?.modelVersion ?? undefined,
+      mediaType: media.type,
+      mediaSubCategory: media.subCategory,
+      mediaMainCategory: media.mediaMainCategory,
+      mediaName: media.name,
+      factSheet: {
+        forceLoopSov: media.forceLoopSov,
+        spotDurationSec: media.spotDurationSec,
+        loopDurationSec: media.loopDurationSec,
+        playsPerHour: media.playsPerHour,
+      },
+    },
+    isKo,
+  );
   /** 크기·유형·타깃만 — 해상도/시인성 등은 집행 탭에서 노출 */
   const summaryTags = heroTags.slice(0, 3);
 
