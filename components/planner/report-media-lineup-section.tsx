@@ -26,7 +26,10 @@ import {
   writePlannerReportViewMode,
   type PlannerReportViewMode,
 } from "@/lib/planner-report-view-mode";
-import { exportMediaLineMetaParts } from "@/lib/planner-report-export/media-card-layout";
+import {
+  exportMediaLineMetaParts,
+  formatPlannerExportCpmValue,
+} from "@/lib/planner-report-export/media-card-layout";
 import { cn } from "@/lib/utils";
 
 const VIEW_MODES: {
@@ -64,6 +67,10 @@ function exportRowToDetail(
     recommendReason: row.recommendReason,
     exposureContributionPct: row.exposureContributionPct,
     budgetContributionPct: row.budgetContributionPct,
+    cpmWon: row.cpmWon,
+    country: row.country,
+    cpmBenchmarkLabel: row.cpmBenchmarkLabel,
+    footfallBenchmarkLabel: row.footfallBenchmarkLabel,
   };
 }
 
@@ -86,6 +93,7 @@ function exportRowToCatalogItem(row: PlannerExportMediaRow, index: number): Home
      */
     impressions:
       row.adjustedDailyReach != null ? row.adjustedDailyReach * 30 : undefined,
+    cpm: row.cpmWon ?? undefined,
     thumbnailUrl: row.thumbUrl ?? undefined,
     /**
      * 온라인 채널(유튜브/네이버/틱톡 등)은 실물 사진 대신 플랫폼 배지로 표시된다
@@ -151,6 +159,27 @@ function RawFootfallHint({
     >
       i
     </span>
+  );
+}
+
+function LineupBenchmarkNote({
+  row,
+  className,
+}: {
+  row: PlannerExportMediaRow;
+  className?: string;
+}) {
+  if (!row.cpmBenchmarkLabel?.trim()) return null;
+  return (
+    <p
+      className={cn(
+        "text-[10px] leading-snug text-[color:var(--qp-accent)]",
+        className,
+      )}
+      title={row.cpmBenchmarkLabel}
+    >
+      {row.cpmBenchmarkLabel}
+    </p>
   );
 }
 
@@ -220,6 +249,7 @@ function DetailLineupCard({
         />
       </div>
       <RawFootfallMobileNote row={row} isKo={isKo} className="px-1" />
+      <LineupBenchmarkNote row={row} className="px-1 pt-0.5" />
     </div>
   );
 }
@@ -241,7 +271,10 @@ function DiscoveryLineupCard({
   const highlights = row.recommendReason ? [row.recommendReason] : [];
 
   if (viewMode === "compact") {
-    const metaLine = exportMediaLineMetaParts(row, { includePrice: true }).join(" · ");
+    const metaLine = [
+      ...exportMediaLineMetaParts(row, { includePrice: true }),
+      `CPM ${formatPlannerExportCpmValue(row, isKo)}`,
+    ].join(" · ");
     return (
       <div className={cn(DOCUMENT_LINEUP_CARD, "relative")}>
         <DiscoveryMediaCard
@@ -261,6 +294,10 @@ function DiscoveryLineupCard({
         <RawFootfallMobileNote
           row={row}
           isKo={isKo}
+          className="border-t border-gray-100 px-2 py-1.5 dark:border-gray-200"
+        />
+        <LineupBenchmarkNote
+          row={row}
           className="border-t border-gray-100 px-2 py-1.5 dark:border-gray-200"
         />
       </div>
@@ -290,6 +327,10 @@ function DiscoveryLineupCard({
           isKo={isKo}
           className="border-t border-gray-100 px-2 py-1.5 dark:border-gray-200"
         />
+        <LineupBenchmarkNote
+          row={row}
+          className="border-t border-gray-100 px-2 py-1.5 dark:border-gray-200"
+        />
       </div>
     );
   }
@@ -314,6 +355,10 @@ function DiscoveryLineupCard({
       <RawFootfallMobileNote
         row={row}
         isKo={isKo}
+        className="border-t border-gray-100 px-2 py-1.5 dark:border-gray-200"
+      />
+      <LineupBenchmarkNote
+        row={row}
         className="border-t border-gray-100 px-2 py-1.5 dark:border-gray-200"
       />
     </div>

@@ -1,6 +1,15 @@
+import { formatCPM } from "@/lib/metrics/format";
 import type { PlannerExportMediaRow } from "@/lib/planner-report-export/types";
 
 export type MediaCardSpec = { label: string; value: string };
+
+export function formatPlannerExportCpmValue(
+  row: Pick<PlannerExportMediaRow, "cpmWon" | "country">,
+  isKo: boolean,
+): string {
+  const locale = isKo ? "ko-KR" : "en-US";
+  return formatCPM(row.cpmWon, locale, row.country);
+}
 
 export function exportMediaLineMetaParts(
   row: PlannerExportMediaRow,
@@ -57,6 +66,12 @@ export function collectMediaCardSpecs(
   }
   if (row.broadcastLabel) {
     specs.push({ label: isKo ? "송출" : "Spot", value: row.broadcastLabel });
+  }
+  if (row.kind !== "custom") {
+    specs.push({
+      label: "CPM",
+      value: formatPlannerExportCpmValue(row, isKo),
+    });
   }
   if (row.cpmBenchmarkLabel) {
     specs.push({

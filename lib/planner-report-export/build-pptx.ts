@@ -243,7 +243,25 @@ function estimatePptCardHeight(
   let h = 0.55;
   if (row.location) h += 0.22;
   if (row.categoryLabel) h += 0.2;
-  if (specs.length > 0) h += 0.12 + Math.ceil(specs.length / 2) * 0.24;
+  if (specs.length > 0) {
+    const charsPerLine = 36;
+    for (let i = 0; i < specs.length; i += 2) {
+      const linesL = Math.max(
+        1,
+        Math.ceil((specs[i]!.value.length + specs[i]!.label.length) / charsPerLine),
+      );
+      const linesR = specs[i + 1]
+        ? Math.max(
+            1,
+            Math.ceil(
+              (specs[i + 1]!.value.length + specs[i + 1]!.label.length) /
+                charsPerLine,
+            ),
+          )
+        : 0;
+      h += 0.1 + Math.max(linesL, linesR) * 0.11 + 0.06;
+    }
+  }
   if (row.monthlyPriceLabel || row.lineTotalLabel) h += 0.48;
   if (row.recommendReason?.trim()) h += 0.38;
   if (showMediaCardContributions(portfolioLen, row)) h += 0.42;
@@ -1222,19 +1240,30 @@ export async function buildPlannerReportPptx(
     const specs = collectMediaCardSpecs(row, isKo);
     if (specs.length > 0) {
       ty += 0.08;
+      const charsPerLine = 36;
       for (let i = 0; i < specs.length; i += 2) {
         const drawSpec = (spec: { label: string; value: string }, sx: number) => {
+          const lineCount = Math.max(
+            1,
+            Math.ceil((spec.value.length + spec.label.length) / charsPerLine),
+          );
           slide.addText(
             [
-              { text: `${spec.label} `, options: { color: GRAY, fontSize: 9 } },
-              { text: spec.value, options: { color: INK, fontSize: 9, bold: true } },
+              { text: `${spec.label}\n`, options: { color: GRAY, fontSize: 8 } },
+              {
+                text: spec.value,
+                options: { color: INK, fontSize: 8, bold: true, breakLine: true },
+              },
             ].map((p) => ({ ...p, options: { ...p.options, fontFace: face } })),
-            { x: sx, y: ty, w: colW, h: 0.22 },
+            { x: sx, y: ty, w: colW, h: lineCount * 0.11 + 0.08, valign: "top" },
           );
+          return lineCount;
         };
-        drawSpec(specs[i]!, textX);
-        if (specs[i + 1]) drawSpec(specs[i + 1]!, textX + colW + 0.15);
-        ty += 0.24;
+        const linesL = drawSpec(specs[i]!, textX);
+        const linesR = specs[i + 1]
+          ? drawSpec(specs[i + 1]!, textX + colW + 0.15)
+          : 0;
+        ty += Math.max(linesL, linesR) * 0.11 + 0.1;
       }
     }
 

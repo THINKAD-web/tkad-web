@@ -9,6 +9,7 @@ import {
   Tag,
   Users,
   Radio,
+  CircleDollarSign,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ import { OnlinePlatformBadge } from "@/components/media/online-platform-badge";
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
 import { REPORT_BRAND } from "@/lib/planner-report-export/document-theme";
 import { footfallVsReachShortFootnote } from "@/lib/planner-report-performance-guide";
+import { formatPlannerExportCpmValue } from "@/lib/planner-report-export/media-card-layout";
 
 const LIGHT = {
   bg: "#FFFFFF",
@@ -230,7 +232,37 @@ export function MediaDetailCard({
               stackOnNarrow={largeThumb}
             />
           ) : null}
+          <SpecRow
+            icon={CircleDollarSign}
+            label="CPM"
+            value={formatPlannerExportCpmValue(
+              {
+                cpmWon: detail.cpmWon,
+                country: detail.country,
+              },
+              isKo,
+            )}
+            stackOnNarrow={largeThumb}
+          />
         </div>
+
+        {detail.cpmBenchmarkLabel ? (
+          <p
+            className="rounded-lg border border-dashed border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)]/40 px-2.5 py-2 text-[11px] font-medium leading-snug text-[#374151]"
+            title={detail.cpmBenchmarkLabel}
+          >
+            {detail.cpmBenchmarkLabel}
+          </p>
+        ) : null}
+
+        {detail.footfallBenchmarkLabel ? (
+          <p
+            className="text-[11px] leading-snug text-[#6B7280]"
+            title={detail.footfallBenchmarkLabel}
+          >
+            {detail.footfallBenchmarkLabel}
+          </p>
+        ) : null}
 
         {(detail.monthlyPriceLabel || detail.lineTotalLabel) && (
           <div

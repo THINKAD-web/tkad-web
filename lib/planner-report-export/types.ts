@@ -47,6 +47,13 @@ export type PlannerExportMediaRow = {
   dailyTraffic?: number;
   /** 일 실노출(추정) — 접촉률·SOV 보정. 기여도·CPM·정렬의 기준값과 동일 */
   adjustedDailyReach?: number;
+  /**
+   * 매체 1유닛 표시 CPM (원) — `resolveCpmWonForDisplayFromMediaItem` SSOT (#615).
+   * null/undefined 면 카드에 「CPM 산정 중」 등 pending 표기.
+   */
+  cpmWon?: number | null;
+  /** JP 매체 CPM ¥ 표기용 */
+  country?: string | null;
   broadcastLabel?: string;
   monthlyPriceLabel?: string;
   lineTotalLabel?: string;
