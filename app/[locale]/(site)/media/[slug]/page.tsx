@@ -75,6 +75,8 @@ import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
 import { ExitSurveyBanner } from "@/components/exit-survey-banner";
 import { formatSizeDisplayOptional } from "@/lib/format-media-size";
+import { seoulCpmBenchmarkBadgeForMedia } from "@/lib/planner/seoul-media-benchmark";
+import { getSeoulBenchmarkCatalogCached } from "@/lib/planner/seoul-benchmark-catalog-cache";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -222,6 +224,21 @@ export default async function MediaDetailPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const tMedia = await getTranslations({ locale, namespace: "media" });
   const isKo = locale === "ko";
+  let seoulCpmBenchmarkBadge: ReturnType<
+    typeof seoulCpmBenchmarkBadgeForMedia
+  > = null;
+  if (!media.keywordFilter) {
+    try {
+      const benchmarkCatalog = await getSeoulBenchmarkCatalogCached();
+      seoulCpmBenchmarkBadge = seoulCpmBenchmarkBadgeForMedia(
+        media,
+        benchmarkCatalog,
+        isKo,
+      );
+    } catch (e) {
+      console.error("[media-detail] seoul cpm benchmark failed", media.id, e);
+    }
+  }
   const recentBrands = await getMediaRecentBrands(media.id, media.region, isKo);
   const periodLabel = t(
     mediaDetailPricePeriodTranslationKey(media.pricePeriod),
@@ -401,6 +418,7 @@ export default async function MediaDetailPage({ params }: Props) {
 
       <MediaDetailPageView
         media={media}
+        seoulCpmBenchmarkBadge={seoulCpmBenchmarkBadge}
         similarSortCatalog={similarSortCatalog}
         locale={locale}
         isKo={isKo}
