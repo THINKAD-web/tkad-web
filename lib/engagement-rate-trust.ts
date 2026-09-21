@@ -65,3 +65,50 @@ export function decidePlaceholderEngagementRate(
 
   return { clearRate: true, reason: "placeholder_no_source" };
 }
+
+export type EngagementCopySanitizeResult = {
+  next: string | null;
+  changed: boolean;
+  reason: "empty" | "no_pattern" | "sourced" | "stripped";
+};
+
+/**
+ * effectMemo 등 — 근거(출처·측정) 없이 박힌 참여율 수치 문구 제거.
+ * placeholder 0.65(65%) 및 동일 패턴의 무근거 % 서술 대상.
+ */
+export function sanitizeUnsourcedEngagementCopyInText(
+  text: string | null | undefined,
+): EngagementCopySanitizeResult {
+  const raw = text?.trim() ?? "";
+  if (!raw) {
+    return { next: text ?? null, changed: false, reason: "empty" };
+  }
+  if (!ENGAGEMENT_RATE_COPY_PATTERN.test(raw)) {
+    return { next: raw, changed: false, reason: "no_pattern" };
+  }
+  if (ENGAGEMENT_RATE_SOURCE_PATTERN.test(raw)) {
+    return { next: raw, changed: false, reason: "sourced" };
+  }
+
+  let next = raw
+    .replace(
+      /참여율\s*0\.65\s*\(\s*65\s*%\s*\)\s*수준의\s*/gi,
+      "",
+    )
+    .replace(/참여율\s*[\d.]+\s*\(\s*[\d.]+\s*%\s*\)\s*수준의\s*/gi, "")
+    .replace(/참여율\s*[\d.]+\s*%\s*(?:수준의\s*)?/gi, "")
+    .replace(/engagement\s*rate\s*[\d.]+\s*%?\s*(?:level\s*)?/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+([,.!?])/g, "$1")
+    .trim();
+
+  if (next === raw) {
+    return { next: raw, changed: false, reason: "no_pattern" };
+  }
+
+  return {
+    next: next.length ? next : null,
+    changed: true,
+    reason: "stripped",
+  };
+}
