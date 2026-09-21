@@ -19,6 +19,9 @@ export function RelatedCases({ cases, isKo }: Props) {
   const t = useTranslations("mediaDetail.relatedCases");
   if (cases.length === 0) return null;
 
+  const hasVerifiedCase = cases.some((c) => !c.isExampleScenario);
+  const descKey = hasVerifiedCase ? "desc" : "descExample";
+
   return (
     <section className="overflow-hidden rounded-[28px] border border-border/80 bg-card/80 shadow-sm backdrop-blur">
       <header className="border-b border-border/70 px-6 py-5">
@@ -30,7 +33,7 @@ export function RelatedCases({ cases, isKo }: Props) {
           {t("title")}
         </h2>
         <p className="mt-1 tkad-type-caption tracking-tight text-muted-foreground">
-          {t("desc")}
+          {t(descKey)}
         </p>
       </header>
       <div className="p-6">
@@ -58,10 +61,15 @@ export function RelatedCases({ cases, isKo }: Props) {
                   <p className="line-clamp-3 tkad-type-caption leading-relaxed tracking-tight text-muted-foreground">
                     {stripMarkdown(c.summaryKo)}
                   </p>
-                  <p className="mt-auto tkad-type-label text-accent">
-                    {`// `}
-                    {c.clientName}
-                  </p>
+                  {c.isExampleScenario ? (
+                    <p className="mt-auto tkad-type-label text-amber-800 dark:text-amber-200">
+                      {t("badgeExample")}
+                    </p>
+                  ) : (
+                    <p className="mt-auto tkad-type-label text-muted-foreground">
+                      {c.clientName}
+                    </p>
+                  )}
                 </Link>
               </li>
             );

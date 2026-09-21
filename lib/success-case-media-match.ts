@@ -1,4 +1,5 @@
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
+import { isExampleSuccessCase } from "@/lib/success-case-example";
 
 export type MediaCaseMatchContext = {
   mediaId: string;
@@ -56,6 +57,7 @@ export function caseMatchesMedia(
   ctx: MediaCaseMatchContext,
 ): boolean {
   if (item.mediaIds.includes(ctx.mediaId)) return true;
+  if (item.isExampleScenario) return false;
 
   const caseHay = caseHaystack(item);
   const mediaHay = mediaHaystack(ctx);

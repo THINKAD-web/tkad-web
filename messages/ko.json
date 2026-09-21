@@ -1520,6 +1520,8 @@
     "metricReach": "도달 증가",
     "detailBack": "성공 사례 목록",
     "detailVerified": "검증 사례",
+    "detailExampleScenario": "예시 시나리오",
+    "detailExampleDisclaimer": "이 페이지는 실제 집행·성과를 검증한 사례가 아니라, 예산·매체 믹스를 이해하기 위한 참고 시나리오입니다. 수치는 가정에 기반하며 실제 견적·집행 결과와 다를 수 있습니다.",
     "detailDownloadPdf": "캠페인 리포트 PDF 다운로드",
     "detailSimilarCampaign": "비슷한 캠페인 문의하기",
     "detailPrev": "이전 사례",
@@ -3297,7 +3299,9 @@
     },
     "relatedCases": {
       "title": "이 매체로 진행한 캠페인",
-      "desc": "공개 동의를 받은 실 사례입니다. 카드 클릭 시 사례 상세로 이동합니다."
+      "desc": "공개 동의를 받은 실 집행 사례입니다. 카드 클릭 시 사례 상세로 이동합니다.",
+      "descExample": "참고용 예시 시나리오입니다. 실제 이 매체 집행·성과 검증 데이터가 아닐 수 있습니다.",
+      "badgeExample": "예시 시나리오"
     },
     "roadview": {
       "title": "현장 로드뷰",
