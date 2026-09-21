@@ -1519,6 +1519,8 @@
     "metricReach": "Reach uplift",
     "detailBack": "All case studies",
     "detailVerified": "Verified case",
+    "detailExampleScenario": "Example scenario",
+    "detailExampleDisclaimer": "This page is a reference scenario for budget and media mix planning—not a verified execution or measured performance. Figures are illustrative and may differ from actual quotes and results.",
     "detailDownloadPdf": "Download campaign report PDF",
     "detailSimilarCampaign": "Request a similar campaign",
     "detailPrev": "Previous",
@@ -3316,7 +3318,9 @@
     },
     "relatedCases": {
       "title": "Campaigns run on this media",
-      "desc": "Real cases (with public consent). Click to view full case study."
+      "desc": "Verified executions (with public consent). Click to view the full case study.",
+      "descExample": "Reference scenarios only—not verified performance on this media.",
+      "badgeExample": "Example scenario"
     },
     "roadview": {
       "title": "Street roadview",

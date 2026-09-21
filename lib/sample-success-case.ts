@@ -47,6 +47,7 @@ function buildListItem(
     periodEndIso: study.periodEndIso,
     budgetRange: isKo ? study.budgetRangeKo : study.budgetRangeEn,
     highlightMetrics,
+    isExampleScenario: false,
   };
 }
 

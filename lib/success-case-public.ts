@@ -25,6 +25,8 @@ export type PublicSuccessCaseListItem = {
   budgetRange: string | null;
   /** 카드용 핵심 지표 (최대 3) */
   highlightMetrics: CaseStudyMetric[];
+  /** metricsJson.seed — 실 집행 검증 사례가 아닌 예시 시나리오 */
+  isExampleScenario: boolean;
 };
 
 export type PublicSuccessCaseDetail = PublicSuccessCaseListItem & {

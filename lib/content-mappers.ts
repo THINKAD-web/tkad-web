@@ -7,6 +7,7 @@ import {
   parseBudgetRangeFromMetrics,
   parseCaseStudyMetrics,
 } from "@/lib/campaign-case-study";
+import { isExampleSuccessCase } from "@/lib/success-case-example";
 import type {
   CaseStudyMediaLink,
   PublicSuccessCaseDetail,
@@ -223,6 +224,7 @@ export function successCaseToPublicListItem(
     periodEndIso: row.periodEnd ? row.periodEnd.toISOString() : null,
     budgetRange: parseBudgetRangeFromMetrics(metricsJson, locale),
     highlightMetrics: structured.slice(0, 3),
+    isExampleScenario: isExampleSuccessCase(metricsJson),
   };
 }
 

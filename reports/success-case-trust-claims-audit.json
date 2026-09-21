@@ -1,0 +1,126 @@
+{
+  "generatedAt": "2026-09-21T01:18:13.155Z",
+  "publishedCount": 5,
+  "casesWithHits": 4,
+  "seedCasesWithHits": 4,
+  "cases": [
+    {
+      "id": "cmpmpwvte0004s82j4mx4tutt",
+      "titleKo": "패션 브랜드의 OOH 캠페인 성공기",
+      "seed": true,
+      "campaignId": null,
+      "mediaIdsCount": 0,
+      "hitCount": 2,
+      "hits": [
+        {
+          "ruleId": "SPECIFIC_CPM",
+          "labelKo": "구체 CPM 수치",
+          "snippet": "**CPM(1,000회 노출당 비용):** 약 **2,200원** (총예산 3,600만원 기준)",
+          "field": "resultsKo[4]"
+        },
+        {
+          "ruleId": "SNS_COUNT",
+          "labelKo": "SNS·UGC 건수 주장",
+          "snippet": "기간 중 해당 빌보드를 배경으로 한 인스타그램 게시물 약 **1,400건** 이상 자발 업로드 확인 (브랜드 해시태그 및 위치 태그 기준 집계)",
+          "field": "resultsKo[5]"
+        }
+      ]
+    },
+    {
+      "id": "cmpmpw1fm0003s82jyw0ig1tr",
+      "titleKo": "F&B 브랜드의 OOH 캠페인 성공기",
+      "seed": true,
+      "campaignId": null,
+      "mediaIdsCount": 0,
+      "hitCount": 1,
+      "hits": [
+        {
+          "ruleId": "SPECIFIC_CPM",
+          "labelKo": "구체 CPM 수치",
+          "snippet": "평균 CPM: **약 3,800원** (동일 예산 SNS 광고 대비 40% 낮은 수준)",
+          "field": "resultsKo[1]"
+        }
+      ]
+    },
+    {
+      "id": "cmpmpv6s30002s82jlxjmt4i7",
+      "titleKo": "엔터 브랜드의 OOH 캠페인 성공기",
+      "seed": true,
+      "campaignId": null,
+      "mediaIdsCount": 0,
+      "hitCount": 7,
+      "hits": [
+        {
+          "ruleId": "INDUSTRY_BENCHMARK",
+          "labelKo": "업계 평균 대비·벤치마크 주장",
+          "snippet": "100원** (강남 핵심 상권 기준 업계 평균 대비 18% 효율 개선)",
+          "field": "resultsKo[1]"
+        },
+        {
+          "ruleId": "PERCENT_IMPROVEMENT",
+          "labelKo": "퍼센트 개선·효율 주장",
+          "snippet": "남 핵심 상권 기준 업계 평균 대비 18% 효율 개선)",
+          "field": "resultsKo[1]"
+        },
+        {
+          "ruleId": "SPECIFIC_CPM",
+          "labelKo": "구체 CPM 수치",
+          "snippet": "DOOH CPM: **약 1,100원** (강남 핵심 상권 기준 업계 평균 대비 18% 효율 개선)",
+          "field": "resultsKo[1]"
+        },
+        {
+          "ruleId": "SPECIFIC_CPM",
+          "labelKo": "구체 CPM 수치",
+          "snippet": "지하철 CPM: **약 850원**",
+          "field": "resultsKo[2]"
+        },
+        {
+          "ruleId": "SPECIFIC_CPM",
+          "labelKo": "구체 CPM 수치",
+          "snippet": "캠페인 통합 평균 CPM: **약 980원**",
+          "field": "resultsKo[3]"
+        },
+        {
+          "ruleId": "SNS_COUNT",
+          "labelKo": "SNS·UGC 건수 주장",
+          "snippet": "인증샷 기반 SNS 2차 확산: 캠페인 기간 중 해당 위치 태그 게시물 **약 14,000건** 이상 (인스타그램·X 합산)",
+          "field": "resultsKo[4]"
+        },
+        {
+          "ruleId": "TREND_KEYWORD_COUNT",
+          "labelKo": "실시간 트렌드·키워드 등장 횟수",
+          "snippet": "아티스트 관련 실시간 트렌드 키워드 등장 횟수: 발매 당일 포함 **총 9회**",
+          "field": "resultsKo[5]"
+        }
+      ]
+    },
+    {
+      "id": "cmpmpteu40000s82j3r7yo6iw",
+      "titleKo": "뷰티 브랜드의 OOH 캠페인 성공기",
+      "seed": true,
+      "campaignId": null,
+      "mediaIdsCount": 0,
+      "hitCount": 3,
+      "hits": [
+        {
+          "ruleId": "SPECIFIC_CPM",
+          "labelKo": "구체 CPM 수치",
+          "snippet": "**평균 CPM**: 약 **2,045원** (동일 예산 대비 SNS 광고 CPM 대비 경쟁력 있는 수치)",
+          "field": "resultsKo[1]"
+        },
+        {
+          "ruleId": "SNS_COUNT",
+          "labelKo": "SNS·UGC 건수 주장",
+          "snippet": "캠페인 기간 중 인스타그램·틱톡에서 가로수길 전광판을 배경으로 한 자발적 인증 게시물 **약 340건** 확인 (브랜드 해시태그 기준)",
+          "field": "resultsKo[3]"
+        },
+        {
+          "ruleId": "PERCENT_IMPROVEMENT",
+          "labelKo": "퍼센트 개선·효율 주장",
+          "snippet": "룹 내 신제품 인지율 **전 대비 +19%p 상승**",
+          "field": "resultsKo[5]"
+        }
+      ]
+    }
+  ]
+}

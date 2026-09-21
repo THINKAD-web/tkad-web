@@ -2,7 +2,7 @@
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { guardInsightMarkdownBoldParticles } from "@/lib/insight-markdown-bold-guard";
+import { prepareInsightMarkdown } from "@/lib/insight-markdown-bold-guard";
 
 /**
  * 트렌드 리포트 본문 마크다운 렌더 (PR-5).
@@ -13,7 +13,7 @@ import { guardInsightMarkdownBoldParticles } from "@/lib/insight-markdown-bold-g
  * 부모 (page.tsx) 는 Server Component 로 SEO/JSON-LD 렌더 유지.
  */
 export function InsightMarkdownBody({ markdown }: { markdown: string }) {
-  const normalizedMarkdown = guardInsightMarkdownBoldParticles(markdown);
+  const normalizedMarkdown = prepareInsightMarkdown(markdown);
 
   return (
     <div className="prose-insight max-w-none text-foreground">

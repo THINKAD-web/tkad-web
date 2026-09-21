@@ -43,7 +43,8 @@ export function metricsInputForCatalogCpm(item: MetricInput): MediaMetricsInput 
 function formatCpmLine(cpm: number | null | undefined, locale: string): string | null {
   const display = resolveCpmDisplay(cpm, locale);
   if (display.rawWon == null) return null;
-  return display.displayable ? `CPM ${display.text}` : display.text;
+  if (!display.displayable) return display.text;
+  return `CPM ${display.text}`;
 }
 
 function formatImpressionsLine(

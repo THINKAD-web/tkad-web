@@ -12,6 +12,7 @@ import {
 import type { MediaItem } from "@/lib/media-data";
 import { resolveLocalLandingForMedia } from "@/lib/local-seo-landings";
 import { inferMarketingTypeSlug } from "@/lib/marketing-media-types";
+import { regionLabel } from "@/lib/media-keyword-landing";
 
 type Pill = { href: string; label: string };
 
@@ -42,9 +43,10 @@ export function buildMediaDetailSeoLinks(
   }
 
   if (media.region) {
+    const regionName = regionLabel(media.region, locale);
     pills.push({
       href: `/media/region/${encodeURIComponent(media.region)}`,
-      label: isKo ? `${media.region} 매체` : `${media.region} media`,
+      label: isKo ? `${regionName} 매체` : `${regionName} media`,
     });
   }
 
