@@ -6,7 +6,7 @@ import type { MediaItem } from "@/lib/media-data";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
 import {
   formatMonthlyImpressionsLabel,
-  resolveCpmWon,
+  resolveCpmWonForDisplay,
 } from "@/lib/media-metrics";
 import {
   formatCatalogPriceFieldWon,
@@ -82,12 +82,9 @@ export function MediaDetailHeroInfo({
   const locale = isKo ? "ko-KR" : "en-US";
   const displayPrice = resolveMediaDisplayPrice(media);
   const multiPriceOptions = (media.priceOptions?.length ?? 0) >= 2;
-  /**
-   * 히어로 기본 CPM — 카탈로그 대표가 SSOT (견적 스티키 선택옵션 CPM과 별개).
-   * 극단값은 `resolveCpmDisplay` 가 "CPM 산정 중" 으로 대체한다 (⑧).
-   */
+  /** 히어로 CPM — 표시가(`resolveMediaDisplayPrice`)와 동일 분자 (견적 옵션 선택 CPM과 별개). */
   const cpmDisplay = resolveCpmDisplay(
-    resolveCpmWon(media),
+    resolveCpmWonForDisplay(media),
     locale,
     media.country,
   );

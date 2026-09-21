@@ -4,6 +4,7 @@ import { estimateCatalogCpmWon } from "./media-metrics.ts";
 import {
   buildCatalogItemMetricLine,
   resolveCpmWon,
+  resolveCpmWonForDisplay,
 } from "./media-card-metrics.ts";
 
 /** T1 — 광화문 루미형: 정상 월노출 + 만 단위로 오염된 stored CPM */
@@ -80,13 +81,14 @@ test("buildCatalogItemMetricLine shows recalc cpm not stored outlier", () => {
   assert.doesNotMatch(line!, /469/);
 });
 
-test("buildCatalogItemMetricLine uses catalogPrice over display price", () => {
+test("buildCatalogItemMetricLine uses display price not catalogPrice", () => {
   const impressions = 1_900_000;
   const catalogPrice = 30_000_000;
   const displayPrice = 15_000_000;
   const line = buildCatalogItemMetricLine(
     {
       price: displayPrice,
+      pricePeriod: "month",
       catalogPrice,
       impressions,
       cpm: undefined,
@@ -94,13 +96,28 @@ test("buildCatalogItemMetricLine uses catalogPrice over display price", () => {
     true,
     "ko-KR",
   );
-  const expected = Math.round(catalogPrice / (impressions / 1000));
+  const expected = Math.round(displayPrice / (impressions / 1000));
   assert.ok(line);
   assert.match(line!, new RegExp(`CPM ₩${expected.toLocaleString("ko-KR")}`));
   assert.doesNotMatch(
     line!,
     new RegExp(
-      `CPM ₩${Math.round(displayPrice / (impressions / 1000)).toLocaleString("ko-KR")}`,
+      `CPM ₩${Math.round(catalogPrice / (impressions / 1000)).toLocaleString("ko-KR")}`,
     ),
   );
+});
+
+test("display CPM matches cheapest price option (케이팝스퀘어형)", () => {
+  const impressions = 4_500_000;
+  const cpm = resolveCpmWonForDisplay({
+    price: 100_000_000,
+    pricePeriod: "month",
+    priceOptions: [
+      { price: 100_000_000, period: "month", label: "1구좌" },
+      { price: 80_000_000, period: "month", label: "0.5구좌" },
+    ],
+    impressions,
+    cpm: 22_222,
+  });
+  assert.equal(cpm, Math.round(80_000_000 / (impressions / 1000)));
 });
