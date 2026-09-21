@@ -21,6 +21,8 @@ type Props = {
   subwayEnabled?: boolean;
   onSubwayEnabledChange?: (enabled: boolean) => void;
   showSubwayToggle?: boolean;
+  showServiceRegionCoverageNote?: boolean;
+  serviceRegionDistrictCount?: number;
 };
 
 export function MediaMapVisibilityLegend({
@@ -29,6 +31,8 @@ export function MediaMapVisibilityLegend({
   subwayEnabled = true,
   onSubwayEnabledChange,
   showSubwayToggle = false,
+  showServiceRegionCoverageNote = false,
+  serviceRegionDistrictCount,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const { resolvedTheme } = useTheme();
@@ -65,6 +69,40 @@ export function MediaMapVisibilityLegend({
           aria-hidden
         />
       </button>
+
+      {showServiceRegionCoverageNote ? (
+        <div
+          className="border-t border-border/70 px-3 py-2 dark:border-white/10"
+          data-screenshot="media-map-legend-coverage-note"
+        >
+          <p className="tkad-type-note leading-snug text-tkad-secondary">
+            <span
+              className="mr-1.5 inline-block h-2 w-2 shrink-0 rounded-sm border border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)]/20 align-middle"
+              aria-hidden
+            />
+            {isKo ? (
+              <>
+                <span className="font-semibold text-foreground">권역 면</span>
+                {typeof serviceRegionDistrictCount === "number"
+                  ? ` · ${serviceRegionDistrictCount}구역`
+                  : null}
+                <span className="text-tkad-muted">
+                  {" "}
+                  — 중심점 원형 근사(실경계 아님)
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="font-semibold text-foreground">Area fill</span>
+                {typeof serviceRegionDistrictCount === "number"
+                  ? ` · ${serviceRegionDistrictCount} districts`
+                  : null}
+                <span className="text-tkad-muted"> — approx. circles</span>
+              </>
+            )}
+          </p>
+        </div>
+      ) : null}
 
       {showSubwayToggle && onSubwayEnabledChange ? (
         <div className="border-t border-border/70 px-3 py-2 dark:border-white/10">

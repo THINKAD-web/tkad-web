@@ -74,6 +74,8 @@ scripts/print-admin-*.ts
 !.github/pr-screenshots/map-ux-phase-1/*.png
 !.github/pr-screenshots/map-ux-phase-2/
 !.github/pr-screenshots/map-ux-phase-2/*.png
+!.github/pr-screenshots/map-coverage-poc/
+!.github/pr-screenshots/map-coverage-poc/*.png
 !docs/screenshots/
 !docs/screenshots/pr4-baseline/
 !docs/screenshots/pr4-baseline/*.png

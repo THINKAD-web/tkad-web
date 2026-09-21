@@ -93,6 +93,8 @@ import {
 import {
   resolveItemMapDisplayMode,
 } from "@/lib/media-map/map-display-mode";
+import { resolveMapCoverageOverlayState } from "@/lib/media-map/map-service-region-coverage-overlay";
+import { MediaMapCoverageOverlayHint } from "@/components/media-map/media-map-coverage-overlay-hint";
 
 function itemShowsMapPin(item: MapMapItem): boolean {
   return resolveItemMapDisplayMode(item) === "pin";
@@ -728,6 +730,11 @@ export default function MediaMapPageClient() {
     const extra = selectedPins.filter((m) => !existingIds.has(m.id));
     return extra.length > 0 ? [...fromItems, ...extra] : fromItems;
   }, [items, selectedItem]);
+
+  const coverageOverlay = useMemo(
+    () => resolveMapCoverageOverlayState(items),
+    [items],
+  );
 
   useEffect(() => {
     markersRef.current = markers;
@@ -1411,11 +1418,22 @@ export default function MediaMapPageClient() {
               themeAwareTiles
               subwayOverlayEnabled={subwayOverlayEnabled}
               onPinLabelStateChange={handlePinLabelStateChange}
+              coverageGeoJson={coverageOverlay?.geoJson ?? null}
+              fitCoverageBounds={coverageOverlay != null}
+              fitBoundsMaxZoom={12}
             />
           </div>
 
           {showNonPinBanner ? (
             <MediaMapNonPinBanner isKo={isKo} mobileListCount={mobileInList} />
+          ) : null}
+
+          {coverageOverlay && isMobile ? (
+            <MediaMapCoverageOverlayHint
+              isKo={isKo}
+              districtCount={coverageOverlay.districtCount}
+              className="pointer-events-auto absolute left-3 top-[7.25rem] z-[11] max-w-[min(calc(100%-1.5rem),240px)]"
+            />
           ) : null}
 
           {!isMobile && showListStepCoachmark ? (
@@ -1608,12 +1626,21 @@ export default function MediaMapPageClient() {
                   </button>
                 </div>
               ) : null}
+              {coverageOverlay && !isMobile ? (
+                <MediaMapCoverageOverlayHint
+                  isKo={isKo}
+                  districtCount={coverageOverlay.districtCount}
+                  className="pointer-events-auto max-w-[200px]"
+                />
+              ) : null}
               <MediaMapVisibilityLegend
                 isKo={isKo}
                 className="pointer-events-auto max-w-[168px]"
                 showSubwayToggle
                 subwayEnabled={subwayOverlayEnabled}
                 onSubwayEnabledChange={handleSubwayOverlayChange}
+                showServiceRegionCoverageNote={coverageOverlay != null}
+                serviceRegionDistrictCount={coverageOverlay?.districtCount}
               />
             </div>
           ) : null}
