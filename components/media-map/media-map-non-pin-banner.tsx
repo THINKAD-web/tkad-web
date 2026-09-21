@@ -28,7 +28,7 @@ export function MediaMapNonPinBanner({
         mapFloatingPanelClass(
           "pointer-events-none absolute z-[10] flex items-start gap-2 px-3 py-2",
         ),
-        "left-3 right-3 top-3 sm:left-4 sm:right-auto sm:max-w-md md:top-14",
+        "left-3 right-14 top-2 max-sm:top-2 sm:left-4 sm:right-auto sm:max-w-md md:top-14",
         className,
       )}
       role="status"

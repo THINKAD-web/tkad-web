@@ -1249,7 +1249,7 @@ export default function MediaMapPageClient() {
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <p
-          className="tkad-type-meta min-w-0 truncate font-semibold text-foreground"
+          className="tkad-type-meta min-w-0 font-semibold text-foreground line-clamp-2 leading-snug"
           title={mapResultDetailLabel}
         >
           {showMapEmptyOverlay
