@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-09-21T01:48:41.400Z",
+  "report": [
+    {
+      "slug": "koekseu-keipap-seukweeo-jeongwangpan-gwanggo",
+      "name": "코엑스 케이팝 스퀘어 전광판 광고",
+      "displayPriceWon": 80000000,
+      "dbRootPrice": 100000000,
+      "monthlyPriceForCpm": 80000000,
+      "impressions": 4500000,
+      "storedCpm": 22222,
+      "cpmBeforeRootPrice": 22222,
+      "cpmAfterDisplayPrice": 17778,
+      "deltaWon": -4444
+    }
+  ]
+}

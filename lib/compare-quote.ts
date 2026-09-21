@@ -13,7 +13,7 @@ import {
   isPricingUnavailable,
 } from "@/lib/pricing-unavailable";
 import {
-  resolveCpmWon,
+  resolveCpmWonForDisplay,
   resolveMonthlyImpressions,
 } from "@/lib/media-metrics";
 import {
@@ -57,7 +57,7 @@ export function pricePeriodDays(period: MediaPricePeriodKey): number {
 }
 
 export function resolveMediaCpmWon(m: MediaItem): number | null {
-  return resolveCpmWon(m);
+  return resolveCpmWonForDisplay(m);
 }
 
 export type MediaQuoteLine = {

@@ -7,7 +7,7 @@ import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import type { MediaItem } from "@/lib/media-data";
 import { resolveMediaDisplayPill } from "@/lib/media-display-labels";
 import {
-  resolveCpmWon,
+  resolveCpmWonForDisplay,
   resolveMonthlyImpressions,
 } from "@/lib/media-metrics";
 import { formatSizeDisplay } from "@/lib/format-media-size";
@@ -23,7 +23,7 @@ const KNOWN_REGION_CODES = new Set([
 ]);
 
 function formatCpmDisplay(m: MediaItem, locale: string): string {
-  const cpm = resolveCpmWon(m);
+  const cpm = resolveCpmWonForDisplay(m);
   if (cpm != null && Number.isFinite(cpm) && cpm > 0) {
     return `₩${Math.round(cpm).toLocaleString(locale)}`;
   }
@@ -88,7 +88,7 @@ export function CompareSpecTable({
         key: "cpm",
         label: t("compareRowCpm"),
         cell: (m) => formatCpmDisplay(m, locale),
-        numVal: (m) => resolveCpmWon(m),
+        numVal: (m) => resolveCpmWonForDisplay(m),
         better: "lower",
       },
       {

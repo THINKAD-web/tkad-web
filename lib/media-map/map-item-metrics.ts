@@ -1,9 +1,11 @@
-import { formatMonthlyImpressionsLabel, resolveCpmWon } from "@/lib/media-metrics";
+import {
+  formatMonthlyImpressionsLabel,
+  resolveCpmWonForDisplay,
+} from "@/lib/media-metrics";
 import { resolveCpmDisplay } from "@/lib/metrics/format";
 import {
   buildMapItemMetricLine,
   buildCatalogItemMetricLine,
-  metricsInputForCatalogCpm,
 } from "@/lib/media-card-metrics";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 
@@ -18,7 +20,7 @@ export function formatMapImpressions(
 
 /** 지도 핀 CPM — 극단값은 "CPM 산정 중" (⑧) */
 export function formatMapCpm(item: MapMapItem, locale: string): string | null {
-  const cpm = resolveCpmWon(metricsInputForCatalogCpm(item));
+  const cpm = resolveCpmWonForDisplay(item);
   const display = resolveCpmDisplay(cpm, locale);
   if (display.rawWon == null) return null;
   return display.text;
