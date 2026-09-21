@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { MediaAnalyticsReport } from "@/lib/media-report-analytics";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
 import type { MediaItem } from "@/lib/media-data";
+import type { SeoulCpmBenchmarkBadge } from "@/lib/planner/seoul-media-benchmark";
 import type { MediaRecentBrandsData } from "@/lib/insights/media-recent-brands";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaDetailHeroSection } from "@/components/media-detail/media-detail-hero-section";
@@ -41,6 +42,7 @@ type Props = {
   instantBookingEligible: boolean;
   /** MediaBooking 이력 부족 시 캘린더 정직 안내 */
   availabilitySparse?: boolean;
+  seoulCpmBenchmarkBadge?: SeoulCpmBenchmarkBadge | null;
   labels: {
     back: string;
     priceTitle: string;
@@ -106,6 +108,7 @@ export function MediaDetailPageView({
   periodLabel,
   instantBookingEligible,
   availabilitySparse = false,
+  seoulCpmBenchmarkBadge = null,
   labels,
   overview,
   belowFold,
@@ -119,6 +122,7 @@ export function MediaDetailPageView({
     >
         <MediaDetailHeroSection
           media={media}
+          seoulCpmBenchmarkBadge={seoulCpmBenchmarkBadge}
           isKo={isKo}
           typeLabel={typeLabel}
           locationShort={formatMediaLocationShort(media, isKo)}

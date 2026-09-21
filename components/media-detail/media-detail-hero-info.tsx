@@ -6,8 +6,10 @@ import type { MediaItem } from "@/lib/media-data";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
 import {
   formatMonthlyImpressionsLabel,
+  mediaDisplayCpmSourceFromItem,
   resolveCpmWonForDisplay,
 } from "@/lib/media-metrics";
+import type { SeoulCpmBenchmarkBadge } from "@/lib/planner/seoul-media-benchmark";
 import {
   formatCatalogPriceFieldWon,
   formatMediaPriceWonWithSymbol,
@@ -42,6 +44,7 @@ type Props = {
   hasPriceOptions: boolean;
   primaryPriceOption?: { price: number; label: string; period?: string };
   actions: ReactNode;
+  seoulCpmBenchmarkBadge?: SeoulCpmBenchmarkBadge | null;
   className?: string;
 };
 
@@ -76,6 +79,7 @@ export function MediaDetailHeroInfo({
   hasPriceOptions,
   primaryPriceOption,
   actions,
+  seoulCpmBenchmarkBadge = null,
   className,
 }: Props) {
   const displayName = isKo ? media.name : media.nameEn || media.name;
@@ -83,29 +87,13 @@ export function MediaDetailHeroInfo({
   const displayPrice = resolveMediaDisplayPrice(media);
   const multiPriceOptions = (media.priceOptions?.length ?? 0) >= 2;
   /** 히어로 CPM — 표시가(`resolveMediaDisplayPrice`)와 동일 분자 (견적 옵션 선택 CPM과 별개). */
+  const cpmSource = mediaDisplayCpmSourceFromItem(media);
   const cpmDisplay = resolveCpmDisplay(
-    resolveCpmWonForDisplay(media),
+    resolveCpmWonForDisplay(cpmSource),
     locale,
     media.country,
   );
-  const impressionsLabel = formatMonthlyImpressionsLabel(
-    {
-      ...media,
-      engineDailyImpressions: media.computedMetric?.dailyImpressions ?? undefined,
-      impressionModelVersion: media.computedMetric?.modelVersion ?? undefined,
-      mediaType: media.type,
-      mediaSubCategory: media.subCategory,
-      mediaMainCategory: media.mediaMainCategory,
-      mediaName: media.name,
-      factSheet: {
-        forceLoopSov: media.forceLoopSov,
-        spotDurationSec: media.spotDurationSec,
-        loopDurationSec: media.loopDurationSec,
-        playsPerHour: media.playsPerHour,
-      },
-    },
-    isKo,
-  );
+  const impressionsLabel = formatMonthlyImpressionsLabel(cpmSource, isKo);
   /** 크기·유형·타깃만 — 해상도/시인성 등은 집행 탭에서 노출 */
   const summaryTags = heroTags.slice(0, 3);
 
@@ -230,6 +218,15 @@ export function MediaDetailHeroInfo({
           }
         />
       </div>
+
+      {seoulCpmBenchmarkBadge ? (
+        <p
+          className="rounded-xl border border-dashed border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)]/40 px-3 py-2 text-[length:var(--qp-text-meta)] font-medium leading-snug text-gray-800 dark:text-white/85"
+          title={seoulCpmBenchmarkBadge.fullLabel}
+        >
+          {seoulCpmBenchmarkBadge.shortLabel}
+        </p>
+      ) : null}
 
       {actions}
     </div>
