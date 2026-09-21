@@ -69,6 +69,12 @@ import {
 } from "@/lib/media-map/onboarding-storage";
 import { isMapMobileListAutoExpandFilter } from "@/lib/media-map/map-mobile-list-filter";
 import { MediaMapNonPinBanner } from "@/components/media-map/media-map-non-pin-banner";
+import { MediaMapPeekDiscoverabilityChips } from "@/components/media-map/media-map-peek-discoverability-chips";
+import {
+  readMapAreaSearchMode,
+  writeMapAreaSearchMode,
+  type MapAreaSearchMode,
+} from "@/lib/media-map/map-area-search-mode";
 import { MediaMapItemList } from "@/components/media-map/media-map-item-list";
 import {
   markMapPageInit,
@@ -176,6 +182,8 @@ export default function MediaMapPageClient() {
   const [threeStepTour, setThreeStepTour] = useState<
     "" | "1" | "2" | "done"
   >("done");
+  const [areaSearchMode, setAreaSearchMode] =
+    useState<MapAreaSearchMode>("auto");
   const [facets, setFacets] = useState<Facets>({ regions: [], types: [] });
   const [loading, setLoading] = useState(false);
   /** 자동 영역 재조회(fetch) 진행 중 — 우상단 스피너 표시용 */
@@ -771,6 +779,7 @@ export default function MediaMapPageClient() {
   useEffect(() => {
     clearAutoSearchDebounce();
 
+    if (areaSearchMode !== "auto") return;
     if (!viewportDirty || !bounds || !searchedBounds) return;
     if (!mapBoundsChangeExceedsThreshold(searchedBounds, bounds)) return;
 
@@ -799,6 +808,7 @@ export default function MediaMapPageClient() {
     viewportDirty,
     searchedBounds,
     browseFilters.q,
+    areaSearchMode,
     runSearch,
     clearAutoSearchDebounce,
   ]);
@@ -807,7 +817,30 @@ export default function MediaMapPageClient() {
 
   useEffect(() => {
     setThreeStepTour(readMapThreeStepTourProgress());
+    setAreaSearchMode(readMapAreaSearchMode());
   }, []);
+
+  const handleAreaSearchModeChange = useCallback(
+    (mode: MapAreaSearchMode) => {
+      writeMapAreaSearchMode(mode);
+      setAreaSearchMode(mode);
+      if (mode !== "auto") return;
+      const b = boundsRef.current;
+      const s = searchedBoundsRef.current;
+      if (
+        !viewportDirtyRef.current ||
+        !b ||
+        !s ||
+        !mapBoundsChangeExceedsThreshold(s, b)
+      ) {
+        return;
+      }
+      clearAutoSearchDebounce();
+      setAutoRefreshing(true);
+      void runSearch(b).finally(() => setAutoRefreshing(false));
+    },
+    [runSearch, clearAutoSearchDebounce],
+  );
 
   const dismissSearchCoachmark = useCallback(() => {
     if (threeStepTour === "1") {
@@ -839,12 +872,16 @@ export default function MediaMapPageClient() {
     void runSearch(bounds);
   }, [bounds, runSearch, dismissSearchCoachmark, clearAutoSearchDebounce]);
 
-  const showSearchAreaButton =
-    !isMapTextSearchActive(browseFilters) &&
-    viewportDirty &&
+  const boundsNeedAreaSearch =
     bounds != null &&
     searchedBounds != null &&
     !boundsEqual(bounds, searchedBounds);
+
+  const showSearchAreaButton =
+    areaSearchMode === "manual" &&
+    !isMapTextSearchActive(browseFilters) &&
+    viewportDirty &&
+    boundsNeedAreaSearch;
 
   // 마커 클릭 시 즉시 selectedId + selectedItem을 한 번에 set (지연 없이 카드 표시)
   const handleSelect = useCallback(
@@ -1096,6 +1133,7 @@ export default function MediaMapPageClient() {
   ]);
 
   useEffect(() => {
+    if (areaSearchMode !== "manual") return;
     if (!showSearchAreaButton || !mapChromeVisible) return;
     if (hasSeenMapOnboarding(MAP_ONBOARDING_KEYS.searchNudge)) return;
     const timer = window.setTimeout(() => {
@@ -1108,7 +1146,7 @@ export default function MediaMapPageClient() {
       );
     }, 5000);
     return () => window.clearTimeout(timer);
-  }, [showSearchAreaButton, mapChromeVisible, isKo, toast]);
+  }, [areaSearchMode, showSearchAreaButton, mapChromeVisible, isKo, toast]);
 
   const locateFloatingButtons = (mobileCompact = false) => (
     <>
@@ -1197,8 +1235,14 @@ export default function MediaMapPageClient() {
       onHotspotRegionSelect={handleHotspotRegionSelect}
       mapThreeStepSearchCoachmarkOpen={threeStepTour === ""}
       onMapThreeStepSearchCoachmarkDismiss={dismissSearchStep1Coachmark}
+      mapAreaSearchMode={areaSearchMode}
+      onMapAreaSearchModeChange={handleAreaSearchModeChange}
     />
   );
+
+  const openMobileListSheet = useCallback(() => {
+    setSheetSnap("full");
+  }, []);
 
   const mapPinCount =
     mapPinsReturned ??
@@ -1642,6 +1686,14 @@ export default function MediaMapPageClient() {
             onSnapChange={handleSheetSnapChange}
             isKo={isKo}
             header={mobileSheetHeader}
+            peekFooter={
+              <MediaMapPeekDiscoverabilityChips
+                isKo={isKo}
+                mobileListCount={mobileInList}
+                listCount={listCount}
+                onOpenList={openMobileListSheet}
+              />
+            }
             onPeekChromeHeightChange={setPeekChromeHeight}
           >
             {listEl}
