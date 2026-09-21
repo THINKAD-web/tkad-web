@@ -11,7 +11,35 @@ export const MAP_ONBOARDING_KEYS = {
   sheetPeekHint: `${PREFIX}sheet_hint_seen`,
   /** 밀집 구역 cap 시 매체명 라벨 힌트 */
   pinLabelCapHint: `${PREFIX}pin_label_cap_hint_seen`,
+  /** 3단계 코치마크 — "done" | "1" | "2" | ""(미시작) */
+  threeStepTour: `${PREFIX}three_step_tour_v1`,
 } as const;
+
+export function readMapThreeStepTourProgress(): "" | "1" | "2" | "done" {
+  if (!canUseStorage()) return "done";
+  try {
+    const v = window.localStorage.getItem(MAP_ONBOARDING_KEYS.threeStepTour);
+    if (v === "1" || v === "2" || v === "done") return v;
+    return "";
+  } catch {
+    return "done";
+  }
+}
+
+export function writeMapThreeStepTourProgress(
+  progress: "" | "1" | "2" | "done",
+): void {
+  if (!canUseStorage()) return;
+  try {
+    if (progress === "") {
+      window.localStorage.removeItem(MAP_ONBOARDING_KEYS.threeStepTour);
+    } else {
+      window.localStorage.setItem(MAP_ONBOARDING_KEYS.threeStepTour, progress);
+    }
+  } catch {
+    /* ignore */
+  }
+}
 
 export type MapOnboardingKey =
   (typeof MAP_ONBOARDING_KEYS)[keyof typeof MAP_ONBOARDING_KEYS];

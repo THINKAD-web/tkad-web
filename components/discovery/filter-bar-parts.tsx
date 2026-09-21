@@ -251,6 +251,26 @@ export function formatMapViewCountCompact(
   return isKo ? `${n}개` : `${n} results`;
 }
 
+/** `/media/map` — 핀 vs 목록 vs 이동형(지도 핀 없음) 분리 표기 */
+export function formatMapViewCountPinList(
+  pinCount: number,
+  listCount: number,
+  mobileListCount: number,
+  isKo: boolean,
+): string {
+  const fmt = (n: number) =>
+    isKo ? n.toLocaleString("ko-KR") : n.toLocaleString();
+  const pins = isKo ? `핀 ${fmt(pinCount)}` : `${fmt(pinCount)} pins`;
+  if (mobileListCount > 0) {
+    const listCore = isKo
+      ? `목록 ${fmt(listCount)}건(이동형 ${fmt(mobileListCount)}건 별도)`
+      : `${fmt(listCount)} listed (${fmt(mobileListCount)} mobile, not on map)`;
+    return `${pins} · ${listCore}`;
+  }
+  const listCore = isKo ? `목록 ${fmt(listCount)}건` : `${fmt(listCount)} listed`;
+  return `${pins} · ${listCore}`;
+}
+
 /** hover/title용 상세 breakdown */
 export function formatMapViewCountDetail(
   listed: number,
@@ -258,16 +278,20 @@ export function formatMapViewCountDetail(
   serviceRegion: number,
   locationUnknown: number,
   isKo: boolean,
+  mobileListCount = 0,
 ): string {
+  if (mobileListCount > 0 || serviceRegion > 0) {
+    return formatMapViewCountPinList(
+      mapPins,
+      listed,
+      mobileListCount,
+      isKo,
+    );
+  }
   const parts = [
     isKo ? `목록 ${listed}개` : `${listed} listed`,
     isKo ? `지도 ${mapPins}개` : `${mapPins} on map`,
   ];
-  if (serviceRegion > 0) {
-    parts.push(
-      isKo ? `서비스지역 ${serviceRegion}` : `${serviceRegion} service region`,
-    );
-  }
   if (locationUnknown > 0) {
     parts.push(
       isKo

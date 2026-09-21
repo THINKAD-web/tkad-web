@@ -201,6 +201,17 @@ export async function GET(req: Request) {
         ? Math.round(zoomRaw)
         : null;
 
+    let serviceRegionTotal = 0;
+    let locationUnknownTotal = 0;
+    let mobileListTotal = 0;
+
+    for (const m of sorted) {
+      const mode = resolveMapDisplayMode(m);
+      if (mode === "service_region") serviceRegionTotal += 1;
+      else if (mode === "location_unknown") locationUnknownTotal += 1;
+      if (m.type === "mobile") mobileListTotal += 1;
+    }
+
     const { items: limitedCatalog, mapPlottableTotal, mapPinsReturned, mapPinsTruncated } =
       applyMapPinResponseLimit(sorted, {
         bounds,
@@ -208,14 +219,9 @@ export async function GET(req: Request) {
         prioritizeViewport: true,
       });
 
-    let serviceRegionTotal = 0;
-    let locationUnknownTotal = 0;
-
     const items = limitedCatalog.map((m) => {
       const mapDisplayMode = resolveMapDisplayMode(m);
       const serviceRegionLabel = resolveServiceRegionLabel(m);
-      if (mapDisplayMode === "service_region") serviceRegionTotal += 1;
-      else if (mapDisplayMode === "location_unknown") locationUnknownTotal += 1;
       return toMapItem(m, mapDisplayMode, serviceRegionLabel);
     });
 
@@ -228,6 +234,7 @@ export async function GET(req: Request) {
       mapPinsTruncated,
       serviceRegionTotal,
       locationUnknownTotal,
+      mobileListTotal,
       facets,
     });
   } catch (e) {
