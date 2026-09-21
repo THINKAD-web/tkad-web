@@ -4,6 +4,10 @@
  */
 import type { MediaItem } from "@/lib/media-data";
 import {
+  resolvePublicMonthlyImpressions,
+  type MonthlyImpressionsInput,
+} from "@/lib/media-impressions-ssot";
+import {
   catalogPriceFieldToWon,
   compareMediaByMonthlyEquivalentPrice,
   mediaMonthlyEquivalentSortWon,
@@ -18,7 +22,19 @@ export const MEDIA_DAYS_PER_MONTH = 30;
 export type MediaMetricsInput = Pick<
   MediaItem,
   "cpm" | "price" | "impressions" | "monthlyFootTraffic" | "dailyFootTraffic"
->;
+> &
+  Partial<
+    Pick<
+      MonthlyImpressionsInput,
+      | "engineDailyImpressions"
+      | "impressionModelVersion"
+      | "mediaType"
+      | "mediaSubCategory"
+      | "mediaMainCategory"
+      | "mediaName"
+      | "factSheet"
+    >
+  >;
 
 export type MediaListPriceInput = MediaPriceSortable;
 
@@ -31,12 +47,18 @@ const CPM_STORED_RATIO_MAX = 1.15;
  * (이관: ai-recommend-metrics.estimatedMonthlyImpressions)
  */
 export function resolveMonthlyImpressions(m: MediaMetricsInput): number {
-  const imp = m.impressions ?? m.monthlyFootTraffic;
-  if (typeof imp === "number" && Number.isFinite(imp) && imp > 0) {
-    return Math.round(imp);
-  }
-  const d = m.dailyFootTraffic ?? 0;
-  return Math.round(Math.max(0, d) * MEDIA_DAYS_PER_MONTH);
+  return resolvePublicMonthlyImpressions({
+    impressions: m.impressions,
+    monthlyFootTraffic: m.monthlyFootTraffic,
+    dailyFootTraffic: m.dailyFootTraffic,
+    engineDailyImpressions: m.engineDailyImpressions,
+    impressionModelVersion: m.impressionModelVersion,
+    mediaType: m.mediaType,
+    mediaSubCategory: m.mediaSubCategory,
+    mediaMainCategory: m.mediaMainCategory,
+    mediaName: m.mediaName,
+    factSheet: m.factSheet,
+  });
 }
 
 /**
