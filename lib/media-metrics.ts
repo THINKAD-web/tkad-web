@@ -4,6 +4,7 @@
  */
 import type { MediaItem } from "@/lib/media-data";
 import {
+  mediaItemToImpressionsInput,
   resolvePublicMonthlyImpressions,
   type MonthlyImpressionsInput,
 } from "@/lib/media-impressions-ssot";
@@ -107,6 +108,43 @@ export function mediaMetricsInputForDisplayCpm(
 
 export function resolveCpmWonForDisplay(m: MediaDisplayCpmSource): number | null {
   return resolveCpmWon(mediaMetricsInputForDisplayCpm(m));
+}
+
+/** 카탈로그·벤치마크·상세 — 노출 SSOT + 표시가 CPM (#615/#616) */
+export function mediaDisplayCpmSourceFromItem(
+  m: MediaItem & {
+    productPriceWon?: number | null;
+    productPriceDays?: number | null;
+  },
+): MediaDisplayCpmSource {
+  const imp = mediaItemToImpressionsInput(m);
+  return {
+    cpm: m.cpm,
+    price: m.price,
+    pricePeriod: m.pricePeriod,
+    priceOptions: m.priceOptions,
+    productPriceWon: m.productPriceWon,
+    productPriceDays: m.productPriceDays,
+    impressions: imp.impressions,
+    monthlyFootTraffic: imp.monthlyFootTraffic,
+    dailyFootTraffic: imp.dailyFootTraffic,
+    engineDailyImpressions: imp.engineDailyImpressions,
+    impressionModelVersion: imp.impressionModelVersion,
+    mediaType: imp.mediaType,
+    mediaSubCategory: imp.mediaSubCategory,
+    mediaMainCategory: imp.mediaMainCategory,
+    mediaName: imp.mediaName,
+    factSheet: imp.factSheet,
+  };
+}
+
+export function resolveCpmWonForDisplayFromMediaItem(
+  m: MediaItem & {
+    productPriceWon?: number | null;
+    productPriceDays?: number | null;
+  },
+): number | null {
+  return resolveCpmWonForDisplay(mediaDisplayCpmSourceFromItem(m));
 }
 
 /**

@@ -1,16 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import { resolveCpmWonForDisplayFromMediaItem } from "@/lib/media-metrics";
 import { classifyMedia } from "@/lib/metrics/classify";
 import { isCpmInRange } from "@/lib/metrics/cpm";
-import {
-  DAYS_PER_MONTH,
-  MIN_IMPRESSIONS_FOR_CPM,
-} from "@/lib/metrics/constants";
-import {
-  resolveContactRateWithBasis,
-  resolveSovShareWithBasis,
-} from "@/lib/metrics/defaults";
-import { calcImpressions } from "@/lib/metrics/impressions";
 import type { MediaMetricClass } from "@/lib/metrics/types";
 import type { PlannerExportMediaRow } from "@/lib/planner-report-export/types";
 
@@ -79,13 +70,13 @@ export function seoulBenchmarkBucketForMedia(
   return null;
 }
 
-/** v1ImpressionsEngine 과 동일 — 월 1유닛 기준 카탈로그 CPM */
+/**
+ * 공개 카탈로그 1유닛 기준 CPM — `resolveCpmWonForDisplay` + 노출 SSOT (#615/#616).
+ */
 export function catalogMonthlyReferenceCpm(m: MediaItem): {
   cpm: number;
   mediaClass: MediaMetricClass;
 } | null {
-  const daily = m.dailyFootTraffic ?? 0;
-  if (daily <= 0) return null;
   const mediaClass = classifyMedia({
     type: m.type,
     subCategory: m.subCategory ?? m.mediaSubCategory,
@@ -94,29 +85,9 @@ export function catalogMonthlyReferenceCpm(m: MediaItem): {
     widthM: m.widthM,
     heightM: m.heightM,
   });
-  const contact = resolveContactRateWithBasis({
-    type: m.type,
-    subCategory: m.subCategory ?? m.mediaSubCategory,
-    mainCategory: m.mediaMainCategory,
-    name: m.name,
-  });
-  const sov = resolveSovShareWithBasis({
-    type: m.type,
-    subCategory: m.subCategory ?? m.mediaSubCategory,
-    mainCategory: m.mediaMainCategory,
-    name: m.name,
-  });
-  const { totalImpressions } = calcImpressions({
-    dailyTraffic: daily,
-    contactRate: contact.value,
-    sovShare: sov.value,
-    units: 1,
-    days: DAYS_PER_MONTH,
-  });
-  const priceWon = catalogPriceFieldToWon(m.price);
-  if (priceWon <= 0 || totalImpressions < MIN_IMPRESSIONS_FOR_CPM) return null;
-  const cpm = Math.round((priceWon / totalImpressions) * 1000);
-  if (cpm <= 0) return null;
+  const cpm = resolveCpmWonForDisplayFromMediaItem(m);
+  if (cpm == null || cpm <= 0) return null;
+  if (!isCpmInRange(cpm, mediaClass)) return null;
   return { cpm, mediaClass };
 }
 
@@ -160,9 +131,7 @@ export function computeSeoulTypeBenchmarks(
     const foot = m.dailyFootTraffic ?? 0;
     if (foot > 0) buckets[bucket].footfalls.push(foot);
     const ref = catalogMonthlyReferenceCpm(m);
-    if (ref && isCpmInRange(ref.cpm, ref.mediaClass)) {
-      buckets[bucket].cpms.push(ref.cpm);
-    }
+    if (ref) buckets[bucket].cpms.push(ref.cpm);
   }
 
   const out = {} as SeoulTypeBenchmarkIndex;
@@ -209,6 +178,80 @@ export function seoulBenchmarkFootnote(isKo: boolean): string {
     : "Seoul type benchmarks use public-catalog monthly 1-unit reference CPM and daily OTS medians; actual flight terms may differ.";
 }
 
+export type SeoulCpmBenchmarkBadge =
+  | { kind: "compare"; shortLabel: string; fullLabel: string }
+  | { kind: "insufficient"; shortLabel: string; fullLabel: string }
+  | null;
+
+function buildCpmBenchmarkLabel(args: {
+  lineCpm: number;
+  stats: SeoulBucketBenchmarkStats;
+  typeLabel: string;
+  isKo: boolean;
+}): string | undefined {
+  const { lineCpm, stats, typeLabel, isKo } = args;
+  const insufficient = isKo
+    ? SEOUL_BENCHMARK_INSUFFICIENT_KO
+    : SEOUL_BENCHMARK_INSUFFICIENT_EN;
+
+  if (stats.cpmComparable && stats.medianCpm != null) {
+    const pct = formatPctLine(pctVsMedian(lineCpm, stats.medianCpm), isKo);
+    const cpmFmt = lineCpm.toLocaleString(isKo ? "ko-KR" : "en-US");
+    const medFmt = stats.medianCpm.toLocaleString(isKo ? "ko-KR" : "en-US");
+    return isKo
+      ? `이 매체 CPM ₩${cpmFmt} — 서울 ${typeLabel} 평균(중앙값) ₩${medFmt} 대비 ${pct} (n=${stats.nCpm})`
+      : `CPM ₩${cpmFmt} — vs Seoul ${typeLabel} median ₩${medFmt}: ${pct} (n=${stats.nCpm})`;
+  }
+  return isKo
+    ? `서울 ${typeLabel} CPM 벤치마크: ${insufficient}`
+    : `Seoul ${typeLabel} CPM benchmark: ${insufficient}`;
+}
+
+/** 매체 상세 히어로 배지 — 서울 3버킷만, DOOH 등은 null */
+export function seoulCpmBenchmarkBadgeForMedia(
+  media: MediaItem,
+  catalog: readonly MediaItem[],
+  isKo: boolean,
+): SeoulCpmBenchmarkBadge {
+  if (!isSeoulMedia(media)) return null;
+  const bucket = seoulBenchmarkBucketForMedia(media);
+  if (!bucket) return null;
+
+  const lineCpm = resolveCpmWonForDisplayFromMediaItem(media);
+  if (lineCpm == null || lineCpm <= 0) return null;
+
+  const stats =
+    computeSeoulTypeBenchmarks(catalog)[bucket] ?? emptyBucketStats(bucket);
+  const typeLabel = isKo ? BUCKET_LABEL_KO[bucket] : BUCKET_LABEL_EN[bucket];
+  const fullLabel = buildCpmBenchmarkLabel({
+    lineCpm,
+    stats,
+    typeLabel,
+    isKo,
+  });
+  if (!fullLabel) return null;
+
+  if (!stats.cpmComparable) {
+    return {
+      kind: "insufficient",
+      shortLabel: isKo
+        ? `서울 ${typeLabel} · ${SEOUL_BENCHMARK_INSUFFICIENT_KO}`
+        : `Seoul ${typeLabel} · ${SEOUL_BENCHMARK_INSUFFICIENT_EN}`,
+      fullLabel,
+    };
+  }
+
+  const pct = pctVsMedian(lineCpm, stats.medianCpm!);
+  const pctText = formatPctLine(pct, isKo);
+  return {
+    kind: "compare",
+    shortLabel: isKo
+      ? `서울 ${typeLabel} 중앙값 대비 ${pctText}`
+      : `vs Seoul ${typeLabel} median: ${pctText}`,
+    fullLabel,
+  };
+}
+
 type AttachArgs = {
   portfolioRows: PlannerExportMediaRow[];
   catalog: readonly MediaItem[];
@@ -233,35 +276,27 @@ export function attachSeoulBenchmarksToPortfolioRows(
     if (!bucket) return row;
     const stats = benchmarks[bucket] ?? emptyBucketStats(bucket);
     const typeLabel = args.isKo ? BUCKET_LABEL_KO[bucket] : BUCKET_LABEL_EN[bucket];
-    const insufficient = args.isKo
-      ? SEOUL_BENCHMARK_INSUFFICIENT_KO
-      : SEOUL_BENCHMARK_INSUFFICIENT_EN;
 
     let cpmBenchmarkLabel: string | undefined;
-    const lineCpm = cpmById.get(row.id);
+    const lineCpm =
+      resolveCpmWonForDisplayFromMediaItem(media) ??
+      cpmById.get(row.id) ??
+      null;
     if (lineCpm != null && lineCpm > 0) {
-      if (stats.cpmComparable && stats.medianCpm != null) {
-        const pct = formatPctLine(
-          pctVsMedian(lineCpm, stats.medianCpm),
-          args.isKo,
-        );
-        const cpmFmt = lineCpm.toLocaleString(args.isKo ? "ko-KR" : "en-US");
-        const medFmt = stats.medianCpm.toLocaleString(
-          args.isKo ? "ko-KR" : "en-US",
-        );
-        cpmBenchmarkLabel = args.isKo
-          ? `이 매체 CPM ₩${cpmFmt} — 서울 ${typeLabel} 평균(중앙값) ₩${medFmt} 대비 ${pct} (n=${stats.nCpm})`
-          : `CPM ₩${cpmFmt} — vs Seoul ${typeLabel} median ₩${medFmt}: ${pct} (n=${stats.nCpm})`;
-      } else {
-        cpmBenchmarkLabel = args.isKo
-          ? `서울 ${typeLabel} CPM 벤치마크: ${insufficient}`
-          : `Seoul ${typeLabel} CPM benchmark: ${insufficient}`;
-      }
+      cpmBenchmarkLabel = buildCpmBenchmarkLabel({
+        lineCpm,
+        stats,
+        typeLabel,
+        isKo: args.isKo,
+      });
     }
 
     let footfallBenchmarkLabel: string | undefined;
     const foot = row.dailyTraffic ?? media.dailyFootTraffic ?? 0;
     if (foot > 0) {
+      const insufficient = args.isKo
+        ? SEOUL_BENCHMARK_INSUFFICIENT_KO
+        : SEOUL_BENCHMARK_INSUFFICIENT_EN;
       if (stats.footfallComparable && stats.medianFootfall != null) {
         const pct = formatPctLine(
           pctVsMedian(foot, stats.medianFootfall),
