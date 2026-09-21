@@ -24,18 +24,21 @@ async function main() {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 
   await page.goto(`${BASE}/ko/cases/${CASE_ID}`, {
-    waitUntil: "networkidle",
-    timeout: 120_000,
+    waitUntil: "domcontentloaded",
+    timeout: 180_000,
   });
+  await page.waitForSelector("text=예시 시나리오", { timeout: 60_000 }).catch(() => {});
+  await page.waitForTimeout(1500);
   await page.screenshot({
     path: resolve(OUT, "01-case-detail-example-scenario.png"),
     fullPage: false,
   });
 
   await page.goto(`${BASE}/ko/media/${KPOP_SLUG}`, {
-    waitUntil: "networkidle",
-    timeout: 120_000,
+    waitUntil: "domcontentloaded",
+    timeout: 180_000,
   });
+  await page.waitForTimeout(2000);
   await page.screenshot({
     path: resolve(OUT, "02-kpop-detail-hero-cpm.png"),
     fullPage: false,
@@ -47,7 +50,7 @@ async function main() {
     fullPage: false,
   });
 
-  await page.goto(`${BASE}/ko`, { waitUntil: "networkidle", timeout: 120_000 });
+  await page.goto(`${BASE}/ko`, { waitUntil: "domcontentloaded", timeout: 180_000 });
   await page.evaluate(() => {
     const el = document.getElementById("home-planner-coverage");
     el?.scrollIntoView({ behavior: "instant", block: "start" });
@@ -59,9 +62,10 @@ async function main() {
   });
 
   await page.goto(`${BASE}/ko/pricing`, {
-    waitUntil: "networkidle",
-    timeout: 120_000,
+    waitUntil: "domcontentloaded",
+    timeout: 180_000,
   });
+  await page.waitForTimeout(1500);
   await page.screenshot({
     path: resolve(OUT, "05-pricing-plans-api-limits.png"),
     fullPage: true,
