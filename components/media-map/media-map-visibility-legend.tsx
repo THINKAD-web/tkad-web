@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useTheme } from "next-themes";
-import { visibilityPinLegendEntries } from "@/lib/map-pin-visibility-colors";
+import {
+  visibilityPinLegendEntries,
+  visibilityPinTierRingStroke,
+} from "@/lib/map-pin-visibility-colors";
 import {
   MEDIA_TYPE_PIN_LEGEND_ENTRIES,
   pinLegendMiniDataUrl,
@@ -123,7 +126,7 @@ export function MediaMapVisibilityLegend({
           </ul>
 
           <p className="tkad-type-note mb-1.5 mt-3 font-semibold text-foreground">
-            {isKo ? "가시성 (외곽 ring)" : "Visibility (outer ring)"}
+            {isKo ? "가시성 (핀 숫자·ring)" : "Visibility (pin # & ring)"}
           </p>
           <ul className="space-y-1">
             {visibilityEntries.map((tier) => (
@@ -132,10 +135,21 @@ export function MediaMapVisibilityLegend({
                 className="tkad-type-note flex items-center gap-2 leading-tight text-tkad-secondary"
               >
                 <span
-                  className="h-3 w-3 shrink-0 rounded-full border-2 bg-transparent"
-                  style={{ borderColor: tier.stroke }}
+                  className="relative h-3 w-3 shrink-0 rounded-full border-2 bg-transparent"
+                  style={{
+                    borderColor: visibilityPinTierRingStroke(
+                      tier.tier,
+                      forLightMapTiles,
+                    ),
+                  }}
                   aria-hidden
-                />
+                >
+                  {tier.tier > 0 ? (
+                    <span className="absolute -right-0.5 -top-1 text-[7px] font-extrabold leading-none text-slate-600 dark:text-slate-300">
+                      {tier.tier}
+                    </span>
+                  ) : null}
+                </span>
                 <span className="min-w-0">
                   <span className="font-medium text-foreground">
                     {isKo ? tier.labelKo : tier.labelEn}
@@ -152,8 +166,8 @@ export function MediaMapVisibilityLegend({
           </ul>
           <p className="tkad-type-note mt-1.5 text-tkad-muted">
             {isKo
-              ? "외곽 ring 진할수록 높은 가시성 · 모양·색으로 매체 유형 구분 · 확대 시 매체명 표시"
-              : "Darker outer ring = higher visibility · shape and color = media type · zoom in for names"}
+              ? "핀 우상단 숫자(1–5)=가시성 등급 · ring은 등급 구분(틸 클러스터와 별개) · 안쪽 색·모양=매체 유형"
+              : "Pin corner number (1–5) = visibility tier · ring marks tier (not clusters) · inner shape/color = media type"}
           </p>
           {showSubwayToggle ? (
             <p className="tkad-type-note mt-2 text-tkad-muted">

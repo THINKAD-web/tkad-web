@@ -16,7 +16,7 @@ type Props = {
   className?: string;
 };
 
-/** `/media/map` — native select 대신 툴바 높이(h-9)에 맞는 정렬 드롭다운 */
+/** `/media/map` — native select 대신 툴바 높이(h-11)에 맞는 정렬 드롭다운 */
 export function MapToolbarSortDropdown({ value, onChange, className }: Props) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);

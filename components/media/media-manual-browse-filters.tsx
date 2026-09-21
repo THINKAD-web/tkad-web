@@ -56,6 +56,7 @@ import {
   MAP_TOOLBAR_VIEW_TOGGLE,
 } from "@/components/media-map/map-toolbar-control-styles";
 import { MapToolbarSortDropdown } from "@/components/media-map/map-toolbar-sort-dropdown";
+import { MapOnboardingCoachmark } from "@/components/media-map/map-onboarding-coachmark";
 import {
   MediaFilterVaulSheet,
   MediaSortVaulSheet,
@@ -235,6 +236,9 @@ export type MediaManualBrowseFiltersProps = {
   onHotspotRegionSelect?: (regionMain: string, regionSub: string) => void;
   /** PR4 — `/media` vs `/media/online` facet set */
   browseChannel?: BrowseChannelRoute;
+  /** `/media/map` 3-step 온보딩 — 1단계 검색 코치마크 */
+  mapThreeStepSearchCoachmarkOpen?: boolean;
+  onMapThreeStepSearchCoachmarkDismiss?: () => void;
 };
 
 export function MediaManualBrowseFilters({
@@ -293,6 +297,8 @@ export function MediaManualBrowseFilters({
   showHotspotRegions = false,
   onHotspotRegionSelect,
   browseChannel = "offline",
+  mapThreeStepSearchCoachmarkOpen = false,
+  onMapThreeStepSearchCoachmarkDismiss,
 }: MediaManualBrowseFiltersProps) {
   const isOnlineBrowse = browseChannel === "online";
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -1181,6 +1187,7 @@ export function MediaManualBrowseFilters({
           ? MAP_TOOLBAR_SEARCH_WRAP
           : "flex-1 sm:min-w-[12rem] sm:max-w-md",
       )}
+      data-map-onboarding={mapPageViewModes ? "toolbar-search" : undefined}
     >
       <Search
         className={cn(
@@ -1226,6 +1233,20 @@ export function MediaManualBrowseFilters({
         >
           <X className="h-4 w-4 text-gray-400 dark:text-white/40" />
         </button>
+      ) : null}
+      {mapPageViewModes && mapThreeStepSearchCoachmarkOpen ? (
+        <MapOnboardingCoachmark
+          open
+          title={isKo ? "1/3 · 매체 검색" : "1/3 · Search media"}
+          description={
+            isKo
+              ? "매체명·지역·유형으로 전국 검색할 수 있어요."
+              : "Search nationwide by name, region, or type."
+          }
+          dismissLabel={isKo ? "다음" : "Next"}
+          onDismiss={() => onMapThreeStepSearchCoachmarkDismiss?.()}
+          placement="below"
+        />
       ) : null}
     </div>
   );

@@ -179,6 +179,35 @@ export function visibilityPinTiersForTiles(
   return forLightBackground ? VISIBILITY_PIN_TIERS : VISIBILITY_PIN_TIERS_DARK;
 }
 
+/** 가시성 tier 외곽 링 — 클러스터(틸)와 구분되는 저채도 monochrome */
+const VISIBILITY_TIER_RING_LIGHT: Record<VisibilityPinTier, string> = {
+  0: "#cbd5e1",
+  1: "#e2e8f0",
+  2: "#cbd5e1",
+  3: "#94a3b8",
+  4: "#64748b",
+  5: "#475569",
+};
+
+const VISIBILITY_TIER_RING_DARK: Record<VisibilityPinTier, string> = {
+  0: "#64748b",
+  1: "#475569",
+  2: "#64748b",
+  3: "#94a3b8",
+  4: "#cbd5e1",
+  5: "#e2e8f0",
+};
+
+export function visibilityPinTierRingStroke(
+  tier: VisibilityPinTier,
+  forLightBackground = true,
+): string {
+  const table = forLightBackground
+    ? VISIBILITY_TIER_RING_LIGHT
+    : VISIBILITY_TIER_RING_DARK;
+  return table[tier] ?? table[0];
+}
+
 export function visibilityPinTierForScore(
   score: number | null | undefined,
 ): VisibilityPinTier {

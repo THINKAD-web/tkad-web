@@ -10,7 +10,10 @@ import {
   pinLetterForType,
   pinShapeForType,
 } from "../lib/map-pin-icon-data.ts";
-import { visibilityPinTierDefForScore } from "../lib/map-pin-visibility-colors.ts";
+import {
+  visibilityPinTierForScore,
+  visibilityPinTierRingStroke,
+} from "../lib/map-pin-visibility-colors.ts";
 
 function decodeSvg(dataUrl: string): string {
   assert.ok(dataUrl.startsWith("data:image/svg+xml;charset=UTF-8,"));
@@ -39,24 +42,26 @@ assert.notEqual(digitalHigh, staticHigh, "type changes data url");
 assert.notEqual(staticHigh, networkHigh, "network vs static");
 
 const svgDigital = decodeSvg(digitalHigh);
-assert.doesNotMatch(svgDigital, /<text[\s>]/, "no letter text on pin");
+assert.match(svgDigital, /<text[\s>]/, "tier number on pin");
+assert.match(svgDigital, />5<\/text>/, "tier 5 label for score 95");
 assert.match(svgDigital, /fill="#0f5f5c"/, "digital fill");
 assert.match(svgDigital, /<circle cx="16"/, "digital circle shape");
+const tier5 = visibilityPinTierForScore(95);
 assert.match(
   svgDigital,
   new RegExp(
-    `stroke="${visibilityPinTierDefForScore(95, true).stroke.replace("#", "\\#")}"`,
+    `stroke="${visibilityPinTierRingStroke(tier5, true).replace("#", "\\#")}"`,
   ),
-  "tier stroke on outer ring",
+  "monochrome tier ring",
 );
 
 const svgStatic = decodeSvg(staticHigh);
-assert.doesNotMatch(svgStatic, /<text[\s>]/, "no letter text on pin");
+assert.match(svgStatic, /<text[\s>]/, "tier number on static pin");
 assert.match(svgStatic, /fill="#334155"/, "static fill");
 assert.match(svgStatic, /<rect x="5"/, "static rounded-square shape");
 
 const svgNetwork = decodeSvg(networkHigh);
-assert.doesNotMatch(svgNetwork, /<text[\s>]/, "no letter text on pin");
+assert.match(svgNetwork, /<text[\s>]/, "tier number on network pin");
 assert.match(svgNetwork, /fill="#1e4976"/, "network navy fill");
 assert.match(svgNetwork, /points="16,5 27,16 16,27 5,16"/, "network diamond shape");
 
