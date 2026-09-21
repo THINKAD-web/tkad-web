@@ -67,6 +67,7 @@ import {
   buildDefaultExecutiveSummaryLines,
   buildDefaultReportGreeting,
 } from "@/lib/planner-report-export/report-copy";
+import { resolveCpmWonForDisplayFromMediaItem } from "@/lib/media-metrics";
 import {
   attachSeoulBenchmarksToPortfolioRows,
   seoulBenchmarkFootnote,
@@ -541,10 +542,18 @@ export function buildOohReportPayload(
     ...(a.customPortfolioRows ?? []),
   ];
 
-  const benchmarkPlanCpms = plan.mediaItems.map((mi) => ({
-    id: mi.id,
-    cpmWon: mi.cpmWon,
-  }));
+  const portfolioById = new Map(orderedPortfolio.map((m) => [m.id, m]));
+  const benchmarkCatalogById = new Map(
+    (a.benchmarkCatalog ?? []).map((m) => [m.id, m]),
+  );
+  const benchmarkPlanCpms = plan.mediaItems.map((mi) => {
+    const m = portfolioById.get(mi.id) ?? benchmarkCatalogById.get(mi.id);
+    const displayCpm = m ? resolveCpmWonForDisplayFromMediaItem(m) : null;
+    return {
+      id: mi.id,
+      cpmWon: displayCpm ?? mi.cpmWon,
+    };
+  });
 
   if (a.benchmarkCatalog?.length) {
     portfolioRows = attachSeoulBenchmarksToPortfolioRows({
