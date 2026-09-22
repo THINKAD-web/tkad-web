@@ -4,6 +4,7 @@ import {
   OohContractSendMode,
   OohContractStatus,
 } from "@prisma/client";
+import { contentDispositionInlinePdf } from "./contract-preview-pdf.ts";
 import {
   canAdminSendInvoiceForContract,
   canCustomerSignContract,
@@ -102,6 +103,15 @@ test("admin invoice gate includes Mode B attachment_sent", () => {
     }),
     false,
   );
+});
+
+test("korean upload filename is a valid Content-Disposition ByteString", () => {
+  const name = "(260918)_기어세컨드 홍대 상진빌딩 계약서_싱커드.pdf";
+  const value = contentDispositionInlinePdf(name);
+  assert.equal([...value].every((ch) => ch.charCodeAt(0) <= 255), true);
+  const headers = new Headers({ "Content-Disposition": value });
+  assert.match(headers.get("Content-Disposition") ?? "", /filename\*=UTF-8''/);
+  assert.match(headers.get("Content-Disposition") ?? "", /filename="/);
 });
 
 test("mapUploadPdfFetchErrorToHttpStatus", () => {
