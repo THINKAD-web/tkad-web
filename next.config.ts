@@ -28,6 +28,12 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig: NextConfig = {
   /** jsPDF/pptxgenjs — Node 네이티브 의존성; Turbopack 번들 시 resolve 오류 방지 */
   serverExternalPackages: ["pptxgenjs", "jszip", "pdfjs-dist"],
+  outputFileTracingIncludes: {
+    "/api/quote/[id]/contract/sign": [
+      "./node_modules/pdfjs-dist/legacy/build/pdf.mjs",
+      "./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs",
+    ],
+  },
   /**
    * Vercel 8GB builders: webpack compile + `tsc` in one process often hits the 45m
    * build limit (logs stop at "Running TypeScript …"). Typecheck locally / in CI via

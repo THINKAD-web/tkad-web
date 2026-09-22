@@ -1,4 +1,8 @@
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 import type { PdfTextRun } from "@/lib/upload-contract-stamp-anchor";
+
+const require = createRequire(import.meta.url);
 
 type PdfjsTextItem = {
   str: string;
@@ -19,6 +23,7 @@ type PdfjsDoc = {
 
 type PdfjsModule = {
   getDocument: (src: Record<string, unknown>) => { promise: Promise<PdfjsDoc> };
+  GlobalWorkerOptions: { workerSrc: string };
 };
 
 /** 마지막 페이지 텍스트 런. 워커 없이 Node에서만 호출한다. */
@@ -30,6 +35,15 @@ export async function extractLastPageTextRuns(pdfBytes: Uint8Array): Promise<{
     const pdfjs = (await import(
       "pdfjs-dist/legacy/build/pdf.mjs"
     )) as PdfjsModule;
+    const workerEntry = require.resolve(
+      "pdfjs-dist/legacy/build/pdf.worker.mjs",
+    );
+    pdfjs.GlobalWorkerOptions.workerSrc = pathToFileURL(workerEntry).href;
+    const workerMod = (await import(pdfjs.GlobalWorkerOptions.workerSrc)) as {
+      WorkerMessageHandler: unknown;
+    };
+    (globalThis as { pdfjsWorker?: { WorkerMessageHandler: unknown } }).pdfjsWorker =
+      { WorkerMessageHandler: workerMod.WorkerMessageHandler };
     const doc = await pdfjs.getDocument({
       data: pdfBytes,
       disableWorker: true,

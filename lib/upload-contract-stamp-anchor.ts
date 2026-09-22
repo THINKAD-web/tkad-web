@@ -100,6 +100,23 @@ export function partyASealRect(
   return { x, y, w: size, h: size };
 }
 
+/**
+ * 텍스트 추출이 실패해도 페이지 구석·바닥 감사 박스에 두지 않는다.
+ * 좌표는 업로드 표준 계약(A4, 갑 대표자 (인))에서 잰 비율.
+ */
+export function partyASealFallback(page: {
+  width: number;
+  height: number;
+}): PdfRect {
+  const size = UPLOAD_PARTY_A_SEAL_PT;
+  return {
+    x: page.width * (135.4 / 595.32),
+    y: page.height * (146.1 / 841.92),
+    w: size,
+    h: size,
+  };
+}
+
 const IMAGE_DRAW =
   /([0-9.]+) 0 0 ([0-9.]+) ([0-9.]+) ([0-9.]+) cm(\s*\/[^\s]+\s+Do)/g;
 

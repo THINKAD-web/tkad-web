@@ -16,6 +16,7 @@ import { sha256Hex } from "@/lib/signature-audit";
 import { extractLastPageTextRuns } from "@/lib/upload-contract-pdf-text";
 import {
   lowerSealMatrices,
+  partyASealFallback,
   partyASealRect,
   partyASignatureRect,
   type PdfRect,
@@ -227,49 +228,18 @@ export async function buildSignedUploadContractPdf(
   const { width } = page.getSize();
 
   const textLayer = await extractLastPageTextRuns(new Uint8Array(sourcePdf));
-  const seal = textLayer
-    ? partyASealRect(textLayer.page, textLayer.items)
-    : null;
+  const pageSize = page.getSize();
+  const seal =
+    (textLayer && partyASealRect(textLayer.page, textLayer.items)) ||
+    partyASealFallback({ width: pageSize.width, height: pageSize.height });
+  if (!textLayer) {
+    console.warn("[upload-contract-sign] no text layer; using 갑 seal fallback");
+  }
   if (textLayer) {
     lowerEmbeddedSeals(pdfDoc, page, textLayer.items);
   }
 
   const margin = 36;
-  const sigRaw = images.signaturePngBase64?.trim();
-  if (sigRaw) {
-    const { img: png } = await embedSignImage(pdfDoc, sigRaw);
-    const slot = seal
-      ? partyASignatureRect(seal)
-      : { x: margin, y: margin, w: 140, h: 36 };
-    const fitted = fitInside(slot, png.width, png.height);
-    page.drawImage(png, {
-      x: fitted.x,
-      y: fitted.y,
-      width: fitted.w,
-      height: fitted.h,
-    });
-  }
-
-  const stampRaw = images.stampPngBase64?.trim();
-  if (stampRaw) {
-    const { img: stampImg } = await embedSignImage(pdfDoc, stampRaw);
-    const slot = seal
-      ? seal
-      : {
-          x: width - margin - 72,
-          y: margin,
-          w: 72,
-          h: 72,
-        };
-    const fitted = fitInside(slot, stampImg.width, stampImg.height);
-    page.drawImage(stampImg, {
-      x: fitted.x,
-      y: fitted.y,
-      width: fitted.w,
-      height: fitted.h,
-    });
-  }
-
   const yBase = 50;
 
   const { font, hangul } = await overlayFont(pdfDoc);
@@ -301,6 +271,30 @@ export async function buildSignedUploadContractPdf(
       color: rgb(0.1, 0.1, 0.1),
     });
     y -= lineH;
+  }
+
+  const sigRaw = images.signaturePngBase64?.trim();
+  if (sigRaw) {
+    const { img: png } = await embedSignImage(pdfDoc, sigRaw);
+    const fitted = fitInside(partyASignatureRect(seal), png.width, png.height);
+    page.drawImage(png, {
+      x: fitted.x,
+      y: fitted.y,
+      width: fitted.w,
+      height: fitted.h,
+    });
+  }
+
+  const stampRaw = images.stampPngBase64?.trim();
+  if (stampRaw) {
+    const { img: stampImg } = await embedSignImage(pdfDoc, stampRaw);
+    const fitted = fitInside(seal, stampImg.width, stampImg.height);
+    page.drawImage(stampImg, {
+      x: fitted.x,
+      y: fitted.y,
+      width: fitted.w,
+      height: fitted.h,
+    });
   }
 
   const out = await pdfDoc.save();
