@@ -2864,7 +2864,7 @@
     "contractStandardTerms": "Standard terms summary",
     "contractArticle5": "Article 5 (Special terms)",
     "contractArticle6": "Article 6 (General)",
-    "contractSpecialTermsLabel": "Special terms (per deal)",
+    "contractSpecialTermsLabel": "Special terms (Article 1 notes)",
     "contractSpecialTermsPh": "Enter deal-specific terms. Leave empty to use the standard clause in the PDF.",
     "contractTermsSave": "Save special terms",
     "contractTermsSaveHint": "Saved terms appear in the PDF preview below.",

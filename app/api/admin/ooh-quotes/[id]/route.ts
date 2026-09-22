@@ -44,6 +44,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     row.mediaIds,
     row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
     isKo,
+    { start: row.startDate, end: row.endDate },
   );
 
   let contract = row.oohContract;
@@ -58,8 +59,9 @@ export async function GET(request: NextRequest, { params }: Params) {
     { ...row, oohContract: contract },
     mediaPack.names,
     contractRecordId,
+    undefined,
+    mediaPack.lineItems,
   );
-  pdfVars.mediaLineItems = mediaPack.lineItems;
 
   return json({
     quote: {
@@ -199,6 +201,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       extraProductionWon: numOrUndef(meta.extraProductionWon),
       extraInstallWon: numOrUndef(meta.extraInstallWon),
       extraOtherWon: numOrUndef(meta.extraOtherWon),
+      otherNotes:
+        typeof meta.otherNotes === "string" ? meta.otherNotes : undefined,
     });
     await db.ooHQuote.update({
       where: { id },

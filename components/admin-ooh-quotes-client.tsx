@@ -816,6 +816,7 @@ export default function AdminOohQuotesClient() {
                           <AdminOohContractDetailPanel
                             quoteId={row.id}
                             detail={detail}
+                            contractAmountManwon={row.totalAmount}
                             recalcBusy={busyId === row.id}
                             onRecalc={() =>
                               void run(row.id, async () => {
@@ -1078,6 +1079,7 @@ export default function AdminOohQuotesClient() {
                           <AdminOohContractDetailPanel
                             quoteId={row.id}
                             detail={detail}
+                            contractAmountManwon={row.totalAmount}
                             recalcBusy={busyId === row.id}
                             onRecalc={() =>
                               void run(row.id, async () => {

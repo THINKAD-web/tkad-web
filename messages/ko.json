@@ -2864,7 +2864,7 @@
     "contractStandardTerms": "표준 약관 요약",
     "contractArticle5": "제5조 (특약)",
     "contractArticle6": "제6조 (일반)",
-    "contractSpecialTermsLabel": "특약 (건별 수정)",
+    "contractSpecialTermsLabel": "특약사항 (제1조 기타사항)",
     "contractSpecialTermsPh": "이 건에만 적용할 특약을 입력하세요. 비우면 표준 문구가 PDF에 들어갑니다.",
     "contractTermsSave": "특약 저장",
     "contractTermsSaveHint": "저장 후 아래 PDF 미리보기에 반영됩니다.",

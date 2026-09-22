@@ -603,6 +603,7 @@ export default function AdminContractsClient() {
               <AdminOohContractDetailPanel
                 quoteId={sheetQuoteId}
                 detail={detail}
+                contractAmountManwon={selectedRow?.totalAmount}
                 recalcBusy={recalcBusy}
                 onRecalc={() => {
                   if (!sheetQuoteId) return;
