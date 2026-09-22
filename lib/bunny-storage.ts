@@ -119,18 +119,32 @@ export async function uploadToBunnyStorage(opts: {
     throw new Error(`BUNNY_UPLOAD_FAILED:${res.status}:${t.slice(0, 200)}`);
   }
 
+  const publicUrl = buildBunnyCdnUrl(normalizedPath);
+  if (!publicUrl) {
+    throw new Error("BUNNY_CDN_URL_BUILD_FAILED");
+  }
+
   return {
     path: normalizedPath,
-    publicUrl: joinUrl(cdnBase, normalizedPath),
+    publicUrl,
   };
 }
 
-/** CDN 공개 URL → 스토리지 존 내 경로 (삭제용) */
+/** CDN 공개 URL → 스토리지 존 내 경로 (삭제·Storage API fetch용) */
 export function bunnyPathFromPublicUrl(publicUrl: string): string | null {
-  const cdnBase = process.env.BUNNY_CDN_BASE_URL?.trim()?.replace(/\/+$/, "");
-  if (!cdnBase || !publicUrl.startsWith(cdnBase)) return null;
-  const path = publicUrl.slice(cdnBase.length).replace(/^\/+/, "");
-  return path || null;
+  const cdnBase = process.env.BUNNY_CDN_BASE_URL?.trim();
+  if (!cdnBase) return null;
+  try {
+    const pub = new URL(publicUrl.trim());
+    const base = new URL(
+      cdnBase.includes("://") ? cdnBase : `https://${cdnBase}`,
+    );
+    if (pub.origin !== base.origin) return null;
+    const objectPath = pub.pathname.replace(/^\/+|\/+$/g, "");
+    return objectPath || null;
+  } catch {
+    return null;
+  }
 }
 
 /** 매체 `image` + `extractedImages` 에서 고유 URL 목록 */

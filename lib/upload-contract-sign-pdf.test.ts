@@ -15,7 +15,7 @@ describe("buildSignedUploadContractPdf", () => {
 
     const { pdfBase64, sha256 } = await buildSignedUploadContractPdf(
       sourcePdf,
-      TINY_PNG_B64,
+      { signaturePngBase64: TINY_PNG_B64 },
       {
         signerName: "Test User",
         signerEmail: "test@example.com",
