@@ -3010,7 +3010,16 @@
     "sendUploadOk": "Sent. Check Contract management.",
     "sendUploadFail": "Upload contract send failed.",
     "uploadPreviewLocal": "Preview local PDF",
-    "uploadBusy": "Uploading PDF…"
+    "uploadBusy": "Uploading PDF…",
+    "uploadErrCloudinaryNotConfigured": "Cloudinary is not configured. Check CLOUDINARY_* env vars on Vercel.",
+    "uploadErrCloudinaryUpload": "Cloudinary PDF upload failed.",
+    "uploadErrPdfOnly": "Only PDF files are allowed.",
+    "uploadErrPdfSize": "PDF must be 10MB or smaller.",
+    "uploadErrMissingFile": "No file selected.",
+    "sendUploadErrPdfFetch": "Could not fetch the uploaded PDF on the server. Check Cloudinary settings.",
+    "sendUploadErrShaMismatch": "PDF integrity check failed. Please upload the file again.",
+    "sendUploadErrDatesRequired": "Start and end dates are required when media is selected.",
+    "sendUploadErrValidation": "Invalid request. Re-upload the PDF and try again."
   },
   "quoteCustomer": {
     "detailTitle": "Your quote",

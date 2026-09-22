@@ -43,7 +43,44 @@ import {
   type StandaloneContractDraft,
   STANDALONE_CONTRACT_DRAFT_VERSION,
 } from "@/lib/standalone-contract";
+import { readAdminApiError } from "@/lib/admin-api-error";
 import { cn } from "@/lib/utils";
+
+function uploadApiErrorMessage(code: string, t: (k: string) => string): string {
+  switch (code) {
+    case "cloudinary_not_configured":
+      return t("uploadErrCloudinaryNotConfigured");
+    case "cloudinary_upload_failed":
+      return t("uploadErrCloudinaryUpload");
+    case "pdf_only":
+    case "not_pdf":
+      return t("uploadErrPdfOnly");
+    case "invalid_pdf_size":
+      return t("uploadErrPdfSize");
+    case "missing_file":
+      return t("uploadErrMissingFile");
+    default:
+      return code;
+  }
+}
+
+function sendUploadApiErrorMessage(code: string, t: (k: string) => string): string {
+  switch (code) {
+    case "upload_fetch_failed":
+    case "upload_pdf_unreachable":
+      return t("sendUploadErrPdfFetch");
+    case "upload_sha_mismatch":
+      return t("sendUploadErrShaMismatch");
+    case "MEDIA_REQUIRED":
+      return t("sendEsignMediaRequired");
+    case "DATES_REQUIRED":
+      return t("sendUploadErrDatesRequired");
+    case "validation_failed":
+      return t("sendUploadErrValidation");
+    default:
+      return code;
+  }
+}
 
 const DRAFT_STORAGE_KEY = "tkad-admin-standalone-contract-draft-v1";
 
@@ -344,7 +381,8 @@ export default function AdminStandaloneContractClient() {
         });
         const raw: unknown = await res.json().catch(() => ({}));
         if (!res.ok) {
-          throw new Error(t("sendUploadFail"));
+          const code = readAdminApiError(raw, "upload_failed");
+          throw new Error(uploadApiErrorMessage(code, t));
         }
         const url =
           typeof raw === "object" &&
@@ -459,7 +497,9 @@ export default function AdminStandaloneContractClient() {
           }
         }
         if (!res.ok) {
-          throw new Error(t("sendUploadFail"));
+          const code = readAdminApiError(raw, "send_failed");
+          const msg = sendUploadApiErrorMessage(code, t);
+          throw new Error(msg === code ? t("sendUploadFail") : msg);
         }
         const emailed =
           typeof raw === "object" &&

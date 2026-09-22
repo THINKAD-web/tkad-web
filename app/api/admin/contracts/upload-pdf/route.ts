@@ -47,7 +47,13 @@ export async function POST(request: NextRequest) {
 
   const sha256 = hashUploadPdfBuffer(buf);
   const token = randomBytes(12).toString("hex");
-  const url = await uploadOohContractSourcePdf(buf, token);
+  let url: string;
+  try {
+    url = await uploadOohContractSourcePdf(buf, token);
+  } catch (e) {
+    console.error("[upload-pdf] cloudinary", e);
+    return json({ error: "cloudinary_upload_failed" }, 502);
+  }
   const fileName = (file.name || "contract.pdf").slice(0, 255);
 
   return json({

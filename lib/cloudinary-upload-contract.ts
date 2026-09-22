@@ -40,6 +40,7 @@ export async function uploadOohContractSourcePdf(
         public_id: safeId,
         overwrite: true,
         use_filename: false,
+        format: "pdf",
       },
       (err, result) => {
         if (err) {
