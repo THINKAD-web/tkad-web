@@ -12,7 +12,8 @@ import { computeAdminQuoteTotals } from "@/lib/admin-quote-calc";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { sendOoHQuoteToClient } from "@/lib/ooh-quote-send";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
-import { isEmailConfigured, sendEmail } from "@/lib/email/client";
+import { isEmailConfigured } from "@/lib/email/client";
+import { sendContractInviteEmail } from "@/lib/contract-invite-email";
 import { createNotification } from "@/lib/notifications";
 import { postInternalAlert } from "@/lib/internal-webhook";
 import { notifySlackBookingConfirm } from "@/lib/quote-slack-notify";
@@ -219,33 +220,16 @@ export async function advanceNegotiationQuoteToContract(
   const isKo = localeStr === "ko";
   const to = row.clientEmail?.trim();
   if (to && isEmailConfigured()) {
-    void sendEmail({
+    void sendContractInviteEmail({
       to,
+      clientName: row.clientName,
+      locale: localeStr === "en" ? "en" : "ko",
+      quoteId,
+      variant: "booking_confirmed",
+      previewUrl: previewAbs,
       subject: isKo
-        ? "[THINKAD] 가격 제안 수락 — 전자계약을 진행해 주세요"
+        ? "[싱커드] 가격 제안 수락 — 전자계약을 진행해 주세요"
         : "[THINKAD] Price accepted — sign your e-contract",
-      text: isKo
-        ? [
-            `안녕하세요 ${row.clientName}님,`,
-            "",
-            "제안하신 단가가 수락되었습니다. 견적서를 확인한 뒤 전자계약서에 서명해 주세요.",
-            "",
-            `견적 미리보기: ${previewAbs}`,
-            `전자계약: ${contractAbs}`,
-            "",
-            "감사합니다.",
-          ].join("\n")
-        : [
-            `Hello ${row.clientName},`,
-            "",
-            "Your proposed rate was accepted. Review the quote and sign the e-contract.",
-            "",
-            `Quote: ${previewAbs}`,
-            `Contract: ${contractAbs}`,
-          ].join("\n"),
-      html: isKo
-        ? `<p>제안 단가가 <strong>수락</strong>되었습니다.</p><p><a href="${previewAbs}">견적 미리보기</a> · <a href="${contractAbs}"><strong>전자계약 진행 →</strong></a></p>`
-        : `<p>Your offer was <strong>accepted</strong>.</p><p><a href="${previewAbs}">View quote</a> · <a href="${contractAbs}"><strong>Sign contract →</strong></a></p>`,
     }).catch(() => {});
   }
 

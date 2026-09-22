@@ -172,6 +172,18 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         typeof meta.mediaCount === "string" ? meta.mediaCount : undefined,
       paymentMethod:
         typeof meta.paymentMethod === "string" ? meta.paymentMethod : undefined,
+      accountManagerName:
+        typeof meta.accountManagerName === "string"
+          ? meta.accountManagerName
+          : undefined,
+      accountManagerEmail:
+        typeof meta.accountManagerEmail === "string"
+          ? meta.accountManagerEmail
+          : undefined,
+      accountManagerPhone:
+        typeof meta.accountManagerPhone === "string"
+          ? meta.accountManagerPhone
+          : undefined,
     });
     await db.ooHQuote.update({
       where: { id },
