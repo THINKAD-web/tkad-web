@@ -5,6 +5,7 @@ import { CreditCard } from "lucide-react";
 import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { buildShareMetadata, pageAlternates, siteKeywords } from "@/lib/seo";
+import { ogAltForRoute } from "@/lib/og-route-copy";
 import { getCurrentUser } from "@/lib/user-session";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
@@ -50,6 +51,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: titleShare,
       description,
       path: "/pricing",
+      alt: ogAltForRoute("pricing"),
+      image: { kind: "segment", segment: "pricing" },
     }),
   };
 }
