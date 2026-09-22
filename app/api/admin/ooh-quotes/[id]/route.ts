@@ -9,7 +9,7 @@ import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import {
   loadOoHQuoteForContract,
   ooHQuoteToContractPdfVars,
-  resolveMediaNamesForQuote,
+  resolveContractMediaForQuote,
 } from "@/lib/ooh-contract-context";
 import { canPreviewOohContract } from "@/lib/ooh-contract-display";
 import {
@@ -18,6 +18,12 @@ import {
   type OohContractMeta,
 } from "@/lib/ooh-contract-meta";
 import { parseContractInviteSendLog } from "@/lib/contract-invite-log";
+
+function numOrUndef(v: unknown): number | undefined {
+  const n = typeof v === "number" ? v : Number(v);
+  if (!Number.isFinite(n) || n < 0) return undefined;
+  return Math.round(n);
+}
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +39,13 @@ export async function GET(request: NextRequest, { params }: Params) {
   if (!row) return json({ error: "not_found" }, 404);
 
   const isKo = row.locale !== "en";
-  const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
+  const mediaPack = await resolveContractMediaForQuote(
+    db,
+    row.mediaIds,
+    row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
+    isKo,
+    { start: row.startDate, end: row.endDate },
+  );
 
   let contract = row.oohContract;
   if (canPreviewOohContract(row.status) && !contract) {
@@ -45,8 +57,10 @@ export async function GET(request: NextRequest, { params }: Params) {
   const contractRecordId = contract?.id ?? id;
   const pdfVars = ooHQuoteToContractPdfVars(
     { ...row, oohContract: contract },
-    mediaNames,
+    mediaPack.names,
     contractRecordId,
+    undefined,
+    mediaPack.lineItems,
   );
 
   return json({
@@ -184,6 +198,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         typeof meta.accountManagerPhone === "string"
           ? meta.accountManagerPhone
           : undefined,
+      extraProductionWon: numOrUndef(meta.extraProductionWon),
+      extraInstallWon: numOrUndef(meta.extraInstallWon),
+      extraOtherWon: numOrUndef(meta.extraOtherWon),
+      otherNotes:
+        typeof meta.otherNotes === "string" ? meta.otherNotes : undefined,
     });
     await db.ooHQuote.update({
       where: { id },

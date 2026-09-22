@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ExternalLink, FileText, Loader2, Mail, Save } from "lucide-react";
 import type { ContractInviteSendEntry } from "@/lib/contract-invite-log";
@@ -14,6 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
+import {
+  buildContractMoney,
+  isSentenceMediaCount,
+  resolveContractMediaCountLabel,
+  supplyWonFromManwonField,
+} from "@/lib/contract-money";
+import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
 
 function formatKoNumber(value: number | null | undefined, fallback = "—"): string {
   if (value == null || !Number.isFinite(value)) return fallback;
@@ -58,6 +65,8 @@ type Props = {
   onSaved: () => void;
   onRecalc: () => void;
   recalcBusy: boolean;
+  /** OoHQuote.totalAmount (만원, VAT별도) */
+  contractAmountManwon?: number;
 };
 
 export function AdminOohContractDetailPanel({
@@ -66,6 +75,7 @@ export function AdminOohContractDetailPanel({
   onSaved,
   onRecalc,
   recalcBusy,
+  contractAmountManwon,
 }: Props) {
   const t = useTranslations("adminOohQuotes");
   const { toast } = useToast();
@@ -102,6 +112,51 @@ export function AdminOohContractDetailPanel({
   useEffect(() => {
     setMetaDraft(detail?.contractMeta ?? {});
   }, [detail?.contractMeta, quoteId]);
+
+  const mediaUnitCount = Math.max(
+    1,
+    (breakdown?.lines ?? []).filter(
+      (line) => line.mediaId && !isQuoteAddonLineId(line.mediaId),
+    ).length ||
+      display?.mediaLines.length ||
+      1,
+  );
+  const prevMediaUnits = useRef<number | null>(null);
+  useEffect(() => {
+    if (prevMediaUnits.current == null) {
+      prevMediaUnits.current = mediaUnitCount;
+      return;
+    }
+    if (prevMediaUnits.current === mediaUnitCount) return;
+    prevMediaUnits.current = mediaUnitCount;
+    setMetaDraft((m) => {
+      if (isSentenceMediaCount(m.mediaCount)) return m;
+      return { ...m, mediaCount: `${mediaUnitCount}기` };
+    });
+  }, [mediaUnitCount]);
+
+  const countResolution = resolveContractMediaCountLabel({
+    mediaUnitCount,
+    adminMediaCount: metaDraft.mediaCount,
+  });
+  const liveMoney = buildContractMoney({
+    mediaLines: (breakdown?.lines ?? [])
+      .filter((line) => line.mediaId && !isQuoteAddonLineId(line.mediaId))
+      .map((line) => ({
+        name: line.mediaName,
+        location: line.location ?? "",
+        spec: line.quantityLabel ?? "",
+        supplyWon: line.lineSupplyWon,
+      })),
+    contractMediaSupplyWon:
+      contractAmountManwon != null
+        ? supplyWonFromManwonField(contractAmountManwon)
+        : undefined,
+    extraProductionWon: metaDraft.extraProductionWon,
+    extraInstallWon: metaDraft.extraInstallWon,
+    extraOtherWon: metaDraft.extraOtherWon,
+    productionCostText: metaDraft.productionCost,
+  });
 
   const saveTerms = useCallback(async () => {
     if (!contract?.canEditTerms) return;
@@ -477,6 +532,69 @@ export function AdminOohContractDetailPanel({
                 onChange={(e) =>
                   setMetaDraft((m) => ({ ...m, productionCost: e.target.value }))
                 }
+                placeholder="자체제작 또는 제작비 설명"
+              />
+            </label>
+            <label className="space-y-1 text-xs">
+              <span className="font-medium text-muted-foreground">
+                제작비 (원, VAT별도)
+              </span>
+              <Input
+                type="number"
+                min={0}
+                value={
+                  metaDraft.extraProductionWon != null &&
+                  metaDraft.extraProductionWon > 0
+                    ? String(metaDraft.extraProductionWon)
+                    : ""
+                }
+                onChange={(e) => {
+                  const n = Math.max(0, parseInt(e.target.value, 10) || 0);
+                  setMetaDraft((m) => ({
+                    ...m,
+                    extraProductionWon: n > 0 ? n : undefined,
+                  }));
+                }}
+                placeholder="예) 2000000"
+              />
+            </label>
+            <label className="space-y-1 text-xs">
+              <span className="font-medium text-muted-foreground">설치비 (원, VAT별도)</span>
+              <Input
+                inputMode="numeric"
+                value={
+                  metaDraft.extraInstallWon != null && metaDraft.extraInstallWon > 0
+                    ? String(metaDraft.extraInstallWon)
+                    : ""
+                }
+                onChange={(e) => {
+                  const n = Math.max(0, parseInt(e.target.value.replace(/[^\d]/g, ""), 10) || 0);
+                  setMetaDraft((m) => ({ ...m, extraInstallWon: n > 0 ? n : undefined }));
+                }}
+              />
+            </label>
+            <label className="space-y-1 text-xs">
+              <span className="font-medium text-muted-foreground">기타 (원, VAT별도)</span>
+              <Input
+                inputMode="numeric"
+                value={
+                  metaDraft.extraOtherWon != null && metaDraft.extraOtherWon > 0
+                    ? String(metaDraft.extraOtherWon)
+                    : ""
+                }
+                onChange={(e) => {
+                  const n = Math.max(0, parseInt(e.target.value.replace(/[^\d]/g, ""), 10) || 0);
+                  setMetaDraft((m) => ({ ...m, extraOtherWon: n > 0 ? n : undefined }));
+                }}
+              />
+            </label>
+            <label className="space-y-1 text-xs sm:col-span-2">
+              <span className="font-medium text-muted-foreground">기타사항 (제1조)</span>
+              <Input
+                value={metaDraft.otherNotes ?? ""}
+                onChange={(e) =>
+                  setMetaDraft((m) => ({ ...m, otherNotes: e.target.value }))
+                }
               />
             </label>
             <label className="space-y-1 text-xs">
@@ -501,6 +619,27 @@ export function AdminOohContractDetailPanel({
                 }
               />
             </label>
+            {countResolution.overridden ? (
+              <p className="sm:col-span-2 text-[11px] text-amber-700 dark:text-amber-300">
+                수량 입력이 매체 수({mediaUnitCount}기)와 달라 계약서에는 {countResolution.label}로 표시됩니다.
+              </p>
+            ) : null}
+            {liveMoney.adjustmentWon !== 0 ? (
+              <p className="sm:col-span-2 text-[11px] text-amber-700 dark:text-amber-300">
+                협의 조정 {liveMoney.adjustmentWon > 0 ? "+" : "−"}
+                {Math.abs(liveMoney.adjustmentWon).toLocaleString("ko-KR")}원이 계약서에 표시됩니다.
+              </p>
+            ) : null}
+            <div className="sm:col-span-2 rounded-lg bg-muted/40 p-2 text-[11px] tabular-nums leading-relaxed">
+              매체비 {liveMoney.mediaSubtotalWon.toLocaleString("ko-KR")} · 조정{" "}
+              {liveMoney.adjustmentWon.toLocaleString("ko-KR")} · 제작{" "}
+              {liveMoney.extraProductionWon.toLocaleString("ko-KR")} · 설치{" "}
+              {liveMoney.extraInstallWon.toLocaleString("ko-KR")} · 기타{" "}
+              {liveMoney.extraOtherWon.toLocaleString("ko-KR")} · 공급가{" "}
+              {liveMoney.supplyWon.toLocaleString("ko-KR")} · VAT{" "}
+              {liveMoney.vatWon.toLocaleString("ko-KR")} · 총액{" "}
+              {liveMoney.totalAmountDisplay}
+            </div>
             <div className="sm:col-span-2">
               <Button
                 type="button"

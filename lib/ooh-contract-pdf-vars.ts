@@ -7,6 +7,8 @@ import {
   formatContractDateKo,
   formatContractMediaCount,
   formatContractPeriodDateKo,
+  formatContractPeriodDateDisplayKo,
+  formatKoreanPhoneDisplay,
   formatContractTotalAmountVatIncluded,
   parseContractPeriodRange,
   parseIsoDateOnly,
@@ -55,10 +57,10 @@ export function buildKoOohContractPdfVars(
     clientCompany: company,
     clientRepName: input.clientRepName.trim() || contact || "",
     clientAddress: input.clientAddress.trim() || "",
-    clientPhone: input.clientPhone.trim() || "",
+    clientPhone: formatKoreanPhoneDisplay(input.clientPhone.trim() || ""),
     campaignName: input.campaignName.trim() || "옥외광고",
-    periodStart: formatContractPeriodDateKo(start),
-    periodEnd: formatContractPeriodDateKo(end),
+    periodStart: isKo ? formatContractPeriodDateDisplayKo(start) : formatContractPeriodDateKo(start),
+    periodEnd: isKo ? formatContractPeriodDateDisplayKo(end) : formatContractPeriodDateKo(end),
     periodMonths: computeContractPeriodMonthsLabel(start, end),
     productionCost: input.productionCost?.trim() || defaultProductionCostKo(),
     mediaCount: formatContractMediaCount(input.mediaCount ?? 1),
@@ -80,24 +82,31 @@ export function buildKoOohContractPdfVars(
       `${formatContractPeriodDateKo(start)} - ${formatContractPeriodDateKo(end)}`,
     amountLine: input.totalAmountManwon
       ? isKo
-        ? `총 광고 집행 금액(참고, 부가세 별도, 만원): ₩${input.totalAmountManwon.toLocaleString("ko-KR")}`
-        : `Total media fee (excl. VAT, 10K KRW units): ₩${input.totalAmountManwon.toLocaleString("en-US")}`
+        ? `총 광고 집행 금액(참고, 부가세 별도, 만원): ￦${input.totalAmountManwon.toLocaleString("ko-KR")}`
+        : `Total media fee (excl. VAT, 10K KRW units): ￦${input.totalAmountManwon.toLocaleString("en-US")}`
       : formatContractTotalAmountVatIncluded(totalWon),
     specialTerms: input.specialTerms ?? null,
   };
 }
 
+/** fallback으로 빈 칸만 채우고, 저장된 메타 필드는 전부 통과시킨다 */
 export function contractMetaWithDefaults(
   meta: OohContractMeta,
   fallback: Partial<OohContractMeta> = {},
 ): OohContractMeta {
   return {
+    ...fallback,
+    ...meta,
     clientRepName: meta.clientRepName ?? fallback.clientRepName,
     clientAddress: meta.clientAddress ?? fallback.clientAddress,
     campaignName: meta.campaignName ?? fallback.campaignName,
     productionCost: meta.productionCost ?? fallback.productionCost,
     mediaCount: meta.mediaCount ?? fallback.mediaCount,
     paymentMethod: meta.paymentMethod ?? fallback.paymentMethod,
+    extraProductionWon: meta.extraProductionWon ?? fallback.extraProductionWon,
+    extraInstallWon: meta.extraInstallWon ?? fallback.extraInstallWon,
+    extraOtherWon: meta.extraOtherWon ?? fallback.extraOtherWon,
+    otherNotes: meta.otherNotes ?? fallback.otherNotes,
   };
 }
 

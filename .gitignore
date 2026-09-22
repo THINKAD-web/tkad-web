@@ -88,6 +88,8 @@ scripts/print-admin-*.ts
 !reports/design-tone-audit-20260826/screenshots/option-a-media/*.png
 !reports/trust-credibility-urgent/
 !reports/trust-credibility-urgent/*.png
+!reports/contract-quality-2026-09-22/*.png
+!reports/contract-golden-2026-09-22/*.png
 scripts/fix-*.ts
 scripts/.backfill-media-translations-calibration.json
 

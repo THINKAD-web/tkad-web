@@ -2,7 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 import {
   loadOoHQuoteForContract,
   ooHQuoteToContractPdfVars,
-  resolveMediaNamesForQuote,
+  resolveContractMediaForQuote,
 } from "@/lib/ooh-contract-context";
 import { buildSignedOohContractPdf } from "@/lib/ooh-contract-pdf";
 import {
@@ -29,8 +29,20 @@ export async function rebuildSignedOohContractPdfFromRecord(
   }
 
   const isKo = row.locale !== "en";
-  const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
-  const vars = ooHQuoteToContractPdfVars(row, mediaNames, c.id);
+  const mediaPack = await resolveContractMediaForQuote(
+    db,
+    row.mediaIds,
+    row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
+    isKo,
+    { start: row.startDate, end: row.endDate },
+  );
+  const vars = ooHQuoteToContractPdfVars(
+    row,
+    mediaPack.names,
+    c.id,
+    undefined,
+    mediaPack.lineItems,
+  );
   const sigB64 = signaturePngBase64FromStored(c.signatureImage);
 
   const documentContentSha256 = await hashUnsignedContractDocument(vars);

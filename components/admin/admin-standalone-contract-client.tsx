@@ -135,6 +135,9 @@ export default function AdminStandaloneContractClient() {
   const [clientPhone, setClientPhone] = useState("");
   const [campaignName, setCampaignName] = useState("");
   const [productionCost, setProductionCost] = useState("자체제작");
+  const [extraProductionWon, setExtraProductionWon] = useState("");
+  const [extraInstallWon, setExtraInstallWon] = useState("");
+  const [extraOtherWon, setExtraOtherWon] = useState("");
   const [mediaCount, setMediaCount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("계산서 발행 후 선결제");
   const [clientEmail, setClientEmail] = useState("");
@@ -250,11 +253,15 @@ export default function AdminStandaloneContractClient() {
       paymentMethod,
       clientEmail: clientEmail.trim() || "",
       mediaIds: selectedMedia.map((m) => m.id),
+      mediaIds: selectedMedia.map((m) => m.id),
       mediaLines: selectedMedia.map((m) => m.label),
       period: periodLabel,
       startDate,
       endDate,
       totalAmountManwon: manwon,
+      extraProductionWon: Math.max(0, parseInt(extraProductionWon, 10) || 0),
+      extraInstallWon: Math.max(0, parseInt(extraInstallWon, 10) || 0),
+      extraOtherWon: Math.max(0, parseInt(extraOtherWon, 10) || 0),
       specialTerms: specialTerms.trim() || null,
       locale: isKo ? "ko" : "en",
       download: false,
@@ -299,11 +306,15 @@ export default function AdminStandaloneContractClient() {
         (selectedMedia.length > 0 ? `${selectedMedia.length}기` : ""),
       paymentMethod: paymentMethod.trim(),
       clientEmail: clientEmail.trim() || "",
+      mediaIds: selectedMedia.map((m) => m.id),
       mediaLines: selectedMedia.map((m) => m.label),
       period: periodLabel,
       startDate,
       endDate,
       totalAmountManwon: manwon,
+      extraProductionWon: Math.max(0, parseInt(extraProductionWon, 10) || 0),
+      extraInstallWon: Math.max(0, parseInt(extraInstallWon, 10) || 0),
+      extraOtherWon: Math.max(0, parseInt(extraOtherWon, 10) || 0),
       specialTerms: specialTerms.trim() || null,
       locale: isKo ? "ko" : "en",
     };
@@ -708,9 +719,9 @@ export default function AdminStandaloneContractClient() {
     const label = (isKo ? m.name : m.nameEn) || m.name;
     setSelectedMedia((prev) => {
       const next = [...prev, { id: m.id, label }];
-      if (!mediaCount.trim()) {
-        setMediaCount(`${next.length}기`);
-      }
+      setMediaCount((cur) =>
+        /[^\d기\s]/u.test(cur.trim()) ? cur : `${next.length}기`,
+      );
       return next;
     });
     if (!totalAmountManwon.trim() && mediaSumManwon === 0) {
@@ -1143,6 +1154,18 @@ export default function AdminStandaloneContractClient() {
                 />
               </label>
               <label className="space-y-1 text-sm">
+                <span className="text-xs font-medium text-muted-foreground">제작비 (원)</span>
+                <Input type="number" min={0} value={extraProductionWon} onChange={(e) => setExtraProductionWon(e.target.value)} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-xs font-medium text-muted-foreground">설치비 (원)</span>
+                <Input type="number" min={0} value={extraInstallWon} onChange={(e) => setExtraInstallWon(e.target.value)} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-xs font-medium text-muted-foreground">기타 (원)</span>
+                <Input type="number" min={0} value={extraOtherWon} onChange={(e) => setExtraOtherWon(e.target.value)} />
+              </label>
+              <label className="space-y-1 text-sm">
                 <span className="text-xs font-medium text-muted-foreground">
                   {t("mediaCount")}
                 </span>
@@ -1194,7 +1217,17 @@ export default function AdminStandaloneContractClient() {
                       type="button"
                       className="rounded p-0.5 hover:bg-muted"
                       onClick={() =>
-                        setSelectedMedia((prev) => prev.filter((x) => x.id !== m.id))
+                        setSelectedMedia((prev) => {
+                          const next = prev.filter((x) => x.id !== m.id);
+                          setMediaCount((cur) =>
+                            /[^\d기\s]/u.test(cur.trim())
+                              ? cur
+                              : next.length > 0
+                                ? `${next.length}기`
+                                : "",
+                          );
+                          return next;
+                        })
                       }
                       aria-label={t("removeMedia")}
                     >

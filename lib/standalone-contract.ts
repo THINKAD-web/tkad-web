@@ -2,13 +2,19 @@ import { z } from "zod";
 import {
   buildKoOohContractPdfVars,
   parseStandaloneIsoDates,
-  vatIncludedWonFromManwon,
 } from "@/lib/ooh-contract-pdf-vars";
 import type { OohContractPdfVars } from "@/lib/ooh-contract-pdf";
 import {
+  buildContractMoney,
+  resolveContractExtraWons,
+  resolveContractMediaCountLabel,
+  supplyWonFromManwonField,
+} from "@/lib/contract-money";
+import type { ContractMediaLineItem } from "@/lib/ooh-contract-pdf";
+import {
   defaultContractPaymentMethodKo,
   defaultProductionCostKo,
-  formatContractMediaCount,
+  formatContractCampaignName,
 } from "@/lib/ooh-contract-format";
 
 /** localStorage / 향후 파이프라인 bridge용 초안 스키마 버전 */
@@ -37,11 +43,15 @@ export const StandaloneContractPreviewBody = z.object({
   /** 발송·파이프라인 bridge 메타 — PDF 본문에는 미포함 */
   clientEmail: optionalClientEmail,
   mediaLines: z.array(z.string().min(1).max(200)).max(50).default([]),
+  mediaIds: z.array(z.string().min(1).max(64)).max(50).optional().default([]),
   period: z.string().min(1).max(120),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   /** OoHQuote.totalAmount 와 동일 — 만원 단위 (VAT 별도) */
   totalAmountManwon: z.number().int().positive().max(999_999_999),
+  extraProductionWon: z.number().int().nonnegative().max(50_000_000_000).optional(),
+  extraInstallWon: z.number().int().nonnegative().max(50_000_000_000).optional(),
+  extraOtherWon: z.number().int().nonnegative().max(50_000_000_000).optional(),
   specialTerms: z.string().max(8000).optional().nullable(),
   locale: z.enum(["ko", "en"]).default("ko"),
   download: z.boolean().optional().default(false),
@@ -103,8 +113,8 @@ export function buildContractAmountLine(
 ): string {
   const fmt = isKo ? "ko-KR" : "en-US";
   return isKo
-    ? `총 광고 집행 금액(참고, 부가세 별도, 만원): ₩${totalAmountManwon.toLocaleString(fmt)}`
-    : `Total media fee (excl. VAT, 10K KRW units): ₩${totalAmountManwon.toLocaleString(fmt)}`;
+    ? `총 광고 집행 금액(참고, 부가세 별도, 만원): ￦${totalAmountManwon.toLocaleString(fmt)}`
+    : `Total media fee (excl. VAT, 10K KRW units): ￦${totalAmountManwon.toLocaleString(fmt)}`;
 }
 
 function resolveStandaloneDates(input: StandaloneContractPreviewInput) {
@@ -121,18 +131,54 @@ function resolveStandaloneDates(input: StandaloneContractPreviewInput) {
 export function standaloneContractToPdfVars(
   input: StandaloneContractPreviewInput,
   draftId: string,
+  resolvedLines?: ContractMediaLineItem[],
 ): OohContractPdfVars {
   const isKo = input.locale !== "en";
   const { start, end } = resolveStandaloneDates(input);
-  const mediaCount =
-    input.mediaCount?.trim() ||
-    formatContractMediaCount(input.mediaLines.length || 1);
-  const countNum = parseInt(mediaCount, 10) || input.mediaLines.length || 1;
-  const campaign =
-    input.campaignName?.trim() ||
-    (input.mediaLines[0] ? `${input.mediaLines[0]} 광고` : "옥외광고");
+  const names = (
+    resolvedLines?.length
+      ? resolvedLines.map((line) => line.name)
+      : input.mediaLines.map((m) => m.trim())
+  ).filter(Boolean);
+  const campaign = formatContractCampaignName(names, input.campaignName);
+  const unitCount = Math.max(1, names.length || input.mediaIds?.length || 1);
+  const count = resolveContractMediaCountLabel({
+    mediaUnitCount: unitCount,
+    adminMediaCount: input.mediaCount,
+  });
 
-  return buildKoOohContractPdfVars({
+  const mediaSupply = supplyWonFromManwonField(input.totalAmountManwon);
+  const lineItems: ContractMediaLineItem[] =
+    resolvedLines?.length
+      ? resolvedLines
+      : names.map((name) => ({
+          name,
+          location: "",
+          spec: "",
+          unitPriceWon: 0,
+          lineSupplyWon: 0,
+        }));
+  const extras = resolveContractExtraWons(
+    {
+      extraProductionWon: input.extraProductionWon,
+      extraInstallWon: input.extraInstallWon,
+      extraOtherWon: input.extraOtherWon,
+      productionCost: input.productionCost,
+    },
+    null,
+  );
+  const money = buildContractMoney({
+    mediaLines: lineItems.map((item) => ({
+      name: item.name,
+      location: item.location ?? "",
+      spec: item.spec,
+      supplyWon: item.lineSupplyWon,
+    })),
+    contractMediaSupplyWon: mediaSupply,
+    ...extras,
+    productionCostText: input.productionCost,
+  });
+  const vars = buildKoOohContractPdfVars({
     contractId: draftId,
     isKo,
     clientCompany: input.clientCompany?.trim() || input.clientName.trim(),
@@ -142,15 +188,28 @@ export function standaloneContractToPdfVars(
     campaignName: campaign,
     startDate: start,
     endDate: end,
-    totalWonVatIncluded: vatIncludedWonFromManwon(input.totalAmountManwon),
+    totalWonVatIncluded: money.totalWon,
     productionCost: input.productionCost?.trim() || defaultProductionCostKo(),
-    mediaCount: countNum,
+    mediaCount: unitCount,
     paymentMethod:
       input.paymentMethod?.trim() || defaultContractPaymentMethodKo(),
     clientName: input.clientName.trim(),
-    mediaLines: input.mediaLines.map((m) => m.trim()).filter(Boolean),
+    mediaLines: names,
     periodLabel: input.period.trim(),
     specialTerms: input.specialTerms?.trim() || null,
-    totalAmountManwon: input.totalAmountManwon,
   });
+  vars.mediaLineItems = lineItems;
+  vars.costLines = [
+    { label: "제작비", amountWon: money.extraProductionWon },
+    { label: "설치비", amountWon: money.extraInstallWon },
+    { label: "기타 비용", amountWon: money.extraOtherWon },
+  ];
+  vars.adUnitPriceDisplay = money.adUnitPriceDisplay;
+  vars.totalAmount = money.totalAmountDisplay;
+  vars.amountKorean = money.amountKorean;
+  vars.contractMoney = money;
+  vars.mediaCount = count.label;
+  const notes = input.specialTerms?.trim();
+  if (notes) vars.otherNotes = notes;
+  return vars;
 }

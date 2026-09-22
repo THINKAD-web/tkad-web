@@ -19,6 +19,8 @@ import {
   isQuoteHoldDatesRequiredError,
 } from "@/lib/ooh-quote-booking-hold";
 import type { StandaloneContractPreviewInput } from "@/lib/standalone-contract";
+import { catalogSupplyWonForPeriod } from "@/lib/ooh-contract-context";
+import { inclusiveCampaignDays } from "@/lib/admin-quote-calc";
 
 export const STANDALONE_OOH_SOURCE_NOTE = "[[ooh-contract-source:standalone]]";
 
@@ -61,6 +63,9 @@ export function buildStandaloneOoHQuoteCreateData(
     productionCost: input.productionCost?.trim() || undefined,
     mediaCount: input.mediaCount?.trim() || undefined,
     paymentMethod: input.paymentMethod?.trim() || undefined,
+    extraProductionWon: input.extraProductionWon,
+    extraInstallWon: input.extraInstallWon,
+    extraOtherWon: input.extraOtherWon,
   };
 
   const humanNote = [
@@ -125,6 +130,60 @@ export async function createStandaloneContractSend(
   const quote = await db.ooHQuote.create({
     data: buildStandaloneOoHQuoteCreateData(input),
     include: { oohContract: true },
+  });
+
+  const start = parseIsoDate(input.startDate);
+  const end = parseIsoDate(input.endDate);
+  const mediaRows = await db.media.findMany({
+    where: { id: { in: input.mediaIds } },
+    select: {
+      id: true,
+      name: true,
+      location: true,
+      price: true,
+      pricePeriod: true,
+      width: true,
+      height: true,
+    },
+  });
+  const order = new Map(input.mediaIds.map((id, i) => [id, i]));
+  mediaRows.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+  const days = Math.max(1, inclusiveCampaignDays(start, end));
+  const lines = mediaRows.map((m) => {
+    const supply = catalogSupplyWonForPeriod({
+      price: m.price,
+      pricePeriod: m.pricePeriod,
+      start,
+      end,
+    });
+    const spec = [m.width, m.height].filter(Boolean).join("×");
+    return {
+      mediaId: m.id,
+      mediaName: m.name,
+      location: m.location,
+      periodDays: days,
+      unitPriceWon: supply,
+      lineSupplyWon: supply,
+      impressions: 0,
+      quantityLabel: spec,
+    };
+  });
+  const subtotalWon = lines.reduce((s, l) => s + l.lineSupplyWon, 0);
+  const vatWon = Math.round(subtotalWon * 0.1);
+  await db.ooHQuote.update({
+    where: { id: quote.id },
+    data: {
+      quoteBreakdown: {
+        lines,
+        subtotalWon,
+        discountRate: 0,
+        discountWon: 0,
+        supplyWon: subtotalWon,
+        vatWon,
+        totalWon: subtotalWon + vatWon,
+        issuedAt: new Date().toISOString(),
+      },
+    },
   });
 
   const contract = quote.oohContract;

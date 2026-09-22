@@ -17,7 +17,7 @@ import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import {
   loadOoHQuoteForContract,
   ooHQuoteToContractPdfVars,
-  resolveMediaNamesForQuote,
+  resolveContractMediaForQuote,
 } from "@/lib/ooh-contract-context";
 import { buildSignedOohContractPdf } from "@/lib/ooh-contract-pdf";
 import { sendContractSignedEvidenceEmails } from "@/lib/contract-sign-notify";
@@ -220,8 +220,20 @@ export async function POST(
       pdfBase64 = signed.pdfBase64;
       sha256 = signed.sha256;
     } else {
-      const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
-      const vars = ooHQuoteToContractPdfVars(row, mediaNames, contract.id);
+      const mediaPack = await resolveContractMediaForQuote(
+        db,
+        row.mediaIds,
+        row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
+        isKo,
+        { start: row.startDate, end: row.endDate },
+      );
+      const vars = ooHQuoteToContractPdfVars(
+        row,
+        mediaPack.names,
+        contract.id,
+        undefined,
+        mediaPack.lineItems,
+      );
       documentHash = await hashUnsignedContractDocument(vars);
       const built = await buildSignedOohContractPdf(
         vars,

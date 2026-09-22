@@ -9,7 +9,7 @@ function readUnder10000(n: number): string {
   const baek = Math.floor((n % 1000) / 100);
   const sip = Math.floor((n % 100) / 10);
   const il = n % 10;
-  if (cheon > 0) out += (cheon === 1 ? "" : DIGIT[cheon]) + "천";
+  if (cheon > 0) out += DIGIT[cheon] + "천";
   if (baek > 0) out += (baek === 1 ? "" : DIGIT[baek]) + "백";
   if (sip > 0) out += (sip === 1 ? "일십" : `${DIGIT[sip]!}십`);
   if (il > 0) out += DIGIT[il]!;

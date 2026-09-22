@@ -13,7 +13,36 @@ export type OohContractMeta = {
   accountManagerName?: string;
   accountManagerEmail?: string;
   accountManagerPhone?: string;
+  /** VAT 별도 원 */
+  extraProductionWon?: number;
+  extraInstallWon?: number;
+  extraOtherWon?: number;
+  /** 제1조 기타사항 */
+  otherNotes?: string;
 };
+
+/** 문자열 안의 `}` 를 포함해도 객체 하나 전체를 잘라낸다 */
+function sliceJsonObject(text: string, openBrace: number): string | null {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = openBrace; i < text.length; i++) {
+    const ch = text[i]!;
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === "{") depth += 1;
+    else if (ch === "}") {
+      depth -= 1;
+      if (depth === 0) return text.slice(openBrace, i + 1);
+    }
+  }
+  return null;
+}
 
 export function parseOohContractMeta(
   adminNote: string | null | undefined,
@@ -21,16 +50,22 @@ export function parseOohContractMeta(
   if (!adminNote?.trim()) return {};
   const idx = adminNote.indexOf(OOH_CONTRACT_META_PREFIX);
   if (idx < 0) return {};
-  const jsonStart = adminNote.indexOf("{", idx);
+  const jsonStart = adminNote.indexOf("{", idx + OOH_CONTRACT_META_PREFIX.length);
   if (jsonStart < 0) return {};
-  const jsonEnd = adminNote.indexOf("}", jsonStart);
-  if (jsonEnd < 0) return {};
+  const raw = sliceJsonObject(adminNote, jsonStart);
+  if (!raw) {
+    console.warn("[ooh-contract-meta] JSON object not closed after marker");
+    return {};
+  }
   try {
-    const parsed = JSON.parse(
-      adminNote.slice(jsonStart, jsonEnd + 1),
-    ) as OohContractMeta;
-    return typeof parsed === "object" && parsed !== null ? parsed : {};
-  } catch {
+    const parsed = JSON.parse(raw) as OohContractMeta;
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      console.warn("[ooh-contract-meta] marker payload is not an object");
+      return {};
+    }
+    return parsed;
+  } catch (err) {
+    console.warn("[ooh-contract-meta] JSON parse failed", err);
     return {};
   }
 }
