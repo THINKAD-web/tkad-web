@@ -1,9 +1,6 @@
 import { createHash } from "node:crypto";
 import type { SignatureAuditLog } from "@prisma/client";
-import {
-  buildOohContractPdf,
-  type OohContractPdfVars,
-} from "@/lib/ooh-contract-pdf";
+import type { OohContractPdfVars } from "@/lib/ooh-contract-pdf";
 
 export function sha256Hex(data: Buffer | string): string {
   const buf = typeof data === "string" ? Buffer.from(data, "utf8") : data;
@@ -14,6 +11,7 @@ export function sha256Hex(data: Buffer | string): string {
 export async function hashUnsignedContractDocument(
   vars: OohContractPdfVars,
 ): Promise<string> {
+  const { buildOohContractPdf } = await import("@/lib/ooh-contract-pdf");
   const { pdfBase64 } = await buildOohContractPdf(vars);
   return sha256Hex(Buffer.from(pdfBase64, "base64"));
 }

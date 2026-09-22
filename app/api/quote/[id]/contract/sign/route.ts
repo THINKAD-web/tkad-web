@@ -10,7 +10,6 @@ import {
   normalizeContractSendMode,
 } from "@/lib/contract-send-mode";
 import { fetchUploadedContractPdfVerified } from "@/lib/ooh-contract-upload-pdf";
-import { buildSignedUploadContractPdf } from "@/lib/upload-contract-sign-pdf";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
@@ -19,7 +18,6 @@ import {
   ooHQuoteToContractPdfVars,
   resolveContractMediaForQuote,
 } from "@/lib/ooh-contract-context";
-import { buildSignedOohContractPdf } from "@/lib/ooh-contract-pdf";
 import { sendContractSignedEvidenceEmails } from "@/lib/contract-sign-notify";
 import {
   formatSignedAtKst,
@@ -203,6 +201,9 @@ export async function POST(
         contract.uploadedPdfSha256?.trim() ||
         contract.documentSha256?.trim() ||
         sha256Hex(sourcePdf);
+      const { buildSignedUploadContractPdf } = await import(
+        "@/lib/upload-contract-sign-pdf"
+      );
       const signed = await buildSignedUploadContractPdf(
         sourcePdf,
         {
@@ -235,6 +236,7 @@ export async function POST(
         mediaPack.lineItems,
       );
       documentHash = await hashUnsignedContractDocument(vars);
+      const { buildSignedOohContractPdf } = await import("@/lib/ooh-contract-pdf");
       const built = await buildSignedOohContractPdf(
         vars,
         {
