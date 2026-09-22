@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { autoTable, type CellDef, type CellHookData } from "jspdf-autotable";
 import {
   ensureKrFontForServerPdf,
   krFontFamily,
@@ -762,8 +763,38 @@ function measureTableRowHeight(
   );
 }
 
+/** 1pt in jsPDF millimetres */
+const CONTRACT_TABLE_LINE_MM = 0.35;
+const CONTRACT_TABLE_GRID: [number, number, number] = [40, 40, 40];
+const CONTRACT_TABLE_HEAD_BG: [number, number, number] = [236, 236, 236];
+const CONTRACT_TABLE_LABEL_BG: [number, number, number] = [245, 245, 245];
+
+type ContractPdfDoc = import("jspdf").default;
+
+function contractTableMargins(doc: ContractPdfDoc, margin: number) {
+  const pageH = doc.internal.pageSize.getHeight();
+  return {
+    left: margin,
+    right: margin,
+    top: KO_LAYOUT.pageTop,
+    bottom: Math.max(12, pageH - KO_LAYOUT.pageBottom),
+  };
+}
+
+function useContractTableFont(fam: string) {
+  return (data: CellHookData) => {
+    data.cell.styles.font = fam;
+  };
+}
+
+function autoTableFinalY(doc: ContractPdfDoc, fallback: number): number {
+  const last = (doc as ContractPdfDoc & { lastAutoTable?: { finalY?: number } })
+    .lastAutoTable;
+  return (last?.finalY ?? fallback) + KO_LAYOUT.paragraphGap;
+}
+
 function drawArticle1SummaryTable(
-  doc: import("jspdf").default,
+  doc: ContractPdfDoc,
   fam: string,
   rows: readonly { label: string; value: string }[],
   margin: number,
@@ -773,66 +804,62 @@ function drawArticle1SummaryTable(
   const parsed = rows.filter((r) => r.label.trim());
   if (parsed.length === 0) return yStart;
 
-  const valueW = maxW - KO_LAYOUT.tableLabelW - KO_LAYOUT.tablePad * 2;
-  const labelW = KO_LAYOUT.tableLabelW - KO_LAYOUT.tablePad * 2;
-  const rowHeights = parsed.map((row) =>
-    measureTableRowHeight(doc, row.label, row.value, maxW),
-  );
-  const tableH = rowHeights.reduce((sum, h) => sum + h, 0);
-  let y = ensurePageSpace(doc, yStart, tableH + 2);
-
-  doc.setDrawColor(170, 170, 170);
-  doc.setLineWidth(KO_LAYOUT.tableBorderPt);
-  doc.rect(margin, y, maxW, tableH);
-
-  const valueX = margin + KO_LAYOUT.tableLabelW;
-  doc.line(valueX, y, valueX, y + tableH);
-
-  let rowY = y;
-  for (let i = 0; i < parsed.length; i++) {
-    const rowH = rowHeights[i]!;
-    if (i > 0) {
-      doc.line(margin, rowY, margin + maxW, rowY);
-    }
-    const row = parsed[i]!;
+  const y = ensurePageSpace(doc, yStart, 20);
+  setContractFont(doc, fam, "normal");
+  const body: CellDef[][] = parsed.map((row) => {
     const valueStyle = tableValueStyle(row.label);
-    const labelLines = wrapLines(doc, row.label, labelW);
-    const valueLines = wrapLines(doc, row.value, valueW);
-    const textTop = rowY + KO_LAYOUT.tablePad + KO_LAYOUT.tableValueLineH * 0.85;
+    const alignRight = tableValueAlignRight(row.label);
+    return [
+      {
+        content: row.label,
+        styles: {
+          font: fam,
+          fontStyle: "bold",
+          fontSize: KO_LAYOUT.tableFontPt,
+          fillColor: CONTRACT_TABLE_LABEL_BG,
+          halign: "left",
+          textColor: [0, 0, 0],
+        },
+      },
+      {
+        content: row.value,
+        styles: {
+          font: fam,
+          fontStyle: valueStyle.bold ? "bold" : "normal",
+          fontSize: valueStyle.size ?? KO_LAYOUT.tableFontPt,
+          halign: alignRight ? "right" : "left",
+          textColor: valueStyle.color ?? [0, 0, 0],
+          fillColor: [255, 255, 255],
+        },
+      },
+    ];
+  });
 
-    doc.setFillColor(245, 245, 245);
-    doc.rect(margin, rowY, KO_LAYOUT.tableLabelW, rowH, "F");
+  autoTable(doc, {
+    startY: y,
+    margin: contractTableMargins(doc, margin),
+    tableWidth: maxW,
+    theme: "grid",
+    showHead: "never",
+    body,
+    styles: {
+      font: fam,
+      fontSize: KO_LAYOUT.tableFontPt,
+      cellPadding: KO_LAYOUT.tablePad,
+      textColor: [0, 0, 0],
+      lineColor: CONTRACT_TABLE_GRID,
+      lineWidth: CONTRACT_TABLE_LINE_MM,
+      valign: "middle",
+      overflow: "linebreak",
+    },
+    columnStyles: {
+      0: { cellWidth: KO_LAYOUT.tableLabelW },
+      1: { cellWidth: maxW - KO_LAYOUT.tableLabelW },
+    },
+    didParseCell: useContractTableFont(fam),
+  });
 
-    labelLines.forEach((line, li) => {
-      drawTextRun(
-        doc,
-        fam,
-        margin + KO_LAYOUT.tablePad,
-        textTop + li * KO_LAYOUT.tableValueLineH,
-        line,
-        { bold: true, size: KO_LAYOUT.tableFontPt },
-      );
-    });
-    const valueRightX = margin + maxW - KO_LAYOUT.tablePad;
-    valueLines.forEach((line, li) => {
-      const opts = tableValueAlignRight(row.label)
-        ? { ...valueStyle, align: "right" as const }
-        : valueStyle;
-      drawTextRun(
-        doc,
-        fam,
-        tableValueAlignRight(row.label)
-          ? valueRightX
-          : valueX + KO_LAYOUT.tablePad,
-        textTop + li * KO_LAYOUT.tableValueLineH,
-        line,
-        opts,
-      );
-    });
-    rowY += rowH;
-  }
-
-  return y + tableH + KO_LAYOUT.paragraphGap;
+  return autoTableFinalY(doc, y);
 }
 
 function estimateParagraphRenderHeight(
@@ -1211,8 +1238,40 @@ function applyKoContractPageChrome(
   }
 }
 
+function mediaSummaryFootRow(
+  fam: string,
+  label: string,
+  amount: string,
+  bold: boolean,
+): CellDef[] {
+  const fontStyle = bold ? "bold" : "normal";
+  return [
+    {
+      content: label,
+      colSpan: 4,
+      styles: {
+        font: fam,
+        fontStyle,
+        halign: "left",
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+      },
+    },
+    {
+      content: amount,
+      styles: {
+        font: fam,
+        fontStyle,
+        halign: "right",
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+      },
+    },
+  ];
+}
+
 function drawMediaScheduleTable(
-  doc: import("jspdf").default,
+  doc: ContractPdfDoc,
   fam: string,
   vars: OohContractPdfVars,
   margin: number,
@@ -1221,149 +1280,127 @@ function drawMediaScheduleTable(
 ): number {
   const items = vars.mediaLineItems ?? [];
   if (items.length === 0) return y;
-  y = ensurePageSpace(doc, y, 16);
+  y = ensurePageSpace(doc, y, 22);
   drawTextRun(doc, fam, margin, y, "※ 매체별 내역", {
     bold: true,
     size: KO_LAYOUT.articleTitlePt,
   });
   y += KO_LAYOUT.bodyLineH + 1;
 
-  const colWs = [maxW * 0.08, maxW * 0.28, maxW * 0.24, maxW * 0.18, maxW * 0.22];
-  const headers = ["No", "매체명", "위치", "규격", "공급가(VAT별도)"];
-  const headerH = 7;
-  const bodyRows: { cells: string[]; rowH: number }[] = [];
-  let sum = 0;
-  items.forEach((item, idx) => {
-    const cells = [
-      String(idx + 1),
-      item.name,
-      item.location?.trim() || "—",
-      item.spec?.trim() || "—",
-      wonLabel(item.lineSupplyWon),
-    ];
-    const heights = cells.map((c, i) =>
-      Math.max(
-        5,
-        wrapLines(doc, c, colWs[i]! - KO_LAYOUT.tablePad * 2).length *
-          KO_LAYOUT.tableValueLineH,
-      ),
-    );
-    const rowH =
-      Math.max(KO_LAYOUT.tableRowH, ...heights) + KO_LAYOUT.tablePad;
-    bodyRows.push({ cells, rowH });
-    sum += item.lineSupplyWon;
-  });
+  const colWs = [
+    maxW * 0.05,
+    maxW * 0.3,
+    maxW * 0.25,
+    maxW * 0.15,
+    maxW * 0.25,
+  ];
   const money = moneyFromPdfVars(vars);
-  const wonText = (n: number) => `￦${Math.round(n).toLocaleString("ko-KR")}`;
-  const summaryRows: { text: string; bold: boolean }[] = [
-    { text: `매체비 소계 ${wonText(sum)}`, bold: true },
+  const body: CellDef[][] = items.map((item, idx) => [
+    { content: String(idx + 1), styles: { halign: "center", font: fam } },
+    { content: item.name, styles: { halign: "left", font: fam } },
+    {
+      content: item.location?.trim() || "—",
+      styles: { halign: "left", font: fam },
+    },
+    {
+      content: item.spec?.trim() || "—",
+      styles: { halign: "left", font: fam },
+    },
+    {
+      content: wonLabel(item.lineSupplyWon),
+      styles: { halign: "right", font: fam },
+    },
+  ]);
+  const foot: CellDef[][] = [
+    mediaSummaryFootRow(fam, "매체비 소계", wonLabel(money.mediaSubtotalWon), true),
   ];
   if (money.adjustmentWon !== 0) {
     const sign = money.adjustmentWon > 0 ? "+" : "−";
-    summaryRows.push({
-      text: `협의 조정 ${sign}${wonText(Math.abs(money.adjustmentWon))}`,
-      bold: true,
-    });
+    foot.push(
+      mediaSummaryFootRow(
+        fam,
+        "협의 조정",
+        `${sign}${wonLabel(Math.abs(money.adjustmentWon))}`,
+        true,
+      ),
+    );
   }
   if (money.extraProductionWon > 0) {
-    summaryRows.push({
-      text: `제작비 ${wonText(money.extraProductionWon)}`,
-      bold: false,
-    });
+    foot.push(
+      mediaSummaryFootRow(fam, "제작비", wonLabel(money.extraProductionWon), false),
+    );
   }
   if (money.extraInstallWon > 0) {
-    summaryRows.push({
-      text: `설치비 ${wonText(money.extraInstallWon)}`,
-      bold: false,
-    });
+    foot.push(
+      mediaSummaryFootRow(fam, "설치비", wonLabel(money.extraInstallWon), false),
+    );
   }
   if (money.extraOtherWon > 0) {
-    summaryRows.push({
-      text: `기타 ${wonText(money.extraOtherWon)}`,
-      bold: false,
-    });
-  }
-  summaryRows.push(
-    { text: `공급가액 합계 ${wonText(money.supplyWon)}`, bold: true },
-    { text: `부가세(10%) ${wonText(money.vatWon)}`, bold: false },
-    { text: `총액(VAT포함) ${wonText(money.totalWon)}`, bold: true },
-  );
-  const extraRows: { cells: string[]; rowH: number }[] = [];
-  const footerH = (KO_LAYOUT.tableRowH + 2) * summaryRows.length;
-  const tableH = headerH + bodyRows.reduce((s, r) => s + r.rowH, 0) + footerH;
-
-  y = ensurePageSpace(doc, y, tableH + 4);
-  const tableTop = y;
-  doc.setDrawColor(170, 170, 170);
-  doc.setLineWidth(KO_LAYOUT.tableBorderPt);
-  doc.rect(margin, tableTop, maxW, tableH);
-
-  let rowY = tableTop;
-  let x = margin;
-  headers.forEach((h, i) => {
-    if (i > 0) {
-      doc.line(x, tableTop, x, tableTop + tableH);
-    }
-    drawTextRun(doc, fam, x + KO_LAYOUT.tablePad, rowY + 5, h, {
-      bold: true,
-      size: 8,
-    });
-    x += colWs[i]!;
-  });
-  rowY += headerH;
-  doc.line(margin, rowY, margin + maxW, rowY);
-
-  for (const row of bodyRows) {
-    x = margin;
-    row.cells.forEach((c, i) => {
-      const lines = wrapLines(doc, c, colWs[i]! - KO_LAYOUT.tablePad * 2);
-      lines.forEach((line, li) => {
-        drawTextRun(
-          doc,
-          fam,
-          x + KO_LAYOUT.tablePad,
-          rowY + KO_LAYOUT.tablePad + 4 + li * KO_LAYOUT.tableValueLineH,
-          line,
-          { size: 8 },
-        );
-      });
-      x += colWs[i]!;
-    });
-    rowY += row.rowH;
-    doc.line(margin, rowY, margin + maxW, rowY);
-  }
-
-  for (const row of extraRows) {
-    x = margin;
-    row.cells.forEach((c, i) => {
-      drawTextRun(
-        doc,
-        fam,
-        x + KO_LAYOUT.tablePad,
-        rowY + 5,
-        c,
-        { size: 8 },
-      );
-      x += colWs[i]!;
-    });
-    rowY += row.rowH;
-    doc.line(margin, rowY, margin + maxW, rowY);
-  }
-
-  for (const row of summaryRows) {
-    drawTextRun(
-      doc,
-      fam,
-      margin + KO_LAYOUT.tablePad,
-      rowY + 5,
-      row.text,
-      { bold: row.bold, size: 8.5 },
+    foot.push(
+      mediaSummaryFootRow(fam, "기타", wonLabel(money.extraOtherWon), false),
     );
-    rowY += KO_LAYOUT.tableRowH + 1;
-    doc.line(margin, rowY, margin + maxW, rowY);
   }
+  foot.push(
+    mediaSummaryFootRow(fam, "공급가액 합계", wonLabel(money.supplyWon), true),
+    mediaSummaryFootRow(fam, "부가세(10%)", wonLabel(money.vatWon), false),
+    mediaSummaryFootRow(fam, "총액(VAT포함)", wonLabel(money.totalWon), true),
+  );
 
-  return tableTop + tableH + KO_LAYOUT.paragraphGap + 2;
+  setContractFont(doc, fam, "normal");
+  autoTable(doc, {
+    startY: y,
+    margin: contractTableMargins(doc, margin),
+    tableWidth: maxW,
+    theme: "grid",
+    showHead: "everyPage",
+    showFoot: "lastPage",
+    rowPageBreak: "avoid",
+    head: [["No", "매체명", "위치", "규격", "공급가(VAT별도)"]],
+    body,
+    foot,
+    styles: {
+      font: fam,
+      fontSize: 8,
+      cellPadding: KO_LAYOUT.tablePad,
+      textColor: [0, 0, 0],
+      lineColor: CONTRACT_TABLE_GRID,
+      lineWidth: CONTRACT_TABLE_LINE_MM,
+      valign: "middle",
+      overflow: "linebreak",
+    },
+    headStyles: {
+      font: fam,
+      fontStyle: "bold",
+      fillColor: CONTRACT_TABLE_HEAD_BG,
+      textColor: [0, 0, 0],
+      halign: "center",
+    },
+    footStyles: {
+      font: fam,
+      fillColor: [255, 255, 255],
+      textColor: [0, 0, 0],
+    },
+    columnStyles: {
+      0: { cellWidth: colWs[0], halign: "center" },
+      1: { cellWidth: colWs[1], halign: "left" },
+      2: { cellWidth: colWs[2], halign: "left" },
+      3: { cellWidth: colWs[3], halign: "left" },
+      4: { cellWidth: colWs[4], halign: "right" },
+    },
+    didParseCell: (data) => {
+      data.cell.styles.font = fam;
+      if (data.column.index === 0) {
+        data.cell.styles.cellPadding = {
+          top: KO_LAYOUT.tablePad,
+          right: 0.6,
+          bottom: KO_LAYOUT.tablePad,
+          left: 0.6,
+        };
+      }
+    },
+  });
+
+  return autoTableFinalY(doc, y);
 }
 
 async function buildKoStandardContractPdf(
