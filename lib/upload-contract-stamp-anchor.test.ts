@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   lowerSealMatrices,
+  partyASealFallback,
   partyASealRect,
+  UPLOAD_AUDIT_TOP_PT,
   UPLOAD_PARTY_A_SEAL_PT,
   type PdfTextRun,
 } from "@/lib/upload-contract-stamp-anchor";
@@ -76,6 +78,13 @@ test("lowers an embedded seal that covers the phone line", () => {
   assert.doesNotMatch(next, /157\.87/);
   const again = lowerSealMatrices(next, GEARSECOND_SIG);
   assert.equal(again, next);
+});
+
+test("fallback seal stays above the audit band and in the left column", () => {
+  const seal = partyASealFallback(PAGE);
+  assert.ok(seal.y > UPLOAD_AUDIT_TOP_PT + 8);
+  assert.ok(seal.x + seal.w < PAGE.width * 0.5);
+  assert.ok(seal.y + seal.h < 195);
 });
 
 test("returns null when the page has no 갑 대표자 line", () => {
