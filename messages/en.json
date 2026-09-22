@@ -3013,6 +3013,7 @@
     "uploadBusy": "Uploading PDF…",
     "uploadErrCloudinaryNotConfigured": "Cloudinary is not configured. Check CLOUDINARY_* env vars on Vercel.",
     "uploadErrCloudinaryUpload": "Cloudinary PDF upload failed.",
+    "uploadErrCloudinaryDisabled": "This Cloudinary cloud is disabled. Enable the product environment at cloudinary.com, or update Vercel CLOUDINARY_CLOUD_NAME, API_KEY, and API_SECRET to match an active cloud (align or remove CLOUDINARY_URL).",
     "uploadErrPdfOnly": "Only PDF files are allowed.",
     "uploadErrPdfSize": "PDF must be 10MB or smaller.",
     "uploadErrMissingFile": "No file selected.",
