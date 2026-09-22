@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/toast-provider";
 import { useAdminMediaPickerList } from "@/hooks/use-admin-media-picker-list";
+import { parseWonFromLooseAdminInput } from "@/lib/contract-money";
 import { catalogPriceFieldToWon } from "@/lib/pricing";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
 import { wonToManwon } from "@/lib/ooh-quote-amount";
@@ -223,6 +224,11 @@ export default function AdminStandaloneContractClient() {
         if (b) setEndDate(b);
       }
       setTotalAmountManwon(String(parsed.totalAmountManwon ?? ""));
+      setExtraProductionWon(
+        parsed.extraProductionWon ? String(parsed.extraProductionWon) : "",
+      );
+      setExtraInstallWon(parsed.extraInstallWon ? String(parsed.extraInstallWon) : "");
+      setExtraOtherWon(parsed.extraOtherWon ? String(parsed.extraOtherWon) : "");
       setSpecialTerms(parsed.specialTerms ?? "");
       if (parsed.mediaIds?.length && parsed.mediaLines?.length) {
         setSelectedMedia(
@@ -253,15 +259,14 @@ export default function AdminStandaloneContractClient() {
       paymentMethod,
       clientEmail: clientEmail.trim() || "",
       mediaIds: selectedMedia.map((m) => m.id),
-      mediaIds: selectedMedia.map((m) => m.id),
       mediaLines: selectedMedia.map((m) => m.label),
       period: periodLabel,
       startDate,
       endDate,
       totalAmountManwon: manwon,
-      extraProductionWon: Math.max(0, parseInt(extraProductionWon, 10) || 0),
-      extraInstallWon: Math.max(0, parseInt(extraInstallWon, 10) || 0),
-      extraOtherWon: Math.max(0, parseInt(extraOtherWon, 10) || 0),
+      extraProductionWon: parseWonFromLooseAdminInput(extraProductionWon),
+      extraInstallWon: parseWonFromLooseAdminInput(extraInstallWon),
+      extraOtherWon: parseWonFromLooseAdminInput(extraOtherWon),
       specialTerms: specialTerms.trim() || null,
       locale: isKo ? "ko" : "en",
       download: false,
@@ -279,6 +284,9 @@ export default function AdminStandaloneContractClient() {
     clientRepName,
     draftId,
     endDate,
+    extraInstallWon,
+    extraOtherWon,
+    extraProductionWon,
     isKo,
     mediaCount,
     paymentMethod,
@@ -312,9 +320,9 @@ export default function AdminStandaloneContractClient() {
       startDate,
       endDate,
       totalAmountManwon: manwon,
-      extraProductionWon: Math.max(0, parseInt(extraProductionWon, 10) || 0),
-      extraInstallWon: Math.max(0, parseInt(extraInstallWon, 10) || 0),
-      extraOtherWon: Math.max(0, parseInt(extraOtherWon, 10) || 0),
+      extraProductionWon: parseWonFromLooseAdminInput(extraProductionWon),
+      extraInstallWon: parseWonFromLooseAdminInput(extraInstallWon),
+      extraOtherWon: parseWonFromLooseAdminInput(extraOtherWon),
       specialTerms: specialTerms.trim() || null,
       locale: isKo ? "ko" : "en",
     };
@@ -328,6 +336,9 @@ export default function AdminStandaloneContractClient() {
     clientRepName,
     draftId,
     endDate,
+    extraInstallWon,
+    extraOtherWon,
+    extraProductionWon,
     isKo,
     mediaCount,
     paymentMethod,
@@ -1155,15 +1166,28 @@ export default function AdminStandaloneContractClient() {
               </label>
               <label className="space-y-1 text-sm">
                 <span className="text-xs font-medium text-muted-foreground">제작비 (원)</span>
-                <Input type="number" min={0} value={extraProductionWon} onChange={(e) => setExtraProductionWon(e.target.value)} />
+                <Input
+                  inputMode="numeric"
+                  value={extraProductionWon}
+                  onChange={(e) => setExtraProductionWon(e.target.value)}
+                  placeholder="2,000,000"
+                />
               </label>
               <label className="space-y-1 text-sm">
                 <span className="text-xs font-medium text-muted-foreground">설치비 (원)</span>
-                <Input type="number" min={0} value={extraInstallWon} onChange={(e) => setExtraInstallWon(e.target.value)} />
+                <Input
+                  inputMode="numeric"
+                  value={extraInstallWon}
+                  onChange={(e) => setExtraInstallWon(e.target.value)}
+                />
               </label>
               <label className="space-y-1 text-sm">
                 <span className="text-xs font-medium text-muted-foreground">기타 (원)</span>
-                <Input type="number" min={0} value={extraOtherWon} onChange={(e) => setExtraOtherWon(e.target.value)} />
+                <Input
+                  inputMode="numeric"
+                  value={extraOtherWon}
+                  onChange={(e) => setExtraOtherWon(e.target.value)}
+                />
               </label>
               <label className="space-y-1 text-sm">
                 <span className="text-xs font-medium text-muted-foreground">

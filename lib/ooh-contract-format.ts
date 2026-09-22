@@ -75,15 +75,18 @@ export function defaultProductionCostKo(): string {
 
 /** 매체명·캠페인명 끝에 이미 "광고"가 있으면 true */
 export function mediaNameAlreadyHasAdSuffix(name: string): boolean {
-  const t = name.trim();
-  return /광고\s*$/u.test(t);
+  const t = name.trim().replace(/[\s\u00A0\u3000.,·]+$/u, "");
+  return /광고$/u.test(t);
 }
 
-/** "광고 광고" 등 중복 접미 제거 */
+/** "광고 광고" / "광고광고" 중복 접미 제거 */
 export function dedupeCampaignAdSuffix(text: string): string {
   let out = text.trim();
-  out = out.replace(/광고\s+광고/gu, "광고");
-  out = out.replace(/(광고)\s*광고\s*$/u, "$1");
+  let prev = "";
+  while (out !== prev) {
+    prev = out;
+    out = out.replace(/광고\s*광고/gu, "광고");
+  }
   return out;
 }
 
@@ -148,22 +151,43 @@ export function formatContractArticle1PeriodValue(
   return `- ${range}\n- 단, 광고기간은 제작관계상 개시일이 변동될 수 있습니다.`;
 }
 
-/** 한국 전화번호 표시 (010/02 등) */
+/**
+ * 한국 전화번호 표시.
+ * 02는 9자리(02-XXX-XXXX)·10자리(02-XXXX-XXXX),
+ * 휴대폰 11자리, 지역번호 10~11자리, 050 계열 12자리.
+ */
 export function formatKoreanPhoneDisplay(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.length === 11 && digits.startsWith("010")) {
+  const trimmed = phone.trim();
+  if (!trimmed) return "";
+  let digits = trimmed.replace(/\D/g, "");
+  if (digits.startsWith("82") && digits.length >= 10) {
+    digits = `0${digits.slice(2)}`;
+  }
+  if (!digits.startsWith("0") && digits.length < 8) return trimmed;
+
+  if (digits.startsWith("02")) {
+    const rest = digits.slice(2);
+    if (rest.length === 7) return `02-${rest.slice(0, 3)}-${rest.slice(3)}`;
+    if (rest.length === 8) return `02-${rest.slice(0, 4)}-${rest.slice(4)}`;
+  }
+  if (digits.startsWith("050") && digits.length === 12) {
+    return `${digits.slice(0, 4)}-${digits.slice(4, 8)}-${digits.slice(8)}`;
+  }
+  if (/^01[016789]/.test(digits) && digits.length === 11) {
     return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
   }
-  if (digits.length === 10 && digits.startsWith("02")) {
-    return `02-${digits.slice(2, 6)}-${digits.slice(6)}`;
+  if (/^0\d{2}/.test(digits) && !digits.startsWith("02")) {
+    if (digits.length === 10) {
+      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    if (digits.length === 11) {
+      return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+    }
   }
-  if (digits.length === 11 && digits.startsWith("01")) {
-    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  if (/^1[568]\d{6}$/.test(digits)) {
+    return `${digits.slice(0, 4)}-${digits.slice(4)}`;
   }
-  if (digits.length === 10) {
-    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
-  }
-  return phone.trim();
+  return trimmed;
 }
 
 export function buildMediaContractSpecLabel(media: {
