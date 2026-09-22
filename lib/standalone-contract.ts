@@ -8,7 +8,6 @@ import { buildContractMoney, supplyWonFromManwonField } from "@/lib/contract-mon
 import {
   defaultContractPaymentMethodKo,
   defaultProductionCostKo,
-  formatContractAdUnitPriceDisplay,
   formatContractCampaignName,
   formatContractMediaCount,
 } from "@/lib/ooh-contract-format";
@@ -108,8 +107,8 @@ export function buildContractAmountLine(
 ): string {
   const fmt = isKo ? "ko-KR" : "en-US";
   return isKo
-    ? `총 광고 집행 금액(참고, 부가세 별도, 만원): ₩${totalAmountManwon.toLocaleString(fmt)}`
-    : `Total media fee (excl. VAT, 10K KRW units): ₩${totalAmountManwon.toLocaleString(fmt)}`;
+    ? `총 광고 집행 금액(참고, 부가세 별도, 만원): ￦${totalAmountManwon.toLocaleString(fmt)}`
+    : `Total media fee (excl. VAT, 10K KRW units): ￦${totalAmountManwon.toLocaleString(fmt)}`;
 }
 
 function resolveStandaloneDates(input: StandaloneContractPreviewInput) {
@@ -137,14 +136,26 @@ export function standaloneContractToPdfVars(
   const campaign = formatContractCampaignName(names, input.campaignName);
 
   const mediaSupply = supplyWonFromManwonField(input.totalAmountManwon);
+  const lineItems = names.map((name) => ({
+    name,
+    location: "",
+    spec: "",
+    unitPriceWon: 0,
+    lineSupplyWon: 0,
+  }));
   const money = buildContractMoney({
-    mediaSupplyWon: mediaSupply,
+    mediaLines: lineItems.map((item) => ({
+      name: item.name,
+      location: "",
+      spec: "",
+      supplyWon: 0,
+    })),
+    contractMediaSupplyWon: mediaSupply,
     extraProductionWon: input.extraProductionWon,
     extraInstallWon: input.extraInstallWon,
     extraOtherWon: input.extraOtherWon,
+    productionCostText: input.productionCost,
   });
-  const perLine =
-    names.length > 0 ? Math.round(mediaSupply / names.length) : mediaSupply;
   const vars = buildKoOohContractPdfVars({
     contractId: draftId,
     isKo,
@@ -165,17 +176,15 @@ export function standaloneContractToPdfVars(
     periodLabel: input.period.trim(),
     specialTerms: input.specialTerms?.trim() || null,
   });
-  vars.mediaLineItems = names.map((name) => ({
-    name,
-    spec: "",
-    unitPriceWon: perLine,
-    lineSupplyWon: perLine,
-  }));
+  vars.mediaLineItems = lineItems;
   vars.costLines = [
     { label: "제작비", amountWon: money.extraProductionWon },
     { label: "설치비", amountWon: money.extraInstallWon },
     { label: "기타 비용", amountWon: money.extraOtherWon },
   ];
-  vars.adUnitPriceDisplay = formatContractAdUnitPriceDisplay(mediaSupply);
+  vars.adUnitPriceDisplay = money.adUnitPriceDisplay;
+  vars.totalAmount = money.totalAmountDisplay;
+  vars.amountKorean = money.amountKorean;
+  vars.contractMoney = money;
   return vars;
 }

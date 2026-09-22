@@ -9,16 +9,16 @@ import type { OohContractPdfVars } from "@/lib/ooh-contract-pdf";
 import {
   buildMediaContractSpecLabel,
   defaultProductionCostKo,
-  formatContractAdUnitPriceDisplay,
   formatContractCampaignName,
   formatContractMediaCount,
 } from "@/lib/ooh-contract-format";
 import {
   buildContractMoney,
-  productionCostLooksLikeWonAmountOnly,
   resolveContractExtraWons,
+  resolveContractMediaCountLabel,
   supplyWonFromManwonField,
 } from "@/lib/contract-money";
+import { inclusiveCampaignDays } from "@/lib/admin-quote-calc";
 import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
 import type { ContractMediaLineItem } from "@/lib/ooh-contract-pdf";
 import {
@@ -48,26 +48,21 @@ function mediaCountFromBreakdown(breakdown: QuoteBreakdown | null | undefined): 
   return Math.max(1, sum);
 }
 
-function totalWonFromQuote(
-  row: {
-    totalAmount: number;
-    quoteBreakdown: QuoteBreakdown | null;
-  },
-  extras: {
-    extraProductionWon?: number;
-    extraInstallWon?: number;
-    extraOtherWon?: number;
-  },
-): number {
-  const breakdown = row.quoteBreakdown as QuoteBreakdown | null;
-  const mediaSupply =
-    breakdown?.supplyWon && breakdown.supplyWon > 0
-      ? Math.round(breakdown.supplyWon)
-      : supplyWonFromManwonField(row.totalAmount, breakdown?.subtotalWon);
-  return buildContractMoney({
-    mediaSupplyWon: mediaSupply,
-    ...extras,
-  }).totalWon;
+export function catalogSupplyWonForPeriod(input: {
+  price: number | null | undefined;
+  pricePeriod?: string | null;
+  start: Date | null;
+  end: Date | null;
+}): number {
+  const price = Math.round(input.price ?? 0);
+  if (price <= 0) return 0;
+  const start = input.start ?? new Date();
+  const end = input.end ?? start;
+  const days = Math.max(1, inclusiveCampaignDays(start, end));
+  const period = input.pricePeriod ?? "month";
+  if (period === "day") return price * days;
+  if (period === "week") return price * Math.max(1, Math.round(days / 7));
+  return price * Math.max(1, Math.round(days / 30));
 }
 
 export function ooHQuoteToContractPdfVars(
@@ -75,6 +70,7 @@ export function ooHQuoteToContractPdfVars(
   mediaNames: string[],
   contractRecordId: string,
   metaOverride?: OohContractMeta,
+  lineItems?: ContractMediaLineItem[],
 ): OohContractPdfVars {
   const isKo = row.locale !== "en";
   const breakdownForCount = row.quoteBreakdown as QuoteBreakdown | null;
@@ -94,20 +90,22 @@ export function ooHQuoteToContractPdfVars(
   );
   const { start, end } = resolveContractDatesFromQuote(row);
   const extras = resolveContractExtraWons(meta, breakdownForCount);
-  const totalWon = totalWonFromQuote(row, extras);
   const breakdown = row.quoteBreakdown as QuoteBreakdown | null;
-  const mediaItems = mediaLineItemsFromQuote(breakdown, mediaNames);
+  const mediaItems = lineItems?.length
+    ? lineItems
+    : mediaLineItemsFromQuote(breakdown, mediaNames);
+  const contractMediaSupplyWon = supplyWonFromManwonField(row.totalAmount);
   const money = buildContractMoney({
-    mediaSupplyWon:
-      breakdown?.supplyWon && breakdown.supplyWon > 0
-        ? breakdown.supplyWon
-        : supplyWonFromManwonField(row.totalAmount, breakdown?.subtotalWon),
+    mediaLines: mediaItems.map((item) => ({
+      name: item.name,
+      location: item.location ?? "",
+      spec: item.spec,
+      supplyWon: item.lineSupplyWon,
+    })),
+    contractMediaSupplyWon,
     ...extras,
+    productionCostText: meta.productionCost,
   });
-  const mediaSupplyWon =
-    breakdown?.supplyWon && breakdown.supplyWon > 0
-      ? Math.round(breakdown.supplyWon)
-      : supplyWonFromManwonField(row.totalAmount, breakdown?.subtotalWon);
 
   const vars = buildKoOohContractPdfVars({
     contractId: contractRecordId,
@@ -119,12 +117,8 @@ export function ooHQuoteToContractPdfVars(
     campaignName: formatContractCampaignName(mediaNames, meta.campaignName),
     startDate: start,
     endDate: end,
-    totalWonVatIncluded: totalWon,
-    productionCost:
-      extras.extraProductionWon > 0 &&
-      productionCostLooksLikeWonAmountOnly(meta.productionCost)
-        ? defaultProductionCostKo()
-        : meta.productionCost,
+    totalWonVatIncluded: money.totalWon,
+    productionCost: meta.productionCost,
     mediaCount: defaultUnitCount,
     paymentMethod: meta.paymentMethod,
     clientName: row.clientName,
@@ -139,18 +133,21 @@ export function ooHQuoteToContractPdfVars(
     { label: "설치비", amountWon: money.extraInstallWon },
     { label: "기타 비용", amountWon: money.extraOtherWon },
   ];
-  vars.adUnitPriceDisplay = formatContractAdUnitPriceDisplay(mediaSupplyWon);
+  vars.adUnitPriceDisplay = money.adUnitPriceDisplay;
+  vars.totalAmount = money.totalAmountDisplay;
+  vars.amountKorean = money.amountKorean;
+  vars.contractMoney = money;
   const noteParts = [
     meta.otherNotes?.trim(),
     row.oohContract?.specialTerms?.trim(),
   ].filter(Boolean);
   vars.otherNotes = noteParts.length > 0 ? noteParts.join("\n") : undefined;
-  const countLabel = metaOverride?.mediaCount?.trim() ?? meta.mediaCount?.trim();
-  if (countLabel && !/^\d+기?$/.test(countLabel)) {
-    vars.mediaCount = countLabel;
-  } else {
-    vars.mediaCount = formatContractMediaCount(defaultUnitCount);
-  }
+  const count = resolveContractMediaCountLabel({
+    mediaUnitCount: defaultUnitCount,
+    adminMediaCount: metaOverride?.mediaCount ?? meta.mediaCount,
+  });
+  vars.mediaCount = count.label;
+  vars.mediaCountOverridden = count.overridden;
   return vars;
 }
 
@@ -164,13 +161,15 @@ function mediaLineItemsFromQuote(
   if (mediaLines.length) {
     return mediaLines.map((line) => ({
       name: line.mediaName,
-      spec: line.location || line.quantityLabel || "",
+      location: line.location || "",
+      spec: line.quantityLabel || "",
       unitPriceWon: line.unitPriceWon,
       lineSupplyWon: line.lineSupplyWon,
     }));
   }
   return mediaNames.map((name) => ({
     name,
+    location: "",
     spec: "",
     unitPriceWon: 0,
     lineSupplyWon: 0,
@@ -196,6 +195,7 @@ export async function resolveContractMediaForQuote(
   mediaIds: string[],
   breakdown: QuoteBreakdown | null,
   isKo: boolean,
+  period?: { start: Date | null; end: Date | null },
 ): Promise<{ names: string[]; lineItems: ContractMediaLineItem[] }> {
   if (mediaIds.length === 0) return { names: [], lineItems: [] };
   const media = await db.media.findMany({
@@ -208,6 +208,8 @@ export async function resolveContractMediaForQuote(
       region: true,
       width: true,
       height: true,
+      price: true,
+      pricePeriod: true,
     },
   });
   const order = new Map(mediaIds.map((id, i) => [id, i]));
@@ -230,29 +232,33 @@ export async function resolveContractMediaForQuote(
       lineByName.get(name.trim()) ??
       lineByName.get(m.name.trim()) ??
       mediaLines[lineItems.length];
-    const spec =
-      buildMediaContractSpecLabel(m) ||
+    const sizeSpec = buildMediaContractSpecLabel({
+      width: m.width,
+      height: m.height,
+    });
+    const location =
+      m.location?.trim() ||
+      m.region?.trim() ||
       bd?.location?.trim() ||
-      bd?.quantityLabel?.trim() ||
       "";
+    const spec = sizeSpec || bd?.quantityLabel?.trim() || "";
+    const fromBreakdown = Math.round(bd?.lineSupplyWon ?? 0);
+    const lineSupplyWon =
+      fromBreakdown > 0
+        ? fromBreakdown
+        : catalogSupplyWonForPeriod({
+            price: m.price,
+            pricePeriod: m.pricePeriod,
+            start: period?.start ?? null,
+            end: period?.end ?? null,
+          });
     lineItems.push({
       name,
+      location,
       spec,
-      unitPriceWon: bd?.unitPriceWon ?? 0,
-      lineSupplyWon: bd?.lineSupplyWon ?? 0,
+      unitPriceWon: bd?.unitPriceWon ?? lineSupplyWon,
+      lineSupplyWon,
     });
-  }
-
-  if (lineItems.length === 0 && breakdown?.lines?.length) {
-    for (const line of breakdown.lines) {
-      names.push(line.mediaName);
-      lineItems.push({
-        name: line.mediaName,
-        spec: line.location || line.quantityLabel || "",
-        unitPriceWon: line.unitPriceWon,
-        lineSupplyWon: line.lineSupplyWon,
-      });
-    }
   }
 
   return { names, lineItems };
