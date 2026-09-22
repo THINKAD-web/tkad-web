@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import {
+  formatCloudinaryUploadError,
   isCloudinaryConfigured,
   uploadOohContractSourcePdf,
 } from "@/lib/cloudinary-upload-contract";
@@ -51,8 +52,9 @@ export async function POST(request: NextRequest) {
   try {
     url = await uploadOohContractSourcePdf(buf, token);
   } catch (e) {
-    console.error("[upload-pdf] cloudinary", e);
-    return json({ error: "cloudinary_upload_failed" }, 502);
+    const detail = formatCloudinaryUploadError(e);
+    console.error("[upload-pdf] cloudinary", detail, e);
+    return json({ error: "cloudinary_upload_failed", detail }, 502);
   }
   const fileName = (file.name || "contract.pdf").slice(0, 255);
 

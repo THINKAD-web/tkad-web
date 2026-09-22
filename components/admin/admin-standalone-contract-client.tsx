@@ -43,7 +43,10 @@ import {
   type StandaloneContractDraft,
   STANDALONE_CONTRACT_DRAFT_VERSION,
 } from "@/lib/standalone-contract";
-import { readAdminApiError } from "@/lib/admin-api-error";
+import {
+  readAdminApiError,
+  readAdminApiErrorDetail,
+} from "@/lib/admin-api-error";
 import { cn } from "@/lib/utils";
 
 function uploadApiErrorMessage(code: string, t: (k: string) => string): string {
@@ -382,7 +385,13 @@ export default function AdminStandaloneContractClient() {
         const raw: unknown = await res.json().catch(() => ({}));
         if (!res.ok) {
           const code = readAdminApiError(raw, "upload_failed");
-          throw new Error(uploadApiErrorMessage(code, t));
+          const detail = readAdminApiErrorDetail(raw);
+          const base = uploadApiErrorMessage(code, t);
+          throw new Error(
+            detail && code === "cloudinary_upload_failed"
+              ? `${base} (${detail})`
+              : base,
+          );
         }
         const url =
           typeof raw === "object" &&
