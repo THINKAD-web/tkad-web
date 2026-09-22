@@ -52,7 +52,8 @@ export const notoSerifKr = Noto_Serif_KR({
   subsets: ["latin"],
   variable: "--font-noto-serif-kr",
   display: "swap",
-  weight: ["400", "600", "700"],
+  weight: ["400", "700"],
+  adjustFontFallback: false,
 });
 
 export const jetBrainsMono = JetBrains_Mono({

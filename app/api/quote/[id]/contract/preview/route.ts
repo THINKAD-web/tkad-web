@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { OoHQuoteStatus, OohContractSendMode } from "@prisma/client";
-import { fetchUploadedContractPdfVerified } from "@/lib/ooh-contract-upload-pdf";
+import { fetchUploadedContractPdfForPreview } from "@/lib/ooh-contract-upload-pdf";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
@@ -67,7 +67,7 @@ export async function GET(
       return new NextResponse("Not found", { status: 404 });
     }
     try {
-      const buf = await fetchUploadedContractPdfVerified(
+      const buf = await fetchUploadedContractPdfForPreview(
         contract.uploadedPdfUrl,
         contract.uploadedPdfSha256,
       );
@@ -81,7 +81,12 @@ export async function GET(
           "Cache-Control": "no-store, private",
         },
       });
-    } catch {
+    } catch (e) {
+      console.error("[contract preview] upload pdf", {
+        quoteId: id,
+        url: contract.uploadedPdfUrl,
+        err: e,
+      });
       return new NextResponse("Unavailable", { status: 503 });
     }
   }
