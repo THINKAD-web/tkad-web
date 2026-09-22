@@ -11,6 +11,15 @@ import { normalizeContractSendMode, isUploadedContractSendMode } from "@/lib/con
 type QuoteRow = NonNullable<Awaited<ReturnType<typeof loadOoHQuoteForContract>>>;
 type ContractRow = NonNullable<QuoteRow["oohContract"]>;
 
+/** Node Headers는 ByteString만 허용 — 한글 파일명은 filename* 로만 전달 */
+export function contentDispositionInlinePdf(fileName: string): string {
+  const raw = fileName.replace(/[\r\n"]/g, "").trim() || "thinkad-contract.pdf";
+  const ascii =
+    raw.replace(/[^\x20-\x7E]/g, "_").replace(/_+/g, "_") || "thinkad-contract.pdf";
+  const utf8 = encodeURIComponent(raw);
+  return `inline; filename="${ascii}"; filename*=UTF-8''${utf8}`;
+}
+
 export class ContractPreviewError extends Error {
   constructor(
     message: string,

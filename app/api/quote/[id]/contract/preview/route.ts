@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   ContractPreviewError,
   buildContractPreviewPdfBuffer,
+  contentDispositionInlinePdf,
 } from "@/lib/contract-preview-pdf";
 import { CONTRACT_CUSTOMER_VIEW_STATUSES } from "@/lib/contract-send-mode";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
@@ -57,7 +58,7 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${fileName.replace(/"/g, "")}"`,
+        "Content-Disposition": contentDispositionInlinePdf(fileName),
         "Cache-Control": "no-store, private",
       },
     });
