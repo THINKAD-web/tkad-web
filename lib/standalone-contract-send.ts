@@ -10,6 +10,7 @@ import {
 } from "@/lib/ooh-contract-meta";
 import {
   appendContractInviteSendLog,
+  parseContractInviteSendLog,
   type ContractInviteSendEntry,
 } from "@/lib/contract-invite-log";
 import { sendContractInviteEmail } from "@/lib/contract-invite-email";
@@ -113,6 +114,8 @@ export async function createStandaloneContractSend(
   contractId: string;
   emailed: boolean;
   inviteLog: ContractInviteSendEntry[];
+  emailSkipReason?: "not_configured" | "send_failed";
+  emailDetail?: string;
 }> {
   if (!input.mediaIds.length) {
     throw new StandaloneContractSendError(
@@ -209,29 +212,35 @@ export async function createStandaloneContractSend(
   }
 
   const locale = input.locale === "en" ? "en" : "ko";
-  const emailed = await sendContractInviteEmail({
+  const inviteEmail = await sendContractInviteEmail({
     to: input.clientEmail.trim(),
     clientName: input.clientName.trim(),
     locale,
     quoteId: quote.id,
   });
+  const emailed = inviteEmail.sent;
 
-  const entry: ContractInviteSendEntry = {
-    sentAt: new Date().toISOString(),
-    to: input.clientEmail.trim(),
-    kind: "initial",
-  };
-  const inviteLog = appendContractInviteSendLog(null, entry);
-  await db.oohContract.update({
-    where: { id: contract.id },
-    data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
-  });
+  let inviteLog = parseContractInviteSendLog(null);
+  if (emailed) {
+    const entry: ContractInviteSendEntry = {
+      sentAt: new Date().toISOString(),
+      to: input.clientEmail.trim(),
+      kind: "initial",
+    };
+    inviteLog = appendContractInviteSendLog(null, entry);
+    await db.oohContract.update({
+      where: { id: contract.id },
+      data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
+    });
+  }
 
   return {
     quoteId: quote.id,
     contractId: contract.id,
     emailed,
     inviteLog,
+    emailSkipReason: inviteEmail.skipReason,
+    emailDetail: inviteEmail.detail,
   };
 }
 
@@ -242,6 +251,8 @@ export async function resendContractInvite(
   emailed: boolean;
   inviteLog: ContractInviteSendEntry[];
   quoteId: string;
+  emailSkipReason?: "not_configured" | "send_failed";
+  emailDetail?: string;
 }> {
   const contract = await db.oohContract.findUnique({
     where: { id: contractId },
@@ -264,23 +275,33 @@ export async function resendContractInvite(
     throw new StandaloneContractSendError("VALIDATION", "missing_client_email");
   }
 
-  const emailed = await sendContractInviteEmail({
+  const inviteEmail = await sendContractInviteEmail({
     to,
     clientName: row.clientName,
     locale,
     quoteId: row.id,
   });
+  const emailed = inviteEmail.sent;
 
-  const entry: ContractInviteSendEntry = {
-    sentAt: new Date().toISOString(),
-    to,
-    kind: "resend",
+  let inviteLog = parseContractInviteSendLog(contract.inviteSendLog);
+  if (emailed) {
+    const entry: ContractInviteSendEntry = {
+      sentAt: new Date().toISOString(),
+      to,
+      kind: "resend",
+    };
+    inviteLog = appendContractInviteSendLog(contract.inviteSendLog, entry);
+    await db.oohContract.update({
+      where: { id: contract.id },
+      data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
+    });
+  }
+
+  return {
+    emailed,
+    inviteLog,
+    quoteId: row.id,
+    emailSkipReason: inviteEmail.skipReason,
+    emailDetail: inviteEmail.detail,
   };
-  const inviteLog = appendContractInviteSendLog(contract.inviteSendLog, entry);
-  await db.oohContract.update({
-    where: { id: contract.id },
-    data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
-  });
-
-  return { emailed, inviteLog, quoteId: row.id };
 }

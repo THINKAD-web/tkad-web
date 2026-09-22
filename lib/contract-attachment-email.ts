@@ -1,4 +1,4 @@
-import { isEmailConfigured, sendEmail } from "@/lib/email/client";
+import { isEmailConfigured, sendEmailWithResult } from "@/lib/email/client";
 
 /** Mode B — 계약 PDF 첨부 발송 (서명 링크 없음) */
 export async function sendContractAttachmentEmail(input: {
@@ -20,7 +20,7 @@ export async function sendContractAttachmentEmail(input: {
     : `${safeName}.pdf`;
 
   try {
-    await sendEmail({
+    const sent = await sendEmailWithResult({
       to,
       subject: isKo
         ? "[싱커드] 계약서를 확인해 주세요"
@@ -34,11 +34,15 @@ export async function sendContractAttachmentEmail(input: {
       attachments: [
         {
           filename,
-          content: input.pdfBuffer,
+          content: input.pdfBuffer.toString("base64"),
+          encoding: "base64",
         },
       ],
     });
-    return true;
+    if (!sent.sent) {
+      console.error("[contract-attachment-email] provider rejected:", sent.error);
+    }
+    return sent.sent;
   } catch (e) {
     console.error("[contract-attachment-email]", e);
     return false;

@@ -49,6 +49,8 @@ export async function POST(request: NextRequest) {
       contractId: result.contractId,
       emailed: result.emailed,
       inviteLog: result.inviteLog,
+      emailSkipReason: result.emailSkipReason,
+      emailDetail: result.emailDetail,
     });
   } catch (e) {
     if (e instanceof StandaloneContractSendError) {

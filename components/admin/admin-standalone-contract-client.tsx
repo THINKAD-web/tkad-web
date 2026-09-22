@@ -90,6 +90,29 @@ function sendUploadApiErrorMessage(code: string, t: (k: string) => string): stri
   }
 }
 
+function toastContractInviteEmailSkipped(
+  raw: unknown,
+  toast: (variant: "error" | "success", message: string) => void,
+  t: (key: string) => string,
+) {
+  const obj =
+    typeof raw === "object" && raw !== null
+      ? (raw as {
+          emailSkipReason?: unknown;
+          emailDetail?: unknown;
+        })
+      : {};
+  const base =
+    obj.emailSkipReason === "send_failed"
+      ? t("contractInviteEmailSkipped")
+      : t("sendEsignEmailSkipped");
+  const detail =
+    typeof obj.emailDetail === "string" && obj.emailDetail.trim()
+      ? ` (${obj.emailDetail.trim()})`
+      : "";
+  toast("error", `${base}${detail}`);
+}
+
 const DRAFT_STORAGE_KEY = "tkad-admin-standalone-contract-draft-v1";
 
 function isValidOptionalEmail(value: string): boolean {
@@ -548,8 +571,11 @@ export default function AdminStandaloneContractClient() {
           raw !== null &&
           "emailed" in raw &&
           (raw as { emailed?: unknown }).emailed === true;
-        toast("success", t("sendUploadOk"));
-        if (!emailed) toast("error", t("sendEsignEmailSkipped"));
+        if (emailed) {
+          toast("success", t("sendUploadOk"));
+        } else {
+          toastContractInviteEmailSkipped(raw, toast, t);
+        }
         router.push("/admin/contracts");
       } catch (e) {
         toast("error", e instanceof Error ? e.message : t("sendUploadFail"));
@@ -699,9 +725,10 @@ export default function AdminStandaloneContractClient() {
           raw !== null &&
           "emailed" in raw &&
           (raw as { emailed?: unknown }).emailed === true;
-        toast("success", t("sendEsignOk"));
-        if (!emailed) {
-          toast("error", t("sendEsignEmailSkipped"));
+        if (emailed) {
+          toast("success", t("sendEsignOk"));
+        } else {
+          toastContractInviteEmailSkipped(raw, toast, t);
         }
         router.push("/admin/contracts");
       } catch (e) {

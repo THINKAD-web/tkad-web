@@ -242,7 +242,31 @@ export function AdminOohContractDetailPanel({
         }
         return;
       }
-      toast("success", t("contractResendInviteOk"));
+      const emailed =
+        typeof raw === "object" &&
+        raw !== null &&
+        "emailed" in raw &&
+        (raw as { emailed?: unknown }).emailed === true;
+      if (emailed) {
+        toast("success", t("contractResendInviteOk"));
+      } else {
+        const detail =
+          typeof raw === "object" &&
+          raw !== null &&
+          "emailDetail" in raw &&
+          typeof (raw as { emailDetail?: unknown }).emailDetail === "string"
+            ? (raw as { emailDetail: string }).emailDetail.trim()
+            : "";
+        const base =
+          typeof raw === "object" &&
+          raw !== null &&
+          "emailSkipReason" in raw &&
+          (raw as { emailSkipReason?: unknown }).emailSkipReason ===
+            "not_configured"
+            ? t("sendEsignEmailSkipped")
+            : t("contractInviteEmailSkipped");
+        toast("error", detail ? `${base} (${detail})` : base);
+      }
       onSaved();
     } catch {
       toast("error", t("contractResendInviteFail"));

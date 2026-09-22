@@ -1,5 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
-import { isEmailConfigured, sendEmail } from "@/lib/email/client";
+import {
+  isEmailConfigured,
+  sendEmailWithResult,
+} from "@/lib/email/client";
 import { getFormalQuoteIssuer } from "@/lib/formal-quote-issuer";
 import {
   loadOoHQuoteForContract,
@@ -236,6 +239,12 @@ ${previewHtml}
   return { subject, text, html };
 }
 
+export type ContractInviteEmailResult = {
+  sent: boolean;
+  skipReason?: "not_configured" | "send_failed";
+  detail?: string;
+};
+
 /** 부킹 확정·standalone 발송·재발송 — 고객에게 전자서명 URL 안내 */
 export async function sendContractInviteEmail(input: {
   to: string;
@@ -245,9 +254,14 @@ export async function sendContractInviteEmail(input: {
   variant?: ContractInviteEmailVariant;
   previewUrl?: string;
   subject?: string;
-}): Promise<boolean> {
+}): Promise<ContractInviteEmailResult> {
   const to = input.to.trim();
-  if (!to || !isEmailConfigured()) return false;
+  if (!to) {
+    return { sent: false, skipReason: "send_failed", detail: "missing recipient" };
+  }
+  if (!isEmailConfigured()) {
+    return { sent: false, skipReason: "not_configured" };
+  }
 
   const variant = input.variant ?? "standard";
 
@@ -265,8 +279,16 @@ export async function sendContractInviteEmail(input: {
         },
         { subject: input.subject, variant },
       );
-      await sendEmail({ to, ...mail });
-      return true;
+      const sent = await sendEmailWithResult({ to, ...mail });
+      if (!sent.sent) {
+        console.error("[contract-invite-email] provider rejected:", sent.error);
+        return {
+          sent: false,
+          skipReason: "send_failed",
+          detail: sent.error,
+        };
+      }
+      return { sent: true };
     }
 
     const isKo = input.locale !== "en";
@@ -290,10 +312,22 @@ export async function sendContractInviteEmail(input: {
       },
       { subject: input.subject, variant },
     );
-    await sendEmail({ to, ...mail });
-    return true;
+    const sent = await sendEmailWithResult({ to, ...mail });
+    if (!sent.sent) {
+      console.error("[contract-invite-email] provider rejected:", sent.error);
+      return {
+        sent: false,
+        skipReason: "send_failed",
+        detail: sent.error,
+      };
+    }
+    return { sent: true };
   } catch (e) {
     console.error("[contract-invite-email]", e);
-    return false;
+    return {
+      sent: false,
+      skipReason: "send_failed",
+      detail: e instanceof Error ? e.message : "send failed",
+    };
   }
 }

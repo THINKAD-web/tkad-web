@@ -8,6 +8,7 @@ import {
 import { z } from "zod";
 import {
   appendContractInviteSendLog,
+  parseContractInviteSendLog,
   type ContractInviteSendEntry,
 } from "@/lib/contract-invite-log";
 import { sendContractInviteEmail } from "@/lib/contract-invite-email";
@@ -210,12 +211,13 @@ export async function createUploadContractSend(
   let entry: ContractInviteSendEntry;
 
   if (input.mode === "uploaded_esign") {
-    emailed = await sendContractInviteEmail({
+    const inviteEmail = await sendContractInviteEmail({
       to: input.clientEmail.trim(),
       clientName: input.clientName.trim(),
       locale,
       quoteId: quote.id,
     });
+    emailed = inviteEmail.sent;
     entry = {
       sentAt: new Date().toISOString(),
       to: input.clientEmail.trim(),
@@ -236,11 +238,14 @@ export async function createUploadContractSend(
     };
   }
 
-  const inviteLog = appendContractInviteSendLog(null, entry);
-  await db.oohContract.update({
-    where: { id: contract.id },
-    data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
-  });
+  let inviteLog = parseContractInviteSendLog(null);
+  if (emailed) {
+    inviteLog = appendContractInviteSendLog(null, entry);
+    await db.oohContract.update({
+      where: { id: contract.id },
+      data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
+    });
+  }
 
   return {
     quoteId: quote.id,
@@ -299,11 +304,14 @@ export async function resendUploadContractDelivery(
       to,
       kind: "attachment_resend",
     };
-    const inviteLog = appendContractInviteSendLog(contract.inviteSendLog, entry);
-    await db.oohContract.update({
-      where: { id: contract.id },
-      data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
-    });
+    let inviteLog = parseContractInviteSendLog(contract.inviteSendLog);
+    if (emailed) {
+      inviteLog = appendContractInviteSendLog(contract.inviteSendLog, entry);
+      await db.oohContract.update({
+        where: { id: contract.id },
+        data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
+      });
+    }
     return { emailed, inviteLog, quoteId: row.id };
   }
 
@@ -314,23 +322,33 @@ export async function resendUploadContractDelivery(
         "contract_not_pending",
       );
     }
-    const emailed = await sendContractInviteEmail({
+    const inviteEmail = await sendContractInviteEmail({
       to,
       clientName: row.clientName,
       locale,
       quoteId: row.id,
     });
+    const emailed = inviteEmail.sent;
     const entry: ContractInviteSendEntry = {
       sentAt: new Date().toISOString(),
       to,
       kind: "resend",
     };
-    const inviteLog = appendContractInviteSendLog(contract.inviteSendLog, entry);
-    await db.oohContract.update({
-      where: { id: contract.id },
-      data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
-    });
-    return { emailed, inviteLog, quoteId: row.id };
+    let inviteLog = parseContractInviteSendLog(contract.inviteSendLog);
+    if (emailed) {
+      inviteLog = appendContractInviteSendLog(contract.inviteSendLog, entry);
+      await db.oohContract.update({
+        where: { id: contract.id },
+        data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
+      });
+    }
+    return {
+      emailed,
+      inviteLog,
+      quoteId: row.id,
+      emailSkipReason: inviteEmail.skipReason,
+      emailDetail: inviteEmail.detail,
+    };
   }
 
   throw new StandaloneContractSendError("VALIDATION", "unsupported_send_mode");
