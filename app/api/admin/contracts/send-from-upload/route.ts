@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { assertAdminDb, json } from "@/lib/admin-guard";
+import { assertAdminDb, adminDbQueryFailed, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import {
   createUploadContractSend,
@@ -55,9 +55,17 @@ export async function POST(request: NextRequest) {
       }
       return json({ error: e.message, code: e.code }, 400);
     }
-    if (e instanceof Error && e.message === "upload_fetch_failed") {
-      return json({ error: "upload_pdf_unreachable" }, 400);
+    if (e instanceof Error) {
+      if (
+        e.message === "upload_fetch_failed" ||
+        e.message === "upload_sha_mismatch" ||
+        e.message === "not_pdf" ||
+        e.message === "invalid_upload_url"
+      ) {
+        return json({ error: e.message }, 400);
+      }
     }
-    throw e;
+    console.error("[send-from-upload]", e);
+    return adminDbQueryFailed(e);
   }
 }

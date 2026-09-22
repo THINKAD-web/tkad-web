@@ -36,7 +36,12 @@ const requiredClientEmail = z
 
 export const UploadContractSendBody = z.object({
   mode: z.enum(["uploaded_esign", "uploaded_attachment"]),
-  uploadedPdfUrl: z.string().url().max(2048),
+  /** Cloudinary secure_url — zod .url() 거부 케이스 방지 */
+  uploadedPdfUrl: z
+    .string()
+    .min(12)
+    .max(2048)
+    .refine((v) => v.startsWith("https://"), { message: "invalid_upload_url" }),
   uploadedPdfSha256: z
     .string()
     .regex(/^[a-f0-9]{64}$/i)
