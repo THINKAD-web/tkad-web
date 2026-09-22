@@ -386,9 +386,15 @@ export default function AdminStandaloneContractClient() {
         if (!res.ok) {
           const code = readAdminApiError(raw, "upload_failed");
           const detail = readAdminApiErrorDetail(raw);
-          const base = uploadApiErrorMessage(code, t);
+          let base = uploadApiErrorMessage(code, t);
+          if (
+            detail &&
+            /cloud_name is disabled/i.test(detail)
+          ) {
+            base = t("uploadErrCloudinaryDisabled");
+          }
           throw new Error(
-            detail && code === "cloudinary_upload_failed"
+            detail && code === "cloudinary_upload_failed" && !/cloud_name is disabled/i.test(detail)
               ? `${base} (${detail})`
               : base,
           );
