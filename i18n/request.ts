@@ -1,10 +1,11 @@
 import { getRequestConfig } from "next-intl/server";
-import { hasLocale, IntlErrorCode } from "next-intl";
+import { hasLocale } from "next-intl";
 import { routing } from "./routing";
 import enMessages from "../messages/en.json";
 import koMessages from "../messages/ko.json";
 import jaMessages from "../messages/ja.json";
 import zhMessages from "../messages/zh.json";
+import { createIntlMessageHandlers } from "@/lib/i18n-message-fallback";
 
 /** Static imports so the full locale JSON is always bundled (avoids Turbopack issues with dynamic JSON imports). */
 const messagesByLocale = {
@@ -13,16 +14,6 @@ const messagesByLocale = {
   ja: jaMessages,
   zh: zhMessages,
 } as const;
-
-function getNestedString(obj: unknown, dottedKey: string): string | undefined {
-  const parts = dottedKey.split(".");
-  let cur: unknown = obj;
-  for (const part of parts) {
-    if (!cur || typeof cur !== "object" || Array.isArray(cur)) return undefined;
-    cur = (cur as Record<string, unknown>)[part];
-  }
-  return typeof cur === "string" ? cur : undefined;
-}
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
@@ -34,26 +25,15 @@ export default getRequestConfig(async ({ requestLocale }) => {
     messagesByLocale[locale as keyof typeof messagesByLocale] ??
     messagesByLocale.en;
 
+  const { onError, getMessageFallback } = createIntlMessageHandlers(
+    messages as Record<string, unknown>,
+  );
+
   return {
     locale,
     messages,
     timeZone: "Asia/Seoul",
-    onError(error) {
-      if (error.code === IntlErrorCode.MISSING_MESSAGE) {
-        return;
-      }
-      console.error(error);
-    },
-    getMessageFallback({ namespace, key, error }) {
-      if (error.code === IntlErrorCode.MISSING_MESSAGE) {
-        const fullKey = namespace ? `${namespace}.${key}` : key;
-        return (
-          getNestedString(enMessages, fullKey) ??
-          getNestedString(messages, fullKey) ??
-          fullKey
-        );
-      }
-      return key;
-    },
+    onError,
+    getMessageFallback,
   };
 });

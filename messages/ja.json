@@ -69,7 +69,9 @@
     },
     "relatedCases": {
       "title": "この媒体で実施したキャンペーン",
-      "desc": "公開同意のある実事例です。カードをクリックで詳細へ。"
+      "desc": "公開同意のある実事例です。カードをクリックで詳細へ。",
+      "descExample": "参考用の例示シナリオです。この媒体での実際の掲載・成果を検証したデータではない場合があります。",
+      "badgeExample": "例示シナリオ"
     },
     "roadview": {
       "title": "ストリートビュー",
@@ -1673,6 +1675,8 @@
     "metricReach": "リーチアップリフト",
     "detailBack": "すべてのケーススタディ",
     "detailVerified": "確認済みケース",
+    "detailExampleScenario": "例示シナリオ",
+    "detailExampleDisclaimer": "このページは実際の掲載・成果を検証した事例ではなく、予算とメディアミックスを理解するための参考シナリオです。数値は仮定に基づくものであり、実際の見積もり・掲載結果と異なる場合があります。",
     "detailDownloadPdf": "キャンペーンレポートPDFをダウンロード",
     "detailSimilarCampaign": "類似キャンペーンをリクエスト",
     "detailPrev": "前へ",

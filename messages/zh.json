@@ -69,7 +69,9 @@
     },
     "relatedCases": {
       "title": "在此媒体上投放的案例",
-      "desc": "经公开同意的真实案例。点击卡片查看详情。"
+      "desc": "经公开同意的真实案例。点击卡片查看详情。",
+      "descExample": "仅供参考的示例场景，可能并非该媒体上已验证的投放与效果数据。",
+      "badgeExample": "示例场景"
     },
     "roadview": {
       "title": "街景",
@@ -1673,6 +1675,8 @@
     "metricReach": "触达提升",
     "detailBack": "全部案例研究",
     "detailVerified": "已验证案例",
+    "detailExampleScenario": "示例场景",
+    "detailExampleDisclaimer": "本页并非经核实的投放与效果案例，而是帮助理解预算与媒体组合的参考场景。数据为示意性质，可能与实际报价与投放结果不同。",
     "detailDownloadPdf": "下载活动报告PDF",
     "detailSimilarCampaign": "申请类似活动",
     "detailPrev": "上一个",

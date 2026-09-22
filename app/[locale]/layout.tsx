@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { hasLocale } from "next-intl";
+import { IntlClientProvider } from "@/components/intl-client-provider";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { PublicOnlyMount } from "@/components/public-only-mount";
 import { notFound } from "next/navigation";
@@ -178,16 +179,12 @@ export default async function LocaleLayout({ children, params }: Props) {
           </Suspense>
         </PublicOnlyMount>
         <ThemeProvider>
-          <NextIntlClientProvider
-            locale={locale}
-            messages={messages}
-            timeZone="Asia/Seoul"
-          >
+          <IntlClientProvider locale={locale} messages={messages}>
             <PublicOnlyMount>
               <DeferredAnalytics />
             </PublicOnlyMount>
             {children}
-          </NextIntlClientProvider>
+          </IntlClientProvider>
         </ThemeProvider>
       </body>
     </html>
