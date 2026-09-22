@@ -1,4 +1,6 @@
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
+import { PDFDocument, rgb, StandardFonts, type PDFFont } from "pdf-lib";
+import { loadServerKrTtf } from "@/lib/jspdf-register-noto-kr";
 import { sha256Hex } from "@/lib/signature-audit";
 
 export type UploadContractSignOverlay = {
@@ -38,6 +40,29 @@ async function embedSignImage(
       return { img: await pdfDoc.embedPng(bytes), mime: "png" };
     }
   }
+}
+
+/** Helvetica(WinAnsi)에 없는 글자는 ? 로 바꿔 서명 합성 자체가 실패하지 않게 한다. */
+export function toWinAnsiSafe(text: string): string {
+  let out = "";
+  for (const ch of text) {
+    const code = ch.codePointAt(0) ?? 0;
+    out += code >= 32 && code <= 126 ? ch : "?";
+  }
+  return out;
+}
+
+async function overlayFont(pdfDoc: PDFDocument): Promise<PDFFont> {
+  try {
+    const ttf = await loadServerKrTtf();
+    if (ttf) {
+      pdfDoc.registerFontkit(fontkit);
+      return await pdfDoc.embedFont(ttf, { subset: true });
+    }
+  } catch (e) {
+    console.warn("[upload-contract-sign] KR font unavailable", e);
+  }
+  return pdfDoc.embedFont(StandardFonts.Helvetica);
 }
 
 /** 업로드 PDF 마지막 페이지 하단에 서명·도장·감사 텍스트 합성 (A-1) */
@@ -84,13 +109,15 @@ export async function buildSignedUploadContractPdf(
     yBase = Math.max(yBase, margin + stampH + 8);
   }
 
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const embedded = await overlayFont(pdfDoc);
   const fontSize = 9;
+  const kr = embedded.name !== "Helvetica";
+  const textOf = (line: string) => (kr ? line : toWinAnsiSafe(line));
   const lines = [
-    `Signer: ${overlay.signerName} (${overlay.signerEmail})`,
-    `Signed at (KST): ${overlay.signedAtKst}`,
-    `Document SHA-256: ${overlay.documentContentSha256}`,
-    `Signature SHA-256: ${overlay.signatureImageSha256}`,
+    textOf(`Signer: ${overlay.signerName} (${overlay.signerEmail})`),
+    textOf(`Signed at (KST): ${overlay.signedAtKst}`),
+    textOf(`Document SHA-256: ${overlay.documentContentSha256}`),
+    textOf(`Signature SHA-256: ${overlay.signatureImageSha256}`),
   ];
   let y = yBase;
   for (const line of lines) {
@@ -98,7 +125,7 @@ export async function buildSignedUploadContractPdf(
       x: margin,
       y,
       size: fontSize,
-      font,
+      font: embedded,
       color: rgb(0.15, 0.15, 0.15),
       maxWidth: width - margin * 2,
     });
