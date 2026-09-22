@@ -25,6 +25,8 @@ import {
   publicMediaSortNeedsAppLevelPriceNormalize,
   type PublicMediaSort,
 } from "@/lib/public-media-query";
+import { findMediaIdsByCollapsedTextSearch } from "@/lib/media-search-db";
+import { buildPrismaMediaTextSearchWhere } from "@/lib/media-search-text";
 import type { MergedBrowseQuery } from "@/lib/merged-media-browse";
 import {
   applyMergedBrowseExtraFilters,
@@ -143,7 +145,26 @@ async function loadMediaBrowseCandidates(
   params: MergedBrowseQuery,
 ): Promise<MediaItem[]> {
   const db = getPrisma();
-  const where = buildMediaBrowseDbWhere(params);
+  let where = buildMediaBrowseDbWhere(params);
+  const q = params.q?.trim();
+  if (q) {
+    const collapsedIds = await findMediaIdsByCollapsedTextSearch(db, q);
+    if (collapsedIds.length > 0) {
+      const chipOnly = buildMediaBrowseDbWhere({ ...params, q: null });
+      const tokenWhere = buildPrismaMediaTextSearchWhere(q);
+      where = {
+        AND: [
+          chipOnly,
+          {
+            OR: [
+              ...(tokenWhere ? [tokenWhere] : []),
+              { id: { in: collapsedIds } },
+            ],
+          },
+        ],
+      };
+    }
+  }
   const rows = await db.media.findMany({
     where,
     select: MEDIA_BROWSE_CANDIDATE_SELECT,
