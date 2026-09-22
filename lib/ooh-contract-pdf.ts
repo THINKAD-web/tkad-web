@@ -14,6 +14,10 @@ import {
   type OohContractTemplateSection,
   type OohContractTemplateVars,
 } from "@/lib/ooh-contract-template-ko";
+import {
+  formatContractArticle1PeriodValue,
+  formatContractDesignProductionLine,
+} from "@/lib/ooh-contract-format";
 
 export type OohContractPdfVars = {
   isKo: boolean;
@@ -39,6 +43,10 @@ export type OohContractPdfVars = {
   specialTerms?: string | null;
   mediaLineItems?: ContractMediaLineItem[];
   costLines?: { label: string; amountWon: number }[];
+  /** 제1조 광고단가 (VAT별도) */
+  adUnitPriceDisplay?: string;
+  /** 제1조 기타사항 */
+  otherNotes?: string;
 };
 
 export type ContractMediaLineItem = {
@@ -64,10 +72,17 @@ export type OohContractSignAudit = {
 const KO_ACCENT: [number, number, number] = [91, 33, 182];
 
 /** KO 11조 PDF 레이아웃 (원문 문구는 템플릿 그대로) */
+const KO_CONTRACT_SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+  process.env.SITE_URL?.replace(/\/$/, "") ||
+  "https://tkad.co.kr";
+
 const KO_LAYOUT = {
   margin: 18,
-  pageTop: 20,
-  pageBottom: 279,
+  headerH: 10,
+  footerH: 8,
+  pageTop: 30,
+  pageBottom: 272,
   bodyPt: 9.5,
   bodyLineH: 5.5,
   articleTitlePt: 11.5,
@@ -198,13 +213,47 @@ function measureWrappedHeight(
   return Math.max(lineH, lines.length * lineH);
 }
 
-function parseSummaryRow(line: string): { label: string; value: string } | null {
-  const idx = line.indexOf(":");
-  if (idx <= 0) return null;
-  return {
-    label: line.slice(0, idx).trim(),
-    value: line.slice(idx + 1).trim(),
-  };
+function sumMediaSupplyWon(vars: OohContractPdfVars): number {
+  const items = vars.mediaLineItems ?? [];
+  if (items.length === 0) return 0;
+  return items.reduce((s, i) => s + Math.round(i.lineSupplyWon), 0);
+}
+
+function buildArticle1TableRows(
+  vars: OohContractPdfVars,
+): { label: string; value: string }[] {
+  const adUnit =
+    vars.adUnitPriceDisplay?.trim() ||
+    (sumMediaSupplyWon(vars) > 0
+      ? `₩ ${sumMediaSupplyWon(vars).toLocaleString("ko-KR")} (VAT별도)`
+      : "별도 협의");
+
+  return [
+    { label: "광고명칭", value: vars.campaignName },
+    {
+      label: "계약기간",
+      value: formatContractArticle1PeriodValue(
+        vars.periodStart,
+        vars.periodEnd,
+        vars.periodMonths,
+      ),
+    },
+    { label: "광고단가", value: adUnit },
+    { label: "수량", value: vars.mediaCount },
+    {
+      label: "제작비/디자인비",
+      value: formatContractDesignProductionLine(
+        vars.productionCost,
+        vars.costLines,
+      ),
+    },
+    { label: "총액", value: vars.totalAmount },
+    { label: "결제방법", value: vars.paymentMethod },
+    {
+      label: "기타사항",
+      value: vars.otherNotes?.trim() ?? "",
+    },
+  ];
 }
 
 /** 제N조 (제목) 접두 + 본문 분리 — 원문 텍스트 보존 */
@@ -390,13 +439,18 @@ function emphasisRulesForSection(
 }
 
 function tableValueStyle(label: string): TextRunOpts {
-  if (label.includes("최종합계")) {
+  if (label.includes("총액") || label.includes("최종합계")) {
     return { bold: true, size: KO_LAYOUT.tableTotalPt, color: KO_ACCENT };
   }
-  if (label.includes("광고기간")) {
+  if (label.includes("계약기간") || label.includes("광고기간")) {
     return { bold: true, size: KO_LAYOUT.tableFontPt };
   }
   return { size: KO_LAYOUT.tableFontPt };
+}
+
+function paragraphLineIndent(line: string): number {
+  if (/^(\d+\)|\(\d+\))\s*/.test(line.trim())) return 5;
+  return 0;
 }
 
 function drawWrappedParagraphLines(
@@ -409,9 +463,12 @@ function drawWrappedParagraphLines(
   emphasisRules: readonly EmphasisRule[] = [],
 ): number {
   let y = yStart;
-  for (const line of wrapLines(doc, text, maxW)) {
+  const indent = paragraphLineIndent(text);
+  const lineMaxW = maxW - indent;
+  const x = margin + indent;
+  for (const line of wrapLines(doc, text, lineMaxW)) {
     y = ensurePageSpace(doc, y, KO_LAYOUT.bodyLineH);
-    drawLineWithEmphasis(doc, fam, margin, y, line, emphasisRules);
+    drawLineWithEmphasis(doc, fam, x, y, line, emphasisRules);
     y += KO_LAYOUT.bodyLineH;
   }
   return y;
@@ -600,14 +657,12 @@ function measureTableRowHeight(
 function drawArticle1SummaryTable(
   doc: import("jspdf").default,
   fam: string,
-  rows: readonly string[],
+  rows: readonly { label: string; value: string }[],
   margin: number,
   maxW: number,
   yStart: number,
 ): number {
-  const parsed = rows
-    .map(parseSummaryRow)
-    .filter((r): r is { label: string; value: string } => r != null);
+  const parsed = rows.filter((r) => r.label.trim());
   if (parsed.length === 0) return yStart;
 
   const valueW = maxW - KO_LAYOUT.tableLabelW - KO_LAYOUT.tablePad * 2;
@@ -702,6 +757,7 @@ function estimateArticleHeight(
   doc: import("jspdf").default,
   section: OohContractTemplateSection,
   maxW: number,
+  vars: OohContractPdfVars,
 ): number {
   const paras = articleParagraphsForRender(section).filter((p) => p.trim());
   if (paras.length === 0) return KO_LAYOUT.articleGapBefore;
@@ -709,16 +765,13 @@ function estimateArticleHeight(
   let h = KO_LAYOUT.articleGapBefore + KO_LAYOUT.paragraphGap;
   const isArt1 = section.heading.startsWith("제1조");
 
-  if (isArt1 && section.paragraphs.filter((p) => p.trim()).length > 1) {
+  if (isArt1 && section.paragraphs.filter((p) => p.trim()).length >= 1) {
     const leadPara = section.paragraphs.filter((p) => p.trim())[0]!;
     h += estimateParagraphRenderHeight(doc, leadPara, maxW, {
       titleOnOwnLine: true,
     });
-    const tableRows = section.paragraphs.filter((p) => p.trim()).slice(1);
-    for (const row of tableRows) {
-      const parsed = parseSummaryRow(row);
-      if (!parsed) continue;
-      h += measureTableRowHeight(doc, parsed.label, parsed.value, maxW);
+    for (const row of buildArticle1TableRows(vars)) {
+      h += measureTableRowHeight(doc, row.label, row.value, maxW);
     }
     h += KO_LAYOUT.paragraphGap;
     return h + KO_LAYOUT.articleGapAfter;
@@ -752,7 +805,7 @@ function renderKoArticleSection(
   const rawParas = section.paragraphs.filter((p) => p.trim());
   if (rawParas.length === 0) return yStart;
 
-  const est = estimateArticleHeight(doc, section, maxW);
+  const est = estimateArticleHeight(doc, section, maxW, vars);
   let y = yStart;
   if (est <= KO_KEEP_TOGETHER_MAX_MM && y + est > KO_LAYOUT.pageBottom) {
     doc.addPage();
@@ -763,7 +816,7 @@ function renderKoArticleSection(
   const emphasis = emphasisRulesForSection(section.heading, vars);
 
   const isArt1 = section.heading.startsWith("제1조");
-  if (isArt1 && rawParas.length > 1) {
+  if (isArt1 && rawParas.length >= 1) {
     y = drawArticleLeadParagraph(
       doc,
       fam,
@@ -775,7 +828,14 @@ function renderKoArticleSection(
       { titleOnOwnLine: true },
     );
     y += KO_LAYOUT.paragraphGap;
-    y = drawArticle1SummaryTable(doc, fam, rawParas.slice(1), margin, maxW, y);
+    y = drawArticle1SummaryTable(
+      doc,
+      fam,
+      buildArticle1TableRows(vars),
+      margin,
+      maxW,
+      y,
+    );
     return y + KO_LAYOUT.articleGapAfter;
   }
 
@@ -923,7 +983,7 @@ function renderKoSignatureBlock(
     leftX + 3,
     ly,
     colW - 6,
-    "대표이사",
+    "대표자",
     vars.clientRepName,
   );
 
@@ -937,7 +997,7 @@ function renderKoSignatureBlock(
     rightX + 3,
     ry,
     colW - 6,
-    "대표이사",
+    "대표자",
     partyB.representative,
   );
 
@@ -987,29 +1047,58 @@ function wonLabel(n: number): string {
   return `₩${Math.round(n).toLocaleString("ko-KR")}`;
 }
 
-function drawExtraCostLines(
+function drawDaEumDivider(
   doc: import("jspdf").default,
   fam: string,
-  vars: OohContractPdfVars,
-  margin: number,
-  maxW: number,
-  y: number,
+  pageW: number,
+  yStart: number,
 ): number {
-  const lines = vars.costLines?.filter((l) => l.amountWon > 0) ?? [];
-  if (lines.length === 0) return y;
-  for (const line of lines) {
-    y = ensurePageSpace(doc, y, KO_LAYOUT.bodyLineH);
+  let y = ensurePageSpace(doc, yStart, KO_LAYOUT.bodyLineH * 2);
+  y += 2;
+  drawTextRun(doc, fam, pageW / 2, y, "- 다 음 -", {
+    size: KO_LAYOUT.bodyPt,
+    align: "center",
+  });
+  return y + KO_LAYOUT.bodyLineH + 2;
+}
+
+function applyKoContractPageChrome(
+  doc: import("jspdf").default,
+  fam: string,
+  pageW: number,
+  margin: number,
+): void {
+  const party = OOH_CONTRACT_PARTY_B_KO;
+  const pageCount = doc.getNumberOfPages();
+  const headerLine = `${party.address} · ${party.tel} · ${party.email}`;
+  const footerUrl = KO_CONTRACT_SITE_URL.replace(/^https?:\/\//, "");
+
+  for (let page = 1; page <= pageCount; page++) {
+    doc.setPage(page);
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.2);
+    doc.line(margin, 24, pageW - margin, 24);
+
+    drawTextRun(doc, fam, margin, 20, headerLine, {
+      size: 7.5,
+      color: [70, 70, 70],
+    });
+
+    const footerY = 287;
+    doc.line(margin, footerY - 3, pageW - margin, footerY - 3);
+    drawTextRun(doc, fam, margin, footerY, footerUrl, {
+      size: 7.5,
+      color: [90, 90, 90],
+    });
     drawTextRun(
       doc,
       fam,
-      margin,
-      y,
-      `${line.label} : ${wonLabel(line.amountWon)} (VAT 별도)`,
-      { size: KO_LAYOUT.bodyPt },
+      pageW - margin,
+      footerY,
+      `${page} / ${pageCount}`,
+      { size: 7.5, color: [90, 90, 90], align: "right" },
     );
-    y += KO_LAYOUT.bodyLineH;
   }
-  return y + KO_LAYOUT.paragraphGap;
 }
 
 function drawMediaScheduleTable(
@@ -1029,41 +1118,83 @@ function drawMediaScheduleTable(
   });
   y += KO_LAYOUT.bodyLineH + 1;
 
-  const cols = [maxW * 0.42, maxW * 0.28, maxW * 0.3];
+  const colWs = [maxW * 0.4, maxW * 0.3, maxW * 0.3];
   const headers = ["매체", "규격·위치", "공급가(VAT별도)"];
-  y = ensurePageSpace(doc, y, 8);
-  let x = margin;
-  doc.setFontSize(8);
-  setContractFont(doc, fam, "bold");
-  headers.forEach((h, i) => {
-    doc.text(h, x, y);
-    x += cols[i]!;
-  });
-  y += 5;
-  setContractFont(doc, fam, "normal");
+  const headerH = 7;
+  const bodyRows: { cells: string[]; rowH: number }[] = [];
   let sum = 0;
   for (const item of items) {
-    y = ensurePageSpace(doc, y, 6);
-    x = margin;
     const cells = [
       item.name,
       item.spec || "—",
       wonLabel(item.lineSupplyWon),
     ];
-    cells.forEach((c, i) => {
-      const wrapped = wrapLines(doc, c, cols[i]! - 2);
-      doc.text(wrapped[0] ?? "", x, y);
-      x += cols[i]!;
-    });
+    const heights = cells.map((c, i) =>
+      Math.max(
+        5,
+        wrapLines(doc, c, colWs[i]! - KO_LAYOUT.tablePad * 2).length *
+          KO_LAYOUT.tableValueLineH,
+      ),
+    );
+    const rowH =
+      Math.max(KO_LAYOUT.tableRowH, ...heights) + KO_LAYOUT.tablePad;
+    bodyRows.push({ cells, rowH });
     sum += item.lineSupplyWon;
-    y += 5.5;
   }
-  y = ensurePageSpace(doc, y, 6);
-  drawTextRun(doc, fam, margin, y, `매체 소계 ${wonLabel(sum)}`, {
-    bold: true,
-    size: 9,
+  const footerH = KO_LAYOUT.tableRowH + 2;
+  const tableH = headerH + bodyRows.reduce((s, r) => s + r.rowH, 0) + footerH;
+
+  y = ensurePageSpace(doc, y, tableH + 4);
+  const tableTop = y;
+  doc.setDrawColor(170, 170, 170);
+  doc.setLineWidth(KO_LAYOUT.tableBorderPt);
+  doc.rect(margin, tableTop, maxW, tableH);
+
+  let rowY = tableTop;
+  let x = margin;
+  headers.forEach((h, i) => {
+    if (i > 0) {
+      doc.line(x, tableTop, x, tableTop + tableH);
+    }
+    drawTextRun(doc, fam, x + KO_LAYOUT.tablePad, rowY + 5, h, {
+      bold: true,
+      size: 8,
+    });
+    x += colWs[i]!;
   });
-  return y + KO_LAYOUT.paragraphGap + 2;
+  rowY += headerH;
+  doc.line(margin, rowY, margin + maxW, rowY);
+
+  for (const row of bodyRows) {
+    x = margin;
+    row.cells.forEach((c, i) => {
+      const lines = wrapLines(doc, c, colWs[i]! - KO_LAYOUT.tablePad * 2);
+      lines.forEach((line, li) => {
+        drawTextRun(
+          doc,
+          fam,
+          x + KO_LAYOUT.tablePad,
+          rowY + KO_LAYOUT.tablePad + 4 + li * KO_LAYOUT.tableValueLineH,
+          line,
+          { size: 8 },
+        );
+      });
+      x += colWs[i]!;
+    });
+    rowY += row.rowH;
+    doc.line(margin, rowY, margin + maxW, rowY);
+  }
+
+  drawTextRun(
+    doc,
+    fam,
+    margin + KO_LAYOUT.tablePad,
+    rowY + 5,
+    `매체 소계 ${wonLabel(sum)}`,
+    { bold: true, size: 8.5 },
+  );
+
+  return tableTop + tableH + KO_LAYOUT.paragraphGap + 2;
 }
 
 async function buildKoStandardContractPdf(
@@ -1119,7 +1250,7 @@ async function buildKoStandardContractPdf(
         }
         y += KO_LAYOUT.paragraphGap;
       }
-      y += 1;
+      y = drawDaEumDivider(doc, fam, pageW, y + 1);
       continue;
     }
 
@@ -1127,9 +1258,6 @@ async function buildKoStandardContractPdf(
       y = renderKoArticleSection(doc, fam, section, margin, maxW, y, vars);
       if (section.heading.startsWith("제2조")) {
         y = drawMediaScheduleTable(doc, fam, vars, margin, maxW, y);
-      }
-      if (section.heading.startsWith("제1조")) {
-        y = drawExtraCostLines(doc, fam, vars, margin, maxW, y);
       }
     }
   }
@@ -1165,6 +1293,8 @@ async function buildKoStandardContractPdf(
       }
     }
   }
+
+  applyKoContractPageChrome(doc, fam, pageW, margin);
 
   const dataUri = doc.output("datauristring") as string;
   const i = dataUri.indexOf(",");

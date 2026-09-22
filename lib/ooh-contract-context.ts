@@ -8,6 +8,8 @@ import {
 import type { OohContractPdfVars } from "@/lib/ooh-contract-pdf";
 import {
   defaultProductionCostKo,
+  formatContractAdUnitPriceDisplay,
+  formatContractCampaignName,
   formatContractMediaCount,
 } from "@/lib/ooh-contract-format";
 import {
@@ -93,8 +95,10 @@ export function ooHQuoteToContractPdfVars(
         : supplyWonFromManwonField(row.totalAmount, breakdown?.subtotalWon),
     ...extras,
   });
-  const campaignDefault =
-    mediaNames.length > 0 ? `${mediaNames[0]} 광고` : "옥외광고 집행";
+  const mediaSupplyWon =
+    breakdown?.supplyWon && breakdown.supplyWon > 0
+      ? Math.round(breakdown.supplyWon)
+      : supplyWonFromManwonField(row.totalAmount, breakdown?.subtotalWon);
 
   const vars = buildKoOohContractPdfVars({
     contractId: contractRecordId,
@@ -103,7 +107,7 @@ export function ooHQuoteToContractPdfVars(
     clientRepName: meta.clientRepName ?? row.clientName,
     clientAddress: meta.clientAddress ?? "",
     clientPhone: row.clientPhone?.trim() ?? "",
-    campaignName: meta.campaignName ?? campaignDefault,
+    campaignName: formatContractCampaignName(mediaNames, meta.campaignName),
     startDate: start,
     endDate: end,
     totalWonVatIncluded: totalWon,
@@ -124,6 +128,12 @@ export function ooHQuoteToContractPdfVars(
     { label: "설치비", amountWon: money.extraInstallWon },
     { label: "기타 비용", amountWon: money.extraOtherWon },
   ];
+  vars.adUnitPriceDisplay = formatContractAdUnitPriceDisplay(mediaSupplyWon);
+  vars.otherNotes = meta.otherNotes?.trim() || undefined;
+  const countLabel = meta.mediaCount?.trim();
+  if (countLabel && !/^\d+기?$/.test(countLabel)) {
+    vars.mediaCount = countLabel;
+  }
   return vars;
 }
 

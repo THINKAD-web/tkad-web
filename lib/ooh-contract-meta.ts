@@ -17,6 +17,8 @@ export type OohContractMeta = {
   extraProductionWon?: number;
   extraInstallWon?: number;
   extraOtherWon?: number;
+  /** 제1조 기타사항 */
+  otherNotes?: string;
 };
 
 export function parseOohContractMeta(

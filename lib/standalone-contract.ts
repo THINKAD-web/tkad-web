@@ -8,6 +8,8 @@ import { buildContractMoney, supplyWonFromManwonField } from "@/lib/contract-mon
 import {
   defaultContractPaymentMethodKo,
   defaultProductionCostKo,
+  formatContractAdUnitPriceDisplay,
+  formatContractCampaignName,
   formatContractMediaCount,
 } from "@/lib/ooh-contract-format";
 
@@ -131,9 +133,8 @@ export function standaloneContractToPdfVars(
     input.mediaCount?.trim() ||
     formatContractMediaCount(input.mediaLines.length || 1);
   const countNum = parseInt(mediaCount, 10) || input.mediaLines.length || 1;
-  const campaign =
-    input.campaignName?.trim() ||
-    (input.mediaLines[0] ? `${input.mediaLines[0]} 광고` : "옥외광고");
+  const names = input.mediaLines.map((m) => m.trim()).filter(Boolean);
+  const campaign = formatContractCampaignName(names, input.campaignName);
 
   const mediaSupply = supplyWonFromManwonField(input.totalAmountManwon);
   const money = buildContractMoney({
@@ -142,7 +143,6 @@ export function standaloneContractToPdfVars(
     extraInstallWon: input.extraInstallWon,
     extraOtherWon: input.extraOtherWon,
   });
-  const names = input.mediaLines.map((m) => m.trim()).filter(Boolean);
   const perLine =
     names.length > 0 ? Math.round(mediaSupply / names.length) : mediaSupply;
   const vars = buildKoOohContractPdfVars({
@@ -176,5 +176,6 @@ export function standaloneContractToPdfVars(
     { label: "설치비", amountWon: money.extraInstallWon },
     { label: "기타 비용", amountWon: money.extraOtherWon },
   ];
+  vars.adUnitPriceDisplay = formatContractAdUnitPriceDisplay(mediaSupply);
   return vars;
 }
