@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-09-22T23:01:05.964Z",
+  "messageKeyThreshold": 1,
+  "mediaCoverageThreshold": 0.95,
+  "locales": {
+    "ja": {
+      "messageKeyCountEn": 3725,
+      "messageKeyCountTarget": 3725,
+      "messageKeyRatio": 1,
+      "messagesComplete": true,
+      "missingMessageKeys": [],
+      "mediaActiveTotal": 1047,
+      "mediaWithTranslation": 1047,
+      "mediaCoverageRatio": 1,
+      "mediaCoveragePass": true,
+      "indexAllowed": true
+    },
+    "zh": {
+      "messageKeyCountEn": 3725,
+      "messageKeyCountTarget": 3725,
+      "messageKeyRatio": 1,
+      "messagesComplete": true,
+      "missingMessageKeys": [],
+      "mediaActiveTotal": 1047,
+      "mediaWithTranslation": 1047,
+      "mediaCoverageRatio": 1,
+      "mediaCoveragePass": true,
+      "indexAllowed": true
+    }
+  }
+}

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
+import { LOCALE_LABEL } from "@/components/locale-switcher";
 import {
   BookOpen,
   ChevronRight,
@@ -91,11 +93,17 @@ export function HeaderProfileDropdown({
     setMenuPanel("main");
   };
 
+  const nextLocale = (() => {
+    const list = routing.locales;
+    const idx = list.indexOf(locale as (typeof list)[number]);
+    const i = idx >= 0 ? idx : 0;
+    return list[(i + 1) % list.length] ?? routing.defaultLocale;
+  })();
+
   const switchLocale = () => {
-    const next = locale === "ko" ? "en" : "ko";
     startTransition(() => {
       if (pathname == null || pathname === "") return;
-      router.replace(pathname, { locale: next });
+      router.replace(pathname, { locale: nextLocale });
     });
     close();
   };
@@ -227,7 +235,7 @@ export function HeaderProfileDropdown({
           </button>
           <button type="button" role="menuitem" onClick={switchLocale} disabled={isPending} className={headerChromeMenuItemClass}>
             <Globe className="h-4 w-4 opacity-70" />
-            {locale === "ko" ? "English" : "한국어"}
+            {LOCALE_LABEL[nextLocale] ?? nextLocale}
           </button>
           {mounted ? (
             <button type="button" role="menuitem" onClick={toggleTheme} className={headerChromeMenuItemClass}>
