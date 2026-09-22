@@ -781,16 +781,33 @@ function contractTableMargins(doc: ContractPdfDoc, margin: number) {
   };
 }
 
-function useContractTableFont(fam: string) {
-  return (data: CellHookData) => {
-    data.cell.styles.font = fam;
-  };
-}
-
-function autoTableFinalY(doc: ContractPdfDoc, fallback: number): number {
+function autoTableFinalY(
+  doc: ContractPdfDoc,
+  fallback: number,
+  gapAfter = KO_LAYOUT.paragraphGap,
+): number {
   const last = (doc as ContractPdfDoc & { lastAutoTable?: { finalY?: number } })
     .lastAutoTable;
-  return (last?.finalY ?? fallback) + KO_LAYOUT.paragraphGap;
+  return (last?.finalY ?? fallback) + gapAfter;
+}
+
+/** 매체·합계 표: 텍스트 열 좌측, 공급가 열 우측 */
+function applyMediaTableCellAlign(data: CellHookData): void {
+  if (data.section === "head" && data.row.index === 0) return;
+  const raw = String(
+    (data.cell.raw as { content?: string } | undefined)?.content ??
+      data.cell.text ??
+      "",
+  ).trim();
+  if (/^[+−-]?￦/.test(raw) || data.column.index === 4) {
+    data.cell.styles.halign = "right";
+    return;
+  }
+  if (data.section === "head" && data.row.index === 1 && data.column.index === 0) {
+    data.cell.styles.halign = "center";
+    return;
+  }
+  data.cell.styles.halign = "left";
 }
 
 function drawArticle1SummaryTable(
@@ -845,7 +862,12 @@ function drawArticle1SummaryTable(
     styles: {
       font: fam,
       fontSize: KO_LAYOUT.tableFontPt,
-      cellPadding: KO_LAYOUT.tablePad,
+      cellPadding: {
+        top: 1.8,
+        right: KO_LAYOUT.tablePad,
+        bottom: 1.8,
+        left: KO_LAYOUT.tablePad,
+      },
       textColor: [0, 0, 0],
       lineColor: CONTRACT_TABLE_GRID,
       lineWidth: CONTRACT_TABLE_LINE_MM,
@@ -856,10 +878,12 @@ function drawArticle1SummaryTable(
       0: { cellWidth: KO_LAYOUT.tableLabelW },
       1: { cellWidth: maxW - KO_LAYOUT.tableLabelW },
     },
-    didParseCell: useContractTableFont(fam),
+    didParseCell: (data) => {
+      data.cell.styles.font = fam;
+    },
   });
 
-  return autoTableFinalY(doc, y);
+  return autoTableFinalY(doc, y, 1);
 }
 
 function estimateParagraphRenderHeight(
@@ -1098,13 +1122,13 @@ function renderKoSignatureBlock(
   const colW = (maxW - KO_LAYOUT.sigColGap) / 2;
   const leftX = margin;
   const rightX = margin + colW + KO_LAYOUT.sigColGap;
-  const blockH = KO_LAYOUT.sigBoxH + 20;
+  const blockH = KO_LAYOUT.sigBoxH + 14;
 
   let y = ensurePageSpace(doc, yStart, blockH);
   y += KO_LAYOUT.sigBlockTopGap;
 
   drawTextRun(doc, fam, pageW / 2, y, vars.contractDate, {
-    size: 10.5,
+    size: 10,
     bold: true,
     align: "center",
   });
@@ -1118,10 +1142,10 @@ function renderKoSignatureBlock(
   doc.rect(leftX, boxTop, colW, KO_LAYOUT.sigBoxH);
   doc.rect(rightX, boxTop, colW, KO_LAYOUT.sigBoxH);
 
-  drawTextRun(doc, fam, leftX + 3, boxTop + 5, '"갑"', { bold: true, size: 9.5 });
-  drawTextRun(doc, fam, rightX + 3, boxTop + 5, '"을"', { bold: true, size: 9.5 });
+  drawTextRun(doc, fam, leftX + 3, boxTop + 4, '"갑"', { bold: true, size: 9 });
+  drawTextRun(doc, fam, rightX + 3, boxTop + 4, '"을"', { bold: true, size: 9 });
 
-  let ly = boxTop + 10;
+  let ly = boxTop + 9;
   ly = drawSigFieldRow(doc, fam, leftX + 3, ly, colW - 6, "상호", vars.clientCompany);
   ly = drawSigFieldRow(doc, fam, leftX + 3, ly, colW - 6, "주소", vars.clientAddress);
   ly = drawSigFieldRow(doc, fam, leftX + 3, ly, colW - 6, "전화번호", vars.clientPhone);
@@ -1135,7 +1159,7 @@ function renderKoSignatureBlock(
     vars.clientRepName,
   );
 
-  let ry = boxTop + 10;
+  let ry = boxTop + 9;
   ry = drawSigFieldRow(doc, fam, rightX + 3, ry, colW - 6, "상호", partyB.companyName);
   ry = drawSigFieldRow(doc, fam, rightX + 3, ry, colW - 6, "주소", partyB.address);
   ry = drawSigFieldRow(doc, fam, rightX + 3, ry, colW - 6, "전화번호", partyB.tel);
@@ -1207,7 +1231,7 @@ function drawDaEumDivider(
     size: KO_LAYOUT.bodyPt,
     align: "center",
   });
-  return y + KO_LAYOUT.bodyLineH + 2;
+  return y + KO_LAYOUT.bodyLineH + 1;
 }
 
 function applyKoContractPageChrome(
@@ -1280,12 +1304,8 @@ function drawMediaScheduleTable(
 ): number {
   const items = vars.mediaLineItems ?? [];
   if (items.length === 0) return y;
-  y = ensurePageSpace(doc, y, 22);
-  drawTextRun(doc, fam, margin, y, "※ 매체별 내역", {
-    bold: true,
-    size: KO_LAYOUT.articleTitlePt,
-  });
-  y += KO_LAYOUT.bodyLineH + 1;
+  y = ensurePageSpace(doc, y, 20);
+  y += 0.5;
 
   const colWs = [
     maxW * 0.05,
@@ -1296,20 +1316,11 @@ function drawMediaScheduleTable(
   ];
   const money = moneyFromPdfVars(vars);
   const body: CellDef[][] = items.map((item, idx) => [
-    { content: String(idx + 1), styles: { halign: "center", font: fam } },
-    { content: item.name, styles: { halign: "left", font: fam } },
-    {
-      content: item.location?.trim() || "—",
-      styles: { halign: "left", font: fam },
-    },
-    {
-      content: item.spec?.trim() || "—",
-      styles: { halign: "left", font: fam },
-    },
-    {
-      content: wonLabel(item.lineSupplyWon),
-      styles: { halign: "right", font: fam },
-    },
+    { content: String(idx + 1) },
+    { content: item.name },
+    { content: item.location?.trim() || "—" },
+    { content: item.spec?.trim() || "—" },
+    { content: wonLabel(item.lineSupplyWon) },
   ]);
   const foot: CellDef[][] = [
     mediaSummaryFootRow(fam, "매체비 소계", wonLabel(money.mediaSubtotalWon), true),
@@ -1355,13 +1366,32 @@ function drawMediaScheduleTable(
     showHead: "everyPage",
     showFoot: "lastPage",
     rowPageBreak: "avoid",
-    head: [["No", "매체명", "위치", "규격", "공급가(VAT별도)"]],
+    head: [
+      [
+        {
+          content: "※ 매체별 내역",
+          colSpan: 5,
+          styles: {
+            fontStyle: "bold",
+            halign: "left",
+            fillColor: [255, 255, 255],
+            fontSize: KO_LAYOUT.mediaTableFontPt + 0.5,
+          },
+        },
+      ],
+      ["No", "매체명", "위치", "규격", "공급가(VAT별도)"],
+    ],
     body,
     foot,
     styles: {
       font: fam,
-      fontSize: 8,
-      cellPadding: KO_LAYOUT.tablePad,
+      fontSize: KO_LAYOUT.mediaTableFontPt,
+      cellPadding: {
+        top: 1.6,
+        right: KO_LAYOUT.tablePad,
+        bottom: 1.6,
+        left: KO_LAYOUT.tablePad,
+      },
       textColor: [0, 0, 0],
       lineColor: CONTRACT_TABLE_GRID,
       lineWidth: CONTRACT_TABLE_LINE_MM,
@@ -1373,7 +1403,6 @@ function drawMediaScheduleTable(
       fontStyle: "bold",
       fillColor: CONTRACT_TABLE_HEAD_BG,
       textColor: [0, 0, 0],
-      halign: "center",
     },
     footStyles: {
       font: fam,
@@ -1381,26 +1410,31 @@ function drawMediaScheduleTable(
       textColor: [0, 0, 0],
     },
     columnStyles: {
-      0: { cellWidth: colWs[0], halign: "center" },
-      1: { cellWidth: colWs[1], halign: "left" },
-      2: { cellWidth: colWs[2], halign: "left" },
-      3: { cellWidth: colWs[3], halign: "left" },
-      4: { cellWidth: colWs[4], halign: "right" },
+      0: { cellWidth: colWs[0] },
+      1: { cellWidth: colWs[1] },
+      2: { cellWidth: colWs[2] },
+      3: { cellWidth: colWs[3] },
+      4: { cellWidth: colWs[4] },
     },
     didParseCell: (data) => {
       data.cell.styles.font = fam;
-      if (data.column.index === 0) {
+      if (data.section === "head" && data.row.index === 0) {
+        data.cell.styles.font = fam;
+        return;
+      }
+      applyMediaTableCellAlign(data);
+      if (data.column.index === 0 && data.section !== "foot") {
         data.cell.styles.cellPadding = {
-          top: KO_LAYOUT.tablePad,
-          right: 0.6,
-          bottom: KO_LAYOUT.tablePad,
-          left: 0.6,
+          top: 1.6,
+          right: 0.5,
+          bottom: 1.6,
+          left: 0.5,
         };
       }
     },
   });
 
-  return autoTableFinalY(doc, y);
+  return autoTableFinalY(doc, y, 1);
 }
 
 async function buildKoStandardContractPdf(
@@ -1433,7 +1467,7 @@ async function buildKoStandardContractPdf(
     }
 
     if (section.kind === "signature") {
-      const sigNeed = KO_LAYOUT.sigBoxH + 28;
+      const sigNeed = KO_LAYOUT.sigBoxH + 22;
       const prev = template.sections[template.sections.indexOf(section) - 1];
       const keepWithArt11 = prev?.heading.startsWith("제11조");
       if (
@@ -1471,7 +1505,7 @@ async function buildKoStandardContractPdf(
     if (section.kind === "article") {
       if (section.heading.startsWith("제11조")) {
         const h11 = estimateArticleHeight(doc, section, maxW, vars);
-        const sigBundle = KO_LAYOUT.sigBoxH + 28;
+        const sigBundle = KO_LAYOUT.sigBoxH + 22;
         const bundle = h11 + sigBundle;
         if (y + bundle > KO_LAYOUT.pageBottom) {
           doc.addPage();

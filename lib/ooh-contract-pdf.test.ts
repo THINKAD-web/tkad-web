@@ -6,6 +6,7 @@ import {
   splitArt10And11ForRender,
   splitArticleBodyAtItemBoundaries,
 } from "@/lib/ooh-contract-pdf";
+import { standaloneContractToPdfVars } from "@/lib/standalone-contract";
 import {
   OOH_CONTRACT_TEMPLATE_KO_ARTICLES,
   OOH_CONTRACT_TEMPLATE_SAMPLE_VARS,
@@ -54,6 +55,53 @@ test("Korean spectory sample contract stays within compact page count", async ()
   const { pdfBase64 } = await buildOohContractPdf(KO_VARS);
   const pages = countPdfPages(pdfBase64);
   assert.ok(pages >= 2 && pages <= 4, `unexpected page count ${pages}`);
+});
+
+test("Korean 2-media G1-like contract fits on 2 pages", async () => {
+  const lines = [
+    {
+      name: "코엑스 케이팝 스퀘어 전광판 광고",
+      location:
+        "서울 강남구 영동대로 513 스타필드 코엑스몰 K-POP 광장 (코엑스 아티움 벽면)",
+      spec: "81×20",
+      unitPriceWon: 100_000_000,
+      lineSupplyWon: 100_000_000,
+    },
+    {
+      name: "명동 미디어폴 디지털 광고",
+      location: "서울 중구 명동길 255m 구간 명동 미디어폴",
+      spec: "1.5×2.5",
+      unitPriceWon: 10_000_000,
+      lineSupplyWon: 10_000_000,
+    },
+  ];
+  const vars = standaloneContractToPdfVars(
+    {
+      clientCompany: "싱커드",
+      clientName: "홍길동",
+      clientRepName: "홍길동",
+      clientAddress: "서울",
+      clientPhone: "021234567",
+      campaignName: "",
+      productionCost: "자체제작",
+      mediaCount: "2기",
+      paymentMethod: "계산서 발행 후 선결제",
+      clientEmail: "",
+      mediaIds: ["a", "b"],
+      mediaLines: lines.map((l) => l.name),
+      period: "2026-09-22 ~ 2026-10-21",
+      startDate: "2026-09-22",
+      endDate: "2026-10-21",
+      totalAmountManwon: 10000,
+      extraProductionWon: 2_000_000,
+      locale: "ko",
+      download: false,
+    },
+    "G1-PAGE-COUNT",
+    lines,
+  );
+  const { pdfBase64 } = await buildOohContractPdf(vars);
+  assert.equal(countPdfPages(pdfBase64), 2);
 });
 
 test("Korean contract PDF embeds NotoSansKR", async () => {
