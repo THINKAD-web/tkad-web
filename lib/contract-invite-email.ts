@@ -112,7 +112,7 @@ export async function resolveContractInviteEmailPayload(
     ),
     issuerCompany: isKo ? issuer.companyKo : issuer.companyEn,
     accountManagerName,
-    mediaNames,
+    mediaNames: mediaPack.names,
     amountLabel: pdfVars.totalAmount ?? pdfVars.amountLine ?? "",
     period,
     contactEmail: meta.accountManagerEmail?.trim() || issuer.email,
