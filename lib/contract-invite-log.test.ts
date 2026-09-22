@@ -39,4 +39,15 @@ describe("contract-invite-log", () => {
     assert.equal(log.length, 2);
     assert.equal(log[1]?.kind, "resend");
   });
+
+  it("parseContractInviteSendLog accepts attachment kinds", () => {
+    const log = parseContractInviteSendLog([
+      {
+        sentAt: "2026-01-01T00:00:00.000Z",
+        to: "a@b.co",
+        kind: "attachment_initial",
+      },
+    ]);
+    assert.equal(log[0]?.kind, "attachment_initial");
+  });
 });

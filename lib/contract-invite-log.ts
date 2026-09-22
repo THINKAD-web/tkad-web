@@ -1,4 +1,15 @@
-export type ContractInviteSendKind = "initial" | "resend";
+export type ContractInviteSendKind =
+  | "initial"
+  | "resend"
+  | "attachment_initial"
+  | "attachment_resend";
+
+const VALID_KINDS = new Set<ContractInviteSendKind>([
+  "initial",
+  "resend",
+  "attachment_initial",
+  "attachment_resend",
+]);
 
 export type ContractInviteSendEntry = {
   sentAt: string;
@@ -17,8 +28,7 @@ export function parseContractInviteSendLog(
       typeof item === "object" &&
       typeof (item as ContractInviteSendEntry).sentAt === "string" &&
       typeof (item as ContractInviteSendEntry).to === "string" &&
-      ((item as ContractInviteSendEntry).kind === "initial" ||
-        (item as ContractInviteSendEntry).kind === "resend")
+      VALID_KINDS.has((item as ContractInviteSendEntry).kind)
     ) {
       out.push(item as ContractInviteSendEntry);
     }
