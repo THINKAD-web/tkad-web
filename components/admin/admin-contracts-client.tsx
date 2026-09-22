@@ -110,10 +110,8 @@ export default function AdminContractsClient() {
         cache: "no-store",
       });
       const raw = (await res.json()) as {
-        quote?: {
+        quote?: OohQuoteContractDetail & {
           quoteBreakdown?: QuoteBreakdown | null;
-          contract?: OohQuoteContractDetail["contract"];
-          contractDisplay?: OohQuoteContractDetail["contractDisplay"];
         };
       };
       if (!res.ok) throw new Error("load_failed");
@@ -123,6 +121,7 @@ export default function AdminContractsClient() {
         quoteBreakdown: q?.quoteBreakdown ?? null,
         contract: q?.contract ?? null,
         contractDisplay: q?.contractDisplay ?? null,
+        contractMeta: q?.contractMeta ?? null,
       });
     } catch {
       setDetail({ loading: false });

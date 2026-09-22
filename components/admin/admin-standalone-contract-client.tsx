@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   Eye,
   FileDown,
   FileSignature,
   Loader2,
+  Mail,
   Plus,
   Search,
   X,
@@ -79,6 +80,7 @@ function addMonthsISODate(iso: string, months: number): string {
 export default function AdminStandaloneContractClient() {
   const t = useTranslations("adminStandaloneContract");
   const { toast } = useToast();
+  const router = useRouter();
   const locale = useLocale();
   const isKo = locale === "ko";
 
@@ -111,6 +113,7 @@ export default function AdminStandaloneContractClient() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [sendBusy, setSendBusy] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const previewUrlRef = useRef<string | null>(null);
 
@@ -406,6 +409,96 @@ export default function AdminStandaloneContractClient() {
     URL.revokeObjectURL(url);
     toast("success", t("downloadOk"));
   }, [draftId, fetchPdf, t, toast]);
+
+  const postSend = useCallback(
+    async (force: boolean) => {
+      setSubmitAttempted(true);
+      if (!clientName.trim()) {
+        toast("error", t("errClientName"));
+        return;
+      }
+      if (!totalAmountManwon.trim() || parseInt(totalAmountManwon, 10) <= 0) {
+        toast("error", t("errAmount"));
+        return;
+      }
+      if (!clientEmail.trim()) {
+        toast("error", t("sendEsignEmailRequired"));
+        return;
+      }
+      if (!isValidOptionalEmail(clientEmail)) {
+        toast("error", t("errClientEmailFormat"));
+        return;
+      }
+      if (selectedMedia.length === 0) {
+        toast("error", t("sendEsignMediaRequired"));
+        return;
+      }
+
+      setSendBusy(true);
+      try {
+        persistDraft();
+        const res = await fetch("/api/admin/contracts/send-from-standalone", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...buildPayload(),
+            mediaIds: selectedMedia.map((m) => m.id),
+            force,
+          }),
+        });
+        const raw: unknown = await res.json().catch(() => ({}));
+        if (res.status === 409) {
+          const code =
+            typeof raw === "object" &&
+            raw !== null &&
+            "code" in raw &&
+            (raw as { code?: unknown }).code === "BOOKING_CONFLICT";
+          if (code && !force && window.confirm(t("sendEsignConflictConfirm"))) {
+            await postSend(true);
+            return;
+          }
+        }
+        if (!res.ok) {
+          const msg =
+            typeof raw === "object" &&
+            raw !== null &&
+            "error" in raw &&
+            typeof (raw as { error?: unknown }).error === "string"
+              ? (raw as { error: string }).error
+              : t("sendEsignFail");
+          throw new Error(msg);
+        }
+        const emailed =
+          typeof raw === "object" &&
+          raw !== null &&
+          "emailed" in raw &&
+          (raw as { emailed?: unknown }).emailed === true;
+        toast("success", t("sendEsignOk"));
+        if (!emailed) {
+          toast("error", t("sendEsignEmailSkipped"));
+        }
+        router.push("/admin/contracts");
+      } catch (e) {
+        toast("error", e instanceof Error ? e.message : t("sendEsignFail"));
+      } finally {
+        setSendBusy(false);
+      }
+    },
+    [
+      buildPayload,
+      clientEmail,
+      clientName,
+      persistDraft,
+      router,
+      selectedMedia,
+      t,
+      toast,
+      totalAmountManwon,
+    ],
+  );
+
+  const onSendEsign = useCallback(() => void postSend(false), [postSend]);
 
   const addMedia = (m: AdminMediaDto) => {
     if (selectedMedia.some((s) => s.id === m.id)) return;
@@ -770,11 +863,16 @@ export default function AdminStandaloneContractClient() {
       <div className={STICKY_ACTION_BAR_DOCK_SPACER_CLASS} aria-hidden />
 
       <StickyActionBar open ariaLabel={t("stickyLabel")} layout="dock" portal>
-        <div className={cn(STICKY_ACTION_BAR_ROW, "max-w-3xl px-4 sm:px-6")}>
+        <div
+          className={cn(
+            STICKY_ACTION_BAR_ROW,
+            "max-w-4xl flex-wrap px-4 sm:px-6",
+          )}
+        >
           <Button
             type="button"
-            disabled={pdfBusy}
-            className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "flex-1")}
+            disabled={pdfBusy || sendBusy}
+            className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "min-w-[7rem] flex-1")}
             onClick={() => void onPreview()}
           >
             {pdfBusy ? (
@@ -786,8 +884,8 @@ export default function AdminStandaloneContractClient() {
           </Button>
           <Button
             type="button"
-            disabled={pdfBusy}
-            className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_PRIMARY, "flex-1")}
+            disabled={pdfBusy || sendBusy}
+            className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "min-w-[7rem] flex-1")}
             onClick={() => void onDownload()}
           >
             {pdfBusy ? (
@@ -796,6 +894,19 @@ export default function AdminStandaloneContractClient() {
               <FileDown className="mr-1 h-3.5 w-3.5" />
             )}
             {t("downloadPdf")}
+          </Button>
+          <Button
+            type="button"
+            disabled={pdfBusy || sendBusy}
+            className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_PRIMARY, "min-w-[7rem] flex-1")}
+            onClick={onSendEsign}
+          >
+            {sendBusy ? (
+              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Mail className="mr-1 h-3.5 w-3.5" />
+            )}
+            {t("sendEsign")}
           </Button>
         </div>
       </StickyActionBar>
