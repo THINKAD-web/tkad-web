@@ -2937,7 +2937,18 @@
     "sendMode_auto": "자동 생성",
     "sendMode_upload_esign": "업로드·전자서명",
     "sendMode_upload_attachment": "업로드·첨부",
-    "badgeAttachmentSent": "첨부 발송"
+    "badgeAttachmentSent": "첨부 발송",
+    "cancelContract": "취소",
+    "cancelConfirm": "이 계약을 취소할까요? 서명 링크는 무효가 되고 매체 홀드가 해제됩니다. (목록에는 남습니다)",
+    "cancelOk": "계약을 취소했습니다.",
+    "cancelFail": "계약을 취소하지 못했습니다.",
+    "deleteContract": "삭제",
+    "deleteConfirm": "이 계약·견적을 목록에서 완전히 삭제할까요? 복구할 수 없습니다.",
+    "deleteConfirmSigned": "서명·확정된 계약입니다. 영구 삭제하면 감사 로그도 함께 지워집니다. 정말 삭제할까요?",
+    "deleteOk": "삭제했습니다.",
+    "deleteFail": "삭제하지 못했습니다.",
+    "deleteFailCampaign": "캠페인에 연결된 견적입니다. 캠페인을 먼저 정리하거나 운영팀에 문의해 주세요.",
+    "deleteFailLocked": "집행 중·완료된 캠페인 견적은 삭제할 수 없습니다."
   },
   "adminStandaloneContract": {
     "title": "계약서 빠른 작성",

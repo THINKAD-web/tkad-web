@@ -28,8 +28,11 @@ export const CONTRACT_LAYOUT = {
   tableTotalPt: 9.5,
   articleMidGap: 2,
   sigColGap: 6,
-  sigBoxH: 54,
+  sigBoxH: 50,
   sigFieldH: 5,
+  /** 갑·을 대표자란 도장 크기 (mm) */
+  sigStampMm: 17,
+  sigStampInsetMm: 7,
   sigDateGap: 4,
   sigBlockTopGap: 1.5,
   clauseIndentMm: 4,
