@@ -37,6 +37,15 @@ export type OohContractPdfVars = {
   period?: string;
   amountLine?: string;
   specialTerms?: string | null;
+  mediaLineItems?: ContractMediaLineItem[];
+  costLines?: { label: string; amountWon: number }[];
+};
+
+export type ContractMediaLineItem = {
+  name: string;
+  spec: string;
+  unitPriceWon: number;
+  lineSupplyWon: number;
 };
 
 export type OohContractSignAudit = {
@@ -974,6 +983,89 @@ function renderKoSignatureBlock(
   return boxTop + KO_LAYOUT.sigBoxH + 6;
 }
 
+function wonLabel(n: number): string {
+  return `₩${Math.round(n).toLocaleString("ko-KR")}`;
+}
+
+function drawExtraCostLines(
+  doc: import("jspdf").default,
+  fam: string,
+  vars: OohContractPdfVars,
+  margin: number,
+  maxW: number,
+  y: number,
+): number {
+  const lines = vars.costLines?.filter((l) => l.amountWon > 0) ?? [];
+  if (lines.length === 0) return y;
+  for (const line of lines) {
+    y = ensurePageSpace(doc, y, KO_LAYOUT.bodyLineH);
+    drawTextRun(
+      doc,
+      fam,
+      margin,
+      y,
+      `${line.label} : ${wonLabel(line.amountWon)} (VAT 별도)`,
+      { size: KO_LAYOUT.bodyPt },
+    );
+    y += KO_LAYOUT.bodyLineH;
+  }
+  return y + KO_LAYOUT.paragraphGap;
+}
+
+function drawMediaScheduleTable(
+  doc: import("jspdf").default,
+  fam: string,
+  vars: OohContractPdfVars,
+  margin: number,
+  maxW: number,
+  y: number,
+): number {
+  const items = vars.mediaLineItems ?? [];
+  if (items.length === 0) return y;
+  y = ensurePageSpace(doc, y, 16);
+  drawTextRun(doc, fam, margin, y, "매체별 내역", {
+    bold: true,
+    size: KO_LAYOUT.articleTitlePt,
+  });
+  y += KO_LAYOUT.bodyLineH + 1;
+
+  const cols = [maxW * 0.42, maxW * 0.28, maxW * 0.3];
+  const headers = ["매체", "규격·위치", "공급가(VAT별도)"];
+  y = ensurePageSpace(doc, y, 8);
+  let x = margin;
+  doc.setFontSize(8);
+  setContractFont(doc, fam, "bold");
+  headers.forEach((h, i) => {
+    doc.text(h, x, y);
+    x += cols[i]!;
+  });
+  y += 5;
+  setContractFont(doc, fam, "normal");
+  let sum = 0;
+  for (const item of items) {
+    y = ensurePageSpace(doc, y, 6);
+    x = margin;
+    const cells = [
+      item.name,
+      item.spec || "—",
+      wonLabel(item.lineSupplyWon),
+    ];
+    cells.forEach((c, i) => {
+      const wrapped = wrapLines(doc, c, cols[i]! - 2);
+      doc.text(wrapped[0] ?? "", x, y);
+      x += cols[i]!;
+    });
+    sum += item.lineSupplyWon;
+    y += 5.5;
+  }
+  y = ensurePageSpace(doc, y, 6);
+  drawTextRun(doc, fam, margin, y, `매체 소계 ${wonLabel(sum)}`, {
+    bold: true,
+    size: 9,
+  });
+  return y + KO_LAYOUT.paragraphGap + 2;
+}
+
 async function buildKoStandardContractPdf(
   vars: OohContractPdfVars,
   options?: {
@@ -1033,6 +1125,12 @@ async function buildKoStandardContractPdf(
 
     if (section.kind === "article") {
       y = renderKoArticleSection(doc, fam, section, margin, maxW, y, vars);
+      if (section.heading.startsWith("제2조")) {
+        y = drawMediaScheduleTable(doc, fam, vars, margin, maxW, y);
+      }
+      if (section.heading.startsWith("제1조")) {
+        y = drawExtraCostLines(doc, fam, vars, margin, maxW, y);
+      }
     }
   }
 

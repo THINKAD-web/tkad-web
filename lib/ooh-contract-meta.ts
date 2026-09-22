@@ -13,6 +13,10 @@ export type OohContractMeta = {
   accountManagerName?: string;
   accountManagerEmail?: string;
   accountManagerPhone?: string;
+  /** VAT 별도 원 */
+  extraProductionWon?: number;
+  extraInstallWon?: number;
+  extraOtherWon?: number;
 };
 
 export function parseOohContractMeta(

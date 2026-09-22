@@ -4,7 +4,6 @@ import {
   buildKoOohContractPdfVars,
   contractMetaWithDefaults,
   resolveContractDatesFromQuote,
-  vatIncludedWonFromManwon,
 } from "@/lib/ooh-contract-pdf-vars";
 import type { OohContractPdfVars } from "@/lib/ooh-contract-pdf";
 import {
@@ -12,8 +11,10 @@ import {
   formatContractMediaCount,
 } from "@/lib/ooh-contract-format";
 import {
-  coerceOohQuoteTotalAmountManwon,
-} from "@/lib/ooh-quote-amount";
+  buildContractMoney,
+  supplyWonFromManwonField,
+} from "@/lib/contract-money";
+import type { ContractMediaLineItem } from "@/lib/ooh-contract-pdf";
 import {
   parseOohContractMeta,
   type OohContractMeta,
@@ -43,14 +44,21 @@ function totalWonFromQuote(
     totalAmount: number;
     quoteBreakdown: QuoteBreakdown | null;
   },
+  extras: {
+    extraProductionWon?: number;
+    extraInstallWon?: number;
+    extraOtherWon?: number;
+  },
 ): number {
   const breakdown = row.quoteBreakdown as QuoteBreakdown | null;
-  if (breakdown?.totalWon && breakdown.totalWon > 0) {
-    return Math.round(breakdown.totalWon);
-  }
-  const ref = breakdown?.totalWon ?? null;
-  const { manwon } = coerceOohQuoteTotalAmountManwon(row.totalAmount, ref);
-  return vatIncludedWonFromManwon(manwon);
+  const mediaSupply =
+    breakdown?.supplyWon && breakdown.supplyWon > 0
+      ? Math.round(breakdown.supplyWon)
+      : supplyWonFromManwonField(row.totalAmount, breakdown?.subtotalWon);
+  return buildContractMoney({
+    mediaSupplyWon: mediaSupply,
+    ...extras,
+  }).totalWon;
 }
 
 export function ooHQuoteToContractPdfVars(
@@ -70,15 +78,25 @@ export function ooHQuoteToContractPdfVars(
     },
   );
   const { start, end } = resolveContractDatesFromQuote(row);
-  const totalWon = totalWonFromQuote(row);
-  const { manwon } = coerceOohQuoteTotalAmountManwon(
-    row.totalAmount,
-    (row.quoteBreakdown as QuoteBreakdown | null)?.totalWon,
-  );
+  const extras = {
+    extraProductionWon: numMeta(meta.extraProductionWon),
+    extraInstallWon: numMeta(meta.extraInstallWon),
+    extraOtherWon: numMeta(meta.extraOtherWon),
+  };
+  const totalWon = totalWonFromQuote(row, extras);
+  const breakdown = row.quoteBreakdown as QuoteBreakdown | null;
+  const mediaItems = mediaLineItemsFromQuote(breakdown, mediaNames);
+  const money = buildContractMoney({
+    mediaSupplyWon:
+      breakdown?.supplyWon && breakdown.supplyWon > 0
+        ? breakdown.supplyWon
+        : supplyWonFromManwonField(row.totalAmount, breakdown?.subtotalWon),
+    ...extras,
+  });
   const campaignDefault =
     mediaNames.length > 0 ? `${mediaNames[0]} 광고` : "옥외광고 집행";
 
-  return buildKoOohContractPdfVars({
+  const vars = buildKoOohContractPdfVars({
     contractId: contractRecordId,
     isKo,
     clientCompany: row.clientCompany?.trim() || row.clientName,
@@ -98,8 +116,40 @@ export function ooHQuoteToContractPdfVars(
     mediaLines: mediaNames,
     periodLabel: row.period,
     specialTerms: row.oohContract?.specialTerms ?? null,
-    totalAmountManwon: manwon,
+    totalAmountManwon: undefined,
   });
+  vars.mediaLineItems = mediaItems;
+  vars.costLines = [
+    { label: "제작비", amountWon: money.extraProductionWon },
+    { label: "설치비", amountWon: money.extraInstallWon },
+    { label: "기타 비용", amountWon: money.extraOtherWon },
+  ];
+  return vars;
+}
+
+function numMeta(v: unknown): number {
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
+}
+
+function mediaLineItemsFromQuote(
+  breakdown: QuoteBreakdown | null,
+  mediaNames: string[],
+): ContractMediaLineItem[] {
+  if (breakdown?.lines?.length) {
+    return breakdown.lines.map((line) => ({
+      name: line.mediaName,
+      spec: line.location || line.quantityLabel || "",
+      unitPriceWon: line.unitPriceWon,
+      lineSupplyWon: line.lineSupplyWon,
+    }));
+  }
+  return mediaNames.map((name) => ({
+    name,
+    spec: "",
+    unitPriceWon: 0,
+    lineSupplyWon: 0,
+  }));
 }
 
 export async function resolveMediaNamesForQuote(

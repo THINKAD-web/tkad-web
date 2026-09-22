@@ -2,9 +2,9 @@ import { z } from "zod";
 import {
   buildKoOohContractPdfVars,
   parseStandaloneIsoDates,
-  vatIncludedWonFromManwon,
 } from "@/lib/ooh-contract-pdf-vars";
 import type { OohContractPdfVars } from "@/lib/ooh-contract-pdf";
+import { buildContractMoney, supplyWonFromManwonField } from "@/lib/contract-money";
 import {
   defaultContractPaymentMethodKo,
   defaultProductionCostKo,
@@ -42,6 +42,9 @@ export const StandaloneContractPreviewBody = z.object({
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   /** OoHQuote.totalAmount 와 동일 — 만원 단위 (VAT 별도) */
   totalAmountManwon: z.number().int().positive().max(999_999_999),
+  extraProductionWon: z.number().int().nonnegative().max(50_000_000_000).optional(),
+  extraInstallWon: z.number().int().nonnegative().max(50_000_000_000).optional(),
+  extraOtherWon: z.number().int().nonnegative().max(50_000_000_000).optional(),
   specialTerms: z.string().max(8000).optional().nullable(),
   locale: z.enum(["ko", "en"]).default("ko"),
   download: z.boolean().optional().default(false),
@@ -132,7 +135,17 @@ export function standaloneContractToPdfVars(
     input.campaignName?.trim() ||
     (input.mediaLines[0] ? `${input.mediaLines[0]} 광고` : "옥외광고");
 
-  return buildKoOohContractPdfVars({
+  const mediaSupply = supplyWonFromManwonField(input.totalAmountManwon);
+  const money = buildContractMoney({
+    mediaSupplyWon: mediaSupply,
+    extraProductionWon: input.extraProductionWon,
+    extraInstallWon: input.extraInstallWon,
+    extraOtherWon: input.extraOtherWon,
+  });
+  const names = input.mediaLines.map((m) => m.trim()).filter(Boolean);
+  const perLine =
+    names.length > 0 ? Math.round(mediaSupply / names.length) : mediaSupply;
+  const vars = buildKoOohContractPdfVars({
     contractId: draftId,
     isKo,
     clientCompany: input.clientCompany?.trim() || input.clientName.trim(),
@@ -142,15 +155,26 @@ export function standaloneContractToPdfVars(
     campaignName: campaign,
     startDate: start,
     endDate: end,
-    totalWonVatIncluded: vatIncludedWonFromManwon(input.totalAmountManwon),
+    totalWonVatIncluded: money.totalWon,
     productionCost: input.productionCost?.trim() || defaultProductionCostKo(),
     mediaCount: countNum,
     paymentMethod:
       input.paymentMethod?.trim() || defaultContractPaymentMethodKo(),
     clientName: input.clientName.trim(),
-    mediaLines: input.mediaLines.map((m) => m.trim()).filter(Boolean),
+    mediaLines: names,
     periodLabel: input.period.trim(),
     specialTerms: input.specialTerms?.trim() || null,
-    totalAmountManwon: input.totalAmountManwon,
   });
+  vars.mediaLineItems = names.map((name) => ({
+    name,
+    spec: "",
+    unitPriceWon: perLine,
+    lineSupplyWon: perLine,
+  }));
+  vars.costLines = [
+    { label: "제작비", amountWon: money.extraProductionWon },
+    { label: "설치비", amountWon: money.extraInstallWon },
+    { label: "기타 비용", amountWon: money.extraOtherWon },
+  ];
+  return vars;
 }

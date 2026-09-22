@@ -19,6 +19,12 @@ import {
 } from "@/lib/ooh-contract-meta";
 import { parseContractInviteSendLog } from "@/lib/contract-invite-log";
 
+function numOrUndef(v: unknown): number | undefined {
+  const n = typeof v === "number" ? v : Number(v);
+  if (!Number.isFinite(n) || n < 0) return undefined;
+  return Math.round(n);
+}
+
 export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
@@ -184,6 +190,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         typeof meta.accountManagerPhone === "string"
           ? meta.accountManagerPhone
           : undefined,
+      extraProductionWon: numOrUndef(meta.extraProductionWon),
+      extraInstallWon: numOrUndef(meta.extraInstallWon),
+      extraOtherWon: numOrUndef(meta.extraOtherWon),
     });
     await db.ooHQuote.update({
       where: { id },

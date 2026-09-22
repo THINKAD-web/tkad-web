@@ -318,3 +318,149 @@ export async function buildSimpleContractPdfBase64(p: {
   const i = dataUri.indexOf(",");
   return i >= 0 ? dataUri.slice(i + 1) : dataUri;
 }
+
+export type BillingPdfLine = {
+  name: string;
+  spec?: string;
+  amountWon: number;
+};
+
+export async function buildBillingDocumentPdfBase64(p: {
+  isKo: boolean;
+  kind: "invoice" | "summary";
+  clientName: string;
+  company?: string | null;
+  period: string;
+  dueDate?: string;
+  lines: BillingPdfLine[];
+  extraLines?: BillingPdfLine[];
+  supplyWon: number;
+  vatWon: number;
+  totalWon: number;
+  bankName?: string;
+  bankAccount?: string;
+  bankHolder?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+}): Promise<string> {
+  const { default: JsPDF } = await import("jspdf");
+  const { getFormalQuoteIssuer } = await import("@/lib/formal-quote-issuer");
+  const issuer = getFormalQuoteIssuer();
+  const doc = new JsPDF();
+  const margin = 16;
+  const pageW = doc.internal.pageSize.getWidth();
+  const maxW = pageW - 2 * margin;
+  const hasKr = p.isKo ? await ensureKrFontForServerPdf(doc) : false;
+  const fam = p.isKo ? krFontFamily(hasKr) : "helvetica";
+  const won = (n: number) =>
+    `₩${Math.round(n).toLocaleString(p.isKo ? "ko-KR" : "en-US")}`;
+
+  let y = 18;
+  doc.setFillColor(26, 42, 108);
+  doc.rect(0, 0, pageW, 22, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont(fam, "bold");
+  doc.setFontSize(14);
+  doc.text(p.isKo ? issuer.companyKo : issuer.companyEn, margin, 14);
+  doc.setFontSize(11);
+  const title =
+    p.kind === "invoice"
+      ? p.isKo
+        ? "청구서"
+        : "Invoice"
+      : p.isKo
+        ? "계약 요약"
+        : "Contract summary";
+  doc.text(title, pageW - margin, 14, { align: "right" });
+
+  y = 32;
+  doc.setTextColor(20, 20, 20);
+  doc.setFont(fam, "normal");
+  doc.setFontSize(10);
+  const meta = [
+    p.isKo ? `수신: ${p.clientName}` : `To: ${p.clientName}`,
+    p.company ? (p.isKo ? `회사: ${p.company}` : `Company: ${p.company}`) : "",
+    p.isKo ? `집행 기간: ${p.period}` : `Period: ${p.period}`,
+    p.dueDate ? (p.isKo ? `납기: ${p.dueDate}` : `Due: ${p.dueDate}`) : "",
+  ].filter(Boolean);
+  for (const line of meta) {
+    doc.text(line, margin, y);
+    y += 6;
+  }
+  y += 4;
+
+  const rows = [...p.lines, ...(p.extraLines ?? [])];
+  doc.setFont(fam, "bold");
+  doc.text(p.isKo ? "항목" : "Item", margin, y);
+  doc.text(p.isKo ? "금액 (VAT 별도)" : "Amount excl. VAT", pageW - margin, y, {
+    align: "right",
+  });
+  y += 2;
+  doc.setDrawColor(180, 180, 180);
+  doc.line(margin, y, pageW - margin, y);
+  y += 6;
+  doc.setFont(fam, "normal");
+  for (const row of rows) {
+    if (y > 260) {
+      doc.addPage();
+      y = 20;
+    }
+    const label = row.spec ? `${row.name} · ${row.spec}` : row.name;
+    const chunks = doc.splitTextToSize(label, maxW - 40) as string[];
+    doc.text(chunks[0] ?? "", margin, y);
+    doc.text(won(row.amountWon), pageW - margin, y, { align: "right" });
+    y += 6;
+  }
+
+  y += 2;
+  doc.line(margin, y, pageW - margin, y);
+  y += 7;
+  const totals = [
+    [p.isKo ? "공급가액" : "Supply", won(p.supplyWon)],
+    [p.isKo ? "VAT (10%)" : "VAT (10%)", won(p.vatWon)],
+    [p.isKo ? "합계" : "Total", won(p.totalWon)],
+  ] as const;
+  totals.forEach(([label, value], idx) => {
+    doc.setFont(fam, idx === 2 ? "bold" : "normal");
+    doc.text(label, margin, y);
+    doc.text(value, pageW - margin, y, { align: "right" });
+    y += 6;
+  });
+
+  y += 6;
+  doc.setFont(fam, "bold");
+  doc.text(p.isKo ? "입금 계좌" : "Bank", margin, y);
+  y += 6;
+  doc.setFont(fam, "normal");
+  for (const line of [
+    p.bankName ?? "",
+    p.bankAccount ?? "",
+    p.bankHolder ? (p.isKo ? `예금주 ${p.bankHolder}` : `Holder ${p.bankHolder}`) : "",
+  ].filter(Boolean)) {
+    doc.text(line, margin, y);
+    y += 5;
+  }
+
+  const footerY = 285;
+  doc.setFontSize(8);
+  doc.setTextColor(90, 90, 90);
+  doc.text(
+    `${p.isKo ? issuer.companyKo : issuer.companyEn} · ${issuer.tel} · ${issuer.email}`,
+    margin,
+    footerY,
+  );
+  if (p.contactPhone || p.contactEmail) {
+    doc.text(
+      p.isKo
+        ? `문의 ${p.contactPhone ?? ""} ${p.contactEmail ?? ""}`.trim()
+        : `Contact ${p.contactPhone ?? ""} ${p.contactEmail ?? ""}`.trim(),
+      margin,
+      footerY + 4,
+    );
+  }
+
+  const dataUri = doc.output("datauristring") as string;
+  const i = dataUri.indexOf(",");
+  return i >= 0 ? dataUri.slice(i + 1) : dataUri;
+}
+

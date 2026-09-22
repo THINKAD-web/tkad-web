@@ -511,6 +511,32 @@ export default function AdminContractsClient() {
                               {t("signedPdf")}
                             </a>
                           ) : null}
+                          {row.contractStatus === "pending" ||
+                          row.contractStatus === "attachment_sent" ? (
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1 rounded-md border border-red-300 px-2 py-1 text-[10px] font-semibold text-red-700"
+                              onClick={() => {
+                                if (
+                                  !window.confirm(
+                                    "이 계약을 취소할까요? 서명 링크는 무효가 되고 매체 홀드가 해제됩니다.",
+                                  )
+                                ) {
+                                  return;
+                                }
+                                void fetch(
+                                  `/api/admin/ooh-quotes/${row.quoteId}/cancel-unsigned`,
+                                  { method: "POST", credentials: "include" },
+                                ).then(() => void load());
+                              }}
+                            >
+                              취소
+                            </button>
+                          ) : row.contractSigned ? (
+                            <span className="max-w-[8rem] text-[10px] text-muted-foreground">
+                              서명 완료 건은 취소 불가
+                            </span>
+                          ) : null}
                         </div>
                       </td>
                     </tr>

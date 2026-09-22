@@ -135,6 +135,9 @@ export default function AdminStandaloneContractClient() {
   const [clientPhone, setClientPhone] = useState("");
   const [campaignName, setCampaignName] = useState("");
   const [productionCost, setProductionCost] = useState("자체제작");
+  const [extraProductionWon, setExtraProductionWon] = useState("");
+  const [extraInstallWon, setExtraInstallWon] = useState("");
+  const [extraOtherWon, setExtraOtherWon] = useState("");
   const [mediaCount, setMediaCount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("계산서 발행 후 선결제");
   const [clientEmail, setClientEmail] = useState("");
@@ -255,6 +258,9 @@ export default function AdminStandaloneContractClient() {
       startDate,
       endDate,
       totalAmountManwon: manwon,
+      extraProductionWon: Math.max(0, parseInt(extraProductionWon, 10) || 0),
+      extraInstallWon: Math.max(0, parseInt(extraInstallWon, 10) || 0),
+      extraOtherWon: Math.max(0, parseInt(extraOtherWon, 10) || 0),
       specialTerms: specialTerms.trim() || null,
       locale: isKo ? "ko" : "en",
       download: false,
@@ -304,6 +310,9 @@ export default function AdminStandaloneContractClient() {
       startDate,
       endDate,
       totalAmountManwon: manwon,
+      extraProductionWon: Math.max(0, parseInt(extraProductionWon, 10) || 0),
+      extraInstallWon: Math.max(0, parseInt(extraInstallWon, 10) || 0),
+      extraOtherWon: Math.max(0, parseInt(extraOtherWon, 10) || 0),
       specialTerms: specialTerms.trim() || null,
       locale: isKo ? "ko" : "en",
     };
@@ -1141,6 +1150,18 @@ export default function AdminStandaloneContractClient() {
                   onChange={(e) => setProductionCost(e.target.value)}
                   placeholder={t("productionCostPh")}
                 />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-xs font-medium text-muted-foreground">제작비 (원)</span>
+                <Input type="number" min={0} value={extraProductionWon} onChange={(e) => setExtraProductionWon(e.target.value)} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-xs font-medium text-muted-foreground">설치비 (원)</span>
+                <Input type="number" min={0} value={extraInstallWon} onChange={(e) => setExtraInstallWon(e.target.value)} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-xs font-medium text-muted-foreground">기타 (원)</span>
+                <Input type="number" min={0} value={extraOtherWon} onChange={(e) => setExtraOtherWon(e.target.value)} />
               </label>
               <label className="space-y-1 text-sm">
                 <span className="text-xs font-medium text-muted-foreground">
