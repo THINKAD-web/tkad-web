@@ -76,6 +76,7 @@ scripts/print-admin-*.ts
 !.github/pr-screenshots/map-ux-phase-2/*.png
 !.github/pr-screenshots/map-coverage-poc/
 !.github/pr-screenshots/map-coverage-poc/*.png
+!.github/pr-screenshots/contract-sign-font-page2.png
 !docs/screenshots/
 !docs/screenshots/pr4-baseline/
 !docs/screenshots/pr4-baseline/*.png
