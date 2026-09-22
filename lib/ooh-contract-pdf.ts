@@ -14,11 +14,18 @@ import {
   type OohContractTemplateSection,
   type OohContractTemplateVars,
 } from "@/lib/ooh-contract-template-ko";
-import { buildContractMoney } from "@/lib/contract-money";
+import {
+  buildContractMoney,
+  type ContractMoneyBreakdown,
+} from "@/lib/contract-money";
 import {
   formatContractArticle1PeriodValue,
   formatContractDesignProductionLine,
 } from "@/lib/ooh-contract-format";
+import {
+  CONTRACT_ACCENT as KO_ACCENT,
+  CONTRACT_LAYOUT as KO_LAYOUT,
+} from "@/lib/contract-layout";
 
 export type OohContractPdfVars = {
   isKo: boolean;
@@ -48,10 +55,14 @@ export type OohContractPdfVars = {
   adUnitPriceDisplay?: string;
   /** 제1조 기타사항 */
   otherNotes?: string;
+  /** 금액 SSOT. 있으면 제1조·매체표·제3조가 이 값만 사용 */
+  contractMoney?: ContractMoneyBreakdown;
+  mediaCountOverridden?: boolean;
 };
 
 export type ContractMediaLineItem = {
   name: string;
+  location?: string;
   spec: string;
   unitPriceWon: number;
   lineSupplyWon: number;
@@ -69,43 +80,11 @@ export type OohContractSignAudit = {
   signatureImageSha256: string;
 };
 
-/** THINKAD 브랜드 violet — 최종합계 등 절제된 포인트 강조용 */
-const KO_ACCENT: [number, number, number] = [91, 33, 182];
-
 /** KO 11조 PDF 레이아웃 (원문 문구는 템플릿 그대로) */
 const KO_CONTRACT_SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
   process.env.SITE_URL?.replace(/\/$/, "") ||
   "https://tkad.co.kr";
-
-const KO_LAYOUT = {
-  margin: 25,
-  footerH: 8,
-  pageTop: 22,
-  pageBottom: 283,
-  bodyPt: 9.5,
-  bodyLineH: 5.5,
-  articleTitlePt: 11.5,
-  preambleLineH: 5.5,
-  articleGapBefore: 3,
-  articleGapAfter: 2,
-  paragraphGap: 2,
-  titlePt: 22,
-  titleGapAfter: 14,
-  tableLabelW: 38,
-  tableRowH: 7,
-  tableValueLineH: 4.2,
-  tablePad: 2,
-  tableBorderPt: 0.35,
-  tableFontPt: 9,
-  tableTotalPt: 10,
-  articleMidGap: 3,
-  sigColGap: 6,
-  sigBoxH: 46,
-  sigFieldH: 6,
-  sigDateGap: 7,
-  sigBlockTopGap: 4,
-} as const;
 
 /** 짧은 조항만 페이지 하단에서 통째로 넘김 (과도한 빈 여백 방지) */
 const KO_KEEP_TOGETHER_MAX_MM = 32;
@@ -197,7 +176,6 @@ function wrapParagraphByWords(
 }
 
 function articleUsesTitleOnOwnLine(heading: string): boolean {
-  if (heading.startsWith("제2조") || heading.startsWith("제6조")) return false;
   return heading.startsWith("제");
 }
 
@@ -221,6 +199,7 @@ function drawSpacedContractTitle(
 }
 
 function moneyFromPdfVars(vars: OohContractPdfVars) {
+  if (vars.contractMoney) return vars.contractMoney;
   const mediaSupply = sumMediaSupplyWon(vars);
   const lines = vars.costLines ?? [];
   const pick = (label: string) =>
@@ -302,7 +281,9 @@ function sumMediaSupplyWon(vars: OohContractPdfVars): number {
 function buildArticle1TableRows(
   vars: OohContractPdfVars,
 ): { label: string; value: string }[] {
+  const money = vars.contractMoney;
   const adUnit =
+    money?.adUnitPriceDisplay ||
     vars.adUnitPriceDisplay?.trim() ||
     (sumMediaSupplyWon(vars) > 0
       ? `￦ ${sumMediaSupplyWon(vars).toLocaleString("ko-KR")}원(VAT별도)`
@@ -322,12 +303,14 @@ function buildArticle1TableRows(
     { label: "수량", value: vars.mediaCount },
     {
       label: "제작비/디자인비",
-      value: formatContractDesignProductionLine(
-        vars.productionCost,
-        vars.costLines,
-      ),
+      value:
+        money?.productionDisplay ||
+        formatContractDesignProductionLine(
+          vars.productionCost,
+          vars.costLines,
+        ),
     },
-    { label: "총액", value: vars.totalAmount },
+    { label: "총액", value: money?.totalAmountDisplay || vars.totalAmount },
     { label: "결제방법", value: vars.paymentMethod },
     {
       label: "기타사항",
@@ -535,9 +518,14 @@ function tableValueStyle(label: string): TextRunOpts {
   return { size: KO_LAYOUT.tableFontPt };
 }
 
-function paragraphLineIndent(line: string): number {
-  if (/^(\d+\)|\(\d+\))\s*/.test(line.trim())) return 5;
-  return 0;
+function clauseMarker(text: string): { hangMm: number; marker: string; rest: string } | null {
+  const m = text.trim().match(/^(\(\d+\)|\d+\))\s*([\s\S]*)$/);
+  if (!m) return null;
+  return {
+    hangMm: m[1]!.startsWith("(") ? 8 : 4,
+    marker: `${m[1]} `,
+    rest: m[2] ?? "",
+  };
 }
 
 function drawWrappedParagraphLines(
@@ -550,12 +538,30 @@ function drawWrappedParagraphLines(
   emphasisRules: readonly EmphasisRule[] = [],
 ): number {
   let y = yStart;
-  const indent = paragraphLineIndent(text);
-  const lineMaxW = maxW - indent;
-  const x = margin + indent;
-  for (const line of wrapLines(doc, text, lineMaxW)) {
+  const marked = clauseMarker(text);
+  if (!marked) {
+    for (const line of wrapLines(doc, text, maxW)) {
+      y = ensurePageSpace(doc, y, KO_LAYOUT.bodyLineH);
+      drawLineWithEmphasis(doc, fam, margin, y, line, emphasisRules);
+      y += KO_LAYOUT.bodyLineH;
+    }
+    return y;
+  }
+
+  setContractFont(doc, fam, "normal");
+  doc.setFontSize(KO_LAYOUT.bodyPt);
+  const markerW = doc.getTextWidth(marked.marker);
+  const firstX = margin + marked.hangMm;
+  const contX = firstX + markerW;
+  const firstW = Math.max(20, maxW - marked.hangMm - markerW);
+  const lines = wrapLines(doc, marked.rest, firstW);
+  y = ensurePageSpace(doc, y, KO_LAYOUT.bodyLineH);
+  drawTextRun(doc, fam, firstX, y, marked.marker, { size: KO_LAYOUT.bodyPt });
+  drawLineWithEmphasis(doc, fam, contX, y, lines[0] ?? "", emphasisRules);
+  y += KO_LAYOUT.bodyLineH;
+  for (let i = 1; i < lines.length; i++) {
     y = ensurePageSpace(doc, y, KO_LAYOUT.bodyLineH);
-    drawLineWithEmphasis(doc, fam, x, y, line, emphasisRules);
+    drawLineWithEmphasis(doc, fam, contX, y, lines[i]!, emphasisRules);
     y += KO_LAYOUT.bodyLineH;
   }
   return y;
@@ -1159,7 +1165,7 @@ function renderKoSignatureBlock(
 }
 
 function wonLabel(n: number): string {
-  return `₩${Math.round(n).toLocaleString("ko-KR")}`;
+  return `￦${Math.round(n).toLocaleString("ko-KR")}`;
 }
 
 function drawDaEumDivider(
@@ -1216,21 +1222,23 @@ function drawMediaScheduleTable(
   const items = vars.mediaLineItems ?? [];
   if (items.length === 0) return y;
   y = ensurePageSpace(doc, y, 16);
-  drawTextRun(doc, fam, margin, y, "매체별 내역", {
+  drawTextRun(doc, fam, margin, y, "※ 매체별 내역", {
     bold: true,
     size: KO_LAYOUT.articleTitlePt,
   });
   y += KO_LAYOUT.bodyLineH + 1;
 
-  const colWs = [maxW * 0.4, maxW * 0.3, maxW * 0.3];
-  const headers = ["매체", "규격·위치", "공급가(VAT별도)"];
+  const colWs = [maxW * 0.08, maxW * 0.28, maxW * 0.24, maxW * 0.18, maxW * 0.22];
+  const headers = ["No", "매체명", "위치", "규격", "공급가(VAT별도)"];
   const headerH = 7;
   const bodyRows: { cells: string[]; rowH: number }[] = [];
   let sum = 0;
-  for (const item of items) {
+  items.forEach((item, idx) => {
     const cells = [
+      String(idx + 1),
       item.name,
-      item.spec || "—",
+      item.location?.trim() || "—",
+      item.spec?.trim() || "—",
       wonLabel(item.lineSupplyWon),
     ];
     const heights = cells.map((c, i) =>
@@ -1244,30 +1252,44 @@ function drawMediaScheduleTable(
       Math.max(KO_LAYOUT.tableRowH, ...heights) + KO_LAYOUT.tablePad;
     bodyRows.push({ cells, rowH });
     sum += item.lineSupplyWon;
-  }
+  });
   const money = moneyFromPdfVars(vars);
-  const extraRows: { cells: string[]; rowH: number }[] = [];
-  for (const line of vars.costLines ?? []) {
-    if (line.amountWon <= 0) continue;
-    const label = line.label;
-    const cells = [label, "", `￦${Math.round(line.amountWon).toLocaleString("ko-KR")}`];
-    const rowH = KO_LAYOUT.tableRowH + KO_LAYOUT.tablePad;
-    extraRows.push({ cells, rowH });
-  }
-  const summaryRows = [
-    { text: `매체 소계 ￦${sum.toLocaleString("ko-KR")}`, bold: true },
-    ...(money.supplyWon > sum
-      ? [{ text: `공급가 합계 ￦${money.supplyWon.toLocaleString("ko-KR")}`, bold: true }]
-      : []),
-    { text: `VAT (10%) ￦${money.vatWon.toLocaleString("ko-KR")}`, bold: false },
-    {
-      text: `총액(VAT포함) ￦${money.totalWon.toLocaleString("ko-KR")}`,
-      bold: true,
-    },
+  const wonText = (n: number) => `￦${Math.round(n).toLocaleString("ko-KR")}`;
+  const summaryRows: { text: string; bold: boolean }[] = [
+    { text: `매체비 소계 ${wonText(sum)}`, bold: true },
   ];
-  const footerH =
-    (KO_LAYOUT.tableRowH + 2) * summaryRows.length +
-    extraRows.reduce((s, r) => s + r.rowH, 0);
+  if (money.adjustmentWon !== 0) {
+    const sign = money.adjustmentWon > 0 ? "+" : "−";
+    summaryRows.push({
+      text: `협의 조정 ${sign}${wonText(Math.abs(money.adjustmentWon))}`,
+      bold: true,
+    });
+  }
+  if (money.extraProductionWon > 0) {
+    summaryRows.push({
+      text: `제작비 ${wonText(money.extraProductionWon)}`,
+      bold: false,
+    });
+  }
+  if (money.extraInstallWon > 0) {
+    summaryRows.push({
+      text: `설치비 ${wonText(money.extraInstallWon)}`,
+      bold: false,
+    });
+  }
+  if (money.extraOtherWon > 0) {
+    summaryRows.push({
+      text: `기타 ${wonText(money.extraOtherWon)}`,
+      bold: false,
+    });
+  }
+  summaryRows.push(
+    { text: `공급가액 합계 ${wonText(money.supplyWon)}`, bold: true },
+    { text: `부가세(10%) ${wonText(money.vatWon)}`, bold: false },
+    { text: `총액(VAT포함) ${wonText(money.totalWon)}`, bold: true },
+  );
+  const extraRows: { cells: string[]; rowH: number }[] = [];
+  const footerH = (KO_LAYOUT.tableRowH + 2) * summaryRows.length;
   const tableH = headerH + bodyRows.reduce((s, r) => s + r.rowH, 0) + footerH;
 
   y = ensurePageSpace(doc, y, tableH + 4);
@@ -1375,7 +1397,13 @@ async function buildKoStandardContractPdf(
 
     if (section.kind === "signature") {
       const sigNeed = KO_LAYOUT.sigBoxH + 28;
-      if (y + sigNeed > KO_LAYOUT.pageBottom && y > KO_LAYOUT.pageTop + 40) {
+      const prev = template.sections[template.sections.indexOf(section) - 1];
+      const keepWithArt11 = prev?.heading.startsWith("제11조");
+      if (
+        !keepWithArt11 &&
+        y + sigNeed > KO_LAYOUT.pageBottom &&
+        y > KO_LAYOUT.pageTop + 40
+      ) {
         doc.addPage();
         y = KO_LAYOUT.pageTop;
       }
@@ -1404,16 +1432,11 @@ async function buildKoStandardContractPdf(
     }
 
     if (section.kind === "article") {
-      if (section.heading.startsWith("제10조")) {
-        const art11 = template.sections.find((s) => s.heading.startsWith("제11조"));
-        const h10 = estimateArticleHeight(doc, section, maxW, vars);
-        const h11 = art11
-          ? estimateArticleHeight(doc, art11, maxW, vars)
-          : 0;
-        const sigBundle = KO_LAYOUT.sigBoxH + 36;
-        const bundle = h10 + h11 + sigBundle;
-        const usable = KO_LAYOUT.pageBottom - KO_LAYOUT.pageTop;
-        if (bundle <= usable && y + bundle > KO_LAYOUT.pageBottom) {
+      if (section.heading.startsWith("제11조")) {
+        const h11 = estimateArticleHeight(doc, section, maxW, vars);
+        const sigBundle = KO_LAYOUT.sigBoxH + 28;
+        const bundle = h11 + sigBundle;
+        if (y + bundle > KO_LAYOUT.pageBottom) {
           doc.addPage();
           y = KO_LAYOUT.pageTop;
         }
