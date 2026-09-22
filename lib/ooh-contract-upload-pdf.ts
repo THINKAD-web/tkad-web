@@ -73,10 +73,10 @@ export async function fetchUploadedContractPdfBuffer(
       assertUploadPdfBuffer(buf);
       return buf;
     } catch (e) {
-      if (e instanceof Error && e.message.startsWith("BUNNY_FETCH_FAILED")) {
-        throw new Error("upload_fetch_failed");
+      if (!(e instanceof Error && e.message.startsWith("BUNNY_FETCH_FAILED"))) {
+        throw e;
       }
-      throw e;
+      // Storage API 실패 시 Pull Zone CDN으로 폴백
     }
   }
 
