@@ -2885,7 +2885,13 @@
     "contractStatus_pending": "Awaiting signature",
     "contractStatus_signed": "Signed",
     "contractStatus_confirmed": "Confirmed",
-    "contractStatus_cancelled": "Cancelled"
+    "contractStatus_cancelled": "Cancelled",
+    "contractStatus_attachment_sent": "Attachment sent",
+    "contractInviteLogKind_attachment_initial": "Attachment (initial)",
+    "contractInviteLogKind_attachment_resend": "Attachment (resend)",
+    "contractResendAttachment": "Resend attachment",
+    "contractResendAttachmentOk": "Contract attachment email resent.",
+    "contractResendAttachmentNotSent": "Not in attachment-sent status."
   },
   "adminContracts": {
     "title": "Contracts",
@@ -2923,7 +2929,11 @@
     "signedPdf": "Signed PDF",
     "detailTitle": "Contract detail",
     "openInPipeline": "Open in pipeline",
-    "newContract": "Quick contract draft"
+    "newContract": "Quick contract draft",
+    "sendMode_auto": "Auto-generated",
+    "sendMode_upload_esign": "Upload · e-sign",
+    "sendMode_upload_attachment": "Upload · attachment",
+    "badgeAttachmentSent": "Attachment sent"
   },
   "adminStandaloneContract": {
     "title": "Quick contract",
@@ -2984,7 +2994,23 @@
     "sendEsignEmailSkipped": "Email is not configured — contract was created without mail.",
     "errClientName": "Contact name is required.",
     "errAmount": "Enter contract amount (10K KRW units).",
-    "errClientEmailFormat": "Customer email format is invalid."
+    "errClientEmailFormat": "Customer email format is invalid.",
+    "tabCompose": "Compose",
+    "tabUpload": "Upload existing PDF",
+    "uploadHint": "Upload a PDF (max 10MB), then send an e-sign link or email attachment.",
+    "uploadPickPdf": "Choose PDF",
+    "uploadPdfReady": "Uploaded: {name}",
+    "uploadPdfMissing": "Upload a contract PDF first.",
+    "uploadModeEsign": "E-sign request (Mode A)",
+    "uploadModeAttachment": "Attachment only (Mode B)",
+    "uploadModeEsignHint": "Media and dates required · holds applied",
+    "uploadModeAttachmentHint": "Dates and holds only when media is selected",
+    "sendUploadEsign": "Send upload · e-sign",
+    "sendUploadAttachment": "Send upload · attachment",
+    "sendUploadOk": "Sent. Check Contract management.",
+    "sendUploadFail": "Upload contract send failed.",
+    "uploadPreviewLocal": "Preview local PDF",
+    "uploadBusy": "Uploading PDF…"
   },
   "quoteCustomer": {
     "detailTitle": "Your quote",
@@ -3070,6 +3096,8 @@
     "downloadSigned": "Download signed PDF",
     "backQuote": "Back to quote",
     "notYet": "Signing opens after booking is confirmed.",
+    "attachmentOnlyTitle": "Contract review",
+    "attachmentOnlyBody": "This contract was sent as an email attachment. You can review the PDF below.",
     "notAvailableTitle": "Not at contract stage yet",
     "notAvailableBody": "Check your quote status. E-contract signing opens after booking is confirmed.",
     "backToStatus": "Back to quote status"

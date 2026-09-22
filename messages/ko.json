@@ -2885,7 +2885,13 @@
     "contractStatus_pending": "서명 대기",
     "contractStatus_signed": "서명 완료",
     "contractStatus_confirmed": "확정",
-    "contractStatus_cancelled": "취소됨"
+    "contractStatus_cancelled": "취소됨",
+    "contractStatus_attachment_sent": "첨부 발송",
+    "contractInviteLogKind_attachment_initial": "첨부 최초 발송",
+    "contractInviteLogKind_attachment_resend": "첨부 재발송",
+    "contractResendAttachment": "첨부 재발송",
+    "contractResendAttachmentOk": "계약서 첨부 메일을 다시 보냈습니다.",
+    "contractResendAttachmentNotSent": "첨부 발송 상태가 아닙니다."
   },
   "adminContracts": {
     "title": "계약 관리",
@@ -2923,7 +2929,11 @@
     "signedPdf": "서명 PDF",
     "detailTitle": "계약 상세",
     "openInPipeline": "파이프라인에서 열기",
-    "newContract": "계약서 빠른 작성"
+    "newContract": "계약서 빠른 작성",
+    "sendMode_auto": "자동 생성",
+    "sendMode_upload_esign": "업로드·전자서명",
+    "sendMode_upload_attachment": "업로드·첨부",
+    "badgeAttachmentSent": "첨부 발송"
   },
   "adminStandaloneContract": {
     "title": "계약서 빠른 작성",
@@ -2984,7 +2994,23 @@
     "sendEsignEmailSkipped": "이메일 설정이 없어 링크 메일은 보내지 못했습니다. 계약 건은 생성되었습니다.",
     "errClientName": "담당자명을 입력해 주세요.",
     "errAmount": "계약 금액(만원)을 입력해 주세요.",
-    "errClientEmailFormat": "고객 이메일 형식이 올바르지 않습니다."
+    "errClientEmailFormat": "고객 이메일 형식이 올바르지 않습니다.",
+    "tabCompose": "직접 작성",
+    "tabUpload": "기존 계약서 업로드",
+    "uploadHint": "PDF(10MB 이하)를 업로드한 뒤 전자서명 링크 또는 이메일 첨부로 발송합니다.",
+    "uploadPickPdf": "PDF 선택",
+    "uploadPdfReady": "업로드 완료: {name}",
+    "uploadPdfMissing": "계약서 PDF를 먼저 업로드해 주세요.",
+    "uploadModeEsign": "전자서명 요청 (Mode A)",
+    "uploadModeAttachment": "첨부만 발송 (Mode B)",
+    "uploadModeEsignHint": "매체·집행 기간 필수 · 홀드 적용",
+    "uploadModeAttachmentHint": "매체 선택 시에만 기간·홀드 적용",
+    "sendUploadEsign": "업로드 계약 · 전자서명 발송",
+    "sendUploadAttachment": "업로드 계약 · 첨부 발송",
+    "sendUploadOk": "발송을 완료했습니다. 계약 관리에서 확인하세요.",
+    "sendUploadFail": "업로드 계약 발송에 실패했습니다.",
+    "uploadPreviewLocal": "로컬 PDF 미리보기",
+    "uploadBusy": "PDF 업로드 중…"
   },
   "quoteCustomer": {
     "detailTitle": "견적 확인",
@@ -3070,6 +3096,8 @@
     "downloadSigned": "서명 PDF 다운로드",
     "backQuote": "견적 페이지로",
     "notYet": "부킹 확정 후 이 페이지에서 서명할 수 있습니다.",
+    "attachmentOnlyTitle": "계약서 확인",
+    "attachmentOnlyBody": "이 계약은 이메일 첨부로 발송되었습니다. 아래에서 PDF를 확인할 수 있습니다.",
     "notAvailableTitle": "아직 계약 단계가 아닙니다",
     "notAvailableBody": "견적 진행 상태를 확인한 뒤, 부킹 확정 이후에 전자계약서 서명이 열립니다.",
     "backToStatus": "견적 상태 페이지로"

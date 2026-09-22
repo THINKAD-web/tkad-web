@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
+import { OohContractSendMode } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
+import { resendUploadContractDelivery } from "@/lib/contract-upload-send";
 import {
   resendContractInvite,
   StandaloneContractSendError,
@@ -18,7 +20,17 @@ export async function POST(request: NextRequest, { params }: Params) {
   const db = getPrisma();
 
   try {
-    const result = await resendContractInvite(db, contractId);
+    const row = await db.oohContract.findUnique({
+      where: { id: contractId },
+      select: { sendMode: true },
+    });
+    if (!row) {
+      return json({ error: "not_found" }, 404);
+    }
+    const result =
+      row.sendMode === OohContractSendMode.auto_generated
+        ? await resendContractInvite(db, contractId)
+        : await resendUploadContractDelivery(db, contractId);
     return json({
       ok: true,
       quoteId: result.quoteId,

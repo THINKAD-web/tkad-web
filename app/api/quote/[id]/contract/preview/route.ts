@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { OoHQuoteStatus } from "@prisma/client";
+import { OoHQuoteStatus, OohContractSendMode } from "@prisma/client";
+import { fetchUploadedContractPdfVerified } from "@/lib/ooh-contract-upload-pdf";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
@@ -56,6 +57,34 @@ export async function GET(
   row = (await loadOoHQuoteForContract(db, id))!;
   const contract = row.oohContract;
   if (!contract) return new NextResponse("Not found", { status: 404 });
+
+  const sendMode = contract.sendMode ?? OohContractSendMode.auto_generated;
+  if (
+    sendMode === OohContractSendMode.uploaded_esign ||
+    sendMode === OohContractSendMode.uploaded_attachment
+  ) {
+    if (!contract.uploadedPdfUrl) {
+      return new NextResponse("Not found", { status: 404 });
+    }
+    try {
+      const buf = await fetchUploadedContractPdfVerified(
+        contract.uploadedPdfUrl,
+        contract.uploadedPdfSha256,
+      );
+      const name =
+        contract.uploadedPdfFileName?.trim() || "thinkad-contract.pdf";
+      return new NextResponse(buf, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `inline; filename="${name.replace(/"/g, "")}"`,
+          "Cache-Control": "no-store, private",
+        },
+      });
+    } catch {
+      return new NextResponse("Unavailable", { status: 503 });
+    }
+  }
 
   const isKo = row.locale !== "en";
   const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);

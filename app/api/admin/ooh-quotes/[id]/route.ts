@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { OohContractStatus } from "@prisma/client";
+import { OohContractSendMode, OohContractStatus } from "@prisma/client";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { serializeOoHQuotePublic } from "@/lib/ooh-quote";
@@ -71,7 +71,10 @@ export async function GET(request: NextRequest, { params }: Params) {
             status: contract.status,
             specialTerms: contract.specialTerms,
             signedAt: contract.signedAt?.toISOString() ?? null,
-            canEditTerms: contract.status === OohContractStatus.pending,
+            sendMode: contract.sendMode,
+            canEditTerms:
+              contract.status === OohContractStatus.pending &&
+              contract.sendMode === OohContractSendMode.auto_generated,
             inviteSendLog: parseContractInviteSendLog(contract.inviteSendLog),
           }
         : null,

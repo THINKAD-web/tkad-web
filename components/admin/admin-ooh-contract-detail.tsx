@@ -25,6 +25,7 @@ export type OohQuoteContractDetail = {
   contract?: {
     id: string;
     status: string;
+    sendMode?: string;
     specialTerms: string | null;
     signedAt: string | null;
     canEditTerms: boolean;
@@ -85,6 +86,7 @@ export function AdminOohContractDetailPanel({
       | "contractStatus_pending"
       | "contractStatus_signed"
       | "contractStatus_confirmed"
+      | "contractStatus_attachment_sent"
       | "contractStatus_cancelled";
     try {
       return t(key);
@@ -139,8 +141,23 @@ export function AdminOohContractDetailPanel({
     }
   }, [contract?.canEditTerms, onSaved, quoteId, t, termsDraft, toast]);
 
+  function inviteLogKindLabel(kind: ContractInviteSendEntry["kind"]) {
+    if (kind === "resend") return t("contractInviteLogKind_resend");
+    if (kind === "attachment_initial") {
+      return t("contractInviteLogKind_attachment_initial");
+    }
+    if (kind === "attachment_resend") {
+      return t("contractInviteLogKind_attachment_resend");
+    }
+    return t("contractInviteLogKind_initial");
+  }
+
+  const canResendInvite =
+    contract?.status === "pending" ||
+    contract?.status === "attachment_sent";
+
   const resendInvite = useCallback(async () => {
-    if (!contract?.id || contract.status !== "pending") return;
+    if (!contract?.id || !canResendInvite) return;
     setResendBusy(true);
     try {
       const res = await fetch(
@@ -163,6 +180,8 @@ export function AdminOohContractDetailPanel({
           toast("error", t("contractResendInviteNoEmail"));
         } else if (err === "contract_not_pending") {
           toast("error", t("contractResendInviteNotPending"));
+        } else if (err === "contract_not_attachment_sent") {
+          toast("error", t("contractResendAttachmentNotSent"));
         } else {
           toast("error", err);
         }
@@ -175,7 +194,7 @@ export function AdminOohContractDetailPanel({
     } finally {
       setResendBusy(false);
     }
-  }, [contract?.id, contract?.status, onSaved, t, toast]);
+  }, [canResendInvite, contract?.id, onSaved, t, toast]);
 
   const saveMeta = useCallback(async () => {
     setMetaSaving(true);
@@ -278,7 +297,7 @@ export function AdminOohContractDetailPanel({
                   {contractStatusLabel(contract.status)}
                 </span>
               ) : null}
-              {contract?.status === "pending" ? (
+              {canResendInvite ? (
                 <Button
                   type="button"
                   size="sm"
@@ -291,7 +310,9 @@ export function AdminOohContractDetailPanel({
                   ) : (
                     <Mail className="mr-1 h-3 w-3" />
                   )}
-                  {t("contractResendInvite")}
+                  {contract?.status === "attachment_sent"
+                    ? t("contractResendAttachment")
+                    : t("contractResendInvite")}
                 </Button>
               ) : null}
             </div>
@@ -307,14 +328,12 @@ export function AdminOohContractDetailPanel({
                   <li key={`${entry.sentAt}-${idx}`} className="tabular-nums">
                     {new Date(entry.sentAt).toLocaleString(isKo ? "ko-KR" : "en-US")}{" "}
                     · {entry.to} ·{" "}
-                    {entry.kind === "resend"
-                      ? t("contractInviteLogKind_resend")
-                      : t("contractInviteLogKind_initial")}
+                    {inviteLogKindLabel(entry.kind)}
                   </li>
                 ))}
               </ul>
             </div>
-          ) : contract?.status === "pending" ? (
+          ) : canResendInvite ? (
             <p className="text-[10px] text-muted-foreground">
               {t("contractInviteLogEmpty")}
             </p>

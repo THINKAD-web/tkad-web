@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { OoHQuoteStatus, OohContractStatus } from "@prisma/client";
+import {
+  OoHQuoteStatus,
+  OohContractSendMode,
+  OohContractStatus,
+} from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
@@ -59,12 +63,17 @@ export async function GET(
   if (!fresh) return json({ error: "Not found" }, { status: 404 });
 
   const c = fresh.oohContract;
+  const sendMode = c?.sendMode ?? OohContractSendMode.auto_generated;
   const canSign =
     fresh.status === OoHQuoteStatus.booking_confirmed &&
-    c?.status === OohContractStatus.pending;
+    c?.status === OohContractStatus.pending &&
+    sendMode !== OohContractSendMode.uploaded_attachment;
   const signed =
     c?.status === OohContractStatus.signed ||
     c?.status === OohContractStatus.confirmed;
+  const attachmentOnly =
+    sendMode === OohContractSendMode.uploaded_attachment ||
+    c?.status === OohContractStatus.attachment_sent;
 
   return json({
     quoteId: fresh.id,
@@ -73,7 +82,9 @@ export async function GET(
     clientCompany: fresh.clientCompany,
     locale: fresh.locale,
     contractStatus: c?.status ?? null,
+    sendMode,
     canSign,
     signed,
+    attachmentOnly,
   });
 }

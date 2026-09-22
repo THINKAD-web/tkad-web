@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { OoHQuoteStatus, OohContractStatus } from "@prisma/client";
+import {
+  OoHQuoteStatus,
+  OohContractSendMode,
+  OohContractStatus,
+} from "@prisma/client";
+import { fetchUploadedContractPdfVerified } from "@/lib/ooh-contract-upload-pdf";
+import { buildSignedUploadContractPdf } from "@/lib/upload-contract-sign-pdf";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
@@ -14,6 +20,7 @@ import {
   formatSignedAtKst,
   hashSignatureImagePngBase64,
   hashUnsignedContractDocument,
+  sha256Hex,
 } from "@/lib/signature-audit";
 import { getCurrentUser } from "@/lib/user-session";
 import { postInternalAlert } from "@/lib/internal-webhook";
@@ -116,8 +123,7 @@ export async function POST(
   const signedAtIso = signedAt.toISOString();
   const signedAtKst = formatSignedAtKst(signedAt);
   const isKo = row.locale !== "en";
-  const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
-  const vars = ooHQuoteToContractPdfVars(row, mediaNames, contract.id);
+  const sendMode = contract.sendMode ?? OohContractSendMode.auto_generated;
 
   const sigB64 = signatureRaw.includes(",")
     ? signatureRaw.split(",")[1]!
@@ -131,14 +137,39 @@ export async function POST(
     return json({ error: "Invalid signature encoding" }, { status: 400 });
   }
 
-  const documentHash = await hashUnsignedContractDocument(vars);
   const signatureImageHash = hashSignatureImagePngBase64(sigB64);
   const sessionUser = await getCurrentUser();
 
-  const { pdfBase64, sha256 } = await buildSignedOohContractPdf(
-    vars,
-    sigB64,
-    {
+  let documentHash: string;
+  let pdfBase64: string;
+  let sha256: string;
+
+  if (sendMode === OohContractSendMode.uploaded_esign) {
+    if (!contract.uploadedPdfUrl) {
+      return json({ error: "Upload contract PDF missing" }, { status: 500 });
+    }
+    const sourcePdf = await fetchUploadedContractPdfVerified(
+      contract.uploadedPdfUrl,
+      contract.uploadedPdfSha256,
+    );
+    documentHash =
+      contract.uploadedPdfSha256?.trim() ||
+      contract.documentSha256?.trim() ||
+      sha256Hex(sourcePdf);
+    const signed = await buildSignedUploadContractPdf(sourcePdf, sigB64, {
+      signerName,
+      signerEmail,
+      signedAtKst,
+      documentContentSha256: documentHash,
+      signatureImageSha256: signatureImageHash,
+    });
+    pdfBase64 = signed.pdfBase64;
+    sha256 = signed.sha256;
+  } else {
+    const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
+    const vars = ooHQuoteToContractPdfVars(row, mediaNames, contract.id);
+    documentHash = await hashUnsignedContractDocument(vars);
+    const built = await buildSignedOohContractPdf(vars, sigB64, {
       documentNumber: contract.id,
       signerName,
       signerEmail,
@@ -148,8 +179,10 @@ export async function POST(
       signerAgent: ua,
       documentContentSha256: documentHash,
       signatureImageSha256: signatureImageHash,
-    },
-  );
+    });
+    pdfBase64 = built.pdfBase64;
+    sha256 = built.sha256;
+  }
 
   const pdfBuffer = Buffer.from(pdfBase64, "base64");
   let contractPdfUrl = "inline:signed";
