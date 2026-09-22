@@ -4,6 +4,11 @@ import {
   OohContractSendMode,
   OohContractStatus,
 } from "@prisma/client";
+import {
+  isAttachmentOnlyContract,
+  mapUploadPdfFetchErrorToHttpStatus,
+  normalizeContractSendMode,
+} from "@/lib/contract-send-mode";
 import { fetchUploadedContractPdfVerified } from "@/lib/ooh-contract-upload-pdf";
 import { buildSignedUploadContractPdf } from "@/lib/upload-contract-sign-pdf";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
@@ -119,8 +124,15 @@ export async function POST(
   await ensureOohContractExists(db, id, row.status);
   row = (await loadOoHQuoteForContract(db, id))!;
   const contract = row.oohContract;
-  if (!contract)
-    return json({ error: "Contract record missing" }, { status: 500 });
+  if (!contract) {
+    return json({ error: "Contract record missing" }, { status: 404 });
+  }
+  if (isAttachmentOnlyContract(contract)) {
+    return json(
+      { error: "This contract was sent as an attachment; signing is not required" },
+      { status: 403 },
+    );
+  }
   if (contract.status !== OohContractStatus.pending) {
     return json({ error: "Already signed or closed" }, { status: 409 });
   }
@@ -129,7 +141,7 @@ export async function POST(
   const signedAtIso = signedAt.toISOString();
   const signedAtKst = formatSignedAtKst(signedAt);
   const isKo = row.locale !== "en";
-  const sendMode = contract.sendMode ?? OohContractSendMode.auto_generated;
+  const sendMode = normalizeContractSendMode(contract.sendMode);
 
   function validatePngField(raw: string, label: string): string | null {
     if (!raw) return null;
@@ -178,58 +190,67 @@ export async function POST(
   let pdfBase64: string;
   let sha256: string;
 
-  if (sendMode === OohContractSendMode.uploaded_esign) {
-    if (!contract.uploadedPdfUrl) {
-      return json({ error: "Upload contract PDF missing" }, { status: 500 });
+  try {
+    if (sendMode === OohContractSendMode.uploaded_esign) {
+      if (!contract.uploadedPdfUrl) {
+        return json({ error: "Upload contract PDF missing" }, { status: 503 });
+      }
+      const sourcePdf = await fetchUploadedContractPdfVerified(
+        contract.uploadedPdfUrl,
+        contract.uploadedPdfSha256,
+      );
+      documentHash =
+        contract.uploadedPdfSha256?.trim() ||
+        contract.documentSha256?.trim() ||
+        sha256Hex(sourcePdf);
+      const signed = await buildSignedUploadContractPdf(
+        sourcePdf,
+        {
+          signaturePngBase64: hasSignature ? signatureRaw : null,
+          stampPngBase64: hasStamp ? stampRaw : null,
+        },
+        {
+          signerName,
+          signerEmail,
+          signedAtKst,
+          documentContentSha256: documentHash,
+          signatureImageSha256: signatureImageHash,
+        },
+      );
+      pdfBase64 = signed.pdfBase64;
+      sha256 = signed.sha256;
+    } else {
+      const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
+      const vars = ooHQuoteToContractPdfVars(row, mediaNames, contract.id);
+      documentHash = await hashUnsignedContractDocument(vars);
+      const built = await buildSignedOohContractPdf(
+        vars,
+        {
+          signaturePngBase64: hasSignature ? signatureRaw : null,
+          clientStampDataUrl,
+        },
+        {
+          documentNumber: contract.id,
+          signerName,
+          signerEmail,
+          signedAtIso,
+          signedAtKst,
+          signerIp: ip,
+          signerAgent: ua,
+          documentContentSha256: documentHash,
+          signatureImageSha256: signatureImageHash,
+        },
+      );
+      pdfBase64 = built.pdfBase64;
+      sha256 = built.sha256;
     }
-    const sourcePdf = await fetchUploadedContractPdfVerified(
-      contract.uploadedPdfUrl,
-      contract.uploadedPdfSha256,
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "sign_pdf_failed";
+    console.error("[contract sign] pdf build", { quoteId: id, err: e });
+    return json(
+      { error: "Could not prepare contract PDF for signing" },
+      { status: mapUploadPdfFetchErrorToHttpStatus(msg) },
     );
-    documentHash =
-      contract.uploadedPdfSha256?.trim() ||
-      contract.documentSha256?.trim() ||
-      sha256Hex(sourcePdf);
-    const signed = await buildSignedUploadContractPdf(
-      sourcePdf,
-      {
-        signaturePngBase64: hasSignature ? signatureRaw : null,
-        stampPngBase64: hasStamp ? stampRaw : null,
-      },
-      {
-        signerName,
-        signerEmail,
-        signedAtKst,
-        documentContentSha256: documentHash,
-        signatureImageSha256: signatureImageHash,
-      },
-    );
-    pdfBase64 = signed.pdfBase64;
-    sha256 = signed.sha256;
-  } else {
-    const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
-    const vars = ooHQuoteToContractPdfVars(row, mediaNames, contract.id);
-    documentHash = await hashUnsignedContractDocument(vars);
-    const built = await buildSignedOohContractPdf(
-      vars,
-      {
-        signaturePngBase64: hasSignature ? signatureRaw : null,
-        clientStampDataUrl,
-      },
-      {
-        documentNumber: contract.id,
-        signerName,
-        signerEmail,
-        signedAtIso,
-        signedAtKst,
-        signerIp: ip,
-        signerAgent: ua,
-        documentContentSha256: documentHash,
-        signatureImageSha256: signatureImageHash,
-      },
-    );
-    pdfBase64 = built.pdfBase64;
-    sha256 = built.sha256;
   }
 
   const pdfBuffer = Buffer.from(pdfBase64, "base64");

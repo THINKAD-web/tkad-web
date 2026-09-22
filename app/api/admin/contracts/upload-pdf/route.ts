@@ -81,7 +81,21 @@ export async function POST(request: NextRequest) {
     } catch (e) {
       const detail = bunnyUploadErrorDetail(e);
       console.error("[upload-pdf] bunny", detail, e);
-      return json({ error: "bunny_upload_failed", detail }, 502);
+      if (isCloudinaryConfigured()) {
+        try {
+          url = await uploadOohContractSourcePdf(buf, token);
+          storage = "cloudinary";
+        } catch (ce) {
+          const cd = formatCloudinaryUploadError(ce);
+          console.error("[upload-pdf] cloudinary fallback", cd, ce);
+          return json(
+            { error: "contract_pdf_upload_failed", detail: `${detail}; ${cd}` },
+            502,
+          );
+        }
+      } else {
+        return json({ error: "bunny_upload_failed", detail }, 502);
+      }
     }
   } else if (isCloudinaryConfigured()) {
     try {

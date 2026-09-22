@@ -1,30 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { OoHQuoteStatus, OohContractSendMode } from "@prisma/client";
-import { fetchUploadedContractPdfForPreview } from "@/lib/ooh-contract-upload-pdf";
+import {
+  ContractPreviewError,
+  buildContractPreviewPdfBuffer,
+} from "@/lib/contract-preview-pdf";
+import { CONTRACT_CUSTOMER_VIEW_STATUSES } from "@/lib/contract-send-mode";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
-import {
-  loadOoHQuoteForContract,
-  ooHQuoteToContractPdfVars,
-  resolveMediaNamesForQuote,
-} from "@/lib/ooh-contract-context";
-import { buildOohContractPdf } from "@/lib/ooh-contract-pdf";
+import { loadOoHQuoteForContract } from "@/lib/ooh-contract-context";
 
 export const dynamic = "force-dynamic";
 
 const limiter = rateLimit({ limit: 30, windowMs: 60_000 });
 const CUID_RE = /^c[a-z0-9]{24,}$/i;
-
-const VIEW_STATUSES: OoHQuoteStatus[] = [
-  OoHQuoteStatus.booking_confirmed,
-  OoHQuoteStatus.invoice_sent,
-  OoHQuoteStatus.payment_pending,
-  OoHQuoteStatus.payment_confirmed,
-  OoHQuoteStatus.contract_confirmed,
-  OoHQuoteStatus.in_progress,
-  OoHQuoteStatus.completed,
-];
 
 export async function GET(
   request: NextRequest,
@@ -46,63 +34,42 @@ export async function GET(
     return new NextResponse("Unavailable", { status: 503 });
   }
 
-  const db = getPrisma();
-  let row = await loadOoHQuoteForContract(db, id);
-  if (!row) return new NextResponse("Not found", { status: 404 });
-  if (!VIEW_STATUSES.includes(row.status)) {
-    return new NextResponse("Forbidden", { status: 403 });
-  }
-
-  await ensureOohContractExists(db, id, row.status);
-  row = (await loadOoHQuoteForContract(db, id))!;
-  const contract = row.oohContract;
-  if (!contract) return new NextResponse("Not found", { status: 404 });
-
-  const sendMode = contract.sendMode ?? OohContractSendMode.auto_generated;
-  if (
-    sendMode === OohContractSendMode.uploaded_esign ||
-    sendMode === OohContractSendMode.uploaded_attachment
-  ) {
-    if (!contract.uploadedPdfUrl) {
-      return new NextResponse("Not found", { status: 404 });
+  try {
+    const db = getPrisma();
+    let row = await loadOoHQuoteForContract(db, id);
+    if (!row) return new NextResponse("Not found", { status: 404 });
+    if (!CONTRACT_CUSTOMER_VIEW_STATUSES.includes(row.status)) {
+      return new NextResponse("Forbidden", { status: 403 });
     }
-    try {
-      const buf = await fetchUploadedContractPdfForPreview(
-        contract.uploadedPdfUrl,
-        contract.uploadedPdfSha256,
-      );
-      const name =
-        contract.uploadedPdfFileName?.trim() || "thinkad-contract.pdf";
-      return new NextResponse(buf, {
-        status: 200,
-        headers: {
-          "Content-Type": "application/pdf",
-          "Content-Disposition": `inline; filename="${name.replace(/"/g, "")}"`,
-          "Cache-Control": "no-store, private",
-        },
-      });
-    } catch (e) {
-      console.error("[contract preview] upload pdf", {
-        quoteId: id,
-        url: contract.uploadedPdfUrl,
-        err: e,
-      });
+
+    await ensureOohContractExists(db, id, row.status);
+    row = (await loadOoHQuoteForContract(db, id))!;
+    const contract = row.oohContract;
+    if (!contract) return new NextResponse("Not found", { status: 404 });
+
+    const { buffer, fileName } = await buildContractPreviewPdfBuffer(
+      db,
+      row,
+      contract,
+    );
+
+    return new NextResponse(buffer, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="${fileName.replace(/"/g, "")}"`,
+        "Cache-Control": "no-store, private",
+      },
+    });
+  } catch (e) {
+    if (e instanceof ContractPreviewError) {
+      if (e.code === "NOT_FOUND") {
+        return new NextResponse("Not found", { status: 404 });
+      }
+      console.error("[contract preview]", { quoteId: id, code: e.code, err: e.message });
       return new NextResponse("Unavailable", { status: 503 });
     }
+    console.error("[contract preview] unexpected", { quoteId: id, err: e });
+    return new NextResponse("Unavailable", { status: 503 });
   }
-
-  const isKo = row.locale !== "en";
-  const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
-  const vars = ooHQuoteToContractPdfVars(row, mediaNames, contract.id);
-  const { pdfBase64 } = await buildOohContractPdf(vars);
-  const buf = Buffer.from(pdfBase64, "base64");
-
-  return new NextResponse(buf, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": 'inline; filename="thinkad-contract-preview.pdf"',
-      "Cache-Control": "no-store, private",
-    },
-  });
 }

@@ -1,28 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  OoHQuoteStatus,
-  OohContractSendMode,
-  OohContractStatus,
-} from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import { loadOoHQuoteForContract } from "@/lib/ooh-contract-context";
+import {
+  CONTRACT_CUSTOMER_VIEW_STATUSES,
+  canCustomerSignContract,
+  isAttachmentOnlyContract,
+  isContractCustomerStepComplete,
+  normalizeContractSendMode,
+} from "@/lib/contract-send-mode";
 
 export const dynamic = "force-dynamic";
 
 const limiter = rateLimit({ limit: 40, windowMs: 60_000 });
 const CUID_RE = /^c[a-z0-9]{24,}$/i;
-
-const VIEW_STATUSES: OoHQuoteStatus[] = [
-  OoHQuoteStatus.booking_confirmed,
-  OoHQuoteStatus.invoice_sent,
-  OoHQuoteStatus.payment_pending,
-  OoHQuoteStatus.payment_confirmed,
-  OoHQuoteStatus.contract_confirmed,
-  OoHQuoteStatus.in_progress,
-  OoHQuoteStatus.completed,
-];
 
 function json(body: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
@@ -51,7 +43,7 @@ export async function GET(
   const row = await loadOoHQuoteForContract(db, id);
   if (!row) return json({ error: "Not found" }, { status: 404 });
 
-  if (!VIEW_STATUSES.includes(row.status)) {
+  if (!CONTRACT_CUSTOMER_VIEW_STATUSES.includes(row.status)) {
     return json(
       { error: "Contract not available at this stage" },
       { status: 403 },
@@ -63,17 +55,13 @@ export async function GET(
   if (!fresh) return json({ error: "Not found" }, { status: 404 });
 
   const c = fresh.oohContract;
-  const sendMode = c?.sendMode ?? OohContractSendMode.auto_generated;
-  const canSign =
-    fresh.status === OoHQuoteStatus.booking_confirmed &&
-    c?.status === OohContractStatus.pending &&
-    sendMode !== OohContractSendMode.uploaded_attachment;
-  const signed =
-    c?.status === OohContractStatus.signed ||
-    c?.status === OohContractStatus.confirmed;
-  const attachmentOnly =
-    sendMode === OohContractSendMode.uploaded_attachment ||
-    c?.status === OohContractStatus.attachment_sent;
+  const sendMode = normalizeContractSendMode(c?.sendMode);
+  const canSign = canCustomerSignContract({
+    quoteStatus: fresh.status,
+    contract: c ?? null,
+  });
+  const signed = isContractCustomerStepComplete(c);
+  const attachmentOnly = c ? isAttachmentOnlyContract(c) : false;
 
   return json({
     quoteId: fresh.id,

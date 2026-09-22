@@ -19,6 +19,13 @@ test("send-invoice only after contract signed at booking_confirmed", () => {
     true,
   );
   assert.equal(
+    canShowAwaitingSignature({
+      status: "booking_confirmed",
+      contractSigned: true,
+    }),
+    false,
+  );
+  assert.equal(
     canShowAwaitingSignature({ status: "booking_confirmed", contractSigned: false }),
     true,
   );

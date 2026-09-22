@@ -22,3 +22,5 @@ jobs:
         run: npm run test:shadow-recommend-golden
       - name: Engagement rate trust (effectMemo sanitize)
         run: npm run test:engagement-rate-trust
+      - name: Contract sendMode (preview/sign gates)
+        run: npm run test:contract-send-mode

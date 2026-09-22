@@ -36,6 +36,7 @@
     "test:planner-calc": "tsx --test lib/planner/calc/__tests__/*.test.ts",
     "test:pr2-golden": "tsx --test lib/pricing/__tests__/pr2-golden-baseline.test.ts",
     "test:engagement-rate-trust": "tsx --test lib/engagement-rate-trust.test.ts",
+    "test:contract-send-mode": "tsx --test lib/contract-send-mode.test.ts",
     "test:shadow-recommend-golden": "node --import tsx --test lib/inquiry-auto-proposal/shadow-recommend.test.ts",
     "test:recommend-online-mix": "node --import tsx --test lib/recommend/__tests__/*.test.ts lib/inquiry-auto-proposal/*.test.ts",
     "test:import-csv": "node --experimental-test-module-mocks --import tsx --test app/api/admin/medias/import-csv/route.test.ts",
