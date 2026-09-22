@@ -51,6 +51,7 @@ describe("buildSignedUploadContractPdf", () => {
 
     const out = Buffer.from(pdfBase64, "base64");
     assert.ok(out.subarray(0, 5).toString("ascii").startsWith("%PDF-"));
+    assert.ok(out.length > 500_000, "full KR font should be embedded");
     const reopened = await PDFDocument.load(out);
     assert.equal(reopened.getPageCount(), 1);
   });

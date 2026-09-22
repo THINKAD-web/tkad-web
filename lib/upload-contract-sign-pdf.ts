@@ -1,7 +1,15 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, rgb, StandardFonts, type PDFFont } from "pdf-lib";
 import { loadServerKrTtf } from "@/lib/jspdf-register-noto-kr";
 import { sha256Hex } from "@/lib/signature-audit";
+
+/** Git에 포함된 파일. `public/fonts/*.ttf`는 gitignore라 Vercel 함수에 없다. */
+const BUNDLED_KR_FONT = join(
+  process.cwd(),
+  "lib/fonts/Pretendard-Regular.ttf",
+);
 
 export type UploadContractSignOverlay = {
   signerName: string;
@@ -52,17 +60,88 @@ export function toWinAnsiSafe(text: string): string {
   return out;
 }
 
-async function overlayFont(pdfDoc: PDFDocument): Promise<PDFFont> {
+function readBundledKrFont(): Buffer | null {
   try {
-    const ttf = await loadServerKrTtf();
-    if (ttf) {
-      pdfDoc.registerFontkit(fontkit);
-      return await pdfDoc.embedFont(ttf, { subset: true });
+    const buf = readFileSync(BUNDLED_KR_FONT);
+    if (
+      buf.length > 10_000 &&
+      buf[0] === 0x00 &&
+      buf[1] === 0x01 &&
+      buf[2] === 0x00 &&
+      buf[3] === 0x00
+    ) {
+      return buf;
     }
   } catch (e) {
-    console.warn("[upload-contract-sign] KR font unavailable", e);
+    console.warn("[upload-contract-sign] bundled KR font missing", e);
   }
-  return pdfDoc.embedFont(StandardFonts.Helvetica);
+  return null;
+}
+
+function fontCanDrawHangul(font: PDFFont): boolean {
+  try {
+    const hangul = font.widthOfTextAtSize("홍", 12);
+    const latin = font.widthOfTextAtSize("Signer", 12);
+    return hangul > 4 && hangul < 40 && latin > 12 && latin < 90;
+  } catch {
+    return false;
+  }
+}
+
+export type OverlayFontSource = "bundled" | "cdn" | "helvetica";
+
+let lastOverlayFontSource: OverlayFontSource = "helvetica";
+
+export function takeOverlayFontSource(): OverlayFontSource {
+  return lastOverlayFontSource;
+}
+
+async function overlayFont(
+  pdfDoc: PDFDocument,
+): Promise<{ font: PDFFont; hangul: boolean }> {
+  const bundled = readBundledKrFont();
+  const ttf = bundled ?? (await loadServerKrTtf());
+  const source: OverlayFontSource = bundled ? "bundled" : ttf ? "cdn" : "helvetica";
+  if (ttf) {
+    try {
+      pdfDoc.registerFontkit(fontkit);
+      // subset:true 는 Pretendard/Noto CJK에서 글자가 띄엄띄엄 깨진다.
+      const font = await pdfDoc.embedFont(ttf, { subset: false });
+      if (fontCanDrawHangul(font)) {
+        lastOverlayFontSource = source;
+        return { font, hangul: true };
+      }
+      console.warn("[upload-contract-sign] KR font failed glyph check", font.name);
+    } catch (e) {
+      console.warn("[upload-contract-sign] KR font embed failed", e);
+    }
+  }
+  lastOverlayFontSource = "helvetica";
+  return {
+    font: await pdfDoc.embedFont(StandardFonts.Helvetica),
+    hangul: false,
+  };
+}
+
+function wrapOverlayLine(
+  font: PDFFont,
+  text: string,
+  size: number,
+  maxW: number,
+): string[] {
+  const lines: string[] = [];
+  let current = "";
+  for (const ch of text) {
+    const next = current + ch;
+    if (current && font.widthOfTextAtSize(next, size) > maxW) {
+      lines.push(current);
+      current = ch;
+    } else {
+      current = next;
+    }
+  }
+  if (current) lines.push(current);
+  return lines.length > 0 ? lines : [""];
 }
 
 /** 업로드 PDF 마지막 페이지 하단에 서명·도장·감사 텍스트 합성 (A-1) */
@@ -109,27 +188,35 @@ export async function buildSignedUploadContractPdf(
     yBase = Math.max(yBase, margin + stampH + 8);
   }
 
-  const embedded = await overlayFont(pdfDoc);
+  const { font, hangul } = await overlayFont(pdfDoc);
   const fontSize = 9;
-  const kr = embedded.name !== "Helvetica";
-  const textOf = (line: string) => (kr ? line : toWinAnsiSafe(line));
+  const textOf = (line: string) => (hangul ? line : toWinAnsiSafe(line));
+  const maxW = width - margin * 2;
   const lines = [
-    textOf(`Signer: ${overlay.signerName} (${overlay.signerEmail})`),
-    textOf(`Signed at (KST): ${overlay.signedAtKst}`),
-    textOf(`Document SHA-256: ${overlay.documentContentSha256}`),
-    textOf(`Signature SHA-256: ${overlay.signatureImageSha256}`),
-  ];
-  let y = yBase;
+    `Signer: ${overlay.signerName} (${overlay.signerEmail})`,
+    `Signed at (KST): ${overlay.signedAtKst}`,
+    `Document SHA-256: ${overlay.documentContentSha256}`,
+    `Signature SHA-256: ${overlay.signatureImageSha256}`,
+  ].flatMap((line) => wrapOverlayLine(font, textOf(line), fontSize, maxW));
+  const lineH = fontSize + 4;
+  const boxH = lines.length * lineH + 8;
+  page.drawRectangle({
+    x: margin - 4,
+    y: yBase - 4,
+    width: maxW + 8,
+    height: boxH,
+    color: rgb(1, 1, 1),
+  });
+  let y = yBase + (lines.length - 1) * lineH;
   for (const line of lines) {
     page.drawText(line, {
       x: margin,
       y,
       size: fontSize,
-      font: embedded,
-      color: rgb(0.15, 0.15, 0.15),
-      maxWidth: width - margin * 2,
+      font,
+      color: rgb(0.1, 0.1, 0.1),
     });
-    y += fontSize + 4;
+    y -= lineH;
   }
 
   const out = await pdfDoc.save();
