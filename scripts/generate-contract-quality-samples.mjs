@@ -5,6 +5,7 @@ import { buildContractMoney } from "../lib/contract-money.ts";
 import {
   formatContractAmountKorean,
   formatContractAdUnitPriceDisplay,
+  formatContractMediaCount,
 } from "../lib/ooh-contract-format.ts";
 
 const out = "reports/contract-quality-2026-09-22";
@@ -15,62 +16,65 @@ const refPdf =
 try {
   copyFileSync(refPdf, `${out}/reference-original.pdf`);
 } catch {
-  /* optional on CI */
+  /* optional */
 }
 
-/** 원본 PDF(260918 기어세컨드·홍대 상진빌딩) 동일 조건 */
-const mediaSupplyWon = 15_000_000;
+/** QA: 매체 2개 + 제작비 2천만 (VAT 포함 총 1.32억) */
+const mediaSupplyWon = 100_000_000;
 const money = buildContractMoney({
   mediaSupplyWon,
-  extraProductionWon: 0,
+  extraProductionWon: 20_000_000,
   extraInstallWon: 0,
   extraOtherWon: 0,
 });
 
 const contract = await buildOohContractPdf({
   isKo: true,
-  contractId: "GEAR-SECOND-260918",
-  clientCompany: "㈜기어세컨드",
-  clientRepName: "김 민 상",
-  clientAddress: "서울특별시 성동구 성수이로 62",
-  clientPhone: "02-718-6348",
-  campaignName: "홍대 상진빌딩 빌딩 전광판광고",
-  periodStart: "2026년 9월 27일",
-  periodEnd: "2026년 10월 26일",
+  contractId: "QA-2MEDIA-PROD20M",
+  clientCompany: "테스트5",
+  clientRepName: "홍길동",
+  clientAddress: "서울특별시 강남구",
+  clientPhone: "01064325577",
+  campaignName: "강남 LED 광고 외 1건",
+  periodStart: "2026년 9월 22일",
+  periodEnd: "2026년 10월 21일",
   periodMonths: "1개월",
-  productionCost:
-    "광고주 직접 제작 – 9월21일 오전까지 sales@tkad.co.kr로 전달",
-  mediaCount: "1구좌 (30초) – 1일 100회 이상 송출",
+  productionCost: "제작비",
+  mediaCount: formatContractMediaCount(2),
   totalAmount: `￦ ${money.totalWon.toLocaleString("ko-KR")}(VAT포함)`,
   amountKorean: formatContractAmountKorean(money.totalWon),
-  paymentMethod: "계약서 작성 후 세금계산서 발행 및 9월 22일 이내 선입금",
-  contractDate: "2026년 9월 18일",
+  paymentMethod: "계산서 발행 후 선결제",
+  contractDate: "2026년 9월 22일",
   adUnitPriceDisplay: formatContractAdUnitPriceDisplay(mediaSupplyWon),
   otherNotes: "",
   mediaLineItems: [
     {
-      name: "홍대 상진빌딩 전광판",
-      spec: "홍대 · 상진빌딩",
-      unitPriceWon: mediaSupplyWon,
-      lineSupplyWon: mediaSupplyWon,
+      name: "강남역 LED",
+      spec: "10m×6m · 강남역",
+      unitPriceWon: 60_000_000,
+      lineSupplyWon: 60_000_000,
+    },
+    {
+      name: "홍대 빌보드",
+      spec: "8m×4m · 홍대",
+      unitPriceWon: 40_000_000,
+      lineSupplyWon: 40_000_000,
     },
   ],
-  costLines: [],
+  costLines: [{ label: "제작비", amountWon: money.extraProductionWon }],
 });
 writeFileSync(`${out}/contract.pdf`, Buffer.from(contract.pdfBase64, "base64"));
 
 const shared = {
   isKo: true,
-  clientName: "김민상",
-  company: "㈜기어세컨드",
-  period: "2026-09-27 ~ 2026-10-26",
+  clientName: "테스트5",
+  company: "테스트5",
+  period: "2026-09-22 ~ 2026-10-21",
   lines: [
-    {
-      name: "홍대 상진빌딩 전광판",
-      spec: "홍대",
-      amountWon: mediaSupplyWon,
-    },
+    { name: "강남역 LED", spec: "강남", amountWon: 60_000_000 },
+    { name: "홍대 빌보드", spec: "홍대", amountWon: 40_000_000 },
   ],
+  extraLines: [{ name: "제작비", amountWon: 20_000_000 }],
   supplyWon: money.supplyWon,
   vatWon: money.vatWon,
   totalWon: money.totalWon,

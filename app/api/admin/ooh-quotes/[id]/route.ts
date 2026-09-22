@@ -9,7 +9,7 @@ import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import {
   loadOoHQuoteForContract,
   ooHQuoteToContractPdfVars,
-  resolveMediaNamesForQuote,
+  resolveContractMediaForQuote,
 } from "@/lib/ooh-contract-context";
 import { canPreviewOohContract } from "@/lib/ooh-contract-display";
 import {
@@ -39,7 +39,12 @@ export async function GET(request: NextRequest, { params }: Params) {
   if (!row) return json({ error: "not_found" }, 404);
 
   const isKo = row.locale !== "en";
-  const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
+  const mediaPack = await resolveContractMediaForQuote(
+    db,
+    row.mediaIds,
+    row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
+    isKo,
+  );
 
   let contract = row.oohContract;
   if (canPreviewOohContract(row.status) && !contract) {
@@ -51,9 +56,10 @@ export async function GET(request: NextRequest, { params }: Params) {
   const contractRecordId = contract?.id ?? id;
   const pdfVars = ooHQuoteToContractPdfVars(
     { ...row, oohContract: contract },
-    mediaNames,
+    mediaPack.names,
     contractRecordId,
   );
+  pdfVars.mediaLineItems = mediaPack.lineItems;
 
   return json({
     quote: {

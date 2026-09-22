@@ -20,6 +20,12 @@ export function formatContractPeriodDateKo(d: Date): string {
   return `${y}년 ${String(m).padStart(2, "0")}월 ${String(day).padStart(2, "0")}일`;
 }
 
+/** 계약서 제1조 등 표시용 — 예: 2026년 9월 27일 (zero-pad 없음) */
+export function formatContractPeriodDateDisplayKo(d: Date): string {
+  const { y, m, day } = kstParts(d);
+  return `${y}년 ${m}월 ${day}일`;
+}
+
 /** 계약 체결일 — 예: 2026년 6월 29일 (월 zero-pad 없음) */
 export function formatContractDateKo(d: Date = new Date()): string {
   const { y, m, day } = kstParts(d);
@@ -107,19 +113,25 @@ export function formatContractAdUnitPriceDisplay(mediaSupplyWon: number): string
   return `￦ ${n.toLocaleString("ko-KR")}원(VAT별도)`;
 }
 
+const GENERIC_PRODUCTION_LABELS = new Set([
+  "제작비",
+  "자체제작",
+  defaultProductionCostKo(),
+]);
+
 export function formatContractDesignProductionLine(
   productionCost: string,
   costLines?: readonly { label: string; amountWon: number }[],
 ): string {
   const parts: string[] = [];
   const prod = productionCost.trim();
-  if (prod && prod !== "—") parts.push(prod);
+  const prodIsGeneric = !prod || GENERIC_PRODUCTION_LABELS.has(prod);
+  if (prod && !prodIsGeneric) parts.push(prod);
+
   for (const line of costLines ?? []) {
-    if (line.amountWon > 0) {
-      parts.push(
-        `${line.label} ₩ ${Math.round(line.amountWon).toLocaleString("ko-KR")} (VAT별도)`,
-      );
-    }
+    if (line.amountWon <= 0) continue;
+    const won = Math.round(line.amountWon).toLocaleString("ko-KR");
+    parts.push(`${line.label} ￦ ${won}원(VAT별도)`);
   }
   return parts.length > 0 ? parts.join(" / ") : "해당 없음";
 }
@@ -129,10 +141,41 @@ export function formatContractArticle1PeriodValue(
   periodEnd: string,
   periodMonths: string,
 ): string {
-  const range = periodStart.includes("년")
-    ? `${periodStart.replace(/일$/, "").trim()} ~ ${periodEnd.replace(/일$/, "").trim()} (${periodMonths})`
-    : `${periodStart} ~ ${periodEnd} (${periodMonths})`;
+  const range = `${periodStart} ~ ${periodEnd} (${periodMonths})`;
   return `- ${range}\n- 단, 광고기간은 제작관계상 개시일이 변동될 수 있습니다.`;
+}
+
+/** 한국 전화번호 표시 (010/02 등) */
+export function formatKoreanPhoneDisplay(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("010")) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 10 && digits.startsWith("02")) {
+    return `02-${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+  if (digits.length === 11 && digits.startsWith("01")) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 10) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  return phone.trim();
+}
+
+export function buildMediaContractSpecLabel(media: {
+  width?: string | null;
+  height?: string | null;
+  location?: string | null;
+  region?: string | null;
+}): string {
+  const w = media.width?.trim();
+  const h = media.height?.trim();
+  const size =
+    w && h ? `${w}×${h}` : w || h || "";
+  const loc = media.location?.trim() || media.region?.trim() || "";
+  if (size && loc) return `${size} · ${loc}`;
+  return size || loc || "";
 }
 
 /** ISO 기간 "2026-07-01 ~ 2026-07-31" 또는 단일 문자열 파싱 */

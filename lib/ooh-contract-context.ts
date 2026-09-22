@@ -7,6 +7,7 @@ import {
 } from "@/lib/ooh-contract-pdf-vars";
 import type { OohContractPdfVars } from "@/lib/ooh-contract-pdf";
 import {
+  buildMediaContractSpecLabel,
   defaultProductionCostKo,
   formatContractAdUnitPriceDisplay,
   formatContractCampaignName,
@@ -70,13 +71,16 @@ export function ooHQuoteToContractPdfVars(
   metaOverride?: OohContractMeta,
 ): OohContractPdfVars {
   const isKo = row.locale !== "en";
+  const breakdownForCount = row.quoteBreakdown as QuoteBreakdown | null;
+  const defaultUnitCount = Math.max(
+    mediaNames.length,
+    mediaCountFromBreakdown(breakdownForCount),
+  );
   const meta = contractMetaWithDefaults(
     { ...parseOohContractMeta(row.adminNote), ...metaOverride },
     {
       productionCost: defaultProductionCostKo(),
-      mediaCount: formatContractMediaCount(
-        mediaNames.length || mediaCountFromBreakdown(row.quoteBreakdown as QuoteBreakdown | null),
-      ),
+      mediaCount: formatContractMediaCount(defaultUnitCount),
     },
   );
   const { start, end } = resolveContractDatesFromQuote(row);
@@ -112,9 +116,7 @@ export function ooHQuoteToContractPdfVars(
     endDate: end,
     totalWonVatIncluded: totalWon,
     productionCost: meta.productionCost,
-    mediaCount: meta.mediaCount
-      ? parseInt(meta.mediaCount, 10) || mediaNames.length || 1
-      : mediaNames.length || mediaCountFromBreakdown(row.quoteBreakdown as QuoteBreakdown | null),
+    mediaCount: defaultUnitCount,
     paymentMethod: meta.paymentMethod,
     clientName: row.clientName,
     mediaLines: mediaNames,
@@ -129,10 +131,16 @@ export function ooHQuoteToContractPdfVars(
     { label: "기타 비용", amountWon: money.extraOtherWon },
   ];
   vars.adUnitPriceDisplay = formatContractAdUnitPriceDisplay(mediaSupplyWon);
-  vars.otherNotes = meta.otherNotes?.trim() || undefined;
-  const countLabel = meta.mediaCount?.trim();
+  const noteParts = [
+    meta.otherNotes?.trim(),
+    row.oohContract?.specialTerms?.trim(),
+  ].filter(Boolean);
+  vars.otherNotes = noteParts.length > 0 ? noteParts.join("\n") : undefined;
+  const countLabel = metaOverride?.mediaCount?.trim() ?? meta.mediaCount?.trim();
   if (countLabel && !/^\d+기?$/.test(countLabel)) {
     vars.mediaCount = countLabel;
+  } else {
+    vars.mediaCount = formatContractMediaCount(defaultUnitCount);
   }
   return vars;
 }
@@ -167,11 +175,72 @@ export async function resolveMediaNamesForQuote(
   mediaIds: string[],
   isKo: boolean,
 ): Promise<string[]> {
-  if (mediaIds.length === 0) return [];
+  const pack = await resolveContractMediaForQuote(
+    db,
+    mediaIds,
+    null,
+    isKo,
+  );
+  return pack.names;
+}
+
+export async function resolveContractMediaForQuote(
+  db: PrismaClient,
+  mediaIds: string[],
+  breakdown: QuoteBreakdown | null,
+  isKo: boolean,
+): Promise<{ names: string[]; lineItems: ContractMediaLineItem[] }> {
+  if (mediaIds.length === 0) return { names: [], lineItems: [] };
   const media = await db.media.findMany({
     where: { id: { in: mediaIds } },
+    select: {
+      id: true,
+      name: true,
+      nameEn: true,
+      location: true,
+      region: true,
+      width: true,
+      height: true,
+    },
   });
   const order = new Map(mediaIds.map((id, i) => [id, i]));
   media.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
-  return media.map((m) => (isKo ? m.name : m.nameEn) || m.name);
+
+  const lineByName = new Map(
+    (breakdown?.lines ?? []).map((line) => [line.mediaName, line]),
+  );
+
+  const names: string[] = [];
+  const lineItems: ContractMediaLineItem[] = [];
+
+  for (const m of media) {
+    const name = (isKo ? m.name : m.nameEn) || m.name;
+    names.push(name);
+    const bd = lineByName.get(name) ?? breakdown?.lines?.[lineItems.length];
+    const spec =
+      bd?.location?.trim() ||
+      buildMediaContractSpecLabel(m) ||
+      bd?.quantityLabel?.trim() ||
+      "";
+    lineItems.push({
+      name,
+      spec,
+      unitPriceWon: bd?.unitPriceWon ?? 0,
+      lineSupplyWon: bd?.lineSupplyWon ?? 0,
+    });
+  }
+
+  if (lineItems.length === 0 && breakdown?.lines?.length) {
+    for (const line of breakdown.lines) {
+      names.push(line.mediaName);
+      lineItems.push({
+        name: line.mediaName,
+        spec: line.location || line.quantityLabel || "",
+        unitPriceWon: line.unitPriceWon,
+        lineSupplyWon: line.lineSupplyWon,
+      });
+    }
+  }
+
+  return { names, lineItems };
 }

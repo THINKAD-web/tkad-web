@@ -4,6 +4,9 @@ import {
   dedupeCampaignAdSuffix,
   formatContractCampaignName,
   formatContractAmountKorean,
+  formatContractArticle1PeriodValue,
+  formatContractDesignProductionLine,
+  formatKoreanPhoneDisplay,
 } from "@/lib/ooh-contract-format";
 
 test("formatContractCampaignName — 다중 매체 외 N건", () => {
@@ -37,4 +40,25 @@ test("dedupeCampaignAdSuffix", () => {
 
 test("formatContractAmountKorean — 대액", () => {
   assert.equal(formatContractAmountKorean(110_000_000), "일억천만원정");
+  assert.equal(formatContractAmountKorean(132_000_000), "일억삼천이백만원정");
+});
+
+test("formatContractArticle1PeriodValue keeps 일 suffix", () => {
+  const v = formatContractArticle1PeriodValue(
+    "2026년 9월 22일",
+    "2026년 10월 21일",
+    "1개월",
+  );
+  assert.match(v, /22일 ~ 2026년 10월 21일/);
+});
+
+test("formatContractDesignProductionLine shows won amounts", () => {
+  const line = formatContractDesignProductionLine("제작비", [
+    { label: "제작비", amountWon: 20_000_000 },
+  ]);
+  assert.match(line, /￦ 20,000,000원\(VAT별도\)/);
+});
+
+test("formatKoreanPhoneDisplay", () => {
+  assert.equal(formatKoreanPhoneDisplay("01064325577"), "010-6432-5577");
 });

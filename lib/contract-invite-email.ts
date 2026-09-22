@@ -4,7 +4,7 @@ import { getFormalQuoteIssuer } from "@/lib/formal-quote-issuer";
 import {
   loadOoHQuoteForContract,
   ooHQuoteToContractPdfVars,
-  resolveMediaNamesForQuote,
+  resolveContractMediaForQuote,
 } from "@/lib/ooh-contract-context";
 import { parseOohContractMeta } from "@/lib/ooh-contract-meta";
 import { splitPdfLogicalLines } from "@/lib/pdf-line-break";
@@ -72,9 +72,15 @@ export async function resolveContractInviteEmailPayload(
   const isKo = row.locale !== "en";
   const issuer = getFormalQuoteIssuer();
   const meta = parseOohContractMeta(row.adminNote);
-  const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
+  const mediaPack = await resolveContractMediaForQuote(
+    db,
+    row.mediaIds,
+    row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
+    isKo,
+  );
   const contractId = row.oohContract?.id ?? quoteId;
-  const pdfVars = ooHQuoteToContractPdfVars(row, mediaNames, contractId);
+  const pdfVars = ooHQuoteToContractPdfVars(row, mediaPack.names, contractId);
+  pdfVars.mediaLineItems = mediaPack.lineItems;
 
   const accountManagerName =
     meta.accountManagerName?.trim() ||

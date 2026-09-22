@@ -3,7 +3,7 @@ import { fetchUploadedContractPdfForPreview } from "@/lib/ooh-contract-upload-pd
 import {
   loadOoHQuoteForContract,
   ooHQuoteToContractPdfVars,
-  resolveMediaNamesForQuote,
+  resolveContractMediaForQuote,
 } from "@/lib/ooh-contract-context";
 import { buildOohContractPdf } from "@/lib/ooh-contract-pdf";
 import { normalizeContractSendMode, isUploadedContractSendMode } from "@/lib/contract-send-mode";
@@ -62,8 +62,14 @@ export async function buildContractPreviewPdfBuffer(
 
   try {
     const isKo = row.locale !== "en";
-    const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
-    const vars = ooHQuoteToContractPdfVars(row, mediaNames, contract.id);
+    const mediaPack = await resolveContractMediaForQuote(
+      db,
+      row.mediaIds,
+      row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
+      isKo,
+    );
+    const vars = ooHQuoteToContractPdfVars(row, mediaPack.names, contract.id);
+    vars.mediaLineItems = mediaPack.lineItems;
     const { pdfBase64 } = await buildOohContractPdf(vars);
     return {
       buffer: Buffer.from(pdfBase64, "base64"),
