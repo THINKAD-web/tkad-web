@@ -4,6 +4,7 @@ import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { canAdminSendInvoice } from "@/lib/ooh-quote";
 import { buildSimpleContractPdfBase64 } from "@/lib/server-ooh-quote-pdf";
+import { splitPdfLogicalLines } from "@/lib/pdf-line-break";
 import { sendEmailWithPdfAttachment } from "@/lib/email/client";
 
 export const dynamic = "force-dynamic";
@@ -72,7 +73,9 @@ export async function POST(
         ? `회사: ${row.clientCompany}`
         : `Company: ${row.clientCompany}`
       : "",
-    isKo ? `광고 기간: ${row.period}` : `Period: ${row.period}`,
+    ...(isKo
+      ? splitPdfLogicalLines(`광고 기간: ${row.period}`)
+      : splitPdfLogicalLines(`Period: ${row.period}`)),
     isKo
       ? `총 집행 금액(참고, 만원): ₩${row.totalAmount.toLocaleString("ko-KR")}`
       : `Total (10K KRW units): ₩${row.totalAmount.toLocaleString("en-US")}`,

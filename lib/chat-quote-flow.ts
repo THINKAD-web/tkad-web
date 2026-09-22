@@ -8,6 +8,10 @@ import { computeAdminQuoteTotals } from "@/lib/admin-quote-calc";
 import { sendOoHQuoteToClient } from "@/lib/ooh-quote-send";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import { isEmailConfigured, sendEmail } from "@/lib/email/client";
+import {
+  buildContractInviteEmail,
+  resolveContractInviteEmailPayload,
+} from "@/lib/contract-invite-email";
 import { createNotification } from "@/lib/notifications";
 import { postInternalAlert } from "@/lib/internal-webhook";
 import { notifySlackBookingConfirm } from "@/lib/quote-slack-notify";
@@ -238,32 +242,19 @@ export async function advanceChatQuoteToContract(
   const to = row.clientEmail?.trim();
 
   if (to && isEmailConfigured()) {
-    void sendEmail({
-      to,
-      subject: isKo
-        ? "[THINKAD] 견적 수락 — 전자계약을 진행해 주세요"
-        : "[THINKAD] Quote accepted — sign your e-contract",
-      text: isKo
-        ? [
-            `안녕하세요 ${row.clientName}님,`,
-            "",
-            "채팅 견적이 수락되었습니다. 전자계약서에 서명해 주세요.",
-            "",
-            `견적: ${previewAbs}`,
-            `계약: ${contractAbs}`,
-          ].join("\n")
-        : [
-            `Hello ${row.clientName},`,
-            "",
-            "Your chat quote was accepted. Please sign the e-contract.",
-            "",
-            `Quote: ${previewAbs}`,
-            `Contract: ${contractAbs}`,
-          ].join("\n"),
-      html: isKo
-        ? `<p>견적이 <strong>수락</strong>되었습니다.</p><p><a href="${previewAbs}">견적</a> · <a href="${contractAbs}"><strong>전자계약 →</strong></a></p>`
-        : `<p>Quote <strong>accepted</strong>.</p><p><a href="${previewAbs}">Preview</a> · <a href="${contractAbs}"><strong>Contract →</strong></a></p>`,
-    }).catch(() => {});
+    void (async () => {
+      const payload = await resolveContractInviteEmailPayload(db, quoteId);
+      if (!payload) return;
+      const mail = buildContractInviteEmail(
+        { ...payload, contractUrl: contractAbs, previewUrl: previewAbs },
+        {
+          subject: isKo
+            ? "[싱커드] 견적 수락 — 전자계약을 진행해 주세요"
+            : "[THINKAD] Quote accepted — sign your e-contract",
+        },
+      );
+      await sendEmail({ to, ...mail });
+    })().catch(() => {});
   }
 
   return { contractUrl, previewUrl };

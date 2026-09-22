@@ -79,6 +79,32 @@ test("English contract PDF stays on Helvetica (no KR font required)", async () =
   assert.match(latin, /Helvetica/i);
 });
 
+test("signed contract PDF embeds signature image", async () => {
+  const unsigned = await buildOohContractPdf(KO_VARS);
+  const unsignedImages = (
+    Buffer.from(unsigned.pdfBase64, "base64").toString("latin1").match(
+      /\/Subtype \/Image/g,
+    ) ?? []
+  ).length;
+  const { pdfBase64 } = await buildSignedOohContractPdf(KO_VARS, TINY_PNG_B64, {
+    documentNumber: "DOC-1",
+    signerName: "홍길동",
+    signerEmail: "test@example.com",
+    signedAtIso: "2026-07-08T13:00:00.000Z",
+    signedAtKst: "2026. 07. 08. 22:00:00",
+    signerIp: "127.0.0.1",
+    signerAgent: "test-agent",
+    documentContentSha256: "a".repeat(64),
+    signatureImageSha256: "b".repeat(64),
+  });
+  const signedImages = (
+    Buffer.from(pdfBase64, "base64").toString("latin1").match(
+      /\/Subtype \/Image/g,
+    ) ?? []
+  ).length;
+  assert.ok(signedImages > unsignedImages);
+});
+
 test("signed contract PDF uses same Korean font path", async () => {
   const { pdfBase64 } = await buildSignedOohContractPdf(KO_VARS, TINY_PNG_B64, {
     documentNumber: "DOC-1",

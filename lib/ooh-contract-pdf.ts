@@ -88,6 +88,39 @@ const KO_KEEP_TOGETHER_MAX_MM = 32;
 
 const LINE_H = 5;
 
+function pngDataUrlForJsPdf(pngBase64OrDataUrl: string): string {
+  const raw = pngBase64OrDataUrl.includes(",")
+    ? pngBase64OrDataUrl.split(",")[1]!
+    : pngBase64OrDataUrl;
+  return `data:image/png;base64,${raw}`;
+}
+
+function embedPngOnPdf(
+  doc: import("jspdf").default,
+  pngBase64OrDataUrl: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): boolean {
+  const dataUrl = pngDataUrlForJsPdf(pngBase64OrDataUrl);
+  try {
+    doc.addImage(dataUrl, "PNG", x, y, w, h, undefined, "FAST");
+    return true;
+  } catch {
+    try {
+      const raw = pngBase64OrDataUrl.includes(",")
+        ? pngBase64OrDataUrl.split(",")[1]!
+        : pngBase64OrDataUrl;
+      const bytes = Uint8Array.from(Buffer.from(raw, "base64"));
+      doc.addImage(bytes, "PNG", x, y, w, h, undefined, "FAST");
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
+
 function wrapLines(
   doc: import("jspdf").default,
   text: string,
@@ -895,18 +928,21 @@ function renderKoSignatureBlock(
     partyB.representative,
   );
 
-  const sigW = 46;
-  const sigH = 18;
-  const sigX = leftX + colW - sigW - 5;
-  const sigY = boxTop + KO_LAYOUT.sigBoxH - sigH - 4;
+  const sigW = Math.min(colW - 10, 52);
+  const sigH = 22;
+  const sigX = leftX + colW - sigW - 4;
+  const sigY = boxTop + KO_LAYOUT.sigBoxH - sigH - 3;
 
   if (options?.signaturePngBase64) {
-    const raw = options.signaturePngBase64.includes(",")
-      ? options.signaturePngBase64.split(",")[1]!
-      : options.signaturePngBase64;
-    try {
-      doc.addImage(raw, "PNG", sigX, sigY, sigW, sigH);
-    } catch {
+    const ok = embedPngOnPdf(
+      doc,
+      options.signaturePngBase64,
+      sigX,
+      sigY,
+      sigW,
+      sigH,
+    );
+    if (!ok) {
       drawTextRun(doc, fam, leftX + 4, sigY + 10, "(서명 이미지 처리 오류)", {
         size: 8,
       });
@@ -1118,7 +1154,9 @@ async function buildLegacyEnContractPdf(
       setContractFont(doc, fam, "bold");
       doc.text("Advertiser signature", margin, y);
       y += 6;
-      doc.addImage(raw, "PNG", sigX, y - 4, sigW, sigH);
+      if (!embedPngOnPdf(doc, raw, sigX, y - 4, sigW, sigH)) {
+        throw new Error("embed failed");
+      }
       y += sigH + 6;
     } catch {
       doc.text("(Signature image error)", margin, y);

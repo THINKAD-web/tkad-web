@@ -304,6 +304,49 @@ export function AdminOohContractDetailPanel({
             </label>
             <label className="space-y-1 text-xs">
               <span className="font-medium text-muted-foreground">
+                {t("contractAccountManager")}
+              </span>
+              <Input
+                value={metaDraft.accountManagerName ?? ""}
+                onChange={(e) =>
+                  setMetaDraft((m) => ({
+                    ...m,
+                    accountManagerName: e.target.value,
+                  }))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-xs">
+              <span className="font-medium text-muted-foreground">
+                {t("contractAccountManagerEmail")}
+              </span>
+              <Input
+                type="email"
+                value={metaDraft.accountManagerEmail ?? ""}
+                onChange={(e) =>
+                  setMetaDraft((m) => ({
+                    ...m,
+                    accountManagerEmail: e.target.value,
+                  }))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-xs">
+              <span className="font-medium text-muted-foreground">
+                {t("contractAccountManagerPhone")}
+              </span>
+              <Input
+                value={metaDraft.accountManagerPhone ?? ""}
+                onChange={(e) =>
+                  setMetaDraft((m) => ({
+                    ...m,
+                    accountManagerPhone: e.target.value,
+                  }))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-xs sm:col-span-2">
+              <span className="font-medium text-muted-foreground">
                 {t("contractCampaignName")}
               </span>
               <Input

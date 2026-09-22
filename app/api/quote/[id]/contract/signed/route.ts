@@ -3,6 +3,7 @@ import { OohContractStatus } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { loadOoHQuoteForContract } from "@/lib/ooh-contract-context";
+import { rebuildSignedOohContractPdfFromRecord } from "@/lib/ooh-contract-signed-pdf";
 import { isAdminRequestAuthorized } from "@/lib/require-admin-request";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,19 @@ export async function GET(
       c.status !== OohContractStatus.confirmed)
   ) {
     return new NextResponse("Not found", { status: 404 });
+  }
+
+  const rebuilt = await rebuildSignedOohContractPdfFromRecord(db, id);
+  if (rebuilt) {
+    const buf = Buffer.from(rebuilt.pdfBase64, "base64");
+    return new NextResponse(buf, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": 'attachment; filename="thinkad-contract-signed.pdf"',
+        "Cache-Control": "no-store, private",
+      },
+    });
   }
 
   const url = c.contractPdfUrl?.trim();

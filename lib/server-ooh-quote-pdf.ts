@@ -1,5 +1,10 @@
 import type { PrismaClient } from "@prisma/client";
 import {
+  ensureKrFontForServerPdf,
+  krFontFamily,
+} from "@/lib/jspdf-register-noto-kr";
+import { splitPdfLogicalLines } from "@/lib/pdf-line-break";
+import {
   quotePdfToBase64,
   type BuildQuotePdfParams,
   type QuotePdfRow,
@@ -282,21 +287,30 @@ export async function buildSimpleContractPdfBase64(p: {
   const doc = new JsPDF();
   const margin = 20;
   const pageW = doc.internal.pageSize.getWidth();
+  const maxW = pageW - 2 * margin;
+  const hasKr = p.isKo ? await ensureKrFontForServerPdf(doc) : false;
+  const fam = p.isKo ? krFontFamily(hasKr) : "helvetica";
   let y = 20;
-  doc.setFont("helvetica", "bold");
+  doc.setFont(fam, "bold");
   doc.setFontSize(14);
   doc.text(p.title, margin, y);
   y += 12;
-  doc.setFont("helvetica", "normal");
+  doc.setFont(fam, "normal");
   doc.setFontSize(10);
   for (const line of p.lines) {
-    for (const chunk of doc.splitTextToSize(line, pageW - 2 * margin)) {
-      if (y > 280) {
-        doc.addPage();
-        y = 20;
+    for (const physical of splitPdfLogicalLines(line)) {
+      if (!physical.trim()) {
+        y += 4;
+        continue;
       }
-      doc.text(chunk, margin, y);
-      y += 5;
+      for (const chunk of doc.splitTextToSize(physical, maxW) as string[]) {
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(chunk, margin, y);
+        y += 5;
+      }
     }
     y += 2;
   }

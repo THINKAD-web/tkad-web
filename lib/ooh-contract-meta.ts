@@ -9,6 +9,10 @@ export type OohContractMeta = {
   productionCost?: string;
   mediaCount?: string;
   paymentMethod?: string;
+  /** 싱커드 담당자 — 계약 초대 메일 문의처 */
+  accountManagerName?: string;
+  accountManagerEmail?: string;
+  accountManagerPhone?: string;
 };
 
 export function parseOohContractMeta(
