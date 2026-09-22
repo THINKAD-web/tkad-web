@@ -51,6 +51,26 @@ export type StandaloneContractPreviewInput = z.infer<
   typeof StandaloneContractPreviewBody
 >;
 
+const requiredClientEmail = z
+  .string()
+  .min(1)
+  .max(254)
+  .refine((v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), {
+    message: "invalid_client_email",
+  });
+
+/** Standalone → OoHQuote + 전자서명 URL 발송 */
+export const StandaloneContractSendBody = StandaloneContractPreviewBody.extend({
+  draftId: z.string().min(1).max(64).optional(),
+  mediaIds: z.array(z.string().min(1).max(64)).min(1).max(50),
+  clientEmail: requiredClientEmail,
+  force: z.boolean().optional().default(false),
+});
+
+export type StandaloneContractSendBodyInput = z.infer<
+  typeof StandaloneContractSendBody
+>;
+
 /** 저장·파이프라인 연결 확장용 */
 export type StandaloneContractDraft = StandaloneContractPreviewInput & {
   version: typeof STANDALONE_CONTRACT_DRAFT_VERSION;

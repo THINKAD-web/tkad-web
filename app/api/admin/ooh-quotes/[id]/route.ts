@@ -17,6 +17,7 @@ import {
   parseOohContractMeta,
   type OohContractMeta,
 } from "@/lib/ooh-contract-meta";
+import { parseContractInviteSendLog } from "@/lib/contract-invite-log";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,7 @@ export async function GET(request: NextRequest, { params }: Params) {
             specialTerms: contract.specialTerms,
             signedAt: contract.signedAt?.toISOString() ?? null,
             canEditTerms: contract.status === OohContractStatus.pending,
+            inviteSendLog: parseContractInviteSendLog(contract.inviteSendLog),
           }
         : null,
       contractMeta: parseOohContractMeta(row.adminNote),

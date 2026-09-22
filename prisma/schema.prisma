@@ -1433,6 +1433,8 @@ model OohContract {
 
   documentSha256 String? @map("document_sha256")
   specialTerms   String? @map("special_terms") @db.Text
+  /// 서명 URL 이메일 발송 이력 [{ sentAt, to, kind: initial|resend }]
+  inviteSendLog  Json?   @map("invite_send_log")
 
   status OohContractStatus @default(pending)
 
