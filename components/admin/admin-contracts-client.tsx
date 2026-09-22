@@ -59,6 +59,8 @@ type ContractRow = {
   endDate: string | null;
   quoteStatus: string;
   contractStatus: string;
+  sendMode?: string;
+  uploadedPdfFileName?: string | null;
   contractSigned: boolean;
   signedAt: string | null;
 };
@@ -176,9 +178,17 @@ export default function AdminContractsClient() {
     if (sheetQuoteId) void loadDetail(sheetQuoteId);
   }, [sheetQuoteId, loadDetail]);
 
+  function sendModeLabel(mode: string | undefined) {
+    if (mode === "uploaded_esign") return t("sendMode_upload_esign");
+    if (mode === "uploaded_attachment") return t("sendMode_upload_attachment");
+    if (mode === "auto_generated") return t("sendMode_auto");
+    return null;
+  }
+
   function contractStatusLabel(status: string) {
     const key = `contractStatus_${status}` as
       | "contractStatus_pending"
+      | "contractStatus_attachment_sent"
       | "contractStatus_signed"
       | "contractStatus_confirmed"
       | "contractStatus_cancelled";
@@ -376,6 +386,12 @@ export default function AdminContractsClient() {
                         <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
                           {contractStatusLabel(row.contractStatus)}
                         </span>
+                        {sendModeLabel(row.sendMode) &&
+                        row.sendMode !== "auto_generated" ? (
+                          <span className="rounded-full border border-[color:var(--qp-accent)]/40 px-2 py-0.5 text-[10px] font-medium text-[color:var(--qp-accent)]">
+                            {sendModeLabel(row.sendMode)}
+                          </span>
+                        ) : null}
                       </div>
                       <p className="mt-1 text-[10px] text-muted-foreground">
                         {t("colSignedAt")}: {formatDate(row.signedAt)}
@@ -455,9 +471,17 @@ export default function AdminContractsClient() {
                         {formatOohQuoteTotalKrw(row.totalAmount)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
-                          {contractStatusLabel(row.contractStatus)}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1">
+                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                            {contractStatusLabel(row.contractStatus)}
+                          </span>
+                          {sendModeLabel(row.sendMode) &&
+                          row.sendMode !== "auto_generated" ? (
+                            <span className="rounded-full border border-[color:var(--qp-accent)]/40 px-2 py-0.5 text-[10px] font-medium text-[color:var(--qp-accent)]">
+                              {sendModeLabel(row.sendMode)}
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
                       <td className="px-4 py-3 tabular-nums text-muted-foreground">
                         {formatDate(row.signedAt)}

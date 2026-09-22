@@ -14,6 +14,7 @@ type Session = {
   clientCompany: string | null;
   canSign: boolean;
   signed: boolean;
+  attachmentOnly?: boolean;
 };
 
 export default function ContractSignClient({ quoteId }: { quoteId: string }) {
@@ -169,6 +170,27 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
             {t("backToStatus")}
           </BtnBlock>
         </div>
+      </div>
+    );
+  }
+
+  if (!session.canSign && session.attachmentOnly) {
+    const previewSrc = `/api/quote/${quoteId}/contract/preview`;
+    return (
+      <div className="mx-auto max-w-3xl space-y-6 py-10">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {t("attachmentOnlyTitle")}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("attachmentOnlyBody")}
+          </p>
+        </div>
+        <iframe
+          title={t("previewTitle")}
+          src={previewSrc}
+          className="h-[min(720px,75vh)] w-full border-2 border-border bg-white"
+        />
       </div>
     );
   }

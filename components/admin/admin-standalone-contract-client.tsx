@@ -7,10 +7,12 @@ import {
   Eye,
   FileDown,
   FileSignature,
+  FileUp,
   Loader2,
   Mail,
   Plus,
   Search,
+  Upload,
   X,
 } from "lucide-react";
 import {
@@ -110,6 +112,19 @@ export default function AdminStandaloneContractClient() {
     listError,
     filtered,
   } = useAdminMediaPickerList({ loadErrorMessage: t("loadError") });
+
+  const [pageTab, setPageTab] = useState<"compose" | "upload">("compose");
+  const [uploadMode, setUploadMode] = useState<
+    "uploaded_esign" | "uploaded_attachment"
+  >("uploaded_esign");
+  const [uploadedPdf, setUploadedPdf] = useState<{
+    uploadedPdfUrl: string;
+    uploadedPdfSha256: string;
+    uploadedPdfFileName: string;
+  } | null>(null);
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [localPdfUrl, setLocalPdfUrl] = useState<string | null>(null);
+  const localPdfUrlRef = useRef<string | null>(null);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -306,6 +321,178 @@ export default function AdminStandaloneContractClient() {
 
   useEffect(() => () => revokePreviewUrl(), [revokePreviewUrl]);
 
+  const revokeLocalPdfUrl = useCallback(() => {
+    if (localPdfUrlRef.current) {
+      URL.revokeObjectURL(localPdfUrlRef.current);
+      localPdfUrlRef.current = null;
+    }
+    setLocalPdfUrl(null);
+  }, []);
+
+  useEffect(() => () => revokeLocalPdfUrl(), [revokeLocalPdfUrl]);
+
+  const onPickUploadPdf = useCallback(
+    async (file: File) => {
+      setUploadBusy(true);
+      try {
+        const fd = new FormData();
+        fd.set("file", file);
+        const res = await fetch("/api/admin/contracts/upload-pdf", {
+          method: "POST",
+          credentials: "include",
+          body: fd,
+        });
+        const raw: unknown = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(t("sendUploadFail"));
+        }
+        const url =
+          typeof raw === "object" &&
+          raw !== null &&
+          "uploadedPdfUrl" in raw &&
+          typeof (raw as { uploadedPdfUrl?: unknown }).uploadedPdfUrl ===
+            "string"
+            ? (raw as { uploadedPdfUrl: string }).uploadedPdfUrl
+            : "";
+        const sha =
+          typeof raw === "object" &&
+          raw !== null &&
+          "uploadedPdfSha256" in raw &&
+          typeof (raw as { uploadedPdfSha256?: unknown }).uploadedPdfSha256 ===
+            "string"
+            ? (raw as { uploadedPdfSha256: string }).uploadedPdfSha256
+            : "";
+        const name =
+          typeof raw === "object" &&
+          raw !== null &&
+          "uploadedPdfFileName" in raw &&
+          typeof (raw as { uploadedPdfFileName?: unknown })
+            .uploadedPdfFileName === "string"
+            ? (raw as { uploadedPdfFileName: string }).uploadedPdfFileName
+            : file.name;
+        if (!url || !sha) throw new Error(t("sendUploadFail"));
+        setUploadedPdf({
+          uploadedPdfUrl: url,
+          uploadedPdfSha256: sha,
+          uploadedPdfFileName: name,
+        });
+        revokeLocalPdfUrl();
+        const blobUrl = URL.createObjectURL(file);
+        localPdfUrlRef.current = blobUrl;
+        setLocalPdfUrl(blobUrl);
+        toast("success", t("uploadPdfReady", { name }));
+      } catch (e) {
+        toast("error", e instanceof Error ? e.message : t("sendUploadFail"));
+      } finally {
+        setUploadBusy(false);
+      }
+    },
+    [revokeLocalPdfUrl, t, toast],
+  );
+
+  const postUploadSend = useCallback(
+    async (force: boolean) => {
+      setSubmitAttempted(true);
+      if (!clientName.trim()) {
+        toast("error", t("errClientName"));
+        return;
+      }
+      if (!clientEmail.trim()) {
+        toast("error", t("sendEsignEmailRequired"));
+        return;
+      }
+      if (!isValidOptionalEmail(clientEmail)) {
+        toast("error", t("errClientEmailFormat"));
+        return;
+      }
+      if (!uploadedPdf) {
+        toast("error", t("uploadPdfMissing"));
+        return;
+      }
+      if (uploadMode === "uploaded_esign") {
+        if (selectedMedia.length === 0) {
+          toast("error", t("sendEsignMediaRequired"));
+          return;
+        }
+        if (!startDate || !endDate) {
+          toast("error", t("sendEsignFail"));
+          return;
+        }
+      } else if (selectedMedia.length > 0 && (!startDate || !endDate)) {
+        toast("error", t("sendEsignFail"));
+        return;
+      }
+
+      const manwon = parseInt(totalAmountManwon, 10);
+      setSendBusy(true);
+      try {
+        const res = await fetch("/api/admin/contracts/send-from-upload", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: uploadMode,
+            ...uploadedPdf,
+            clientName: clientName.trim(),
+            clientCompany: clientCompany.trim(),
+            clientPhone: clientPhone.trim(),
+            clientEmail: clientEmail.trim(),
+            locale: isKo ? "ko" : "en",
+            mediaIds: selectedMedia.map((m) => m.id),
+            startDate: startDate || undefined,
+            endDate: endDate || undefined,
+            totalAmountManwon:
+              Number.isFinite(manwon) && manwon > 0 ? manwon : undefined,
+            force,
+          }),
+        });
+        const raw: unknown = await res.json().catch(() => ({}));
+        if (res.status === 409) {
+          const code =
+            typeof raw === "object" &&
+            raw !== null &&
+            "code" in raw &&
+            (raw as { code?: unknown }).code === "BOOKING_CONFLICT";
+          if (code && !force && window.confirm(t("sendEsignConflictConfirm"))) {
+            await postUploadSend(true);
+            return;
+          }
+        }
+        if (!res.ok) {
+          throw new Error(t("sendUploadFail"));
+        }
+        const emailed =
+          typeof raw === "object" &&
+          raw !== null &&
+          "emailed" in raw &&
+          (raw as { emailed?: unknown }).emailed === true;
+        toast("success", t("sendUploadOk"));
+        if (!emailed) toast("error", t("sendEsignEmailSkipped"));
+        router.push("/admin/contracts");
+      } catch (e) {
+        toast("error", e instanceof Error ? e.message : t("sendUploadFail"));
+      } finally {
+        setSendBusy(false);
+      }
+    },
+    [
+      clientCompany,
+      clientEmail,
+      clientName,
+      clientPhone,
+      endDate,
+      isKo,
+      router,
+      selectedMedia,
+      startDate,
+      t,
+      toast,
+      totalAmountManwon,
+      uploadMode,
+      uploadedPdf,
+    ],
+  );
+
   const fetchPdf = useCallback(
     async (download: boolean) => {
       setSubmitAttempted(true);
@@ -498,6 +685,235 @@ export default function AdminStandaloneContractClient() {
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2 border-b border-border/60 pb-3">
+        <Button
+          type="button"
+          size="sm"
+          variant={pageTab === "compose" ? "default" : "outline"}
+          onClick={() => setPageTab("compose")}
+        >
+          {t("tabCompose")}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={pageTab === "upload" ? "default" : "outline"}
+          onClick={() => setPageTab("upload")}
+        >
+          <Upload className="mr-1 h-3.5 w-3.5" />
+          {t("tabUpload")}
+        </Button>
+      </div>
+
+      {pageTab === "upload" ? (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card className={cn(adminQuoteSectionCard, "lg:col-span-2")}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">{t("tabUpload")}</CardTitle>
+              <p className="text-xs text-muted-foreground">{t("uploadHint")}</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={
+                    uploadMode === "uploaded_esign" ? "default" : "outline"
+                  }
+                  onClick={() => setUploadMode("uploaded_esign")}
+                >
+                  {t("uploadModeEsign")}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={
+                    uploadMode === "uploaded_attachment" ? "default" : "outline"
+                  }
+                  onClick={() => setUploadMode("uploaded_attachment")}
+                >
+                  {t("uploadModeAttachment")}
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {uploadMode === "uploaded_esign"
+                  ? t("uploadModeEsignHint")
+                  : t("uploadModeAttachmentHint")}
+              </p>
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-input px-4 py-3 text-sm hover:bg-muted/30">
+                <FileUp className="h-4 w-4" />
+                {uploadBusy ? t("uploadBusy") : t("uploadPickPdf")}
+                <input
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  className="sr-only"
+                  disabled={uploadBusy}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void onPickUploadPdf(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              {uploadedPdf ? (
+                <p className="text-xs font-medium text-foreground">
+                  {t("uploadPdfReady", {
+                    name: uploadedPdf.uploadedPdfFileName,
+                  })}
+                </p>
+              ) : null}
+            </CardContent>
+          </Card>
+
+          <Card className={cn(adminQuoteSectionCard, "lg:col-span-2")}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">{t("sectionParties")}</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <label className="space-y-1 text-sm sm:col-span-2">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t("clientName")} *
+                </span>
+                <Input
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  placeholder={t("clientNamePh")}
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t("clientCompany")}
+                </span>
+                <Input
+                  value={clientCompany}
+                  onChange={(e) => setClientCompany(e.target.value)}
+                  placeholder={t("clientCompanyPh")}
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t("clientEmail")} *
+                </span>
+                <Input
+                  type="email"
+                  value={clientEmail}
+                  onChange={(e) => setClientEmail(e.target.value)}
+                  placeholder={t("clientEmailPh")}
+                />
+              </label>
+              {uploadMode === "uploaded_esign" ||
+              selectedMedia.length > 0 ? (
+                <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
+                  <label className="space-y-1 text-sm">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {t("startDate")}
+                    </span>
+                    <Input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </label>
+                  <label className="space-y-1 text-sm">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {t("endDate")}
+                    </span>
+                    <Input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </label>
+                </div>
+              ) : null}
+              <label className="space-y-1 text-sm sm:col-span-2">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t("totalAmountManwon")}
+                </span>
+                <Input
+                  type="number"
+                  min={1}
+                  value={totalAmountManwon}
+                  onChange={(e) => setTotalAmountManwon(e.target.value)}
+                  placeholder="5000"
+                />
+              </label>
+            </CardContent>
+          </Card>
+
+          <Card className={adminQuoteSectionCard}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">{t("sectionMedia")}</CardTitle>
+              {uploadMode === "uploaded_esign" ? (
+                <p className="text-xs text-red-600">{t("sendEsignMediaRequired")}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {t("uploadModeAttachmentHint")}
+                </p>
+              )}
+              <div className="relative mt-3">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder={t("searchMedia")}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+            </CardHeader>
+            <CardContent className={`max-h-[min(360px,40vh)] overflow-auto p-0 ${adminQuoteSurfaceMutedClass}`}>
+              {listLoading ? (
+                <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  {t("loading")}
+                </div>
+              ) : (
+                <table className="w-full text-sm">
+                  <tbody>
+                    {filtered.slice(0, 80).map((m) => {
+                      const picked = selectedMedia.some((s) => s.id === m.id);
+                      return (
+                        <tr key={m.id} className={adminQuoteTableRowClass}>
+                          <td className="px-3 py-2 font-medium">{m.name}</td>
+                          <td className="px-2 py-2 text-right">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant={picked ? "secondary" : "outline"}
+                              disabled={picked}
+                              onClick={() => addMedia(m)}
+                            >
+                              <Plus className="mr-1 h-3 w-3" />
+                              {picked ? t("added") : t("add")}
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </CardContent>
+          </Card>
+
+          {localPdfUrl ? (
+            <Card className={adminQuoteSectionCard}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">{t("uploadPreviewLocal")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <iframe
+                  title={t("uploadPreviewLocal")}
+                  src={localPdfUrl}
+                  className="h-[min(480px,60vh)] w-full rounded-xl border border-gray-200 bg-white dark:border-white/10"
+                />
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+      ) : null}
+
+      {pageTab === "compose" ? (
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className={cn(adminQuoteSectionCard, "lg:col-span-2")}>
           <CardHeader className="pb-3">
@@ -792,8 +1208,9 @@ export default function AdminStandaloneContractClient() {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
-      {previewOpen && previewUrl ? (
+      {pageTab === "compose" && previewOpen && previewUrl ? (
         <Card className={adminQuoteSectionCard}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base">{t("previewTitle")}</CardTitle>
@@ -825,45 +1242,81 @@ export default function AdminStandaloneContractClient() {
             "max-w-4xl flex-wrap px-4 sm:px-6",
           )}
         >
-          <Button
-            type="button"
-            disabled={pdfBusy || sendBusy}
-            className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "min-w-[7rem] flex-1")}
-            onClick={() => void onPreview()}
-          >
-            {pdfBusy ? (
-              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Eye className="mr-1 h-3.5 w-3.5" />
-            )}
-            {t("previewPdf")}
-          </Button>
-          <Button
-            type="button"
-            disabled={pdfBusy || sendBusy}
-            className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "min-w-[7rem] flex-1")}
-            onClick={() => void onDownload()}
-          >
-            {pdfBusy ? (
-              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <FileDown className="mr-1 h-3.5 w-3.5" />
-            )}
-            {t("downloadPdf")}
-          </Button>
-          <Button
-            type="button"
-            disabled={pdfBusy || sendBusy}
-            className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_PRIMARY, "min-w-[7rem] flex-1")}
-            onClick={onSendEsign}
-          >
-            {sendBusy ? (
-              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Mail className="mr-1 h-3.5 w-3.5" />
-            )}
-            {t("sendEsign")}
-          </Button>
+          {pageTab === "compose" ? (
+            <>
+              <Button
+                type="button"
+                disabled={pdfBusy || sendBusy}
+                className={cn(
+                  STICKY_ACTION_BAR_BTN,
+                  STICKY_ACTION_BAR_BTN_IDLE,
+                  "min-w-[7rem] flex-1",
+                )}
+                onClick={() => void onPreview()}
+              >
+                {pdfBusy ? (
+                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Eye className="mr-1 h-3.5 w-3.5" />
+                )}
+                {t("previewPdf")}
+              </Button>
+              <Button
+                type="button"
+                disabled={pdfBusy || sendBusy}
+                className={cn(
+                  STICKY_ACTION_BAR_BTN,
+                  STICKY_ACTION_BAR_BTN_IDLE,
+                  "min-w-[7rem] flex-1",
+                )}
+                onClick={() => void onDownload()}
+              >
+                {pdfBusy ? (
+                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <FileDown className="mr-1 h-3.5 w-3.5" />
+                )}
+                {t("downloadPdf")}
+              </Button>
+              <Button
+                type="button"
+                disabled={pdfBusy || sendBusy}
+                className={cn(
+                  STICKY_ACTION_BAR_BTN,
+                  STICKY_ACTION_BAR_BTN_PRIMARY,
+                  "min-w-[7rem] flex-1",
+                )}
+                onClick={onSendEsign}
+              >
+                {sendBusy ? (
+                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Mail className="mr-1 h-3.5 w-3.5" />
+                )}
+                {t("sendEsign")}
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              disabled={sendBusy || uploadBusy}
+              className={cn(
+                STICKY_ACTION_BAR_BTN,
+                STICKY_ACTION_BAR_BTN_PRIMARY,
+                "min-w-[10rem] flex-1",
+              )}
+              onClick={() => void postUploadSend(false)}
+            >
+              {sendBusy ? (
+                <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Mail className="mr-1 h-3.5 w-3.5" />
+              )}
+              {uploadMode === "uploaded_esign"
+                ? t("sendUploadEsign")
+                : t("sendUploadAttachment")}
+            </Button>
+          )}
         </div>
       </StickyActionBar>
     </AdminQuotePageShell>
