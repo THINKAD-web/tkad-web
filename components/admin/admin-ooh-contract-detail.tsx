@@ -663,7 +663,7 @@ export function AdminOohContractDetailPanel({
               {t("contractStandardTerms")}
             </p>
             <p className="leading-relaxed text-foreground/90">
-              <span className="font-medium">{t("contractArticle5")}: </span>
+              <span className="font-medium">{t("contractSpecialTermsLabel")}: </span>
               {effectiveSpecialTerms(isKo, contract?.specialTerms ?? null)}
             </p>
             <p className="leading-relaxed text-muted-foreground">

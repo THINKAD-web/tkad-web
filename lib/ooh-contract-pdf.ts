@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { autoTable, type CellDef, type CellHookData } from "jspdf-autotable";
 import {
   ensureKrFontForServerPdf,
   krFontFamily,
@@ -762,8 +763,55 @@ function measureTableRowHeight(
   );
 }
 
+/** 1pt in jsPDF millimetres */
+const CONTRACT_TABLE_LINE_MM = 0.35;
+const CONTRACT_TABLE_GRID: [number, number, number] = [40, 40, 40];
+const CONTRACT_TABLE_HEAD_BG: [number, number, number] = [236, 236, 236];
+const CONTRACT_TABLE_LABEL_BG: [number, number, number] = [245, 245, 245];
+
+type ContractPdfDoc = import("jspdf").default;
+
+function contractTableMargins(doc: ContractPdfDoc, margin: number) {
+  const pageH = doc.internal.pageSize.getHeight();
+  return {
+    left: margin,
+    right: margin,
+    top: KO_LAYOUT.pageTop,
+    bottom: Math.max(12, pageH - KO_LAYOUT.pageBottom),
+  };
+}
+
+function autoTableFinalY(
+  doc: ContractPdfDoc,
+  fallback: number,
+  gapAfter = KO_LAYOUT.paragraphGap,
+): number {
+  const last = (doc as ContractPdfDoc & { lastAutoTable?: { finalY?: number } })
+    .lastAutoTable;
+  return (last?.finalY ?? fallback) + gapAfter;
+}
+
+/** 매체·합계 표: 텍스트 열 좌측, 공급가 열 우측 */
+function applyMediaTableCellAlign(data: CellHookData): void {
+  if (data.section === "head" && data.row.index === 0) return;
+  const raw = String(
+    (data.cell.raw as { content?: string } | undefined)?.content ??
+      data.cell.text ??
+      "",
+  ).trim();
+  if (/^[+−-]?￦/.test(raw) || data.column.index === 4) {
+    data.cell.styles.halign = "right";
+    return;
+  }
+  if (data.section === "head" && data.row.index === 1 && data.column.index === 0) {
+    data.cell.styles.halign = "center";
+    return;
+  }
+  data.cell.styles.halign = "left";
+}
+
 function drawArticle1SummaryTable(
-  doc: import("jspdf").default,
+  doc: ContractPdfDoc,
   fam: string,
   rows: readonly { label: string; value: string }[],
   margin: number,
@@ -773,66 +821,69 @@ function drawArticle1SummaryTable(
   const parsed = rows.filter((r) => r.label.trim());
   if (parsed.length === 0) return yStart;
 
-  const valueW = maxW - KO_LAYOUT.tableLabelW - KO_LAYOUT.tablePad * 2;
-  const labelW = KO_LAYOUT.tableLabelW - KO_LAYOUT.tablePad * 2;
-  const rowHeights = parsed.map((row) =>
-    measureTableRowHeight(doc, row.label, row.value, maxW),
-  );
-  const tableH = rowHeights.reduce((sum, h) => sum + h, 0);
-  let y = ensurePageSpace(doc, yStart, tableH + 2);
-
-  doc.setDrawColor(170, 170, 170);
-  doc.setLineWidth(KO_LAYOUT.tableBorderPt);
-  doc.rect(margin, y, maxW, tableH);
-
-  const valueX = margin + KO_LAYOUT.tableLabelW;
-  doc.line(valueX, y, valueX, y + tableH);
-
-  let rowY = y;
-  for (let i = 0; i < parsed.length; i++) {
-    const rowH = rowHeights[i]!;
-    if (i > 0) {
-      doc.line(margin, rowY, margin + maxW, rowY);
-    }
-    const row = parsed[i]!;
+  const y = ensurePageSpace(doc, yStart, 20);
+  setContractFont(doc, fam, "normal");
+  const body: CellDef[][] = parsed.map((row) => {
     const valueStyle = tableValueStyle(row.label);
-    const labelLines = wrapLines(doc, row.label, labelW);
-    const valueLines = wrapLines(doc, row.value, valueW);
-    const textTop = rowY + KO_LAYOUT.tablePad + KO_LAYOUT.tableValueLineH * 0.85;
+    const alignRight = tableValueAlignRight(row.label);
+    return [
+      {
+        content: row.label,
+        styles: {
+          font: fam,
+          fontStyle: "bold",
+          fontSize: KO_LAYOUT.tableFontPt,
+          fillColor: CONTRACT_TABLE_LABEL_BG,
+          halign: "left",
+          textColor: [0, 0, 0],
+        },
+      },
+      {
+        content: row.value,
+        styles: {
+          font: fam,
+          fontStyle: valueStyle.bold ? "bold" : "normal",
+          fontSize: valueStyle.size ?? KO_LAYOUT.tableFontPt,
+          halign: alignRight ? "right" : "left",
+          textColor: valueStyle.color ?? [0, 0, 0],
+          fillColor: [255, 255, 255],
+        },
+      },
+    ];
+  });
 
-    doc.setFillColor(245, 245, 245);
-    doc.rect(margin, rowY, KO_LAYOUT.tableLabelW, rowH, "F");
+  autoTable(doc, {
+    startY: y,
+    margin: contractTableMargins(doc, margin),
+    tableWidth: maxW,
+    theme: "grid",
+    showHead: "never",
+    body,
+    styles: {
+      font: fam,
+      fontSize: KO_LAYOUT.tableFontPt,
+      cellPadding: {
+        top: 1.8,
+        right: KO_LAYOUT.tablePad,
+        bottom: 1.8,
+        left: KO_LAYOUT.tablePad,
+      },
+      textColor: [0, 0, 0],
+      lineColor: CONTRACT_TABLE_GRID,
+      lineWidth: CONTRACT_TABLE_LINE_MM,
+      valign: "middle",
+      overflow: "linebreak",
+    },
+    columnStyles: {
+      0: { cellWidth: KO_LAYOUT.tableLabelW },
+      1: { cellWidth: maxW - KO_LAYOUT.tableLabelW },
+    },
+    didParseCell: (data) => {
+      data.cell.styles.font = fam;
+    },
+  });
 
-    labelLines.forEach((line, li) => {
-      drawTextRun(
-        doc,
-        fam,
-        margin + KO_LAYOUT.tablePad,
-        textTop + li * KO_LAYOUT.tableValueLineH,
-        line,
-        { bold: true, size: KO_LAYOUT.tableFontPt },
-      );
-    });
-    const valueRightX = margin + maxW - KO_LAYOUT.tablePad;
-    valueLines.forEach((line, li) => {
-      const opts = tableValueAlignRight(row.label)
-        ? { ...valueStyle, align: "right" as const }
-        : valueStyle;
-      drawTextRun(
-        doc,
-        fam,
-        tableValueAlignRight(row.label)
-          ? valueRightX
-          : valueX + KO_LAYOUT.tablePad,
-        textTop + li * KO_LAYOUT.tableValueLineH,
-        line,
-        opts,
-      );
-    });
-    rowY += rowH;
-  }
-
-  return y + tableH + KO_LAYOUT.paragraphGap;
+  return autoTableFinalY(doc, y, 1);
 }
 
 function estimateParagraphRenderHeight(
@@ -1071,13 +1122,13 @@ function renderKoSignatureBlock(
   const colW = (maxW - KO_LAYOUT.sigColGap) / 2;
   const leftX = margin;
   const rightX = margin + colW + KO_LAYOUT.sigColGap;
-  const blockH = KO_LAYOUT.sigBoxH + 20;
+  const blockH = KO_LAYOUT.sigBoxH + 14;
 
   let y = ensurePageSpace(doc, yStart, blockH);
   y += KO_LAYOUT.sigBlockTopGap;
 
   drawTextRun(doc, fam, pageW / 2, y, vars.contractDate, {
-    size: 10.5,
+    size: 10,
     bold: true,
     align: "center",
   });
@@ -1091,10 +1142,10 @@ function renderKoSignatureBlock(
   doc.rect(leftX, boxTop, colW, KO_LAYOUT.sigBoxH);
   doc.rect(rightX, boxTop, colW, KO_LAYOUT.sigBoxH);
 
-  drawTextRun(doc, fam, leftX + 3, boxTop + 5, '"갑"', { bold: true, size: 9.5 });
-  drawTextRun(doc, fam, rightX + 3, boxTop + 5, '"을"', { bold: true, size: 9.5 });
+  drawTextRun(doc, fam, leftX + 3, boxTop + 4, '"갑"', { bold: true, size: 9 });
+  drawTextRun(doc, fam, rightX + 3, boxTop + 4, '"을"', { bold: true, size: 9 });
 
-  let ly = boxTop + 10;
+  let ly = boxTop + 9;
   ly = drawSigFieldRow(doc, fam, leftX + 3, ly, colW - 6, "상호", vars.clientCompany);
   ly = drawSigFieldRow(doc, fam, leftX + 3, ly, colW - 6, "주소", vars.clientAddress);
   ly = drawSigFieldRow(doc, fam, leftX + 3, ly, colW - 6, "전화번호", vars.clientPhone);
@@ -1108,7 +1159,7 @@ function renderKoSignatureBlock(
     vars.clientRepName,
   );
 
-  let ry = boxTop + 10;
+  let ry = boxTop + 9;
   ry = drawSigFieldRow(doc, fam, rightX + 3, ry, colW - 6, "상호", partyB.companyName);
   ry = drawSigFieldRow(doc, fam, rightX + 3, ry, colW - 6, "주소", partyB.address);
   ry = drawSigFieldRow(doc, fam, rightX + 3, ry, colW - 6, "전화번호", partyB.tel);
@@ -1180,7 +1231,7 @@ function drawDaEumDivider(
     size: KO_LAYOUT.bodyPt,
     align: "center",
   });
-  return y + KO_LAYOUT.bodyLineH + 2;
+  return y + KO_LAYOUT.bodyLineH + 1;
 }
 
 function applyKoContractPageChrome(
@@ -1211,8 +1262,40 @@ function applyKoContractPageChrome(
   }
 }
 
+function mediaSummaryFootRow(
+  fam: string,
+  label: string,
+  amount: string,
+  bold: boolean,
+): CellDef[] {
+  const fontStyle = bold ? "bold" : "normal";
+  return [
+    {
+      content: label,
+      colSpan: 4,
+      styles: {
+        font: fam,
+        fontStyle,
+        halign: "left",
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+      },
+    },
+    {
+      content: amount,
+      styles: {
+        font: fam,
+        fontStyle,
+        halign: "right",
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+      },
+    },
+  ];
+}
+
 function drawMediaScheduleTable(
-  doc: import("jspdf").default,
+  doc: ContractPdfDoc,
   fam: string,
   vars: OohContractPdfVars,
   margin: number,
@@ -1221,149 +1304,137 @@ function drawMediaScheduleTable(
 ): number {
   const items = vars.mediaLineItems ?? [];
   if (items.length === 0) return y;
-  y = ensurePageSpace(doc, y, 16);
-  drawTextRun(doc, fam, margin, y, "※ 매체별 내역", {
-    bold: true,
-    size: KO_LAYOUT.articleTitlePt,
-  });
-  y += KO_LAYOUT.bodyLineH + 1;
+  y = ensurePageSpace(doc, y, 20);
+  y += 0.5;
 
-  const colWs = [maxW * 0.08, maxW * 0.28, maxW * 0.24, maxW * 0.18, maxW * 0.22];
-  const headers = ["No", "매체명", "위치", "규격", "공급가(VAT별도)"];
-  const headerH = 7;
-  const bodyRows: { cells: string[]; rowH: number }[] = [];
-  let sum = 0;
-  items.forEach((item, idx) => {
-    const cells = [
-      String(idx + 1),
-      item.name,
-      item.location?.trim() || "—",
-      item.spec?.trim() || "—",
-      wonLabel(item.lineSupplyWon),
-    ];
-    const heights = cells.map((c, i) =>
-      Math.max(
-        5,
-        wrapLines(doc, c, colWs[i]! - KO_LAYOUT.tablePad * 2).length *
-          KO_LAYOUT.tableValueLineH,
-      ),
-    );
-    const rowH =
-      Math.max(KO_LAYOUT.tableRowH, ...heights) + KO_LAYOUT.tablePad;
-    bodyRows.push({ cells, rowH });
-    sum += item.lineSupplyWon;
-  });
+  const colWs = [
+    maxW * 0.05,
+    maxW * 0.3,
+    maxW * 0.25,
+    maxW * 0.15,
+    maxW * 0.25,
+  ];
   const money = moneyFromPdfVars(vars);
-  const wonText = (n: number) => `￦${Math.round(n).toLocaleString("ko-KR")}`;
-  const summaryRows: { text: string; bold: boolean }[] = [
-    { text: `매체비 소계 ${wonText(sum)}`, bold: true },
+  const body: CellDef[][] = items.map((item, idx) => [
+    { content: String(idx + 1) },
+    { content: item.name },
+    { content: item.location?.trim() || "—" },
+    { content: item.spec?.trim() || "—" },
+    { content: wonLabel(item.lineSupplyWon) },
+  ]);
+  const foot: CellDef[][] = [
+    mediaSummaryFootRow(fam, "매체비 소계", wonLabel(money.mediaSubtotalWon), true),
   ];
   if (money.adjustmentWon !== 0) {
     const sign = money.adjustmentWon > 0 ? "+" : "−";
-    summaryRows.push({
-      text: `협의 조정 ${sign}${wonText(Math.abs(money.adjustmentWon))}`,
-      bold: true,
-    });
+    foot.push(
+      mediaSummaryFootRow(
+        fam,
+        "협의 조정",
+        `${sign}${wonLabel(Math.abs(money.adjustmentWon))}`,
+        true,
+      ),
+    );
   }
   if (money.extraProductionWon > 0) {
-    summaryRows.push({
-      text: `제작비 ${wonText(money.extraProductionWon)}`,
-      bold: false,
-    });
+    foot.push(
+      mediaSummaryFootRow(fam, "제작비", wonLabel(money.extraProductionWon), false),
+    );
   }
   if (money.extraInstallWon > 0) {
-    summaryRows.push({
-      text: `설치비 ${wonText(money.extraInstallWon)}`,
-      bold: false,
-    });
+    foot.push(
+      mediaSummaryFootRow(fam, "설치비", wonLabel(money.extraInstallWon), false),
+    );
   }
   if (money.extraOtherWon > 0) {
-    summaryRows.push({
-      text: `기타 ${wonText(money.extraOtherWon)}`,
-      bold: false,
-    });
-  }
-  summaryRows.push(
-    { text: `공급가액 합계 ${wonText(money.supplyWon)}`, bold: true },
-    { text: `부가세(10%) ${wonText(money.vatWon)}`, bold: false },
-    { text: `총액(VAT포함) ${wonText(money.totalWon)}`, bold: true },
-  );
-  const extraRows: { cells: string[]; rowH: number }[] = [];
-  const footerH = (KO_LAYOUT.tableRowH + 2) * summaryRows.length;
-  const tableH = headerH + bodyRows.reduce((s, r) => s + r.rowH, 0) + footerH;
-
-  y = ensurePageSpace(doc, y, tableH + 4);
-  const tableTop = y;
-  doc.setDrawColor(170, 170, 170);
-  doc.setLineWidth(KO_LAYOUT.tableBorderPt);
-  doc.rect(margin, tableTop, maxW, tableH);
-
-  let rowY = tableTop;
-  let x = margin;
-  headers.forEach((h, i) => {
-    if (i > 0) {
-      doc.line(x, tableTop, x, tableTop + tableH);
-    }
-    drawTextRun(doc, fam, x + KO_LAYOUT.tablePad, rowY + 5, h, {
-      bold: true,
-      size: 8,
-    });
-    x += colWs[i]!;
-  });
-  rowY += headerH;
-  doc.line(margin, rowY, margin + maxW, rowY);
-
-  for (const row of bodyRows) {
-    x = margin;
-    row.cells.forEach((c, i) => {
-      const lines = wrapLines(doc, c, colWs[i]! - KO_LAYOUT.tablePad * 2);
-      lines.forEach((line, li) => {
-        drawTextRun(
-          doc,
-          fam,
-          x + KO_LAYOUT.tablePad,
-          rowY + KO_LAYOUT.tablePad + 4 + li * KO_LAYOUT.tableValueLineH,
-          line,
-          { size: 8 },
-        );
-      });
-      x += colWs[i]!;
-    });
-    rowY += row.rowH;
-    doc.line(margin, rowY, margin + maxW, rowY);
-  }
-
-  for (const row of extraRows) {
-    x = margin;
-    row.cells.forEach((c, i) => {
-      drawTextRun(
-        doc,
-        fam,
-        x + KO_LAYOUT.tablePad,
-        rowY + 5,
-        c,
-        { size: 8 },
-      );
-      x += colWs[i]!;
-    });
-    rowY += row.rowH;
-    doc.line(margin, rowY, margin + maxW, rowY);
-  }
-
-  for (const row of summaryRows) {
-    drawTextRun(
-      doc,
-      fam,
-      margin + KO_LAYOUT.tablePad,
-      rowY + 5,
-      row.text,
-      { bold: row.bold, size: 8.5 },
+    foot.push(
+      mediaSummaryFootRow(fam, "기타", wonLabel(money.extraOtherWon), false),
     );
-    rowY += KO_LAYOUT.tableRowH + 1;
-    doc.line(margin, rowY, margin + maxW, rowY);
   }
+  foot.push(
+    mediaSummaryFootRow(fam, "공급가액 합계", wonLabel(money.supplyWon), true),
+    mediaSummaryFootRow(fam, "부가세(10%)", wonLabel(money.vatWon), false),
+    mediaSummaryFootRow(fam, "총액(VAT포함)", wonLabel(money.totalWon), true),
+  );
 
-  return tableTop + tableH + KO_LAYOUT.paragraphGap + 2;
+  setContractFont(doc, fam, "normal");
+  autoTable(doc, {
+    startY: y,
+    margin: contractTableMargins(doc, margin),
+    tableWidth: maxW,
+    theme: "grid",
+    showHead: "everyPage",
+    showFoot: "lastPage",
+    rowPageBreak: "avoid",
+    head: [
+      [
+        {
+          content: "※ 매체별 내역",
+          colSpan: 5,
+          styles: {
+            fontStyle: "bold",
+            halign: "left",
+            fillColor: [255, 255, 255],
+            fontSize: KO_LAYOUT.mediaTableFontPt + 0.5,
+          },
+        },
+      ],
+      ["No", "매체명", "위치", "규격", "공급가(VAT별도)"],
+    ],
+    body,
+    foot,
+    styles: {
+      font: fam,
+      fontSize: KO_LAYOUT.mediaTableFontPt,
+      cellPadding: {
+        top: 1.6,
+        right: KO_LAYOUT.tablePad,
+        bottom: 1.6,
+        left: KO_LAYOUT.tablePad,
+      },
+      textColor: [0, 0, 0],
+      lineColor: CONTRACT_TABLE_GRID,
+      lineWidth: CONTRACT_TABLE_LINE_MM,
+      valign: "middle",
+      overflow: "linebreak",
+    },
+    headStyles: {
+      font: fam,
+      fontStyle: "bold",
+      fillColor: CONTRACT_TABLE_HEAD_BG,
+      textColor: [0, 0, 0],
+    },
+    footStyles: {
+      font: fam,
+      fillColor: [255, 255, 255],
+      textColor: [0, 0, 0],
+    },
+    columnStyles: {
+      0: { cellWidth: colWs[0] },
+      1: { cellWidth: colWs[1] },
+      2: { cellWidth: colWs[2] },
+      3: { cellWidth: colWs[3] },
+      4: { cellWidth: colWs[4] },
+    },
+    didParseCell: (data) => {
+      data.cell.styles.font = fam;
+      if (data.section === "head" && data.row.index === 0) {
+        data.cell.styles.font = fam;
+        return;
+      }
+      applyMediaTableCellAlign(data);
+      if (data.column.index === 0 && data.section !== "foot") {
+        data.cell.styles.cellPadding = {
+          top: 1.6,
+          right: 0.5,
+          bottom: 1.6,
+          left: 0.5,
+        };
+      }
+    },
+  });
+
+  return autoTableFinalY(doc, y, 1);
 }
 
 async function buildKoStandardContractPdf(
@@ -1396,7 +1467,7 @@ async function buildKoStandardContractPdf(
     }
 
     if (section.kind === "signature") {
-      const sigNeed = KO_LAYOUT.sigBoxH + 28;
+      const sigNeed = KO_LAYOUT.sigBoxH + 22;
       const prev = template.sections[template.sections.indexOf(section) - 1];
       const keepWithArt11 = prev?.heading.startsWith("제11조");
       if (
@@ -1434,7 +1505,7 @@ async function buildKoStandardContractPdf(
     if (section.kind === "article") {
       if (section.heading.startsWith("제11조")) {
         const h11 = estimateArticleHeight(doc, section, maxW, vars);
-        const sigBundle = KO_LAYOUT.sigBoxH + 28;
+        const sigBundle = KO_LAYOUT.sigBoxH + 22;
         const bundle = h11 + sigBundle;
         if (y + bundle > KO_LAYOUT.pageBottom) {
           doc.addPage();
