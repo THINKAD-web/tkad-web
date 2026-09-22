@@ -205,6 +205,30 @@ export async function deleteBunnyPublicUrls(urls: string[]): Promise<void> {
   }
 }
 
+/** Storage Zone API로 객체 바이트 조회 (CDN URL 대신 서버 검증용) */
+export async function fetchFromBunnyStorage(path: string): Promise<Buffer> {
+  const zone = process.env.BUNNY_STORAGE_ZONE?.trim();
+  const key = process.env.BUNNY_STORAGE_API_KEY?.trim();
+  if (!zone || !key) {
+    throw new Error("BUNNY_STORAGE_NOT_CONFIGURED");
+  }
+  const normalizedPath = assertAsciiBunnyObjectPath(path.replace(/^\/+/, ""));
+  const getUrl = `${bunnyStorageBaseUrl()}/${encodeURIComponent(zone)}/${normalizedPath}`;
+
+  const res = await fetch(getUrl, {
+    method: "GET",
+    headers: { AccessKey: key },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`BUNNY_FETCH_FAILED:${res.status}:${t.slice(0, 200)}`);
+  }
+
+  return Buffer.from(await res.arrayBuffer());
+}
+
 export async function deleteFromBunnyStorage(path: string): Promise<void> {
   const zone = process.env.BUNNY_STORAGE_ZONE?.trim();
   const key = process.env.BUNNY_STORAGE_API_KEY?.trim();

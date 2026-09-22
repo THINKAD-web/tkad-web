@@ -3011,6 +3011,8 @@
     "sendUploadFail": "업로드 계약 발송에 실패했습니다.",
     "uploadPreviewLocal": "로컬 PDF 미리보기",
     "uploadBusy": "PDF 업로드 중…",
+    "uploadErrStorageNotConfigured": "계약 PDF 저장소가 설정되지 않았습니다. Bunny(BUNNY_STORAGE_*) 또는 Cloudinary를 설정해 주세요.",
+    "uploadErrBunnyUpload": "Bunny Storage PDF 업로드에 실패했습니다.",
     "uploadErrCloudinaryNotConfigured": "Cloudinary가 설정되지 않았습니다. Vercel 환경 변수(CLOUDINARY_*)를 확인해 주세요.",
     "uploadErrCloudinaryUpload": "Cloudinary PDF 업로드에 실패했습니다.",
     "uploadErrCloudinaryDisabled": "Cloudinary cloud가 비활성(disabled) 상태입니다. cloudinary.com 콘솔에서 Product environment를 활성화하거나, Vercel Production의 CLOUDINARY_CLOUD_NAME·API_KEY·API_SECRET을 사용 중인 cloud와 일치시키세요. (CLOUDINARY_URL이 있으면 삭제하거나 동일 cloud로 맞추세요.)",
