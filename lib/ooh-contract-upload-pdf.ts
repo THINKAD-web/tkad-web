@@ -1,7 +1,8 @@
 import { v2 as cloudinary } from "cloudinary";
 import { parseCloudinaryPublicId } from "@/lib/campaign-proof-cloudinary";
 import {
-  bunnyPathFromPublicUrl,
+  buildBunnyCdnUrl,
+  bunnyStoragePathCandidatesFromPublicUrl,
   fetchFromBunnyStorage,
   isBunnyStorageConfigured,
 } from "@/lib/bunny-storage";
@@ -66,21 +67,40 @@ export async function fetchUploadedContractPdfBuffer(
     throw new Error("invalid_upload_url");
   }
 
-  const bunnyPath = bunnyPathFromPublicUrl(trimmed);
-  if (bunnyPath && isBunnyStorageConfigured()) {
-    try {
-      const buf = await fetchFromBunnyStorage(bunnyPath);
-      assertUploadPdfBuffer(buf);
-      return buf;
-    } catch (e) {
-      if (!(e instanceof Error && e.message.startsWith("BUNNY_FETCH_FAILED"))) {
+  const bunnyPaths = bunnyStoragePathCandidatesFromPublicUrl(trimmed);
+  if (bunnyPaths.length && isBunnyStorageConfigured()) {
+    let storageFailed = false;
+    for (const bunnyPath of bunnyPaths) {
+      try {
+        const buf = await fetchFromBunnyStorage(bunnyPath);
+        assertUploadPdfBuffer(buf);
+        return buf;
+      } catch (e) {
+        if (e instanceof Error && e.message.startsWith("BUNNY_FETCH_FAILED")) {
+          storageFailed = true;
+          continue;
+        }
+        if (
+          e instanceof Error &&
+          (e.message === "not_pdf" || e.message === "empty_pdf")
+        ) {
+          continue;
+        }
         throw e;
       }
-      // Storage API 실패 시 Pull Zone CDN으로 폴백
+    }
+    if (!storageFailed && bunnyPaths.length > 0) {
+      // paths existed but content was not PDF — fall through to HTTP
     }
   }
 
-  const candidates = [trimmed];
+  const httpUrlCandidates = new Set<string>([trimmed]);
+  for (const p of bunnyPaths) {
+    const cdn = buildBunnyCdnUrl(p);
+    if (cdn) httpUrlCandidates.add(cdn);
+  }
+
+  const candidates = [...httpUrlCandidates];
   if (isCloudinaryHost(trimmed)) {
     const signed = cloudinarySignedRawDeliveryUrl(trimmed);
     if (signed && signed !== trimmed) {
@@ -120,4 +140,24 @@ export async function fetchUploadedContractPdfVerified(
     throw new Error("upload_sha_mismatch");
   }
   return buf;
+}
+
+/** 미리보기 전용 — fetch 실패 시 SHA 불일치면 PDF만 검증 후 반환 (서명 API는 verified 유지) */
+export async function fetchUploadedContractPdfForPreview(
+  uploadedPdfUrl: string,
+  expectedSha256: string | null | undefined,
+): Promise<Buffer> {
+  try {
+    return await fetchUploadedContractPdfVerified(
+      uploadedPdfUrl,
+      expectedSha256,
+    );
+  } catch (e) {
+    if (!(e instanceof Error && e.message === "upload_sha_mismatch")) {
+      throw e;
+    }
+    const buf = await fetchUploadedContractPdfBuffer(uploadedPdfUrl);
+    console.warn("[contract preview] uploaded PDF sha mismatch; serving fetched PDF");
+    return buf;
+  }
 }

@@ -147,6 +147,19 @@ export function bunnyPathFromPublicUrl(publicUrl: string): string | null {
   }
 }
 
+/** 업로드 URL → Storage GET 후보 경로 (legacy `tkad/tkad/…` 중복 prefix 보정) */
+export function bunnyStoragePathCandidatesFromPublicUrl(
+  publicUrl: string,
+): string[] {
+  const primary = bunnyPathFromPublicUrl(publicUrl);
+  if (!primary) return [];
+  const out = new Set<string>([primary]);
+  if (primary.startsWith("tkad/tkad/")) {
+    out.add(primary.slice("tkad/".length));
+  }
+  return [...out];
+}
+
 /** 매체 `image` + `extractedImages` 에서 고유 URL 목록 */
 export function collectMediaImageUrls(
   image: string | null | undefined,

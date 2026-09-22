@@ -32,11 +32,17 @@ export default function ContractPdfPreview({ quoteId, className, title }: Props)
           if (!cancelled) setFailed(true);
           return;
         }
-        const blob = await res.blob();
-        if (blob.size < 100 || blob.type.includes("text")) {
+        const buf = await res.arrayBuffer();
+        if (buf.byteLength < 100) {
           if (!cancelled) setFailed(true);
           return;
         }
+        const head = new TextDecoder().decode(new Uint8Array(buf, 0, 5));
+        if (!head.startsWith("%PDF-")) {
+          if (!cancelled) setFailed(true);
+          return;
+        }
+        const blob = new Blob([buf], { type: "application/pdf" });
         revoked = URL.createObjectURL(blob);
         if (!cancelled) setBlobUrl(revoked);
       } catch {

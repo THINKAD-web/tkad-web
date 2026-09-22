@@ -49,10 +49,11 @@ export const spaceGrotesk = Space_Grotesk({
 
 /** 잡지형 헤드라인 — 홈·인사이트 등 읽는 화면 (한글 지원) */
 export const notoSerifKr = Noto_Serif_KR({
-  subsets: ["latin"],
+  subsets: ["latin", "korean"],
   variable: "--font-noto-serif-kr",
   display: "swap",
-  weight: ["400", "600", "700"],
+  weight: ["400", "700"],
+  adjustFontFallback: false,
 });
 
 export const jetBrainsMono = JetBrains_Mono({

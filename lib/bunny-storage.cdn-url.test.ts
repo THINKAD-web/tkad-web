@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildBunnyCdnUrl, bunnyPathFromPublicUrl } from "./bunny-storage";
+import {
+  buildBunnyCdnUrl,
+  bunnyPathFromPublicUrl,
+  bunnyStoragePathCandidatesFromPublicUrl,
+} from "./bunny-storage";
 
 const ENV_KEY = "BUNNY_CDN_BASE_URL";
 
@@ -51,6 +55,16 @@ test("buildBunnyCdnUrl matrix", async (t) => {
         "https://tkad-cdn.b-cdn.net/tkad/contracts/source/abc.pdf",
       ),
       "tkad/contracts/source/abc.pdf",
+    );
+  });
+
+  await t.test("bunnyStoragePathCandidates dedupes legacy tkad/tkad prefix", () => {
+    process.env[ENV_KEY] = "https://tkad-cdn.b-cdn.net/tkad";
+    assert.deepEqual(
+      bunnyStoragePathCandidatesFromPublicUrl(
+        "https://tkad-cdn.b-cdn.net/tkad/tkad/contracts/source/legacy.pdf",
+      ),
+      ["tkad/tkad/contracts/source/legacy.pdf", "tkad/contracts/source/legacy.pdf"],
     );
   });
 });
