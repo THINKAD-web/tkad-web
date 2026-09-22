@@ -2937,7 +2937,18 @@
     "sendMode_auto": "Auto-generated",
     "sendMode_upload_esign": "Upload · e-sign",
     "sendMode_upload_attachment": "Upload · attachment",
-    "badgeAttachmentSent": "Attachment sent"
+    "badgeAttachmentSent": "Attachment sent",
+    "cancelContract": "Cancel",
+    "cancelConfirm": "Cancel this contract? The signing link will stop working and media holds will be released. (The row stays in the list.)",
+    "cancelOk": "Contract cancelled.",
+    "cancelFail": "Could not cancel the contract.",
+    "deleteContract": "Delete",
+    "deleteConfirm": "Permanently delete this contract and quote? This cannot be undone.",
+    "deleteConfirmSigned": "This contract is signed or confirmed. Deleting removes audit logs too. Continue?",
+    "deleteOk": "Deleted.",
+    "deleteFail": "Could not delete.",
+    "deleteFailCampaign": "This quote is linked to a campaign. Clear the campaign link first.",
+    "deleteFailLocked": "In-progress or completed campaign quotes cannot be deleted."
   },
   "adminStandaloneContract": {
     "title": "Quick contract",

@@ -10,6 +10,7 @@ import {
   Loader2,
   RefreshCw,
   Search,
+  Trash2,
 } from "lucide-react";
 import type { QuoteBreakdown } from "@/lib/quote-calculator";
 import {
@@ -82,6 +83,14 @@ function formatPeriod(row: ContractRow): string {
     return `${formatDate(row.startDate)} ~ ${formatDate(row.endDate)}`;
   }
   return row.period || "—";
+}
+
+function canCancelUnsignedContract(status: string): boolean {
+  return status === "pending" || status === "attachment_sent";
+}
+
+function deleteNeedsSignedAck(status: string): boolean {
+  return status === "signed" || status === "confirmed";
 }
 
 export default function AdminContractsClient() {
@@ -202,6 +211,76 @@ export default function AdminContractsClient() {
   function openRow(quoteId: string) {
     setSheetQuoteId(quoteId);
   }
+
+  const cancelContract = useCallback(
+    async (quoteId: string) => {
+      if (!window.confirm(t("cancelConfirm"))) return;
+      try {
+        const res = await fetch(
+          `/api/admin/ooh-quotes/${quoteId}/cancel-unsigned`,
+          { method: "POST", credentials: "include" },
+        );
+        if (!res.ok) {
+          toast("error", t("cancelFail"));
+          return;
+        }
+        toast("success", t("cancelOk"));
+        if (sheetQuoteId === quoteId) {
+          setSheetQuoteId(null);
+          setDetail(undefined);
+        }
+        await load();
+      } catch {
+        toast("error", t("cancelFail"));
+      }
+    },
+    [load, sheetQuoteId, t, toast],
+  );
+
+  const deleteContract = useCallback(
+    async (row: ContractRow) => {
+      const needsAck = deleteNeedsSignedAck(row.contractStatus);
+      const msg = needsAck ? t("deleteConfirmSigned") : t("deleteConfirm");
+      if (!window.confirm(msg)) return;
+      try {
+        const res = await fetch(`/api/admin/contracts/${row.contractId}`, {
+          method: "DELETE",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: needsAck
+            ? JSON.stringify({ acknowledgeSigned: true })
+            : undefined,
+        });
+        const raw: unknown = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const err =
+            typeof raw === "object" &&
+            raw !== null &&
+            "error" in raw &&
+            typeof (raw as { error?: unknown }).error === "string"
+              ? (raw as { error: string }).error
+              : "delete_fail";
+          if (err === "campaign_linked") {
+            toast("error", t("deleteFailCampaign"));
+          } else if (err === "quote_locked") {
+            toast("error", t("deleteFailLocked"));
+          } else {
+            toast("error", t("deleteFail"));
+          }
+          return;
+        }
+        toast("success", t("deleteOk"));
+        if (sheetQuoteId === row.quoteId) {
+          setSheetQuoteId(null);
+          setDetail(undefined);
+        }
+        await load();
+      } catch {
+        toast("error", t("deleteFail"));
+      }
+    },
+    [load, sheetQuoteId, t, toast],
+  );
 
   const selectedRow = rows.find((r) => r.quoteId === sheetQuoteId);
 
@@ -432,6 +511,25 @@ export default function AdminContractsClient() {
                       >
                         {t("detailTitle")}
                       </Button>
+                      {canCancelUnsignedContract(row.contractStatus) ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={`border-red-300 text-red-700 hover:bg-red-50 ${adminMobileTouchBtnClass}`}
+                          onClick={() => void cancelContract(row.quoteId)}
+                        >
+                          {t("cancelContract")}
+                        </Button>
+                      ) : null}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={`border-red-300 text-red-700 hover:bg-red-50 ${adminMobileTouchBtnClass}`}
+                        onClick={() => void deleteContract(row)}
+                      >
+                        <Trash2 className="mr-1.5 h-4 w-4" />
+                        {t("deleteContract")}
+                      </Button>
                     </div>
                   </AdminMobileCard>
                 ))}
@@ -511,32 +609,24 @@ export default function AdminContractsClient() {
                               {t("signedPdf")}
                             </a>
                           ) : null}
-                          {row.contractStatus === "pending" ||
-                          row.contractStatus === "attachment_sent" ? (
+                          {canCancelUnsignedContract(row.contractStatus) ? (
                             <button
                               type="button"
-                              className="inline-flex items-center gap-1 rounded-md border border-red-300 px-2 py-1 text-[10px] font-semibold text-red-700"
-                              onClick={() => {
-                                if (
-                                  !window.confirm(
-                                    "이 계약을 취소할까요? 서명 링크는 무효가 되고 매체 홀드가 해제됩니다.",
-                                  )
-                                ) {
-                                  return;
-                                }
-                                void fetch(
-                                  `/api/admin/ooh-quotes/${row.quoteId}/cancel-unsigned`,
-                                  { method: "POST", credentials: "include" },
-                                ).then(() => void load());
-                              }}
+                              className="inline-flex items-center gap-1 rounded-md border border-red-300 px-2 py-1 text-[10px] font-semibold text-red-700 hover:bg-red-50"
+                              onClick={() => void cancelContract(row.quoteId)}
                             >
-                              취소
+                              {t("cancelContract")}
                             </button>
-                          ) : row.contractSigned ? (
-                            <span className="max-w-[8rem] text-[10px] text-muted-foreground">
-                              서명 완료 건은 취소 불가
-                            </span>
                           ) : null}
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 rounded-md border border-red-400 bg-red-50 px-2 py-1 text-[10px] font-semibold text-red-800 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-950/60"
+                            title={t("deleteContract")}
+                            onClick={() => void deleteContract(row)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            {t("deleteContract")}
+                          </button>
                         </div>
                       </td>
                     </tr>

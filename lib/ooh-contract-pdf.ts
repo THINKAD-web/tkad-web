@@ -502,13 +502,6 @@ function emphasisRulesForSection(
   return [];
 }
 
-function tableValueAlignRight(label: string): boolean {
-  if (label.includes("광고명칭") || label.includes("계약기간") || label.includes("기타")) {
-    return false;
-  }
-  return true;
-}
-
 function tableValueStyle(label: string): TextRunOpts {
   if (label.includes("총액") || label.includes("최종합계")) {
     return { bold: true, size: KO_LAYOUT.tableTotalPt, color: KO_ACCENT };
@@ -791,22 +784,8 @@ function autoTableFinalY(
   return (last?.finalY ?? fallback) + gapAfter;
 }
 
-/** 매체·합계 표: 텍스트 열 좌측, 공급가 열 우측 */
+/** 매체·합계 표 — 전 열 좌측 정렬 */
 function applyMediaTableCellAlign(data: CellHookData): void {
-  if (data.section === "head" && data.row.index === 0) return;
-  const raw = String(
-    (data.cell.raw as { content?: string } | undefined)?.content ??
-      data.cell.text ??
-      "",
-  ).trim();
-  if (/^[+−-]?￦/.test(raw) || data.column.index === 4) {
-    data.cell.styles.halign = "right";
-    return;
-  }
-  if (data.section === "head" && data.row.index === 1 && data.column.index === 0) {
-    data.cell.styles.halign = "center";
-    return;
-  }
   data.cell.styles.halign = "left";
 }
 
@@ -825,7 +804,6 @@ function drawArticle1SummaryTable(
   setContractFont(doc, fam, "normal");
   const body: CellDef[][] = parsed.map((row) => {
     const valueStyle = tableValueStyle(row.label);
-    const alignRight = tableValueAlignRight(row.label);
     return [
       {
         content: row.label,
@@ -844,7 +822,7 @@ function drawArticle1SummaryTable(
           font: fam,
           fontStyle: valueStyle.bold ? "bold" : "normal",
           fontSize: valueStyle.size ?? KO_LAYOUT.tableFontPt,
-          halign: alignRight ? "right" : "left",
+          halign: "left",
           textColor: valueStyle.color ?? [0, 0, 0],
           fillColor: [255, 255, 255],
         },
@@ -862,6 +840,7 @@ function drawArticle1SummaryTable(
     styles: {
       font: fam,
       fontSize: KO_LAYOUT.tableFontPt,
+      halign: "left",
       cellPadding: {
         top: 1.8,
         right: KO_LAYOUT.tablePad,
@@ -880,6 +859,7 @@ function drawArticle1SummaryTable(
     },
     didParseCell: (data) => {
       data.cell.styles.font = fam;
+      data.cell.styles.halign = "left";
     },
   });
 
@@ -1075,23 +1055,15 @@ function drawPartyStamp(
   cx: number,
   cy: number,
 ) {
-  const stampSize = 24;
+  const stampSize = KO_LAYOUT.sigStampMm;
+  const x = cx - stampSize / 2;
+  const y = cy - stampSize / 2;
   if (stampDataUrl) {
-    try {
-      doc.addImage(
-        stampDataUrl,
-        "PNG",
-        cx - stampSize / 2,
-        cy - stampSize / 2,
-        stampSize,
-        stampSize,
-        undefined,
-        "FAST",
-        -3,
-      );
+    const raw = stampDataUrl.includes(",")
+      ? stampDataUrl.split(",")[1]!
+      : stampDataUrl.replace(/^data:image\/png;base64,/, "");
+    if (embedPngOnPdf(doc, raw, x, y, stampSize, stampSize)) {
       return;
-    } catch {
-      /* fallback below */
     }
   }
   doc.setDrawColor(160, 160, 160);
@@ -1173,10 +1145,34 @@ function renderKoSignatureBlock(
     partyB.representative,
   );
 
-  const sigW = Math.min(colW - 10, 52);
-  const sigH = 22;
-  const sigX = leftX + colW - sigW - 4;
-  const sigY = boxTop + KO_LAYOUT.sigBoxH - sigH - 3;
+  /** 대표자 행 — 도장·서명은 이 줄 오른쪽 (인) 위치 */
+  const repRowCenterY =
+    boxTop + 9 + 3 * KO_LAYOUT.sigFieldH + KO_LAYOUT.sigFieldH / 2;
+  const stampInset = KO_LAYOUT.sigStampInsetMm;
+  const stampSize = KO_LAYOUT.sigStampMm;
+
+  const partyBStampCx = rightX + colW - stampInset;
+  const partyBStampCy = repRowCenterY;
+  drawPartyStamp(doc, fam, options?.stampDataUrl ?? null, partyBStampCx, partyBStampCy);
+
+  const clientStampCx = leftX + colW - stampInset;
+  const clientStampCy = repRowCenterY;
+  if (options?.clientStampDataUrl) {
+    drawPartyStamp(
+      doc,
+      fam,
+      options.clientStampDataUrl,
+      clientStampCx,
+      clientStampCy,
+    );
+  }
+
+  const sigH = 16;
+  const sigW = Math.min(colW - stampInset - stampSize - 8, 44);
+  const sigX = options?.clientStampDataUrl
+    ? leftX + colW - stampInset - stampSize - sigW - 3
+    : leftX + colW - stampInset - sigW;
+  const sigY = repRowCenterY - sigH / 2;
 
   if (options?.signaturePngBase64) {
     const ok = embedPngOnPdf(
@@ -1193,24 +1189,8 @@ function renderKoSignatureBlock(
       });
     }
   } else if (!options?.clientStampDataUrl) {
-    drawSignaturePlaceholder(doc, fam, sigX + sigW / 2, sigY + sigH / 2);
+    drawSignaturePlaceholder(doc, fam, sigX + sigW / 2, repRowCenterY);
   }
-
-  const clientStampCx = leftX + colW - 14;
-  const clientStampCy = boxTop + KO_LAYOUT.sigBoxH - 12;
-  if (options?.clientStampDataUrl) {
-    drawPartyStamp(
-      doc,
-      fam,
-      options.clientStampDataUrl,
-      clientStampCx,
-      clientStampCy,
-    );
-  }
-
-  const stampCx = rightX + colW - 14;
-  const stampCy = boxTop + KO_LAYOUT.sigBoxH - 12;
-  drawPartyStamp(doc, fam, options?.stampDataUrl ?? null, stampCx, stampCy);
 
   return boxTop + KO_LAYOUT.sigBoxH + 6;
 }
@@ -1286,7 +1266,7 @@ function mediaSummaryFootRow(
       styles: {
         font: fam,
         fontStyle,
-        halign: "right",
+        halign: "left",
         fillColor: [255, 255, 255],
         textColor: [0, 0, 0],
       },
@@ -1386,6 +1366,7 @@ function drawMediaScheduleTable(
     styles: {
       font: fam,
       fontSize: KO_LAYOUT.mediaTableFontPt,
+      halign: "left",
       cellPadding: {
         top: 1.6,
         right: KO_LAYOUT.tablePad,
@@ -1401,11 +1382,13 @@ function drawMediaScheduleTable(
     headStyles: {
       font: fam,
       fontStyle: "bold",
+      halign: "left",
       fillColor: CONTRACT_TABLE_HEAD_BG,
       textColor: [0, 0, 0],
     },
     footStyles: {
       font: fam,
+      halign: "left",
       fillColor: [255, 255, 255],
       textColor: [0, 0, 0],
     },
@@ -1418,10 +1401,6 @@ function drawMediaScheduleTable(
     },
     didParseCell: (data) => {
       data.cell.styles.font = fam;
-      if (data.section === "head" && data.row.index === 0) {
-        data.cell.styles.font = fam;
-        return;
-      }
       applyMediaTableCellAlign(data);
       if (data.column.index === 0 && data.section !== "foot") {
         data.cell.styles.cellPadding = {
