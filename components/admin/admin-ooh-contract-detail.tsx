@@ -477,6 +477,30 @@ export function AdminOohContractDetailPanel({
                 onChange={(e) =>
                   setMetaDraft((m) => ({ ...m, productionCost: e.target.value }))
                 }
+                placeholder="자체제작 또는 제작비 설명"
+              />
+            </label>
+            <label className="space-y-1 text-xs">
+              <span className="font-medium text-muted-foreground">
+                제작비 (원, VAT별도)
+              </span>
+              <Input
+                type="number"
+                min={0}
+                value={
+                  metaDraft.extraProductionWon != null &&
+                  metaDraft.extraProductionWon > 0
+                    ? String(metaDraft.extraProductionWon)
+                    : ""
+                }
+                onChange={(e) => {
+                  const n = Math.max(0, parseInt(e.target.value, 10) || 0);
+                  setMetaDraft((m) => ({
+                    ...m,
+                    extraProductionWon: n > 0 ? n : undefined,
+                  }));
+                }}
+                placeholder="예) 20000000"
               />
             </label>
             <label className="space-y-1 text-xs">

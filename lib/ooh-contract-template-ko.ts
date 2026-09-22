@@ -257,7 +257,7 @@ export const OOH_CONTRACT_TEMPLATE_KO_ARTICLES: readonly OohContractTemplateSect
       kind: "article",
       heading: "제2조 (계약의목적)",
       paragraphs: [
-        '제2조 (계약의목적) "갑"은 "갑"의 광고물에 대한 제작 및 유지 관리를 "을"에게 위임해서 "을"로 하여금 광고물의 제작 및 유지 관리를 성실하게 이행함을 목적으로 한다.',
+        '제2조 (계약의목적) "갑"은 "갑"의 광고물에 대한 제작 및 유지 관리를 "을"에게 위임해서 "을"로\u00A0하여금 광고물의 제작 및 유지 관리를 성실하게 이행함을 목적으로 한다.',
       ],
     },
     {
@@ -285,7 +285,7 @@ export const OOH_CONTRACT_TEMPLATE_KO_ARTICLES: readonly OohContractTemplateSect
       kind: "article",
       heading: "제6조 (광고물 관리)",
       paragraphs: [
-        '제6조 (광고물 관리) "을"은 "갑"과의 계약을 성실히 이행하기 위하여 월 1회 이상 광고물을 점검해야 한다. "갑"의 관리 요구가 있을 경우 1개월이내라 하여도 7일 이내에 관리에 응해야 되며 관리사항을 "갑"에게 통보해야 한다.',
+        '제6조 (광고물 관리) "을"은 "갑"과의 계약을 성실히 이행하기 위하여 월 1회 이상 광고물을 점검해야\u00A0한다. "갑"의 관리 요구가 있을 경우 1개월이내라 하여도 7일 이내에 관리에 응해야 되며 관리사항을 "갑"에게 통보해야 한다.',
       ],
     },
     {

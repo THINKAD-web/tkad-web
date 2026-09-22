@@ -87,8 +87,8 @@ const KO_LAYOUT = {
   bodyLineH: 5.5,
   articleTitlePt: 11.5,
   preambleLineH: 5.5,
-  articleGapBefore: 4,
-  articleGapAfter: 2.5,
+  articleGapBefore: 3,
+  articleGapAfter: 2,
   paragraphGap: 2,
   titlePt: 22,
   titleGapAfter: 14,
@@ -159,12 +159,18 @@ function wrapLines(
 }
 
 /** 단어(공백) 단위 줄바꿈 — 전문 등에서 "광고 계약" 중간 끊김 방지 */
+function normalizeContractWrapText(text: string): string {
+  return text
+    .replace(/"을"로\s+하여금/g, '"을"로\u00A0하여금')
+    .replace(/점검해야\s+한다/g, "점검해야\u00A0한다");
+}
+
 function wrapParagraphByWords(
   doc: import("jspdf").default,
   paragraph: string,
   maxW: number,
 ): string[] {
-  const trimmed = paragraph.trim();
+  const trimmed = normalizeContractWrapText(paragraph.trim());
   if (!trimmed) return [];
   const tokens = trimmed.split(/(\s+)/).filter((t) => t.length > 0);
   if (tokens.length <= 1) {
@@ -378,7 +384,7 @@ type TextRunOpts = {
   bold?: boolean;
   size?: number;
   color?: [number, number, number];
-  align?: "left" | "center";
+  align?: "left" | "center" | "right";
 };
 
 type EmphasisRule = TextRunOpts & {
@@ -439,8 +445,8 @@ function drawTextRun(
   doc.setFontSize(opts.size ?? KO_LAYOUT.bodyPt);
   if (opts.color) doc.setTextColor(...opts.color);
   else doc.setTextColor(0, 0, 0);
-  if (opts.align === "center") {
-    doc.text(text, x, y, { align: "center" });
+  if (opts.align === "center" || opts.align === "right") {
+    doc.text(text, x, y, { align: opts.align });
     return 0;
   }
   doc.text(text, x, y);
@@ -510,6 +516,13 @@ function emphasisRulesForSection(
     ];
   }
   return [];
+}
+
+function tableValueAlignRight(label: string): boolean {
+  if (label.includes("광고명칭") || label.includes("계약기간") || label.includes("기타")) {
+    return false;
+  }
+  return true;
 }
 
 function tableValueStyle(label: string): TextRunOpts {
@@ -794,14 +807,20 @@ function drawArticle1SummaryTable(
         { bold: true, size: KO_LAYOUT.tableFontPt },
       );
     });
+    const valueRightX = margin + maxW - KO_LAYOUT.tablePad;
     valueLines.forEach((line, li) => {
+      const opts = tableValueAlignRight(row.label)
+        ? { ...valueStyle, align: "right" as const }
+        : valueStyle;
       drawTextRun(
         doc,
         fam,
-        valueX + KO_LAYOUT.tablePad,
+        tableValueAlignRight(row.label)
+          ? valueRightX
+          : valueX + KO_LAYOUT.tablePad,
         textTop + li * KO_LAYOUT.tableValueLineH,
         line,
-        valueStyle,
+        opts,
       );
     });
     rowY += rowH;
@@ -928,6 +947,7 @@ function renderKoArticleSection(
       maxW,
       y,
     );
+    y = drawMediaScheduleTable(doc, fam, vars, margin, maxW, y);
     return y + KO_LAYOUT.articleGapAfter;
   }
 
@@ -1165,18 +1185,9 @@ function applyKoContractPageChrome(
 ): void {
   const pageCount = doc.getNumberOfPages();
   const footerUrl = "http://www.tkad.co.kr";
-  const page1Header =
-    "48, Ttukseom-ro 17-ga-gil, Seongdong-gu Seoul, Republic of Korea  TEL +82 (2) 515-2772 E-mail. sales@tkad.co.kr";
 
   for (let page = 1; page <= pageCount; page++) {
     doc.setPage(page);
-    if (page === 1) {
-      drawTextRun(doc, fam, pageW - margin, 14, page1Header, {
-        size: 6.5,
-        color: [90, 90, 90],
-        align: "right",
-      });
-    }
 
     const footerY = 290;
     drawTextRun(doc, fam, margin, footerY, footerUrl, {
@@ -1393,10 +1404,21 @@ async function buildKoStandardContractPdf(
     }
 
     if (section.kind === "article") {
-      y = renderKoArticleSection(doc, fam, section, margin, maxW, y, vars);
-      if (section.heading.startsWith("제2조")) {
-        y = drawMediaScheduleTable(doc, fam, vars, margin, maxW, y);
+      if (section.heading.startsWith("제10조")) {
+        const art11 = template.sections.find((s) => s.heading.startsWith("제11조"));
+        const h10 = estimateArticleHeight(doc, section, maxW, vars);
+        const h11 = art11
+          ? estimateArticleHeight(doc, art11, maxW, vars)
+          : 0;
+        const sigBundle = KO_LAYOUT.sigBoxH + 36;
+        const bundle = h10 + h11 + sigBundle;
+        const usable = KO_LAYOUT.pageBottom - KO_LAYOUT.pageTop;
+        if (bundle <= usable && y + bundle > KO_LAYOUT.pageBottom) {
+          doc.addPage();
+          y = KO_LAYOUT.pageTop;
+        }
       }
+      y = renderKoArticleSection(doc, fam, section, margin, maxW, y, vars);
     }
   }
 

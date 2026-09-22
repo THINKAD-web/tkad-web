@@ -125,7 +125,10 @@ export function formatContractDesignProductionLine(
 ): string {
   const parts: string[] = [];
   const prod = productionCost.trim();
-  const prodIsGeneric = !prod || GENERIC_PRODUCTION_LABELS.has(prod);
+  const prodIsGeneric =
+    !prod ||
+    GENERIC_PRODUCTION_LABELS.has(prod) ||
+    /^[\d,\s원₩￦.]+$/u.test(prod);
   if (prod && !prodIsGeneric) parts.push(prod);
 
   for (const line of costLines ?? []) {

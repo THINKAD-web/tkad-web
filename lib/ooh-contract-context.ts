@@ -15,8 +15,11 @@ import {
 } from "@/lib/ooh-contract-format";
 import {
   buildContractMoney,
+  productionCostLooksLikeWonAmountOnly,
+  resolveContractExtraWons,
   supplyWonFromManwonField,
 } from "@/lib/contract-money";
+import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
 import type { ContractMediaLineItem } from "@/lib/ooh-contract-pdf";
 import {
   parseOohContractMeta,
@@ -34,9 +37,12 @@ export async function loadOoHQuoteForContract(
 }
 
 function mediaCountFromBreakdown(breakdown: QuoteBreakdown | null | undefined): number {
-  if (!breakdown?.lines?.length) return 1;
+  const mediaLines = (breakdown?.lines ?? []).filter(
+    (line) => line.mediaId && !isQuoteAddonLineId(line.mediaId),
+  );
+  if (mediaLines.length === 0) return 0;
   let sum = 0;
-  for (const line of breakdown.lines) {
+  for (const line of mediaLines) {
     sum += line.quantity ?? 1;
   }
   return Math.max(1, sum);
@@ -72,9 +78,12 @@ export function ooHQuoteToContractPdfVars(
 ): OohContractPdfVars {
   const isKo = row.locale !== "en";
   const breakdownForCount = row.quoteBreakdown as QuoteBreakdown | null;
+  const mediaIdCount = row.mediaIds?.length ?? 0;
   const defaultUnitCount = Math.max(
+    mediaIdCount,
     mediaNames.length,
     mediaCountFromBreakdown(breakdownForCount),
+    1,
   );
   const meta = contractMetaWithDefaults(
     { ...parseOohContractMeta(row.adminNote), ...metaOverride },
@@ -84,11 +93,7 @@ export function ooHQuoteToContractPdfVars(
     },
   );
   const { start, end } = resolveContractDatesFromQuote(row);
-  const extras = {
-    extraProductionWon: numMeta(meta.extraProductionWon),
-    extraInstallWon: numMeta(meta.extraInstallWon),
-    extraOtherWon: numMeta(meta.extraOtherWon),
-  };
+  const extras = resolveContractExtraWons(meta, breakdownForCount);
   const totalWon = totalWonFromQuote(row, extras);
   const breakdown = row.quoteBreakdown as QuoteBreakdown | null;
   const mediaItems = mediaLineItemsFromQuote(breakdown, mediaNames);
@@ -115,7 +120,11 @@ export function ooHQuoteToContractPdfVars(
     startDate: start,
     endDate: end,
     totalWonVatIncluded: totalWon,
-    productionCost: meta.productionCost,
+    productionCost:
+      extras.extraProductionWon > 0 &&
+      productionCostLooksLikeWonAmountOnly(meta.productionCost)
+        ? defaultProductionCostKo()
+        : meta.productionCost,
     mediaCount: defaultUnitCount,
     paymentMethod: meta.paymentMethod,
     clientName: row.clientName,
@@ -145,17 +154,15 @@ export function ooHQuoteToContractPdfVars(
   return vars;
 }
 
-function numMeta(v: unknown): number {
-  const n = typeof v === "number" ? v : Number(v);
-  return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
-}
-
 function mediaLineItemsFromQuote(
   breakdown: QuoteBreakdown | null,
   mediaNames: string[],
 ): ContractMediaLineItem[] {
-  if (breakdown?.lines?.length) {
-    return breakdown.lines.map((line) => ({
+  const mediaLines = (breakdown?.lines ?? []).filter(
+    (line) => line.mediaId && !isQuoteAddonLineId(line.mediaId),
+  );
+  if (mediaLines.length) {
+    return mediaLines.map((line) => ({
       name: line.mediaName,
       spec: line.location || line.quantityLabel || "",
       unitPriceWon: line.unitPriceWon,
@@ -206,9 +213,11 @@ export async function resolveContractMediaForQuote(
   const order = new Map(mediaIds.map((id, i) => [id, i]));
   media.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
 
-  const lineByName = new Map(
-    (breakdown?.lines ?? []).map((line) => [line.mediaName, line]),
+  const mediaLines = (breakdown?.lines ?? []).filter(
+    (line) => line.mediaId && !isQuoteAddonLineId(line.mediaId),
   );
+  const lineByMediaId = new Map(mediaLines.map((line) => [line.mediaId, line]));
+  const lineByName = new Map(mediaLines.map((line) => [line.mediaName.trim(), line]));
 
   const names: string[] = [];
   const lineItems: ContractMediaLineItem[] = [];
@@ -216,10 +225,14 @@ export async function resolveContractMediaForQuote(
   for (const m of media) {
     const name = (isKo ? m.name : m.nameEn) || m.name;
     names.push(name);
-    const bd = lineByName.get(name) ?? breakdown?.lines?.[lineItems.length];
+    const bd =
+      lineByMediaId.get(m.id) ??
+      lineByName.get(name.trim()) ??
+      lineByName.get(m.name.trim()) ??
+      mediaLines[lineItems.length];
     const spec =
-      bd?.location?.trim() ||
       buildMediaContractSpecLabel(m) ||
+      bd?.location?.trim() ||
       bd?.quantityLabel?.trim() ||
       "";
     lineItems.push({
