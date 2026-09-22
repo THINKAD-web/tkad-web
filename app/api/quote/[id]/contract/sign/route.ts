@@ -303,7 +303,11 @@ export async function POST(
       signerEmail,
       signerIp: ip,
       signerAgent: ua,
-      signatureImage: (hasSignature ? signatureRaw : stampRaw).slice(0, 500_000),
+      signatureImage: (hasSignature ? signatureRaw : stampRaw).slice(
+        0,
+        500_000,
+      ),
+      clientStampImage: hasStamp ? stampRaw.slice(0, 500_000) : null,
       agreementAcceptedAt: signedAt,
       signedPdfBase64,
       documentSha256: sha256,
