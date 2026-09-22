@@ -32,10 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/toast-provider";
-import {
-  parseAdminMediaListFromApiJson,
-  type AdminMediaDto,
-} from "@/lib/admin-media-dto";
+import { useAdminMediaPickerList } from "@/hooks/use-admin-media-picker-list";
 import { catalogPriceFieldToWon } from "@/lib/pricing";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
 import { wonToManwon } from "@/lib/ooh-quote-amount";
@@ -105,10 +102,14 @@ export default function AdminStandaloneContractClient() {
     { id: string; label: string }[]
   >([]);
 
-  const [medias, setMedias] = useState<AdminMediaDto[]>([]);
-  const [listLoading, setListLoading] = useState(true);
-  const [listError, setListError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  const {
+    medias,
+    search,
+    setSearch,
+    listLoading,
+    listError,
+    filtered,
+  } = useAdminMediaPickerList({ loadErrorMessage: t("loadError") });
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -122,18 +123,6 @@ export default function AdminStandaloneContractClient() {
     [startDate, endDate],
   );
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return medias;
-    return medias.filter(
-      (m) =>
-        m.name.toLowerCase().includes(q) ||
-        (m.nameEn?.toLowerCase().includes(q) ?? false) ||
-        m.location.toLowerCase().includes(q) ||
-        m.region.toLowerCase().includes(q),
-    );
-  }, [medias, search]);
-
   const mediaSumManwon = useMemo(() => {
     let sumWon = 0;
     for (const sel of selectedMedia) {
@@ -144,39 +133,6 @@ export default function AdminStandaloneContractClient() {
     }
     return sumWon > 0 ? wonToManwon(sumWon) : 0;
   }, [selectedMedia, medias]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setListLoading(true);
-      setListError(null);
-      try {
-        const res = await fetch("/api/admin/medias?take=500", {
-          credentials: "include",
-          cache: "no-store",
-        });
-        const raw: unknown = await res.json();
-        if (!res.ok) {
-          if (!cancelled) setListError(t("loadError"));
-          return;
-        }
-        const { medias: next, error: parseErr } =
-          parseAdminMediaListFromApiJson(raw);
-        if (parseErr) {
-          if (!cancelled) setListError(parseErr);
-          return;
-        }
-        if (!cancelled) setMedias(next);
-      } catch {
-        if (!cancelled) setListError(t("loadError"));
-      } finally {
-        if (!cancelled) setListLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [t]);
 
   useEffect(() => {
     try {

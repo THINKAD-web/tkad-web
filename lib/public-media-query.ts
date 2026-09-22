@@ -9,6 +9,7 @@ import { publicNotFlaggedMediaWhere } from "@/lib/media-review-status";
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
 import { expandBrowseRegionSub } from "@/lib/media-browse-regions";
 import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
+import { buildPrismaMediaTextSearchWhere } from "@/lib/media-search-text";
 
 export type PublicMediaSort =
   | "popular"
@@ -130,16 +131,8 @@ export function buildPublicMediaWhere(
   }
 
   if (params.q?.trim()) {
-    const q = params.q.trim();
-    and.push({
-      OR: [
-        { name: { contains: q, mode: "insensitive" } },
-        { region: { contains: q, mode: "insensitive" } },
-        { city: { contains: q, mode: "insensitive" } },
-        { district: { contains: q, mode: "insensitive" } },
-        { type: { contains: q, mode: "insensitive" } },
-      ],
-    });
+    const textWhere = buildPrismaMediaTextSearchWhere(params.q.trim());
+    if (textWhere) and.push(textWhere);
   }
 
   const minPrice = params.minPrice ?? params.priceMin;
