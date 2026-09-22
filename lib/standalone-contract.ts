@@ -4,12 +4,17 @@ import {
   parseStandaloneIsoDates,
 } from "@/lib/ooh-contract-pdf-vars";
 import type { OohContractPdfVars } from "@/lib/ooh-contract-pdf";
-import { buildContractMoney, supplyWonFromManwonField } from "@/lib/contract-money";
+import {
+  buildContractMoney,
+  resolveContractExtraWons,
+  resolveContractMediaCountLabel,
+  supplyWonFromManwonField,
+} from "@/lib/contract-money";
+import type { ContractMediaLineItem } from "@/lib/ooh-contract-pdf";
 import {
   defaultContractPaymentMethodKo,
   defaultProductionCostKo,
   formatContractCampaignName,
-  formatContractMediaCount,
 } from "@/lib/ooh-contract-format";
 
 /** localStorage / 향후 파이프라인 bridge용 초안 스키마 버전 */
@@ -38,6 +43,7 @@ export const StandaloneContractPreviewBody = z.object({
   /** 발송·파이프라인 bridge 메타 — PDF 본문에는 미포함 */
   clientEmail: optionalClientEmail,
   mediaLines: z.array(z.string().min(1).max(200)).max(50).default([]),
+  mediaIds: z.array(z.string().min(1).max(64)).max(50).optional().default([]),
   period: z.string().min(1).max(120),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -125,35 +131,51 @@ function resolveStandaloneDates(input: StandaloneContractPreviewInput) {
 export function standaloneContractToPdfVars(
   input: StandaloneContractPreviewInput,
   draftId: string,
+  resolvedLines?: ContractMediaLineItem[],
 ): OohContractPdfVars {
   const isKo = input.locale !== "en";
   const { start, end } = resolveStandaloneDates(input);
-  const mediaCount =
-    input.mediaCount?.trim() ||
-    formatContractMediaCount(input.mediaLines.length || 1);
-  const countNum = parseInt(mediaCount, 10) || input.mediaLines.length || 1;
-  const names = input.mediaLines.map((m) => m.trim()).filter(Boolean);
+  const names = (
+    resolvedLines?.length
+      ? resolvedLines.map((line) => line.name)
+      : input.mediaLines.map((m) => m.trim())
+  ).filter(Boolean);
   const campaign = formatContractCampaignName(names, input.campaignName);
+  const unitCount = Math.max(1, names.length || input.mediaIds?.length || 1);
+  const count = resolveContractMediaCountLabel({
+    mediaUnitCount: unitCount,
+    adminMediaCount: input.mediaCount,
+  });
 
   const mediaSupply = supplyWonFromManwonField(input.totalAmountManwon);
-  const lineItems = names.map((name) => ({
-    name,
-    location: "",
-    spec: "",
-    unitPriceWon: 0,
-    lineSupplyWon: 0,
-  }));
+  const lineItems: ContractMediaLineItem[] =
+    resolvedLines?.length
+      ? resolvedLines
+      : names.map((name) => ({
+          name,
+          location: "",
+          spec: "",
+          unitPriceWon: 0,
+          lineSupplyWon: 0,
+        }));
+  const extras = resolveContractExtraWons(
+    {
+      extraProductionWon: input.extraProductionWon,
+      extraInstallWon: input.extraInstallWon,
+      extraOtherWon: input.extraOtherWon,
+      productionCost: input.productionCost,
+    },
+    null,
+  );
   const money = buildContractMoney({
     mediaLines: lineItems.map((item) => ({
       name: item.name,
-      location: "",
-      spec: "",
-      supplyWon: 0,
+      location: item.location ?? "",
+      spec: item.spec,
+      supplyWon: item.lineSupplyWon,
     })),
     contractMediaSupplyWon: mediaSupply,
-    extraProductionWon: input.extraProductionWon,
-    extraInstallWon: input.extraInstallWon,
-    extraOtherWon: input.extraOtherWon,
+    ...extras,
     productionCostText: input.productionCost,
   });
   const vars = buildKoOohContractPdfVars({
@@ -168,7 +190,7 @@ export function standaloneContractToPdfVars(
     endDate: end,
     totalWonVatIncluded: money.totalWon,
     productionCost: input.productionCost?.trim() || defaultProductionCostKo(),
-    mediaCount: countNum,
+    mediaCount: unitCount,
     paymentMethod:
       input.paymentMethod?.trim() || defaultContractPaymentMethodKo(),
     clientName: input.clientName.trim(),
@@ -186,5 +208,8 @@ export function standaloneContractToPdfVars(
   vars.totalAmount = money.totalAmountDisplay;
   vars.amountKorean = money.amountKorean;
   vars.contractMoney = money;
+  vars.mediaCount = count.label;
+  const notes = input.specialTerms?.trim();
+  if (notes) vars.otherNotes = notes;
   return vars;
 }

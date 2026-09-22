@@ -253,6 +253,7 @@ export default function AdminStandaloneContractClient() {
       paymentMethod,
       clientEmail: clientEmail.trim() || "",
       mediaIds: selectedMedia.map((m) => m.id),
+      mediaIds: selectedMedia.map((m) => m.id),
       mediaLines: selectedMedia.map((m) => m.label),
       period: periodLabel,
       startDate,
@@ -305,6 +306,7 @@ export default function AdminStandaloneContractClient() {
         (selectedMedia.length > 0 ? `${selectedMedia.length}기` : ""),
       paymentMethod: paymentMethod.trim(),
       clientEmail: clientEmail.trim() || "",
+      mediaIds: selectedMedia.map((m) => m.id),
       mediaLines: selectedMedia.map((m) => m.label),
       period: periodLabel,
       startDate,
@@ -717,9 +719,9 @@ export default function AdminStandaloneContractClient() {
     const label = (isKo ? m.name : m.nameEn) || m.name;
     setSelectedMedia((prev) => {
       const next = [...prev, { id: m.id, label }];
-      if (!mediaCount.trim()) {
-        setMediaCount(`${next.length}기`);
-      }
+      setMediaCount((cur) =>
+        /[^\d기\s]/u.test(cur.trim()) ? cur : `${next.length}기`,
+      );
       return next;
     });
     if (!totalAmountManwon.trim() && mediaSumManwon === 0) {
@@ -1215,7 +1217,17 @@ export default function AdminStandaloneContractClient() {
                       type="button"
                       className="rounded p-0.5 hover:bg-muted"
                       onClick={() =>
-                        setSelectedMedia((prev) => prev.filter((x) => x.id !== m.id))
+                        setSelectedMedia((prev) => {
+                          const next = prev.filter((x) => x.id !== m.id);
+                          setMediaCount((cur) =>
+                            /[^\d기\s]/u.test(cur.trim())
+                              ? cur
+                              : next.length > 0
+                                ? `${next.length}기`
+                                : "",
+                          );
+                          return next;
+                        })
                       }
                       aria-label={t("removeMedia")}
                     >

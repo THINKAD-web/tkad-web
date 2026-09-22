@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assertAdmin } from "@/lib/admin-guard";
+import { getPrisma } from "@/lib/prisma";
 import { buildOohContractPdf } from "@/lib/ooh-contract-pdf";
+import { resolveContractMediaForQuote } from "@/lib/ooh-contract-context";
+import { parseStandaloneIsoDates } from "@/lib/ooh-contract-pdf-vars";
 import {
   newStandaloneContractDraftId,
   StandaloneContractPreviewBody,
@@ -39,7 +42,27 @@ export async function POST(request: NextRequest) {
 
   let buf: Buffer;
   try {
-    const vars = standaloneContractToPdfVars(parsed.data, draftId);
+    let resolvedLines;
+    if (parsed.data.mediaIds.length > 0) {
+      const db = getPrisma();
+      const dates =
+        parsed.data.startDate && parsed.data.endDate
+          ? parseStandaloneIsoDates(parsed.data.startDate, parsed.data.endDate)
+          : { start: null, end: null };
+      const pack = await resolveContractMediaForQuote(
+        db,
+        parsed.data.mediaIds,
+        null,
+        parsed.data.locale !== "en",
+        dates,
+      );
+      resolvedLines = pack.lineItems;
+    }
+    const vars = standaloneContractToPdfVars(
+      parsed.data,
+      draftId,
+      resolvedLines,
+    );
     const { pdfBase64 } = await buildOohContractPdf(vars);
     buf = Buffer.from(pdfBase64, "base64");
   } catch (e) {
