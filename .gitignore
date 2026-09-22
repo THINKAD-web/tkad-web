@@ -90,6 +90,8 @@ scripts/print-admin-*.ts
 !reports/trust-credibility-urgent/*.png
 !reports/contract-quality-2026-09-22/*.png
 !reports/contract-golden-2026-09-22/*.png
+!reports/contract-table-2026-09-23/
+!reports/contract-table-2026-09-23/*.png
 scripts/fix-*.ts
 scripts/.backfill-media-translations-calibration.json
 
