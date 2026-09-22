@@ -6,6 +6,11 @@ import {
   splitArt10And11ForRender,
   splitArticleBodyAtItemBoundaries,
 } from "@/lib/ooh-contract-pdf";
+import {
+  computeKoSignatureSealLayout,
+  sealsClearOfTextRows,
+} from "@/lib/ooh-contract-signature-layout";
+import { CONTRACT_LAYOUT } from "@/lib/contract-layout";
 import { standaloneContractToPdfVars } from "@/lib/standalone-contract";
 import {
   OOH_CONTRACT_TEMPLATE_KO_ARTICLES,
@@ -156,6 +161,31 @@ test("signed contract PDF embeds signature image", async () => {
     ) ?? []
   ).length;
   assert.ok(signedImages > unsignedImages);
+});
+
+test("KO signature seal layout keeps stamps below representative row", () => {
+  const boxTop = 200;
+  const margin = CONTRACT_LAYOUT.margin;
+  const pageInner = 210 - 2 * margin;
+  const colW = (pageInner - CONTRACT_LAYOUT.sigColGap) / 2;
+  const leftX = margin;
+  const rightX = margin + colW + CONTRACT_LAYOUT.sigColGap;
+  const textEndY = boxTop + 9 + 4 * CONTRACT_LAYOUT.sigFieldH;
+
+  const layout = computeKoSignatureSealLayout({
+    boxTop,
+    leftX,
+    rightX,
+    colW,
+    ly: textEndY,
+    ry: textEndY,
+    hasClientStamp: true,
+  });
+
+  assert.ok(sealsClearOfTextRows(layout));
+  const repRowY = textEndY - CONTRACT_LAYOUT.sigFieldH;
+  assert.ok(layout.partyBStamp.y > repRowY + 1);
+  assert.ok(layout.partyAStamp.x < layout.partyBStamp.x);
 });
 
 test("signed contract PDF uses same Korean font path", async () => {
