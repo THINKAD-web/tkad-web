@@ -5,6 +5,7 @@ import {
   createUploadContractSend,
   UploadContractSendBody,
 } from "@/lib/contract-upload-send";
+import { mapUploadPdfFetchErrorToHttpStatus } from "@/lib/contract-send-mode";
 import { StandaloneContractSendError } from "@/lib/standalone-contract-send";
 
 export const dynamic = "force-dynamic";
@@ -56,13 +57,16 @@ export async function POST(request: NextRequest) {
       return json({ error: e.message, code: e.code }, 400);
     }
     if (e instanceof Error) {
+      const status = mapUploadPdfFetchErrorToHttpStatus(e.message);
       if (
         e.message === "upload_fetch_failed" ||
         e.message === "upload_sha_mismatch" ||
         e.message === "not_pdf" ||
-        e.message === "invalid_upload_url"
+        e.message === "invalid_upload_url" ||
+        e.message === "pdf_too_large" ||
+        e.message.startsWith("BUNNY_")
       ) {
-        return json({ error: e.message }, 400);
+        return json({ error: e.message }, status);
       }
     }
     console.error("[send-from-upload]", e);

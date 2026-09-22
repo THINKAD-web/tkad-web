@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { assertAdminDb, json } from "@/lib/admin-guard";
+import { assertAdminDb, adminDbQueryFailed, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { StandaloneContractSendBody } from "@/lib/standalone-contract";
 import {
@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
       }
       return json({ error: e.message, code: e.code }, 400);
     }
-    throw e;
+    console.error("[send-from-standalone]", e);
+    return adminDbQueryFailed(e);
   }
 }

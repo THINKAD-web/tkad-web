@@ -1,4 +1,13 @@
-import { OoHQuoteStatus, OohContractStatus, type OoHQuote } from "@prisma/client";
+import {
+  OoHQuoteStatus,
+  OohContractSendMode,
+  OohContractStatus,
+  type OoHQuote,
+} from "@prisma/client";
+import {
+  canCustomerSignContract,
+  isContractCustomerStepComplete,
+} from "@/lib/contract-send-mode";
 import {
   partialPeriodRateDaysFromKey,
   partialRateLookupKeyFromDays,
@@ -120,14 +129,16 @@ export type OoHQuotePublicJson = {
 
 export function serializeOoHQuotePublic(
   row: OoHQuote,
-  contract?: { status: OohContractStatus } | null,
+  contract?: {
+    status: OohContractStatus;
+    sendMode?: OohContractSendMode | null;
+  } | null,
 ): OoHQuotePublicJson {
-  const contractSigned =
-    contract?.status === OohContractStatus.signed ||
-    contract?.status === OohContractStatus.confirmed;
-  const canSignContract =
-    row.status === OoHQuoteStatus.booking_confirmed &&
-    (!contract || contract.status === OohContractStatus.pending);
+  const contractSigned = isContractCustomerStepComplete(contract);
+  const canSignContract = canCustomerSignContract({
+    quoteStatus: row.status,
+    contract: contract ?? null,
+  });
 
   return {
     id: row.id,
