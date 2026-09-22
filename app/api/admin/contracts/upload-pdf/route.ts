@@ -1,6 +1,12 @@
 import { randomBytes } from "node:crypto";
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
+import { buildOohContractSourcePdfBunnyPath } from "@/lib/bunny-upload-path";
+import {
+  getBunnyStorageConfigStatus,
+  isBunnyStorageConfigured,
+  uploadToBunnyStorage,
+} from "@/lib/bunny-storage";
 import {
   formatCloudinaryUploadError,
   isCloudinaryConfigured,
@@ -15,13 +21,22 @@ export const dynamic = "force-dynamic";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
+function bunnyUploadErrorDetail(err: unknown): string {
+  if (err instanceof Error) {
+    if (err.message === "BUNNY_STORAGE_NOT_CONFIGURED") {
+      const st = getBunnyStorageConfigStatus();
+      return st.missingEnvVars.length
+        ? `missing: ${st.missingEnvVars.join(", ")}`
+        : "not configured";
+    }
+    return err.message.slice(0, 240);
+  }
+  return "unknown";
+}
+
 export async function POST(request: NextRequest) {
   const deny = assertAdminDb(request);
   if (deny) return deny;
-
-  if (!isCloudinaryConfigured()) {
-    return json({ error: "cloudinary_not_configured" }, 503);
-  }
 
   const form = await request.formData().catch(() => null);
   const file = form?.get("file");
@@ -48,18 +63,48 @@ export async function POST(request: NextRequest) {
 
   const sha256 = hashUploadPdfBuffer(buf);
   const token = randomBytes(12).toString("hex");
-  let url: string;
-  try {
-    url = await uploadOohContractSourcePdf(buf, token);
-  } catch (e) {
-    const detail = formatCloudinaryUploadError(e);
-    console.error("[upload-pdf] cloudinary", detail, e);
-    return json({ error: "cloudinary_upload_failed", detail }, 502);
-  }
   const fileName = (file.name || "contract.pdf").slice(0, 255);
+
+  let url: string;
+  let storage: "bunny" | "cloudinary";
+
+  if (isBunnyStorageConfigured()) {
+    try {
+      const path = buildOohContractSourcePdfBunnyPath(token);
+      const uploaded = await uploadToBunnyStorage({
+        path,
+        bytes,
+        contentType: "application/pdf",
+      });
+      url = uploaded.publicUrl;
+      storage = "bunny";
+    } catch (e) {
+      const detail = bunnyUploadErrorDetail(e);
+      console.error("[upload-pdf] bunny", detail, e);
+      return json({ error: "bunny_upload_failed", detail }, 502);
+    }
+  } else if (isCloudinaryConfigured()) {
+    try {
+      url = await uploadOohContractSourcePdf(buf, token);
+      storage = "cloudinary";
+    } catch (e) {
+      const detail = formatCloudinaryUploadError(e);
+      console.error("[upload-pdf] cloudinary", detail, e);
+      return json({ error: "cloudinary_upload_failed", detail }, 502);
+    }
+  } else {
+    return json(
+      {
+        error: "contract_pdf_storage_not_configured",
+        detail: "Set BUNNY_STORAGE_* (preferred) or CLOUDINARY_*",
+      },
+      503,
+    );
+  }
 
   return json({
     ok: true,
+    storage,
     uploadedPdfUrl: url,
     uploadedPdfSha256: sha256,
     uploadedPdfFileName: fileName,

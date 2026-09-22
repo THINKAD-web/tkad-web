@@ -51,6 +51,10 @@ import { cn } from "@/lib/utils";
 
 function uploadApiErrorMessage(code: string, t: (k: string) => string): string {
   switch (code) {
+    case "contract_pdf_storage_not_configured":
+      return t("uploadErrStorageNotConfigured");
+    case "bunny_upload_failed":
+      return t("uploadErrBunnyUpload");
     case "cloudinary_not_configured":
       return t("uploadErrCloudinaryNotConfigured");
     case "cloudinary_upload_failed":
@@ -393,11 +397,12 @@ export default function AdminStandaloneContractClient() {
           ) {
             base = t("uploadErrCloudinaryDisabled");
           }
-          throw new Error(
-            detail && code === "cloudinary_upload_failed" && !/cloud_name is disabled/i.test(detail)
-              ? `${base} (${detail})`
-              : base,
-          );
+          const showDetail =
+            detail &&
+            (code === "bunny_upload_failed" ||
+              (code === "cloudinary_upload_failed" &&
+                !/cloud_name is disabled/i.test(detail)));
+          throw new Error(showDetail ? `${base} (${detail})` : base);
         }
         const url =
           typeof raw === "object" &&

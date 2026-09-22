@@ -9,6 +9,7 @@
 | 견적 발송 | `POST .../send-quote` | **Email** — `RESEND_API_KEY` 또는 `SMTP_*` + `SMTP_FROM` | PDF 메일 미발송, `emailed: false` |
 | 부킹 확정 | `PATCH .../booking-confirm` | Email (권장) | 계약 서명 URL 메일 미발송 |
 | 고객 서명 | `POST /api/quote/[id]/contract/sign` | DB (`DATABASE_URL`) | 503 Unavailable |
+| 업로드 계약 원본 PDF | admin upload-pdf | **`BUNNY_STORAGE_*` (권장)** | Cloudinary `CLOUDINARY_*` 폴백 |
 | 서명 PDF 저장 | sign → Cloudinary | `CLOUDINARY_*` (선택) | DB `signedPdfBase64` 폴백 (동작함) |
 | 청구 발송 | `POST .../send-invoice` | Email + **`QUOTE_BANK_NAME`**, **`QUOTE_BANK_ACCOUNT`**, **`QUOTE_BANK_HOLDER`** | 503 Email not configured / PDF에 계좌 placeholder |
 | 계약 확정 | `PATCH .../contract-confirm` | Email (권장) | Campaign 생성은 됨, 안내 메일 실패(log) |

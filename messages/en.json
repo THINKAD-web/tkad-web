@@ -3011,6 +3011,8 @@
     "sendUploadFail": "Upload contract send failed.",
     "uploadPreviewLocal": "Preview local PDF",
     "uploadBusy": "Uploading PDF…",
+    "uploadErrStorageNotConfigured": "Contract PDF storage is not configured. Set BUNNY_STORAGE_* (preferred) or Cloudinary.",
+    "uploadErrBunnyUpload": "Bunny Storage PDF upload failed.",
     "uploadErrCloudinaryNotConfigured": "Cloudinary is not configured. Check CLOUDINARY_* env vars on Vercel.",
     "uploadErrCloudinaryUpload": "Cloudinary PDF upload failed.",
     "uploadErrCloudinaryDisabled": "This Cloudinary cloud is disabled. Enable the product environment at cloudinary.com, or update Vercel CLOUDINARY_CLOUD_NAME, API_KEY, and API_SECRET to match an active cloud (align or remove CLOUDINARY_URL).",

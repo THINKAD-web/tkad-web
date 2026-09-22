@@ -1,6 +1,11 @@
 import { v2 as cloudinary } from "cloudinary";
 import { parseCloudinaryPublicId } from "@/lib/campaign-proof-cloudinary";
 import {
+  bunnyPathFromPublicUrl,
+  fetchFromBunnyStorage,
+  isBunnyStorageConfigured,
+} from "@/lib/bunny-storage";
+import {
   getCloudinaryCredentials,
   isCloudinaryConfigured,
 } from "@/lib/cloudinary-env";
@@ -59,6 +64,20 @@ export async function fetchUploadedContractPdfBuffer(
   const trimmed = uploadedPdfUrl.trim();
   if (!trimmed.startsWith("https://")) {
     throw new Error("invalid_upload_url");
+  }
+
+  const bunnyPath = bunnyPathFromPublicUrl(trimmed);
+  if (bunnyPath && isBunnyStorageConfigured()) {
+    try {
+      const buf = await fetchFromBunnyStorage(bunnyPath);
+      assertUploadPdfBuffer(buf);
+      return buf;
+    } catch (e) {
+      if (e instanceof Error && e.message.startsWith("BUNNY_FETCH_FAILED")) {
+        throw new Error("upload_fetch_failed");
+      }
+      throw e;
+    }
   }
 
   const candidates = [trimmed];

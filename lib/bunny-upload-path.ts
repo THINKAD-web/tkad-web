@@ -73,6 +73,17 @@ export function buildBunnyUuidUploadPath(
   return assertAsciiBunnyObjectPath(`${safePrefix}/${safeId}.${safeExt}`);
 }
 
+/** OoH 계약서 업로드 원본 PDF — `tkad/contracts/source/{token}.pdf` */
+export function buildOohContractSourcePdfBunnyPath(uploadToken: string): string {
+  const safeToken = uploadToken.replace(/[^a-fA-F0-9]/g, "").slice(0, 48);
+  if (!safeToken) {
+    throw new Error("BUNNY_PATH_BAD_TOKEN");
+  }
+  return assertAsciiBunnyObjectPath(
+    `tkad/contracts/source/${safeToken}.pdf`,
+  );
+}
+
 /** admin 미디어 이미지: `tkad/admin/yyyy/mm/{uuid}.ext` */
 export function buildAdminBunnyImageUploadPath(
   contentType: string,
