@@ -1,9 +1,25 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import fontkit from "@pdf-lib/fontkit";
-import { PDFDocument, rgb, StandardFonts, type PDFFont } from "pdf-lib";
+import {
+  decodePDFRawStream,
+  PDFArray,
+  PDFDocument,
+  PDFName,
+  PDFRawStream,
+  rgb,
+  StandardFonts,
+  type PDFFont,
+} from "pdf-lib";
 import { loadServerKrTtf } from "@/lib/jspdf-register-noto-kr";
 import { sha256Hex } from "@/lib/signature-audit";
+import { extractLastPageTextRuns } from "@/lib/upload-contract-pdf-text";
+import {
+  lowerSealMatrices,
+  partyASealRect,
+  partyASignatureRect,
+  type PdfRect,
+} from "@/lib/upload-contract-stamp-anchor";
 
 /** Git에 포함된 파일. `public/fonts/*.ttf`는 gitignore라 Vercel 함수에 없다. */
 const BUNDLED_KR_FONT = join(
@@ -144,7 +160,59 @@ function wrapOverlayLine(
   return lines.length > 0 ? lines : [""];
 }
 
-/** 업로드 PDF 마지막 페이지 하단에 서명·도장·감사 텍스트 합성 (A-1) */
+function lowerEmbeddedSeals(
+  pdfDoc: PDFDocument,
+  page: ReturnType<PDFDocument["getPages"]>[number],
+  items: import("@/lib/upload-contract-stamp-anchor").PdfTextRun[],
+) {
+  const raw = page.node.Contents();
+  const rewrite = (stream: PDFRawStream) => {
+    const text = Buffer.from(decodePDFRawStream(stream).decode()).toString(
+      "latin1",
+    );
+    const next = lowerSealMatrices(text, items);
+    if (next === text) return stream;
+    const dict = stream.dict.clone(pdfDoc.context);
+    dict.delete(PDFName.of("Filter"));
+    dict.delete(PDFName.of("DecodeParms"));
+    return PDFRawStream.of(dict, new Uint8Array(Buffer.from(next, "latin1")));
+  };
+
+  if (raw instanceof PDFArray) {
+    const nextRefs = raw.asArray().map((ref) => {
+      const looked = pdfDoc.context.lookup(ref);
+      if (!(looked instanceof PDFRawStream)) return ref;
+      const replaced = rewrite(looked);
+      if (replaced === looked) return ref;
+      return pdfDoc.context.register(replaced);
+    });
+    page.node.set(PDFName.of("Contents"), pdfDoc.context.obj(nextRefs));
+    return;
+  }
+  if (raw instanceof PDFRawStream) {
+    const replaced = rewrite(raw);
+    if (replaced !== raw) {
+      page.node.set(
+        PDFName.of("Contents"),
+        pdfDoc.context.register(replaced),
+      );
+    }
+  }
+}
+
+function fitInside(rect: PdfRect, imgW: number, imgH: number): PdfRect {
+  const scale = Math.min(rect.w / imgW, rect.h / imgH);
+  const w = imgW * scale;
+  const h = imgH * scale;
+  return {
+    x: rect.x + (rect.w - w) / 2,
+    y: rect.y + (rect.h - h) / 2,
+    w,
+    h,
+  };
+}
+
+/** 업로드 PDF 마지막 페이지 — 갑 `(인)`에 도장, 그 아래 서명·감사 텍스트 */
 export async function buildSignedUploadContractPdf(
   sourcePdf: Buffer,
   images: {
@@ -158,35 +226,51 @@ export async function buildSignedUploadContractPdf(
   const page = pages[pages.length - 1]!;
   const { width } = page.getSize();
 
+  const textLayer = await extractLastPageTextRuns(new Uint8Array(sourcePdf));
+  const seal = textLayer
+    ? partyASealRect(textLayer.page, textLayer.items)
+    : null;
+  if (textLayer) {
+    lowerEmbeddedSeals(pdfDoc, page, textLayer.items);
+  }
+
   const margin = 36;
-  let yBase = margin + 8;
   const sigRaw = images.signaturePngBase64?.trim();
   if (sigRaw) {
     const { img: png } = await embedSignImage(pdfDoc, sigRaw);
-    const sigW = 140;
-    const sigH = (png.height / png.width) * sigW;
-    yBase = margin + sigH + 8;
+    const slot = seal
+      ? partyASignatureRect(seal)
+      : { x: margin, y: margin, w: 140, h: 36 };
+    const fitted = fitInside(slot, png.width, png.height);
     page.drawImage(png, {
-      x: margin,
-      y: margin,
-      width: sigW,
-      height: sigH,
+      x: fitted.x,
+      y: fitted.y,
+      width: fitted.w,
+      height: fitted.h,
     });
   }
 
   const stampRaw = images.stampPngBase64?.trim();
   if (stampRaw) {
     const { img: stampImg } = await embedSignImage(pdfDoc, stampRaw);
-    const stampW = 72;
-    const stampH = (stampImg.height / stampImg.width) * stampW;
+    const slot = seal
+      ? seal
+      : {
+          x: width - margin - 72,
+          y: margin,
+          w: 72,
+          h: 72,
+        };
+    const fitted = fitInside(slot, stampImg.width, stampImg.height);
     page.drawImage(stampImg, {
-      x: width - margin - stampW,
-      y: margin,
-      width: stampW,
-      height: stampH,
+      x: fitted.x,
+      y: fitted.y,
+      width: fitted.w,
+      height: fitted.h,
     });
-    yBase = Math.max(yBase, margin + stampH + 8);
   }
+
+  const yBase = 50;
 
   const { font, hangul } = await overlayFont(pdfDoc);
   const fontSize = 9;

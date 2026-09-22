@@ -6,6 +6,10 @@ import {
 } from "@/lib/ooh-contract-context";
 import { buildSignedOohContractPdf } from "@/lib/ooh-contract-pdf";
 import {
+  isUploadedContractSendMode,
+  normalizeContractSendMode,
+} from "@/lib/contract-send-mode";
+import {
   formatSignedAtKst,
   hashSignatureImagePngBase64,
   hashUnsignedContractDocument,
@@ -63,6 +67,9 @@ export async function rebuildSignedOohContractPdfFromRecord(
   const row = await loadOoHQuoteForContract(db, quoteId);
   const c = row?.oohContract;
   if (!row || !c?.signatureImage?.trim() || !c.signerName || !c.signerEmail || !c.signedAt) {
+    return null;
+  }
+  if (isUploadedContractSendMode(normalizeContractSendMode(c.sendMode))) {
     return null;
   }
 
