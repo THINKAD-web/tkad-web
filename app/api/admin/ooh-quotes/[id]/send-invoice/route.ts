@@ -6,6 +6,7 @@ import { canAdminSendInvoiceForContract } from "@/lib/contract-send-mode";
 import { canAdminSendInvoice } from "@/lib/ooh-quote";
 import { buildBillingDocumentPdfBase64 } from "@/lib/server-ooh-quote-pdf";
 import { buildContractMoney, supplyWonFromManwonField } from "@/lib/contract-money";
+import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
 import { parseOohContractMeta } from "@/lib/ooh-contract-meta";
 import { getFormalQuoteIssuer } from "@/lib/formal-quote-issuer";
 import { sendEmailWithPdfAttachment } from "@/lib/email/client";
@@ -48,36 +49,56 @@ export async function POST(
 
   const meta = parseOohContractMeta(row.adminNote);
   const breakdown = row.quoteBreakdown as {
-    lines?: { mediaName: string; location?: string; lineSupplyWon: number }[];
-    supplyWon?: number;
-    subtotalWon?: number;
+    lines?: {
+      mediaId?: string;
+      mediaName: string;
+      location?: string;
+      quantityLabel?: string;
+      lineSupplyWon: number;
+    }[];
   } | null;
-  const mediaSupply =
-    breakdown?.supplyWon && breakdown.supplyWon > 0
-      ? breakdown.supplyWon
-      : supplyWonFromManwonField(row.totalAmount, breakdown?.subtotalWon);
+  const mediaSource = (breakdown?.lines ?? []).filter(
+    (line) => line.mediaId && !isQuoteAddonLineId(line.mediaId),
+  );
   const money = buildContractMoney({
-    mediaSupplyWon: mediaSupply,
+    mediaLines: mediaSource.map((line) => ({
+      name: line.mediaName,
+      location: line.location ?? "",
+      spec: line.quantityLabel ?? "",
+      supplyWon: line.lineSupplyWon,
+    })),
+    contractMediaSupplyWon: supplyWonFromManwonField(row.totalAmount),
     extraProductionWon: meta.extraProductionWon,
     extraInstallWon: meta.extraInstallWon,
     extraOtherWon: meta.extraOtherWon,
+    productionCostText: meta.productionCost,
   });
   const mediaLines =
-    breakdown?.lines?.map((line) => ({
-      name: line.mediaName,
-      spec: line.location,
-      amountWon: line.lineSupplyWon,
-    })) ?? [
-      {
-        name: isKo ? "매체비" : "Media fee",
-        amountWon: money.mediaSupplyWon,
-      },
-    ];
+    money.mediaLines.length > 0
+      ? money.mediaLines.map((line) => ({
+          name: line.name,
+          spec: [line.location, line.spec].filter(Boolean).join(" · "),
+          amountWon: line.supplyWon,
+        }))
+      : [
+          {
+            name: isKo ? "매체비" : "Media fee",
+            amountWon: money.contractMediaSupplyWon,
+          },
+        ];
   const extraLines = [
+    ...(money.adjustmentWon !== 0
+      ? [
+          {
+            name: isKo ? "협의 조정" : "Adjustment",
+            amountWon: money.adjustmentWon,
+          },
+        ]
+      : []),
     { name: isKo ? "제작비" : "Production", amountWon: money.extraProductionWon },
     { name: isKo ? "설치비" : "Installation", amountWon: money.extraInstallWon },
     { name: isKo ? "기타" : "Other", amountWon: money.extraOtherWon },
-  ].filter((l) => l.amountWon > 0);
+  ].filter((l) => l.amountWon !== 0);
   const issuer = getFormalQuoteIssuer();
   const bankName = process.env.QUOTE_BANK_NAME?.trim() || issuer.bank;
   const bankAccount = process.env.QUOTE_BANK_ACCOUNT?.trim() || issuer.account;

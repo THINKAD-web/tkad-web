@@ -77,10 +77,16 @@ export async function resolveContractInviteEmailPayload(
     row.mediaIds,
     row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
     isKo,
+    { start: row.startDate, end: row.endDate },
   );
   const contractId = row.oohContract?.id ?? quoteId;
-  const pdfVars = ooHQuoteToContractPdfVars(row, mediaPack.names, contractId);
-  pdfVars.mediaLineItems = mediaPack.lineItems;
+  const pdfVars = ooHQuoteToContractPdfVars(
+    row,
+    mediaPack.names,
+    contractId,
+    undefined,
+    mediaPack.lineItems,
+  );
 
   const accountManagerName =
     meta.accountManagerName?.trim() ||

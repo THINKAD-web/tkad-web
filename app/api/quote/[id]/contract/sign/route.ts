@@ -225,9 +225,15 @@ export async function POST(
         row.mediaIds,
         row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
         isKo,
+        { start: row.startDate, end: row.endDate },
       );
-      const vars = ooHQuoteToContractPdfVars(row, mediaPack.names, contract.id);
-      vars.mediaLineItems = mediaPack.lineItems;
+      const vars = ooHQuoteToContractPdfVars(
+        row,
+        mediaPack.names,
+        contract.id,
+        undefined,
+        mediaPack.lineItems,
+      );
       documentHash = await hashUnsignedContractDocument(vars);
       const built = await buildSignedOohContractPdf(
         vars,

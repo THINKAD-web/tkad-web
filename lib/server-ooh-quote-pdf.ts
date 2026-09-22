@@ -353,7 +353,7 @@ export async function buildBillingDocumentPdfBase64(p: {
   const hasKr = p.isKo ? await ensureKrFontForServerPdf(doc) : false;
   const fam = p.isKo ? krFontFamily(hasKr) : "helvetica";
   const won = (n: number) =>
-    `₩${Math.round(n).toLocaleString(p.isKo ? "ko-KR" : "en-US")}`;
+    `￦${Math.round(n).toLocaleString(p.isKo ? "ko-KR" : "en-US")}`;
 
   let y = 18;
   doc.setFillColor(26, 42, 108);

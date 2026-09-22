@@ -34,9 +34,15 @@ export async function rebuildSignedOohContractPdfFromRecord(
     row.mediaIds,
     row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
     isKo,
+    { start: row.startDate, end: row.endDate },
   );
-  const vars = ooHQuoteToContractPdfVars(row, mediaPack.names, c.id);
-  vars.mediaLineItems = mediaPack.lineItems;
+  const vars = ooHQuoteToContractPdfVars(
+    row,
+    mediaPack.names,
+    c.id,
+    undefined,
+    mediaPack.lineItems,
+  );
   const sigB64 = signaturePngBase64FromStored(c.signatureImage);
 
   const documentContentSha256 = await hashUnsignedContractDocument(vars);

@@ -67,9 +67,15 @@ export async function buildContractPreviewPdfBuffer(
       row.mediaIds,
       row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
       isKo,
+      { start: row.startDate, end: row.endDate },
     );
-    const vars = ooHQuoteToContractPdfVars(row, mediaPack.names, contract.id);
-    vars.mediaLineItems = mediaPack.lineItems;
+    const vars = ooHQuoteToContractPdfVars(
+      row,
+      mediaPack.names,
+      contract.id,
+      undefined,
+      mediaPack.lineItems,
+    );
     const { pdfBase64 } = await buildOohContractPdf(vars);
     return {
       buffer: Buffer.from(pdfBase64, "base64"),
