@@ -146,9 +146,6 @@ const nextConfig: NextConfig = {
       "./public/fonts/Pretendard-Regular.ttf",
     ],
     "/api/quote/[id]/contract/sign": ["./lib/fonts/Pretendard-Regular.ttf"],
-    "/api/quote/contract/overlay-font-sample": [
-      "./lib/fonts/Pretendard-Regular.ttf",
-    ],
   },
   webpack(config, { dev, isServer }) {
     config.resolve ??= {};
