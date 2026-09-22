@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import { fetchUploadedContractPdfVerified } from "@/lib/ooh-contract-upload-pdf";
-import { getPrisma } from "@/lib/prisma";
-import { formatSignedAtKst } from "@/lib/signature-audit";
 import {
   buildSignedUploadContractPdf,
   takeOverlayFontSource,
@@ -12,7 +9,11 @@ export const maxDuration = 60;
 
 /** 배포 확인용. 확인 후 이 라우트는 제거한다. */
 const SAMPLE_TOKEN = "overlay-font-check-7f3c";
-const CONTRACT_ID = "cmucegp5i000b04jx5n3alogg";
+const SOURCE_PDF =
+  "https://tkad-cdn.b-cdn.net/tkad/contracts/source/75f38db084fa9c66604e0d62.pdf";
+
+const SIGNATURE_PNG =
+  "iVBORw0KGgoAAAANSUhEUgAAAaQAAAB4CAYAAAC9x4bVAAAHP0lEQVR4Ae3BAZJiyXZEwbi5h9j/AmMRoZY0Mv0eqwcPiioSOO7TVgAAPNsSAAAbWAIAYANLAABsYAkAgA0sAQCwgSUAADawBADABpYAANjAEgAAG1gCAGADSwAAbGAJAIANLAEAsIElAAA2sAQAwAaWAADYwBIAABtYAgBgA0sAAGxgCQCADSwBALCBJQAANrAEAMAGlgAA2MASAAAbWAIAYANLAABsYAkAgA0sAQCwgSUAADawBADABpYAANjAEgAAG1gCAGADSwAAbGAJAIANLAEAsIElAAA2sAQAwAaWAADYwBIAABtYAgBgA0sAAGxgCQCADSwBALCBJQAANrAEAMAG/gvIDInWGsOH+gAAAABJRU5ErkJggg==";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -20,36 +21,20 @@ export async function GET(req: Request) {
     return new NextResponse("Not found", { status: 404 });
   }
 
-  const db = getPrisma();
-  const contract = await db.oohContract.findUnique({
-    where: { id: CONTRACT_ID },
-    include: { auditLogs: { orderBy: { signedAt: "desc" }, take: 1 } },
-  });
-  if (
-    !contract?.uploadedPdfUrl ||
-    !contract.signatureImage ||
-    !contract.signerName ||
-    !contract.signerEmail ||
-    !contract.signedAt
-  ) {
-    return NextResponse.json({ error: "contract_incomplete" }, { status: 404 });
+  const res = await fetch(SOURCE_PDF);
+  if (!res.ok) {
+    return NextResponse.json({ error: "source_fetch_failed" }, { status: 502 });
   }
-
-  const audit = contract.auditLogs[0];
-  const sourcePdf = await fetchUploadedContractPdfVerified(
-    contract.uploadedPdfUrl,
-    contract.uploadedPdfSha256,
-  );
+  const sourcePdf = Buffer.from(await res.arrayBuffer());
   const signed = await buildSignedUploadContractPdf(
     sourcePdf,
-    { signaturePngBase64: contract.signatureImage },
+    { signaturePngBase64: SIGNATURE_PNG },
     {
-      signerName: contract.signerName,
-      signerEmail: contract.signerEmail,
-      signedAtKst: formatSignedAtKst(contract.signedAt),
-      documentContentSha256:
-        audit?.documentHash || contract.uploadedPdfSha256 || "",
-      signatureImageSha256: audit?.signatureImageHash || "",
+      signerName: "홍 용 기",
+      signerEmail: "mannote@naver.com",
+      signedAtKst: "2026. 9. 22. 18:57:55",
+      documentContentSha256: "ab".repeat(32),
+      signatureImageSha256: "cd".repeat(32),
     },
   );
   const buf = Buffer.from(signed.pdfBase64, "base64");
