@@ -69,6 +69,14 @@ scripts/screenshot-*
 scripts/simulate-*.ts
 scripts/print-admin-*.ts
 *.png
+!.github/pr-screenshots/
+!.github/pr-screenshots/map-ux-phase-1/
+!.github/pr-screenshots/map-ux-phase-1/*.png
+!.github/pr-screenshots/map-ux-phase-2/
+!.github/pr-screenshots/map-ux-phase-2/*.png
+!.github/pr-screenshots/map-coverage-poc/
+!.github/pr-screenshots/map-coverage-poc/*.png
+!.github/pr-screenshots/contract-sign-font-page2.png
 !docs/screenshots/
 !docs/screenshots/pr4-baseline/
 !docs/screenshots/pr4-baseline/*.png
@@ -78,6 +86,8 @@ scripts/print-admin-*.ts
 !docs/screenshots/pr461-qp-preview/*.png
 !reports/design-tone-audit-20260826/screenshots/option-a-media/
 !reports/design-tone-audit-20260826/screenshots/option-a-media/*.png
+!reports/trust-credibility-urgent/
+!reports/trust-credibility-urgent/*.png
 scripts/fix-*.ts
 scripts/.backfill-media-translations-calibration.json
 

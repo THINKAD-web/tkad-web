@@ -37,9 +37,15 @@ export async function POST(request: NextRequest) {
       ? (raw as { draftId: string }).draftId.trim()
       : newStandaloneContractDraftId();
 
-  const vars = standaloneContractToPdfVars(parsed.data, draftId);
-  const { pdfBase64 } = await buildOohContractPdf(vars);
-  const buf = Buffer.from(pdfBase64, "base64");
+  let buf: Buffer;
+  try {
+    const vars = standaloneContractToPdfVars(parsed.data, draftId);
+    const { pdfBase64 } = await buildOohContractPdf(vars);
+    buf = Buffer.from(pdfBase64, "base64");
+  } catch (e) {
+    console.error("[admin contract preview]", e);
+    return NextResponse.json({ error: "pdf_generate_failed" }, { status: 503 });
+  }
 
   const disposition = parsed.data.download ? "attachment" : "inline";
   const filename = `thinkad-contract-${draftId.slice(-8).toLowerCase()}.pdf`;

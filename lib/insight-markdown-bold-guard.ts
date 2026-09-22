@@ -24,3 +24,17 @@ export function guardInsightMarkdownBoldParticles(markdown: string): string {
   }
   return next;
 }
+
+/** GFM 취소선(~~) — 시간대 "8~10" 등 단일 물결표가 오인 파싱되지 않도록 이스케이프 */
+const TIME_RANGE_TILDE = /(\d)~(\d)/g;
+
+export function guardInsightMarkdownTimeRangeTildes(markdown: string): string {
+  if (!markdown.includes("~")) return markdown;
+  return markdown.replace(TIME_RANGE_TILDE, "$1\\~$2");
+}
+
+export function prepareInsightMarkdown(markdown: string): string {
+  return guardInsightMarkdownTimeRangeTildes(
+    guardInsightMarkdownBoldParticles(markdown),
+  );
+}

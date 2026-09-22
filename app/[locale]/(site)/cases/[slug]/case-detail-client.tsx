@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
-import { CategoryHeroBetaBadge } from "@/components/category-explore-hero";
 import { CaseMetricsCharts } from "@/components/cases/case-metrics-charts";
 import { SimilarCasesRow } from "@/components/cases/similar-cases-row";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -85,6 +84,7 @@ export default function CaseDetailClient({
   const metrics =
     row.structuredMetrics.length > 0 ? row.structuredMetrics : [];
   const headline = buildCaseHeadline(row, locale);
+  const isExample = row.isExampleScenario;
 
   const galleryUrls = useMemo(
     () => row.galleryUrls.filter(Boolean),
@@ -115,20 +115,27 @@ export default function CaseDetailClient({
               {t("detailBack")}
             </Link>
 
-            <p className="flex flex-wrap items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
-              <span>{`// CASE / ${row.id.slice(0, 8).toUpperCase()}`}</span>
-              <CategoryHeroBetaBadge />
-            </p>
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] px-3 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]">
                 {row.industry}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
-                <BadgeCheck className="h-3 w-3 text-[var(--qp-accent)]" />
-                {t("detailVerified")}
-              </span>
+              {isExample ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/50 bg-amber-500/10 px-3 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-amber-900 dark:text-amber-100">
+                  {t("detailExampleScenario")}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
+                  <BadgeCheck className="h-3 w-3 text-[var(--qp-accent)]" />
+                  {t("detailVerified")}
+                </span>
+              )}
             </div>
+
+            {isExample ? (
+              <p className="mt-3 max-w-3xl rounded-lg border border-amber-400/40 bg-amber-500/5 px-4 py-3 text-sm leading-relaxed text-amber-950 dark:text-amber-50">
+                {t("detailExampleDisclaimer")}
+              </p>
+            ) : null}
 
             <p className="mt-4 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-400">
               {row.clientName}

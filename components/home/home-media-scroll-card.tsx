@@ -7,10 +7,12 @@ import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import {
   buildHomePopularCardPriceDisplay,
-  formatHomePopularCardCpm,
   homePopularCardCpmTooltip,
   homePopularCardDoohTooltip,
+  homePopularCardCpmWon,
 } from "@/lib/home-popular-card-display";
+import { regionLabel } from "@/lib/media-keyword-landing";
+import { resolveCpmDisplay } from "@/lib/metrics/format";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -65,11 +67,21 @@ export function HomeMediaScrollCard({
   priority,
 }: Props) {
   const locale = isKo ? "ko-KR" : "en-US";
+  const localeTag = isKo ? "ko" : "en";
   const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
   const showDoohHint = item.type?.toUpperCase().includes("DOOH") ?? false;
-  const regionParts = [item.region, item.type].filter(Boolean);
+  const regionDisplay = item.region
+    ? regionLabel(item.region, localeTag)
+    : null;
+  const regionParts = [regionDisplay, item.type].filter(Boolean);
   const priceDisplay = buildHomePopularCardPriceDisplay(item, locale, isKo);
-  const cpmLabel = formatHomePopularCardCpm(item, locale);
+  const cpmDisplay = resolveCpmDisplay(homePopularCardCpmWon(item), locale);
+  const cpmLine =
+    cpmDisplay.rawWon != null
+      ? cpmDisplay.displayable
+        ? `CPM ${cpmDisplay.text}`
+        : cpmDisplay.text
+      : null;
 
   return (
     <Link
@@ -135,11 +147,9 @@ export function HomeMediaScrollCard({
             ) : null}
           </div>
         ) : null}
-        {cpmLabel ? (
+        {cpmLine ? (
           <p className="tkad-type-note flex items-center gap-0.5 tabular-nums text-tkad-muted">
-            <span>
-              CPM {cpmLabel}
-            </span>
+            <span>{cpmLine}</span>
             <CardInfoButton
               label={isKo ? "CPM 설명" : "About CPM"}
               title={homePopularCardCpmTooltip(isKo)}

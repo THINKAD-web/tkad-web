@@ -4,6 +4,8 @@ import { DISPLAY_MODE_LABELS } from "@/lib/display-mode-labels";
 import {
   visibilityPinTierDefForScore,
   visibilityPinTierForScore,
+  visibilityPinTierRingStroke,
+  type VisibilityPinTier,
 } from "@/lib/map-pin-visibility-colors";
 import { BRAND_ACCENT, BRAND_ACCENT_STROKE, BRAND_ACCENT_STROKE_ALT } from "@/lib/brand-palette";
 
@@ -124,6 +126,15 @@ function buildOuterRing(
   }
 }
 
+function buildTierNumberLabel(
+  tier: VisibilityPinTier,
+  forLightBackground: boolean,
+): string {
+  if (tier <= 0) return "";
+  const fill = forLightBackground ? "#475569" : "#e2e8f0";
+  return `<text x="26" y="9" text-anchor="end" font-size="8" font-weight="800" font-family="ui-sans-serif,system-ui,sans-serif" fill="${fill}">${tier}</text>`;
+}
+
 function buildSelectionIndicator(shape: PinShapeKind): string {
   switch (shape) {
     case "rounded-square":
@@ -156,13 +167,14 @@ export function buildPinDataUrl(
 ): string {
   const { fill } = pinColorForType(type);
   const shape = pinShapeForType(type);
-  const tierDef = visibilityPinTierDefForScore(
-    visibilityScore !== undefined ? visibilityScore : null,
-    forLightBackground,
-  );
+  const score =
+    visibilityScore !== undefined ? visibilityScore : null;
+  const tier = visibilityPinTierForScore(score);
   const size = selected ? 34 : 30;
   const outerRing = selected ? 3 : 2.5;
-  const outerStroke = selected ? MAP_PIN_SELECTION_RING : tierDef.stroke;
+  const outerStroke = selected
+    ? MAP_PIN_SELECTION_RING
+    : visibilityPinTierRingStroke(tier, forLightBackground);
   const innerEdge = forLightBackground
     ? "rgba(15,23,42,0.18)"
     : "rgba(255,255,255,0.28)";
@@ -171,7 +183,7 @@ export function buildPinDataUrl(
   <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 32 32">
     ${buildInnerShape(shape, fill, innerEdge)}
     ${buildOuterRing(shape, outerStroke, outerRing)}
-    ${selected ? buildSelectionIndicator(shape) : ""}
+    ${selected ? buildSelectionIndicator(shape) : buildTierNumberLabel(tier, forLightBackground)}
   </svg>`;
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
 }

@@ -109,8 +109,6 @@ export const PDF_LAYOUT = {
   groupSegmentTrailingMm: 2,
 } as const;
 
-const M = PDF_LAYOUT.marginMm;
-
 function drawKpiBadge(
   doc: import("jspdf").jsPDF,
   k: PlannerExportKpi,
@@ -142,6 +140,9 @@ export async function buildPlannerReportPdf(
   assets?: PlannerReportExportAssets,
 ): Promise<Uint8Array> {
   const theme = getReportDocumentTheme(assets?.style);
+  const M = theme.pdf.marginMm;
+  const kpiCardFilled = theme.pdf.kpiCardFilled;
+  const kpiCardBorder = theme.pdf.kpiCardBorder;
   const {
     accentRgb: QP_ACCENT,
     accentSoftRgb: QP_ACCENT_SOFT,
@@ -150,6 +151,7 @@ export async function buildPlannerReportPdf(
     coverBgRgb: COVER_BG,
     coverTextRgb: COVER_TEXT,
     coverMutedRgb: COVER_MUTED,
+    coverTopBarRgb: COVER_TOP_BAR,
   } = theme.pdf;
   const wordmarkOnDark = theme.coverMode === "filled";
 
@@ -169,6 +171,19 @@ export async function buildPlannerReportPdf(
   const setFill = (c: readonly number[]) => doc.setFillColor(c[0]!, c[1]!, c[2]!);
   const setText = (c: readonly number[]) => doc.setTextColor(c[0]!, c[1]!, c[2]!);
   const setDraw = (c: readonly number[]) => doc.setDrawColor(c[0]!, c[1]!, c[2]!);
+
+  const paintKpiCard = (x: number, cardY: number, w: number, h: number) => {
+    if (kpiCardFilled) {
+      setFill(GRAY_50);
+      doc.roundedRect(x, cardY, w, h, R, R, "F");
+      return;
+    }
+    if (kpiCardBorder) {
+      setDraw(GRAY_200);
+      doc.setLineWidth(0.35);
+      doc.roundedRect(x, cardY, w, h, R, R, "S");
+    }
+  };
 
   let y = 0;
   const getY = () => y;
@@ -350,7 +365,7 @@ export async function buildPlannerReportPdf(
     setFill(COVER_BG);
     doc.rect(0, 0, pageW, pageH, "F");
     if (theme.topAccentBar) {
-      setFill(QP_ACCENT);
+      setFill(COVER_TOP_BAR);
       doc.rect(0, 0, pageW, theme.coverMode === "minimal" ? 1.2 : 3, "F");
     }
     if (theme.coverMode === "filled") {
@@ -412,8 +427,7 @@ export async function buildPlannerReportPdf(
       const kW = contentW / kpis.length;
       kpis.forEach((k, i) => {
         const x = M + kW * i;
-        setFill(GRAY_50);
-        doc.roundedRect(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm, R, R, "F");
+        paintKpiCard(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm);
         doc.setFont(FONT, "normal");
         doc.setFontSize(PDF_LAYOUT.kpiLabelPt);
         setText(GRAY_500);
@@ -684,8 +698,7 @@ export async function buildPlannerReportPdf(
     const kW = contentW / kpis.length;
     kpis.forEach((k, i) => {
       const x = M + kW * i;
-      setFill(GRAY_50);
-      doc.roundedRect(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm, R, R, "F");
+      paintKpiCard(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm);
       doc.setFont(FONT, "normal");
       doc.setFontSize(PDF_LAYOUT.kpiLabelPt);
       setText(GRAY_500);
@@ -1115,8 +1128,29 @@ export async function buildPlannerReportPdf(
     let contentH = 5;
     if (row.location) contentH += 4.2;
     if (row.categoryLabel) contentH += 4.2;
-    // 라벨·값 2줄 스택(일 실노출(추정) 등 긴 라벨 겹침 방지)
-    if (specs.length > 0) contentH += 3 + Math.ceil(specs.length / 2) * 7.8;
+    const specLabelValueGap = 3.2;
+    const specRowGap = 1.5;
+    const specLineH = 3.6;
+    if (specs.length > 0) {
+      contentH += 3;
+      doc.setFontSize(PDF_LAYOUT.detailSpecPt);
+      for (let i = 0; i < specs.length; i += 2) {
+        const hLeft =
+          specLabelValueGap +
+          ((
+            doc.splitTextToSize(specs[i]!.value, colW) as string[]
+          ).length || 1) *
+            specLineH;
+        const hRight = specs[i + 1]
+          ? specLabelValueGap +
+            ((
+              doc.splitTextToSize(specs[i + 1]!.value, colW) as string[]
+            ).length || 1) *
+              specLineH
+          : 0;
+        contentH += Math.max(hLeft, hRight) + specRowGap;
+      }
+    }
     if (row.monthlyPriceLabel || row.lineTotalLabel) contentH += 11;
     if (row.recommendReason?.trim()) {
       const reasonLines = doc.splitTextToSize(
@@ -1205,18 +1239,15 @@ export async function buildPlannerReportPdf(
       doc.line(textX, ty, textX + textW, ty);
       ty += 3;
       doc.setFontSize(PDF_LAYOUT.detailSpecPt);
-      const specLabelValueGap = 3.2;
-      const specRowGap = 1.5;
       for (let i = 0; i < specs.length; i += 2) {
         const drawSpec = (spec: MediaCardSpec, sx: number): number => {
           setText(GRAY_500);
           doc.text(`${spec.label}`, sx, ty);
           setText(INK);
           doc.setFont(FONT, "normal");
-          const val =
-            (doc.splitTextToSize(spec.value, colW) as string[])[0] ?? spec.value;
-          doc.text(val, sx, ty + specLabelValueGap);
-          return specLabelValueGap + 3.6;
+          const valLines = doc.splitTextToSize(spec.value, colW) as string[];
+          doc.text(valLines, sx, ty + specLabelValueGap);
+          return specLabelValueGap + valLines.length * specLineH;
         };
         let rowH = drawSpec(specs[i]!, textX);
         if (specs[i + 1]) {
@@ -1760,8 +1791,7 @@ export async function buildPlannerReportPdf(
       const kW = contentW / kpis.length;
       kpis.forEach((k, i) => {
         const x = M + kW * i;
-        setFill(GRAY_50);
-        doc.roundedRect(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm, R, R, "F");
+        paintKpiCard(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm);
         doc.setFont(FONT, "normal");
         doc.setFontSize(PDF_LAYOUT.kpiLabelPt);
         setText(GRAY_500);

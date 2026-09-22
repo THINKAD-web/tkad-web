@@ -29,6 +29,7 @@ export function useReportCopyAutoDraft(params: {
   enabled: boolean;
   fingerprint: FingerprintInput;
   strategyInput: DefaultExecutiveSummaryInput;
+  documentType?: import("@/lib/planner-report-export/document-type").PlannerDocumentTypeKey;
 }) {
   const clientName = useReportCopyStore((s) => s.clientName);
   const greeting = useReportCopyStore((s) => s.greeting);
@@ -81,6 +82,7 @@ export function useReportCopyAutoDraft(params: {
     const nextGreeting = buildDefaultReportGreeting(
       params.isKo,
       clientName.trim() || undefined,
+      params.documentType,
     );
     const nextExecutive = joinReportCopyLines(
       buildDefaultExecutiveSummaryLines(params.strategyInput),
@@ -100,6 +102,7 @@ export function useReportCopyAutoDraft(params: {
   }, [
     params.enabled,
     params.isKo,
+    params.documentType,
     params.strategyInput,
     strategyInputKey,
     greetingTouched,
@@ -124,6 +127,7 @@ export function useReportCopyAutoDraft(params: {
     const nextGreeting = buildDefaultReportGreeting(
       params.isKo,
       clientName.trim() || undefined,
+      params.documentType,
     );
     const nextExecutive = joinReportCopyLines(
       buildDefaultExecutiveSummaryLines(params.strategyInput),
@@ -135,6 +139,7 @@ export function useReportCopyAutoDraft(params: {
     });
   }, [
     params.isKo,
+    params.documentType,
     params.strategyInput,
     clientName,
     copyFingerprintCurrent,

@@ -59,6 +59,16 @@ import {
 import type { PlannerExportBadgeKind } from "@/lib/planner-report-export/export-badge";
 import type { PatternComboDimensions } from "@/lib/recommend/pattern-stats-types";
 import {
+  DEFAULT_PLANNER_DOCUMENT_TYPE,
+  getPlannerDocumentTypeConfig,
+  type PlannerDocumentTypeKey,
+} from "@/lib/planner-report-export/document-type";
+import {
+  buildDefaultExecutiveSummaryLines,
+  buildDefaultReportGreeting,
+} from "@/lib/planner-report-export/report-copy";
+import { resolveCpmWonForDisplayFromMediaItem } from "@/lib/media-metrics";
+import {
   attachSeoulBenchmarksToPortfolioRows,
   seoulBenchmarkFootnote,
 } from "@/lib/planner/seoul-media-benchmark";
@@ -143,12 +153,16 @@ export type BuildOohPayloadArgs = {
   customLineCount?: number;
   /** 서울 유형 벤치마크 집계용 — 공개 카탈로그 전체 (미전달 시 export enrich) */
   benchmarkCatalog?: readonly MediaItem[];
+  /** 문서유형 — 제목·인사 톤 SSOT (기본 proposal) */
+  documentTypeKey?: PlannerDocumentTypeKey;
 };
 
 export function buildOohReportPayload(
   a: BuildOohPayloadArgs,
 ): PlannerReportExportPayload {
   const isKo = a.isKo;
+  const documentTypeKey = a.documentTypeKey ?? DEFAULT_PLANNER_DOCUMENT_TYPE;
+  const documentTypeConfig = getPlannerDocumentTypeConfig(documentTypeKey);
   const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
   const pricing: PlannerPortfolioPricing = {
     quantities: a.campaignMediaQuantities,
@@ -359,6 +373,12 @@ export function buildOohReportPayload(
   // ── 전략 요약 (왜 / 효과 / 다음 액션) ──
   const sections: PlannerExportSection[] = [];
 
+  let resolvedReportGreeting = a.reportGreeting?.trim() || undefined;
+  let resolvedExecutiveSummaryLines =
+    a.reportExecutiveSummaryLines && a.reportExecutiveSummaryLines.length > 0
+      ? a.reportExecutiveSummaryLines
+      : undefined;
+
   const goalContextLines = buildGoalFollowUpReportLines(
     a.campaignGoal ?? null,
     a.goalFollowUp ?? {},
@@ -372,7 +392,20 @@ export function buildOohReportPayload(
   }
 
   if (a.portfolio.length) {
-    const topMedia = a.portfolio[0]?.name ?? (isKo ? "핵심 매체" : "key media");
+    const mediaHints = plan.mediaItems.map((mi) => {
+      const media = a.portfolio.find((m) => m.id === mi.id);
+      return {
+        name: mi.name,
+        location: media?.location ?? undefined,
+        budgetPct: mi.budgetShare,
+        cpmWon: mi.cpmWon,
+      };
+    });
+    const topByBudget = mediaHints
+      .filter((h) => h.budgetPct > 0)
+      .sort((a, b) => b.budgetPct - a.budgetPct)[0];
+    const topMedia = topByBudget?.name ?? (isKo ? "핵심 매체" : "key media");
+    const topMediaBudgetPct = topByBudget?.budgetPct ?? 0;
     const strategyCtx = {
       isKo,
       campaignGoal: a.campaignGoal ?? null,
@@ -383,8 +416,26 @@ export function buildOohReportPayload(
       seoulZones: a.seoulZones ?? [],
       followUp: a.goalFollowUp ?? {},
       portfolioCount: a.portfolio.length,
+      mediaHints,
     };
-    const hasExecutiveOverride = a.reportExecutiveSummaryLines !== undefined;
+    if (resolvedReportGreeting === undefined) {
+      resolvedReportGreeting = buildDefaultReportGreeting(
+        isKo,
+        a.clientName?.trim() || undefined,
+        documentTypeKey,
+      );
+    }
+    if (a.reportExecutiveSummaryLines === undefined) {
+      resolvedExecutiveSummaryLines = buildDefaultExecutiveSummaryLines({
+        ...strategyCtx,
+        topMediaName: topMedia,
+        topMediaBudgetPct:
+          topMediaBudgetPct > 0 ? topMediaBudgetPct : undefined,
+      });
+    }
+    const hasExecutiveOverride =
+      resolvedExecutiveSummaryLines !== undefined &&
+      resolvedExecutiveSummaryLines.length > 0;
     if (!hasExecutiveOverride) {
       const extraLines = buildReportStrategyLines(strategyCtx);
       const impressionTotal =
@@ -395,6 +446,9 @@ export function buildOohReportPayload(
                 : (a.metrics?.estimatedTotalImpressions ?? 0),
             )
           : null;
+      const budgetPctStr = topMediaBudgetPct > 0
+        ? ` (${Math.round(topMediaBudgetPct)}%)`
+        : "";
       const strategyLines = [
         buildReportWhyLine(strategyCtx),
         ...extraLines,
@@ -406,8 +460,8 @@ export function buildOohReportPayload(
             ? "예상 효과 · 핵심 타깃 도달률·ROI는 행정동 인구 데이터 연동 후 제공됩니다."
             : "Impact · Core reach and ROI will be available after dong-level population data is connected.",
         isKo
-          ? `다음 액션 · ${topMedia} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
-          : `Next · Lock ${topMedia} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
+          ? `다음 액션 · 예산 비중 1위 ${topMedia}${budgetPctStr} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
+          : `Next · Lock ${topMedia}${budgetPctStr} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
       ];
       sections.push({
         title: isKo ? "전략 요약" : "Strategy summary",
@@ -488,10 +542,18 @@ export function buildOohReportPayload(
     ...(a.customPortfolioRows ?? []),
   ];
 
-  const benchmarkPlanCpms = plan.mediaItems.map((mi) => ({
-    id: mi.id,
-    cpmWon: mi.cpmWon,
-  }));
+  const portfolioById = new Map(orderedPortfolio.map((m) => [m.id, m]));
+  const benchmarkCatalogById = new Map(
+    (a.benchmarkCatalog ?? []).map((m) => [m.id, m]),
+  );
+  const benchmarkPlanCpms = plan.mediaItems.map((mi) => {
+    const m = portfolioById.get(mi.id) ?? benchmarkCatalogById.get(mi.id);
+    const displayCpm = m ? resolveCpmWonForDisplayFromMediaItem(m) : null;
+    return {
+      id: mi.id,
+      cpmWon: displayCpm ?? mi.cpmWon,
+    };
+  });
 
   if (a.benchmarkCatalog?.length) {
     portfolioRows = attachSeoulBenchmarksToPortfolioRows({
@@ -590,22 +652,17 @@ export function buildOohReportPayload(
   return {
     kind: "ooh",
     isKo,
-    documentTitle:
-      a.regionBreakdown && a.regionBreakdown.length > 0
-        ? isKo
-          ? "내 플랜 매체 제안 보고서"
-          : "My plan media report"
-        : isKo
-          ? "OOH 옥외광고 플래너 보고서"
-          : "OOH Media Plan Report",
+    documentTitle: isKo
+      ? documentTypeConfig.titleKo
+      : documentTypeConfig.titleEn,
+    documentTypeWord: isKo
+      ? documentTypeConfig.fileNameWordKo
+      : documentTypeConfig.fileNameWordEn,
     campaignName: a.goalTitle,
     clientName: a.clientName?.trim() || undefined,
     coverLogoUrl: a.coverLogoUrl?.trim() || undefined,
-    greetingText: a.reportGreeting?.trim() || undefined,
-    executiveSummaryLines:
-      a.reportExecutiveSummaryLines && a.reportExecutiveSummaryLines.length > 0
-        ? a.reportExecutiveSummaryLines
-        : undefined,
+    greetingText: resolvedReportGreeting,
+    executiveSummaryLines: resolvedExecutiveSummaryLines,
     generatedAt: a.generatedAt,
     goalTitle: a.goalTitle,
     budgetMan: a.budgetMan,

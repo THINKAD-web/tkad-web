@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
-import { OoHQuoteStatus, OohContractStatus } from "@prisma/client";
+import { OoHQuoteStatus } from "@prisma/client";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
+import { canAdminSendInvoiceForContract } from "@/lib/contract-send-mode";
 import { canAdminSendInvoice } from "@/lib/ooh-quote";
 import { buildSimpleContractPdfBase64 } from "@/lib/server-ooh-quote-pdf";
 import { splitPdfLogicalLines } from "@/lib/pdf-line-break";
@@ -44,12 +45,9 @@ export async function POST(
   if (!canAdminSendInvoice(row.status)) {
     return json({ error: "Invalid status for this action" }, 409);
   }
-  if (
-    !row.oohContract ||
-    row.oohContract.status !== OohContractStatus.signed
-  ) {
+  if (!row.oohContract || !canAdminSendInvoiceForContract(row.oohContract)) {
     return json(
-      { error: "전자계약 서명 완료 후 청구서를 발송할 수 있습니다." },
+      { error: "전자계약 서명(또는 첨부 발송) 완료 후 청구서를 발송할 수 있습니다." },
       409,
     );
   }

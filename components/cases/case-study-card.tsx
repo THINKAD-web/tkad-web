@@ -42,6 +42,11 @@ export function CaseStudyCard({ item, className, compact }: Props) {
           heightClass="h-28"
           badge={
             <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+              {item.isExampleScenario ? (
+                <span className="rounded-full border border-amber-400/50 bg-amber-500/15 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.14em] text-amber-950 shadow-sm dark:text-amber-50">
+                  {t("detailExampleScenario")}
+                </span>
+              ) : null}
               {showAnonymizedBadge ? (
                 <span className="rounded-full border border-gray-200 bg-white/90 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.14em] text-gray-700 shadow-sm dark:border-white/25 dark:bg-black/55 dark:text-white/90">
                   {t("badgeAnonymized")}

@@ -1,0 +1,207 @@
+{
+  "generatedAt": "2026-09-21T01:52:30.561Z",
+  "activeMedia": 1049,
+  "v0DailyImpressionsEqualsFootfall": 776,
+  "storedImpressionsFootTrafficProxy": 71,
+  "samples": {
+    "v0FootfallMirror": [
+      {
+        "slug": "daegu-gukjegonghang-dochakjang-meoltibijeon-gwanggo",
+        "name": "대구 국제공항 도착장 멀티비전 광고",
+        "dailyFootfall": 12500,
+        "impressions": 2200000,
+        "engineDaily": 12500
+      },
+      {
+        "slug": "gwanghwamun-rumi-midieo-jeongwangpan-gwanggo",
+        "name": "광화문 루미 미디어 전광판 광고",
+        "dailyFootfall": 35529,
+        "impressions": 1850000,
+        "engineDaily": 35529
+      },
+      {
+        "slug": "gangnamyeok-midieowol-gwanggo",
+        "name": "지하철 2호선 강남역 미디어월 광고",
+        "dailyFootfall": 54026,
+        "impressions": 1800000,
+        "engineDaily": 54026
+      },
+      {
+        "slug": "hongdaeipguyeok-donggyobilding-oebyeok-ateuwol-gwanggo",
+        "name": "홍대 동교빌딩 외벽 아트월 광고",
+        "dailyFootfall": 306571,
+        "impressions": 4000000,
+        "engineDaily": 306571
+      },
+      {
+        "slug": "yeouido-ifc-sinema-ds-gwanggo",
+        "name": "여의도 IFC 시네마 DS 광고",
+        "dailyFootfall": 1806286,
+        "impressions": 3200000,
+        "engineDaily": 1806286
+      },
+      {
+        "slug": "seutapildeu-hanamjeom-midieotawo-panorama-seukeurin-gwanggo",
+        "name": "스타필드 하남점 미디어타워 & 파노라마 스크린 광고",
+        "dailyFootfall": 70000,
+        "impressions": 3200000,
+        "engineDaily": 70000
+      },
+      {
+        "slug": "jihacheol-2hoseon-jamsilyeok-maekseubijeon-gwanggo-bokje",
+        "name": "지하철 2호선 건대입구역 맥스비전 광고",
+        "dailyFootfall": 77912,
+        "impressions": 2337360,
+        "engineDaily": 77912
+      },
+      {
+        "slug": "daejeon-nyuyuseongpeuraja-jeongwangpan-gwanggo",
+        "name": "대전 뉴유성프라자 전광판 광고",
+        "dailyFootfall": 85000,
+        "impressions": 1650000,
+        "engineDaily": 85000
+      },
+      {
+        "slug": "sinseoldong-seupaiseubilding-jeongwangpan-gwanggo",
+        "name": "신설동 스파이스빌딩 전광판 광고",
+        "dailyFootfall": 65000,
+        "impressions": 1200000,
+        "engineDaily": 65000
+      },
+      {
+        "slug": "hyeondaebaekhwajeom-sinchonjeom-yupeulrekseu-byeokmyeon-jeongwangpan-bokje-1",
+        "name": "현대백화점 신촌점 유플렉스 지하 연결통로 LCD 광고",
+        "dailyFootfall": 155000,
+        "impressions": 2100000,
+        "engineDaily": 155000
+      },
+      {
+        "slug": "yongsan-mugyeongbilding-oebyeok-ateuwol-gwanggo",
+        "name": "용산 무경빌딩 외벽 아트월 광고",
+        "dailyFootfall": 84143,
+        "impressions": 1800000,
+        "engineDaily": 84143
+      },
+      {
+        "slug": null,
+        "name": "더현대 서울 디지털갤러리 광고",
+        "dailyFootfall": 54857,
+        "impressions": 3200000,
+        "engineDaily": 54857
+      },
+      {
+        "slug": "jonggak-j-raibeu-midieo-jeongwangpan-gwanggo",
+        "name": "종각 J-라이브 미디어 전광판 광고",
+        "dailyFootfall": 140000,
+        "impressions": 1800000,
+        "engineDaily": 140000
+      },
+      {
+        "slug": "yeouido-yeoui12-olrimpikdaero-dijiteol-gwanggo",
+        "name": "여의도 여의12 올림픽대로 디지털 광고",
+        "dailyFootfall": 137357,
+        "impressions": 8500000,
+        "engineDaily": 137357
+      },
+      {
+        "slug": null,
+        "name": "지하철 9호선 캔버스9 광고 Turn-Key (4개역 통합)",
+        "dailyFootfall": 420700,
+        "impressions": 12600000,
+        "engineDaily": 420700
+      }
+    ],
+    "storedProxy": [
+      {
+        "slug": "jihacheol-2hoseon-jamsilyeok-maekseubijeon-gwanggo-bokje",
+        "name": "지하철 2호선 건대입구역 맥스비전 광고",
+        "dailyFootfall": 77912,
+        "impressions": 2337360
+      },
+      {
+        "slug": null,
+        "name": "충무로 제일병원빌딩 전광판 광고",
+        "dailyFootfall": 66300,
+        "impressions": 1989000
+      },
+      {
+        "slug": "yongsanyeok-aipakeumol-midieowol-gwanggo",
+        "name": "용산역 아이파크몰 미디어월 광고",
+        "dailyFootfall": 85000,
+        "impressions": 2550000
+      },
+      {
+        "slug": null,
+        "name": "청주 사창사거리 재원빌딩 전광판 광고",
+        "dailyFootfall": 70000,
+        "impressions": 2100000
+      },
+      {
+        "slug": "gonghangcheoldo-geomamyeok-dijiteolsainiji-gwanggo-bokje",
+        "name": "공항철도 인천국제공항 T1 디지털사이니지 광고",
+        "dailyFootfall": 95000,
+        "impressions": 2850000
+      },
+      {
+        "slug": "eeobusan-gukjeseon-tapseunggwon-humyeon-gwanggo-bokje",
+        "name": "에어부산 항공기 외부 랩핑 광고",
+        "dailyFootfall": 45000,
+        "impressions": 1350000
+      },
+      {
+        "slug": "gonghangcheoldo-gongdeokyeok-dijiteolsainiji-gwanggo-bokje",
+        "name": "공항철도 홍대입구역 디지털사이니지 광고",
+        "dailyFootfall": 120000,
+        "impressions": 3600000
+      },
+      {
+        "slug": null,
+        "name": "인천지하철 1호선 테크노파크역 I-SCREEN 영상광고",
+        "dailyFootfall": 10583,
+        "impressions": 317490
+      },
+      {
+        "slug": null,
+        "name": "서울법인 택시 외부 광고",
+        "dailyFootfall": 850000,
+        "impressions": 25500000
+      },
+      {
+        "slug": null,
+        "name": "천안·아산 버스 외부 광고",
+        "dailyFootfall": 85000,
+        "impressions": 2550000
+      },
+      {
+        "slug": null,
+        "name": "테헤란로 성담빌딩 전광판 광고",
+        "dailyFootfall": 120000,
+        "impressions": 3600000
+      },
+      {
+        "slug": "incheon-jihacheol-dijiteol-sainiji-gwanggo-jakjeonyeok",
+        "name": "인천지하철 1호선 작전역 디지털사이니지 (디지털포스터) 광고",
+        "dailyFootfall": 13364,
+        "impressions": 400920
+      },
+      {
+        "slug": null,
+        "name": "서초 T-Center 호남선 쉘터 광고",
+        "dailyFootfall": 180000,
+        "impressions": 5400000
+      },
+      {
+        "slug": "jihacheol-2hoseon-yeoksamyeok-maekseubijeon-gwanggo-bokje",
+        "name": "지하철2호선 왕십리역 맥스비전 광고",
+        "dailyFootfall": 34250,
+        "impressions": 1027500
+      },
+      {
+        "slug": "gonghangcheoldo-dijiteolmidieositiyeok-dijiteolsainiji-gwanggo-bokje",
+        "name": "공항철도 김포공항역 디지털사이니지 광고",
+        "dailyFootfall": 85000,
+        "impressions": 2550000
+      }
+    ]
+  }
+}

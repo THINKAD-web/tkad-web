@@ -4,6 +4,11 @@
  */
 import type { MediaItem } from "@/lib/media-data";
 import {
+  mediaItemToImpressionsInput,
+  resolvePublicMonthlyImpressions,
+  type MonthlyImpressionsInput,
+} from "@/lib/media-impressions-ssot";
+import {
   catalogPriceFieldToWon,
   compareMediaByMonthlyEquivalentPrice,
   mediaMonthlyEquivalentSortWon,
@@ -18,7 +23,19 @@ export const MEDIA_DAYS_PER_MONTH = 30;
 export type MediaMetricsInput = Pick<
   MediaItem,
   "cpm" | "price" | "impressions" | "monthlyFootTraffic" | "dailyFootTraffic"
->;
+> &
+  Partial<
+    Pick<
+      MonthlyImpressionsInput,
+      | "engineDailyImpressions"
+      | "impressionModelVersion"
+      | "mediaType"
+      | "mediaSubCategory"
+      | "mediaMainCategory"
+      | "mediaName"
+      | "factSheet"
+    >
+  >;
 
 export type MediaListPriceInput = MediaPriceSortable;
 
@@ -31,12 +48,18 @@ const CPM_STORED_RATIO_MAX = 1.15;
  * (이관: ai-recommend-metrics.estimatedMonthlyImpressions)
  */
 export function resolveMonthlyImpressions(m: MediaMetricsInput): number {
-  const imp = m.impressions ?? m.monthlyFootTraffic;
-  if (typeof imp === "number" && Number.isFinite(imp) && imp > 0) {
-    return Math.round(imp);
-  }
-  const d = m.dailyFootTraffic ?? 0;
-  return Math.round(Math.max(0, d) * MEDIA_DAYS_PER_MONTH);
+  return resolvePublicMonthlyImpressions({
+    impressions: m.impressions,
+    monthlyFootTraffic: m.monthlyFootTraffic,
+    dailyFootTraffic: m.dailyFootTraffic,
+    engineDailyImpressions: m.engineDailyImpressions,
+    impressionModelVersion: m.impressionModelVersion,
+    mediaType: m.mediaType,
+    mediaSubCategory: m.mediaSubCategory,
+    mediaMainCategory: m.mediaMainCategory,
+    mediaName: m.mediaName,
+    factSheet: m.factSheet,
+  });
 }
 
 /**
@@ -49,9 +72,84 @@ export function resolveMonthlyListPriceWon(m: MediaListPriceInput): number {
   return priceToMonthlyEquivalentWon(priceWon, period);
 }
 
+export type MediaDisplayCpmSource = MediaMetricsInput &
+  MediaListPriceInput & {
+    productPriceWon?: number | null;
+    productPriceDays?: number | null;
+  };
+
+/**
+ * CPM 분자 — 카드·상세·지도와 동일한 **표시가 월 환산**.
+ * `productPriceWon`(등록 30일 상품)이 있으면 홈 인기 카드와 동일하게 우선.
+ */
+export function resolveCpmMonthlyPriceWon(m: MediaDisplayCpmSource): number {
+  if (
+    typeof m.productPriceWon === "number" &&
+    Number.isFinite(m.productPriceWon) &&
+    m.productPriceWon > 0
+  ) {
+    return m.productPriceWon;
+  }
+  return resolveMonthlyListPriceWon(m);
+}
+
+/** UI CPM 입력 — `resolveMediaDisplayPrice` SSOT 분자 */
+export function mediaMetricsInputForDisplayCpm(
+  m: MediaDisplayCpmSource,
+): MediaMetricsInput {
+  return {
+    cpm: m.cpm,
+    price: resolveCpmMonthlyPriceWon(m),
+    impressions: m.impressions,
+    monthlyFootTraffic: m.monthlyFootTraffic,
+    dailyFootTraffic: m.dailyFootTraffic,
+  };
+}
+
+export function resolveCpmWonForDisplay(m: MediaDisplayCpmSource): number | null {
+  return resolveCpmWon(mediaMetricsInputForDisplayCpm(m));
+}
+
+/** 카탈로그·벤치마크·상세 — 노출 SSOT + 표시가 CPM (#615/#616) */
+export function mediaDisplayCpmSourceFromItem(
+  m: MediaItem & {
+    productPriceWon?: number | null;
+    productPriceDays?: number | null;
+  },
+): MediaDisplayCpmSource {
+  const imp = mediaItemToImpressionsInput(m);
+  return {
+    cpm: m.cpm,
+    price: m.price,
+    pricePeriod: m.pricePeriod,
+    priceOptions: m.priceOptions,
+    productPriceWon: m.productPriceWon,
+    productPriceDays: m.productPriceDays,
+    impressions: imp.impressions,
+    monthlyFootTraffic: imp.monthlyFootTraffic,
+    dailyFootTraffic: imp.dailyFootTraffic,
+    engineDailyImpressions: imp.engineDailyImpressions,
+    impressionModelVersion: imp.impressionModelVersion,
+    mediaType: imp.mediaType,
+    mediaSubCategory: imp.mediaSubCategory,
+    mediaMainCategory: imp.mediaMainCategory,
+    mediaName: imp.mediaName,
+    factSheet: imp.factSheet,
+  };
+}
+
+export function resolveCpmWonForDisplayFromMediaItem(
+  m: MediaItem & {
+    productPriceWon?: number | null;
+    productPriceDays?: number | null;
+  },
+): number | null {
+  return resolveCpmWonForDisplay(mediaDisplayCpmSourceFromItem(m));
+}
+
 /**
  * 카탈로그 가격 필드 기준 CPM 재계산(원/1000회) — 반올림 전.
- * 목록 표시가(기간 환산)가 아니라 `m.price` 원 단위를 쓴다 (기존 정책 유지).
+ * `m.price`는 **월 환산 광고비(원)** 로 호출한다 (`mediaMetricsInputForDisplayCpm`).
  */
 export function estimateCatalogCpmWon(m: MediaMetricsInput): number | null {
   const imp = resolveMonthlyImpressions(m);

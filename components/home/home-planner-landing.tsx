@@ -218,11 +218,9 @@ export async function HomePlannerLanding({
               </h3>
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {digitalTiles.map((tile) => (
-                  <a
+                  <Link
                     key={tile.platformId}
                     href={tile.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className={tileClass}
                   >
                     <p className="text-xs font-bold leading-snug text-gray-900 dark:text-white sm:text-base">
@@ -233,7 +231,7 @@ export async function HomePlannerLanding({
                         {t("coverageCount", { count: tile.count })}
                       </p>
                     ) : null}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>

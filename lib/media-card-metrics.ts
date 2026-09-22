@@ -2,38 +2,37 @@ import { formatMediaPriceCompactWon } from "@/lib/media-price-format";
 import { resolveCpmDisplay } from "@/lib/metrics/format";
 import {
   formatMonthlyImpressionsLabel,
+  mediaMetricsInputForDisplayCpm,
   resolveCpmWon,
+  resolveCpmWonForDisplay,
   type MediaMetricsInput,
 } from "@/lib/media-metrics";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 
-/** 표시가(`price`)와 대표가(`catalogPrice`)가 분리된 카드/지도 입력 */
-type MetricInput = MediaMetricsInput & {
-  catalogPrice?: number | null;
-};
+/** 카드·지도 — `resolveMediaDisplayPrice` / `productPriceWon` SSOT */
+type MetricInput = MediaMetricsInput &
+  Pick<
+    import("@/lib/media-data").MediaItem,
+    "pricePeriod" | "priceOptions"
+  > & {
+    catalogPrice?: number | null;
+    productPriceWon?: number | null;
+    productPriceDays?: number | null;
+  };
 
-/**
- * CPM 분자 — `catalogPrice`(DB 대표가) 우선, 없으면 `price`.
- * resolveCpmWon 시그니처는 그대로 두고 호출 전 price만 정규화.
- */
+/** @deprecated 이름 유지 — 내부는 display-price SSOT */
 export function metricsInputForCatalogCpm(item: MetricInput): MediaMetricsInput {
-  const catalog = item.catalogPrice;
-  if (typeof catalog === "number" && Number.isFinite(catalog) && catalog > 0) {
-    return {
-      cpm: item.cpm,
-      price: catalog,
-      impressions: item.impressions,
-      monthlyFootTraffic: item.monthlyFootTraffic,
-      dailyFootTraffic: item.dailyFootTraffic,
-    };
-  }
-  return {
+  return mediaMetricsInputForDisplayCpm({
     cpm: item.cpm,
     price: item.price,
+    pricePeriod: item.pricePeriod,
+    priceOptions: item.priceOptions,
+    productPriceWon: item.productPriceWon,
+    productPriceDays: item.productPriceDays,
     impressions: item.impressions,
     monthlyFootTraffic: item.monthlyFootTraffic,
     dailyFootTraffic: item.dailyFootTraffic,
-  };
+  });
 }
 
 /**
@@ -43,7 +42,8 @@ export function metricsInputForCatalogCpm(item: MetricInput): MediaMetricsInput 
 function formatCpmLine(cpm: number | null | undefined, locale: string): string | null {
   const display = resolveCpmDisplay(cpm, locale);
   if (display.rawWon == null) return null;
-  return display.displayable ? `CPM ${display.text}` : display.text;
+  if (!display.displayable) return display.text;
+  return `CPM ${display.text}`;
 }
 
 function formatImpressionsLine(
@@ -55,8 +55,8 @@ function formatImpressionsLine(
   return isKo ? `유동 ${label}` : `Footfall ${label}`;
 }
 
-/** 목록·지도 카드용 CPM — SSOT `lib/media-metrics.resolveCpmWon` */
-export { resolveCpmWon };
+/** 목록·지도 카드용 CPM — SSOT `resolveCpmWonForDisplay` */
+export { resolveCpmWon, resolveCpmWonForDisplay };
 
 /** 카탈로그·피드 카드 썸네일 하단 1줄 — CPM · 월 유동인구(참고) */
 export function buildCatalogItemMetricLine(
@@ -64,7 +64,7 @@ export function buildCatalogItemMetricLine(
   isKo: boolean,
   locale: string,
 ): string | null {
-  const cpmWon = resolveCpmWon(metricsInputForCatalogCpm(item));
+  const cpmWon = resolveCpmWonForDisplay(item);
   const cpm = cpmWon != null ? formatCpmLine(cpmWon, locale) : null;
   const impressions = formatImpressionsLine(item, isKo);
   if (!cpm && !impressions) return null;
@@ -76,7 +76,7 @@ export function buildCatalogItemMetricLineCompact(
   item: MetricInput,
   locale: string,
 ): string | null {
-  const cpmWon = resolveCpmWon(metricsInputForCatalogCpm(item));
+  const cpmWon = resolveCpmWonForDisplay(item);
   const display = resolveCpmDisplay(cpmWon, locale);
   if (display.rawWon == null) return null;
   if (!display.displayable) return display.text;

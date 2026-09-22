@@ -55,6 +55,7 @@ import {
   parseAdminMediaTranslationsBody,
   persistAdminMediaTranslations,
 } from "@/lib/admin-media-translations";
+import { buildAdminMediaListTextSearchWhere } from "@/lib/media-search-db";
 
 export const dynamic = "force-dynamic";
 
@@ -128,15 +129,7 @@ export async function GET(request: NextRequest) {
     ids.length > 0
       ? { id: { in: ids } }
       : q
-        ? {
-            OR: [
-              { name: { contains: q, mode: "insensitive" } },
-              { nameEn: { contains: q, mode: "insensitive" } },
-              { location: { contains: q, mode: "insensitive" } },
-              { district: { contains: q, mode: "insensitive" } },
-              { city: { contains: q, mode: "insensitive" } },
-            ],
-          }
+        ? ((await buildAdminMediaListTextSearchWhere(db, q)) ?? undefined)
         : undefined;
 
   const medias = await db.media.findMany({

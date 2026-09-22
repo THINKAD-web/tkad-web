@@ -870,7 +870,11 @@ function renderKoSignatureBlock(
   margin: number,
   pageW: number,
   yStart: number,
-  options?: { signaturePngBase64?: string; stampDataUrl?: string | null },
+  options?: {
+    signaturePngBase64?: string;
+    stampDataUrl?: string | null;
+    clientStampDataUrl?: string | null;
+  },
 ): number {
   const partyB = OOH_CONTRACT_PARTY_B_KO;
   const maxW = pageW - 2 * margin;
@@ -947,8 +951,20 @@ function renderKoSignatureBlock(
         size: 8,
       });
     }
-  } else {
+  } else if (!options?.clientStampDataUrl) {
     drawSignaturePlaceholder(doc, fam, sigX + sigW / 2, sigY + sigH / 2);
+  }
+
+  const clientStampCx = leftX + colW - 14;
+  const clientStampCy = boxTop + KO_LAYOUT.sigBoxH - 12;
+  if (options?.clientStampDataUrl) {
+    drawPartyStamp(
+      doc,
+      fam,
+      options.clientStampDataUrl,
+      clientStampCx,
+      clientStampCy,
+    );
   }
 
   const stampCx = rightX + colW - 14;
@@ -962,6 +978,7 @@ async function buildKoStandardContractPdf(
   vars: OohContractPdfVars,
   options?: {
     signaturePngBase64?: string;
+    clientStampDataUrl?: string | null;
     audit?: OohContractSignAudit;
   },
 ): Promise<{ pdfBase64: string; sha256: string }> {
@@ -995,6 +1012,7 @@ async function buildKoStandardContractPdf(
       y = renderKoSignatureBlock(doc, fam, vars, margin, pageW, y, {
         signaturePngBase64: options?.signaturePngBase64,
         stampDataUrl,
+        clientStampDataUrl: options?.clientStampDataUrl ?? null,
       });
       continue;
     }
@@ -1063,6 +1081,7 @@ async function buildLegacyEnContractPdf(
   vars: OohContractPdfVars,
   options?: {
     signaturePngBase64?: string;
+    clientStampDataUrl?: string | null;
     audit?: OohContractSignAudit;
   },
 ): Promise<{ pdfBase64: string; sha256: string }> {
@@ -1162,7 +1181,7 @@ async function buildLegacyEnContractPdf(
       doc.text("(Signature image error)", margin, y);
       y += 8;
     }
-  } else {
+  } else if (!options?.clientStampDataUrl) {
     doc.setDrawColor(180, 180, 180);
     doc.rect(pageW - margin - 60, y, 60, 22);
     setContractFont(doc, fam, "italic");
@@ -1170,6 +1189,29 @@ async function buildLegacyEnContractPdf(
     doc.text("Sign here", pageW - margin - 55, y + 13);
     doc.setFontSize(10);
     y += 28;
+  }
+
+  if (options?.clientStampDataUrl) {
+    try {
+      const stampSize = 28;
+      const stampX = pageW - margin - stampSize;
+      if (y + stampSize + 8 > pageBottom) {
+        doc.addPage();
+        y = 18;
+      }
+      doc.addImage(
+        options.clientStampDataUrl,
+        "PNG",
+        stampX,
+        y,
+        stampSize,
+        stampSize,
+      );
+      y += stampSize + 8;
+    } catch {
+      doc.text("(Stamp image error)", margin, y);
+      y += 8;
+    }
   }
 
   if (options?.audit) {
@@ -1213,6 +1255,7 @@ export async function buildOohContractPdf(
   vars: OohContractPdfVars,
   options?: {
     signaturePngBase64?: string;
+    clientStampDataUrl?: string | null;
     audit?: OohContractSignAudit;
   },
 ): Promise<{ pdfBase64: string; sha256: string }> {
@@ -1224,11 +1267,15 @@ export async function buildOohContractPdf(
 
 export async function buildSignedOohContractPdf(
   vars: OohContractPdfVars,
-  signaturePngBase64: string,
+  images: {
+    signaturePngBase64?: string | null;
+    clientStampDataUrl?: string | null;
+  },
   audit: OohContractSignAudit,
 ): Promise<{ pdfBase64: string; sha256: string }> {
   return buildOohContractPdf(vars, {
-    signaturePngBase64,
+    signaturePngBase64: images.signaturePngBase64 ?? undefined,
+    clientStampDataUrl: images.clientStampDataUrl ?? null,
     audit,
   });
 }

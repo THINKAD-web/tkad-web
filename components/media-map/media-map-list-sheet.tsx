@@ -38,10 +38,13 @@ export function MediaMapListSheet({
   isKo = true,
   className,
   onPeekChromeHeightChange,
+  peekFooter,
 }: {
   snap: MediaMapSheetSnap;
   onSnapChange: (next: MediaMapSheetSnap) => void;
   header?: ReactNode;
+  /** peek 스냅일 때만 — 이동형·목록 discoverability 칩 등 */
+  peekFooter?: ReactNode;
   children: ReactNode;
   isKo?: boolean;
   className?: string;
@@ -96,7 +99,7 @@ export function MediaMapListSheet({
         : null;
     ro?.observe(el);
     return () => ro?.disconnect();
-  }, [header, snap, onPeekChromeHeightChange]);
+  }, [header, peekFooter, snap, onPeekChromeHeightChange]);
 
   useEffect(() => {
     if (!hasSeenMapOnboarding(MAP_ONBOARDING_KEYS.sheetPeekHint)) {
@@ -268,6 +271,9 @@ export function MediaMapListSheet({
           >
             {header}
           </div>
+        ) : null}
+        {snap === "peek" && peekFooter ? (
+          <div className="px-3 pb-2 pt-0">{peekFooter}</div>
         ) : null}
       </div>
 

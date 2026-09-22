@@ -1,6 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import {
-  resolveCpmWon,
+  resolveCpmWonForDisplay,
   resolveMonthlyImpressions,
 } from "@/lib/media-metrics";
 
@@ -226,7 +226,7 @@ export function effectiveEngagement(m: MediaItem): number | null {
 }
 
 export function effectiveCpm(m: MediaItem): number | null {
-  return resolveCpmWon(m);
+  return resolveCpmWonForDisplay(m);
 }
 
 function parseWidthHeightMFromSize(

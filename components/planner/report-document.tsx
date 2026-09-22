@@ -71,8 +71,8 @@ function ShareBarChart({
       {data.map((d, i) => {
         const pct = d.pct ?? 0;
         return (
-          <div key={d.label} className="flex items-center gap-3 text-sm">
-            <span className="w-24 shrink-0 break-words text-gray-600 sm:w-28">
+          <div key={d.label} className="flex items-center gap-2 text-sm sm:gap-3">
+            <span className="w-20 shrink-0 break-words text-gray-600 sm:w-28">
               {d.label}
             </span>
             <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-100">
@@ -108,8 +108,8 @@ function DonutChart({
     (_, i) => fracs.slice(0, i).reduce((a, b) => a + b, 0) * C,
   );
   return (
-    <div className="flex items-center gap-4">
-      <svg width="140" height="140" viewBox="0 0 140 140" className="shrink-0">
+    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+      <svg viewBox="0 0 140 140" className="h-28 w-28 shrink-0 sm:h-[140px] sm:w-[140px]">
         <g transform="translate(70,70) rotate(-90)">
           <circle r={R} fill="none" stroke="#EEF0F4" strokeWidth="20" />
           {data.map((d, i) => (
@@ -211,8 +211,8 @@ function BarChart({
   return (
     <div className="space-y-2.5">
       {data.map((d, i) => (
-        <div key={d.label} className="flex items-center gap-3 text-sm">
-          <span className="w-24 shrink-0 break-words text-gray-600 sm:w-28">{d.label}</span>
+        <div key={d.label} className="flex items-center gap-2 text-sm sm:gap-3">
+          <span className="w-20 shrink-0 break-words text-gray-600 sm:w-28">{d.label}</span>
           <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-100">
             <div
               className="h-full rounded-full"
@@ -222,7 +222,7 @@ function BarChart({
               }}
             />
           </div>
-          <span className="w-24 shrink-0 text-right font-semibold tabular-nums text-gray-900">
+          <span className="w-20 shrink-0 text-right font-semibold tabular-nums text-gray-900 sm:w-24">
             {d.value.toLocaleString(isKo ? "ko-KR" : "en-US")}
           </span>
         </div>
@@ -271,6 +271,12 @@ export const PlannerReportDocument = forwardRef<
   const patternStatsNote = usePatternStatsNote(p.patternStatsQuery, isKo);
   const theme = getReportDocumentTheme(reportStyle);
   const vis = sectionVisibility;
+  const sectionHeadingBar = theme.sectionAccentBar;
+  const sectionAccent = theme.sectionAccentBar ? theme.accent : undefined;
+  const headingProps = {
+    accentColor: sectionAccent,
+    showAccentBar: sectionHeadingBar,
+  };
   const visibleSections = filterExportSections(p.sections, vis)
     ?.filter(
       (sec) =>
@@ -329,70 +335,79 @@ export const PlannerReportDocument = forwardRef<
         titleAriaLabel={isKo ? "보고서 제목" : "Report title"}
       />
 
-      <div className="space-y-9 px-6 py-8 sm:px-9">
-        {editableGreeting && onGreetingChange ? (
-          <section className="space-y-2" data-testid="report-greeting-edit">
-            <DocumentSectionHeading>
-              {isKo ? "인사말" : "Greeting"}
-            </DocumentSectionHeading>
-            <textarea
-              value={p.greetingText ?? ""}
-              onChange={(e) => onGreetingChange(e.target.value)}
-              rows={4}
-              placeholder={
-                isKo
-                  ? "광고주에게 전달할 인사말 (비우면 PDF에서 생략)"
-                  : "Greeting to the client (leave empty to omit)"
-              }
-              className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-[color:var(--qp-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/30"
-            />
-          </section>
-        ) : p.greetingText?.trim() ? (
-          <section className="space-y-2">
-            <DocumentSectionHeading>
-              {isKo ? "인사말" : "Greeting"}
-            </DocumentSectionHeading>
-            <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50/60 p-4 text-sm leading-relaxed text-gray-800">
-              {p.greetingText.split(/\n+/).map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
-            </div>
-          </section>
+      <div
+        className={cn(
+          theme.previewContentGapClass,
+          "px-4 py-6 sm:px-6 sm:py-8 lg:px-9",
+        )}
+      >
+        {sectionVisible(vis, "greeting") ? (
+          editableGreeting && onGreetingChange ? (
+            <section className="space-y-2" data-testid="report-greeting-edit">
+              <DocumentSectionHeading {...headingProps}>
+                {isKo ? "인사말" : "Greeting"}
+              </DocumentSectionHeading>
+              <textarea
+                value={p.greetingText ?? ""}
+                onChange={(e) => onGreetingChange(e.target.value)}
+                rows={4}
+                placeholder={
+                  isKo
+                    ? "광고주에게 전달할 인사말 (비우면 PDF에서 생략)"
+                    : "Greeting to the client (leave empty to omit)"
+                }
+                className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-[color:var(--qp-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/30"
+              />
+            </section>
+          ) : p.greetingText?.trim() ? (
+            <section className="space-y-2">
+              <DocumentSectionHeading {...headingProps}>
+                {isKo ? "인사말" : "Greeting"}
+              </DocumentSectionHeading>
+              <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50/60 p-4 text-sm leading-relaxed text-gray-800">
+                {p.greetingText.split(/\n+/).map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))}
+              </div>
+            </section>
+          ) : null
         ) : null}
 
-        {editableExecutiveSummary && onExecutiveSummaryChange ? (
-          <section className="space-y-2" data-testid="report-executive-edit">
-            <DocumentSectionHeading>
-              {isKo ? "전략 요약" : "Strategy summary"}
-            </DocumentSectionHeading>
-            <textarea
-              value={(p.executiveSummaryLines ?? []).join("\n\n")}
-              onChange={(e) => onExecutiveSummaryChange(e.target.value)}
-              rows={8}
-              placeholder={
-                isKo
-                  ? "제안 배경·전략·다음 액션 (비우면 PDF에서 생략)"
-                  : "Proposal context and strategy (leave empty to omit)"
-              }
-              className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-[color:var(--qp-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/30"
-            />
-          </section>
-        ) : p.executiveSummaryLines && p.executiveSummaryLines.length > 0 ? (
-          <section className="space-y-3">
-            <DocumentSectionHeading>
-              {isKo ? "전략 요약" : "Strategy summary"}
-            </DocumentSectionHeading>
-            <ul className="space-y-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
-              {p.executiveSummaryLines.map((line, i) => (
-                <ReportScanLine key={i} text={line} />
-              ))}
-            </ul>
-          </section>
+        {sectionVisible(vis, "executiveSummary") ? (
+          editableExecutiveSummary && onExecutiveSummaryChange ? (
+            <section className="space-y-2" data-testid="report-executive-edit">
+              <DocumentSectionHeading {...headingProps}>
+                {isKo ? "전략 요약" : "Strategy summary"}
+              </DocumentSectionHeading>
+              <textarea
+                value={(p.executiveSummaryLines ?? []).join("\n\n")}
+                onChange={(e) => onExecutiveSummaryChange(e.target.value)}
+                rows={8}
+                placeholder={
+                  isKo
+                    ? "제안 배경·전략·다음 액션 (비우면 PDF에서 생략)"
+                    : "Proposal context and strategy (leave empty to omit)"
+                }
+                className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-[color:var(--qp-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/30"
+              />
+            </section>
+          ) : p.executiveSummaryLines && p.executiveSummaryLines.length > 0 ? (
+            <section className="space-y-3">
+              <DocumentSectionHeading {...headingProps}>
+                {isKo ? "전략 요약" : "Strategy summary"}
+              </DocumentSectionHeading>
+              <ul className="space-y-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
+                {p.executiveSummaryLines.map((line, i) => (
+                  <ReportScanLine key={i} text={line} />
+                ))}
+              </ul>
+            </section>
+          ) : null
         ) : null}
 
         {/* 캠페인 개요 */}
         <section className="space-y-4">
-          <DocumentSectionHeading>{isKo ? "캠페인 개요" : "Campaign overview"}</DocumentSectionHeading>
+          <DocumentSectionHeading {...headingProps}>{isKo ? "캠페인 개요" : "Campaign overview"}</DocumentSectionHeading>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
             {summary.map(([label, value]) => (
               <div key={label} className="min-w-0">
@@ -407,11 +422,11 @@ export const PlannerReportDocument = forwardRef<
 
         {/* KPI 카드 */}
         {p.kpis.length ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
             {p.kpis.slice(0, 4).map((k) => (
               <div
                 key={k.label}
-                className="rounded-xl border border-gray-200 bg-gray-50 p-3.5"
+                className="rounded-xl border border-gray-200 bg-gray-50 p-2.5 sm:p-3.5"
                 data-testid={
                   k.status === "pending" ? "report-kpi-pending" : "report-kpi-value"
                 }
@@ -512,7 +527,7 @@ export const PlannerReportDocument = forwardRef<
           (p.charts.reachSummary?.length ?? 0) > 0 ||
           Boolean(p.charts.performanceGuide)) ? (
           <section className="space-y-4">
-            <DocumentSectionHeading>{isKo ? "성과 요약" : "Performance summary"}</DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>{isKo ? "성과 요약" : "Performance summary"}</DocumentSectionHeading>
             {(p.charts.budgetSplit?.length ?? 0) > 0 ||
             (p.charts.browseBudgetSplit?.length ?? 0) > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2">
@@ -597,7 +612,7 @@ export const PlannerReportDocument = forwardRef<
         p.regionBreakdown &&
         p.regionBreakdown.length > 0 ? (
           <section className="space-y-4">
-            <DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>
               {isKo ? "지역별 예산 · 효과" : "Budget & impact by region"}
             </DocumentSectionHeading>
             <div className="grid gap-6 sm:grid-cols-2">
@@ -662,7 +677,7 @@ export const PlannerReportDocument = forwardRef<
         p.regionSubdivision &&
         p.regionSubdivision.breakdown.length >= 2 ? (
           <section className="space-y-4">
-            <DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>
               {isKo ? "상권 · 권역 세분화" : "District & zone detail"}
             </DocumentSectionHeading>
             <p className="text-xs text-gray-500">
@@ -738,7 +753,7 @@ export const PlannerReportDocument = forwardRef<
 
         {sectionVisible(vis, "recommend") && p.recommendRationale ? (
           <section className="space-y-4">
-            <DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>
               {isKo ? "추천 근거" : "Recommendation rationale"}
             </DocumentSectionHeading>
             <div className="space-y-3 rounded-xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-4 sm:p-5 planner-report-rationale-box">
@@ -773,7 +788,7 @@ export const PlannerReportDocument = forwardRef<
 
         {p.onlineSection && p.onlineSection.lines.length > 0 ? (
           <section className="space-y-3">
-            <DocumentSectionHeading>{p.onlineSection.title}</DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>{p.onlineSection.title}</DocumentSectionHeading>
             <p className="text-sm text-gray-600">{p.onlineSection.estimationNotice}</p>
             {p.onlineSection.consultationNotice ? (
               <p className="text-sm font-semibold text-amber-800">
@@ -850,7 +865,7 @@ export const PlannerReportDocument = forwardRef<
         {/* 디지털 예산 배분 */}
         {p.digital && p.digital.length ? (
           <section className="space-y-3">
-            <DocumentSectionHeading>
+            <DocumentSectionHeading {...headingProps}>
               {isKo ? "디지털 예산 배분" : "Digital budget allocation"}
             </DocumentSectionHeading>
             {p.digitalSummary ? (
@@ -890,7 +905,7 @@ export const PlannerReportDocument = forwardRef<
         {(visibleSections ?? []).map((sec) =>
           sec.lines.length ? (
             <section key={sec.title} className="space-y-3">
-              <DocumentSectionHeading>{sec.title}</DocumentSectionHeading>
+              <DocumentSectionHeading {...headingProps}>{sec.title}</DocumentSectionHeading>
               <ul className="space-y-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
                 {sec.lines.map((line, i) => (
                   <ReportScanLine key={i} text={line} />

@@ -125,7 +125,7 @@ export function DiscoveryMediaCardHorizontal({
   );
 
   const thumbShellClass =
-    "relative aspect-[4/3] w-full min-h-[10.5rem] overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800 sm:min-h-[11rem]";
+    "relative aspect-[4/3] w-full min-h-[9rem] overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800 sm:min-h-[11rem]";
 
   const thumbBlock =
     plannerMode && onTogglePlan ? (
@@ -159,7 +159,7 @@ export function DiscoveryMediaCardHorizontal({
           : undefined
       }
     >
-      <h3 className="tkad-type-title line-clamp-2 text-foreground group-hover:text-tkad-accent">
+      <h3 className="tkad-type-title line-clamp-3 leading-snug text-foreground group-hover:text-tkad-accent @[300px]:line-clamp-2">
         {model.name}
       </h3>
     </Link>
@@ -218,7 +218,7 @@ export function DiscoveryMediaCardHorizontal({
   return (
     <article
       className={cn(
-        "@container discovery-media-card-horizontal min-w-0 max-w-full overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-white/[0.04]",
+        "@container discovery-media-card-horizontal min-w-0 max-w-full rounded-2xl border bg-white shadow-sm dark:bg-white/[0.04]",
         selected
           ? "border-2 border-hermes/90 shadow-md shadow-hermes/15 ring-2 ring-inset ring-hermes/35 dark:border-hermes"
           : hovered
@@ -248,12 +248,12 @@ export function DiscoveryMediaCardHorizontal({
           {thumbBlock}
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5 py-0.5">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5 overflow-visible py-0.5">
           <div className="min-w-0 space-y-1">
             {model.type || model.isVerified ? (
               <div className="flex flex-wrap items-center gap-1.5 @[300px]:hidden">
                 {model.type ? (
-                  <span className="tkad-type-note inline-block max-w-full truncate rounded-md bg-gray-100 px-1.5 py-0.5 font-medium capitalize text-tkad-muted dark:bg-white/10">
+                  <span className="tkad-type-note inline-block max-w-full truncate rounded-md bg-gray-100 px-1.5 py-0.5 font-medium capitalize text-gray-600 dark:bg-white/10 dark:text-white/72">
                     {model.type}
                   </span>
                 ) : null}
@@ -277,7 +277,7 @@ export function DiscoveryMediaCardHorizontal({
               />
             </div>
             {interactive ? (
-              <h3 className="tkad-type-title line-clamp-2 text-foreground">
+              <h3 className="tkad-type-title line-clamp-3 leading-snug text-foreground @[300px]:line-clamp-2">
                 {model.name}
               </h3>
             ) : (

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ExternalLink, FileText, Loader2, Save } from "lucide-react";
+import { ExternalLink, FileText, Loader2, Mail, Save } from "lucide-react";
+import type { ContractInviteSendEntry } from "@/lib/contract-invite-log";
 import type { OohContractMeta } from "@/lib/ooh-contract-meta";
 import type { QuoteBreakdown } from "@/lib/quote-calculator";
 import {
@@ -24,9 +25,11 @@ export type OohQuoteContractDetail = {
   contract?: {
     id: string;
     status: string;
+    sendMode?: string;
     specialTerms: string | null;
     signedAt: string | null;
     canEditTerms: boolean;
+    inviteSendLog?: ContractInviteSendEntry[];
   } | null;
   contractDisplay?: {
     isKo: boolean;
@@ -71,6 +74,7 @@ export function AdminOohContractDetailPanel({
   const [saving, setSaving] = useState(false);
   const [metaSaving, setMetaSaving] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
+  const [resendBusy, setResendBusy] = useState(false);
 
   const contract = detail?.contract;
   const display = detail?.contractDisplay;
@@ -82,6 +86,7 @@ export function AdminOohContractDetailPanel({
       | "contractStatus_pending"
       | "contractStatus_signed"
       | "contractStatus_confirmed"
+      | "contractStatus_attachment_sent"
       | "contractStatus_cancelled";
     try {
       return t(key);
@@ -135,6 +140,61 @@ export function AdminOohContractDetailPanel({
       setSaving(false);
     }
   }, [contract?.canEditTerms, onSaved, quoteId, t, termsDraft, toast]);
+
+  function inviteLogKindLabel(kind: ContractInviteSendEntry["kind"]) {
+    if (kind === "resend") return t("contractInviteLogKind_resend");
+    if (kind === "attachment_initial") {
+      return t("contractInviteLogKind_attachment_initial");
+    }
+    if (kind === "attachment_resend") {
+      return t("contractInviteLogKind_attachment_resend");
+    }
+    return t("contractInviteLogKind_initial");
+  }
+
+  const canResendInvite =
+    contract?.status === "pending" ||
+    contract?.status === "attachment_sent";
+
+  const resendInvite = useCallback(async () => {
+    if (!contract?.id || !canResendInvite) return;
+    setResendBusy(true);
+    try {
+      const res = await fetch(
+        `/api/admin/contracts/${contract.id}/resend-invite`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      const raw: unknown = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const err =
+          typeof raw === "object" &&
+          raw !== null &&
+          "error" in raw &&
+          typeof (raw as { error?: unknown }).error === "string"
+            ? (raw as { error: string }).error
+            : t("contractResendInviteFail");
+        if (err === "missing_client_email") {
+          toast("error", t("contractResendInviteNoEmail"));
+        } else if (err === "contract_not_pending") {
+          toast("error", t("contractResendInviteNotPending"));
+        } else if (err === "contract_not_attachment_sent") {
+          toast("error", t("contractResendAttachmentNotSent"));
+        } else {
+          toast("error", err);
+        }
+        return;
+      }
+      toast("success", t("contractResendInviteOk"));
+      onSaved();
+    } catch {
+      toast("error", t("contractResendInviteFail"));
+    } finally {
+      setResendBusy(false);
+    }
+  }, [canResendInvite, contract?.id, onSaved, t, toast]);
 
   const saveMeta = useCallback(async () => {
     setMetaSaving(true);
@@ -231,12 +291,53 @@ export function AdminOohContractDetailPanel({
               <FileText className="h-4 w-4 text-[color:var(--qp-accent)]" aria-hidden />
               {t("contractSectionTitle")}
             </p>
-            {contract ? (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                {contractStatusLabel(contract.status)}
-              </span>
-            ) : null}
+            <div className="flex flex-wrap items-center gap-2">
+              {contract ? (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  {contractStatusLabel(contract.status)}
+                </span>
+              ) : null}
+              {canResendInvite ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={resendBusy}
+                  onClick={() => void resendInvite()}
+                >
+                  {resendBusy ? (
+                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  ) : (
+                    <Mail className="mr-1 h-3 w-3" />
+                  )}
+                  {contract?.status === "attachment_sent"
+                    ? t("contractResendAttachment")
+                    : t("contractResendInvite")}
+                </Button>
+              ) : null}
+            </div>
           </div>
+
+          {contract?.inviteSendLog && contract.inviteSendLog.length > 0 ? (
+            <div className="rounded-xl border border-gray-100 bg-muted/10 p-3 dark:border-white/10">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("contractInviteLogTitle")}
+              </p>
+              <ul className="mt-2 space-y-1 text-[11px] text-foreground">
+                {contract.inviteSendLog.map((entry, idx) => (
+                  <li key={`${entry.sentAt}-${idx}`} className="tabular-nums">
+                    {new Date(entry.sentAt).toLocaleString(isKo ? "ko-KR" : "en-US")}{" "}
+                    · {entry.to} ·{" "}
+                    {inviteLogKindLabel(entry.kind)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : canResendInvite ? (
+            <p className="text-[10px] text-muted-foreground">
+              {t("contractInviteLogEmpty")}
+            </p>
+          ) : null}
 
           <dl className="grid gap-2 sm:grid-cols-2">
             <div>

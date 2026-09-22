@@ -236,6 +236,18 @@ const routes = {
       subtitle: "Simulate reach and ROI by budget, region, and duration",
     },
   },
+  pricing: {
+    ko: {
+      badge: "Pricing",
+      title: "요금제 · FREE · LITE · PRO",
+      subtitle: "제안서·견적표(LITE) · 시뮬레이션·마켓(PRO) — OOH 플래너와 연동",
+    },
+    en: {
+      badge: "Pricing",
+      title: "Plans · FREE · LITE · PRO",
+      subtitle: "Proposals & quotes on LITE · simulation & market on PRO",
+    },
+  },
   quote: {
     ko: {
       badge: "Quote",

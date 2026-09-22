@@ -484,6 +484,12 @@ export function prismaMediaToMediaItem(
       const onlineSpec = mapPrismaOnlineSpec(m);
       return onlineSpec ? { onlineSpec } : {};
     })(),
+    computedMetric: cm
+      ? {
+          dailyImpressions: cm.dailyImpressions ?? null,
+          modelVersion: cm.modelVersion ?? null,
+        }
+      : undefined,
     translations: (() => {
       const raw = (m as Media & { translations?: MediaTranslationRow[] })
         .translations;
@@ -516,6 +522,8 @@ export const PUBLIC_MEDIA_CATALOG_INCLUDE = {
   onlineSpec: { select: PUBLIC_MEDIA_ONLINE_SPEC_SELECT },
   computedMetric: {
     select: {
+      dailyImpressions: true,
+      modelVersion: true,
       demoGenderSplit: true,
       demoAgeSplit: true,
       demoSourceSignalIds: true,

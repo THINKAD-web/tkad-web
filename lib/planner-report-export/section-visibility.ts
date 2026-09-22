@@ -4,6 +4,8 @@ import type { MediaItem } from "@/lib/media-data";
 
 /** 다운로드·미리보기 공통 — 선택 섹션 on/off (export body 전용, payload 오염 없음) */
 export const PLANNER_REPORT_SECTION_KEYS = [
+  "greeting",
+  "executiveSummary",
   "map",
   "recommend",
   "subdivision",
@@ -22,6 +24,8 @@ export const PLANNER_REPORT_SECTION_VISIBILITY_KEY =
   "tkad_planner_report_section_visibility";
 
 const DEFAULT_VISIBILITY: Record<PlannerReportSectionKey, boolean> = {
+  greeting: true,
+  executiveSummary: true,
   map: true,
   recommend: true,
   subdivision: true,
@@ -105,6 +109,16 @@ export function computePlannerReportSectionAvailability(args: {
     Boolean(p.charts?.performanceGuide);
 
   return {
+    greeting: {
+      available: Boolean(p.greetingText?.trim()),
+      reasonKo: "텍스트 없음",
+      reasonEn: "No text",
+    },
+    executiveSummary: {
+      available: (p.executiveSummaryLines?.length ?? 0) > 0,
+      reasonKo: "텍스트 없음",
+      reasonEn: "No text",
+    },
     map: {
       available: mapMarkers > 0,
       reasonKo: noData,

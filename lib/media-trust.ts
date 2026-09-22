@@ -280,7 +280,7 @@ export function trustGradeToneClass(grade: MediaTrustScoreGrade): string {
     case "excellent":
       return "text-emerald-700 dark:text-emerald-300 border-emerald-400/40 bg-emerald-400/10";
     case "good":
-      return "text-[color:var(--qp-accent)] border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)]";
+      return "border-[color:var(--hermes)]/35 bg-[color:var(--hermes)]/12 text-[color:var(--hermes-shade)] dark:border-[color:var(--hermes-on-dark)]/35 dark:bg-[color:var(--hermes)]/20 dark:text-[color:var(--hermes-on-dark)]";
     case "average":
       return "text-amber-800 dark:text-amber-200 border-amber-400/40 bg-amber-400/10";
     case "new":

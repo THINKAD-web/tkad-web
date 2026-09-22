@@ -6,7 +6,7 @@ import type { MediaItem } from "@/lib/media-data";
 import { Button } from "@/components/ui/button";
 import { DocumentPreviewFrame } from "@/components/document/document-layout";
 import { PlannerReportDocument } from "@/components/planner/report-document";
-import { ReportStylePicker } from "@/components/planner/report-style-picker";
+import type { PlannerReportSectionVisibility } from "@/lib/planner-report-export/section-visibility";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import { ReportCopyStaleBanner } from "@/components/planner/report-copy-stale-banner";
 import { plannerProposalGateHint } from "@/lib/entitlements/tier-copy";
@@ -29,7 +29,7 @@ export type BriefProposalPreviewSectionProps = {
   variant: "ooh" | "online";
   exportPayload: PlannerReportExportPayload;
   reportStyle: PlannerReportStyle;
-  onReportStyleChange: (style: PlannerReportStyle) => void;
+  sectionVisibility?: PlannerReportSectionVisibility;
   reportPreviewAllowed: boolean;
   reportPreviewLoading: boolean;
   mapPortfolio?: MediaItem[];
@@ -53,7 +53,7 @@ export function BriefProposalPreviewSection({
   variant,
   exportPayload,
   reportStyle,
-  onReportStyleChange,
+  sectionVisibility,
   reportPreviewAllowed,
   reportPreviewLoading,
   mapPortfolio,
@@ -111,15 +111,11 @@ export function BriefProposalPreviewSection({
               onKeep={onKeepCopyEdits}
             />
           ) : null}
-          <ReportStylePicker
-            isKo={isKo}
-            value={reportStyle}
-            onChange={onReportStyleChange}
-          />
           <DocumentPreviewFrame>
             <PlannerReportDocument
               payload={exportPayload}
               mapPortfolio={mapPortfolio}
+              sectionVisibility={sectionVisibility}
               reportStyle={reportStyle}
               editableTitle={Boolean(onDocumentTitleChange)}
               onDocumentTitleChange={onDocumentTitleChange}

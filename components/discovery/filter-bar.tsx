@@ -21,6 +21,7 @@ export {
   formatMapViewCountLabel,
   formatMapViewCountCompact,
   formatMapViewCountDetail,
+  formatMapViewCountPinList,
   type DiscoveryResultSummaryProps,
   type DiscoveryFilterSheetHeaderProps,
   type DiscoveryEmptyStateProps,

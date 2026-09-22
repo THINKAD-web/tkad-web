@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { MediaItem } from "@/lib/media-data";
+import { matchesMediaTextQuery, type MediaItem } from "@/lib/media-data";
 
 const MIME = "application/x-tkad-planner-media";
 
@@ -82,12 +82,8 @@ export default function PlannerMediaPickStep({
   const listFiltered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return catalog;
-    return catalog.filter((m) => {
-      const name = (isKo ? m.name : (m.nameEn || m.name) || m.name).toLowerCase();
-      const loc = (isKo ? m.location : (m.locationEn || m.location) || m.location).toLowerCase();
-      return name.includes(q) || loc.includes(q);
-    });
-  }, [catalog, query, isKo]);
+    return catalog.filter((m) => matchesMediaTextQuery(m, q));
+  }, [catalog, query]);
 
   const addId = useCallback(
     (id: string, atIndex?: number) => {

@@ -26,6 +26,23 @@ export function hashSignatureImagePngBase64(signaturePngBase64: string): string 
   return sha256Hex(Buffer.from(raw, "base64"));
 }
 
+/** 서명·도장 이미지 감사 해시 (둘 다 있으면 결합) */
+export function hashContractSignImages(input: {
+  signaturePngBase64?: string | null;
+  stampPngBase64?: string | null;
+}): string {
+  const sig = input.signaturePngBase64?.trim();
+  const stamp = input.stampPngBase64?.trim();
+  if (sig && stamp) {
+    return sha256Hex(
+      `${hashSignatureImagePngBase64(sig)}:${hashSignatureImagePngBase64(stamp)}`,
+    );
+  }
+  if (stamp) return hashSignatureImagePngBase64(stamp);
+  if (sig) return hashSignatureImagePngBase64(sig);
+  throw new Error("no_sign_image");
+}
+
 export function formatSignedAtKst(iso: string | Date): string {
   const d = typeof iso === "string" ? new Date(iso) : iso;
   return d.toLocaleString("ko-KR", {

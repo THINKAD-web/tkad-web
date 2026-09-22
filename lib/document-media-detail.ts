@@ -30,6 +30,7 @@ import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
 import { normalizeMediaTypeForPlanner } from "@/lib/planner-logic";
 import { truncateDocText } from "@/lib/document-text";
 import { formatSizeDisplayOptional } from "@/lib/format-media-size";
+import { resolveCpmWonForDisplayFromMediaItem } from "@/lib/media-metrics";
 
 /** 보고서·견적서·PDF/PPT 공용 매체 상세 (필드 없으면 undefined → UI에서 숨김) */
 export type DocumentMediaDetail = {
@@ -59,6 +60,12 @@ export type DocumentMediaDetail = {
   adjustedDailyReach?: number;
   /** DOOH 송출 (예: 15초 / 시간당 240회) */
   broadcastLabel?: string;
+  /** 표시 CPM (원) — `resolveCpmWonForDisplay` SSOT */
+  cpmWon?: number | null;
+  country?: string | null;
+  /** 서울 유형 CPM 벤치마크 (플래너 보고서) */
+  cpmBenchmarkLabel?: string;
+  footfallBenchmarkLabel?: string;
   monthlyPriceLabel?: string;
   lineTotalLabel?: string;
   /** 수량 선택 매체 — 예: 2기, 40대 */
@@ -547,5 +554,7 @@ export function mediaItemToExportRow(
     quantityLabel,
     dailyTraffic,
     adjustedDailyReach: opts?.adjustedDailyReachById?.[m.id],
+    cpmWon: resolveCpmWonForDisplayFromMediaItem(m),
+    country: m.country ?? null,
   };
 }

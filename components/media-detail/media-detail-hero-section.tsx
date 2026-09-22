@@ -8,6 +8,7 @@ import {
 } from "@/components/media-detail/media-detail-hero-info";
 import type { MediaItem } from "@/lib/media-data";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
+import type { SeoulCpmBenchmarkBadge } from "@/lib/planner/seoul-media-benchmark";
 import { cn } from "@/lib/utils";
 import {
   mapItemShowsOnMap,
@@ -50,6 +51,7 @@ type Props = {
   labels: Labels;
   hasPriceOptions: boolean;
   primaryPriceOption?: { price: number; label: string; period?: string };
+  seoulCpmBenchmarkBadge?: SeoulCpmBenchmarkBadge | null;
   className?: string;
 };
 
@@ -66,6 +68,7 @@ export function MediaDetailHeroSection({
   labels,
   hasPriceOptions,
   primaryPriceOption,
+  seoulCpmBenchmarkBadge = null,
   className,
 }: Props) {
   const bucket = normalizeMediaDetailTextLocale(locale);
@@ -128,6 +131,7 @@ export function MediaDetailHeroSection({
             }}
             hasPriceOptions={hasPriceOptions}
             primaryPriceOption={primaryPriceOption}
+            seoulCpmBenchmarkBadge={seoulCpmBenchmarkBadge}
             actions={
               <MediaDetailHeroActions
                 media={media}

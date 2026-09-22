@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useTheme } from "next-themes";
-import { visibilityPinLegendEntries } from "@/lib/map-pin-visibility-colors";
+import {
+  visibilityPinTierRingStroke,
+  visibilityPinTierForScore,
+} from "@/lib/map-pin-visibility-colors";
+import { VISIBILITY_LEGEND_GROUPS } from "@/lib/media-map/map-visibility-legend-groups";
 import {
   MEDIA_TYPE_PIN_LEGEND_ENTRIES,
   pinLegendMiniDataUrl,
@@ -17,6 +21,8 @@ type Props = {
   subwayEnabled?: boolean;
   onSubwayEnabledChange?: (enabled: boolean) => void;
   showSubwayToggle?: boolean;
+  showServiceRegionCoverageNote?: boolean;
+  serviceRegionDistrictCount?: number;
 };
 
 export function MediaMapVisibilityLegend({
@@ -25,12 +31,12 @@ export function MediaMapVisibilityLegend({
   subwayEnabled = true,
   onSubwayEnabledChange,
   showSubwayToggle = false,
+  showServiceRegionCoverageNote = false,
+  serviceRegionDistrictCount,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const { resolvedTheme } = useTheme();
-  /* 지도 타일과 동일: dark → muted orange 팔레트 */
   const forLightMapTiles = resolvedTheme !== "dark";
-  const visibilityEntries = visibilityPinLegendEntries(forLightMapTiles);
 
   return (
     <div
@@ -55,15 +61,48 @@ export function MediaMapVisibilityLegend({
           />
           {isKo ? "범례" : "Legend"}
         </span>
-        {expanded ? (
-          <ChevronDown className="h-3.5 w-3.5 text-tkad-muted" aria-hidden />
-        ) : (
-          <ChevronDown
-            className="h-3.5 w-3.5 rotate-180 text-tkad-muted"
-            aria-hidden
-          />
-        )}
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 text-tkad-muted transition-transform",
+            expanded ? "rotate-180" : "",
+          )}
+          aria-hidden
+        />
       </button>
+
+      {showServiceRegionCoverageNote ? (
+        <div
+          className="border-t border-border/70 px-3 py-2 dark:border-white/10"
+          data-screenshot="media-map-legend-coverage-note"
+        >
+          <p className="tkad-type-note leading-snug text-tkad-secondary">
+            <span
+              className="mr-1.5 inline-block h-2 w-2 shrink-0 rounded-sm border border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)]/20 align-middle"
+              aria-hidden
+            />
+            {isKo ? (
+              <>
+                <span className="font-semibold text-foreground">권역 면</span>
+                {typeof serviceRegionDistrictCount === "number"
+                  ? ` · ${serviceRegionDistrictCount}구역`
+                  : null}
+                <span className="text-tkad-muted">
+                  {" "}
+                  — 중심점 원형 근사(실경계 아님)
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="font-semibold text-foreground">Area fill</span>
+                {typeof serviceRegionDistrictCount === "number"
+                  ? ` · ${serviceRegionDistrictCount} districts`
+                  : null}
+                <span className="text-tkad-muted"> — approx. circles</span>
+              </>
+            )}
+          </p>
+        </div>
+      ) : null}
 
       {showSubwayToggle && onSubwayEnabledChange ? (
         <div className="border-t border-border/70 px-3 py-2 dark:border-white/10">
@@ -90,76 +129,78 @@ export function MediaMapVisibilityLegend({
           <p className="tkad-type-note mb-1.5 font-semibold text-foreground">
             {isKo ? "매체 유형" : "Media type"}
           </p>
-          <ul className="space-y-1.5">
+          <ul className="flex flex-wrap gap-x-3 gap-y-1.5">
             {MEDIA_TYPE_PIN_LEGEND_ENTRIES.map((entry) => (
               <li
                 key={entry.sampleType}
-                className="tkad-type-note leading-tight text-tkad-secondary"
+                className="tkad-type-note inline-flex items-center gap-1.5 text-tkad-secondary"
               >
-                <span className="flex items-start gap-2">
-                  <img
-                    src={pinLegendMiniDataUrl(
-                      entry.sampleType,
-                      forLightMapTiles,
-                      92,
-                    )}
-                    alt=""
-                    className="mt-0.5 h-4 w-4 shrink-0"
-                    aria-hidden
-                  />
-                  <span className="min-w-0">
-                    <span className="font-medium text-foreground">
-                      {isKo ? entry.labelKo : entry.labelEn}
-                    </span>
-                    {entry.noteKo ? (
-                      <span className="mt-0.5 block text-tkad-muted">
-                        {isKo ? entry.noteKo : entry.noteEn}
-                      </span>
-                    ) : null}
-                  </span>
+                <img
+                  src={pinLegendMiniDataUrl(
+                    entry.sampleType,
+                    forLightMapTiles,
+                    92,
+                  )}
+                  alt=""
+                  className="h-4 w-4 shrink-0"
+                  aria-hidden
+                />
+                <span className="font-medium text-foreground">
+                  {isKo ? entry.labelKo : entry.labelEn}
                 </span>
               </li>
             ))}
           </ul>
 
           <p className="tkad-type-note mb-1.5 mt-3 font-semibold text-foreground">
-            {isKo ? "가시성 (외곽 ring)" : "Visibility (outer ring)"}
+            {isKo ? "가시성 (숫자·ring)" : "Visibility (# & ring)"}
           </p>
           <ul className="space-y-1">
-            {visibilityEntries.map((tier) => (
-              <li
-                key={tier.tier}
-                className="tkad-type-note flex items-center gap-2 leading-tight text-tkad-secondary"
-              >
-                <span
-                  className="h-3 w-3 shrink-0 rounded-full border-2 bg-transparent"
-                  style={{ borderColor: tier.stroke }}
-                  aria-hidden
-                />
-                <span className="min-w-0">
-                  <span className="font-medium text-foreground">
-                    {isKo ? tier.labelKo : tier.labelEn}
+            {VISIBILITY_LEGEND_GROUPS.map((group) => {
+              const tier = group.tierSample;
+              const ring = visibilityPinTierRingStroke(
+                visibilityPinTierForScore(
+                  tier === 5 ? 95 : tier === 3 ? 90 : 50,
+                ),
+                forLightMapTiles,
+              );
+              return (
+                <li
+                  key={group.id}
+                  className="tkad-type-note flex items-center gap-2 leading-tight text-tkad-secondary"
+                >
+                  <span
+                    className="relative h-3 w-3 shrink-0 rounded-full border-2 bg-transparent"
+                    style={{ borderColor: ring }}
+                    aria-hidden
+                  >
+                    <span className="absolute -right-0.5 -top-1 text-[7px] font-extrabold leading-none text-slate-600 dark:text-slate-300">
+                      {tier}
+                    </span>
                   </span>
-                  {tier.tier > 0 ? (
+                  <span>
+                    <span className="font-medium text-foreground">
+                      {isKo ? group.labelKo : group.labelEn}
+                    </span>
                     <span className="text-tkad-muted">
                       {" "}
-                      ({isKo ? tier.rangeLabelKo : tier.rangeLabelEn})
+                      ({isKo ? group.rangeLabelKo : group.rangeLabelEn})
                     </span>
-                  ) : null}
-                </span>
-              </li>
-            ))}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
           <p className="tkad-type-note mt-1.5 text-tkad-muted">
             {isKo
-              ? "외곽 ring 진할수록 높은 가시성 · 모양·색으로 매체 유형 구분 · 확대 시 매체명 표시"
-              : "Darker outer ring = higher visibility · shape and color = media type · zoom in for names"}
+              ? "핀 숫자·ring=가시성 · 틸 원=밀집 · 안쪽=매체 유형"
+              : "Pin #/ring = visibility · teal disk = cluster · inner = type"}
           </p>
           {showSubwayToggle ? (
             <p className="tkad-type-note mt-2 text-tkad-muted">
               {isKo ? (
                 <>
-                  지하철 노선·역 ©{" "}
+                  지하철 ©{" "}
                   <a
                     href="https://www.openstreetmap.org/copyright"
                     className="underline underline-offset-2"
@@ -167,8 +208,7 @@ export function MediaMapVisibilityLegend({
                     rel="noopener noreferrer"
                   >
                     OpenStreetMap
-                  </a>{" "}
-                  (ODbL)
+                  </a>
                 </>
               ) : (
                 <>
@@ -180,8 +220,7 @@ export function MediaMapVisibilityLegend({
                     rel="noopener noreferrer"
                   >
                     OpenStreetMap
-                  </a>{" "}
-                  (ODbL)
+                  </a>
                 </>
               )}
             </p>

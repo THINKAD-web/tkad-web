@@ -29,10 +29,12 @@ export function DocumentSectionHeading({
   children,
   className,
   accentColor,
+  showAccentBar = true,
 }: {
   children: React.ReactNode;
   className?: string;
   accentColor?: string;
+  showAccentBar?: boolean;
 }) {
   return (
     <h3
@@ -41,11 +43,13 @@ export function DocumentSectionHeading({
         className,
       )}
     >
-      <span
-        className="inline-block h-4 w-1.5 shrink-0"
-        style={{ background: accentColor ?? "var(--qp-accent)" }}
-        aria-hidden
-      />
+      {showAccentBar ? (
+        <span
+          className="inline-block h-4 w-1.5 shrink-0"
+          style={{ background: accentColor ?? "var(--qp-accent)" }}
+          aria-hidden
+        />
+      ) : null}
       {children}
     </h3>
   );
@@ -141,7 +145,7 @@ export function DocumentGradientHero({
       {theme.topAccentBar || topAccent === "gold" ? (
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-1"
-          style={{ background: theme.accent }}
+          style={{ background: theme.coverTopBar }}
           aria-hidden
         />
       ) : null}

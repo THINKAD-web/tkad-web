@@ -36,15 +36,19 @@ export async function rebuildSignedOohContractPdfFromRecord(
   const documentContentSha256 = await hashUnsignedContractDocument(vars);
   const signatureImageSha256 = hashSignatureImagePngBase64(sigB64);
 
-  return buildSignedOohContractPdf(vars, sigB64, {
-    documentNumber: c.id,
-    signerName: c.signerName,
-    signerEmail: c.signerEmail,
-    signedAtIso: c.signedAt.toISOString(),
-    signedAtKst: formatSignedAtKst(c.signedAt),
-    signerIp: c.signerIp ?? "unknown",
-    signerAgent: c.signerAgent ?? "unknown",
-    documentContentSha256,
-    signatureImageSha256,
-  });
+  return buildSignedOohContractPdf(
+    vars,
+    { signaturePngBase64: sigB64 },
+    {
+      documentNumber: c.id,
+      signerName: c.signerName,
+      signerEmail: c.signerEmail,
+      signedAtIso: c.signedAt.toISOString(),
+      signedAtKst: formatSignedAtKst(c.signedAt),
+      signerIp: c.signerIp ?? "unknown",
+      signerAgent: c.signerAgent ?? "unknown",
+      documentContentSha256,
+      signatureImageSha256,
+    },
+  );
 }

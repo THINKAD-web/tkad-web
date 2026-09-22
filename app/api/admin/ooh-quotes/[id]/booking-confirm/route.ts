@@ -4,8 +4,12 @@ import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { canAdminBookingConfirm } from "@/lib/ooh-quote";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
-import { isEmailConfigured, sendEmail } from "@/lib/email/client";
 import { sendContractInviteEmail } from "@/lib/contract-invite-email";
+import {
+  appendContractInviteSendLog,
+  type ContractInviteSendEntry,
+} from "@/lib/contract-invite-log";
+import type { Prisma } from "@prisma/client";
 import { notifySlackBookingConfirm } from "@/lib/quote-slack-notify";
 import {
   createHoldsForQuote,
@@ -50,7 +54,7 @@ export async function PATCH(
       });
     });
 
-    await ensureOohContractExists(db, id, updated.status);
+    const contractRow = await ensureOohContractExists(db, id, updated.status);
 
     void notifySlackBookingConfirm({
       quoteId: id,
@@ -62,14 +66,29 @@ export async function PATCH(
     }).catch((e) => console.error("[booking-confirm] slack", e));
 
     const to = row.clientEmail?.trim();
-    if (to && isEmailConfigured()) {
-      try {
-        await sendContractInviteEmail(db, id, async (mail) => {
-          await sendEmail({ to, ...mail });
-        });
-      } catch (e) {
-        console.error("[booking-confirm] contract invite email", e);
-      }
+    if (to && contractRow) {
+      const locale = row.locale === "en" ? "en" : "ko";
+      await sendContractInviteEmail({
+        to,
+        clientName: row.clientName,
+        locale,
+        quoteId: id,
+        variant: "booking_confirmed",
+      });
+
+      const entry: ContractInviteSendEntry = {
+        sentAt: new Date().toISOString(),
+        to,
+        kind: "initial",
+      };
+      const inviteLog = appendContractInviteSendLog(
+        contractRow.inviteSendLog,
+        entry,
+      );
+      await db.oohContract.update({
+        where: { id: contractRow.id },
+        data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
+      });
     }
 
     return json({ ok: true, status: updated.status, forced: force });

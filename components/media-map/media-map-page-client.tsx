@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { DiscoveryFilterBar, formatMapViewCountCompact, formatMapViewCountDetail, formatMapViewCountLabel, type DiscoveryFilterBarViewMode } from "@/components/discovery/filter-bar";
+import {
+  DiscoveryFilterBar,
+  formatMapViewCountPinList,
+  type DiscoveryFilterBarViewMode,
+} from "@/components/discovery/filter-bar";
 import { ClipboardCheck, Crosshair, LayoutList, Loader2, Map as MapIcon, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { MediaMapVisibilityLegend } from "@/components/media-map/media-map-visibility-legend";
@@ -60,7 +64,17 @@ import {
   hasSeenMapOnboarding,
   markMapOnboardingSeen,
   MAP_ONBOARDING_KEYS,
+  readMapThreeStepTourProgress,
+  writeMapThreeStepTourProgress,
 } from "@/lib/media-map/onboarding-storage";
+import { isMapMobileListAutoExpandFilter } from "@/lib/media-map/map-mobile-list-filter";
+import { MediaMapNonPinBanner } from "@/components/media-map/media-map-non-pin-banner";
+import { MediaMapPeekDiscoverabilityChips } from "@/components/media-map/media-map-peek-discoverability-chips";
+import {
+  readMapAreaSearchMode,
+  writeMapAreaSearchMode,
+  type MapAreaSearchMode,
+} from "@/lib/media-map/map-area-search-mode";
 import { MediaMapItemList } from "@/components/media-map/media-map-item-list";
 import {
   markMapPageInit,
@@ -79,6 +93,8 @@ import {
 import {
   resolveItemMapDisplayMode,
 } from "@/lib/media-map/map-display-mode";
+import { resolveMapCoverageOverlayState } from "@/lib/media-map/map-service-region-coverage-overlay";
+import { MediaMapCoverageOverlayHint } from "@/components/media-map/media-map-coverage-overlay-hint";
 
 function itemShowsMapPin(item: MapMapItem): boolean {
   return resolveItemMapDisplayMode(item) === "pin";
@@ -162,6 +178,14 @@ export default function MediaMapPageClient() {
   const [serviceRegionTotal, setServiceRegionTotal] = useState<
     number | undefined
   >(undefined);
+  const [mobileListTotal, setMobileListTotal] = useState<number | undefined>(
+    undefined,
+  );
+  const [threeStepTour, setThreeStepTour] = useState<
+    "" | "1" | "2" | "done"
+  >("done");
+  const [areaSearchMode, setAreaSearchMode] =
+    useState<MapAreaSearchMode>("auto");
   const [facets, setFacets] = useState<Facets>({ regions: [], types: [] });
   const [loading, setLoading] = useState(false);
   /** 자동 영역 재조회(fetch) 진행 중 — 우상단 스피너 표시용 */
@@ -202,6 +226,7 @@ export default function MediaMapPageClient() {
   const [invalidateNonce, setInvalidateNonce] = useState(0);
   /** "이 지역에서 검색" 1회성 코치마크 */
   const [showSearchCoachmark, setShowSearchCoachmark] = useState(false);
+  const [showListStepCoachmark, setShowListStepCoachmark] = useState(false);
   const [pinLabelState, setPinLabelState] = useState<MapPinLabelOverlayState | null>(
     null,
   );
@@ -511,6 +536,7 @@ export default function MediaMapPageClient() {
             mapPinsTruncated?: boolean;
             serviceRegionTotal?: number;
             locationUnknownTotal?: number;
+            mobileListTotal?: number;
             locationUnknownIds?: string[];
           };
         };
@@ -547,6 +573,11 @@ export default function MediaMapPageClient() {
               : next.filter(
                   (i) => resolveItemMapDisplayMode(i) === "service_region",
                 ).length,
+          );
+          setMobileListTotal(
+            typeof data.data.mobileListTotal === "number"
+              ? data.data.mobileListTotal
+              : next.filter((i) => i.type === "mobile").length,
           );
           setFacets(
             data.data.facets ?? {
@@ -700,6 +731,11 @@ export default function MediaMapPageClient() {
     return extra.length > 0 ? [...fromItems, ...extra] : fromItems;
   }, [items, selectedItem]);
 
+  const coverageOverlay = useMemo(
+    () => resolveMapCoverageOverlayState(items),
+    [items],
+  );
+
   useEffect(() => {
     markersRef.current = markers;
   }, [markers]);
@@ -750,6 +786,7 @@ export default function MediaMapPageClient() {
   useEffect(() => {
     clearAutoSearchDebounce();
 
+    if (areaSearchMode !== "auto") return;
     if (!viewportDirty || !bounds || !searchedBounds) return;
     if (!mapBoundsChangeExceedsThreshold(searchedBounds, bounds)) return;
 
@@ -778,15 +815,59 @@ export default function MediaMapPageClient() {
     viewportDirty,
     searchedBounds,
     browseFilters.q,
+    areaSearchMode,
     runSearch,
     clearAutoSearchDebounce,
   ]);
 
   useEffect(() => () => clearAutoSearchDebounce(), [clearAutoSearchDebounce]);
 
+  useEffect(() => {
+    setThreeStepTour(readMapThreeStepTourProgress());
+    setAreaSearchMode(readMapAreaSearchMode());
+  }, []);
+
+  const handleAreaSearchModeChange = useCallback(
+    (mode: MapAreaSearchMode) => {
+      writeMapAreaSearchMode(mode);
+      setAreaSearchMode(mode);
+      if (mode !== "auto") return;
+      const b = boundsRef.current;
+      const s = searchedBoundsRef.current;
+      if (
+        !viewportDirtyRef.current ||
+        !b ||
+        !s ||
+        !mapBoundsChangeExceedsThreshold(s, b)
+      ) {
+        return;
+      }
+      clearAutoSearchDebounce();
+      setAutoRefreshing(true);
+      void runSearch(b).finally(() => setAutoRefreshing(false));
+    },
+    [runSearch, clearAutoSearchDebounce],
+  );
+
   const dismissSearchCoachmark = useCallback(() => {
-    markMapOnboardingSeen(MAP_ONBOARDING_KEYS.searchCoachmark);
+    if (threeStepTour === "1") {
+      writeMapThreeStepTourProgress("2");
+      setThreeStepTour("2");
+    } else {
+      markMapOnboardingSeen(MAP_ONBOARDING_KEYS.searchCoachmark);
+    }
     setShowSearchCoachmark(false);
+  }, [threeStepTour]);
+
+  const dismissSearchStep1Coachmark = useCallback(() => {
+    writeMapThreeStepTourProgress("1");
+    setThreeStepTour("1");
+  }, []);
+
+  const dismissListStepCoachmark = useCallback(() => {
+    writeMapThreeStepTourProgress("done");
+    setThreeStepTour("done");
+    setShowListStepCoachmark(false);
   }, []);
 
   const handleSearchThisArea = useCallback(() => {
@@ -798,12 +879,16 @@ export default function MediaMapPageClient() {
     void runSearch(bounds);
   }, [bounds, runSearch, dismissSearchCoachmark, clearAutoSearchDebounce]);
 
-  const showSearchAreaButton =
-    !isMapTextSearchActive(browseFilters) &&
-    viewportDirty &&
+  const boundsNeedAreaSearch =
     bounds != null &&
     searchedBounds != null &&
     !boundsEqual(bounds, searchedBounds);
+
+  const showSearchAreaButton =
+    areaSearchMode === "manual" &&
+    !isMapTextSearchActive(browseFilters) &&
+    viewportDirty &&
+    boundsNeedAreaSearch;
 
   // 마커 클릭 시 즉시 selectedId + selectedItem을 한 번에 set (지연 없이 카드 표시)
   const handleSelect = useCallback(
@@ -1010,12 +1095,52 @@ export default function MediaMapPageClient() {
       setShowSearchCoachmark(false);
       return;
     }
-    if (!hasSeenMapOnboarding(MAP_ONBOARDING_KEYS.searchCoachmark)) {
+    if (threeStepTour === "1") {
+      setShowSearchCoachmark(true);
+      return;
+    }
+    if (
+      threeStepTour === "done" &&
+      !hasSeenMapOnboarding(MAP_ONBOARDING_KEYS.searchCoachmark)
+    ) {
       setShowSearchCoachmark(true);
     }
-  }, [showSearchAreaButton, mapChromeVisible]);
+  }, [showSearchAreaButton, mapChromeVisible, threeStepTour]);
 
   useEffect(() => {
+    if (threeStepTour !== "2") {
+      setShowListStepCoachmark(false);
+      return;
+    }
+    const hasMobile = (mobileListTotal ?? 0) > 0;
+    if (isMobile && hasMobile) {
+      setShowListStepCoachmark(true);
+      return;
+    }
+    if (!isMobile && (matchTotal ?? items.length) > 0) {
+      setShowListStepCoachmark(true);
+    }
+  }, [
+    threeStepTour,
+    isMobile,
+    mobileListTotal,
+    matchTotal,
+    items.length,
+  ]);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    if (!isMapMobileListAutoExpandFilter(browseFilters)) return;
+    setSheetSnap("full");
+  }, [
+    isMobile,
+    browseFilters.subCategory,
+    browseFilters.q,
+    browseFilters,
+  ]);
+
+  useEffect(() => {
+    if (areaSearchMode !== "manual") return;
     if (!showSearchAreaButton || !mapChromeVisible) return;
     if (hasSeenMapOnboarding(MAP_ONBOARDING_KEYS.searchNudge)) return;
     const timer = window.setTimeout(() => {
@@ -1028,7 +1153,7 @@ export default function MediaMapPageClient() {
       );
     }, 5000);
     return () => window.clearTimeout(timer);
-  }, [showSearchAreaButton, mapChromeVisible, isKo, toast]);
+  }, [areaSearchMode, showSearchAreaButton, mapChromeVisible, isKo, toast]);
 
   const locateFloatingButtons = (mobileCompact = false) => (
     <>
@@ -1115,8 +1240,39 @@ export default function MediaMapPageClient() {
       cartCount={planCount}
       showHotspotRegions
       onHotspotRegionSelect={handleHotspotRegionSelect}
+      mapThreeStepSearchCoachmarkOpen={threeStepTour === ""}
+      onMapThreeStepSearchCoachmarkDismiss={dismissSearchStep1Coachmark}
+      mapAreaSearchMode={areaSearchMode}
+      onMapAreaSearchModeChange={handleAreaSearchModeChange}
     />
   );
+
+  const openMobileListSheet = useCallback(() => {
+    setSheetSnap("full");
+  }, []);
+
+  const mapPinCount =
+    mapPinsReturned ??
+    mapPlottableTotal ??
+    items.filter(itemShowsMapPin).length;
+  const listCount = matchTotal ?? items.length;
+  const mobileInList =
+    mobileListTotal ?? items.filter((i) => i.type === "mobile").length;
+
+  const showMapEmptyOverlay =
+    (searchedBounds || isMapTextSearchActive(browseFilters)) &&
+    items.length === 0 &&
+    !loading;
+
+  const mapResultLabel = formatMapViewCountPinList(
+    mapPinCount,
+    listCount,
+    mobileInList,
+    isKo,
+  );
+  const mapResultDetailLabel = mapResultLabel;
+  const showNonPinBanner =
+    mapChromeVisible && mobileInList > 0 && !showMapEmptyOverlay;
 
   const listEl = (
     <MediaMapItemList
@@ -1136,43 +1292,15 @@ export default function MediaMapPageClient() {
     />
   );
 
-  const mapPinCount =
-    mapPlottableTotal ?? items.filter(itemShowsMapPin).length;
-  const serviceRegionInView =
-    serviceRegionTotal ??
-    items.filter((i) => resolveItemMapDisplayMode(i) === "service_region")
-      .length;
-  const locationUnknownInView = items.filter(
-    (i) => resolveItemMapDisplayMode(i) === "location_unknown",
-  ).length;
-
-  const mapResultLabel = formatMapViewCountCompact(items.length, isKo);
-  const mapResultDetailLabel = (() => {
-    const hasExtra =
-      serviceRegionInView > 0 || locationUnknownInView > 0;
-    if (!hasExtra && (matchTotal == null || matchTotal <= items.length)) {
-      return mapResultLabel;
-    }
-    return formatMapViewCountDetail(
-      items.length,
-      mapPinCount,
-      serviceRegionInView,
-      locationUnknownInView,
-      isKo,
-    );
-  })();
-
-  const showMapEmptyOverlay =
-    (searchedBounds || isMapTextSearchActive(browseFilters)) &&
-    items.length === 0 &&
-    !loading;
-
   // 모바일 시트 상단 — 결과 수 + 목록↔지도 토글 (immersive 시 상단에서 이동)
   const mobileSheetHeader = (
-    <div className="flex min-h-0 items-center justify-between gap-2 leading-tight">
+    <div
+      className="relative flex min-h-0 items-center justify-between gap-2 leading-tight"
+      data-map-onboarding="sheet-list-mobile"
+    >
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <p
-          className="tkad-type-meta min-w-0 truncate font-semibold text-foreground"
+          className="tkad-type-meta min-w-0 font-semibold text-foreground line-clamp-2 leading-snug"
           title={mapResultDetailLabel}
         >
           {showMapEmptyOverlay
@@ -1223,6 +1351,21 @@ export default function MediaMapPageClient() {
           <span>{isKo ? "지도" : "Map"}</span>
         </button>
       </div>
+      {showListStepCoachmark && isMobile ? (
+        <MapOnboardingCoachmark
+          open
+          title={isKo ? "3/3 · 목록·이동형" : "3/3 · List & mobile"}
+          description={
+            isKo
+              ? "이동형 매체는 목록에서 확인하세요. 「목록」으로 전체를 펼칠 수 있어요."
+              : "Mobile media appear in the list. Tap List to expand."
+          }
+          dismissLabel={isKo ? "시작하기" : "Got it"}
+          onDismiss={dismissListStepCoachmark}
+          placement="above"
+          className="bottom-full mb-1"
+        />
+      ) : null}
     </div>
   );
 
@@ -1243,6 +1386,18 @@ export default function MediaMapPageClient() {
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         {!isMobile ? (
           <aside className="flex w-[440px] shrink-0 flex-col overflow-y-auto border-r border-gray-200/80 bg-gray-50 lg:w-[520px] dark:border-white/10 dark:bg-[#020202]">
+            <div
+              className="sticky top-0 z-[1] border-b border-gray-200/80 bg-gray-50/95 px-4 py-2 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95"
+              title={mapResultDetailLabel}
+            >
+              <p className="tkad-type-meta font-semibold text-foreground">
+                {showMapEmptyOverlay
+                  ? isKo
+                    ? "이 영역 0개"
+                    : "0 in this area"
+                  : mapResultLabel}
+              </p>
+            </div>
             {listEl}
           </aside>
         ) : null}
@@ -1263,8 +1418,41 @@ export default function MediaMapPageClient() {
               themeAwareTiles
               subwayOverlayEnabled={subwayOverlayEnabled}
               onPinLabelStateChange={handlePinLabelStateChange}
+              coverageGeoJson={coverageOverlay?.geoJson ?? null}
+              fitCoverageBounds={coverageOverlay != null}
+              fitBoundsMaxZoom={12}
             />
           </div>
+
+          {showNonPinBanner ? (
+            <MediaMapNonPinBanner isKo={isKo} mobileListCount={mobileInList} />
+          ) : null}
+
+          {coverageOverlay && isMobile ? (
+            <MediaMapCoverageOverlayHint
+              isKo={isKo}
+              districtCount={coverageOverlay.districtCount}
+              className="pointer-events-auto absolute left-3 top-[7.25rem] z-[11] max-w-[min(calc(100%-1.5rem),240px)]"
+            />
+          ) : null}
+
+          {!isMobile && showListStepCoachmark ? (
+            <div className="pointer-events-none absolute bottom-6 left-4 z-[11] max-w-xs">
+              <MapOnboardingCoachmark
+                open
+                title={isKo ? "3/3 · 목록·이동형" : "3/3 · List & mobile"}
+                description={
+                  isKo
+                    ? "왼쪽 목록에서 이동형 매체를 확인하세요. 상단 숫자는 핀과 목록을 구분합니다."
+                    : "Use the list for mobile media. Counts separate pins from listings."
+                }
+                dismissLabel={isKo ? "시작하기" : "Got it"}
+                onDismiss={dismissListStepCoachmark}
+                placement="above"
+                className="relative left-0 translate-x-0"
+              />
+            </div>
+          ) : null}
 
           {showMapEmptyOverlay && mapChromeVisible ? (
             <MediaMapFloatingEmptyState
@@ -1323,14 +1511,28 @@ export default function MediaMapPageClient() {
                 <MapOnboardingCoachmark
                   open={showSearchCoachmark}
                   title={
-                    isKo ? "지도를 움직였나요?" : "Moved the map?"
+                    threeStepTour === "1"
+                      ? isKo
+                        ? "2/3 · 이 지역 검색"
+                        : "2/3 · Search this area"
+                      : isKo
+                        ? "지도를 움직였나요?"
+                        : "Moved the map?"
                   }
                   description={
                     isKo
                       ? "버튼을 눌러 이 영역의 매체를 불러오세요."
                       : "Tap the button to load media in this area."
                   }
-                  dismissLabel={isKo ? "알겠어요" : "Got it"}
+                  dismissLabel={
+                    threeStepTour === "1"
+                      ? isKo
+                        ? "다음"
+                        : "Next"
+                      : isKo
+                        ? "알겠어요"
+                        : "Got it"
+                  }
                   onDismiss={dismissSearchCoachmark}
                 />
               </div>
@@ -1424,12 +1626,21 @@ export default function MediaMapPageClient() {
                   </button>
                 </div>
               ) : null}
+              {coverageOverlay && !isMobile ? (
+                <MediaMapCoverageOverlayHint
+                  isKo={isKo}
+                  districtCount={coverageOverlay.districtCount}
+                  className="pointer-events-auto max-w-[200px]"
+                />
+              ) : null}
               <MediaMapVisibilityLegend
                 isKo={isKo}
                 className="pointer-events-auto max-w-[168px]"
                 showSubwayToggle
                 subwayEnabled={subwayOverlayEnabled}
                 onSubwayEnabledChange={handleSubwayOverlayChange}
+                showServiceRegionCoverageNote={coverageOverlay != null}
+                serviceRegionDistrictCount={coverageOverlay?.districtCount}
               />
             </div>
           ) : null}
@@ -1502,6 +1713,14 @@ export default function MediaMapPageClient() {
             onSnapChange={handleSheetSnapChange}
             isKo={isKo}
             header={mobileSheetHeader}
+            peekFooter={
+              <MediaMapPeekDiscoverabilityChips
+                isKo={isKo}
+                mobileListCount={mobileInList}
+                listCount={listCount}
+                onOpenList={openMobileListSheet}
+              />
+            }
             onPeekChromeHeightChange={setPeekChromeHeight}
           >
             {listEl}

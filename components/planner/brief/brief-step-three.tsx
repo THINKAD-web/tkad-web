@@ -42,6 +42,10 @@ import {
 } from "@/lib/planner/brief/brief-report-adapter";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
+import { usePlannerReportDocumentType } from "@/hooks/use-planner-report-document-type";
+import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
+import { applyPlannerDocumentTypeToPayload } from "@/lib/planner-report-export/enrich-export-payload";
+import { ReportExportSettingsPanel } from "@/components/planner/report-export-settings-panel";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { useShallow } from "zustand/react/shallow";
 import { useReportCopyStore } from "@/lib/planner-report-export/report-copy-store";
@@ -286,9 +290,13 @@ function BriefStepThreeOohFlow({
     loading: reportPreviewLoading,
   } = useFeatureAccess("planner_result");
   const [reportStyle, setReportStyle] = usePlannerReportStyle();
+  const [documentType, setDocumentType] = usePlannerReportDocumentType();
+  const [sectionVisibility, setSectionVisibility] =
+    usePlannerReportSectionVisibility();
 
   const setReportClientName = useReportCopyStore((s) => s.setClientName);
   const setReportDocumentTitle = useReportCopyStore((s) => s.setDocumentTitle);
+  const reportDocumentTitle = useReportCopyStore((s) => s.documentTitle);
   const coverLogoUrl = useReportCopyStore((s) => s.coverLogoUrl);
   const setCoverLogoUrl = useReportCopyStore((s) => s.setCoverLogoUrl);
   const productionCostWon = useReportCopyStore((s) => s.productionCostWon);
@@ -539,6 +547,7 @@ function BriefStepThreeOohFlow({
       portfolioCount: 0,
       topMediaName: isKo ? "핵심 매체" : "key media",
     },
+    documentType,
   });
 
   const [snapshotAt] = useState(() =>
@@ -547,7 +556,7 @@ function BriefStepThreeOohFlow({
 
   const exportPayload = useMemo(() => {
     if (!exportPlan) return null;
-    return buildBriefReportPayload({
+    const base = buildBriefReportPayload({
       plan: exportPlan,
       catalog,
       isKo,
@@ -555,6 +564,12 @@ function BriefStepThreeOohFlow({
       hasDigitalSnapshot: false,
       reportCopy: reportCopySnapshot,
       generatedAt: snapshotAt,
+      documentTypeKey: documentType,
+    });
+    return applyPlannerDocumentTypeToPayload(base, {
+      isKo,
+      documentType,
+      documentTitleOverride: reportDocumentTitle,
     });
   }, [
     exportPlan,
@@ -563,6 +578,8 @@ function BriefStepThreeOohFlow({
     store.channelMode,
     reportCopySnapshot,
     snapshotAt,
+    documentType,
+    reportDocumentTitle,
   ]);
 
   const handleLogoUpload = useCallback(
@@ -596,6 +613,7 @@ function BriefStepThreeOohFlow({
       try {
         await downloadPlannerReport(format, exportPayload, {
           activitySource: "planner",
+          sectionVisibility,
           style: reportStyle,
         });
         toast(
@@ -616,7 +634,7 @@ function BriefStepThreeOohFlow({
         setExporting(null);
       }
     },
-    [exporting, exportPayload, toast, isKo, reportStyle],
+    [exporting, exportPayload, toast, isKo, reportStyle, sectionVisibility],
   );
 
   const won = (n: number) =>
@@ -858,7 +876,7 @@ function BriefStepThreeOohFlow({
           variant="ooh"
           exportPayload={exportPayload}
           reportStyle={reportStyle}
-          onReportStyleChange={setReportStyle}
+          sectionVisibility={sectionVisibility}
           reportPreviewAllowed={reportPreviewAllowed}
           reportPreviewLoading={reportPreviewLoading}
           mapPortfolio={exportPortfolio}
@@ -908,12 +926,25 @@ function BriefStepThreeOohFlow({
           exporting={exporting}
           exportError={exportError}
         />
+        <ReportExportSettingsPanel
+          isKo={isKo}
+          exportPayload={exportPayload}
+          mapPortfolio={exportPortfolio}
+          documentType={documentType}
+          onDocumentTypeChange={setDocumentType}
+          reportStyle={reportStyle}
+          onReportStyleChange={setReportStyle}
+          sectionVisibility={sectionVisibility}
+          onSectionVisibilityChange={setSectionVisibility}
+          className="rounded-xl border border-border bg-card"
+        />
         <ReportEmailSendDialog
           open={emailDialogOpen}
           onClose={() => setEmailDialogOpen(false)}
           isKo={isKo}
           exportPayload={exportPayload}
           activitySource="planner"
+          sectionVisibility={sectionVisibility}
           onSent={() => {
             toast(
               "success",

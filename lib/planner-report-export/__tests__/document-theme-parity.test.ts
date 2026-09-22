@@ -35,14 +35,17 @@ test("campaign completion palette drops legacy orange", () => {
     const preview = campaignReportPreviewColors(style);
     assert.notDeepEqual(pdf.accent, [255, 102, 0]);
     assert.notEqual(preview.accent.toUpperCase(), "#FF6600");
-    assert.equal(preview.accent.toUpperCase(), "#0D9488");
-    assert.deepEqual(pdf.accent, [13, 148, 136]);
   }
   const brand = campaignReportPdfPalette("brand");
   assert.deepEqual(brand.coverBg, brand.ink);
+  assert.deepEqual(brand.accent, [13, 148, 136]);
   const minimal = campaignReportPdfPalette("minimal");
   assert.deepEqual(minimal.coverBg, [255, 255, 255]);
   assert.notDeepEqual(minimal.coverText, [255, 255, 255]);
+  assert.notDeepEqual(minimal.accent, brand.accent);
+  const corporate = campaignReportPdfPalette("corporate");
+  assert.deepEqual(corporate.accent, [13, 27, 46]);
+  assert.deepEqual(corporate.coverBg, [248, 250, 252]);
 });
 
 test("chart palette no longer uses legacy amber", () => {

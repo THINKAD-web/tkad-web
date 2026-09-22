@@ -66,7 +66,7 @@ export function DiscoveryMediaCardActions({
     "inline-flex h-9 min-h-9 min-w-0 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white px-2 text-[11px] font-semibold leading-none text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12";
 
   const contactLinkClass =
-    "tkad-media-map-sheet-cta tkad-qp-cta inline-flex h-9 min-h-9 min-w-0 items-center justify-center gap-1 rounded-lg px-2 text-[11px] font-semibold leading-none shadow-sm transition-opacity hover:opacity-95";
+    "tkad-media-map-sheet-cta inline-flex h-9 min-h-9 min-w-0 items-center justify-center gap-1 rounded-lg border border-hermes/30 bg-hermes px-2 text-[11px] font-semibold leading-none text-white shadow-sm shadow-hermes/20 transition-colors hover:bg-hermes-shade dark:border-hermes/40 dark:hover:bg-hermes-tint";
 
   const contactLinkProps = {
     className: contactLinkClass,

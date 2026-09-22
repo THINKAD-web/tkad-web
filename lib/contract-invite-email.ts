@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
+import { isEmailConfigured, sendEmail } from "@/lib/email/client";
 import { getFormalQuoteIssuer } from "@/lib/formal-quote-issuer";
 import {
   loadOoHQuoteForContract,
@@ -7,12 +8,29 @@ import {
 } from "@/lib/ooh-contract-context";
 import { parseOohContractMeta } from "@/lib/ooh-contract-meta";
 import { splitPdfLogicalLines } from "@/lib/pdf-line-break";
+import { getPrisma } from "@/lib/prisma";
+
+export function contractSignPageUrl(
+  quoteId: string,
+  locale: "ko" | "en",
+): string {
+  const base = (
+    process.env.SITE_URL?.trim() ||
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000")
+  ).replace(/\/$/, "");
+  const loc = locale === "en" ? "en" : "ko";
+  return `${base}/${loc}/quote/${quoteId}/contract`;
+}
+
+export type ContractInviteEmailVariant = "standard" | "booking_confirmed";
 
 export type ContractInviteEmailPayload = {
   isKo: boolean;
   clientName: string;
   contractUrl: string;
-  /** 견적 미리보기 등 부가 링크 */
   previewUrl?: string;
   issuerCompany: string;
   accountManagerName: string;
@@ -21,25 +39,27 @@ export type ContractInviteEmailPayload = {
   period: string;
   contactEmail: string;
   contactPhone: string;
+  variant?: ContractInviteEmailVariant;
 };
 
 export type ContractInviteEmailOptions = {
   subject?: string;
+  variant?: ContractInviteEmailVariant;
 };
 
-function siteBaseUrl(): string {
-  return (
-    process.env.SITE_URL?.trim() ||
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    (process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000")
-  ).replace(/\/$/, "");
-}
-
-export function contractInviteUrl(quoteId: string, locale: string): string {
-  const loc = locale === "en" ? "en" : "ko";
-  return `${siteBaseUrl()}/${loc}/quote/${quoteId}/contract`;
+function defaultSubject(
+  isKo: boolean,
+  variant: ContractInviteEmailVariant,
+): string {
+  const booking = variant === "booking_confirmed";
+  if (isKo) {
+    return booking
+      ? "[싱커드] 부킹 확정 — 전자계약서를 확인해 주세요"
+      : "[싱커드] 전자계약서를 확인해 주세요";
+  }
+  return booking
+    ? "[THINKAD] Booking confirmed — please review your e-contract"
+    : "[THINKAD] Please review your e-contract";
 }
 
 export async function resolveContractInviteEmailPayload(
@@ -71,7 +91,10 @@ export async function resolveContractInviteEmailPayload(
   return {
     isKo,
     clientName: row.clientName,
-    contractUrl: contractInviteUrl(quoteId, row.locale),
+    contractUrl: contractSignPageUrl(
+      quoteId,
+      row.locale === "en" ? "en" : "ko",
+    ),
     issuerCompany: isKo ? issuer.companyKo : issuer.companyEn,
     accountManagerName,
     mediaNames,
@@ -94,6 +117,9 @@ export function buildContractInviteEmail(
   p: ContractInviteEmailPayload,
   options?: ContractInviteEmailOptions,
 ): { subject: string; text: string; html: string } {
+  const variant = options?.variant ?? p.variant ?? "standard";
+  const booking = variant === "booking_confirmed";
+
   const mediaBlock =
     p.mediaNames.length > 0
       ? p.mediaNames.map((m) => `· ${m}`).join("\n")
@@ -106,10 +132,14 @@ export function buildContractInviteEmail(
     : `Questions? Contact ${p.accountManagerName} at ${p.contactEmail} or ${p.contactPhone}.`;
 
   const subject =
-    options?.subject ??
-    (p.isKo
-      ? `[싱커드] 부킹 확정 — 전자계약서를 확인해 주세요`
-      : `[THINKAD] Booking confirmed — please review your e-contract`);
+    options?.subject ?? defaultSubject(p.isKo, variant);
+
+  const introKo = booking
+    ? `${p.issuerCompany}입니다. 부킹이 확정되었습니다. 아래 내용을 확인한 뒤 전자계약서에 서명해 주세요.`
+    : `${p.issuerCompany}입니다. 아래 내용을 확인한 뒤 전자계약서에 서명해 주세요.`;
+  const introEn = booking
+    ? `${p.issuerCompany} — your booking is confirmed. Please review and sign the e-contract.`
+    : `${p.issuerCompany} — please review the details below and sign the e-contract.`;
 
   const previewText = p.previewUrl
     ? p.isKo
@@ -126,7 +156,7 @@ export function buildContractInviteEmail(
     ? [
         `안녕하세요 ${p.clientName}님,`,
         "",
-        `${p.issuerCompany}입니다. 부킹이 확정되었습니다. 아래 내용을 확인한 뒤 전자계약서에 서명해 주세요.`,
+        introKo,
         "",
         `담당자: ${p.accountManagerName}`,
         `계약 매체:\n${mediaBlock}`,
@@ -144,7 +174,7 @@ export function buildContractInviteEmail(
     : [
         `Hello ${p.clientName},`,
         "",
-        `${p.issuerCompany} — your booking is confirmed. Please review and sign the e-contract.`,
+        introEn,
         "",
         `Account manager: ${p.accountManagerName}`,
         `Media:\n${mediaBlock}`,
@@ -167,7 +197,7 @@ export function buildContractInviteEmail(
 
   const html = p.isKo
     ? `<p>안녕하세요 <strong>${escapeHtml(p.clientName)}</strong>님,</p>
-<p><strong>${escapeHtml(p.issuerCompany)}</strong>입니다. 부킹이 확정되었습니다. 아래 내용을 확인한 뒤 전자계약서에 서명해 주세요.</p>
+<p><strong>${escapeHtml(p.issuerCompany)}</strong>입니다. ${booking ? "부킹이 확정되었습니다. " : ""}아래 내용을 확인한 뒤 전자계약서에 서명해 주세요.</p>
 <table style="border-collapse:collapse;font-size:14px;line-height:1.5">
 <tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">담당자</td><td>${escapeHtml(p.accountManagerName)}</td></tr>
 <tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">계약 매체</td><td>${mediaHtml}</td></tr>
@@ -179,7 +209,7 @@ ${previewHtml}
 <p style="color:#444">${escapeHtml(contactLine)}</p>
 <p>감사합니다.<br/>${escapeHtml(p.issuerCompany)}</p>`
     : `<p>Hello <strong>${escapeHtml(p.clientName)}</strong>,</p>
-<p><strong>${escapeHtml(p.issuerCompany)}</strong> — your booking is confirmed.</p>
+<p><strong>${escapeHtml(p.issuerCompany)}</strong> — ${booking ? "your booking is confirmed. " : ""}Please review and sign.</p>
 <table style="border-collapse:collapse;font-size:14px;line-height:1.5">
 <tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">Account manager</td><td>${escapeHtml(p.accountManagerName)}</td></tr>
 <tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">Media</td><td>${mediaHtml}</td></tr>
@@ -194,14 +224,64 @@ ${previewHtml}
   return { subject, text, html };
 }
 
-export async function sendContractInviteEmail(
-  db: PrismaClient,
-  quoteId: string,
-  send: (mail: { subject: string; text: string; html: string }) => Promise<void>,
-): Promise<boolean> {
-  const payload = await resolveContractInviteEmailPayload(db, quoteId);
-  if (!payload) return false;
-  const mail = buildContractInviteEmail(payload);
-  await send(mail);
-  return true;
+/** 부킹 확정·standalone 발송·재발송 — 고객에게 전자서명 URL 안내 */
+export async function sendContractInviteEmail(input: {
+  to: string;
+  clientName: string;
+  locale: "ko" | "en";
+  quoteId: string;
+  variant?: ContractInviteEmailVariant;
+  previewUrl?: string;
+  subject?: string;
+}): Promise<boolean> {
+  const to = input.to.trim();
+  if (!to || !isEmailConfigured()) return false;
+
+  const variant = input.variant ?? "standard";
+
+  try {
+    const db = getPrisma();
+    const payload = await resolveContractInviteEmailPayload(db, input.quoteId);
+    if (payload) {
+      const mail = buildContractInviteEmail(
+        {
+          ...payload,
+          clientName: input.clientName,
+          contractUrl: contractSignPageUrl(input.quoteId, input.locale),
+          previewUrl: input.previewUrl,
+          variant,
+        },
+        { subject: input.subject, variant },
+      );
+      await sendEmail({ to, ...mail });
+      return true;
+    }
+
+    const isKo = input.locale !== "en";
+    const url = contractSignPageUrl(input.quoteId, input.locale);
+    const booking = variant === "booking_confirmed";
+    const mail = buildContractInviteEmail(
+      {
+        isKo,
+        clientName: input.clientName,
+        contractUrl: url,
+        previewUrl: input.previewUrl,
+        issuerCompany: isKo ? "(주)싱커드" : "THINKAD Inc.",
+        accountManagerName:
+          process.env.QUOTE_ACCOUNT_MANAGER_NAME?.trim() || "THINKAD Sales",
+        mediaNames: [],
+        amountLabel: isKo ? "(계약서에서 확인)" : "(See contract)",
+        period: isKo ? "(계약서에서 확인)" : "(See contract)",
+        contactEmail: getFormalQuoteIssuer().email,
+        contactPhone: getFormalQuoteIssuer().tel,
+        variant,
+      },
+      { subject: input.subject, variant },
+    );
+    await sendEmail({ to, ...mail });
+    return true;
+  } catch (e) {
+    console.error("[contract-invite-email]", e);
+    return false;
+  }
 }

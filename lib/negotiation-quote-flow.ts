@@ -12,11 +12,8 @@ import { computeAdminQuoteTotals } from "@/lib/admin-quote-calc";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { sendOoHQuoteToClient } from "@/lib/ooh-quote-send";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
-import { isEmailConfigured, sendEmail } from "@/lib/email/client";
-import {
-  buildContractInviteEmail,
-  resolveContractInviteEmailPayload,
-} from "@/lib/contract-invite-email";
+import { isEmailConfigured } from "@/lib/email/client";
+import { sendContractInviteEmail } from "@/lib/contract-invite-email";
 import { createNotification } from "@/lib/notifications";
 import { postInternalAlert } from "@/lib/internal-webhook";
 import { notifySlackBookingConfirm } from "@/lib/quote-slack-notify";
@@ -223,19 +220,17 @@ export async function advanceNegotiationQuoteToContract(
   const isKo = localeStr === "ko";
   const to = row.clientEmail?.trim();
   if (to && isEmailConfigured()) {
-    void (async () => {
-      const payload = await resolveContractInviteEmailPayload(db, quoteId);
-      if (!payload) return;
-      const mail = buildContractInviteEmail(
-        { ...payload, contractUrl: contractAbs, previewUrl: previewAbs },
-        {
-          subject: isKo
-            ? "[싱커드] 가격 제안 수락 — 전자계약을 진행해 주세요"
-            : "[THINKAD] Price accepted — sign your e-contract",
-        },
-      );
-      await sendEmail({ to, ...mail });
-    })().catch(() => {});
+    void sendContractInviteEmail({
+      to,
+      clientName: row.clientName,
+      locale: localeStr === "en" ? "en" : "ko",
+      quoteId,
+      variant: "booking_confirmed",
+      previewUrl: previewAbs,
+      subject: isKo
+        ? "[싱커드] 가격 제안 수락 — 전자계약을 진행해 주세요"
+        : "[THINKAD] Price accepted — sign your e-contract",
+    }).catch(() => {});
   }
 
   return { contractUrl, previewUrl };

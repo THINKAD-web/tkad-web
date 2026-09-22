@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { FileDown, Loader2, Lock, Mail, RefreshCw } from "lucide-react";
+import { FileDown, Loader2, Lock, Mail, RefreshCw, Settings2 } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -87,10 +87,11 @@ import type { ScoredMedia as PlannerScoredMedia } from "@/lib/planner/recommend"
 import { enrichPlannerPortfolioForExport, buildPlannerPortfolioScored } from "@/lib/planner/planner-portfolio-rationale";
 import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
 import { PlannerScenarioContextBanner } from "@/components/planner/planner-scenario-context-banner";
-import { ReportSectionVisibilityPanel } from "@/components/planner/report-section-visibility-panel";
+import { ReportExportSettingsPanel } from "@/components/planner/report-export-settings-panel";
 import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
 import { usePlannerReportStyle } from "@/hooks/use-planner-report-style";
-import { ReportStylePicker } from "@/components/planner/report-style-picker";
+import { usePlannerReportDocumentType } from "@/hooks/use-planner-report-document-type";
+import { applyPlannerDocumentTypeToPayload } from "@/lib/planner-report-export/enrich-export-payload";
 import {
   lineupViewModeForExport,
   readPlannerReportViewMode,
@@ -115,6 +116,8 @@ export type PlannerReportSharedProps = {
   seoulZones?: readonly PlannerSeoulZoneKey[];
   goalFollowUp?: PlannerGoalFollowUp;
   portfolio: MediaItem[];
+  /** 서울 CPM·유동 벤치마크 — 공개 카탈로그 SSOT (my/plan 보고서 등) */
+  benchmarkCatalog?: readonly MediaItem[];
   /** Step 4 선택 매체 수량 — 예산·노출·보고서 반영 */
   campaignMediaQuantities?: Record<string, number>;
   campaignMediaPriceOptionIndex?: Record<string, number>;
@@ -388,6 +391,7 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       cpmBars,
       effectSummaryLines,
       contact,
+      planMediaItems: plan.mediaItems,
     }),
     [
       periodDisplay,
@@ -397,6 +401,7 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       cpmBars,
       effectSummaryLines,
       contact,
+      plan.mediaItems,
     ],
   );
 }
@@ -471,6 +476,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     (s) => s.acknowledgeReportCopyFingerprint,
   );
   const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
+  const [reportDocumentType, setReportDocumentType] =
+    usePlannerReportDocumentType();
 
   const isPlanCartReport = props.activitySource === "plan_cart_report";
 
@@ -603,6 +610,26 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     props.narrativeContext?.industryKey,
   ]);
 
+  const mediaHintsForStrategy = useMemo(() => {
+    if (portfolioForExport.length === 0) return [];
+    return derived.planMediaItems.map((mi) => {
+      const media = portfolioForExport.find((m) => m.id === mi.id);
+      return {
+        name: mi.name,
+        location: media?.location ?? undefined,
+        budgetPct: mi.budgetShare,
+        cpmWon: mi.cpmWon,
+      };
+    });
+  }, [derived.planMediaItems, portfolioForExport]);
+
+  const topBudgetMedia = useMemo(() => {
+    const withBudget = mediaHintsForStrategy
+      .filter((h) => h.budgetPct > 0)
+      .sort((a, b) => b.budgetPct - a.budgetPct);
+    return withBudget[0] ?? null;
+  }, [mediaHintsForStrategy]);
+
   const copyStrategyInput = useMemo(
     () => ({
       isKo: props.isKo,
@@ -614,11 +641,13 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       seoulZones: props.seoulZones ?? [],
       followUp: props.goalFollowUp ?? {},
       portfolioCount: portfolioForExport.length,
+      mediaHints: mediaHintsForStrategy,
       topMediaName:
-        portfolioForExport[0]?.name ??
+        topBudgetMedia?.name ??
         (props.isKo ? "핵심 매체" : "key media"),
+      topMediaBudgetPct: topBudgetMedia?.budgetPct,
     }),
-    [props, portfolioForExport],
+    [props, portfolioForExport, mediaHintsForStrategy, topBudgetMedia],
   );
 
   useEffect(() => {
@@ -646,6 +675,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     const greeting = buildDefaultReportGreeting(
       props.isKo,
       reportClientName.trim() || undefined,
+      reportDocumentType,
     );
     const executive = joinReportCopyLines(
       buildDefaultExecutiveSummaryLines(copyStrategyInput),
@@ -665,6 +695,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     copyFingerprintCurrent,
     copyStrategyInput,
     reportClientName,
+    reportDocumentType,
     props.isKo,
     applyReportCopyDraft,
   ]);
@@ -693,6 +724,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     const greeting = buildDefaultReportGreeting(
       props.isKo,
       reportClientName.trim() || undefined,
+      reportDocumentType,
     );
     const executive = joinReportCopyLines(
       buildDefaultExecutiveSummaryLines(copyStrategyInput),
@@ -707,6 +739,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     onlineCopyStrategyInput,
     props.isKo,
     reportClientName,
+    reportDocumentType,
     copyStrategyInput,
     copyFingerprintCurrent,
     applyReportCopyDraft,
@@ -744,8 +777,10 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         campaignMediaQuantities: props.campaignMediaQuantities,
         campaignMediaPriceOptionIndex: props.campaignMediaPriceOptionIndex,
         planCartItems: props.planCartItems,
+        benchmarkCatalog: props.benchmarkCatalog,
         reportGreeting,
         reportExecutiveSummaryLines: executiveSummaryLines,
+        documentTypeKey: reportDocumentType,
       }),
     [
       props,
@@ -756,15 +791,11 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       executiveSummaryLines,
       effectiveRequestedBudgetMan,
       planCartBudgetHonesty,
+      reportDocumentType,
     ],
   );
 
   const exportPayload = useMemo(() => {
-    const compositionTitle =
-      payload.reportComposition === "mixed" ||
-      payload.reportComposition === "onlyOnline"
-        ? payload.documentTitle
-        : undefined;
     const onlyOnlineCopy =
       payload.reportComposition === "onlyOnline"
         ? {
@@ -775,17 +806,24 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 : payload.executiveSummaryLines,
           }
         : {};
-    return {
+    const merged = {
       ...payload,
       ...onlyOnlineCopy,
-      documentTitle:
-        compositionTitle ??
-        (reportDocumentTitle.trim() || payload.documentTitle),
       clientName: reportClientName.trim() || undefined,
-      // C-lite: creativeUploadedUrl(소재) → 표지 로고 임시 재사용. 전용 coverLogo 분리 예정.
       coverLogoUrl:
         (creativeUploadedUrl ?? props.logoUrl)?.trim() || undefined,
+      greetingText:
+        reportGreeting.trim() || payload.greetingText || undefined,
+      executiveSummaryLines:
+        executiveSummaryLines.length > 0
+          ? executiveSummaryLines
+          : payload.executiveSummaryLines,
     };
+    return applyPlannerDocumentTypeToPayload(merged, {
+      isKo: props.isKo,
+      documentType: reportDocumentType,
+      documentTitleOverride: reportDocumentTitle,
+    });
   }, [
     payload,
     reportDocumentTitle,
@@ -794,6 +832,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     executiveSummaryLines,
     creativeUploadedUrl,
     props.logoUrl,
+    props.isKo,
+    reportDocumentType,
   ]);
 
   const [internalSectionVisibility, setInternalSectionVisibility] =
@@ -992,6 +1032,25 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 />
               </DocumentPreviewFrame>
 
+              <button
+                type="button"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm dark:border-white/12 dark:bg-white/5 dark:text-white/90 sm:hidden"
+                onClick={() => {
+                  const target = document.getElementById(
+                    "planner-report-settings",
+                  );
+                  target?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  target
+                    ?.querySelectorAll("details")
+                    .forEach((el) => (el.open = true));
+                }}
+              >
+                <Settings2 className="h-4 w-4" aria-hidden />
+                {props.isKo
+                  ? "문서 유형·스타일·섹션 설정"
+                  : "Document type, style & section settings"}
+              </button>
+
               <PlannerReportPremiumBlock
                 isKo={props.isKo}
                 portfolio={props.portfolio}
@@ -1003,18 +1062,20 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
               />
 
               <PlannerNeonCard>
-                <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:p-6">
-                  <ReportStylePicker
+                <div
+                  id="planner-report-settings"
+                  className="flex scroll-mt-4 flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:p-6"
+                >
+                  <ReportExportSettingsPanel
                     isKo={props.isKo}
-                    value={reportStyle}
-                    onChange={setReportStyle}
-                  />
-                  <ReportSectionVisibilityPanel
-                    isKo={props.isKo}
-                    payload={exportPayload}
+                    exportPayload={exportPayload}
                     mapPortfolio={props.portfolio}
-                    visibility={sectionVisibility}
-                    onChange={setSectionVisibility}
+                    documentType={reportDocumentType}
+                    onDocumentTypeChange={setReportDocumentType}
+                    reportStyle={reportStyle}
+                    onReportStyleChange={setReportStyle}
+                    sectionVisibility={sectionVisibility}
+                    onSectionVisibilityChange={setSectionVisibility}
                   />
                 </div>
                 <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
@@ -1163,169 +1224,5 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         onSent={handleEmailSent}
       />
     </div>
-  );
-}
-
-/** 대시보드(7단계) 하단: PDF 다운로드만 (상세 보고서는 6단계 통합) */
-export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
-  const t = useTranslations("planner");
-  const tCommon = useTranslations("common");
-  const { toast } = useToast();
-  const { allowed: pdfAllowed, loading: pdfAccessLoading } =
-    useFeatureAccess("planner_pdf");
-  const derived = usePlannerReportDerived(props);
-  const [downloading, setDownloading] =
-    useState<PlannerReportExportFormat | null>(null);
-  const [snapshotAt] = useState(() =>
-    new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
-  );
-
-  const [internalSectionVisibility, setInternalSectionVisibility] =
-    usePlannerReportSectionVisibility();
-  const sectionVisibility =
-    props.sectionVisibility ?? internalSectionVisibility;
-
-  const portfolioForExport = useMemo(
-    () => resolvePlannerExportPortfolio(props),
-    [props.portfolio, props.recommendationContext, props.isKo],
-  );
-
-  const handleExport = useCallback(
-    async (format: PlannerReportExportFormat) => {
-      if (downloading) return;
-      setDownloading(format);
-      try {
-        const payload = buildReportPayload({
-          isKo: props.isKo,
-          goalTitle: props.goalTitle,
-          budgetMan: props.budgetNum,
-          periodDisplay: derived.periodDisplay,
-          regionsText: props.regionsText,
-          categoriesText: props.categoriesText,
-          ageText: props.ageText,
-          industryText: props.industryText,
-          industryKey: props.industryKey ?? props.narrativeContext?.industryKey ?? null,
-          campaignGoal: props.campaignGoal,
-          seoulZones: props.seoulZones,
-          goalFollowUp: props.goalFollowUp,
-          portfolio: portfolioForExport,
-          metrics: props.metrics,
-          blendedCpmKrw: derived.blendedCpmKrw,
-          budgetAllocation: derived.budgetAllocation,
-          cpmBars: derived.cpmBars,
-          effectSummaryLines: derived.effectSummaryLines,
-          generatedAt: snapshotAt,
-          months: props.months,
-          regionBreakdown: props.regionBreakdown,
-          regionBudgetCharts: props.regionBudgetCharts,
-          regionImpressionCharts: props.regionImpressionCharts,
-          isAutoPortfolio: props.isAutoPortfolio,
-          campaignMediaQuantities: props.campaignMediaQuantities,
-          campaignMediaPriceOptionIndex: props.campaignMediaPriceOptionIndex,
-          planCartItems: props.planCartItems,
-        });
-        await downloadPlannerReport(format, payload, {
-          activitySource: props.activitySource,
-          sectionVisibility,
-          lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
-        });
-        const { trackGaEvent } = await import("@/lib/ga-events");
-        trackGaEvent("pdf_download", {
-          source: `planner_report_compact_${format}`,
-        });
-        toast("success", t("reportPdfDownloaded"));
-      } catch (e) {
-        console.error("[planner-report-export compact]", e);
-        toast("error", tCommon("pdfGenerationFailed"));
-      } finally {
-        setDownloading(null);
-      }
-    },
-    [downloading, props, derived, snapshotAt, sectionVisibility, portfolioForExport, t, tCommon, toast],
-  );
-
-  if (pdfAccessLoading) {
-    return (
-      <div
-        className="min-h-[8rem] animate-pulse rounded-2xl border dark:border-white/8 border-gray-100 dark:bg-white/5 bg-gray-100/80"
-        aria-busy="true"
-      />
-    );
-  }
-
-  if (!pdfAllowed) return null;
-
-  return (
-    <PlannerNeonCard>
-      <div className={plannerNeon.cardHeader}>
-        <PlannerNeonLabel>PDF Export</PlannerNeonLabel>
-        <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
-          {t("reportPdfDocumentTitle")}
-        </h3>
-        <p className={cn("mt-1", plannerNeon.subtext)}>
-          {props.isKo
-            ? "통합 플래너 보고서를 PDF로 저장합니다."
-            : "Save the unified planner report as PDF."}
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-2 p-5 sm:p-6">
-        <PlannerPdfDownloadGate
-          isKo={props.isKo}
-          onAllowedDownload={() => void handleExport("pdf")}
-        >
-          {({ onDownloadClick, pdfAllowed, checking }) => (
-            <BtnBlock
-              variant="accent"
-              size="md"
-              onClick={onDownloadClick}
-              disabled={downloading !== null || checking}
-            >
-              {downloading === "pdf" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : !pdfAllowed ? (
-                <Lock className="h-4 w-4" />
-              ) : (
-                <FileDown className="h-4 w-4" />
-              )}
-              {!pdfAllowed
-                ? props.isKo
-                  ? "🔒 플래너 보고서 PDF 저장"
-                  : "🔒 Save planner report PDF"
-                : props.isKo
-                  ? "플래너 보고서 PDF 저장"
-                  : t("reportDownloadPdf")}
-            </BtnBlock>
-          )}
-        </PlannerPdfDownloadGate>
-        <PlannerPdfDownloadGate
-          isKo={props.isKo}
-          onAllowedDownload={() => void handleExport("pptx")}
-        >
-          {({ onDownloadClick, pdfAllowed, checking }) => (
-            <BtnBlock
-              variant="secondary"
-              size="md"
-              onClick={onDownloadClick}
-              disabled={downloading !== null || checking}
-            >
-              {downloading === "pptx" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : !pdfAllowed ? (
-                <Lock className="h-4 w-4" />
-              ) : (
-                <FileDown className="h-4 w-4" />
-              )}
-              {!pdfAllowed
-                ? props.isKo
-                  ? "🔒 보고서 PPT 저장"
-                  : "🔒 Save report PPT"
-                : props.isKo
-                  ? "보고서 PPT 저장"
-                  : "Save report PPT"}
-            </BtnBlock>
-          )}
-        </PlannerPdfDownloadGate>
-      </div>
-    </PlannerNeonCard>
   );
 }

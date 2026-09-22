@@ -119,18 +119,45 @@ export async function uploadToBunnyStorage(opts: {
     throw new Error(`BUNNY_UPLOAD_FAILED:${res.status}:${t.slice(0, 200)}`);
   }
 
+  const publicUrl = buildBunnyCdnUrl(normalizedPath);
+  if (!publicUrl) {
+    throw new Error("BUNNY_CDN_URL_BUILD_FAILED");
+  }
+
   return {
     path: normalizedPath,
-    publicUrl: joinUrl(cdnBase, normalizedPath),
+    publicUrl,
   };
 }
 
-/** CDN 공개 URL → 스토리지 존 내 경로 (삭제용) */
+/** CDN 공개 URL → 스토리지 존 내 경로 (삭제·Storage API fetch용) */
 export function bunnyPathFromPublicUrl(publicUrl: string): string | null {
-  const cdnBase = process.env.BUNNY_CDN_BASE_URL?.trim()?.replace(/\/+$/, "");
-  if (!cdnBase || !publicUrl.startsWith(cdnBase)) return null;
-  const path = publicUrl.slice(cdnBase.length).replace(/^\/+/, "");
-  return path || null;
+  const cdnBase = process.env.BUNNY_CDN_BASE_URL?.trim();
+  if (!cdnBase) return null;
+  try {
+    const pub = new URL(publicUrl.trim());
+    const base = new URL(
+      cdnBase.includes("://") ? cdnBase : `https://${cdnBase}`,
+    );
+    if (pub.origin !== base.origin) return null;
+    const objectPath = pub.pathname.replace(/^\/+|\/+$/g, "");
+    return objectPath || null;
+  } catch {
+    return null;
+  }
+}
+
+/** 업로드 URL → Storage GET 후보 경로 (legacy `tkad/tkad/…` 중복 prefix 보정) */
+export function bunnyStoragePathCandidatesFromPublicUrl(
+  publicUrl: string,
+): string[] {
+  const primary = bunnyPathFromPublicUrl(publicUrl);
+  if (!primary) return [];
+  const out = new Set<string>([primary]);
+  if (primary.startsWith("tkad/tkad/")) {
+    out.add(primary.slice("tkad/".length));
+  }
+  return [...out];
 }
 
 /** 매체 `image` + `extractedImages` 에서 고유 URL 목록 */
@@ -203,6 +230,30 @@ export async function deleteBunnyPublicUrls(urls: string[]): Promise<void> {
       console.warn("[bunny-storage] delete skipped", { url, path, err: e });
     }
   }
+}
+
+/** Storage Zone API로 객체 바이트 조회 (CDN URL 대신 서버 검증용) */
+export async function fetchFromBunnyStorage(path: string): Promise<Buffer> {
+  const zone = process.env.BUNNY_STORAGE_ZONE?.trim();
+  const key = process.env.BUNNY_STORAGE_API_KEY?.trim();
+  if (!zone || !key) {
+    throw new Error("BUNNY_STORAGE_NOT_CONFIGURED");
+  }
+  const normalizedPath = assertAsciiBunnyObjectPath(path.replace(/^\/+/, ""));
+  const getUrl = `${bunnyStorageBaseUrl()}/${encodeURIComponent(zone)}/${normalizedPath}`;
+
+  const res = await fetch(getUrl, {
+    method: "GET",
+    headers: { AccessKey: key },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`BUNNY_FETCH_FAILED:${res.status}:${t.slice(0, 200)}`);
+  }
+
+  return Buffer.from(await res.arrayBuffer());
 }
 
 export async function deleteFromBunnyStorage(path: string): Promise<void> {

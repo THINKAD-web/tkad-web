@@ -30,28 +30,19 @@ export type PricingPlanCard = {
   features: PricingPlanFeature[];
 };
 
-function apiLimitsSummary(isKo: boolean): string {
-  const free = formatEntitlementLimit(
-    API_KEY_MONTHLY_LIMITS.FREE,
-    isKo,
-    "회/월",
-    "/mo",
-  );
-  const pro = formatEntitlementLimit(
-    API_KEY_MONTHLY_LIMITS.PRO,
-    isKo,
-    "회/월",
-    "/mo",
-  );
-  const ent = formatEntitlementLimit(
-    API_KEY_MONTHLY_LIMITS.ENTERPRISE,
+function publicApiLimitLine(
+  tier: "FREE" | "PRO" | "ENTERPRISE",
+  isKo: boolean,
+): string {
+  const limit = formatEntitlementLimit(
+    API_KEY_MONTHLY_LIMITS[tier],
     isKo,
     "회/월",
     "/mo",
   );
   return isKo
-    ? `Public API (FREE ${free} · PRO ${pro} · Enterprise ${ent})`
-    : `Public API (FREE ${free} · PRO ${pro} · Enterprise ${ent})`;
+    ? `Public API ${limit}`
+    : `Public API — ${limit}`;
 }
 
 function featuresAtMin(
@@ -193,6 +184,10 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
             ? `플래너 PDF 무료 체험 ${pdfFreeTrial}`
             : `Planner PDF trial — ${pdfFreeTrial}`,
         },
+        {
+          id: "api_limits",
+          text: publicApiLimitLine("FREE", isKo),
+        },
       ],
     },
     {
@@ -236,6 +231,10 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
           id: "ai_freetext",
           text: isKo ? "AI 자유입력 추천" : "AI free-text recommendations",
         },
+        {
+          id: "api_limits",
+          text: publicApiLimitLine("PRO", isKo),
+        },
       ],
     },
     {
@@ -264,21 +263,9 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
           id: "api",
           text: featureLabel("api", isKo),
         },
-        { id: "api_limits", text: apiLimitsSummary(isKo) },
         {
-          id: "whitelabel",
-          text: featureLabel("whitelabel", isKo),
-          comingSoon: true,
-        },
-        {
-          id: "dedicated_manager",
-          text: isKo ? "전담 담당자" : "Dedicated account manager",
-          comingSoon: true,
-        },
-        {
-          id: "custom_reports",
-          text: isKo ? "맞춤 데이터 리포트" : "Custom data reports",
-          comingSoon: true,
+          id: "api_limits",
+          text: publicApiLimitLine("ENTERPRISE", isKo),
         },
       ],
     },

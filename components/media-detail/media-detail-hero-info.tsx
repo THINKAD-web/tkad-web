@@ -11,8 +11,10 @@ import type { MediaItem } from "@/lib/media-data";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
 import {
   formatMonthlyImpressionsLabel,
-  resolveCpmWon,
+  mediaDisplayCpmSourceFromItem,
+  resolveCpmWonForDisplay,
 } from "@/lib/media-metrics";
+import type { SeoulCpmBenchmarkBadge } from "@/lib/planner/seoul-media-benchmark";
 import {
   formatCatalogPriceFieldWon,
   formatMediaPriceWonWithSymbol,
@@ -47,6 +49,7 @@ type Props = {
   hasPriceOptions: boolean;
   primaryPriceOption?: { price: number; label: string; period?: string };
   actions: ReactNode;
+  seoulCpmBenchmarkBadge?: SeoulCpmBenchmarkBadge | null;
   className?: string;
 };
 
@@ -81,6 +84,7 @@ export function MediaDetailHeroInfo({
   hasPriceOptions,
   primaryPriceOption,
   actions,
+  seoulCpmBenchmarkBadge = null,
   className,
 }: Props) {
   const bucket = normalizeMediaDetailTextLocale(locale);
@@ -88,16 +92,17 @@ export function MediaDetailHeroInfo({
   const intlTag = intlLocaleTag(locale);
   const displayPrice = resolveMediaDisplayPrice(media);
   const multiPriceOptions = (media.priceOptions?.length ?? 0) >= 2;
-  /**
-   * 히어로 기본 CPM — 카탈로그 대표가 SSOT (견적 스티키 선택옵션 CPM과 별개).
-   * 극단값은 `resolveCpmDisplay` 가 "CPM 산정 중" 으로 대체한다 (⑧).
-   */
+  /** 히어로 CPM — 표시가(`resolveMediaDisplayPrice`)와 동일 분자 (견적 옵션 선택 CPM과 별개). */
+  const cpmSource = mediaDisplayCpmSourceFromItem(media);
   const cpmDisplay = resolveCpmDisplay(
-    resolveCpmWon(media),
+    resolveCpmWonForDisplay(cpmSource),
     locale,
     media.country,
   );
-  const impressionsLabel = formatMonthlyImpressionsLabel(media, (bucket === "ko"));
+  const impressionsLabel = formatMonthlyImpressionsLabel(
+    cpmSource,
+    bucket === "ko",
+  );
   /** 크기·유형·타깃만 — 해상도/시인성 등은 집행 탭에서 노출 */
   const summaryTags = heroTags.slice(0, 3);
 
@@ -222,6 +227,15 @@ export function MediaDetailHeroInfo({
           }
         />
       </div>
+
+      {seoulCpmBenchmarkBadge ? (
+        <p
+          className="rounded-xl border border-dashed border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)]/40 px-3 py-2 text-[length:var(--qp-text-meta)] font-medium leading-snug text-gray-800 dark:text-white/85"
+          title={seoulCpmBenchmarkBadge.fullLabel}
+        >
+          {seoulCpmBenchmarkBadge.shortLabel}
+        </p>
+      ) : null}
 
       {actions}
     </div>

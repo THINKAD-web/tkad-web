@@ -346,7 +346,6 @@ export function BriefStepThreeOnlineOnly({
               variant="online"
               exportPayload={exportPayload}
               reportStyle={reportStyle}
-              onReportStyleChange={setReportStyle}
               reportPreviewAllowed={reportPreviewAllowed}
               reportPreviewLoading={reportPreviewLoading}
               onDocumentTitleChange={setReportDocumentTitle}

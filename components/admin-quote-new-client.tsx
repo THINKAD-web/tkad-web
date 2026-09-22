@@ -86,6 +86,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { FormalQuoteIssuer } from "@/lib/formal-quote-issuer";
 import { countAdminQuoteInquiryLines } from "@/lib/admin-quote-inquiry";
+import { useAdminMediaPickerList } from "@/hooks/use-admin-media-picker-list";
+import { matchesAdminMediaDtoTextQuery } from "@/lib/admin-media-text-search";
 
 function formatWon(n: number) {
   return `${new Intl.NumberFormat("ko-KR").format(Math.round(n))}원`;
@@ -124,10 +126,16 @@ export default function AdminQuoteNewClient({
   const contractPrompt = searchParams.get("contract") === "1";
   const locale = useLocale();
   const isKo = locale === "ko";
-  const [medias, setMedias] = useState<AdminMediaDto[]>([]);
-  const [listLoading, setListLoading] = useState(true);
-  const [listError, setListError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  const {
+    medias,
+    setMedias,
+    search,
+    setSearch,
+    listLoading,
+    listError,
+  } = useAdminMediaPickerList({
+    loadErrorMessage: t("loadError"),
+  });
 
   const [lines, setLines] = useState<AdminQuoteLine[]>([]);
 
@@ -170,47 +178,6 @@ export default function AdminQuoteNewClient({
   const [existingOohQuoteId, setExistingOohQuoteId] = useState<string | null>(
     null,
   );
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setListLoading(true);
-      setListError(null);
-      try {
-        // 전체 카탈로그 필요 — take=500 이면 updatedAt 하위 매체는 검색·라인 hydrate 누락
-        const res = await fetch("/api/admin/medias?take=5000", {
-          credentials: "include",
-          cache: "no-store",
-        });
-        const raw: unknown = await res.json();
-        if (!res.ok) {
-          const err =
-            typeof raw === "object" &&
-            raw !== null &&
-            "error" in raw &&
-            typeof (raw as { error?: unknown }).error === "string"
-              ? (raw as { error: string }).error
-              : t("loadError");
-          if (!cancelled) setListError(err);
-          return;
-        }
-        const { medias: next, error: parseErr } =
-          parseAdminMediaListFromApiJson(raw);
-        if (parseErr) {
-          if (!cancelled) setListError(parseErr);
-          return;
-        }
-        if (!cancelled) setMedias(next);
-      } catch {
-        if (!cancelled) setListError(t("networkError"));
-      } finally {
-        if (!cancelled) setListLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [t]);
 
   useEffect(() => {
     if (!quoteId || editHydrated || listLoading) return;
@@ -322,13 +289,8 @@ export default function AdminQuoteNewClient({
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return quotePickerMedias;
-    return quotePickerMedias.filter(
-      (m) =>
-        m.name.toLowerCase().includes(q) ||
-        (m.nameEn?.toLowerCase().includes(q) ?? false) ||
-        m.location.toLowerCase().includes(q) ||
-        m.region.toLowerCase().includes(q) ||
-        (m.type?.toLowerCase().includes(q) ?? false),
+    return quotePickerMedias.filter((m) =>
+      matchesAdminMediaDtoTextQuery(m, q),
     );
   }, [quotePickerMedias, search]);
 
