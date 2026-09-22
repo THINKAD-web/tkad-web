@@ -1436,6 +1436,8 @@ model OohContract {
   signerIp            String?   @map("signer_ip")
   signerAgent         String?   @map("signer_agent") @db.Text
   signatureImage      String?   @map("signature_image") @db.Text
+  /// 갑(광고주) 업로드 도장 — 서명 패드와 별도 보관 (PDF 재생성용)
+  clientStampImage    String?   @map("client_stamp_image") @db.Text
   agreementAcceptedAt DateTime? @map("agreement_accepted_at")
 
   documentSha256 String? @map("document_sha256")

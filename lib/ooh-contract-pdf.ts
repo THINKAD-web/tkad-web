@@ -1145,34 +1145,30 @@ function renderKoSignatureBlock(
     partyB.representative,
   );
 
-  /** 대표자 행 — 도장·서명은 이 줄 오른쪽 (인) 위치 */
-  const repRowCenterY =
-    boxTop + 9 + 3 * KO_LAYOUT.sigFieldH + KO_LAYOUT.sigFieldH / 2;
+  /** 텍스트(4행) 아래 박스 하단에 서명·도장 배치 */
   const stampInset = KO_LAYOUT.sigStampInsetMm;
   const stampSize = KO_LAYOUT.sigStampMm;
+  const stampBandCy = boxTop + KO_LAYOUT.sigBoxH - stampSize / 2 - 2.5;
 
   const partyBStampCx = rightX + colW - stampInset;
-  const partyBStampCy = repRowCenterY;
-  drawPartyStamp(doc, fam, options?.stampDataUrl ?? null, partyBStampCx, partyBStampCy);
+  drawPartyStamp(doc, fam, options?.stampDataUrl ?? null, partyBStampCx, stampBandCy);
 
-  const clientStampCx = leftX + colW - stampInset;
-  const clientStampCy = repRowCenterY;
   if (options?.clientStampDataUrl) {
     drawPartyStamp(
       doc,
       fam,
       options.clientStampDataUrl,
-      clientStampCx,
-      clientStampCy,
+      leftX + colW - stampInset,
+      stampBandCy,
     );
   }
 
-  const sigH = 16;
-  const sigW = Math.min(colW - stampInset - stampSize - 8, 44);
+  const sigH = 14;
+  const sigW = Math.min(colW - stampInset - stampSize - 10, 42);
   const sigX = options?.clientStampDataUrl
     ? leftX + colW - stampInset - stampSize - sigW - 3
     : leftX + colW - stampInset - sigW;
-  const sigY = repRowCenterY - sigH / 2;
+  const sigY = stampBandCy - sigH / 2;
 
   if (options?.signaturePngBase64) {
     const ok = embedPngOnPdf(
@@ -1189,7 +1185,7 @@ function renderKoSignatureBlock(
       });
     }
   } else if (!options?.clientStampDataUrl) {
-    drawSignaturePlaceholder(doc, fam, sigX + sigW / 2, repRowCenterY);
+    drawSignaturePlaceholder(doc, fam, sigX + sigW / 2, stampBandCy);
   }
 
   return boxTop + KO_LAYOUT.sigBoxH + 6;
