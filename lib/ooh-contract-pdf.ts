@@ -9,6 +9,7 @@ import {
   OOH_CONTRACT_GENERAL_TERMS_EN,
 } from "@/lib/ooh-contract-display";
 import { resolveQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
+import { computeKoSignatureSealLayout } from "@/lib/ooh-contract-signature-layout";
 import {
   buildOohContractKoTemplate,
   OOH_CONTRACT_PARTY_B_KO,
@@ -1048,16 +1049,14 @@ function drawSignaturePlaceholder(
   });
 }
 
-function drawPartyStamp(
+function drawPartyStampAt(
   doc: import("jspdf").default,
   fam: string,
   stampDataUrl: string | null,
-  cx: number,
-  cy: number,
+  x: number,
+  y: number,
+  stampSize: number,
 ) {
-  const stampSize = KO_LAYOUT.sigStampMm;
-  const x = cx - stampSize / 2;
-  const y = cy - stampSize / 2;
   if (stampDataUrl) {
     const raw = stampDataUrl.includes(",")
       ? stampDataUrl.split(",")[1]!
@@ -1066,6 +1065,8 @@ function drawPartyStamp(
       return;
     }
   }
+  const cx = x + stampSize / 2;
+  const cy = y + stampSize / 2;
   doc.setDrawColor(160, 160, 160);
   doc.setLineWidth(0.4);
   doc.circle(cx, cy, stampSize / 2 - 1);
@@ -1094,7 +1095,9 @@ function renderKoSignatureBlock(
   const colW = (maxW - KO_LAYOUT.sigColGap) / 2;
   const leftX = margin;
   const rightX = margin + colW + KO_LAYOUT.sigColGap;
-  const blockH = KO_LAYOUT.sigBoxH + 14;
+  const estimatedSigBoxH =
+    9 + 4 * KO_LAYOUT.sigFieldH + KO_LAYOUT.sigStampMm + 10;
+  const blockH = estimatedSigBoxH + 14;
 
   let y = ensurePageSpace(doc, yStart, blockH);
   y += KO_LAYOUT.sigBlockTopGap;
@@ -1106,13 +1109,23 @@ function renderKoSignatureBlock(
   });
   y += KO_LAYOUT.sigDateGap;
 
-  y = ensurePageSpace(doc, y, KO_LAYOUT.sigBoxH + 4);
+  y = ensurePageSpace(doc, y, estimatedSigBoxH + 4);
   const boxTop = y;
+  const textEndY = boxTop + 9 + 4 * KO_LAYOUT.sigFieldH;
+  const sealLayout = computeKoSignatureSealLayout({
+    boxTop,
+    leftX,
+    rightX,
+    colW,
+    ly: textEndY,
+    ry: textEndY,
+    hasClientStamp: Boolean(options?.clientStampDataUrl),
+  });
 
   doc.setDrawColor(190, 190, 190);
   doc.setLineWidth(0.3);
-  doc.rect(leftX, boxTop, colW, KO_LAYOUT.sigBoxH);
-  doc.rect(rightX, boxTop, colW, KO_LAYOUT.sigBoxH);
+  doc.rect(leftX, boxTop, colW, sealLayout.sigBoxH);
+  doc.rect(rightX, boxTop, colW, sealLayout.sigBoxH);
 
   drawTextRun(doc, fam, leftX + 3, boxTop + 4, '"갑"', { bold: true, size: 9 });
   drawTextRun(doc, fam, rightX + 3, boxTop + 4, '"을"', { bold: true, size: 9 });
@@ -1145,50 +1158,53 @@ function renderKoSignatureBlock(
     partyB.representative,
   );
 
-  /** 텍스트(4행) 아래 박스 하단에 서명·도장 배치 */
-  const stampInset = KO_LAYOUT.sigStampInsetMm;
   const stampSize = KO_LAYOUT.sigStampMm;
-  const stampBandCy = boxTop + KO_LAYOUT.sigBoxH - stampSize / 2 - 2.5;
-
-  const partyBStampCx = rightX + colW - stampInset;
-  drawPartyStamp(doc, fam, options?.stampDataUrl ?? null, partyBStampCx, stampBandCy);
+  drawPartyStampAt(
+    doc,
+    fam,
+    options?.stampDataUrl ?? null,
+    sealLayout.partyBStamp.x,
+    sealLayout.partyBStamp.y,
+    stampSize,
+  );
 
   if (options?.clientStampDataUrl) {
-    drawPartyStamp(
+    drawPartyStampAt(
       doc,
       fam,
       options.clientStampDataUrl,
-      leftX + colW - stampInset,
-      stampBandCy,
+      sealLayout.partyAStamp.x,
+      sealLayout.partyAStamp.y,
+      stampSize,
     );
   }
 
-  const sigH = 14;
-  const sigW = Math.min(colW - stampInset - stampSize - 10, 42);
-  const sigX = options?.clientStampDataUrl
-    ? leftX + colW - stampInset - stampSize - sigW - 3
-    : leftX + colW - stampInset - sigW;
-  const sigY = stampBandCy - sigH / 2;
+  const { signature: sigRect } = sealLayout;
 
   if (options?.signaturePngBase64) {
     const ok = embedPngOnPdf(
       doc,
       options.signaturePngBase64,
-      sigX,
-      sigY,
-      sigW,
-      sigH,
+      sigRect.x,
+      sigRect.y,
+      sigRect.w,
+      sigRect.h,
     );
     if (!ok) {
-      drawTextRun(doc, fam, leftX + 4, sigY + 10, "(서명 이미지 처리 오류)", {
+      drawTextRun(doc, fam, leftX + 4, sigRect.y + 10, "(서명 이미지 처리 오류)", {
         size: 8,
       });
     }
   } else if (!options?.clientStampDataUrl) {
-    drawSignaturePlaceholder(doc, fam, sigX + sigW / 2, stampBandCy);
+    drawSignaturePlaceholder(
+      doc,
+      fam,
+      sigRect.x + sigRect.w / 2,
+      sigRect.y + sigRect.h / 2,
+    );
   }
 
-  return boxTop + KO_LAYOUT.sigBoxH + 6;
+  return boxTop + sealLayout.sigBoxH + 6;
 }
 
 function wonLabel(n: number): string {
