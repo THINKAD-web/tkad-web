@@ -2878,6 +2878,7 @@
     "contractPreviewUnavailable": "Contract PDF preview is available after booking is confirmed.",
     "contractResendInvite": "Resend signature link",
     "contractResendInviteOk": "Signature link sent again.",
+    "contractInviteEmailSkipped": "Email is not configured or delivery failed. Check Resend and the recipient address, then resend.",
     "contractResendInviteFail": "Could not resend the link.",
     "contractResendInviteNoEmail": "No customer email — cannot resend.",
     "contractResendInviteNotPending": "Resend is only available while awaiting signature.",

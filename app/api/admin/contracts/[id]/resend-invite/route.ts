@@ -37,6 +37,8 @@ export async function POST(request: NextRequest, { params }: Params) {
       quoteId: result.quoteId,
       emailed: result.emailed,
       inviteLog: result.inviteLog,
+      emailSkipReason: result.emailSkipReason,
+      emailDetail: result.emailDetail,
     });
   } catch (e) {
     if (e instanceof StandaloneContractSendError) {

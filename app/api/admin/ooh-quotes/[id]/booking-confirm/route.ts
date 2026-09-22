@@ -68,7 +68,7 @@ export async function PATCH(
     const to = row.clientEmail?.trim();
     if (to && contractRow) {
       const locale = row.locale === "en" ? "en" : "ko";
-      await sendContractInviteEmail({
+      const inviteEmail = await sendContractInviteEmail({
         to,
         clientName: row.clientName,
         locale,
@@ -76,19 +76,21 @@ export async function PATCH(
         variant: "booking_confirmed",
       });
 
-      const entry: ContractInviteSendEntry = {
-        sentAt: new Date().toISOString(),
-        to,
-        kind: "initial",
-      };
-      const inviteLog = appendContractInviteSendLog(
-        contractRow.inviteSendLog,
-        entry,
-      );
-      await db.oohContract.update({
-        where: { id: contractRow.id },
-        data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
-      });
+      if (inviteEmail.sent) {
+        const entry: ContractInviteSendEntry = {
+          sentAt: new Date().toISOString(),
+          to,
+          kind: "initial",
+        };
+        const inviteLog = appendContractInviteSendLog(
+          contractRow.inviteSendLog,
+          entry,
+        );
+        await db.oohContract.update({
+          where: { id: contractRow.id },
+          data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
+        });
+      }
     }
 
     return json({ ok: true, status: updated.status, forced: force });
