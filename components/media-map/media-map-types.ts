@@ -16,6 +16,12 @@ export type MapMapItem = {
   /** DB 대표가 — 지도 카드/핀 CPM SSOT */
   catalogPrice: number;
   catalogPricePeriod: string;
+  /** 목록·홈과 동일 — CPM 분자 SSOT */
+  productPriceWon?: number | null;
+  productPriceDays?: number | null;
+  engineDailyImpressions?: number | null;
+  impressionModelVersion?: string | null;
+  monthlyFootTraffic?: number | null;
   createdAt: string | null;
   lat: number;
   lng: number;

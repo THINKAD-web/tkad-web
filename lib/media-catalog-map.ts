@@ -135,6 +135,9 @@ export function mapMapItemToHomeCatalog(
     pricePeriod: normalizeMediaPricePeriod(item.pricePeriod),
     catalogPrice: item.catalogPrice > 0 ? item.catalogPrice : undefined,
     catalogPricePeriod: normalizeMediaPricePeriod(item.catalogPricePeriod),
+    productPriceWon: item.productPriceWon ?? undefined,
+    productPriceDays: item.productPriceDays ?? undefined,
+    monthlyFootTraffic: item.monthlyFootTraffic ?? undefined,
     thumbnailUrl: resolveCatalogImageSrc(item.image)?.src ?? undefined,
     visibilityScore:
       item.visibilityScore > 0 ? item.visibilityScore : undefined,

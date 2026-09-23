@@ -5,15 +5,14 @@ import {
 } from "@/lib/media-map/map-display-mode";
 import { mediaItemIntersectsMapBounds } from "@/lib/media-detail-map-markers";
 import { getPublicMediaMapCatalogCached } from "@/lib/public-media-map-catalog-cache";
-import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
-import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
+import { serializeMapApiItemFromMediaItem } from "@/lib/media-map/serialize-map-api-item";
 import { filterMediaByDiscoveryChips } from "@/lib/media-discovery-client-filter";
 import {
   sortMapCatalogItems,
   type MapCatalogFilterParams,
 } from "@/lib/public-media-map-filter";
 import { applyMapPinResponseLimit } from "@/lib/media-map/map-pin-response-limit";
-import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
+import type { MediaItem } from "@/lib/media-data";
 import type { PublicMediaSort } from "@/lib/public-media-query";
 import { apiOk, apiServerError } from "@/lib/api-response";
 
@@ -75,56 +74,6 @@ function itemIncludedInMapList(
   }
 
   return true;
-}
-
-function toMapItem(
-  m: MediaItem,
-  mapDisplayMode: MapDisplayMode,
-  serviceRegionLabel: string | undefined,
-) {
-  const display = resolveMediaDisplayPrice(m);
-  return {
-    id: m.id,
-    name: m.name,
-    location: m.location,
-    region: m.region,
-    city: m.city ?? null,
-    district: m.district ?? null,
-    type: m.type,
-    subCategory: m.subCategory ?? null,
-    price: display.priceWon,
-    pricePeriod: display.period,
-    catalogPrice: m.price,
-    catalogPricePeriod: m.pricePeriod,
-    createdAt: m.createdAt ?? null,
-    lat: m.lat,
-    lng: m.lng,
-    image: getPrimaryMediaImageUrl(m),
-    availability: m.availability ?? null,
-    visibilityScore: m.visibilityScore ?? 0,
-    dailyFootTraffic: m.dailyFootTraffic ?? null,
-    impressions: m.impressions ?? null,
-    cpm: m.cpm ?? null,
-    isVerified: m.isVerified === true,
-    isInstantBooking: isInstantBookingEligible({
-      instantBookingEnabled: m.instantBookingEnabled ?? false,
-      availability: m.availability,
-      catalogSource: m.catalogSource,
-    }).eligible,
-    installLocations: m.installLocations?.length
-      ? m.installLocations.map((p) => ({
-          label: p.label,
-          lat: p.lat,
-          lng: p.lng,
-        }))
-      : undefined,
-    mapDisplayMode,
-    serviceRegionLabel: serviceRegionLabel ?? null,
-    /** @deprecated `mapDisplayMode === "location_unknown"` 사용 */
-    locationUnknown: mapDisplayMode === "location_unknown",
-    coverageDistrictCodes:
-      m.coverageDistrictCodes?.length ? [...m.coverageDistrictCodes] : undefined,
-  };
 }
 
 export async function GET(req: Request) {
@@ -222,7 +171,11 @@ export async function GET(req: Request) {
     const items = limitedCatalog.map((m) => {
       const mapDisplayMode = resolveMapDisplayMode(m);
       const serviceRegionLabel = resolveServiceRegionLabel(m);
-      return toMapItem(m, mapDisplayMode, serviceRegionLabel);
+      return serializeMapApiItemFromMediaItem(
+        m,
+        mapDisplayMode,
+        serviceRegionLabel,
+      );
     });
 
     return apiOk({
