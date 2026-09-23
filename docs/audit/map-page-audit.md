@@ -764,14 +764,33 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 
 ### Lighthouse 모바일 (Preview `/ko/media/map`, simulated, 3회 중앙값)
 
-측정일 **2026-09-23** (`scripts/lighthouse-map-runs.mjs`). **Before** = 배치 2 종료 시점 `main` Preview 중앙값(위 표). **After** = 배치 3 전 PR 머지 후 `main` Preview (`3ce3b407` 배포).
+측정일 **2026-09-23** (`scripts/lighthouse-map-runs.mjs`).
 
-| Metric | Before (배치 2 end) | After (배치 3) | 1차 목표 (8 s LCP) |
-|--------|---------------------|----------------|---------------------|
+#### A. 초기 비교 (혼선 있음 — `git-main` Preview 단일 URL)
+
+**Before** = 배치 2 종료 시점 `main` Preview 중앙값(위 배치 2 표). **After** = 배치 3 머지 직후 같은 `git-main` Preview.
+
+| Metric | Before (배치 2 end) | After (`git-main` Preview) | 1차 목표 (8 s LCP) |
+|--------|---------------------|----------------------------|---------------------|
 | FCP | 1.7 s | 2.2 s | — |
-| **LCP** | **15.0 s** | **17.4 s** | **미달** (목표 8 s, Δ 개선 아님 — run 편차 16.5 / 17.4 / 26.4 s) |
+| **LCP** | **15.0 s** | **17.4 s** (재측정 **~26.8 s**) | **미달** · **코드 회귀로 단정 불가** (아래 bisect) |
 | TBT | 1,503 ms | 1,462 ms | 소폭 (~40 ms) |
 | INP | lab N/A | lab N/A | — |
+
+`git-main` Preview는 배치 3 직후 **LCP 25–27 s대로 반복**되며 LCP 타일 URL이 **OSM**(`b.tile.openstreetmap.org`)으로 잡힘. PR Preview(#667–671)는 **~14–16 s**·**VWorld** 타일 — **측정 URL·배포/env(VWorld 키) 불일치** 가능성.
+
+#### B. Bisect (머지 커밋별 **해당 PR Preview URL**, 3회 중앙값)
+
+| 단계 | Preview (고정 URL) | LCP median | LCP 3 runs (s) | TBT median |
+|------|-------------------|------------|----------------|------------|
+| `#667` (`24041506`, PR-7만) | feat-map-batch3-pr7 | **15.7 s** | 14.3, 16.1, 15.7 | 1,390 ms |
+| `#670` (+ PR-8) | feat-map-batch3-pr8 | **14.8 s** | 14.8, 14.5, 16.9 | 1,267 ms |
+| `#671` (+ PR-9) | feat-map-batch3-pr9 | **14.6 s** | 14.6, 16.4, 14.6 | 1,353 ms |
+| `git-main` (동일 코드, alias) | git-main | **25.8–26.8 s** | 16.3–27.6 (편차 큼) | ~1,500 ms |
+
+**결론 (2026-09-23 bisect):** **PR-8 `prefetchMapBasemapChunk`로 LCP 역행이 재현되지 않음** — PR-7→8→9 Preview에서 LCP는 **~15.7 → 14.8 → 14.6 s** (목표 8 s 미달이지만 **단계별 악화 아님**). “15→17.4 s 역행”은 **`git-main` Preview alias 측정**과 bisect 불일치 → **PR-8 롤백 근거 없음**. 우선 **`git-main` vs PR Preview 환경**(VWorld 키·타일 fallback·cold start) 정렬 후 재측정.
+
+**PR-8 경합 가설:** bisect상 prefetch 추가 후 TBT·LCP median **소폭 개선** — 대역폭 경합으로 전체 지연 가설은 **기각(이번 샘플)**.
 
 **LCP element (After):** 여전히 `img.leaflet-tile` (OSM fallback 타일 URL in lab). **LCP 후보가 SSR placeholder(스피너/문구)로 바뀌지 않음** — 측정 트릭 회피 의도대로.
 
