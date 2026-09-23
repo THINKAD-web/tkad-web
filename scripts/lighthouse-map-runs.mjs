@@ -52,7 +52,11 @@ function pickAudits(lhr) {
   const breakdownMap = Object.fromEntries(
     breakdown.map((x) => [x.subpart, x.duration]),
   );
-  const discovery = a["lcp-discovery-insight"]?.details?.items ?? {};
+  const discoveryRoot = a["lcp-discovery-insight"]?.details?.items ?? [];
+  const checklist =
+    discoveryRoot.find((x) => x.type === "checklist")?.items ??
+    discoveryRoot.items ??
+    {};
   return {
     fcpMs: a["first-contentful-paint"]?.numericValue,
     lcpMs: a["largest-contentful-paint"]?.numericValue,
@@ -63,8 +67,8 @@ function pickAudits(lhr) {
     lcpElementRenderDelayMs: breakdownMap.elementRenderDelay,
     lcpElement: pickLcpElementHint(lhr),
     lcpDiscovery: {
-      requestDiscoverable: discovery.requestDiscoverable?.value ?? null,
-      priorityHinted: discovery.priorityHinted?.value ?? null,
+      requestDiscoverable: checklist.requestDiscoverable?.value ?? null,
+      priorityHinted: checklist.priorityHinted?.value ?? null,
     },
   };
 }

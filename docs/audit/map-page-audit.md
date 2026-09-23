@@ -754,4 +754,35 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 
 ---
 
-*Phase 0 시점에는 코드를 변경하지 않았다. 배치 2(#663·#664) 머지 후 §28·§30 관련 항목은 위 기록과 PR 본문을 기준으로 갱신한다.*
+## Phase 1 배치 3 — LCP·타일 로딩 (머지·측정 기록)
+
+| PR | 내용 | 머지 (UTC) | merge commit |
+|---|---|---|---|
+| [#667](https://github.com/THINKAD-web/tkad-web/pull/667) | PR-7 타일 호스트 `preconnect` / `dns-prefetch` | 2026-09-23T04:12:26Z | `24041506` |
+| [#670](https://github.com/THINKAD-web/tkad-web/pull/670) | PR-8 basemap 청크 `import()` prefetch (#668 대체) | 2026-09-23T04:17:21Z | `b36aeb8b` |
+| [#671](https://github.com/THINKAD-web/tkad-web/pull/671) | PR-9 SSR viewport placeholder · `tkad-map-basemap-tiles` mark (#669 대체) | 2026-09-23T04:20:55Z | `3ce3b407` |
+
+### Lighthouse 모바일 (Preview `/ko/media/map`, simulated, 3회 중앙값)
+
+측정일 **2026-09-23** (`scripts/lighthouse-map-runs.mjs`). **Before** = 배치 2 종료 시점 `main` Preview 중앙값(위 표). **After** = 배치 3 전 PR 머지 후 `main` Preview (`3ce3b407` 배포).
+
+| Metric | Before (배치 2 end) | After (배치 3) | 1차 목표 (8 s LCP) |
+|--------|---------------------|----------------|---------------------|
+| FCP | 1.7 s | 2.2 s | — |
+| **LCP** | **15.0 s** | **17.4 s** | **미달** (목표 8 s, Δ 개선 아님 — run 편차 16.5 / 17.4 / 26.4 s) |
+| TBT | 1,503 ms | 1,462 ms | 소폭 (~40 ms) |
+| INP | lab N/A | lab N/A | — |
+
+**LCP element (After):** 여전히 `img.leaflet-tile` (OSM fallback 타일 URL in lab). **LCP 후보가 SSR placeholder(스피너/문구)로 바뀌지 않음** — 측정 트릭 회피 의도대로.
+
+**`lcp-discovery-insight` (After, median run):** `requestDiscoverable: false`, `fetchpriority=high` 미적용 — PR-7·8만으로는 initial document discoverable 전환 **실패**.
+
+**`lcp-breakdown` (After, median run):** TTFB ~34 ms · resource load delay ~1,929 ms · tile load ~44 ms — 병목은 여전히 **클라이언트 체인 이후 타일 discover** 구간.
+
+**체감 vs Lighthouse:** `tkad-map-basemap-tiles` perf mark(첫 Leaflet `tileload`)는 Lighthouse와 별도 — DevTools Performance에서 `tkad-map-basemap-tiles-duration` vs LCP 시각을 대조할 것. **LCP만 개선되고 타일 mark가 그대로면** placeholder가 숫자만 좋게 만든 것.
+
+**다음 후보:** 타일 discoverable 경로(초기 HTML 힌트 한계), 지도 번들/Leaflet init 분리, `tkad-map-basemap-tiles` GA 전송, GA4 이탈·체류(배치 3 전/후 1주).
+
+---
+
+*Phase 0 시점에는 코드를 변경하지 않았다. 배치 2·3 머지 후 §28·§30·§4 는 위 기록과 PR 본문을 기준으로 갱신한다.*
