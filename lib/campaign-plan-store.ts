@@ -16,6 +16,13 @@ import {
   unpackCampaignPlanBriefJson,
 } from "@/lib/campaign-plan-report-copy";
 import type { PlannerReportCopyState } from "@/lib/planner-report-export/report-copy-state";
+import {
+  countCampaignPlanMedia,
+  resolveCampaignPlanGoalTitle,
+  resolveCampaignPlanListTitle,
+  resolveCampaignPlanRegionsText,
+  type CampaignPlanListItem,
+} from "@/lib/campaign-plan-list-item";
 
 export type SavedCampaignPlan = {
   id: string;
@@ -79,6 +86,60 @@ export async function createCampaignPlan(params: {
     createdAt: row.createdAt.toISOString(),
     expiresAt: row.expiresAt?.toISOString() ?? null,
   };
+}
+
+const CAMPAIGN_PLAN_LIST_MAX = 50;
+
+export async function listCampaignPlansForOwner(params: {
+  ownerId: string;
+  isKo: boolean;
+  take?: number;
+}): Promise<CampaignPlanListItem[]> {
+  const take = Math.min(params.take ?? CAMPAIGN_PLAN_LIST_MAX, CAMPAIGN_PLAN_LIST_MAX);
+  const now = new Date();
+  const rows = await prisma.campaignPlan.findMany({
+    where: {
+      ownerId: params.ownerId,
+      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+    },
+    orderBy: { createdAt: "desc" },
+    take,
+    select: {
+      id: true,
+      brief: true,
+      mediaMix: true,
+      metrics: true,
+      engineVersion: true,
+      createdAt: true,
+      expiresAt: true,
+    },
+  });
+
+  return rows.map((row) => {
+    const unpacked = unpackCampaignPlanBriefJson(row.brief);
+    const mediaMix = normalizeMediaMix(row.mediaMix);
+    const metrics = row.metrics as SavedCampaignPlan["metrics"];
+    const createdAt = row.createdAt.toISOString();
+    return {
+      id: row.id,
+      title: resolveCampaignPlanListTitle({
+        brief: unpacked.brief,
+        reportCopy: unpacked.reportCopy,
+        isKo: params.isKo,
+        createdAt,
+      }),
+      goalTitle: resolveCampaignPlanGoalTitle(unpacked.brief.goal, params.isKo),
+      regionsText: resolveCampaignPlanRegionsText(unpacked.brief),
+      mediaCount: countCampaignPlanMedia(mediaMix, unpacked.onlineRecommend),
+      totalCostWon: metrics.totalCostWon,
+      budgetWon: unpacked.brief.budgetWon,
+      flightStart: unpacked.brief.flightStart,
+      flightEnd: unpacked.brief.flightEnd,
+      createdAt,
+      expiresAt: row.expiresAt?.toISOString() ?? null,
+      engineVersion: row.engineVersion,
+    };
+  });
 }
 
 export async function getCampaignPlanById(

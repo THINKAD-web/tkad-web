@@ -314,6 +314,7 @@
   "planNav": {
     "cart": "Selected media",
     "saved": "Plan snapshots",
+    "campaigns": "Saved plans",
     "plannerResults": "Planner & proposals",
     "newPlan": "New plan",
     "legacyMigrateSuccess": "Moved {count} item(s) from the old quote cart to selected media.",

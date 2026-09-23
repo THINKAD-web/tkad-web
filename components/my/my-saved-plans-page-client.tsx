@@ -152,6 +152,25 @@ export function MySavedPlansPageClient() {
               ? "저장 스냅샷을 불러오거나 삭제할 수 있습니다. 사례·커뮤니티 활용 후보로 표시하면 운영팀이 검토합니다."
               : "Restore or delete plan snapshots. Mark as case/community candidate for admin review."}
           </p>
+          <p className="mt-2 text-xs text-gray-500 dark:text-white/45">
+            {isKo ? (
+              <>
+                브리프에서 저장한 캠페인 설계는{" "}
+                <Link href="/my/plan/campaigns" className="font-semibold text-[color:var(--qp-accent)]">
+                  {tPlan("campaigns")}
+                </Link>
+                에서 확인하세요.
+              </>
+            ) : (
+              <>
+                Brief wizard saves are listed under{" "}
+                <Link href="/my/plan/campaigns" className="font-semibold text-[color:var(--qp-accent)]">
+                  {tPlan("campaigns")}
+                </Link>
+                .
+              </>
+            )}
+          </p>
 
           {loading ? (
             <div className="mt-12 flex justify-center text-gray-500 dark:text-white/55">
