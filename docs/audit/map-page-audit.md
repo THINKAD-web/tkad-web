@@ -874,7 +874,7 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 
 - **Lab LCP 8 s** 단독 go/no-go는 **실사용자 CWV와 어긋날 수 있음** — field·GA4/CrUX·`tkad-map-basemap-tiles`를 SSOT 후보로 재설정.
 - **Carto 키**는 lab LCP가 아니라 **다크 basemap 품질(OSM 폴백 vs Carto)** · GA4 `user_properties.theme` dark 비중으로 판단.
-- **코드 후보:** LCP element **기록** → map 경로만 샘플링해 lab(타일) vs field 후보 **대조 가능하게** 만드는 것이 “타일 discoverable” 미세 튜닝보다 선행.
+- **코드 후보:** LCP element **기록** → map 경로만 샘플링해 lab(타일) vs field 후보 **대조 가능하게** 만드는 것이 “타일 discoverable” 미세 튜닝보다 선행. (후속 PR: `web-vitals/attribution` → `/api/vitals` · 배치 4 우선순위는 낮음.)
 
 **GA4 `theme`:** Explore(`G-5QB3QMT01B`, User property `theme`) — 에이전트 세션에서는 Google 재인증으로 **비율 미확인**. 운영자 Explore 결과로 dark ≥~20% 여부 확정 후 Carto 등록 여부 결정.
 
