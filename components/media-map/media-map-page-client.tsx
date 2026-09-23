@@ -58,7 +58,6 @@ import {
   MediaMapListSheet,
   type MediaMapSheetSnap,
 } from "@/components/media-map/media-map-list-sheet";
-import { MapChunkPrefetch } from "@/components/media-map/map-chunk-prefetch";
 import { MapOnboardingCoachmark } from "@/components/media-map/map-onboarding-coachmark";
 import {
   hasSeenMapOnboarding,
@@ -1430,7 +1429,6 @@ export default function MediaMapPageClient() {
 
   return (
     <div className="tkad-media-app-shell tkad-media-map-shell relative flex w-full min-w-0 flex-col bg-gray-50 dark:bg-[#020202]">
-      <MapChunkPrefetch />
       {/* 상단(flex-none): 단일 반응형 컨트롤 바 (항상 고정) */}
       <div
         className={cn(
