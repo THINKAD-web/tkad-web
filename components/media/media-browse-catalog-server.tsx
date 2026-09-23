@@ -8,6 +8,7 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 import { getTranslations } from "next-intl/server";
+import { resolveMediaDisplayName } from "@/lib/media-i18n";
 
 type Props = {
   catalog: MediaItem[];
@@ -44,7 +45,7 @@ export async function MediaBrowseCatalogServer({
         </h2>
         <ul className="flex flex-col gap-2">
           {items.map((media, index) => {
-            const name = isKo ? media.name : media.nameEn || media.name;
+            const name = resolveMediaDisplayName(media, locale);
             const location = isKo
               ? media.location
               : media.locationEn || media.location;

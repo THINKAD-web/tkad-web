@@ -18,6 +18,7 @@ import {
 } from "@/components/media-catalog-shared";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { resolveMediaDisplayName } from "@/lib/media-i18n";
 
 type Props = {
   media: MediaItem;
@@ -51,8 +52,14 @@ export function MediaCatalogCompactLinkRow({
   className,
 }: Props) {
   const tMedia = useTranslations("media");
-  const useKo =
-    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
+  const textLocale =
+    locale != null
+      ? locale.split("-")[0]
+      : isKo ?? true
+        ? "ko"
+        : "en";
+  const useKo = textLocale === "ko";
+  const displayName = resolveMediaDisplayName(media, textLocale);
   const cheapest = getCheapestMediaPriceOption(media);
   const priceWon = cheapest?.priceWon ?? media.price;
   const displayPeriod = cheapest?.period ?? media.pricePeriod;
@@ -65,7 +72,7 @@ export function MediaCatalogCompactLinkRow({
   return (
     <Link
       href={href}
-      aria-label={useKo ? media.name : (media.nameEn || media.name)}
+      aria-label={displayName}
       className={cn(
         MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
         "group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
@@ -103,11 +110,11 @@ export function MediaCatalogCompactLinkRow({
           ) : null}
         </div>
         <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug tracking-tight text-card-foreground sm:line-clamp-1 sm:text-sm">
-          {useKo ? media.name : (media.nameEn || media.name)}
+          {displayName}
         </p>
         <p className="line-clamp-2 min-w-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground sm:line-clamp-1">
           {`// `}
-          {formatMediaLocationShort(media, useKo)}
+          {formatMediaLocationShort(media, textLocale)}
         </p>
         <p className="min-w-0 shrink-0 break-words font-display text-[13px] font-bold tabular-nums leading-tight text-card-foreground sm:text-sm">
           {formatMediaPriceWonWithSymbol(priceWon)}

@@ -1,7 +1,10 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+import {
+  normalizeMediaDetailTextLocale,
+  resolveMediaDisplayName,
+} from "@/lib/media-i18n";
 
 import { forwardRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
@@ -34,6 +37,21 @@ import type {
   DiscoveryMediaCardCatalogProps,
   DiscoveryMediaCardMapProps,
 } from "@/components/discovery/media-card-types";
+
+function localizedCatalogName(
+  item: HomeCatalogMediaItem,
+  locale: string,
+): string {
+  return resolveMediaDisplayName(
+    {
+      name: item.name,
+      nameEn: item.nameEn,
+      location: item.location ?? "",
+      translations: item.translations,
+    },
+    locale,
+  );
+}
 
 type CompactRowProps = Pick<
   DiscoveryMediaCardCatalogProps,
@@ -68,6 +86,7 @@ export function DiscoveryMediaCardCompactRow({
 }: CompactRowProps) {
   const locale = useLocale();
   const tPlan = useTranslations("planCart");
+  const displayName = localizedCatalogName(item, locale);
   const rowLink = (
     <>
       <div className="relative h-11 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
@@ -112,7 +131,7 @@ export function DiscoveryMediaCardCompactRow({
       </div>
 
       <div className="min-w-0 flex-1 leading-tight">
-        <p className="tkad-type-title truncate text-foreground">{item.name}</p>
+        <p className="tkad-type-title truncate text-foreground">{displayName}</p>
         {metaLine ? (
           <p className="tkad-type-meta truncate text-tkad-muted">
             {metaLine}
@@ -277,7 +296,7 @@ export function DiscoveryMediaCardCompactGrid({
       </div>
       <div className="flex min-h-0 flex-1 flex-col p-3">
         <p className="tkad-type-title line-clamp-2 leading-snug text-foreground">
-          {item.name}
+          {model.name}
         </p>
         <p className="tkad-type-meta mt-1 line-clamp-1 text-tkad-muted">
           {[item.region, item.type].filter(Boolean).join(" · ") || "\u00a0"}
@@ -581,7 +600,7 @@ export function DiscoveryMediaCardCatalogTile({
         </span>
       ) : null}
       <p className="tkad-type-title line-clamp-2 leading-snug text-foreground">
-        {item.name}
+        {model.name}
       </p>
       {locationLine ? (
         <p className="tkad-type-meta mt-0.5 line-clamp-1 text-gray-600 dark:text-white/72">

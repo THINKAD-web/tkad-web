@@ -25,6 +25,7 @@ import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { pickTrustBadgesForThumbnail } from "@/lib/media-trust";
 import type { AvailabilityTier } from "@/lib/media-availability-stats";
 import { trackGaEvent } from "@/lib/ga-events";
+import { resolveMediaDisplayName } from "@/lib/media-i18n";
 
 /**
  * 매체 검색 그리드 카드 (리스트/비교/견적 공통).
@@ -71,8 +72,14 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const router = useRouter();
   const tMedia = useTranslations("media");
   const { media, locale, isKo, imagePreparingLabel, popularIds } = props;
-  const useKo =
-    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
+  const textLocale =
+    locale != null
+      ? locale.split("-")[0]
+      : isKo ?? true
+        ? "ko"
+        : "en";
+  const useKo = textLocale === "ko";
+  const displayName = resolveMediaDisplayName(media, textLocale);
   const denseMobile = props.denseMobile ?? false;
   // priceMan 명시(예: 네트워크 패키지 월 환산) 가 우선.
   // 없으면 priceOptions + price 중 *가장 저렴한* 옵션을 표시.
@@ -182,7 +189,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
             denseMobile ? "text-sm sm:text-lg" : "text-base sm:text-lg",
           )}
         >
-          {useKo ? media.name : (media.nameEn || media.name)}
+          {displayName}
         </h3>
         <p
           className={cn(
@@ -190,7 +197,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
             denseMobile ? "text-[11px] sm:text-sm" : "text-sm",
           )}
         >
-          {formatMediaLocationShort(media, useKo)}
+          {formatMediaLocationShort(media, textLocale)}
         </p>
         <MediaRatingBadge
           averageRating={media.averageRating}
@@ -245,7 +252,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
     return (
       <Link
         href={mediaItemDetailPath(media)}
-        aria-label={useKo ? media.name : (media.nameEn || media.name)}
+        aria-label={displayName}
         className={wrapClass}
         onClick={() =>
           trackGaEvent("media_click", {

@@ -18,6 +18,7 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { pickTrustBadgesForThumbnail } from "@/lib/media-trust";
 import { useTranslations } from "next-intl";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
+import { resolveMediaDisplayName } from "@/lib/media-i18n";
 
 type Props = {
   media: MediaItem;
@@ -38,8 +39,14 @@ export function MediaCatalogListCard({
   className,
 }: Props) {
   const tMedia = useTranslations("media");
-  const useKo =
-    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
+  const textLocale =
+    locale != null
+      ? locale.split("-")[0]
+      : isKo ?? true
+        ? "ko"
+        : "en";
+  const useKo = textLocale === "ko";
+  const displayName = resolveMediaDisplayName(media, textLocale);
   const cheapest = getCheapestMediaPriceOption(media);
   const priceWon = cheapest?.priceWon ?? media.price;
   const displayPeriod = cheapest?.period ?? media.pricePeriod;
@@ -55,7 +62,7 @@ export function MediaCatalogListCard({
   const networkSites = media.networkTotalLocations ?? 0;
   const networkPerUnit = media.networkPricePerUnit ?? null;
 
-  const location = formatMediaLocationShort(media, useKo);
+  const location = formatMediaLocationShort(media, textLocale);
   const hasRating =
     media.reviewCount != null &&
     media.reviewCount > 0 &&
@@ -106,7 +113,7 @@ export function MediaCatalogListCard({
                 {useKo ? "네트워크" : "Network"}
               </span>
             ) : null}
-            {useKo ? media.name : (media.nameEn || media.name)}
+            {displayName}
           </h3>
           <p className="line-clamp-1 text-xs text-gray-500 dark:text-white/50">
             {isNetwork && networkSites > 0

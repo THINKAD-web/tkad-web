@@ -1,10 +1,13 @@
 import type { CatalogChannel } from "@/lib/catalog-channel";
 import type { MediaOnlineSpecView, MediaPricePeriodKey } from "@/lib/media-data";
+import type { MediaTranslationRow } from "@/lib/media-i18n";
 
 export type HomeCatalogMediaItem = {
   id: string;
   slug?: string;
   name: string;
+  nameEn?: string;
+  translations?: MediaTranslationRow[];
   /** PR3 — browse plan-cart online gate (`lib/pricing-unavailable.ts`) */
   catalogChannel?: CatalogChannel;
   /** Online budget seed for plan cart — list DTO parity (PR5-b) */

@@ -9,6 +9,7 @@ import {
 import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
 import type { MediaHotspotTag } from "@/lib/matching/region-hotspot";
 import type { MediaTrustBadge } from "@/lib/media-trust";
+import type { MediaTranslationRow } from "@/lib/media-i18n";
 
 /** Slim price option — enough for list-card cheapest-price logic */
 export type MediaCatalogListPriceOption = Pick<
@@ -25,6 +26,7 @@ export type MediaCatalogListItem = {
   slug?: string;
   name: string;
   nameEn: string;
+  translations?: MediaTranslationRow[];
   type: string;
   location: string;
   locationEn: string;
@@ -82,6 +84,7 @@ export const MEDIA_CATALOG_LIST_ITEM_KEYS = [
   "slug",
   "name",
   "nameEn",
+  "translations",
   "type",
   "location",
   "locationEn",
@@ -158,6 +161,7 @@ export function mediaItemToCatalogListItem(item: MediaItem): MediaCatalogListIte
     slug: item.slug,
     name: item.name,
     nameEn: item.nameEn || item.name,
+    translations: item.translations?.length ? item.translations : undefined,
     type: item.type,
     location: item.location,
     locationEn: item.locationEn || item.location,
@@ -227,6 +231,7 @@ export function catalogListItemToMediaItem(
     slug: item.slug,
     name: item.name,
     nameEn: item.nameEn,
+    translations: item.translations,
     location: item.location,
     locationEn: item.locationEn,
     region: item.region,

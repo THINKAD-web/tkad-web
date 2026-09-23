@@ -175,3 +175,34 @@ export function resolveSuccessCaseSummary(
 ): string {
   return resolveMediaText({ locale, ko: item.summaryKo, en: undefined });
 }
+
+/**
+ * Detail overview accordion — long-form copy first, then DB description with PR3 fallback.
+ * ja/zh must not use `catalogDescriptionEn` (often Korean when `descriptionEn` is empty).
+ */
+export function resolveMediaOverviewBody(
+  media: MediaTextSource & {
+    catalogDescription?: string | null;
+    catalogDescriptionEn?: string | null;
+    longDescriptionKo?: string | null;
+    longDescriptionEn?: string | null;
+    descriptionEn?: string | null;
+  },
+  locale: string,
+): string {
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  const long =
+    bucket === "ko"
+      ? media.longDescriptionKo?.trim()
+      : media.longDescriptionEn?.trim();
+  if (long) return long;
+  if (bucket === "ko") {
+    const cat = media.catalogDescription?.trim();
+    if (cat) return cat;
+  }
+  if (bucket === "en") {
+    const en = media.descriptionEn?.trim();
+    if (en) return en;
+  }
+  return resolveMediaField(locale, "description", media).trim();
+}
