@@ -803,9 +803,25 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 - **PR branch Preview:** 빌드 시 VWorld 인라인 → 라이트에서 **VWorld WMTS** → Lab LCP **~14–16 s**.
 - **타일 호스트만의 격차 (동일 배치 3 코드 아님, 호스트 비교):** Production [`tkad.co.kr`](https://tkad.co.kr/ko/media/map) 3회 중앙값 **LCP 25.5 s** (OSM) vs bisect `#671` Preview **14.6 s** (VWorld) — **~11 s** lab 차이. **VWorld 운영키 등록(코드 0)이 PR-7~9 미세 최적화보다 LCP 레버가 클 수 있음** — GA4 `theme`·운영키 정책과 함께 배치 4 우선순위 재검토.
 
-**env 정렬 후 재측정 (TODO):** Production에 VWorld 운영키 추가 → Production 재배포 → `git-main`/`tkad.co.kr`에서 LCP 타일이 VWorld인지 확인 → 동일 URL로 배치 3 전/후·bisect 재실행. **정렬 전까지** “배치 2 end 15 s vs 배치 3 git-main 26 s” **코드 회귀 판정 금지**.
+#### D. Production VWorld env 정렬 후 재측정 (2026-09-23)
 
-**동일 Preview env에서 배치 3 코드 판정 (현재 가능한 최선):** bisect B표 — **소폭 개선(15.7→14.6 s), 8 s 목표 미달**.
+- **운영:** `NEXT_PUBLIC_VWORLD_API_KEY` → Vercel **Production** 추가 · `vercel deploy --prod` · `git-main` alias가 구 배포에 남아 있던 문제 → 최신 Production(`dpl_2eJe…`)으로 **alias 수동 정렬** (`tkad.co.kr`과 동일 HTML `data-dpl-id` 확인).
+- **VWorld 도메인:** Preview 빌드 타일 URL + `Referer: https://tkad.co.kr/…` → **PNG 200** (콘솔 미등록 403 시나리오는 이번 키·도메인 조합에서 재현 안 됨).
+
+| URL | LCP 3 runs (s) | LCP median | LCP 타일 (lab) | TBT median |
+|-----|----------------|------------|----------------|------------|
+| `tkad.co.kr` (정렬 후) | 15.9, 25.5, 16.3 | **16.3 s** | **VWorld** (3/3) | ~1,645 ms |
+| `git-main` alias (정렬 **후**) | 17.8, 26.9, 25.0 | **25.0 s** | **VWorld** (median run) | ~1,659 ms |
+| `git-main` (정렬 **전**, OSM 빌드) | — | **~25.5 s** | OSM | ~1,595 ms |
+| bisect `#671` Preview (참고) | 14.6, 16.4, 14.6 | **14.6 s** | VWorld | ~1,353 ms |
+
+**해석:** env 정렬으로 Production lab LCP 타일은 **OSM → VWorld** 전환 확인. **OSM ~25 s → VWorld ~16 s대**로 내려가 bisect Preview(~15 s)와 **같은 호스트·같은 코드** 기준으로 근접 — **배치 3 “git-main 26 s 역행”은 코드 회귀가 아님**. run 간 **15 s / 25 s 이원 편차**는 동일 배포에서도 재현(lab·cold start) → 단일 중앙값만으로 배치 4 go/no-go 금지.
+
+**배치 3 코드 효과 (Production + VWorld, 정렬 후):** Preview bisect와 방향 일치 — **미세 개선 수준, LCP 8 s 목표 미달**. Carto Production 키·다크 사용자는 GA4 `user_properties.theme` 확인 후 별도.
+
+**정렬 전** “배치 2 end 15 s vs 배치 3 git-main 26 s” **코드 회귀 판정 금지** (§C confound).
+
+**동일 Preview env에서 배치 3 코드 판정 (bisect B):** **15.7 → 14.6 s**, 8 s 미달.
 
 **PR-8 경합 가설:** bisect상 prefetch 추가 후 TBT·LCP median **소폭 개선** — 대역폭 경합으로 전체 지연 가설은 **기각(이번 샘플)**.
 
