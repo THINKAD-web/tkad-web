@@ -731,9 +731,11 @@
 | — | PR-5 서버 전량 카탈로그 | **스킵** (§1 재확인: `page.tsx` 미로드) | — |
 | [#664](https://github.com/THINKAD-web/tkad-web/pull/664) | PR-6 `(site-media-map)` · 푸터 DOM 제외 | 2026-09-23T03:45:44Z | `ba1318f6` |
 
-### Lighthouse 모바일 (Preview `/ko/media/map`, simulated, 3회 중앙값)
+### Lighthouse 모바일 (`/ko/media/map`, simulated, 3회 중앙값)
 
-측정일 **2026-09-23** (로컬 Lighthouse 13, `scripts/lighthouse-map-runs.mjs`). Before = `main` Preview, After = PR-4 Preview (#663). **before/after 모두 Preview**라 상대 비교는 유효.
+측정일 **2026-09-23** (로컬 Lighthouse 13, `scripts/lighthouse-map-runs.mjs`). Before = `git-main` URL, After = PR-4 branch Preview (#663).
+
+**⚠️ 2026-09-23 env 정렬 확인 — 배치 2 LCP 비교도 confound:** `vercel inspect` 기준 **`tkad-web-git-main-…vercel.app` alias는 `target: production`** (`tkad.co.kr`와 동일 빌드). Production env에는 **`NEXT_PUBLIC_VWORLD_API_KEY` 없음** → 라이트·다크 모두 Carto 키도 없어 **런타임 basemap = OSM**. PR-4 Preview는 **`target: preview`** → 빌드 시 VWorld 키 포함 → **LCP 타일 = VWorld**. 따라서 Before **15.0 s (OSM)** vs After **14.9 s (VWorld)** 는 **PR-4 코드 효과만으로 해석 불가** (타일 호스트·env 차이).
 
 | Metric | Before (main Preview) | After (PR-4 Preview) | 배치 2 판정 |
 |--------|------------------------|----------------------|-------------|
@@ -788,11 +790,50 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 | `#671` (+ PR-9) | feat-map-batch3-pr9 | **14.6 s** | 14.6, 16.4, 14.6 | 1,353 ms |
 | `git-main` (동일 코드, alias) | git-main | **25.8–26.8 s** | 16.3–27.6 (편차 큼) | ~1,500 ms |
 
-**결론 (2026-09-23 bisect):** **PR-8 `prefetchMapBasemapChunk`로 LCP 역행이 재현되지 않음** — PR-7→8→9 Preview에서 LCP는 **~15.7 → 14.8 → 14.6 s** (목표 8 s 미달이지만 **단계별 악화 아님**). “15→17.4 s 역행”은 **`git-main` Preview alias 측정**과 bisect 불일치 → **PR-8 롤백 근거 없음**. 우선 **`git-main` vs PR Preview 환경**(VWorld 키·타일 fallback·cold start) 정렬 후 재측정.
+**결론 (2026-09-23 bisect):** **PR-8 `prefetchMapBasemapChunk`로 LCP 역행이 재현되지 않음** — PR-7→8→9 Preview에서 LCP는 **~15.7 → 14.8 → 14.6 s** (목표 8 s 미달이지만 **단계별 악화 아님**). “15→17.4 s 역행”은 **`git-main` alias(= Production 배포)** 측정과 bisect 불일치 → **PR-8 롤백 근거 없음**.
+
+#### C. Vercel env · `git-main` alias (2026-09-23)
+
+| 변수 | Production | Preview | Development |
+|------|------------|---------|-------------|
+| `NEXT_PUBLIC_VWORLD_API_KEY` | **없음 → 2026-09-23 등록** | 있음 | 있음 |
+| `NEXT_PUBLIC_CARTO_BASEMAPS_API_KEY` | **없음** | **없음** | **없음** |
+
+**정렬 전 confound (§C·배치 2·3 표):** 위 표의 Production **「없음」** 시점 기준 측정값. §D 이후 Production은 VWorld 포함 빌드.
+
+- **`git-main` / `tkad.co.kr`:** `vercel inspect tkad-web-git-main-…` → **`target: production`**. Lab LCP 타일 **OSM** — **다크 테마 설계(Carto) 때문이 아님**. 측정 시각(주간) **라이트** + Production 빌드에 VWorld 미포함 → `publicMapTileUrlForTheme('light')` → Carto voyager 의도 → Carto 키 없음 → **OSM** (`lib/public-dark-map-config.ts`).
+- **PR branch Preview:** 빌드 시 VWorld 인라인 → 라이트에서 **VWorld WMTS** → Lab LCP **~14–16 s**.
+- **타일 호스트만의 격차 (동일 배치 3 코드 아님, 호스트 비교):** Production [`tkad.co.kr`](https://tkad.co.kr/ko/media/map) 3회 중앙값 **LCP 25.5 s** (OSM) vs bisect `#671` Preview **14.6 s** (VWorld) — **~11 s** lab 차이. **VWorld 운영키 등록(코드 0)이 PR-7~9 미세 최적화보다 LCP 레버가 클 수 있음** — GA4 `theme`·운영키 정책과 함께 배치 4 우선순위 재검토.
+
+#### D. Production VWorld env 정렬 후 재측정 (2026-09-23)
+
+**사전 확인 (등록 전 필수)**
+
+1. **VWorld 콘솔 도메인:** `.env.production.example` 기준 허용 도메인에 `tkad.co.kr`, `www.tkad.co.kr`, `*.vercel.app`, `localhost` 명시. 등록 후 **WMTS 샘플 타일** + `Referer: https://tkad.co.kr/ko/media/map` → **HTTP 200** (미등록 시 403 → 키만 넣어도 OSM 폴백처럼 보이는 혼선).
+2. **라이트/다크:** 코드상 **라이트만 VWorld** (`publicMapTileUrlForTheme`). **다크는 Carto dark** 설계이나 **Carto 키가 전 환경 없음** → 다크 사용자는 **여전히 OSM**. 이번 작업은 **VWorld Production 키만** — 야간·다크 LCP/체감은 **변경 없음**.
+3. **Carto 키 범위:** GA4 `user_properties.theme` (`components/public-analytics-loader.tsx` — `light`/`dark`, `tkad:theme-auto-changed` 반영)로 **주간/야간 비율** 확인 후 Carto Production 키 등록 여부 결정. 다크 비중이 크면 Carto가 VWorld 다음 레버.
+
+**운영:** `NEXT_PUBLIC_VWORLD_API_KEY` → Vercel **Production** 추가 · Production 재배포(`dpl_2eJeF6vom6By6SCC9aT7KJqCja1n`, 2026-09-23). **`git-main` alias가 구 OSM 빌드에 묶여 있던 구간** → 최신 Production과 **동일 deployment**로 정렬 후 재측정.
+
+| URL | LCP 3 runs (s) | LCP median | LCP 타일 (lab) | TBT median |
+|-----|----------------|------------|----------------|------------|
+| `tkad.co.kr` (정렬 후) | 15.9, 25.5, 16.3 | **16.3 s** | **VWorld** (3/3) | ~1,645 ms |
+| `git-main` alias (정렬 **후**, VWorld 빌드) | 17.8, 26.9, 25.0 | **25.0 s** | **VWorld** (3/3) | ~1,659 ms |
+| `git-main` alias (정렬 **전**, stale OSM 빌드) | — | **~25 s** | **OSM** (3/3) | — |
+| `git-main` (정렬 **전**, OSM 빌드) | — | **~25.5 s** | OSM | ~1,595 ms |
+| bisect `#671` Preview (참고) | 14.6, 16.4, 14.6 | **14.6 s** | VWorld | ~1,353 ms |
+
+**해석:** env 정렬으로 Production lab LCP 타일은 **OSM → VWorld** 전환 확인. **OSM ~25 s → VWorld ~16 s대**로 내려가 bisect Preview(~15 s)와 **같은 호스트·같은 코드** 기준으로 근접 — **배치 3 “git-main 26 s 역행”은 코드 회귀가 아님**. run 간 **15 s / 25 s 이원 편차**는 동일 배포에서도 재현(lab·cold start) → 단일 중앙값만으로 배치 4 go/no-go 금지.
+
+**배치 3 코드 효과 (Production + VWorld, `git-main`/`tkad.co.kr` 동일 빌드):** Preview bisect(#671 **14.6 s**)와 **같은 타일 호스트·같은 main 코드**에서 lab LCP **~16 s대(편차 큼)** — **코드 회귀 아님**, bisect에서 본 **미세 개선 방향과 양립**. **LCP 8 s 목표 미달** 유지 → 배치 4는 코드 미세조정보다 **다크(Carto) 키·타일 discoverable** 등이 남은 레ver.
+
+**정렬 전** “배치 2 end 15 s vs 배치 3 git-main 26 s” **코드 회귀 판정 금지** (§C confound).
+
+**동일 Preview env에서 배치 3 코드 판정 (bisect B):** **15.7 → 14.6 s**, 8 s 미달.
 
 **PR-8 경합 가설:** bisect상 prefetch 추가 후 TBT·LCP median **소폭 개선** — 대역폭 경합으로 전체 지연 가설은 **기각(이번 샘플)**.
 
-**LCP element (After):** 여전히 `img.leaflet-tile` (OSM fallback 타일 URL in lab). **LCP 후보가 SSR placeholder(스피너/문구)로 바뀌지 않음** — 측정 트릭 회피 의도대로.
+**LCP element:** 여전히 `img.leaflet-tile`. env 정렬 **후** Production lab 타일 = **VWorld WMTS** (정렬 전 OSM). **SSR placeholder가 LCP 후보로 바뀌지 않음** — 의도대로.
 
 **`lcp-discovery-insight` (After, median run):** `requestDiscoverable: false`, `fetchpriority=high` 미적용 — PR-7·8만으로는 initial document discoverable 전환 **실패**.
 
