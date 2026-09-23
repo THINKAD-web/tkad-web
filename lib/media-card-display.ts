@@ -1,4 +1,5 @@
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
+import { resolveMediaDisplayName } from "@/lib/media-i18n";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 import {
   buildCatalogItemMetricLine,
@@ -182,11 +183,23 @@ export function catalogItemToDisplayModel(
     highlights?: string[];
   } & PlannerOnlineCardContextEntry,
 ): MediaCardDisplayModel {
-  const useKo =
+  const textLocale =
     opts.locale != null
-      ? opts.locale === "ko" || opts.locale.startsWith("ko")
-      : (opts.isKo ?? true);
-  const locale = useKo ? "ko-KR" : "en-US";
+      ? opts.locale.split("-")[0]
+      : opts.isKo ?? true
+        ? "ko"
+        : "en";
+  const useKo = textLocale === "ko";
+  const locale = useKo ? "ko-KR" : textLocale === "ja" ? "ja-JP" : textLocale === "zh" ? "zh-CN" : "en-US";
+  const displayName = resolveMediaDisplayName(
+    {
+      name: item.name,
+      nameEn: item.nameEn,
+      location: item.location ?? "",
+      translations: item.translations,
+    },
+    textLocale,
+  );
   const parentLabel = opts.priceLabel?.trim() || null;
   const ssotLabel = parentLabel ?? formatBrowseCardPriceLabel(item, locale);
   const formattedNumericPrice =
@@ -202,7 +215,7 @@ export function catalogItemToDisplayModel(
 
   return {
     id: item.id,
-    name: item.name,
+    name: displayName,
     type: item.type,
     trustScore: item.trustScore,
     isVerified: item.isVerified,

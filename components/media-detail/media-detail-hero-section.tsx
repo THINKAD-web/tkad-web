@@ -1,4 +1,4 @@
-import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+import { resolveMediaDisplayName } from "@/lib/media-i18n";
 import { MediaDetailHeroGalleryV2 } from "@/components/media-detail/media-detail-hero-gallery-v2";
 import { MediaDetailHeroActions } from "@/components/media-detail/media-detail-hero-actions";
 import { MediaDetailHeroChrome } from "@/components/media-detail/media-detail-hero-chrome";
@@ -71,11 +71,11 @@ export function MediaDetailHeroSection({
   seoulCpmBenchmarkBadge = null,
   className,
 }: Props) {
-  const bucket = normalizeMediaDetailTextLocale(locale);
-  const displayName = (bucket === "ko") ? media.name : media.nameEn || media.name;
-  const shareDescription = (bucket === "ko")
-    ? `${displayName} — THINKAD 매체 상세`
-    : `${displayName} — THINKAD media detail`;
+  const displayName = resolveMediaDisplayName(media, locale);
+  const shareDescription =
+    locale === "ko" || locale.startsWith("ko")
+      ? `${displayName} — THINKAD 매체 상세`
+      : `${displayName} — THINKAD media detail`;
 
   const mapFallback =
     mapItemShowsOnMap(resolveMapDisplayMode(media)) && media.lat && media.lng

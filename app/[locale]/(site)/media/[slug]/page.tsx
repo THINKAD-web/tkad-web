@@ -38,7 +38,7 @@ import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   normalizeMediaDetailTextLocale,
   resolveMediaDisplayName,
-  resolveMediaField,
+  resolveMediaOverviewBody,
 } from "@/lib/media-i18n";
 import { mediaDetailPricePeriodTranslationKey } from "@/lib/media-price-format";
 import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
@@ -349,21 +349,7 @@ export default async function MediaDetailPage({ params }: Props) {
     ? pickSearchKeywordHints(media.keywordFilter.searchKeywords)
     : [];
 
-  const overviewBody = (() => {
-    const cat = (
-      textLocale === "ko"
-        ? media.catalogDescription
-        : media.catalogDescriptionEn
-    )?.trim();
-    if (cat) return cat;
-    const long = (
-      textLocale === "ko"
-        ? media.longDescriptionKo
-        : media.longDescriptionEn
-    )?.trim();
-    if (long) return long;
-    return resolveMediaField(locale, "description", media).trim();
-  })();
+  const overviewBody = resolveMediaOverviewBody(media, locale);
 
   const imageAlt = buildMediaImageAlt(media, locale);
   const seoContextPills = buildMediaDetailSeoLinks(media, locale);

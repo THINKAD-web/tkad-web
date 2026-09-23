@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   normalizeMediaDetailTextLocale,
   pickMediaTranslationField,
+  resolveMediaOverviewBody,
   resolveMediaText,
 } from "@/lib/media-i18n";
 
@@ -127,4 +128,23 @@ test("pickMediaTranslationField + resolveMediaText end-to-end", () => {
     }),
     "Seoul",
   );
+});
+
+test("resolveMediaOverviewBody — ja uses translation, not catalogDescriptionEn ko fallback", () => {
+  const body = resolveMediaOverviewBody(
+    {
+      name: "명동 미디어폴",
+      location: "서울",
+      catalogDescription: "한국어 설명",
+      catalogDescriptionEn: "한국어 설명",
+      description: "한국어 설명",
+      descriptionEn: null,
+      translations: [
+        { locale: "ja", description: "日本語の説明" },
+        { locale: "zh", description: "中文说明" },
+      ],
+    },
+    "ja",
+  );
+  assert.equal(body, "日本語の説明");
 });
