@@ -358,6 +358,11 @@
 **권장안** — 지도 API `toMapItem` 에 `productPriceWon`, `engineDailyImpressions`, `impressionModelVersion`, `monthlyFootTraffic` 4필드 추가(항목당 +~60B, gzip 영향 미미). 또는 서버에서 CPM·노출을 **미리 계산해 문자열/숫자로 내려** 클라이언트 재계산을 없앤다(후자가 SSOT 로서 더 견고).
 **난이도**: S (필드 추가) / M (서버 선계산)
 
+**Phase 1 PR-3 (#660, 2026-09-23) — 해결·실측**
+- `serializeMapApiItemFromMediaItem` = `mapMediaItemToHomeCatalog` + `mediaItemToImpressionsInput` + `priceOptions` (개별 4필드만 붙이지 않음).
+- 카탈로그 **95건** where old map CPM ≠ list card → **0** regression after SSOT. 근본 원인 중 하나는 **`priceOptions` 누락**(다구좌 표시가·CPM 분자).
+- **SSOT 패턴 재발 가능성:** 다른 API·직렬화에서도 “필드 몇 개만 복사”하면 동일 클래스의 불일치가 난다. 신규/변경 시 **`mapMediaItemToHomeCatalog` / `mediaDisplayCpmSourceFromItem` 계층을 통과**하는지 리뷰 체크리스트로 두는 것을 권장.
+
 ---
 
 ### 19. 현장 확인 수단 (사진 여러 장, 로드뷰 링크)
@@ -678,7 +683,9 @@
 | 동시 렌더 마커 상한 | **50~150개** (zoom tier) | `lib/media-map/map-pin-response-limit.ts:25-36` |
 | 클러스터 해제 zoom | 16 | `dark-map-markers-layer.tsx:252` |
 | 응답 크기(150건) | raw 103 KB / gzip 12.5 KB | 본 보고서 실측(합성) |
-| 응답 크기(865건 전량 가정) | raw 597 KB / gzip 68 KB | 동상 |
+| 응답 크기(865건 전량 가정) | raw 597 KB / gzip 68 KB | 동상 · **전량 upper bound, 실사용 아님** |
+| **실사용 (pin-limit, Korea bounds)** | prod raw ~148 KB → PR-3 ~174 KB (+~17% raw) | 2026-09-23 |
+| **실사용 gzip (pin-limit)** | **~21.5 KB → ~22.7 KB (+1.2 KB)** | **배치 2·용량 판단은 이 행만 기준** |
 | 마커 구현 | DOM `<img>` + data-URI SVG, 아이콘 캐시 | `lib/map-pin-styles.ts:26-47` |
 
 ### 판단: **전환하지 말 것. 현 스택 유지.**
