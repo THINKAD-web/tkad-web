@@ -40,6 +40,8 @@
     "test:shadow-recommend-golden": "node --import tsx --test lib/inquiry-auto-proposal/shadow-recommend.test.ts",
     "test:recommend-online-mix": "node --import tsx --test lib/recommend/__tests__/*.test.ts lib/inquiry-auto-proposal/*.test.ts",
     "test:import-csv": "node --experimental-test-module-mocks --import tsx --test app/api/admin/medias/import-csv/route.test.ts",
+    "test:media-excel-import": "tsx --test lib/admin-media-excel-import.test.ts",
+    "media:excel-to-json": "tsx scripts/excel-to-quick-add-json.mts",
     "build:metro-geo": "tsx scripts/build-metro-geojson.mts",
     "build:metro-geo:capital": "tsx scripts/build-seoul-metro-geojson.mts",
     "build:ktx-srt-geo": "tsx scripts/build-ktx-srt-geojson.mts",
@@ -133,7 +135,8 @@
     "playwright": "^1.60.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "xlsx": "^0.18.5"
   },
   "engines": {
     "node": ">=20.9.0"
