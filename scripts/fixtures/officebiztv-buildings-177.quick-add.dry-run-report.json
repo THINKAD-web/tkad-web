@@ -1,0 +1,54 @@
+{
+  "source": "officebiztv-buildings-177.quick-add.json",
+  "kakaoKeyPresent": true,
+  "counts": {
+    "total": 177,
+    "created": 177,
+    "updated": 0,
+    "failed": 0,
+    "addressVerifiedFalse": 10
+  },
+  "failed": [],
+  "kakaoUnverified": [
+    {
+      "name": "구로SKV1센터 오피스비즈TV 엘리베이터 광고",
+      "full_address": "서울시 구로구 항동 205-7"
+    },
+    {
+      "name": "구로에이스캠프지식산업센터 오피스비즈TV 엘리베이터 광고",
+      "full_address": "서울시 구로구 항동 206-1"
+    },
+    {
+      "name": "퀸즈파크13 오피스비즈TV 엘리베이터 광고",
+      "full_address": "서울시 강서구 마곡동 787-11"
+    },
+    {
+      "name": "가양더리브골드타워 오피스비즈TV 엘리베이터 광고",
+      "full_address": "서울시 강서구 가양동 54-6"
+    },
+    {
+      "name": "문정역테라타워 오피스비즈TV 엘리베이터 광고",
+      "full_address": "서울시 송파구 문정동 324-2"
+    },
+    {
+      "name": "수원SJ타워 오피스비즈TV 엘리베이터 광고",
+      "full_address": "경기도 수원시 팔달구 고등동 219-21"
+    },
+    {
+      "name": "라퍼스트 오피스비즈TV 엘리베이터 광고",
+      "full_address": "경기도 수원시 권선구 곡반정동 139-4"
+    },
+    {
+      "name": "메가비즈타워 B동 오피스비즈TV 엘리베이터 광고",
+      "full_address": "경기도 화성시 영천동 산24-1 "
+    },
+    {
+      "name": "메가비즈타워 C동 오피스비즈TV 엘리베이터 광고",
+      "full_address": "경기도 화성시 영천동 산24-1 "
+    },
+    {
+      "name": "삼성어반타워 오피스비즈TV 엘리베이터 광고",
+      "full_address": "경기도 화성시 영천동 산25-3"
+    }
+  ]
+}
