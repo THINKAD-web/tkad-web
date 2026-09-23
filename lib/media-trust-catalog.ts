@@ -389,25 +389,32 @@ export async function attachMediaTrustToMediaItems(
 
   return items.map((item) => {
     const executionRaw = execMap.get(item.id) ?? emptyExecutionStats();
-    const execution = resolvePublicExecutionStats(item.id, executionRaw, item);
+    /** 카드·상세 「누적 집행 N회」 — 기존 추정치 유지 */
+    const executionForDisplay = resolvePublicExecutionStats(
+      item.id,
+      executionRaw,
+      item,
+    );
+    /** 신뢰 점수·「집행 검증」 배지 — DB 실집행만 (0건이면 추정치 미사용) */
+    const executionForTrust = executionRaw;
     const certifiedPhotoCount = certifiedMap.get(item.id) ?? 0;
     const trustBadges = computeTrustBadges(
       item,
       ctx,
-      execution,
+      executionForTrust,
       certifiedPhotoCount,
     );
     const trustScore = computeTrustScore(
       item,
-      execution,
+      executionForTrust,
       responseMap.get(item.id),
     );
     return {
       ...item,
       trustBadges,
       trustScore,
-      executionCount: execution.totalCount,
-      lastExecutionMonthsAgo: execution.monthsSinceLast,
+      executionCount: executionForDisplay.totalCount,
+      lastExecutionMonthsAgo: executionForDisplay.monthsSinceLast,
     };
   });
 }
