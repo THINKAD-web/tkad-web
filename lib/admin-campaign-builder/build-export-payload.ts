@@ -210,6 +210,7 @@ export function buildCampaignBuilderExportPayload(
     documentTitle: report.title,
     campaignName: payload.title,
     clientName,
+    coverLogoUrl: payload.coverLogoUrl?.trim() || undefined,
     generatedAt,
     goalTitle: payload.title,
     budgetMan: Math.round(summary.totalBudgetWon / 10_000),

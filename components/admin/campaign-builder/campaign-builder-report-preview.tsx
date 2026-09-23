@@ -71,6 +71,7 @@ export function CampaignBuilderReportPreview({
             kind: "builder",
             builderDocumentType: section.documentType,
           })}
+          coverLogoUrl={exportPayload.coverLogoUrl}
           clientName={exportPayload.clientName}
           clientNameSuffix={exportPayload.clientName ? "귀중" : undefined}
         />

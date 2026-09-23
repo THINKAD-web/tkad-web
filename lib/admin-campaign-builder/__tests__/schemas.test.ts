@@ -53,6 +53,22 @@ describe("campaignBuilderPayloadSchema", () => {
     assert.equal(parsed.success, false);
   });
 
+  it("accepts optional coverLogoUrl", () => {
+    const parsed = campaignBuilderPayloadSchema.safeParse({
+      ...validPayload,
+      coverLogoUrl: "https://cdn.example.com/logo.png",
+    });
+    assert.equal(parsed.success, true);
+  });
+
+  it("rejects invalid coverLogoUrl", () => {
+    const parsed = campaignBuilderPayloadSchema.safeParse({
+      ...validPayload,
+      coverLogoUrl: "not-a-url",
+    });
+    assert.equal(parsed.success, false);
+  });
+
   it("accepts insightsOverride partial shape", () => {
     const parsed = campaignBuilderPayloadSchema.safeParse({
       ...validPayload,

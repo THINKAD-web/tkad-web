@@ -100,6 +100,7 @@ export const campaignBuilderPayloadSchema = z.object({
   title: z.string().min(1),
   clientCompany: z.string().optional(),
   clientName: z.string().optional(),
+  coverLogoUrl: z.string().url().optional(),
   notes: z.string().optional(),
   digitalLines: z.array(digitalCampaignLineSchema).default([]),
   oohLines: z.array(oohCampaignLineSchema).default([]),
