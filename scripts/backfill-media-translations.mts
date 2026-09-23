@@ -7,6 +7,8 @@
  * Pass --include-non-public to backfill every `media` row (legacy / admin-only).
  * Idempotent: skips any media that already has BOTH a ja and a zh MediaTranslation
  * row, unless --force is passed (then it regenerates and overwrites those rows).
+ * English columns (`nameEn` / `descriptionEn` / `locationEn`) are NOT written here —
+ * use `scripts/backfill-media-en.mts` (historical gap: en half of each API call was discarded).
  * Fully sequential (one Claude call at a time) — a delay is inserted between
  * batches only for readable progress logging, not for concurrency.
  *
