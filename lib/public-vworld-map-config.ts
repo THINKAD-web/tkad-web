@@ -4,8 +4,8 @@
  * 발급: https://www.vworld.kr → Open API → 인증키
  * Vercel `NEXT_PUBLIC_VWORLD_API_KEY`:
  *   - Development / Preview: 개발키 등록됨 → 라이트 모드 VWorld Base
- *   - Production: **운영키 미등록 (TODO)** — 운영키 발급 후 Production env 에만 추가·재배포.
- *     키 없으면 `publicMapTileUrlForTheme` 가 Carto voyager 로 폴백.
+ *   - Production: Vercel Production env 등록됨 (2026-09-23). 콘솔 도메인(tkad.co.kr 등) 불일치 시 타일 403.
+ *     키 없으면 `publicMapTileUrlForTheme` 가 Carto voyager → Carto 키 없으면 OSM.
  *
  * 다크 모드: VWorld Base 타일에 dark 변형이 없어 dark 테마는 Carto dark 유지.
  */
