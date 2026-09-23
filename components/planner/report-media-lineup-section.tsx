@@ -283,7 +283,6 @@ function DiscoveryLineupCard({
           item={item}
           href={href}
           metaLine={metaLine}
-          isKo={isKo}
           showPlanButton={false}
         />
         <RawFootfallHint
@@ -313,7 +312,6 @@ function DiscoveryLineupCard({
           item={item}
           href={href}
           priceLabel={priceLabel}
-          isKo={isKo}
           className="h-full"
           showPlanButton={false}
         />
@@ -344,7 +342,6 @@ function DiscoveryLineupCard({
         highlights={highlights}
         locationLine={row.location ?? row.region ?? null}
         priceLabel={priceLabel}
-        isKo={isKo}
         showPlanButton={false}
       />
       <RawFootfallHint

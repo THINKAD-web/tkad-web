@@ -2,6 +2,7 @@
 
 import type { MouseEvent } from "react";
 import { ArrowUpRight, MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { PlanCartToggleButton } from "@/components/plan/plan-cart-toggle-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
@@ -12,7 +13,7 @@ export type DiscoveryMediaCardActionsProps = {
   mediaId: string;
   planItem: Omit<PlanCartItem, "addedAt">;
   detailHref: string;
-  isKo?: boolean;
+  locale?: string;
   inCompare?: boolean;
   onToggleCompare?: () => void;
   addedFrom?: PlanCartAddedFrom;
@@ -47,7 +48,7 @@ export function DiscoveryMediaCardActions({
   mediaId,
   planItem,
   detailHref,
-  isKo = true,
+  locale: _locale,
   inCompare = false,
   onToggleCompare,
   addedFrom = "search",
@@ -56,6 +57,7 @@ export function DiscoveryMediaCardActions({
   className,
   stopPropagation = false,
 }: DiscoveryMediaCardActionsProps) {
+  const tMedia = useTranslations("media");
   const contactHref = `/contact?media=${encodeURIComponent(mediaId)}`;
   const btnClass =
     size === "comfortable"
@@ -82,7 +84,7 @@ export function DiscoveryMediaCardActions({
           className={cn(primaryLinkClass, "col-span-1")}
         >
           <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
-          <span className="truncate">{isKo ? "상세 보기" : "Details"}</span>
+          <span className="truncate">{tMedia("cardDetail")}</span>
         </Link>
         <PlanCartToggleButton
           item={planItem}
@@ -97,7 +99,7 @@ export function DiscoveryMediaCardActions({
           className={cn(contactLinkProps.className, "col-span-1")}
         >
           <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
-          <span className="truncate">{isKo ? "문의하기" : "Contact"}</span>
+          <span className="truncate">{tMedia("quickInquiryCta")}</span>
         </Link>
       </div>
     );
@@ -115,7 +117,7 @@ export function DiscoveryMediaCardActions({
             className={cn(shortBtn, primaryLinkClass, "!h-8")}
           >
             <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
-            {isKo ? "상세" : "Details"}
+            {tMedia("cardDetail")}
           </Link>
           <Link
             href={contactHref}
@@ -124,7 +126,7 @@ export function DiscoveryMediaCardActions({
             className={cn(shortBtn, contactLinkProps.className, "!h-8")}
           >
             <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
-            {isKo ? "문의" : "Contact"}
+            {tMedia("quickInquiryCta")}
           </Link>
         </div>
         <div className="flex items-stretch gap-1">
@@ -186,7 +188,7 @@ export function DiscoveryMediaCardActions({
             className={cn(primaryLinkClass, "!h-8 !min-h-8 !text-[11px]")}
           >
             <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
-            <span className="whitespace-nowrap">{isKo ? "상세" : "Details"}</span>
+            <span className="whitespace-nowrap">{tMedia("cardDetail")}</span>
           </Link>
           <Link
             href={contactHref}
@@ -195,7 +197,7 @@ export function DiscoveryMediaCardActions({
             className={cn(contactLinkProps.className, "!h-8 !min-h-8 !text-[11px]")}
           >
             <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
-            <span className="whitespace-nowrap">{isKo ? "문의" : "Contact"}</span>
+            <span className="whitespace-nowrap">{tMedia("quickInquiryCta")}</span>
           </Link>
         </div>
         <div className="flex items-stretch justify-end gap-1">
@@ -231,7 +233,7 @@ export function DiscoveryMediaCardActions({
           className={primaryLinkClass}
         >
           <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
-          {isKo ? "상세 보기" : "View details"}
+          {tMedia("mapCardDetail")}
         </Link>
         <Link
           href={contactHref}
@@ -239,7 +241,7 @@ export function DiscoveryMediaCardActions({
           {...contactLinkProps}
         >
           <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
-          {isKo ? "문의하기" : "Contact"}
+          {tMedia("quickInquiryCta")}
         </Link>
       </div>
       <div className="flex items-stretch gap-1.5">

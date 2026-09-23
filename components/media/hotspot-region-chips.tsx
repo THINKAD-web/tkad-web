@@ -4,6 +4,8 @@ import { listMediaHotspotRegions, hotspotRegionLabel } from "@/lib/media-hotspot
 import { cn } from "@/lib/utils";
 
 type Props = {
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
   regionSub: string;
   onSelect: (regionMain: string, regionSub: string) => void;
@@ -17,7 +19,8 @@ type Props = {
 };
 
 export function HotspotRegionChips({
-  isKo = true,
+  locale,
+  isKo,
   regionSub,
   onSelect,
   onClear,
@@ -26,6 +29,8 @@ export function HotspotRegionChips({
   shortcutToPanel = false,
   onOpenFilterPanel,
 }: Props) {
+  const useKo =
+    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
   const hotspots = listMediaHotspotRegions();
   if (hotspots.length === 0) return null;
 
@@ -40,7 +45,7 @@ export function HotspotRegionChips({
           compact ? "text-[10px]" : "text-xs",
         )}
       >
-        {isKo ? "인기 지역" : "Hot areas"}
+        {useKo ? "인기 지역" : "Hot areas"}
       </p>
       <div className="scrollbar-hide -mx-0.5 flex gap-1.5 overflow-x-auto px-0.5 pb-0.5">
         {hotspots.map((h) => {
@@ -66,7 +71,7 @@ export function HotspotRegionChips({
               )}
               aria-pressed={active}
             >
-              {hotspotRegionLabel(h, isKo)}
+              {hotspotRegionLabel(h, useKo)}
               <span
                 className={cn(
                   "tabular-nums opacity-70",

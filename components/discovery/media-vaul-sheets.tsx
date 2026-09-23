@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Drawer } from "vaul";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { DiscoveryFilterSheetHeader } from "@/components/discovery/filter-bar-parts";
 import { MEDIA_SEARCH_SORT_OPTIONS } from "@/lib/media-discovery-filter-chips";
@@ -10,6 +11,8 @@ import { useVaulStickyFix } from "@/hooks/use-vaul-sticky-fix";
 type FilterSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
   activeFilterCount?: number;
   onReset: () => void;
@@ -26,12 +29,14 @@ type FilterSheetProps = {
 export function MediaFilterVaulSheet({
   open,
   onOpenChange,
-  isKo = true,
+  locale,
+  isKo,
   activeFilterCount = 0,
   onReset,
   applyLabel,
   children,
 }: FilterSheetProps) {
+  const t = useTranslations("media");
   useVaulStickyFix(open);
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} modal>
@@ -45,7 +50,7 @@ export function MediaFilterVaulSheet({
         >
           <Drawer.Handle className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-muted-foreground/25" />
           <DiscoveryFilterSheetHeader
-            isKo={isKo}
+            locale={locale}
             activeFilterCount={activeFilterCount}
             onClose={() => onOpenChange(false)}
             useDrawerTitle
@@ -61,7 +66,7 @@ export function MediaFilterVaulSheet({
               disabled={activeFilterCount === 0}
               className="tkad-type-body rounded-xl border border-border px-4 py-2.5 font-medium text-tkad-secondary disabled:opacity-40 dark:border-white/10"
             >
-              {isKo ? "초기화" : "Reset"}
+              {t("filterReset")}
             </button>
             <button
               type="button"
@@ -80,6 +85,8 @@ export function MediaFilterVaulSheet({
 type SortSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
   sort: string;
   onSortChange: (value: string) => void;
@@ -89,10 +96,12 @@ type SortSheetProps = {
 export function MediaSortVaulSheet({
   open,
   onOpenChange,
-  isKo = true,
+  locale,
+  isKo,
   sort,
   onSortChange,
 }: SortSheetProps) {
+  const t = useTranslations("media");
   useVaulStickyFix(open);
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} modal>
@@ -106,7 +115,7 @@ export function MediaSortVaulSheet({
         >
           <Drawer.Handle className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-muted-foreground/25" />
           <Drawer.Title className="tkad-type-title border-b border-border/70 px-4 py-3 text-foreground dark:border-white/10">
-            {isKo ? "정렬" : "Sort"}
+            {t("sortLabel")}
           </Drawer.Title>
           <ul className="px-2 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
             {MEDIA_SEARCH_SORT_OPTIONS.map((opt) => {

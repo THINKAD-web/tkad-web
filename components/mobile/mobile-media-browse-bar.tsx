@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Filter, LayoutGrid, Map as MapIcon, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHorizontalScrollGesture } from "@/lib/use-horizontal-scroll-gesture";
@@ -10,22 +11,7 @@ import { MediaCategoryBrowseChips } from "@/components/media-category-browse-chi
 import type { BrowseCategoryChip } from "@/lib/media-categories";
 import type { MediaCatalogCardLayout } from "@/components/media-catalog-shared";
 
-const SORT_TABS_KO = [
-  { value: "default", label: "오늘의 인기" },
-  { value: "newest", label: "최신순" },
-  { value: "priceAsc", label: "저가순" },
-  { value: "ratingDesc", label: "평점순" },
-] as const;
-
-const SORT_TABS_EN = [
-  { value: "default", label: "Popular" },
-  { value: "newest", label: "Newest" },
-  { value: "priceAsc", label: "Price ↑" },
-  { value: "ratingDesc", label: "Rating" },
-] as const;
-
 type Props = {
-  isKo: boolean;
   locale: string;
   activeChip: string;
   onChipChange: (chip: string) => void;
@@ -40,7 +26,6 @@ type Props = {
 };
 
 export function MobileMediaBrowseBar({
-  isKo,
   locale,
   activeChip,
   onChipChange,
@@ -53,10 +38,16 @@ export function MobileMediaBrowseBar({
   onCardLayoutChange,
   resultCount,
 }: Props) {
+  const tMedia = useTranslations("media");
   const sortScrollRef = useRef<HTMLUListElement>(null);
   useHorizontalScrollGesture(sortScrollRef);
 
-  const sortTabs = isKo ? SORT_TABS_KO : SORT_TABS_EN;
+  const sortTabs = [
+    { value: "default", label: tMedia("browseSortPopularToday") },
+    { value: "newest", label: tMedia("sortNewest") },
+    { value: "priceAsc", label: tMedia("sortPriceAsc") },
+    { value: "ratingDesc", label: tMedia("sortRatingDesc") },
+  ] as const;
 
   return (
     <div className="space-y-4 md:hidden">
@@ -102,14 +93,14 @@ export function MobileMediaBrowseBar({
 
       <div className="flex items-center justify-between gap-2 px-4">
         <span className="inline-flex items-center gap-1 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-gray-950 dark:text-white">
-          {activeChip || (isKo ? "전국" : "All regions")}
+          {activeChip || tMedia("regions.national")}
         </span>
         <div className="flex items-center gap-2">
           {onCardLayoutChange ? (
             <div className="inline-flex overflow-hidden rounded-xl border border-gray-200 dark:border-white/10">
               <button
                 type="button"
-                aria-label={isKo ? "리스트형" : "List view"}
+                aria-label={tMedia("browseCardLayoutCompact")}
                 onClick={() => onCardLayoutChange("compact")}
                 className={cn(
                   "flex h-9 w-9 items-center justify-center",
@@ -122,7 +113,7 @@ export function MobileMediaBrowseBar({
               </button>
               <button
                 type="button"
-                aria-label={isKo ? "그리드형" : "Grid view"}
+                aria-label={tMedia("browseCardLayoutGrid")}
                 onClick={() => onCardLayoutChange("grid")}
                 className={cn(
                   "flex h-9 w-9 items-center justify-center border-l border-gray-200 dark:border-white/10",
@@ -142,7 +133,7 @@ export function MobileMediaBrowseBar({
               className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-gray-950 dark:text-white"
             >
               <Filter className="h-4 w-4" />
-              {isKo ? "필터" : "Filter"}
+              {tMedia("filterButton")}
             </button>
           ) : null}
           <Link
@@ -150,14 +141,14 @@ export function MobileMediaBrowseBar({
             className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-gray-950 dark:text-white"
           >
             <MapIcon className="h-4 w-4 text-hermes" />
-            {isKo ? "지도" : "Map"}
+            {tMedia("browseMapButton")}
           </Link>
         </div>
       </div>
 
       {resultCount != null ? (
         <p className="px-4 text-xs text-gray-500 dark:text-white/50">
-          {isKo ? `${resultCount}개 매체` : `${resultCount} media`}
+          {tMedia("browseResultTotalMedia", { count: resultCount })}
         </p>
       ) : null}
     </div>

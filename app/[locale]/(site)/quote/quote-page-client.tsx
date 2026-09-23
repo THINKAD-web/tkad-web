@@ -1613,7 +1613,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       </p>
                       <div className="flex flex-col gap-6">
                         <MediaManualBrowseFilters
-                          isKo={isKo}
+                          locale={locale}
                           showSectionHeader
                           sectionEyebrow="Manual Browse"
                           sectionTitle={tPlanner("recommendBrowseTitle")}

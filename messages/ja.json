@@ -1149,7 +1149,55 @@
       "browseCta": "メディアを閲覧",
       "plannerLead": "保存した項目でプランナーを開始しますか?",
       "plannerCta": "プランナーを開始"
-    }
+    },
+    "browseHeroHeadlineBefore": "全国の",
+    "browseHeroHeadlineGradient": "OOH媒体",
+    "browseHeroHeadlineAfter": "を検索",
+    "browseSearchPlaceholder": "媒体名・場所・キーワードで検索",
+    "openFilters": "フィルターを開く",
+    "filterButton": "フィルター",
+    "filterReset": "リセット",
+    "filterClose": "フィルターを閉じる",
+    "clearSearchAria": "検索をクリア",
+    "browseWhere": "どこで？",
+    "browsePopular": "人気",
+    "browseMoreFilters": "追加フィルター",
+    "browseFeatures": "媒体の特徴",
+    "browseCampaignGoal": "広告目的",
+    "browseCampaignGoalEntry": "キャンペーン目的から探す",
+    "browseBudget": "価格帯",
+    "browsePriceMinKrw": "最低価格（ウォン）",
+    "browsePriceMaxKrw": "最高価格（ウォン）",
+    "browseListFiltersAria": "一覧のフィルターと表示",
+    "browseSelectPage": "ページを全選択",
+    "browseClearCompare": "比較をクリア",
+    "browseTryAiRecommend": "AIおすすめを試す →",
+    "browseCompareSelected": "✓ 選択済み",
+    "browseCompareAdd": "+ 比較に追加",
+    "browseResetFiltersChip": "フィルターをリセット ×",
+    "browsePriceRangeTitle": "価格範囲",
+    "browsePriceMinSlider": "最小（100万ウォン）",
+    "browsePriceMaxSlider": "最大（100万ウォン）",
+    "browseCategoriesSheetTitle": "カテゴリ・キャンペーン目的",
+    "browseApply": "適用",
+    "browseMapButton": "地図",
+    "browseMapOpenAria": "地図で見る",
+    "browseCartCount": "カート {count}",
+    "browseCompareCount": "比較 {count}",
+    "browseViewCartAria": "カートの {count} 件を見る",
+    "browseViewCompareAria": "比較 {count} 件を見る",
+    "browseActiveFilterCount": "フィルター {count}",
+    "browseResultShownOfTotal": "全 {total} 件中 {shown} 件を表示",
+    "browseResultShownOfTotalNetwork": "全 {total} 件中 {shown} 件を表示",
+    "browseResultTotalMedia": "全 {count} 件",
+    "browseResultTotalNetwork": "全 {count} 件",
+    "browseCoachSearchTitle": "1/3 · 媒体検索",
+    "browseCoachSearchDismiss": "次へ",
+    "browseSortPopularToday": "今日の人気",
+    "browseSelectedPlanView": "{count}件選択 · 表示",
+    "browseSelectedView": "{count}件選択 · 表示",
+    "browseSelectedPlan": "{count}件選択",
+    "browseSelected": "{count}件選択"
   },
   "recommend": {
     "form": {
@@ -3512,7 +3560,8 @@
       "step3Title": "結果と保存",
       "step3Desc": "確定したミックスと指標のスナップショットを保存します。",
       "cta": "AIプランナーを開始",
-      "viewAll": "すべてのメディアを見る →"
+      "viewAll": "すべてのメディアを見る →",
+      "promptLabel": "一行で説明してください"
     },
     "twoAxis": {
       "eyebrow": "THINKAD",
@@ -3658,7 +3707,14 @@
     "personalizedTitle": "<accent>{name}</accent>さんへのおすすめ",
     "personalizedMeta": "最近の閲覧履歴、業種、予算から",
     "personalizedCtaRecommend": "AIのおすすめをもっと見る",
-    "personalizedCtaPlanner": "AIプランナーを試す"
+    "personalizedCtaPlanner": "AIプランナーを試す",
+    "metadata": {
+      "homeTitle": "看板・地下鉄・バス OOH料金比較 | OOH・デジタル媒体を一覧",
+      "homeSrOnlyH1": "看板・地下鉄・バス OOH料金比較 — OOH・デジタル媒体を比較",
+      "mediaListingDescription": "看板・地下鉄・バス・DOOHなど検証済み媒体を月額・地域・タイプで比較し、THINKADで即見積もり。"
+    },
+    "heroBannerAriaLabel": "ホームヒーロー",
+    "heroBannerSlideAlt": "背景画像 {n}"
   },
   "onboarding": {
     "kicker": "オンボーディング",
@@ -4187,5 +4243,26 @@
         }
       }
     }
+  },
+  "planCart": {
+    "addToPlan": "プランに追加",
+    "add": "追加",
+    "addShort": "追加",
+    "remove": "外す",
+    "removeShort": "外す",
+    "removeHint": "もう一度タップで削除",
+    "addToPlanner": "プランナーに追加",
+    "addToPlannerHint": "プランナー: キャンペーンにこの媒体を追加します",
+    "alreadyInPlan": "すでにプランに入っています",
+    "limitTitle": "プラン上限",
+    "removedToast": "{name} をプランから外しました",
+    "addedToast": "{name} をプランに追加しました",
+    "ariaAdd": "プランに追加",
+    "ariaRemove": "プランから削除（もう一度タップ）",
+    "excludedBudget": "予算のためプランから除外",
+    "whyRecommended": "おすすめ理由",
+    "whyShort": "理由",
+    "noImage": "画像準備中",
+    "noImageShort": "準備中"
   }
 }

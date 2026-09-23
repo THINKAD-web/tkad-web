@@ -1149,7 +1149,55 @@
       "browseCta": "浏览媒体",
       "plannerLead": "使用您保存的选项启动计划器?",
       "plannerCta": "启动计划器"
-    }
+    },
+    "browseHeroHeadlineBefore": "全国",
+    "browseHeroHeadlineGradient": "OOH 媒体",
+    "browseHeroHeadlineAfter": "搜索",
+    "browseSearchPlaceholder": "按媒体名、位置、关键词搜索",
+    "openFilters": "打开筛选",
+    "filterButton": "筛选",
+    "filterReset": "重置",
+    "filterClose": "关闭筛选",
+    "clearSearchAria": "清除搜索",
+    "browseWhere": "在哪里？",
+    "browsePopular": "热门",
+    "browseMoreFilters": "更多筛选",
+    "browseFeatures": "媒体特性",
+    "browseCampaignGoal": "广告目的",
+    "browseCampaignGoalEntry": "按 campaign 目的浏览",
+    "browseBudget": "价格区间",
+    "browsePriceMinKrw": "最低价（韩元）",
+    "browsePriceMaxKrw": "最高价（韩元）",
+    "browseListFiltersAria": "列表筛选与视图",
+    "browseSelectPage": "全选本页",
+    "browseClearCompare": "清空对比",
+    "browseTryAiRecommend": "试试 AI 推荐 →",
+    "browseCompareSelected": "✓ 已选",
+    "browseCompareAdd": "+ 加入对比",
+    "browseResetFiltersChip": "重置筛选 ×",
+    "browsePriceRangeTitle": "价格范围",
+    "browsePriceMinSlider": "最低（100万韩元）",
+    "browsePriceMaxSlider": "最高（100万韩元）",
+    "browseCategoriesSheetTitle": "类别与 campaign 目的",
+    "browseApply": "应用",
+    "browseMapButton": "地图",
+    "browseMapOpenAria": "打开地图",
+    "browseCartCount": "已加 {count}",
+    "browseCompareCount": "对比 {count}",
+    "browseViewCartAria": "查看购物车 {count} 项",
+    "browseViewCompareAria": "查看对比 {count} 项",
+    "browseActiveFilterCount": "{count} 个筛选",
+    "browseResultShownOfTotal": "共 {total} 条，显示 {shown} 条媒体",
+    "browseResultShownOfTotalNetwork": "共 {total} 条，显示 {shown} 条网络",
+    "browseResultTotalMedia": "共 {count} 条媒体",
+    "browseResultTotalNetwork": "共 {count} 条网络",
+    "browseCoachSearchTitle": "1/3 · 媒体搜索",
+    "browseCoachSearchDismiss": "下一步",
+    "browseSortPopularToday": "今日热门",
+    "browseSelectedPlanView": "已选 {count} 项 · 查看",
+    "browseSelectedView": "已选 {count} 项 · 查看",
+    "browseSelectedPlan": "已选 {count} 项",
+    "browseSelected": "已选 {count} 项"
   },
   "recommend": {
     "form": {
@@ -3512,7 +3560,8 @@
       "step3Title": "结果与保存",
       "step3Desc": "保存确认的媒体组合和指标快照。",
       "cta": "启动AI规划器",
-      "viewAll": "查看所有媒体 →"
+      "viewAll": "查看所有媒体 →",
+      "promptLabel": "用一句话描述"
     },
     "twoAxis": {
       "eyebrow": "THINKAD",
@@ -3658,7 +3707,14 @@
     "personalizedTitle": "为<accent>{name}</accent>推荐",
     "personalizedMeta": "根据最近浏览、行业和预算",
     "personalizedCtaRecommend": "更多AI推荐",
-    "personalizedCtaPlanner": "试用AI规划器"
+    "personalizedCtaPlanner": "试用AI规划器",
+    "metadata": {
+      "homeTitle": "广告牌·地铁·公交 OOH 价格对比 | OOH 与数字媒体一览",
+      "homeSrOnlyH1": "广告牌·地铁·公交 OOH 价格对比 — 比较 OOH 与数字媒体",
+      "mediaListingDescription": "按月费、地区、类型比较已验证的广告牌、地铁、公交与 DOOH 媒体，在 THINKAD 即时询价。"
+    },
+    "heroBannerAriaLabel": "首页主视觉",
+    "heroBannerSlideAlt": "背景图 {n}"
   },
   "onboarding": {
     "kicker": "引导流程",
@@ -4187,5 +4243,26 @@
         }
       }
     }
+  },
+  "planCart": {
+    "addToPlan": "加入方案",
+    "add": "加入",
+    "addShort": "加入",
+    "remove": "移除",
+    "removeShort": "移除",
+    "removeHint": "再次点击可移除",
+    "addToPlanner": "加入规划器",
+    "addToPlannerHint": "规划器：将此媒体加入 campaign",
+    "alreadyInPlan": "已在方案中",
+    "limitTitle": "方案上限",
+    "removedToast": "已从方案中移除 {name}",
+    "addedToast": "已将 {name} 加入方案",
+    "ariaAdd": "加入方案",
+    "ariaRemove": "从方案移除（再次点击）",
+    "excludedBudget": "因预算从方案中排除",
+    "whyRecommended": "推荐理由",
+    "whyShort": "理由",
+    "noImage": "图片准备中",
+    "noImageShort": "准备中"
   }
 }

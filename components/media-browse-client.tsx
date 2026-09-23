@@ -148,10 +148,10 @@ export default function MediaBrowseClient({
   // TODO: dev server restart if needed (after large UI changes)
   const t = useTranslations();
   const tMedia = useTranslations("media");
+  const tNav = useTranslations("nav");
   const locale = useLocale();
   const router = useRouter();
-  const isKo = locale === "ko";
-  const searchParams = useSearchParams();
+    const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
   const catFromUrl = searchParams.get("cat") ?? "";
   const categoryFromUrl = searchParams.get("category") ?? "";
@@ -814,9 +814,9 @@ export default function MediaBrowseClient({
         <CategoryExploreHero
           code="// 01 · MEDIA"
           showBeta
-          headlineBefore={isKo ? "전국 " : "Search "}
-          headlineGradient={isKo ? "OOH 매체" : "OOH media"}
-          headlineAfter={isKo ? " 검색" : " nationwide"}
+          headlineBefore={tMedia("browseHeroHeadlineBefore")}
+          headlineGradient={tMedia("browseHeroHeadlineGradient")}
+          headlineAfter={tMedia("browseHeroHeadlineAfter")}
           subtitle={t("media.subtitle")}
         >
           <div className="mx-auto mt-1 w-full max-w-xl">
@@ -828,11 +828,9 @@ export default function MediaBrowseClient({
               <CompositionSearchInput
                 value={catalogSearchQuery}
                 onValueChange={setCatalogSearchQuery}
-                placeholder={
-                  isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
-                }
+                placeholder={tMedia("browseSearchPlaceholder")}
                 className="h-11 w-full rounded-2xl border dark:border-white/18 border-gray-300 dark:bg-white/8 bg-gray-100 pl-10 pr-3 text-base dark:text-white text-gray-900 shadow-[0_18px_56px_rgba(0,0,0,0.4)] placeholder:dark:text-white backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-hermes/40 sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
-                aria-label={isKo ? "매체 검색" : "Search media"}
+                aria-label={tNav("searchAria")}
               />
             </div>
           </div>
@@ -848,7 +846,6 @@ export default function MediaBrowseClient({
 
       <section className="tkad-media-browse-main border-t border-border/60 bg-card py-6 sm:py-14 md:py-10">
         <MobileMediaBrowseBar
-          isKo={isKo}
           locale={locale}
           activeChip={mobileRegionChip}
           onChipChange={(chip) => {
@@ -872,7 +869,7 @@ export default function MediaBrowseClient({
               <MediaScarcitySection
                 catalog={effectiveCatalog}
                 summary={availabilitySummary}
-                isKo={isKo}
+                locale={locale}
                 imagePreparingLabel={t("media.imagePreparing")}
               />
 
@@ -915,7 +912,7 @@ export default function MediaBrowseClient({
                 />
                 <div className="mb-4 rounded-2xl border border-border bg-card p-4">
                   <p className="mb-2 text-sm font-semibold text-foreground">
-                    {isKo ? "가격 범위" : "Price range"}
+                    {tMedia("browsePriceRangeTitle")}
                   </p>
                   <p className="mb-3 text-xs tabular-nums text-hermes">
                     ₩{(budgetMin * 10000).toLocaleString()} ~ ₩
@@ -923,7 +920,7 @@ export default function MediaBrowseClient({
                   </p>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <label className="flex flex-1 flex-col gap-1 text-xs text-muted-foreground">
-                      {isKo ? "최소 (100만원)" : "Min (₩1M)"}
+                      {tMedia("browsePriceMinSlider")}
                       <input
                         type="range"
                         min={0}
@@ -939,7 +936,7 @@ export default function MediaBrowseClient({
                       />
                     </label>
                     <label className="flex flex-1 flex-col gap-1 text-xs text-muted-foreground">
-                      {isKo ? "최대 (100만원)" : "Max (₩1M)"}
+                      {tMedia("browsePriceMaxSlider")}
                       <input
                         type="range"
                         min={0}
@@ -965,7 +962,7 @@ export default function MediaBrowseClient({
                     onClick={resetFilters}
                     className="inline-flex items-center gap-1 rounded-full border border-hermes/30 bg-hermes/15 px-3 py-1.5 text-xs font-semibold text-hermes"
                   >
-                    {isKo ? "필터 초기화 ×" : "Reset filters ×"}
+                    {tMedia("browseResetFiltersChip")}
                   </button>
                 </div>
               ) : null}
@@ -1088,7 +1085,7 @@ export default function MediaBrowseClient({
                 >
                   <SheetHeader className="pb-3 text-left">
                     <SheetTitle>
-                      {isKo ? "카테고리·캠페인 목적" : "Categories"}
+                      {tMedia("browseCategoriesSheetTitle")}
                     </SheetTitle>
                   </SheetHeader>
                   <MediaCategoryFilterPanel
@@ -1110,7 +1107,7 @@ export default function MediaBrowseClient({
                       className="w-full"
                       onClick={() => setCategoryFiltersOpen(false)}
                     >
-                      {isKo ? "적용" : "Apply"}
+                      {tMedia("browseApply")}
                     </BtnBlock>
                   </div>
                 </SheetContent>
@@ -1145,7 +1142,7 @@ export default function MediaBrowseClient({
                   <div
                     className="flex flex-wrap items-center gap-2 rounded-xl border border-border/70 bg-muted/30 p-2 sm:gap-2.5"
                     role="toolbar"
-                    aria-label={isKo ? "목록 필터 및 보기" : "List filters and view"}
+                    aria-label={tMedia("browseListFiltersAria")}
                   >
                     <button
                       type="button"
@@ -1256,7 +1253,7 @@ export default function MediaBrowseClient({
                           variant="secondary"
                           size="sm"
                         >
-                          {isKo ? "전체선택" : "Select page"}
+                          {tMedia("browseSelectPage")}
                         </BtnBlock>
                         <BtnBlock
                           onClick={() => setCompareCartEntries([])}
@@ -1264,7 +1261,7 @@ export default function MediaBrowseClient({
                           variant="secondary"
                           size="sm"
                         >
-                          {isKo ? "비교 비우기" : "Clear compare"}
+                          {tMedia("browseClearCompare")}
                         </BtnBlock>
                       </div>
                     ) : null}
@@ -1313,17 +1310,17 @@ export default function MediaBrowseClient({
                 {gridDisplayList.length === 0 ? (
                   <div className="flex min-h-[24rem] flex-col items-center justify-center gap-6 rounded-2xl border border-gray-100 bg-white px-6 py-16 text-center dark:border-white/10 dark:bg-white/5 sm:px-10">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
-                      {isKo ? "조건에 맞는 매체가 없어요" : "No media matches your filters"}
+                      {tMedia("catalogNoMatchesHint")}
                     </p>
                     <p className="max-w-md text-sm text-gray-500 dark:text-white/60">
-                      {isKo ? "필터를 조정해보세요" : "Try adjusting your filters"}
+                      {tMedia("catalogBrowseEmptySubtitle")}
                     </p>
                     <div className="flex flex-wrap justify-center gap-3">
                       <BtnBlock onClick={resetFilters} variant="secondary" size="md">
-                        {isKo ? "필터 초기화 ×" : "Reset filters ×"}
+                        {tMedia("browseResetFiltersChip")}
                       </BtnBlock>
                       <BtnBlock href="/recommend" variant="primary" size="md">
-                        {isKo ? "AI 매체 추천 써보기 →" : "Try AI recommend →"}
+                        {tMedia("browseTryAiRecommend")}
                       </BtnBlock>
                     </div>
                   </div>
@@ -1342,11 +1339,7 @@ export default function MediaBrowseClient({
                         <div
                           className="pointer-events-auto w-full max-w-md max-h-[40vh] overflow-y-auto animate-in fade-in slide-in-from-bottom-3 duration-200"
                           role="dialog"
-                          aria-label={
-                            isKo
-                              ? mapSelectedMedia.name
-                              : mapSelectedMedia.nameEn
-                          }
+                          aria-label={locale === "ko" ? mapSelectedMedia.name : mapSelectedMedia.nameEn}
                         >
                           <div className="overflow-hidden border-2 border-border bg-card">
                             <div className="flex items-start gap-3 border-b-2 border-border p-3 sm:p-4">
@@ -1361,9 +1354,7 @@ export default function MediaBrowseClient({
                               </div>
                               <div className="min-w-0 flex-1 pt-0.5">
                                 <h3 className="line-clamp-2 text-base font-bold leading-snug tracking-tight text-foreground sm:text-lg">
-                                  {isKo
-                                    ? mapSelectedMedia.name
-                                    : mapSelectedMedia.nameEn}
+                                  {locale === "ko" ? mapSelectedMedia.name : mapSelectedMedia.nameEn}
                                 </h3>
                                 <p className="mt-1.5 font-display text-sm font-bold tabular-nums text-foreground">
                                   {formatCatalogPriceFieldWon(mapSelectedMedia.price)}
@@ -1376,7 +1367,7 @@ export default function MediaBrowseClient({
                                     )}
                                   </span>
                                 </p>
-                                <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+                                <MediaPriceExclNote locale={locale} className="mt-0.5" />
                                 <p className="mt-1.5 flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                                   <Users
                                     className="h-3 w-3 shrink-0 text-accent"
@@ -1420,8 +1411,7 @@ export default function MediaBrowseClient({
                                 className="flex-1 min-w-[8rem]"
                               >
                                 {isInCompare(mapSelectedMedia.id)
-                                  ? (isKo ? "✓ 선택됨" : "✓ Selected")
-                                  : (isKo ? "+ 비교 추가" : "+ Compare")}
+                                  ? tMedia("browseCompareSelected") : tMedia("browseCompareAdd")}
                               </BtnBlock>
                               <BtnBlock
                                 href={buildQuoteWizardEntryHref(mapSelectedMedia)}
@@ -1450,7 +1440,7 @@ export default function MediaBrowseClient({
                       <MediaCatalogGridCard
                         variant="link"
                         media={media}
-                        isKo={isKo}
+                        locale={locale}
                         denseMobile
                         imagePreparingLabel={t("media.imagePreparing")}
                         popularIds={popularIds}
@@ -1494,7 +1484,7 @@ export default function MediaBrowseClient({
                           {catalogCardLayout === "compact" ? (
                             <MediaCatalogListCard
                               media={media}
-                              isKo={isKo}
+                              locale={locale}
                               imagePreparingLabel={t("media.imagePreparing")}
                               rank={
                                 sortBy === "default" || sortBy === "ratingDesc"
@@ -1506,7 +1496,7 @@ export default function MediaBrowseClient({
                             <MediaCatalogGridCard
                               variant="link"
                               media={media}
-                              isKo={isKo}
+                              locale={locale}
                               denseMobile
                               imagePreparingLabel={t("media.imagePreparing")}
                               popularIds={popularIds}
@@ -1519,7 +1509,7 @@ export default function MediaBrowseClient({
                         <div className="hidden md:block">
                           <MediaCatalogCompactLinkRow
                             media={media}
-                            isKo={isKo}
+                            locale={locale}
                             href={mediaItemDetailPath(media)}
                             imagePreparingLabel={t("media.imagePreparing")}
                             popularIds={popularIds}

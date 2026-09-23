@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { Plus, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
@@ -12,6 +13,7 @@ import {
   formatPlannerRecommendLine,
   type MediaCardDisplayModel,
 } from "@/lib/media-card-display";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
 import { cn } from "@/lib/utils";
 
@@ -19,12 +21,12 @@ function CategoryTrustLine({
   type,
   trustScore,
   isVerified,
-  isKo,
+  locale,
 }: {
   type?: string;
   trustScore?: number;
   isVerified?: boolean;
-  isKo: boolean;
+  locale: string;
 }) {
   if (!type && trustScore == null && !isVerified) return null;
   return (
@@ -33,12 +35,12 @@ function CategoryTrustLine({
         <p className="tkad-type-label text-tkad-muted">{type.trim()}</p>
       ) : null}
       {trustScore != null ? (
-        <MediaTrustScoreBadge score={trustScore} isKo={isKo} compact />
+        <MediaTrustScoreBadge score={trustScore} locale={locale} compact />
       ) : null}
       {isVerified ? (
         <MediaThumbnailTrustOverlay
           item={{ isVerified: true, isInstantBooking: false }}
-          isKo={isKo}
+          locale={locale}
           variant="feed"
           verifiedOnly
           layout="flow"
@@ -50,7 +52,6 @@ function CategoryTrustLine({
 
 export type DiscoveryMediaCardHorizontalProps = {
   model: MediaCardDisplayModel;
-  isKo?: boolean;
   rank?: number;
   className?: string;
   /** 지도 리스트 — 카드 전체 클릭 */
@@ -71,7 +72,6 @@ export type DiscoveryMediaCardHorizontalProps = {
 
 export function DiscoveryMediaCardHorizontal({
   model,
-  isKo = true,
   rank,
   className,
   interactive = false,
@@ -88,12 +88,15 @@ export function DiscoveryMediaCardHorizontal({
   addedFrom = "search",
   stopPropagation = false,
 }: DiscoveryMediaCardHorizontalProps) {
+  const locale = useLocale();
+  const tPlan = useTranslations("planCart");
+  const useKo = normalizeMediaDetailTextLocale(locale) === "ko";
   const heroImage = model.thumbnailUrl
     ? catalogThumbnailImageProps(model.thumbnailUrl)
     : null;
 
   const narrowMetric = model.metricLineCompact ?? model.metricLine;
-  const plannerRecommendLine = formatPlannerRecommendLine(model, isKo);
+  const plannerRecommendLine = formatPlannerRecommendLine(model, useKo);
 
   const thumbInner = (
     <>
@@ -113,7 +116,7 @@ export function DiscoveryMediaCardHorizontal({
         />
       ) : (
         <div className="tkad-type-note flex h-full items-center justify-center text-tkad-muted">
-          {isKo ? "이미지 준비중" : "No image"}
+          {tPlan("noImage")}
         </div>
       )}
       {model.galleryExtraCount > 0 ? (
@@ -169,7 +172,7 @@ export function DiscoveryMediaCardHorizontal({
     mediaId: model.id,
     planItem: planItem!,
     detailHref: model.detailHref,
-    isKo,
+    locale,
     inCompare,
     onToggleCompare,
     addedFrom,
@@ -184,7 +187,7 @@ export function DiscoveryMediaCardHorizontal({
           if (stopPropagation) e.stopPropagation();
           onTogglePlan();
         }}
-        title={isInPlan ? (isKo ? "다시 누르면 빼기" : "Tap again to remove") : undefined}
+        title={isInPlan ? tPlan("removeHint") : undefined}
         className={cn(
           "flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-semibold transition-colors",
           isInPlan
@@ -195,12 +198,12 @@ export function DiscoveryMediaCardHorizontal({
         {isInPlan ? (
           <>
             <X className="h-4 w-4" />
-            {isKo ? "빼기" : "Remove"}
+            {tPlan("remove")}
           </>
         ) : (
           <>
             <Plus className="h-4 w-4" />
-            {isKo ? "플랜 담기" : "Add to plan"}
+            {tPlan("addToPlan")}
           </>
         )}
       </button>
@@ -260,7 +263,7 @@ export function DiscoveryMediaCardHorizontal({
                 {model.isVerified ? (
                   <MediaThumbnailTrustOverlay
                     item={{ isVerified: true, isInstantBooking: false }}
-                    isKo={isKo}
+                    locale={locale}
                     variant="feed"
                     verifiedOnly
                     layout="flow"
@@ -273,7 +276,7 @@ export function DiscoveryMediaCardHorizontal({
                 type={model.type}
                 trustScore={model.trustScore}
                 isVerified={model.isVerified}
-                isKo={isKo}
+                locale={locale}
               />
             </div>
             {interactive ? (
@@ -305,7 +308,7 @@ export function DiscoveryMediaCardHorizontal({
                 /{model.periodLabel}
               </span>
             ) : null}
-            <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
+            <MediaPriceExclNote locale={locale} className="tkad-type-note" />
           </div>
 
           {plannerRecommendLine ? (
@@ -314,7 +317,7 @@ export function DiscoveryMediaCardHorizontal({
             </p>
           ) : model.excludedForBudgetReason ? (
             <p className="tkad-type-note line-clamp-1 text-tkad-muted">
-              {isKo ? "예산 부족으로 플랜에서 제외됨" : "Excluded from plan (budget)"}
+              {tPlan("excludedBudget")}
             </p>
           ) : null}
 

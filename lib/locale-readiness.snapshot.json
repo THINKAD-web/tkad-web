@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-22T23:31:21.893Z",
+  "generatedAt": "2026-09-23T00:28:29.249Z",
   "messageKeyThreshold": 1,
   "mediaCoverageThreshold": 0.95,
   "locales": {
     "ja": {
-      "messageKeyCountEn": 3729,
-      "messageKeyCountTarget": 3729,
+      "messageKeyCountEn": 3802,
+      "messageKeyCountTarget": 3802,
       "messageKeyRatio": 1,
       "messagesComplete": true,
       "missingMessageKeys": [],
@@ -16,8 +16,8 @@
       "indexAllowed": true
     },
     "zh": {
-      "messageKeyCountEn": 3729,
-      "messageKeyCountTarget": 3729,
+      "messageKeyCountEn": 3802,
+      "messageKeyCountTarget": 3802,
       "messageKeyRatio": 1,
       "messagesComplete": true,
       "missingMessageKeys": [],

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { HomeHeroAiPrompt } from "@/components/home/home-hero-ai-prompt";
 import { MEDIA_COUNT_LABEL_FALLBACK } from "@/lib/media-count-copy";
@@ -56,8 +56,6 @@ type HomeHeroBannerProps = {
 };
 
 export function HomeHeroBanner({ mediaCountLabel }: HomeHeroBannerProps = {}) {
-  const locale = useLocale();
-  const isKo = locale === "ko";
   const t = useTranslations("homePage");
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -91,7 +89,7 @@ export function HomeHeroBanner({ mediaCountLabel }: HomeHeroBannerProps = {}) {
           "shadow-sm ring-1 ring-black/40",
         )}
         role="region"
-        aria-label={isKo ? "홈 히어로" : "Home hero"}
+        aria-label={t("heroBannerAriaLabel")}
       >
         <div className="ooh-home-hero__base" aria-hidden />
         <div className="ooh-home-hero__glow" aria-hidden />
@@ -153,11 +151,7 @@ export function HomeHeroBanner({ mediaCountLabel }: HomeHeroBannerProps = {}) {
               }}
               className="ooh-home-hero__dot"
               data-current={i === current ? "true" : "false"}
-              aria-label={
-                isKo
-                  ? `${i + 1}번째 배경 이미지`
-                  : `Background image ${i + 1}`
-              }
+              aria-label={t("heroBannerSlideAlt", { n: i + 1 })}
               aria-current={i === current ? "true" : undefined}
             />
           ))}

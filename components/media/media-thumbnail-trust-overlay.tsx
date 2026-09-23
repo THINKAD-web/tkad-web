@@ -5,6 +5,7 @@ import {
   MediaThumbnailBadgeStack,
 } from "@/components/media/media-thumbnail-badge-stack";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
 import { cn } from "@/lib/utils";
 
 type OverlayItem = Pick<
@@ -14,7 +15,9 @@ type OverlayItem = Pick<
 
 type Props = {
   item: OverlayItem;
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   variant?: "card" | "feed";
   /** 피드 카드 — 검증 뱃지만 (즉시예약은 상세로) */
   verifiedOnly?: boolean;
@@ -25,12 +28,17 @@ type Props = {
 
 export function MediaThumbnailTrustOverlay({
   item,
+  locale,
   isKo,
   verifiedOnly = false,
   className,
   layout = "overlay",
 }: Props) {
-  const badges = buildTrustThumbnailBadges(item, isKo, { verifiedOnly });
+  const useKo =
+    locale != null
+      ? normalizeMediaDetailTextLocale(locale) === "ko"
+      : (isKo ?? true);
+  const badges = buildTrustThumbnailBadges(item, useKo, { verifiedOnly });
   return (
     <MediaThumbnailBadgeStack
       badges={badges}

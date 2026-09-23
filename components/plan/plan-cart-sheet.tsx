@@ -13,14 +13,25 @@ import { cn } from "@/lib/utils";
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
 };
 
-export function PlanCartSheet({ open, onOpenChange, isKo = true }: Props) {
+export function PlanCartSheet({
+  open,
+  onOpenChange,
+  locale: localeProp,
+  isKo = true,
+}: Props) {
   useVaulStickyFix(open);
   const { cart, remove, clear } = usePlanCart();
   const items = cart.items;
-  const locale = isKo ? "ko-KR" : "en-US";
+  const useKo =
+    localeProp != null
+      ? localeProp === "ko" || localeProp.startsWith("ko")
+      : isKo;
+  const locale = useKo ? "ko-KR" : "en-US";
 
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} modal>

@@ -11,6 +11,8 @@ type Props = {
   chips: MediaMapActiveFilterChip[];
   onRemove: (key: MediaMapActiveFilterKey) => void;
   onClearAll: () => void;
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
   className?: string;
 };
@@ -19,9 +21,12 @@ export function MediaMapActiveFiltersBar({
   chips,
   onRemove,
   onClearAll,
-  isKo = true,
+  locale,
+  isKo,
   className,
 }: Props) {
+  const useKo =
+    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
   if (chips.length === 0) return null;
 
   return (
@@ -38,7 +43,7 @@ export function MediaMapActiveFiltersBar({
               onClick={() => onRemove(chip.key)}
               className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-white/45 dark:hover:bg-white/10 dark:hover:text-white"
               aria-label={
-                isKo ? `${chip.label} 필터 제거` : `Remove ${chip.label} filter`
+                useKo ? `${chip.label} 필터 제거` : `Remove ${chip.label} filter`
               }
             >
               <X className="h-3 w-3" aria-hidden />
@@ -51,7 +56,7 @@ export function MediaMapActiveFiltersBar({
           className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium text-rose-500 transition-colors hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300"
         >
           <X className="h-3 w-3" aria-hidden />
-          {isKo ? "필터 초기화" : "Clear all"}
+          {useKo ? "필터 초기화" : "Clear all"}
         </button>
       </div>
     </div>

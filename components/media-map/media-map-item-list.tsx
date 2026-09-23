@@ -88,7 +88,6 @@ export const MediaMapItemList = memo(function MediaMapItemList({
             variant="compact"
             compactLayout="map-tile"
             item={it}
-            isKo={isKo}
             locale={locale}
             selected={resolveMediaIdFromMapPinId(selectedId ?? "") === it.id}
             hovered={hoveredMediaId === it.id}

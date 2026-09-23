@@ -1,6 +1,7 @@
 "use client";
 
 import { Filter, LayoutList, Map as MapIcon, SlidersHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 export const MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID = "tkad-media-mobile-bottom-bar-slot";
@@ -11,6 +12,8 @@ const MOBILE_TOOLBAR_BTN =
   "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white tkad-type-meta font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10";
 
 type Props = {
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
   activeFilterCount?: number;
   sortLabel?: string;
@@ -22,7 +25,8 @@ type Props = {
 };
 
 export function MediaMobileBottomBar({
-  isKo = true,
+  locale,
+  isKo,
   activeFilterCount = 0,
   sortLabel,
   viewSegment = "list",
@@ -31,6 +35,10 @@ export function MediaMobileBottomBar({
   onOpenSort,
   className,
 }: Props) {
+  const t = useTranslations("media");
+  const useKo =
+    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
+
   return (
     <nav
       className={cn(
@@ -39,7 +47,7 @@ export function MediaMobileBottomBar({
         "pb-[env(safe-area-inset-bottom,0px)]",
         className,
       )}
-      aria-label={isKo ? "매체 탐색 도구" : "Media browse tools"}
+      aria-label={useKo ? "매체 탐색 도구" : "Media browse tools"}
       data-screenshot="media-mobile-bottom-bar"
     >
       <div className="flex min-w-0 items-center gap-2 px-3 py-2">
@@ -56,7 +64,7 @@ export function MediaMobileBottomBar({
             aria-pressed={viewSegment === "list"}
           >
             <LayoutList className="h-4 w-4 shrink-0" aria-hidden />
-            {isKo ? "목록" : "List"}
+            {t("browseViewList")}
           </button>
           <button
             type="button"
@@ -70,7 +78,7 @@ export function MediaMobileBottomBar({
             aria-pressed={viewSegment === "map"}
           >
             <MapIcon className="h-4 w-4 shrink-0" aria-hidden />
-            {isKo ? "지도" : "Map"}
+            {t("browseViewMap")}
           </button>
         </div>
 
@@ -78,10 +86,10 @@ export function MediaMobileBottomBar({
           type="button"
           onClick={onOpenFilters}
           className={cn(MOBILE_TOOLBAR_BTN, "relative px-3 py-2")}
-          aria-label={isKo ? "필터" : "Filters"}
+          aria-label={t("filterPanelTitle")}
         >
           <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
-          {isKo ? "필터" : "Filter"}
+          {t("filterButton")}
           {activeFilterCount > 0 ? (
             <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-violet-500 px-1.5 text-[11px] font-bold leading-none text-white">
               {activeFilterCount}
@@ -93,10 +101,10 @@ export function MediaMobileBottomBar({
           type="button"
           onClick={onOpenSort}
           className={cn(MOBILE_TOOLBAR_BTN, "max-w-[7.5rem] px-3 py-2")}
-          aria-label={isKo ? "정렬" : "Sort"}
+          aria-label={t("sortLabel")}
         >
           <Filter className="h-4 w-4 shrink-0 rotate-90" aria-hidden />
-          <span className="truncate">{sortLabel ?? (isKo ? "정렬" : "Sort")}</span>
+          <span className="truncate">{sortLabel ?? t("sortLabel")}</span>
         </button>
       </div>
     </nav>

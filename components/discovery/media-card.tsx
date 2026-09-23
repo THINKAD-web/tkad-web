@@ -46,7 +46,6 @@ export const DiscoveryMediaCard = forwardRef<
     recommendReasonInside = false,
     recommendRationaleProminent = false,
     cardFooter,
-    isKo = true,
     plannerMode = false,
     onTogglePlan,
     isInPlan = false,
@@ -65,7 +64,6 @@ export const DiscoveryMediaCard = forwardRef<
       <DiscoveryMediaCardMapTile
         ref={ref}
         {...props}
-        isKo={isKo}
         inCompare={inCompare}
         inCart={inCart}
         onToggleCompare={onToggleCompare}
@@ -99,7 +97,6 @@ export const DiscoveryMediaCard = forwardRef<
         highlights={props.highlights ?? []}
         locationLine={props.locationLine ?? null}
         priceLabel={props.priceLabel}
-        isKo={isKo}
         inCompare={inCompare}
         inCart={inCart}
         onToggleCompare={onToggleCompare}
@@ -117,7 +114,6 @@ export const DiscoveryMediaCard = forwardRef<
       <DiscoveryMediaCardCatalogTile
         item={props.item}
         href={props.href}
-        isKo={isKo}
         priceLabel={props.priceLabel}
         inCompare={inCompare}
         onToggleCompare={onToggleCompare}
@@ -137,7 +133,6 @@ export const DiscoveryMediaCard = forwardRef<
       <DiscoveryMediaCardCompactGrid
         item={props.item}
         href={props.href}
-        isKo={isKo}
         priceLabel={props.priceLabel}
         inCompare={inCompare}
         inCart={inCart}
@@ -171,7 +166,6 @@ export const DiscoveryMediaCard = forwardRef<
         item={props.item}
         href={props.href}
         metaLine={props.metaLine ?? ""}
-        isKo={isKo}
         inCompare={inCompare}
         inCart={inCart}
         onToggleCompare={onToggleCompare}
@@ -180,29 +174,23 @@ export const DiscoveryMediaCard = forwardRef<
         isInPlan={isInPlan}
         onTogglePlan={onTogglePlan}
         rank={rank}
+        showPlanButton={showPlanButton}
+        planAddedFrom={planAddedFrom}
+        plannerCardContext={plannerCardContext}
       />
     );
   }
 
-  const isStackedTile =
-    props.variant === "compact" &&
-    (props.compactLayout === "grid" || props.compactLayout === "map-tile");
-
-  if (!recommendReason?.trim() || recommendReasonInside) {
-    if (compactLayout === "map-tile") {
-      return card;
-    }
+  if (recommendReason?.trim() && !recommendReasonInside) {
     return (
-      <div className={cn(isStackedTile && "h-full min-h-0", className)}>{card}</div>
+      <li className={cn("list-none", className)}>
+        {card}
+        <p className="tkad-type-meta px-3 pb-2 text-tkad-accent">
+          {recommendReason}
+        </p>
+      </li>
     );
   }
 
-  return (
-    <div className={cn("space-y-0", className)}>
-      {card}
-      <p className="tkad-type-meta line-clamp-2 px-3 pb-2 text-tkad-accent">
-        {recommendReason}
-      </p>
-    </div>
-  );
+  return card;
 });

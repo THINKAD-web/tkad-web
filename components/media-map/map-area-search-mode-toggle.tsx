@@ -5,7 +5,9 @@ import type { MapAreaSearchMode } from "@/lib/media-map/map-area-search-mode";
 import { MAP_TOOLBAR_CTRL } from "@/components/media-map/map-toolbar-control-styles";
 
 type Props = {
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   mode: MapAreaSearchMode;
   onChange: (mode: MapAreaSearchMode) => void;
   className?: string;
@@ -14,17 +16,20 @@ type Props = {
 
 /** 지도 pan/zoom 후 자동 재조회 vs 수동 CTA */
 export function MapAreaSearchModeToggle({
+  locale,
   isKo,
   mode,
   onChange,
   className,
   compact = false,
 }: Props) {
+  const useKo =
+    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
   const setMode = (next: MapAreaSearchMode) => {
     if (next !== mode) onChange(next);
   };
 
-  const label = isKo ? "지역 검색" : "Area search";
+  const label = useKo ? "지역 검색" : "Area search";
 
   if (compact) {
     return (
@@ -45,7 +50,7 @@ export function MapAreaSearchModeToggle({
               : "text-tkad-muted hover:text-foreground",
           )}
         >
-          {isKo ? "수동" : "Manual"}
+          {useKo ? "수동" : "Manual"}
         </button>
         <button
           type="button"
@@ -58,7 +63,7 @@ export function MapAreaSearchModeToggle({
               : "text-tkad-muted hover:text-foreground",
           )}
         >
-          {isKo ? "자동" : "Auto"}
+          {useKo ? "자동" : "Auto"}
         </button>
       </div>
     );
@@ -86,12 +91,12 @@ export function MapAreaSearchModeToggle({
             : "",
         )}
         title={
-          isKo
+          useKo
             ? "지도 이동 후 「이 지역에서 검색」 버튼으로 불러오기"
             : "Load with “Search this area” after panning"
         }
       >
-        {isKo ? "수동" : "Manual"}
+        {useKo ? "수동" : "Manual"}
       </button>
       <button
         type="button"
@@ -105,12 +110,12 @@ export function MapAreaSearchModeToggle({
             : "",
         )}
         title={
-          isKo
+          useKo
             ? "지도 이동·줌 후 자동으로 이 영역 매체 불러오기"
             : "Auto-load media when you pan or zoom"
         }
       >
-        {isKo ? "자동" : "Auto"}
+        {useKo ? "자동" : "Auto"}
       </button>
     </div>
   );

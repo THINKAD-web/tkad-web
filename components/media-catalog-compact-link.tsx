@@ -21,7 +21,9 @@ import type { ReactNode } from "react";
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   href: string;
   imagePreparingLabel: string;
   popularIds?: Set<string>;
@@ -39,6 +41,7 @@ type Props = {
  */
 export function MediaCatalogCompactLinkRow({
   media,
+  locale,
   isKo,
   href,
   imagePreparingLabel,
@@ -48,6 +51,8 @@ export function MediaCatalogCompactLinkRow({
   className,
 }: Props) {
   const tMedia = useTranslations("media");
+  const useKo =
+    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
   const cheapest = getCheapestMediaPriceOption(media);
   const priceWon = cheapest?.priceWon ?? media.price;
   const displayPeriod = cheapest?.period ?? media.pricePeriod;
@@ -60,7 +65,7 @@ export function MediaCatalogCompactLinkRow({
   return (
     <Link
       href={href}
-      aria-label={isKo ? media.name : (media.nameEn || media.name)}
+      aria-label={useKo ? media.name : (media.nameEn || media.name)}
       className={cn(
         MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
         "group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
@@ -88,21 +93,21 @@ export function MediaCatalogCompactLinkRow({
       <div className="relative z-[1] flex min-w-0 flex-1 flex-col items-start justify-center gap-1 text-card-foreground">
         <div className="flex min-w-0 flex-wrap items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
           <span className="text-card-foreground">
-            [ {resolveMediaDisplayPill(media, isKo ? "ko" : "en")} ]
+            [ {resolveMediaDisplayPill(media, useKo ? "ko" : "en")} ]
           </span>
           {popularIds?.has(media.id) ? (
             <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-accent bg-accent px-1.5 py-[2px] text-[9px] font-bold tracking-[0.18em] text-accent-foreground">
               <Flame className="h-2 w-2" />
-              {isKo ? "인기" : "Hot"}
+              {useKo ? "인기" : "Hot"}
             </span>
           ) : null}
         </div>
         <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug tracking-tight text-card-foreground sm:line-clamp-1 sm:text-sm">
-          {isKo ? media.name : (media.nameEn || media.name)}
+          {useKo ? media.name : (media.nameEn || media.name)}
         </p>
         <p className="line-clamp-2 min-w-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground sm:line-clamp-1">
           {`// `}
-          {formatMediaLocationShort(media, isKo)}
+          {formatMediaLocationShort(media, useKo)}
         </p>
         <p className="min-w-0 shrink-0 break-words font-display text-[13px] font-bold tabular-nums leading-tight text-card-foreground sm:text-sm">
           {formatMediaPriceWonWithSymbol(priceWon)}

@@ -3,6 +3,24 @@ export const MEDIA_COUNT_LABEL_FALLBACK = "660+";
 
 export const MEDIA_COUNT_PLACEHOLDER = "{count}";
 
+import en from "@/messages/en.json";
+import ja from "@/messages/ja.json";
+import ko from "@/messages/ko.json";
+import zh from "@/messages/zh.json";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
+const HOME_META_BY_LOCALE = {
+  ko: ko.homePage.metadata,
+  en: en.homePage.metadata,
+  ja: ja.homePage.metadata,
+  zh: zh.homePage.metadata,
+} as const;
+
+function homeMetadata(locale: string) {
+  const bucket = normalizeMediaDetailTextLocale(locale);
+  return HOME_META_BY_LOCALE[bucket];
+}
+
 /** 내림 10단위 + "+" (예: 527 → "520+", 8 → "8") */
 export function formatTrustCount(n: number): string {
   if (!Number.isFinite(n) || n <= 0) return "0";
@@ -17,16 +35,12 @@ export function formatTrustCount(n: number): string {
  */
 export function homePageMetadataTitle(locale: string, countLabel: string): string {
   void countLabel;
-  return locale === "ko"
-    ? `전광판·지하철·버스 옥외광고 단가 비교 | OOH·디지털 매체 한눈에`
-    : `Billboard, subway & bus OOH pricing | OOH & digital media, compared`;
+  return homeMetadata(locale).homeTitle;
 }
 
 export function homePageSrOnlyH1(locale: string, countLabel: string): string {
   void countLabel;
-  return locale === "ko"
-    ? `전광판·지하철·버스 옥외광고 단가 비교 — OOH·디지털 매체 한눈에`
-    : `Billboard, subway & bus OOH pricing — compare OOH and digital media`;
+  return homeMetadata(locale).homeSrOnlyH1;
 }
 
 export function mediaListingMetadataDescription(
@@ -34,9 +48,7 @@ export function mediaListingMetadataDescription(
   countLabel: string,
 ): string {
   void countLabel;
-  return locale === "ko"
-    ? `전광판·지하철·버스·DOOH 등 검증 매체를 월 단가·지역·유형별로 비교하고 즉시 견적하세요. THINKAD 싱커드.`
-    : `Compare verified billboards, subway, bus, and DOOH media by monthly rate, region, and format — get instant quotes on THINKAD.`;
+  return homeMetadata(locale).mediaListingDescription;
 }
 
 export function injectMediaCountPlaceholder(

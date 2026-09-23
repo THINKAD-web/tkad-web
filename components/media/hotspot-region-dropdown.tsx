@@ -17,6 +17,8 @@ import {
 import { cn } from "@/lib/utils";
 
 type Props = {
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
   regionSub: string;
   onSelect: (regionMain: string, regionSub: string) => void;
@@ -28,13 +30,16 @@ type Props = {
 
 /** `/media/map` — 인기 지역 compact dropdown (body portal) */
 export function HotspotRegionDropdown({
-  isKo = true,
+  locale,
+  isKo,
   regionSub,
   onSelect,
   onClear,
   className,
   compact = false,
 }: Props) {
+  const useKo =
+    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
   const hotspots = listMediaHotspotRegions();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -49,8 +54,8 @@ export function HotspotRegionDropdown({
 
   const active = hotspots.find((h) => h.regionSub === regionSub);
   const triggerLabel = active
-    ? hotspotRegionLabel(active, isKo)
-    : isKo
+    ? hotspotRegionLabel(active, useKo)
+    : useKo
       ? "인기 지역"
       : "Hot areas";
 
@@ -87,8 +92,8 @@ export function HotspotRegionDropdown({
         panelRef={panelRef}
         getPlacement={getPlacement}
         backdropClassName="absolute inset-0 bg-transparent"
-        closeAriaLabel={isKo ? "닫기" : "Close"}
-        dialogAriaLabel={isKo ? "인기 지역" : "Hot areas"}
+        closeAriaLabel={useKo ? "닫기" : "Close"}
+        dialogAriaLabel={useKo ? "인기 지역" : "Hot areas"}
         panelClassName="overflow-y-auto rounded-xl border border-border/80 bg-card py-1 shadow-lg dark:border-white/12 dark:bg-[#0a0a12]"
       >
         <ul role="listbox" className="min-w-[11rem]">
@@ -102,7 +107,7 @@ export function HotspotRegionDropdown({
                   setOpen(false);
                 }}
               >
-                {isKo ? "선택 해제" : "Clear selection"}
+                {useKo ? "선택 해제" : "Clear selection"}
               </button>
             </li>
           ) : null}
@@ -128,7 +133,7 @@ export function HotspotRegionDropdown({
                   }}
                 >
                   <span className="min-w-0 truncate">
-                    {hotspotRegionLabel(h, isKo)}
+                    {hotspotRegionLabel(h, useKo)}
                   </span>
                   <span className="shrink-0 tabular-nums text-tkad-muted">
                     {h.mediaCount}

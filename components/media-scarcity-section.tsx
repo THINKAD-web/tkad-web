@@ -11,14 +11,14 @@ import type { AvailabilitySummaryResponse } from "@/lib/use-media-availability-s
 type Props = {
   catalog: MediaItem[];
   summary: AvailabilitySummaryResponse | null;
-  isKo: boolean;
+  locale: string;
   imagePreparingLabel: string;
 };
 
 export function MediaScarcitySection({
   catalog,
   summary,
-  isKo,
+  locale,
   imagePreparingLabel,
 }: Props) {
   const t = useTranslations("media.availabilityLive");
@@ -76,7 +76,7 @@ export function MediaScarcitySection({
             <MediaCatalogGridCard
               variant="link"
               media={media}
-              isKo={isKo}
+              locale={locale}
               denseMobile
               imagePreparingLabel={imagePreparingLabel}
               availabilityTier={summary?.items[media.id]?.tier}

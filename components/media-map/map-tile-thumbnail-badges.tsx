@@ -101,6 +101,8 @@ function buildMapTileThumbnailBadges(
 
 type Props = {
   item: MapMapItem;
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
   hideVisibilityScore?: boolean;
   className?: string;
@@ -110,12 +112,15 @@ type Props = {
 
 export function MapTileThumbnailBadges({
   item,
-  isKo = true,
+  locale,
+  isKo,
   hideVisibilityScore = false,
   className,
   layout = "overlay",
 }: Props) {
-  let badges = buildMapTileThumbnailBadges(item, isKo);
+  const useKo =
+    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
+  let badges = buildMapTileThumbnailBadges(item, useKo);
   if (hideVisibilityScore) {
     badges = badges.filter((b) => b.key !== "visibility");
   }

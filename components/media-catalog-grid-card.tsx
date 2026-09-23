@@ -36,7 +36,9 @@ export const mediaCatalogGridCardShellClass =
 
 type Common = {
   media: MediaItem;
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   imagePreparingLabel: string;
   popularIds?: ReadonlySet<string>;
   /** 카탈로그 `price`와 동일 만원 단위 (네트워크 월 환산 등) */
@@ -68,7 +70,9 @@ export type MediaCatalogGridCardProps =
 export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const router = useRouter();
   const tMedia = useTranslations("media");
-  const { media, isKo, imagePreparingLabel, popularIds } = props;
+  const { media, locale, isKo, imagePreparingLabel, popularIds } = props;
+  const useKo =
+    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
   const denseMobile = props.denseMobile ?? false;
   // priceMan 명시(예: 네트워크 패키지 월 환산) 가 우선.
   // 없으면 priceOptions + price 중 *가장 저렴한* 옵션을 표시.
@@ -78,12 +82,14 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   // cheapest.priceWon 은 이미 원(₩) 단위 — formatMediaPriceWonWithSymbol 에 그대로 전달.
   // priceMan / media.price 폴백은 기존 동작 유지 (호출부 데이터 단위에 의존).
   const rawPrice = cheapest?.priceWon ?? props.priceMan ?? media.price;
-  const priceWon = cheapest?.priceWon ?? catalogPriceFieldToWon(rawPrice);
+  const priceWon =
+    cheapest?.priceWon ??
+    (rawPrice != null ? catalogPriceFieldToWon(rawPrice) : 0);
   const displayPeriod =
     props.pricePeriod ?? cheapest?.period ?? media.pricePeriod;
   const showPricePeriod =
     props.showPricePeriod ?? (!!cheapest || props.pricePeriod != null);
-  const typeLabel = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
+  const typeLabel = resolveMediaDisplayPill(media, useKo ? "ko" : "en");
 
   const thumbnailOverlays = (
     <>
@@ -104,7 +110,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           className="absolute left-0 z-10 max-w-[calc(100%-0.5rem)] border-b-2 border-r-2 border-border bg-card/95 px-2 py-1 text-[10px] font-bold tracking-wide backdrop-blur-sm"
           style={{ top: `${i * 1.75}rem` }}
         >
-          {b.emoji} {isKo ? b.labelKo : b.labelEn}
+          {b.emoji} {useKo ? b.labelKo : b.labelEn}
         </div>
       ))}
       {props.variant === "link" ? props.topLeftSlot : null}
@@ -133,7 +139,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
       {popularIds?.has(media.id) ? (
         <div className="absolute bottom-0 right-0 z-10 flex items-center gap-1 border-l-2 border-t-2 border-border bg-accent px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.2em] text-accent-foreground">
           <Flame className="h-3 w-3" />
-          {isKo ? "인기" : "Hot"}
+          {useKo ? "인기" : "Hot"}
         </div>
       ) : null}
     </>
@@ -176,7 +182,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
             denseMobile ? "text-sm sm:text-lg" : "text-base sm:text-lg",
           )}
         >
-          {isKo ? media.name : (media.nameEn || media.name)}
+          {useKo ? media.name : (media.nameEn || media.name)}
         </h3>
         <p
           className={cn(
@@ -184,18 +190,18 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
             denseMobile ? "text-[11px] sm:text-sm" : "text-sm",
           )}
         >
-          {formatMediaLocationShort(media, isKo)}
+          {formatMediaLocationShort(media, useKo)}
         </p>
         <MediaRatingBadge
           averageRating={media.averageRating}
           reviewCount={media.reviewCount}
-          isKo={isKo}
+          isKo={useKo}
           className="mt-0.5"
         />
         {media.trustScore != null ? (
           <MediaTrustScoreBadge
             score={media.trustScore}
-            isKo={isKo}
+            locale={locale ?? (useKo ? "ko" : "en")}
             compact
             className="mt-1"
           />
@@ -203,7 +209,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         {media.trustBadges && media.trustBadges.length > 2 ? (
           <MediaTrustBadges
             badges={media.trustBadges.slice(2)}
-            isKo={isKo}
+            locale={locale ?? (useKo ? "ko" : "en")}
             compact
             className="mt-1"
           />
@@ -239,12 +245,12 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
     return (
       <Link
         href={mediaItemDetailPath(media)}
-        aria-label={isKo ? media.name : (media.nameEn || media.name)}
+        aria-label={useKo ? media.name : (media.nameEn || media.name)}
         className={wrapClass}
         onClick={() =>
           trackGaEvent("media_click", {
             media_id: media.id,
-            media_type: media.type,
+            media_type: media.type ?? undefined,
           })
         }
       >
