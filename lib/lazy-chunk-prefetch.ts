@@ -1,6 +1,7 @@
 /** Shared lazy-chunk prefetch helpers — idempotent, safe to call repeatedly. */
 
 let supportAiChatModalPromise: Promise<unknown> | null = null;
+let mapBasemapChunkPromise: Promise<unknown> | null = null;
 let mapChunksPromise: Promise<unknown> | null = null;
 
 export function prefetchSupportAiChatModal() {
@@ -10,10 +11,18 @@ export function prefetchSupportAiChatModal() {
   return supportAiChatModalPromise;
 }
 
+/** Leaflet + `dark-map-view` only — safe to start before map page client hydrates. */
+export function prefetchMapBasemapChunk() {
+  if (!mapBasemapChunkPromise) {
+    mapBasemapChunkPromise = import("@/components/public-map/dark-map-view");
+  }
+  return mapBasemapChunkPromise;
+}
+
 export function prefetchMapChunks() {
   if (!mapChunksPromise) {
     mapChunksPromise = Promise.all([
-      import("@/components/public-map/dark-map-view"),
+      prefetchMapBasemapChunk(),
       import("@/components/media-map/media-map-page-client"),
     ]);
   }
