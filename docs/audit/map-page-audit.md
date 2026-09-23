@@ -796,8 +796,10 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 
 | 변수 | Production | Preview | Development |
 |------|------------|---------|-------------|
-| `NEXT_PUBLIC_VWORLD_API_KEY` | **없음** | 있음 | 있음 |
+| `NEXT_PUBLIC_VWORLD_API_KEY` | **없음 → 2026-09-23 등록** | 있음 | 있음 |
 | `NEXT_PUBLIC_CARTO_BASEMAPS_API_KEY` | **없음** | **없음** | **없음** |
+
+**정렬 전 confound (§C·배치 2·3 표):** 위 표의 Production **「없음」** 시점 기준 측정값. §D 이후 Production은 VWorld 포함 빌드.
 
 - **`git-main` / `tkad.co.kr`:** `vercel inspect tkad-web-git-main-…` → **`target: production`**. Lab LCP 타일 **OSM** — **다크 테마 설계(Carto) 때문이 아님**. 측정 시각(주간) **라이트** + Production 빌드에 VWorld 미포함 → `publicMapTileUrlForTheme('light')` → Carto voyager 의도 → Carto 키 없음 → **OSM** (`lib/public-dark-map-config.ts`).
 - **PR branch Preview:** 빌드 시 VWorld 인라인 → 라이트에서 **VWorld WMTS** → Lab LCP **~14–16 s**.
@@ -805,19 +807,25 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 
 #### D. Production VWorld env 정렬 후 재측정 (2026-09-23)
 
-- **운영:** `NEXT_PUBLIC_VWORLD_API_KEY` → Vercel **Production** 추가 · `vercel deploy --prod` · `git-main` alias가 구 배포에 남아 있던 문제 → 최신 Production(`dpl_2eJe…`)으로 **alias 수동 정렬** (`tkad.co.kr`과 동일 HTML `data-dpl-id` 확인).
-- **VWorld 도메인:** Preview 빌드 타일 URL + `Referer: https://tkad.co.kr/…` → **PNG 200** (콘솔 미등록 403 시나리오는 이번 키·도메인 조합에서 재현 안 됨).
+**사전 확인 (등록 전 필수)**
+
+1. **VWorld 콘솔 도메인:** `.env.production.example` 기준 허용 도메인에 `tkad.co.kr`, `www.tkad.co.kr`, `*.vercel.app`, `localhost` 명시. 등록 후 **WMTS 샘플 타일** + `Referer: https://tkad.co.kr/ko/media/map` → **HTTP 200** (미등록 시 403 → 키만 넣어도 OSM 폴백처럼 보이는 혼선).
+2. **라이트/다크:** 코드상 **라이트만 VWorld** (`publicMapTileUrlForTheme`). **다크는 Carto dark** 설계이나 **Carto 키가 전 환경 없음** → 다크 사용자는 **여전히 OSM**. 이번 작업은 **VWorld Production 키만** — 야간·다크 LCP/체감은 **변경 없음**.
+3. **Carto 키 범위:** GA4 `user_properties.theme` (`components/public-analytics-loader.tsx` — `light`/`dark`, `tkad:theme-auto-changed` 반영)로 **주간/야간 비율** 확인 후 Carto Production 키 등록 여부 결정. 다크 비중이 크면 Carto가 VWorld 다음 레버.
+
+**운영:** `NEXT_PUBLIC_VWORLD_API_KEY` → Vercel **Production** 추가 · Production 재배포(`dpl_2eJeF6vom6By6SCC9aT7KJqCja1n`, 2026-09-23). **`git-main` alias가 구 OSM 빌드에 묶여 있던 구간** → 최신 Production과 **동일 deployment**로 정렬 후 재측정.
 
 | URL | LCP 3 runs (s) | LCP median | LCP 타일 (lab) | TBT median |
 |-----|----------------|------------|----------------|------------|
 | `tkad.co.kr` (정렬 후) | 15.9, 25.5, 16.3 | **16.3 s** | **VWorld** (3/3) | ~1,645 ms |
-| `git-main` alias (정렬 **후**) | 17.8, 26.9, 25.0 | **25.0 s** | **VWorld** (median run) | ~1,659 ms |
+| `git-main` alias (정렬 **후**, VWorld 빌드) | 17.8, 26.9, 25.0 | **25.0 s** | **VWorld** (3/3) | ~1,659 ms |
+| `git-main` alias (정렬 **전**, stale OSM 빌드) | — | **~25 s** | **OSM** (3/3) | — |
 | `git-main` (정렬 **전**, OSM 빌드) | — | **~25.5 s** | OSM | ~1,595 ms |
 | bisect `#671` Preview (참고) | 14.6, 16.4, 14.6 | **14.6 s** | VWorld | ~1,353 ms |
 
 **해석:** env 정렬으로 Production lab LCP 타일은 **OSM → VWorld** 전환 확인. **OSM ~25 s → VWorld ~16 s대**로 내려가 bisect Preview(~15 s)와 **같은 호스트·같은 코드** 기준으로 근접 — **배치 3 “git-main 26 s 역행”은 코드 회귀가 아님**. run 간 **15 s / 25 s 이원 편차**는 동일 배포에서도 재현(lab·cold start) → 단일 중앙값만으로 배치 4 go/no-go 금지.
 
-**배치 3 코드 효과 (Production + VWorld, 정렬 후):** Preview bisect와 방향 일치 — **미세 개선 수준, LCP 8 s 목표 미달**. Carto Production 키·다크 사용자는 GA4 `user_properties.theme` 확인 후 별도.
+**배치 3 코드 효과 (Production + VWorld, `git-main`/`tkad.co.kr` 동일 빌드):** Preview bisect(#671 **14.6 s**)와 **같은 타일 호스트·같은 main 코드**에서 lab LCP **~16 s대(편차 큼)** — **코드 회귀 아님**, bisect에서 본 **미세 개선 방향과 양립**. **LCP 8 s 목표 미달** 유지 → 배치 4는 코드 미세조정보다 **다크(Carto) 키·타일 discoverable** 등이 남은 레ver.
 
 **정렬 전** “배치 2 end 15 s vs 배치 3 git-main 26 s” **코드 회귀 판정 금지** (§C confound).
 
@@ -825,7 +833,7 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 
 **PR-8 경합 가설:** bisect상 prefetch 추가 후 TBT·LCP median **소폭 개선** — 대역폭 경합으로 전체 지연 가설은 **기각(이번 샘플)**.
 
-**LCP element (After):** 여전히 `img.leaflet-tile` (OSM fallback 타일 URL in lab). **LCP 후보가 SSR placeholder(스피너/문구)로 바뀌지 않음** — 측정 트릭 회피 의도대로.
+**LCP element:** 여전히 `img.leaflet-tile`. env 정렬 **후** Production lab 타일 = **VWorld WMTS** (정렬 전 OSM). **SSR placeholder가 LCP 후보로 바뀌지 않음** — 의도대로.
 
 **`lcp-discovery-insight` (After, median run):** `requestDiscoverable: false`, `fetchpriority=high` 미적용 — PR-7·8만으로는 initial document discoverable 전환 **실패**.
 
