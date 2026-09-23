@@ -733,15 +733,22 @@
 
 ### Lighthouse 모바일 (Preview `/ko/media/map`, simulated, 3회 중앙값)
 
-측정일 **2026-09-23** (로컬 Lighthouse 13). Before = `main` Preview, After = PR-4 Preview (#663 배포).
+측정일 **2026-09-23** (로컬 Lighthouse 13, `scripts/lighthouse-map-runs.mjs`). Before = `main` Preview, After = PR-4 Preview (#663). **before/after 모두 Preview**라 상대 비교는 유효.
 
-| Metric | Before (main Preview) | After (PR-4 Preview) |
-|--------|------------------------|----------------------|
-| LCP | 15.0 s | 14.9 s |
-| INP | lab N/A¹ | lab N/A¹ |
-| TBT | 1,654 ms | 1,503 ms |
+| Metric | Before (main Preview) | After (PR-4 Preview) | 배치 2 판정 |
+|--------|------------------------|----------------------|-------------|
+| FCP | 1.8 s | 1.7 s | — |
+| **LCP** | **15.0 s** | **14.9 s** | **목표 미달** (Δ 0.1 s ≈ 오차, 여전히 ~15 s) |
+| INP | lab N/A¹ | lab N/A¹ | — |
+| TBT | 1,654 ms | 1,503 ms | 소폭 개선 (~150 ms) |
 
 ¹ Lab run에서 `interaction-to-next-paint` 미산출 — 프로덕션 INP는 CrUX/GA4 field.
+
+**LCP 해석 (롤백 사유 아님, 다음 배치 후보)**  
+- PR-4 목적(서버 셸·SEO DOM)은 **달성**: HTML에 h1·지역 링크 존재. **LCP 개선 목표는 달성하지 못함.**  
+- Lighthouse가 잡은 **LCP 후보는 셸 `h1`/텍스트가 아니라 Leaflet 지도 타일 `img.leaflet-tile`** (before: OSM 타일 URL, after: VWorld WMTS 타일). `lcp-discovery-insight`: LCP 리소스가 **initial document에서 discoverable 하지 않음** → 클라이언트 지도 번들·Leaflet 초기화·타일 fetch 이후에 LCP가 확정된다.  
+- **FCP ~1.7 s vs LCP ~15 s** — 초기 페인트(크롬 등)와 “가장 큰 콘텐츠” 시점이 분리. `dynamic(..., { ssr: false })` 셸 분리만으로는 **LCP 후보가 여전히 클라이언트 지도 자산**이다.  
+- **다음 배치 후보 (원인·우선순위는 미확정):** LCP 전략을 SEO 셸과 분리 — 예: visible above-the-fold placeholder, 지도 청크/타일 로드 순서, hero 정적 이미지·`fetchpriority`, 또는 LCP 메트릭과 제품 “지도 가용” 메트릭(`tkad-map-usable` 등) 분리 측정.
 
 Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/media/map) · [PR-4](https://tkad-web-git-feat-map-batch2-pr4-03c145-mannote-6701s-projects.vercel.app/ko/media/map). PR-6 rebase Preview HTML 재확인: h1·`seoul_gangnam`·`tkad-site-footer` 없음 (200).
 
