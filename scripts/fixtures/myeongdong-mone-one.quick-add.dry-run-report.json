@@ -1,0 +1,13 @@
+{
+  "source": "myeongdong-mone-one.quick-add.json",
+  "kakaoKeyPresent": true,
+  "counts": {
+    "total": 1,
+    "created": 1,
+    "updated": 0,
+    "failed": 0,
+    "addressVerifiedFalse": 0
+  },
+  "failed": [],
+  "kakaoUnverified": []
+}
