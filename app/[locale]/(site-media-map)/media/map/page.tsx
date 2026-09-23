@@ -1,5 +1,6 @@
 import MediaMapPageClientLoader from "@/components/media-map/media-map-page-client-loader";
 import { MediaMapPageShell } from "@/components/media-map/media-map-page-shell";
+import { MediaMapTileResourceHints } from "@/components/media-map/media-map-tile-resource-hints";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
@@ -20,6 +21,7 @@ export default async function MediaMapPage({
 
   return (
     <div className="tkad-landing-neon tkad-planner-neon tkad-media-page flex min-h-0 w-full min-w-0 flex-1 flex-col">
+      <MediaMapTileResourceHints />
       <MediaMapPageShell locale={locale} />
       <HomeLandingDayNight>
         <MediaMapPageClientLoader />
