@@ -133,8 +133,12 @@ export function mapMapItemToHomeCatalog(
     location: item.location,
     price: item.price > 0 ? item.price : undefined,
     pricePeriod: normalizeMediaPricePeriod(item.pricePeriod),
+    priceOptions: item.priceOptions?.length ? [...item.priceOptions] : undefined,
     catalogPrice: item.catalogPrice > 0 ? item.catalogPrice : undefined,
     catalogPricePeriod: normalizeMediaPricePeriod(item.catalogPricePeriod),
+    productPriceWon: item.productPriceWon ?? undefined,
+    productPriceDays: item.productPriceDays ?? undefined,
+    monthlyFootTraffic: item.monthlyFootTraffic ?? undefined,
     thumbnailUrl: resolveCatalogImageSrc(item.image)?.src ?? undefined,
     visibilityScore:
       item.visibilityScore > 0 ? item.visibilityScore : undefined,

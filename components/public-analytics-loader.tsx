@@ -4,6 +4,35 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Script from "next/script";
 import type { PublicAnalyticsConfig } from "@/lib/analytics-integrations";
+import { trackEvent } from "@/lib/ga-events";
+
+const ANALYTICS_CONFIG_GA_SESSION_KEY = "tkad_analytics_config_ga_v1";
+
+function markAnalyticsConfigGaOnce(
+  outcome: "loaded" | "failed",
+  detail?: Record<string, string | number | boolean>,
+): void {
+  if (typeof window === "undefined") return;
+  try {
+    const key = `${ANALYTICS_CONFIG_GA_SESSION_KEY}:${outcome}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+  } catch {
+    /* private mode */
+  }
+  trackEvent(
+    outcome === "loaded" ? "analytics_config_loaded" : "analytics_config_failed",
+    detail,
+  );
+}
+
+function syncThemeUserProperty(): void {
+  if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+  const theme = document.documentElement.classList.contains("dark")
+    ? "dark"
+    : "light";
+  window.gtag("set", "user_properties", { theme });
+}
 
 function buildGtmBootstrap(containerId: string): string {
   return `
@@ -54,11 +83,23 @@ export function PublicAnalyticsLoader() {
         const response = await fetch("/api/analytics/config", {
           cache: "no-store",
         });
-        if (!response.ok) return;
+        if (!response.ok) {
+          markAnalyticsConfigGaOnce("failed", {
+            reason: "http_error",
+            status: response.status,
+          });
+          return;
+        }
         const data = (await response.json()) as PublicAnalyticsConfig;
-        if (!cancelled) setConfig(data);
+        if (!cancelled) {
+          setConfig(data);
+          markAnalyticsConfigGaOnce("loaded", {
+            has_ga4: Boolean(data.ga4?.measurementId),
+            has_gtm: Boolean(data.gtm?.containerId),
+          });
+        }
       } catch {
-        // Ignore analytics bootstrap failures to avoid impacting page rendering.
+        markAnalyticsConfigGaOnce("failed", { reason: "network_or_parse" });
       }
     }
 
@@ -68,6 +109,14 @@ export function PublicAnalyticsLoader() {
       cancelled = true;
     };
   }, [shouldLoadAnalytics]);
+
+  useEffect(() => {
+    if (!config) return;
+    syncThemeUserProperty();
+    const onTheme = () => syncThemeUserProperty();
+    window.addEventListener("tkad:theme-auto-changed", onTheme);
+    return () => window.removeEventListener("tkad:theme-auto-changed", onTheme);
+  }, [config]);
 
   if (!shouldLoadAnalytics || !config) return null;
 
