@@ -797,7 +797,7 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 | 변수 | Production | Preview | Development |
 |------|------------|---------|-------------|
 | `NEXT_PUBLIC_VWORLD_API_KEY` | **없음 → 2026-09-23 등록** | 있음 | 있음 |
-| `NEXT_PUBLIC_CARTO_BASEMAPS_API_KEY` | **없음** | **없음** | **없음** |
+| `NEXT_PUBLIC_CARTO_BASEMAPS_API_KEY` | **2026-09-23 등록** | **없음→등록** | **등록** |
 
 **정렬 전 confound (§C·배치 2·3 표):** 위 표의 Production **「없음」** 시점 기준 측정값. §D 이후 Production은 VWorld 포함 빌드.
 
@@ -842,6 +842,52 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 **체감 vs Lighthouse:** `tkad-map-basemap-tiles` perf mark(첫 Leaflet `tileload`)는 Lighthouse와 별도 — DevTools Performance에서 `tkad-map-basemap-tiles-duration` vs LCP 시각을 대조할 것. **LCP만 개선되고 타일 mark가 그대로면** placeholder가 숫자만 좋게 만든 것.
 
 **다음 후보:** 타일 discoverable 경로(초기 HTML 힌트 한계), 지도 번들/Leaflet init 분리, `tkad-map-basemap-tiles` GA 전송, GA4 이탈·체류(배치 3 전/후 1주).
+
+#### E. Field LCP vs Lab LCP — 재평가 (2026-09-23)
+
+**Field (`POST /api/vitals` → `web_vitals`, 최근 14일, `path=/ko/media/map`)**
+
+| 지표 | 값 |
+|------|-----|
+| n | **160** |
+| p50 / p75 / p90 | **~2.05 s / ~2.38 s / ~3.2 s** |
+| CWV “Good” 비율 (LCP &lt; 2.5 s) | **129/160 (~81%)** |
+| `navigationType=navigate` only (n=125) | p50 **~2.28 s** |
+| `back-forward-cache` (n=30) | p50 **~61 ms** (복원 탐색 — lab cold load 와 **동일 모집단 아님**) |
+
+**Lab (Lighthouse 13 simulated mobile, 동 URL):** LCP **~15–26 s**, LCP 후보 **`img.leaflet-tile`** (타일 URL 기록됨).
+
+**LCP element — field 쪽은 현재 알 수 없음**
+
+- `WebVitalsReporter` → `POST /api/vitals` 페이로드: `name`, `value`, `rating`, `path`, `locale`, `navigationType`, `id` **만** (`components/web-vitals-reporter.tsx`, `app/api/vitals/route.ts`).
+- DB `web_vitals` 테이블에도 **LCP 후보 element / URL 컬럼 없음** → 과거 field 샘플로 lab(타일)과 **동일 후보인지 소급 대조 불가**.
+- `next/web-vitals` / `web-vitals` 라이브러리는 **attribution API**(`web-vitals/attribution`)로 element 힌트를 줄 수 있으나 **미연동**.
+
+**해석 (방향성)**
+
+1. **Field p75 ~2.4 s**면 CWV LCP “Good”(≤2.5 s)에 **사실상 근접** — 배치 2·3에서 추적한 **“실사용자 LCP 15 s 위기”는 lab·타일 중심 narrative였을 가능성이 큼** (throttling + lab이 타일을 LCP로 고정).
+2. Lab **15 s vs field ~2 s**를 **직접 비교하는 것은**, element 미기록 상태에서는 **apples-to-oranges** — field가 타일이 아닌 다른 페인트(크롬·placeholder·시트 등)를 LCP로 잡았을 **가설은 plausible**하나 **미검증**. 검증하려면 vitals에 **LCP attribution(또는 `tkad-map-basemap-tiles` 시각) 저장** 필요.
+3. Field 집계는 **bfache 샘플(~19%)** 이 p50을 낮춤 — **cold `navigate`만** 봐도 p50 **~2.3 s**로 lab과 여전히 **한참 차이**.
+4. 일부 **비정상 초대값**(예: reload · ~10⁶ ms) 존재 — 장기적으로 vitals 집계 시 **상한 clip / outlier 제외** 검토.
+
+**배치 4·우선순위 시사**
+
+- **Lab LCP 8 s** 단독 go/no-go는 **실사용자 CWV와 어긋날 수 있음** — field·GA4/CrUX·`tkad-map-basemap-tiles`를 SSOT 후보로 재설정.
+- **Carto 키**는 lab LCP가 아니라 **다크 basemap 품질(OSM 폴백 vs Carto)** · GA4 `user_properties.theme` dark 비중으로 판단.
+- **코드 후보:** LCP element **기록** → map 경로만 샘플링해 lab(타일) vs field 후보 **대조 가능하게** 만드는 것이 “타일 discoverable” 미세 튜닝보다 선행. (후속 PR: `web-vitals/attribution` → `/api/vitals` · 배치 4 우선순위는 낮음.)
+
+**GA4 `theme`:** Explore(`G-5QB3QMT01B`, User property `theme`) — 에이전트 세션에서는 Google 재인증으로 **비율 미확인**. 운영자 Explore 결과로 dark ≥~20% 여부 확정 후 Carto 등록 여부 결정.
+
+#### F. Production CARTO dark basemap 확인 (2026-09-23 KST ~18:15)
+
+**운영:** Vercel **Production** `NEXT_PUBLIC_CARTO_BASEMAPS_API_KEY` 등록 · 재배포 `dpl_3sbg7JJ1WFoCL6Xkb77wj6q3J3ze` (`tkad-b8i1m89sz…`, ~18:04 KST). 코드 참조명 **`NEXT_PUBLIC_CARTO_BASEMAPS_API_KEY`** ↔ `getCartoBasemapsApiKey()` (`lib/public-dark-map-config.ts`) **일치**. 다크 경로: `publicMapTileUrlForTheme('dark')` → `resolvePublicRasterBasemapUrl(PUBLIC_MAP_TILE_URLS.dark)`.
+
+| 확인 | 방법 | 결과 |
+|------|------|------|
+| **다크 타일 호스트** | Playwright headless — `localStorage` manual **dark** + `html.dark` | **`basemaps.cartocdn.com/dark_all/…png?key=…`** 12 req · **OSM 0** · VWorld 0 |
+| **Lab LCP 타일** | `scripts/lighthouse-map-runs.mjs` ×3 · [`tkad.co.kr/ko/media/map`](https://tkad.co.kr/ko/media/map) · 측정 시각 **≥18:00 KST** (auto dark) | LCP **`img.leaflet-tile`** → **`c.basemaps.cartocdn.com/dark_all/…@2x.png?key=…`** (3/3) · median LCP **~26.0 s** (lab만; §E field SSOT) |
+
+**결론:** Production 다크 basemap은 **OSM 폴백 아님** — **CARTO `dark_all` + API key** 정상. (이전 §C·§D 시점 Carto Production **없음** → 다크 OSM 폴백이었던 상태와 구분.)
 
 ---
 
