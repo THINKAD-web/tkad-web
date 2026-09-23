@@ -1227,16 +1227,11 @@ export function MediaManualBrowseFilters({
         value={query}
         onValueChange={onQueryChange}
         type={mapPageViewModes ? "text" : "search"}
+        aria-label={t("browseSearchPlaceholder")}
         placeholder={
-          locale === "ko"
-            ? variant === "network"
-              ? "네트워크명·지역·유형 검색"
-              : mapPageViewModes
-                ? "매체명·지역·유형"
-                : "매체명·지역·유형 검색"
-            : mapPageViewModes
-              ? "Name, region, type"
-              : "Search name, region, type"
+          variant === "network" && locale === "ko"
+            ? "네트워크명·지역·유형 검색"
+            : t("browseSearchPlaceholder")
         }
         className={cn(
           mapPageViewModes

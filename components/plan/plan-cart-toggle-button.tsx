@@ -1,12 +1,13 @@
 "use client";
 
-import { Check, Plus, ShoppingBag, X } from "lucide-react";
-import { useLocale } from "next-intl";
+import { Plus, ShoppingBag, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   mediaActionBlockClass,
   mediaActionPillClass,
 } from "@/components/media/media-action-pill";
 import { usePlanCart } from "@/hooks/use-plan-cart";
+import { useIsPro } from "@/hooks/use-is-pro";
 import { useAppToast } from "@/lib/use-toast";
 import { buildPlanCartLimitMessage } from "@/lib/entitlements/gate-messages";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
@@ -35,9 +36,11 @@ export function PlanCartToggleButton({
   className,
 }: Props) {
   const locale = useLocale();
-  const isKo = locale === "ko";
+  const useKo = locale === "ko" || locale.startsWith("ko");
+  const t = useTranslations("planCart");
   const toast = useAppToast();
-  const { has, add, remove, isPro } = usePlanCart();
+  const { has, add, remove } = usePlanCart();
+  const { isPro } = useIsPro();
   const inCart = has(item.mediaId);
   const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
 
@@ -46,70 +49,44 @@ export function PlanCartToggleButton({
     e.preventDefault();
     if (inCart) {
       remove(item.mediaId);
-      toast.success(
-        isKo
-          ? `${item.mediaName}을(를) 담은 매체에서 뺐어요`
-          : `Removed ${item.mediaName} from your plan`,
-      );
+      toast.success(t("removedToast", { name: item.mediaName }));
       return;
     }
     const result = add(payload);
     if (result.ok && result.added) {
-      toast.success(
-        isKo
-          ? `${item.mediaName}을(를) 담은 매체에 담았어요`
-          : `Added ${item.mediaName} to your plan`,
-      );
+      toast.success(t("addedToast", { name: item.mediaName }));
       return;
     }
     if (result.ok && !result.added) {
-      toast.warning(isKo ? "이미 담은 매체에 있습니다" : "Already in your plan");
+      toast.warning(t("alreadyInPlan"));
       return;
     }
     if (!result.ok && result.reason === "online_blocked") {
-      toast.warning(planCartAddBlockedMessage(item, isKo));
+      toast.warning(planCartAddBlockedMessage(item, useKo));
       return;
     }
     toast.show({
       variant: "warning",
-      title: isKo ? "담은 매체 한도" : "Plan cart limit",
-      description: buildPlanCartLimitMessage(isKo, isPro),
+      title: t("limitTitle"),
+      description: buildPlanCartLimitMessage(useKo, isPro),
     });
   }
 
-  const removeHint = isKo ? "다시 누르면 빼기" : "Tap again to remove";
+  const removeHint = t("removeHint");
 
   const label = feedLabeled
     ? inCart
-      ? isKo
-        ? "빼기"
-        : "Remove"
-      : isKo
-        ? "매체 담기"
-        : "Add media"
+      ? t("remove")
+      : t("addToPlan")
     : gridInline
       ? inCart
-        ? isKo
-          ? "빼기"
-          : "Out"
-        : isKo
-          ? "담기"
-          : "Add"
+        ? t("removeShort")
+        : t("addShort")
       : inCart
-        ? isKo
-          ? "빼기"
-          : "Remove"
-        : isKo
-          ? "담기"
-          : "Add";
+        ? t("remove")
+        : t("addShort");
 
-  const ariaLabel = inCart
-    ? isKo
-      ? "담은 매체에서 제거 (다시 누르면 빼기)"
-      : "Remove from plan (tap again to remove)"
-    : isKo
-      ? "담은 매체에 담기"
-      : "Add to plan";
+  const ariaLabel = inCart ? t("ariaRemove") : t("ariaAdd");
 
   return (
     <button
