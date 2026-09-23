@@ -14,6 +14,8 @@ type Props = {
   skipLinkLabel: string;
   header: ReactNode;
   children: ReactNode;
+  /** false — `/media/map` 등: 푸터를 렌더 트리에서 제외 (CSS 숨김 대신) */
+  showSiteFooter?: boolean;
 };
 
 /**
@@ -22,7 +24,12 @@ type Props = {
  * 헤더 돋보기·⌘K 와 같은 트리를 써야 한다. header 는 서버에서 children 으로
  * 넘기므로 RSC 슬롯 패턴은 유지된다.
  */
-export function PublicPageChrome({ skipLinkLabel, header, children }: Props) {
+export function PublicPageChrome({
+  skipLinkLabel,
+  header,
+  children,
+  showSiteFooter = true,
+}: Props) {
   return (
     <AuthSessionProvider>
       <MobileChromeOverlayProvider>
@@ -52,7 +59,7 @@ export function PublicPageChrome({ skipLinkLabel, header, children }: Props) {
                   {children}
                 </main>
                 <ConditionalPublicChrome>
-                  <FooterBrutal />
+                  {showSiteFooter ? <FooterBrutal /> : null}
                   <DeferredPublicWidgetsGate />
                 </ConditionalPublicChrome>
               </div>
