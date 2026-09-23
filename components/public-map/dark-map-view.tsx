@@ -50,6 +50,7 @@ type Props = {
   selectedId: string | null;
   hoveredId?: string | null;
   onSelect: (id: string) => void;
+  onClusterClick?: () => void;
   onBoundsChange: (b: MapBounds) => void;
   onViewChange?: (view: { lat: number; lng: number; zoom: number }) => void;
   /** 사용자 드래그/줌 시작 시 1회 — 프로그램matic setView 직후에는 호출 안 함 */
@@ -353,6 +354,7 @@ export default function DarkMapView({
   selectedId,
   hoveredId = null,
   onSelect,
+  onClusterClick,
   onBoundsChange,
   onViewChange,
   center = PUBLIC_DARK_MAP_DEFAULT_CENTER,
@@ -445,6 +447,7 @@ export default function DarkMapView({
           markers={markers}
           selectedId={selectedId}
           onSelect={onSelectStable}
+          onClusterClick={onClusterClick}
           disableCluster={!useCluster}
           lightTiles={lightTiles}
           onPinLabelStateChange={onPinLabelStateChange}

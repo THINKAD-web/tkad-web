@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { PlanCartToggleButton } from "@/components/plan/plan-cart-toggle-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
+import type { MapPreviewCtaKind } from "@/lib/map-ga-events";
 import { cn } from "@/lib/utils";
 
 export type DiscoveryMediaCardActionsProps = {
@@ -25,6 +26,8 @@ export type DiscoveryMediaCardActionsProps = {
   className?: string;
   /** 클릭 가능한 카드/타일 안에서 버블링 방지 */
   stopPropagation?: boolean;
+  /** 지도 미리보기(dock) CTA 계측 — detail / contact / add */
+  onMapPreviewCta?: (kind: MapPreviewCtaKind) => void;
 };
 
 function guardCardClick(
@@ -56,6 +59,7 @@ export function DiscoveryMediaCardActions({
   layout = "full",
   className,
   stopPropagation = false,
+  onMapPreviewCta,
 }: DiscoveryMediaCardActionsProps) {
   const tMedia = useTranslations("media");
   const contactHref = `/contact?media=${encodeURIComponent(mediaId)}`;
@@ -80,7 +84,9 @@ export function DiscoveryMediaCardActions({
       <div className={cn("grid min-w-0 grid-cols-3 gap-1.5", className)}>
         <Link
           href={detailHref}
-          onClick={guardCardClick(stopPropagation)}
+          onClick={guardCardClick(stopPropagation, () =>
+            onMapPreviewCta?.("detail"),
+          )}
           className={cn(primaryLinkClass, "col-span-1")}
         >
           <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
@@ -89,12 +95,15 @@ export function DiscoveryMediaCardActions({
         <PlanCartToggleButton
           item={planItem}
           addedFrom={addedFrom}
+          onAddSuccess={() => onMapPreviewCta?.("add")}
           gridInline
           className="!col-span-1 !h-9 !min-h-9 !min-w-0 !rounded-lg !px-1 !text-[11px]"
         />
         <Link
           href={contactHref}
-          onClick={guardCardClick(stopPropagation)}
+          onClick={guardCardClick(stopPropagation, () =>
+            onMapPreviewCta?.("contact"),
+          )}
           {...contactLinkProps}
           className={cn(contactLinkProps.className, "col-span-1")}
         >
@@ -229,7 +238,9 @@ export function DiscoveryMediaCardActions({
       <div className="grid grid-cols-2 gap-1.5">
         <Link
           href={detailHref}
-          onClick={guardCardClick(stopPropagation)}
+          onClick={guardCardClick(stopPropagation, () =>
+            onMapPreviewCta?.("detail"),
+          )}
           className={primaryLinkClass}
         >
           <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
@@ -237,7 +248,9 @@ export function DiscoveryMediaCardActions({
         </Link>
         <Link
           href={contactHref}
-          onClick={guardCardClick(stopPropagation)}
+          onClick={guardCardClick(stopPropagation, () =>
+            onMapPreviewCta?.("contact"),
+          )}
           {...contactLinkProps}
         >
           <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
@@ -260,6 +273,7 @@ export function DiscoveryMediaCardActions({
         <PlanCartToggleButton
           item={planItem}
           addedFrom={addedFrom}
+          onAddSuccess={() => onMapPreviewCta?.("add")}
           gridInline
           className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
         />

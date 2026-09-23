@@ -95,6 +95,15 @@ import {
 } from "@/lib/media-map/map-display-mode";
 import { resolveMapCoverageOverlayState } from "@/lib/media-map/map-service-region-coverage-overlay";
 import { MediaMapCoverageOverlayHint } from "@/components/media-map/media-map-coverage-overlay-hint";
+import {
+  isDefaultMapBrowseFilters,
+  mapBrowseFiltersFingerprint,
+  resolveMapSearchType,
+  trackMapFilterApply,
+  trackMapMarkerClick,
+  trackMapSearch,
+  trackMapView,
+} from "@/lib/map-ga-events";
 
 function itemShowsMapPin(item: MapMapItem): boolean {
   return resolveItemMapDisplayMode(item) === "pin";
@@ -292,6 +301,14 @@ export default function MediaMapPageClient() {
   const lastTextSearchQRef = useRef("");
   const mapFetchAbortRef = useRef<AbortController | null>(null);
   const fetchGenerationRef = useRef(0);
+  const lastTrackedFilterFpRef = useRef<string | null>(null);
+  const lastTrackedSearchQRef = useRef("");
+  /** URL 기본 필터만으로는 `map_filter_apply` 미발화 — 지표 오염 방지 */
+  const filterApplyGaEnabledRef = useRef(
+    !isDefaultMapBrowseFilters(
+      initMapBrowseFiltersFromUrl(initialUrl.current),
+    ),
+  );
   const autoSearchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -420,6 +437,15 @@ export default function MediaMapPageClient() {
       markMapPageUsable();
     }
   }, [loading, items.length]);
+
+  useEffect(() => {
+    if (!view) return;
+    trackMapView({
+      zoom: view.zoom,
+      region_main: browseFilters.regionMain || undefined,
+      region_sub: browseFilters.regionSub || undefined,
+    });
+  }, [view, browseFilters.regionMain, browseFilters.regionSub]);
 
   useEffect(() => {
     setSubwayOverlayEnabled(readSubwayOverlayEnabled());
@@ -586,7 +612,34 @@ export default function MediaMapPageClient() {
             },
           );
 
+          const resultCount =
+            typeof data.data.matchTotal === "number"
+              ? data.data.matchTotal
+              : next.length;
+          const filterFp = mapBrowseFiltersFingerprint(f);
+          if (
+            filterApplyGaEnabledRef.current &&
+            filterFp !== lastTrackedFilterFpRef.current
+          ) {
+            lastTrackedFilterFpRef.current = filterFp;
+            trackMapFilterApply({
+              filter_summary: filterFp,
+              result_count: resultCount,
+            });
+          }
           const qTrim = f.q.trim();
+          if (!qTrim) {
+            lastTrackedSearchQRef.current = "";
+          } else if (qTrim !== lastTrackedSearchQRef.current) {
+            lastTrackedSearchQRef.current = qTrim;
+            trackMapSearch({
+              search_type: resolveMapSearchType(qTrim),
+              query_length: qTrim.length,
+              has_results: resultCount > 0,
+              result_count: resultCount,
+            });
+          }
+
           if (nationalScope && qTrim && qTrim !== lastTextSearchQRef.current) {
             lastTextSearchQRef.current = qTrim;
             applyTextSearchMapView(
@@ -891,11 +944,16 @@ export default function MediaMapPageClient() {
     boundsNeedAreaSearch;
 
   // 마커 클릭 시 즉시 selectedId + selectedItem을 한 번에 set (지연 없이 카드 표시)
+  const handleClusterClick = useCallback(() => {
+    trackMapMarkerClick({ is_cluster: true });
+  }, []);
+
   const handleSelect = useCallback(
     (id: string) => {
       lastFocusedSelectionRef.current = id;
       setSelectedId(id);
       const mediaId = resolveMediaIdFromMapPinId(id);
+      trackMapMarkerClick({ media_id: mediaId, is_cluster: false });
       const item = itemsRef.current.find((i) => i.id === mediaId);
       if (item) setSelectedItem(item);
       if (!item || !itemShowsMapPin(item)) return;
@@ -967,6 +1025,7 @@ export default function MediaMapPageClient() {
   }, [compareEntries, router]);
 
   const patchBrowseFilters = useCallback((patch: Partial<MapBrowseFilters>) => {
+    filterApplyGaEnabledRef.current = true;
     setBrowseFilters((f) => ({ ...f, ...patch }));
   }, []);
 
@@ -1409,6 +1468,7 @@ export default function MediaMapPageClient() {
               markers={markers}
               selectedId={selectedId}
               onSelect={handleSelect}
+              onClusterClick={handleClusterClick}
               onBoundsChange={handleBoundsChange}
               onViewChange={handleViewChange}
               onUserViewportAdjusted={handleUserViewportAdjusted}

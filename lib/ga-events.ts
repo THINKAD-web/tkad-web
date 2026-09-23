@@ -38,20 +38,35 @@ declare global {
 }
 
 /** 임의 이름 GA4 이벤트(타입 자유). 신규 전환 추적용. */
+function cleanGaParams(
+  params?: Record<string, string | number | boolean | undefined>,
+): Record<string, string | number | boolean> {
+  const clean: Record<string, string | number | boolean> = {};
+  if (!params) return clean;
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined) clean[k] = v;
+  }
+  return clean;
+}
+
+function ensureGtagDataLayerStub(): (...args: unknown[]) => void {
+  const w = window as Window & { dataLayer?: unknown[]; gtag?: (...args: unknown[]) => void };
+  w.dataLayer = w.dataLayer || [];
+  if (typeof w.gtag === "function") return w.gtag;
+  const gtag = (...args: unknown[]) => {
+    w.dataLayer!.push(args);
+  };
+  w.gtag = gtag;
+  return gtag;
+}
+
 export function trackEvent(
   name: string,
   params?: Record<string, string | number | boolean | undefined>,
 ): void {
   if (typeof window === "undefined") return;
-  const gtag = window.gtag;
-  if (typeof gtag !== "function") return;
-  const clean: Record<string, string | number | boolean> = {};
-  if (params) {
-    for (const [k, v] of Object.entries(params)) {
-      if (v !== undefined) clean[k] = v;
-    }
-  }
-  gtag("event", name, clean);
+  const clean = cleanGaParams(params);
+  ensureGtagDataLayerStub()("event", name, clean);
 }
 
 export function trackGaEvent(
@@ -75,6 +90,7 @@ export function trackPlanCartUsage(params: CartUsageTrackParams): void {
   trackEvent(CART_USAGE_EVENT_PLAN, {
     media_id: params.media_id,
     source: params.source,
+    added_from: params.source,
     action: params.action,
     media_name: params.media_name,
     cart_kind: "plan",

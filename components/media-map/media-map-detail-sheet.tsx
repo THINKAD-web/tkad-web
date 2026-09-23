@@ -16,6 +16,10 @@ import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-medi
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { FLOATING_SELECTION_BAR_COMPACT_BOTTOM_CLASS } from "@/components/floating-selection-bar";
+import {
+  trackMapPreviewCta,
+  type MapPreviewCtaKind,
+} from "@/lib/map-ga-events";
 
 type AvailabilitySummary = {
   status: "loading" | "available" | "partial" | "busy" | "unknown";
@@ -149,6 +153,12 @@ export function MapDetailQuickActions({
 }
 
 /** 지도 마커 미리보기(dock·bottom-sheet) — 좌 썸네일 + 우 정보·축약 버튼 */
+function mapPreviewCtaHandler(mediaId: string) {
+  return (kind: MapPreviewCtaKind) => {
+    trackMapPreviewCta({ cta_kind: kind, media_id: mediaId });
+  };
+}
+
 function MapMarkerPreviewBody({
   item,
   catalogItem,
@@ -159,6 +169,7 @@ function MapMarkerPreviewBody({
   inCompare,
   onToggleCompare,
   onViewInList,
+  actionsLayout = "map-tile",
 }: {
   item: MapMapItem;
   catalogItem: ReturnType<typeof mapMapItemToHomeCatalog>;
@@ -169,7 +180,9 @@ function MapMarkerPreviewBody({
   inCompare?: boolean;
   onToggleCompare?: () => void;
   onViewInList?: () => void;
+  actionsLayout?: "map-tile" | "preview";
 }) {
+  const onMapPreviewCta = mapPreviewCtaHandler(item.id);
   const thumb = catalogThumbnailImageProps(catalogItem.thumbnailUrl);
   const priceLabel = formatPrice(item.price, item.pricePeriod, isKo ? "ko" : "en");
   const regionLine =
@@ -236,7 +249,8 @@ function MapMarkerPreviewBody({
             inCompare={inCompare}
             onToggleCompare={onToggleCompare}
             addedFrom="map"
-            layout="map-tile"
+            layout={actionsLayout}
+            onMapPreviewCta={onMapPreviewCta}
             className="!mt-0"
             stopPropagation
           />
@@ -343,6 +357,7 @@ function MediaMapDetailBody({
         addedFrom="map"
         size={variant === "sheet" ? "comfortable" : "compact"}
         layout="full"
+        onMapPreviewCta={mapPreviewCtaHandler(item.id)}
         className={variant === "inline" ? "mt-2" : undefined}
         stopPropagation={variant === "inline"}
       />

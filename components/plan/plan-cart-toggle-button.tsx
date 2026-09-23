@@ -24,6 +24,8 @@ type Props = {
   /** 아이콘만 (릴스 등 정사각 버튼) */
   iconOnly?: boolean;
   className?: string;
+  /** 담기 성공 직후 (GA map_preview_cta 등) */
+  onAddSuccess?: () => void;
 };
 
 /** 매체 목록·지도 공통 — 담은 매체(plan cart) 담기 토글 */
@@ -34,6 +36,7 @@ export function PlanCartToggleButton({
   feedLabeled = false,
   iconOnly = false,
   className,
+  onAddSuccess,
 }: Props) {
   const locale = useLocale();
   const useKo = locale === "ko" || locale.startsWith("ko");
@@ -54,6 +57,7 @@ export function PlanCartToggleButton({
     }
     const result = add(payload);
     if (result.ok && result.added) {
+      onAddSuccess?.();
       toast.success(t("addedToast", { name: item.mediaName }));
       return;
     }
