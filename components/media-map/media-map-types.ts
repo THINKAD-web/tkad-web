@@ -13,6 +13,12 @@ export type MapMapItem = {
   /** 목록 표시가 — 최저 옵션 포함 */
   price: number;
   pricePeriod: string;
+  /** CPM SSOT — `resolveMediaDisplayPrice` / 다구좌 옵션 */
+  priceOptions?: Array<{
+    price: number;
+    period: string;
+    label?: string;
+  }>;
   /** DB 대표가 — 지도 카드/핀 CPM SSOT */
   catalogPrice: number;
   catalogPricePeriod: string;

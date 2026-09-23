@@ -29,6 +29,7 @@ export function serializeMapApiItemFromMediaItem(
     subCategory: m.subCategory ?? null,
     price: display.priceWon,
     pricePeriod: display.period,
+    priceOptions: m.priceOptions?.length ? [...m.priceOptions] : undefined,
     catalogPrice: m.price,
     catalogPricePeriod: m.pricePeriod,
     productPriceWon: catalog.productPriceWon ?? null,

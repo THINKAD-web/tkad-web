@@ -380,6 +380,7 @@
 
 **현황**
 - 담기 = **플랜 카트**(localStorage, `PlanCartToggleButton`). 지도에서 `addedFrom: "map"` 으로 기록 (`media-map-detail-sheet.tsx:104-116`).
+- **GA `added_from` / `PlanCartAddedFrom` SSOT** (`lib/plan-cart.ts`): `ai_recommend` · `planner` · `search` · `map` · `package` 만 존재. **`list` / `detail` / `media_list` 구분값은 타입·스키마에 없음** — `/media` 목록·`/media/[id]` 상세·그리드·릴스 등 대부분 UI는 prop으로 **`search`를 하드코딩** (`PlanCartAddButton`/`DiscoveryMediaCardActions`). 지도만 `map`, AI 경로만 `ai_recommend`. “목록 vs 지도” 비교는 **`search` vs `map`** 으로만 가능(의도된 coarse grain, 버그 아님). 더 촘촘한 분해가 필요하면 enum·prop 전수 변경이 별도 티켓.
 - 비교 = 별도 카트(`tkad-compare-cart-v1`), 하단 `CompareBar` (`media-map-page-client.tsx:1666-1674`).
 
 | 목적지 | 경로 | 탭 수 |
