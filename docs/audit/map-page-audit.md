@@ -721,4 +721,30 @@
 
 ---
 
-*본 보고서는 코드를 변경하지 않았다. Phase 1 진행 전 TOP 10 의 순서·범위 확정이 필요하다.*
+## Phase 1 배치 2 — 머지·측정 기록
+
+**GA4 비교:** 배치 1 기준선 **2026-09-23**. 아래 머지 시점 이후 **1주** vs 이전 1주로 필터 사용 세션·지도→담기·모바일 CTA 등 전/후 비교.
+
+| PR | 내용 | 머지 (UTC) | merge commit |
+|---|---|---|---|
+| [#663](https://github.com/THINKAD-web/tkad-web/pull/663) | PR-4 ISR 셸 · `force-dynamic` 제거 · map client `ssr:false` | 2026-09-23T03:42:49Z | `909c4191` |
+| — | PR-5 서버 전량 카탈로그 | **스킵** (§1 재확인: `page.tsx` 미로드) | — |
+| [#664](https://github.com/THINKAD-web/tkad-web/pull/664) | PR-6 `(site-media-map)` · 푸터 DOM 제외 | 2026-09-23T03:45:44Z | `ba1318f6` |
+
+### Lighthouse 모바일 (Preview `/ko/media/map`, simulated, 3회 중앙값)
+
+측정일 **2026-09-23** (로컬 Lighthouse 13). Before = `main` Preview, After = PR-4 Preview (#663 배포).
+
+| Metric | Before (main Preview) | After (PR-4 Preview) |
+|--------|------------------------|----------------------|
+| LCP | 15.0 s | 14.9 s |
+| INP | lab N/A¹ | lab N/A¹ |
+| TBT | 1,654 ms | 1,503 ms |
+
+¹ Lab run에서 `interaction-to-next-paint` 미산출 — 프로덕션 INP는 CrUX/GA4 field.
+
+Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/media/map) · [PR-4](https://tkad-web-git-feat-map-batch2-pr4-03c145-mannote-6701s-projects.vercel.app/ko/media/map). PR-6 rebase Preview HTML 재확인: h1·`seoul_gangnam`·`tkad-site-footer` 없음 (200).
+
+---
+
+*Phase 0 시점에는 코드를 변경하지 않았다. 배치 2(#663·#664) 머지 후 §28·§30 관련 항목은 위 기록과 PR 본문을 기준으로 갱신한다.*
