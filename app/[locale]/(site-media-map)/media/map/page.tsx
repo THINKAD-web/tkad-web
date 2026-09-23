@@ -9,7 +9,7 @@ export const revalidate = 300;
 /**
  * `/media/map` — ISR 서버 셸 + 클라이언트 지도 앱.
  * 마케팅 히어로(// 02 · DISCOVERY) + discovery 서브네비 + 전역 푸터는 이 라우트에서 제거한다.
- * 푸터/오버플로/높이는 `.tkad-media-app-shell` 마커(globals.css `:has()`)로 처리 — root layout 미변경.
+ * 푸터는 `(site-media-map)` 레이아웃에서 DOM 제외. 오버플로/높이는 `.tkad-media-app-shell`(globals.css).
  */
 export default async function MediaMapPage({
   params,
