@@ -175,6 +175,50 @@ export async function generateMediaTranslations(
  * (source: "ai" — draft, not yet human-reviewed). en/ko are not written here;
  * they stay on the existing `Media` columns per the Option C storage design.
  */
+function isTrimEmpty(value: string | null | undefined): boolean {
+  return !String(value ?? "").trim();
+}
+
+export type MediaEnColumnSnapshot = {
+  nameEn?: string | null;
+  descriptionEn?: string | null;
+  locationEn?: string | null;
+  /** Korean description — used to decide if empty `descriptionEn` should be backfilled. */
+  description?: string | null;
+};
+
+/** True when any English column on `Media` still needs a value (public en locale reads these). */
+export function mediaNeedsEnColumnBackfill(row: MediaEnColumnSnapshot): boolean {
+  if (isTrimEmpty(row.nameEn) || isTrimEmpty(row.locationEn)) return true;
+  if (isTrimEmpty(row.descriptionEn) && !isTrimEmpty(row.description)) return true;
+  return false;
+}
+
+/**
+ * Writes `result.en` onto `Media.nameEn` / `descriptionEn` / `locationEn` only where
+ * the column is still empty — never overwrites admin-reviewed or manual AI values.
+ */
+export async function patchMediaEnColumnsIfEmpty(
+  mediaId: string,
+  en: MediaTranslationLangResult,
+  current: MediaEnColumnSnapshot,
+): Promise<{ updated: boolean; fields: string[] }> {
+  const data: {
+    nameEn?: string;
+    descriptionEn?: string;
+    locationEn?: string;
+  } = {};
+  if (isTrimEmpty(current.nameEn) && en.name) data.nameEn = en.name;
+  if (isTrimEmpty(current.locationEn) && en.location) data.locationEn = en.location;
+  if (isTrimEmpty(current.descriptionEn) && en.description) {
+    data.descriptionEn = en.description;
+  }
+  const fields = Object.keys(data);
+  if (fields.length === 0) return { updated: false, fields };
+  await getPrisma().media.update({ where: { id: mediaId }, data });
+  return { updated: true, fields };
+}
+
 export async function upsertMediaTranslationDrafts(
   mediaId: string,
   result: Pick<GenerateMediaTranslationsResult, "ja" | "zh">,
