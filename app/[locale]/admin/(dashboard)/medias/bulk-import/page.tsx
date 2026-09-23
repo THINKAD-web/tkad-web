@@ -27,10 +27,46 @@ type ParseState =
   | { kind: "schema"; message: string }
   | { kind: "ok"; items: QuickAddMediaJson[] };
 
+type BulkImportRowPreview = {
+  addressVerified: boolean;
+  priceAlignmentWarning: string | null;
+  invalidImageUrls: string[];
+  similarNameWarnings: string[];
+};
+
 type ImportOutcome =
-  | { kind: "created"; id: string; name: string }
-  | { kind: "updated"; id: string; name: string }
-  | { kind: "failed"; name: string; error: string };
+  | { kind: "created"; id: string; name: string; preview?: BulkImportRowPreview }
+  | { kind: "updated"; id: string; name: string; preview?: BulkImportRowPreview }
+  | { kind: "failed"; name: string; error: string; rowIndex?: number };
+
+function PreviewChecklist({ preview }: { preview: BulkImportRowPreview }) {
+  return (
+    <ul className="mt-1 space-y-0.5 text-[11px] font-normal text-muted-foreground">
+      <li>
+        {preview.addressVerified
+          ? "✓ Kakao 주소·좌표 보강 성공"
+          : "⚠ Kakao 보강 미확인 — 주소·좌표 수동 확인"}
+      </li>
+      {preview.priceAlignmentWarning ? (
+        <li className="text-amber-800">⚠ {preview.priceAlignmentWarning}</li>
+      ) : (
+        <li>✓ 가격 옵션·대표가 정합(경고 없음)</li>
+      )}
+      {preview.invalidImageUrls.length > 0 ? (
+        <li className="text-amber-800">
+          ⚠ 이미지 URL 형식 오류: {preview.invalidImageUrls.join(", ")}
+        </li>
+      ) : (
+        <li>✓ 이미지 URL 형식</li>
+      )}
+      {preview.similarNameWarnings.length > 0 ? (
+        <li className="text-amber-800">
+          ⚠ 유사 매체명: {preview.similarNameWarnings.join(" · ")}
+        </li>
+      ) : null}
+    </ul>
+  );
+}
 
 type ImportResponse = {
   ok: true;
@@ -195,7 +231,14 @@ export default function AdminMediasBulkImportPage() {
             기준으로 기존 매체는 <strong>업데이트</strong>, 없는 매체는 <strong>신규 등록</strong>됩니다.
             quick-add 와 동일한 카카오·주변·유동인구 보강이 적용됩니다.{" "}
             <strong>주의</strong>: 부분 갱신이 아니라 전체 JSON 으로 덮어쓰기입니다 — 누락된 필드는 빈 값/기본값으로 들어갑니다.
-            먼저 <strong>시뮬레이션 (dry-run)</strong> 으로 어떤 항목이 생성/업데이트되는지 확인 후 실행하세요.
+            엑셀은{" "}
+            <code className="rounded bg-slate-100 px-1">
+              npx tsx scripts/excel-to-quick-add-json.mts 파일.xlsx
+            </code>
+            로 JSON 변환 후 붙여넣을 수 있습니다.{" "}
+            <strong>신규 등록은 isActive=false(비노출)</strong> 로 생성됩니다 — 검수 후 매체
+            목록에서 노출 ON 하세요. 먼저{" "}
+            <strong>시뮬레이션 (dry-run)</strong> 으로 체크리스트를 확인한 뒤 실행하세요.
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={loadSample}>
@@ -302,7 +345,7 @@ export default function AdminMediasBulkImportPage() {
                 if (parseState.kind !== "ok") return;
                 if (
                   !window.confirm(
-                    `총 ${parseState.items.length}건을 import 합니다 (없는 건 신규, 있는 건 업데이트). 계속할까요?`,
+                    `총 ${parseState.items.length}건을 import 합니다. 신규는 비노출(isActive=false)로 생성됩니다. 계속할까요?`,
                   )
                 ) {
                   return;
@@ -365,6 +408,7 @@ export default function AdminMediasBulkImportPage() {
                     <>
                       {" "}
                       · <code className="text-[10px]">{o.id}</code>
+                      {o.preview ? <PreviewChecklist preview={o.preview} /> : null}
                     </>
                   ) : (
                     <>
@@ -378,11 +422,13 @@ export default function AdminMediasBulkImportPage() {
             </ul>
             {response.dryRun ? (
               <p className="text-xs text-muted-foreground">
-                시뮬레이션 결과입니다. DB 에는 변경이 가해지지 않았습니다. 실행 버튼으로 확정하세요.
+                시뮬레이션 결과입니다. DB 에는 변경이 가해지지 않았습니다. 각 행의
+                체크리스트(주소·가격·이미지·유사명) 확인 후 실행 버튼으로 확정하세요.
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">
-                실행 완료. 매체 목록 / /media / /planner 페이지 캐시가 갱신되었습니다.
+                실행 완료. 신규 매체는 비노출 상태입니다 — 가격·CPM·이미지 검수 후 매체
+                목록에서 노출 ON. 캐시가 갱신되었습니다.
               </p>
             )}
           </CardContent>

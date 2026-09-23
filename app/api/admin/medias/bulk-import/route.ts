@@ -21,14 +21,16 @@ import {
   validateMappedMediaMetrics,
 } from "@/lib/media-metrics-write";
 import { resolveCatalogChannelForMediaWrite } from "@/lib/catalog-channel";
+import { buildBulkImportRowPreview } from "@/lib/admin-bulk-import-preview";
+import type { BulkImportRowPreview } from "@/lib/admin-bulk-import-preview";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 type ImportOutcome =
-  | { kind: "created"; id: string; name: string }
-  | { kind: "updated"; id: string; name: string }
-  | { kind: "failed"; name: string; error: string };
+  | { kind: "created"; id: string; name: string; preview?: BulkImportRowPreview }
+  | { kind: "updated"; id: string; name: string; preview?: BulkImportRowPreview }
+  | { kind: "failed"; name: string; error: string; rowIndex?: number };
 
 /**
  * 매체 일괄 import (upsert).
@@ -102,6 +104,8 @@ export async function POST(request: NextRequest) {
 
   const db = getPrisma();
   const outcomes: ImportOutcome[] = [];
+  const nameRows = await db.media.findMany({ select: { name: true } });
+  const existingNamesLower = nameRows.map((r) => r.name.trim().toLowerCase());
 
   for (let i = 0; i < validated.items.length; i++) {
     const row = validated.items[i] as QuickAddMediaJson;
@@ -128,6 +132,13 @@ export async function POST(request: NextRequest) {
 
       const { createPayload, addressVerified, autoPopulatedAt } =
         await enrichQuickAddRowForPersist(row);
+
+      const preview = buildBulkImportRowPreview({
+        createPayload,
+        addressVerified,
+        existingNamesLower,
+        mediaName: row.media_name,
+      });
 
       const metrics = validateMappedMediaMetrics(
         createPayload,
@@ -160,6 +171,7 @@ export async function POST(request: NextRequest) {
             kind: "updated",
             id: existing.id,
             name: existing.name,
+            preview,
           });
           continue;
         }
@@ -195,6 +207,7 @@ export async function POST(request: NextRequest) {
           kind: "updated",
           id: updated.id,
           name: updated.name,
+          preview,
         });
       } else {
         if (dryRun) {
@@ -202,6 +215,7 @@ export async function POST(request: NextRequest) {
             kind: "created",
             id: "(신규)",
             name: row.media_name,
+            preview,
           });
           continue;
         }
@@ -213,6 +227,7 @@ export async function POST(request: NextRequest) {
             priceOptions: prismaFields.priceOptions ?? Prisma.JsonNull,
             addressVerified,
             autoPopulatedAt,
+            isActive: false,
             catalogChannel: resolveCatalogChannelForMediaWrite({
               type: prismaFields.type,
             }),
@@ -237,6 +252,7 @@ export async function POST(request: NextRequest) {
           kind: "created",
           id: created.id,
           name: created.name,
+          preview,
         });
       }
     } catch (e) {
@@ -245,6 +261,7 @@ export async function POST(request: NextRequest) {
         kind: "failed",
         name: row.media_name,
         error: msg,
+        rowIndex: i + 1,
       });
     }
   }
