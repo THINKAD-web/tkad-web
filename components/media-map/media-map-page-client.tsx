@@ -96,6 +96,7 @@ import {
 import { resolveMapCoverageOverlayState } from "@/lib/media-map/map-service-region-coverage-overlay";
 import { MediaMapCoverageOverlayHint } from "@/components/media-map/media-map-coverage-overlay-hint";
 import {
+  isDefaultMapBrowseFilters,
   mapBrowseFiltersFingerprint,
   resolveMapSearchType,
   trackMapFilterApply,
@@ -302,6 +303,12 @@ export default function MediaMapPageClient() {
   const fetchGenerationRef = useRef(0);
   const lastTrackedFilterFpRef = useRef<string | null>(null);
   const lastTrackedSearchQRef = useRef("");
+  /** URL 기본 필터만으로는 `map_filter_apply` 미발화 — 지표 오염 방지 */
+  const filterApplyGaEnabledRef = useRef(
+    !isDefaultMapBrowseFilters(
+      initMapBrowseFiltersFromUrl(initialUrl.current),
+    ),
+  );
   const autoSearchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -610,7 +617,10 @@ export default function MediaMapPageClient() {
               ? data.data.matchTotal
               : next.length;
           const filterFp = mapBrowseFiltersFingerprint(f);
-          if (filterFp !== lastTrackedFilterFpRef.current) {
+          if (
+            filterApplyGaEnabledRef.current &&
+            filterFp !== lastTrackedFilterFpRef.current
+          ) {
             lastTrackedFilterFpRef.current = filterFp;
             trackMapFilterApply({
               filter_summary: filterFp,
@@ -1015,6 +1025,7 @@ export default function MediaMapPageClient() {
   }, [compareEntries, router]);
 
   const patchBrowseFilters = useCallback((patch: Partial<MapBrowseFilters>) => {
+    filterApplyGaEnabledRef.current = true;
     setBrowseFilters((f) => ({ ...f, ...patch }));
   }, []);
 

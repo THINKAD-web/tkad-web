@@ -9,6 +9,22 @@ export type MapPreviewCtaKind = "detail" | "contact" | "add";
 
 export type MapSearchType = "media_name" | "address" | "poi" | "mixed";
 
+export function isDefaultMapBrowseFilters(f: MapBrowseFilters): boolean {
+  const empty = {
+    q: "",
+    mainCategory: "",
+    subCategory: "",
+    target: "",
+    regionMain: "",
+    regionSub: "",
+    priceMin: "",
+    priceMax: "",
+    features: "",
+    sort: "popular" as const,
+  };
+  return mapBrowseFiltersFingerprint(f) === mapBrowseFiltersFingerprint(empty);
+}
+
 export function mapBrowseFiltersFingerprint(f: MapBrowseFilters): string {
   return JSON.stringify({
     q: f.q.trim(),
@@ -35,19 +51,38 @@ export function resolveMapSearchType(q: string): MapSearchType {
 
 const MAP_VIEW_SESSION_KEY = "tkad_map_ga_view_v1";
 
+/** StrictMode·재마운트와 별개로 동일 JS 컨텍스트에서 1회만 */
+let mapViewSentInPageLifetime = false;
+
+export function resetMapViewGaForTests(): void {
+  mapViewSentInPageLifetime = false;
+  if (typeof window !== "undefined") {
+    try {
+      sessionStorage.removeItem(MAP_VIEW_SESSION_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
 export function trackMapView(params: {
   zoom: number;
   region_main?: string;
   region_sub?: string;
 }): void {
+  if (mapViewSentInPageLifetime) return;
   if (typeof window !== "undefined") {
     try {
-      if (sessionStorage.getItem(MAP_VIEW_SESSION_KEY)) return;
+      if (sessionStorage.getItem(MAP_VIEW_SESSION_KEY)) {
+        mapViewSentInPageLifetime = true;
+        return;
+      }
       sessionStorage.setItem(MAP_VIEW_SESSION_KEY, "1");
     } catch {
       /* private mode / disabled storage */
     }
   }
+  mapViewSentInPageLifetime = true;
   trackEvent("map_view", {
     source: MAP_GA_SOURCE,
     zoom: Math.round(params.zoom * 10) / 10,

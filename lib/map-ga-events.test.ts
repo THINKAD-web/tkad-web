@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  isDefaultMapBrowseFilters,
   mapBrowseFiltersFingerprint,
   resolveMapSearchType,
 } from "./map-ga-events.ts";
@@ -31,6 +32,14 @@ test("mapBrowseFiltersFingerprint — stable key order and sorted features", () 
     q: "강남",
   });
   assert.equal(a, b);
+});
+
+test("isDefaultMapBrowseFilters — empty browse state", () => {
+  assert.equal(isDefaultMapBrowseFilters(baseFilters()), true);
+  assert.equal(
+    isDefaultMapBrowseFilters({ ...baseFilters(), regionMain: "서울" }),
+    false,
+  );
 });
 
 test("resolveMapSearchType — heuristics", () => {

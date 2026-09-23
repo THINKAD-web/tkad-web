@@ -49,22 +49,24 @@ function cleanGaParams(
   return clean;
 }
 
+function ensureGtagDataLayerStub(): (...args: unknown[]) => void {
+  const w = window as Window & { dataLayer?: unknown[]; gtag?: (...args: unknown[]) => void };
+  w.dataLayer = w.dataLayer || [];
+  if (typeof w.gtag === "function") return w.gtag;
+  const gtag = (...args: unknown[]) => {
+    w.dataLayer!.push(args);
+  };
+  w.gtag = gtag;
+  return gtag;
+}
+
 export function trackEvent(
   name: string,
   params?: Record<string, string | number | boolean | undefined>,
 ): void {
   if (typeof window === "undefined") return;
   const clean = cleanGaParams(params);
-  const gtag = window.gtag;
-  if (typeof gtag === "function") {
-    gtag("event", name, clean);
-    return;
-  }
-  // GA 스크립트 로드 전에도 dataLayer에 적재 (gtm.js / gtag.js 부트스트랩)
-  const dl = (window as Window & { dataLayer?: unknown[] }).dataLayer;
-  if (Array.isArray(dl)) {
-    dl.push({ event: name, ...clean });
-  }
+  ensureGtagDataLayerStub()("event", name, clean);
 }
 
 export function trackGaEvent(
