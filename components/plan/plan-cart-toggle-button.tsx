@@ -57,16 +57,8 @@ export function PlanCartToggleButton({
     }
     const result = add(payload);
     if (result.ok && result.added) {
-<<<<<<< Updated upstream
-      toast.success(t("addedToast", { name: item.mediaName }));
-=======
       onAddSuccess?.();
-      toast.success(
-        isKo
-          ? `${item.mediaName}을(를) 담은 매체에 담았어요`
-          : `Added ${item.mediaName} to your plan`,
-      );
->>>>>>> Stashed changes
+      toast.success(t("addedToast", { name: item.mediaName }));
       return;
     }
     if (result.ok && !result.added) {

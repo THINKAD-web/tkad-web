@@ -375,6 +375,7 @@ function MediaMapDetailBody({
         inCompare={inCompare}
         onToggleCompare={onToggleCompare}
         onViewInList={onViewInList}
+        actionsLayout="preview"
       />
     );
   }
@@ -390,6 +391,7 @@ function MediaMapDetailBody({
         inCompare={inCompare}
         onToggleCompare={onToggleCompare}
         onViewInList={onViewInList}
+        actionsLayout="preview"
       />
     );
   }
