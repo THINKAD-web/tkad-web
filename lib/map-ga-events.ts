@@ -1,7 +1,10 @@
 /** `/media/map` GA4 퍼널 — `source`는 항상 `map` */
 
 import { trackEvent } from "@/lib/ga-events";
-import type { MapBrowseFilters } from "@/lib/media-map/browse-filters";
+import {
+  initMapBrowseFiltersFromUrl,
+  type MapBrowseFilters,
+} from "@/lib/media-map/browse-filters";
 
 export const MAP_GA_SOURCE = "map" as const;
 
@@ -10,19 +13,10 @@ export type MapPreviewCtaKind = "detail" | "contact" | "add";
 export type MapSearchType = "media_name" | "address" | "poi" | "mixed";
 
 export function isDefaultMapBrowseFilters(f: MapBrowseFilters): boolean {
-  const empty = {
-    q: "",
-    mainCategory: "",
-    subCategory: "",
-    target: "",
-    regionMain: "",
-    regionSub: "",
-    priceMin: "",
-    priceMax: "",
-    features: "",
-    sort: "popular" as const,
-  };
-  return mapBrowseFiltersFingerprint(f) === mapBrowseFiltersFingerprint(empty);
+  return (
+    mapBrowseFiltersFingerprint(f) ===
+    mapBrowseFiltersFingerprint(initMapBrowseFiltersFromUrl(null))
+  );
 }
 
 export function mapBrowseFiltersFingerprint(f: MapBrowseFilters): string {
