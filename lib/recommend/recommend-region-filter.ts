@@ -12,6 +12,7 @@ import type { PlannerIncheonZoneKey } from "@/lib/planner/incheon-zones";
 import { mediaMatchesIncheonZones } from "@/lib/planner/incheon-zones";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import { mediaMatchesSeoulZones } from "@/lib/planner/seoul-zones";
+import { recommendRegionCodesToPlannerIds } from "@/lib/recommend/recommend-sido-regions";
 
 /** 이 수 미만이면 전국 보완 + UI 안내 (recommend 전용) */
 export const RECOMMEND_REGION_SUPPLEMENT_THRESHOLD = 5;
@@ -57,18 +58,9 @@ export type RecommendMatchMeta = {
 export function resolveAiRecommendPlannerRegionIds(
   input: AiRecommendInput,
 ): string[] | undefined {
-  const codes = (input.regionCodes ?? []).filter(
-    (c) => c.trim().length > 0 && !isNonSpecificRegionCode(c),
-  );
-
-  if (codes.length > 0) {
-    if (codes.includes("capital")) {
-      const rest = codes.filter((c) => c !== "capital");
-      const capitalMacro = ["seoul", "gyeonggi", "incheon"];
-      return [...new Set([...capitalMacro, ...rest])];
-    }
-    return codes;
-  }
+  const raw = (input.regionCodes ?? []).filter((c) => c.trim().length > 0);
+  const fromCodes = recommendRegionCodesToPlannerIds(raw);
+  if (fromCodes?.length) return fromCodes;
 
   if (input.busanZones?.length) return ["busan"];
   if (input.gyeonggiZones?.length) return ["gyeonggi"];

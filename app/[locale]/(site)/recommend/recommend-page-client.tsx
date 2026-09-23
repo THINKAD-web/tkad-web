@@ -815,30 +815,16 @@ export default function RecommendPageClient({
   /** AI 자유입력 확인 완료 → 네트워크 제외(v1)로 추천 실행 */
   const handleAiConfirm = useCallback(
     (input: AiRecommendInput) => {
-      const validRegionCodes: RegionCheckboxCode[] = [
-        "seoul",
-        "capital",
-        "incheon",
-        "busan",
-        "jeju",
-        "national",
-      ];
-      const regionCodes: RegionCheckboxCode[] =
-        input.regionCodes?.length ?
-          input.regionCodes
-            .map((c) => (c === "gyeonggi" ? "capital" : c))
-            .filter((c): c is RegionCheckboxCode =>
-              (validRegionCodes as readonly string[]).includes(c),
-            )
-        : input.seoulZones?.length ?
-          ["seoul"]
-        : input.busanZones?.length ?
-          ["busan"]
-        : input.gyeonggiZones?.length ?
-          ["capital"]
-        : input.incheonZones?.length ?
-          ["incheon"]
-        : [];
+      const regionCodes: RegionCheckboxCode[] = (() => {
+        if (input.regionCodes?.length) {
+          return input.regionCodes as RegionCheckboxCode[];
+        }
+        if (input.seoulZones?.length) return ["11"];
+        if (input.busanZones?.length) return ["26"];
+        if (input.gyeonggiZones?.length) return ["41"];
+        if (input.incheonZones?.length) return ["28"];
+        return [];
+      })();
       const payload: MediaAiRecommendFormSubmit = {
         input,
         regionCodes,
@@ -913,7 +899,7 @@ export default function RecommendPageClient({
     const industry = industryFromUrl ?? "";
     const input = buildHomeBudgetRecommendInput(budgetMan, region, industry);
     const regionCodes: RegionCheckboxCode[] =
-      region === "national" ? [] : ["seoul"];
+      region === "national" ? [] : ["11"];
 
     const payload: MediaAiRecommendFormSubmit = {
       input,
