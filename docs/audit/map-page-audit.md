@@ -797,7 +797,7 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 | 변수 | Production | Preview | Development |
 |------|------------|---------|-------------|
 | `NEXT_PUBLIC_VWORLD_API_KEY` | **없음 → 2026-09-23 등록** | 있음 | 있음 |
-| `NEXT_PUBLIC_CARTO_BASEMAPS_API_KEY` | **없음** | **없음** | **없음** |
+| `NEXT_PUBLIC_CARTO_BASEMAPS_API_KEY` | **2026-09-23 등록** | **없음→등록** | **등록** |
 
 **정렬 전 confound (§C·배치 2·3 표):** 위 표의 Production **「없음」** 시점 기준 측정값. §D 이후 Production은 VWorld 포함 빌드.
 
