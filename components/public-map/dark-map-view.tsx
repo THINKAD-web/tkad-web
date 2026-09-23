@@ -25,6 +25,7 @@ import {
 } from "@/components/public-map/dark-map-tile-layer";
 import { LazySeoulMetroOverlayLayer } from "@/components/public-map/lazy-seoul-metro-overlay-layer";
 import { BRAND_ACCENT } from "@/lib/brand-palette";
+import { markMapBasemapTilesVisible } from "@/lib/media-map/map-performance";
 
 export type { MapBounds, MapMarker };
 
@@ -375,8 +376,13 @@ export default function DarkMapView({
 }: Props) {
   const { resolvedTheme } = useTheme();
   const [tilesLoading, setTilesLoading] = useState(true);
+  const basemapTilesMarkedRef = useRef(false);
   const onTilesLoadingChange = useCallback((loading: boolean) => {
     setTilesLoading(loading);
+    if (!loading && !basemapTilesMarkedRef.current) {
+      basemapTilesMarkedRef.current = true;
+      markMapBasemapTilesVisible();
+    }
   }, []);
 
   const leafletZoom = kakaoLevelToLeafletZoom(zoom, 10);
