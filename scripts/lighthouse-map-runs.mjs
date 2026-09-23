@@ -52,14 +52,20 @@ function pickAudits(lhr) {
   const breakdownMap = Object.fromEntries(
     breakdown.map((x) => [x.subpart, x.duration]),
   );
+  const discovery = a["lcp-discovery-insight"]?.details?.items ?? {};
   return {
     fcpMs: a["first-contentful-paint"]?.numericValue,
     lcpMs: a["largest-contentful-paint"]?.numericValue,
     tbtMs: a["total-blocking-time"]?.numericValue,
     inpMs: a["interaction-to-next-paint"]?.numericValue ?? null,
     lcpTtfbMs: breakdownMap.timeToFirstByte,
+    lcpResourceLoadDelayMs: breakdownMap.resourceLoadDelay,
     lcpElementRenderDelayMs: breakdownMap.elementRenderDelay,
     lcpElement: pickLcpElementHint(lhr),
+    lcpDiscovery: {
+      requestDiscoverable: discovery.requestDiscoverable?.value ?? null,
+      priorityHinted: discovery.priorityHinted?.value ?? null,
+    },
   };
 }
 
