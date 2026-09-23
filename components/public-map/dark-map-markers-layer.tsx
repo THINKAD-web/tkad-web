@@ -197,6 +197,7 @@ export function DarkMapMarkersLayer({
   markers,
   selectedId,
   onSelect,
+  onClusterClick,
   disableCluster,
   lightTiles = false,
   onPinLabelStateChange,
@@ -204,6 +205,7 @@ export function DarkMapMarkersLayer({
   markers: MapMarker[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onClusterClick?: () => void;
   disableCluster?: boolean;
   lightTiles?: boolean;
   onPinLabelStateChange?: (state: MapPinLabelOverlayState) => void;
@@ -218,6 +220,8 @@ export function DarkMapMarkersLayer({
   const syncGenerationRef = useRef(0);
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  const onClusterClickRef = useRef(onClusterClick);
+  onClusterClickRef.current = onClusterClick;
   const onPinLabelStateChangeRef = useRef(onPinLabelStateChange);
   onPinLabelStateChangeRef.current = onPinLabelStateChange;
   const lightTilesRef = useRef(lightTiles);
@@ -260,8 +264,18 @@ export function DarkMapMarkersLayer({
             buildClusterIcon(cluster.getChildCount(), lightTilesRef.current),
         });
     layerRef.current = layer;
+    const onCluster =
+      !disableCluster && "on" in layer
+        ? () => onClusterClickRef.current?.()
+        : null;
+    if (onCluster) {
+      (layer as L.MarkerClusterGroup).on("clusterclick", onCluster);
+    }
     map.addLayer(layer);
     return () => {
+      if (onCluster) {
+        (layer as L.MarkerClusterGroup).off("clusterclick", onCluster);
+      }
       syncGenerationRef.current += 1;
       map.removeLayer(layer);
       layerRef.current = null;
