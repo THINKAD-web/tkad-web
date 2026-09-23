@@ -13,6 +13,10 @@ const vitalSchema = z.object({
   locale: z.string().max(8).optional(),
   navigationType: z.string().max(32).optional(),
   id: z.string().max(64).optional(),
+  lcpElement: z.string().max(512).optional(),
+  lcpUrl: z.string().max(2048).optional(),
+  lcpTtfbMs: z.number().finite().nonnegative().optional(),
+  lcpResourceLoadDelayMs: z.number().finite().nonnegative().optional(),
 });
 
 /**
@@ -29,7 +33,18 @@ export async function POST(req: NextRequest) {
     return apiOk({ saved: false });
   }
 
-  const { name, value, rating, path, locale, navigationType } = parsed.data;
+  const {
+    name,
+    value,
+    rating,
+    path,
+    locale,
+    navigationType,
+    lcpElement,
+    lcpUrl,
+    lcpTtfbMs,
+    lcpResourceLoadDelayMs,
+  } = parsed.data;
 
   try {
     await prisma.webVital.create({
@@ -40,6 +55,11 @@ export async function POST(req: NextRequest) {
         path,
         locale: locale ?? null,
         navigationType: navigationType ?? null,
+        lcpElement: name === "LCP" ? (lcpElement ?? null) : null,
+        lcpUrl: name === "LCP" ? (lcpUrl ?? null) : null,
+        lcpTtfbMs: name === "LCP" ? (lcpTtfbMs ?? null) : null,
+        lcpResourceLoadDelayMs:
+          name === "LCP" ? (lcpResourceLoadDelayMs ?? null) : null,
       },
     });
     return apiOk({ saved: true });
