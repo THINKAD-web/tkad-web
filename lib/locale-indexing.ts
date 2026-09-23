@@ -10,6 +10,9 @@ export function isLocaleIndexingAllowed(locale: string): boolean {
   return row?.indexAllowed === true;
 }
 
+/** PR7 alias — same as {@link isLocaleIndexingAllowed}. */
+export const isLocaleReady = isLocaleIndexingAllowed;
+
 export function localeReadinessSnapshot(): LocaleReadinessSnapshot {
   return SNAP;
 }

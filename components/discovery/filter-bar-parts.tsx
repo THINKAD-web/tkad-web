@@ -3,13 +3,14 @@
 import type { ReactNode } from "react";
 import { X } from "lucide-react";
 import { Drawer } from "vaul";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 /** `/media`·`/media/map` 등 — 결과 수 + 선택/담기/비교 요약 행 */
 export type DiscoveryResultSummaryProps = {
   resultLabel?: string | null;
   showResultCount?: boolean;
-  isKo?: boolean;
+  locale?: string;
   selectedCount?: number;
   selectionVariant?: "default" | "plan";
   onSelectedSummaryClick?: () => void;
@@ -24,7 +25,7 @@ export type DiscoveryResultSummaryProps = {
 export function DiscoveryResultSummary({
   resultLabel,
   showResultCount = true,
-  isKo = true,
+  locale = "ko",
   selectedCount = 0,
   selectionVariant = "default",
   onSelectedSummaryClick,
@@ -35,6 +36,7 @@ export function DiscoveryResultSummary({
   className,
   trailing,
 }: DiscoveryResultSummaryProps) {
+  const t = useTranslations("media");
   const showRow =
     (showResultCount && resultLabel) ||
     selectedCount > 0 ||
@@ -63,22 +65,14 @@ export function DiscoveryResultSummary({
               className="tkad-type-meta font-medium text-[color:var(--qp-accent)] underline decoration-[color:var(--qp-accent)]/50 underline-offset-2 hover:opacity-90"
             >
               {selectionVariant === "plan"
-                ? isKo
-                  ? `선택됨 ${selectedCount}개 · 보기`
-                  : `${selectedCount} selected · view`
-                : isKo
-                  ? `선택 ${selectedCount} · 보기`
-                  : `${selectedCount} selected · view`}
+                ? t("browseSelectedPlanView", { count: selectedCount })
+                : t("browseSelectedView", { count: selectedCount })}
             </button>
           ) : (
             <span className="tkad-type-meta font-medium text-[color:var(--qp-accent)]">
               {selectionVariant === "plan"
-                ? isKo
-                  ? `선택됨 ${selectedCount}개`
-                  : `${selectedCount} selected`
-                : isKo
-                  ? `선택 ${selectedCount}`
-                  : `${selectedCount} selected`}
+                ? t("browseSelectedPlan", { count: selectedCount })
+                : t("browseSelected", { count: selectedCount })}
             </span>
           )
         ) : null}
@@ -89,11 +83,11 @@ export function DiscoveryResultSummary({
               onClick={onCartSummaryClick}
               className="tkad-type-meta font-medium text-[color:var(--qp-accent)] underline decoration-[color:var(--qp-accent)]/50 underline-offset-2 hover:opacity-90"
             >
-              {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
+              {t("browseCartCount", { count: cartCount })}
             </button>
           ) : (
             <span className="tkad-type-meta font-medium text-[color:var(--qp-accent)]">
-              {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
+              {t("browseCartCount", { count: cartCount })}
             </span>
           )
         ) : null}
@@ -104,11 +98,11 @@ export function DiscoveryResultSummary({
               onClick={onCompareSummaryClick}
               className="tkad-type-meta font-medium text-[color:var(--qp-accent)] underline decoration-[color:var(--qp-accent)]/50 underline-offset-2 hover:opacity-90"
             >
-              {isKo ? `비교 ${compareCount}` : `${compareCount} compare`}
+              {t("browseCompareCount", { count: compareCount })}
             </button>
           ) : (
             <span className="tkad-type-meta font-medium text-[color:var(--qp-accent)]">
-              {isKo ? `비교 ${compareCount}` : `${compareCount} compare`}
+              {t("browseCompareCount", { count: compareCount })}
             </span>
           )
         ) : null}
@@ -120,6 +114,8 @@ export function DiscoveryResultSummary({
 
 /** 모바일 필터 바텀시트 상단 */
 export type DiscoveryFilterSheetHeaderProps = {
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
   activeFilterCount?: number;
   onClose: () => void;
@@ -129,13 +125,17 @@ export type DiscoveryFilterSheetHeaderProps = {
 };
 
 export function DiscoveryFilterSheetHeader({
-  isKo = true,
+  locale,
+  isKo,
   activeFilterCount = 0,
   onClose,
   title,
   useDrawerTitle = false,
 }: DiscoveryFilterSheetHeaderProps) {
-  const label = title ?? (isKo ? "필터" : "Filters");
+  const t = useTranslations("media");
+  const useKo =
+    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
+  const label = title ?? t("filterPanelTitle");
 
   const titleContent = (
     <>
@@ -160,7 +160,7 @@ export function DiscoveryFilterSheetHeader({
       <button
         type="button"
         onClick={onClose}
-        aria-label={isKo ? "닫기" : "Close"}
+        aria-label={t("filterClose")}
       >
         <X className="h-5 w-5 text-tkad-muted" aria-hidden />
       </button>

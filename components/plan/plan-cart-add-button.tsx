@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { mediaActionPillClass } from "@/components/media/media-action-pill";
 import { useAppToast } from "@/lib/use-toast";
 import { usePlanCart } from "@/hooks/use-plan-cart";
@@ -31,59 +31,42 @@ export function PlanCartAddButton({
   className,
 }: Props) {
   const locale = useLocale();
-  const isKo = locale === "ko";
+  const useKo = locale === "ko";
+  const t = useTranslations("planCart");
   const toast = useAppToast();
   const { has, add, remove } = usePlanCart();
   const { isPro } = useIsPro();
   const inPlan = has(item.mediaId);
   const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
-  const removeHint = isKo ? "다시 누르면 빼기" : "Tap again to remove";
-  const addLabel = mediaDetailLabel
-    ? isKo
-      ? "플래너에 담기"
-      : "Add to planner"
-    : isKo
-      ? "담기"
-      : "Add";
-  const addHint = mediaDetailLabel
-    ? isKo
-      ? "플래너: 캠페인 플래너에 매체를 추가합니다"
-      : "Planner: add this media to your campaign planner"
-    : undefined;
+  const removeHint = t("removeHint");
+  const addLabel = mediaDetailLabel ? t("addToPlanner") : t("add");
+  const addHint = mediaDetailLabel ? t("addToPlannerHint") : undefined;
 
   function handleClick(e: React.MouseEvent) {
     e.stopPropagation();
     e.preventDefault();
     if (inPlan) {
       remove(item.mediaId);
-      toast.success(
-        isKo
-          ? `${item.mediaName}을(를) 담은 매체에서 뺐어요`
-          : `Removed ${item.mediaName} from your plan`,
-      );
+      toast.success(t("removedToast", { name: item.mediaName }));
       return;
     }
     const result = add(payload);
     if (result.ok && result.added) {
-      toast.success(
-        isKo
-          ? `${item.mediaName}을(를) 담은 매체에 담았어요`
-          : `Added ${item.mediaName} to your plan`,
-      );
+      toast.success(t("addedToast", { name: item.mediaName }));
       return;
     }
     if (result.ok && !result.added) {
-      toast.warning(isKo ? "이미 담은 매체에 있습니다" : "Already in your plan");
+      toast.warning(t("alreadyInPlan"));
       return;
     }
     if (!result.ok && result.reason === "online_blocked") {
-      toast.warning(planCartAddBlockedMessage(item, isKo));
+      toast.warning(planCartAddBlockedMessage(item, useKo));
       return;
     }
     toast.show({
       variant: "warning",
-      title: isKo ? "담은 매체 한도" : "Plan cart limit",
-      description: buildPlanCartLimitMessage(isKo, isPro),
+      title: t("limitTitle"),
+      description: buildPlanCartLimitMessage(useKo, isPro),
     });
   }
 
@@ -95,25 +78,17 @@ export function PlanCartAddButton({
         title={inPlan ? removeHint : addHint}
         className={cn(mediaActionPillClass(inPlan, "cart"), className)}
         aria-pressed={inPlan}
-        aria-label={
-          inPlan
-            ? isKo
-              ? "담은 매체에서 제거 (다시 누르면 빼기)"
-              : "Remove from plan (tap again to remove)"
-            : isKo
-              ? "담은 매체에 담기"
-              : "Add to plan"
-        }
+        aria-label={inPlan ? t("ariaRemove") : t("ariaAdd")}
       >
         {inPlan ? (
           <>
             <X className="h-2.5 w-2.5 shrink-0 opacity-90" aria-hidden />
-            {isKo ? "빼기" : "Out"}
+            {t("removeShort")}
           </>
         ) : (
           <>
             <Plus className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />
-            {isKo ? "담기" : "Add"}
+            {t("addShort")}
           </>
         )}
       </button>
@@ -136,22 +111,16 @@ export function PlanCartAddButton({
       aria-pressed={inPlan}
       aria-label={
         inPlan
-          ? isKo
-            ? "담은 매체에서 제거 (다시 누르면 빼기)"
-            : "Remove from plan (tap again to remove)"
-          : isKo
-            ? mediaDetailLabel
-              ? "플래너에 담기"
-              : "담은 매체에 담기"
-            : mediaDetailLabel
-              ? "Add to planner"
-              : "Add to plan"
+          ? t("ariaRemove")
+          : mediaDetailLabel
+            ? t("addToPlanner")
+            : t("ariaAdd")
       }
     >
       {inPlan ? (
         <>
           <X className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          {isKo ? "빼기" : "Remove"}
+          {t("remove")}
         </>
       ) : (
         <>

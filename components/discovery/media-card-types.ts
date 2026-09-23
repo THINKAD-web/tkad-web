@@ -10,7 +10,6 @@ export type MediaCardVariant = "feed" | "compact";
 export type MediaCardCompactLayout = "row" | "grid" | "map-tile";
 
 export type DiscoveryMediaCardSharedProps = {
-  isKo?: boolean;
   className?: string;
   recommendReason?: string;
   /** 확장 시 표시할 추가 근거 bullet (최대 2줄) */

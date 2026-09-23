@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -169,7 +171,7 @@ const MAP_PAGE_VIEW_MODES: {
 ];
 
 export type MediaManualBrowseFiltersProps = {
-  isKo?: boolean;
+  locale?: string;
   query: string;
   onQueryChange: (q: string) => void;
   mainCategory: string;
@@ -246,7 +248,7 @@ export type MediaManualBrowseFiltersProps = {
 };
 
 export function MediaManualBrowseFilters({
-  isKo = true,
+  locale = "ko",
   query,
   onQueryChange,
   mainCategory,
@@ -306,6 +308,24 @@ export function MediaManualBrowseFilters({
   mapAreaSearchMode = "auto",
   onMapAreaSearchModeChange,
 }: MediaManualBrowseFiltersProps) {
+  const t = useTranslations("media");
+  const tNav = useTranslations("nav");
+  const labelKoEn = (ko: string, en: string) => (locale === "ko" ? ko : en);
+  const browseResultLabel = (
+    shown: number,
+    total: number | undefined,
+    kind: "media" | "network" = "media",
+  ) => {
+    if (total != null && total > shown) {
+      return kind === "network"
+        ? t("browseResultShownOfTotalNetwork", { shown, total })
+        : t("browseResultShownOfTotal", { shown, total });
+    }
+    return kind === "network"
+      ? t("browseResultTotalNetwork", { count: shown })
+      : t("browseResultTotalMedia", { count: shown });
+  };
+
   const isOnlineBrowse = browseChannel === "online";
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [regionPanelOpen, setRegionPanelOpen] = useState(false);
@@ -423,7 +443,7 @@ export function MediaManualBrowseFilters({
             priceMax,
             features,
           },
-          isKo,
+          locale === "ko",
         )
       : [],
   );
@@ -441,14 +461,14 @@ export function MediaManualBrowseFilters({
             priceMax,
             features,
           },
-          isKo,
+          locale === "ko",
         )
       : mapBrowseFilterChips,
   );
 
   const sortLabel =
     MEDIA_SEARCH_SORT_OPTIONS.find((o) => o.value === sort)?.label ??
-    (isKo ? "정렬" : "Sort");
+    (t("sortLabel"));
 
   /** 지도 compact — 접힌 상태 배지 (유형·고급 필터 전체) */
   const mapCompactFilterCount = mapBrowseFilterChips.length;
@@ -502,16 +522,16 @@ export function MediaManualBrowseFilters({
   const filterApplyCountPhrase = loading
     ? null
     : mapPageViewModes && viewMode === "map" && variant !== "network"
-      ? formatMapViewCountCompact(resultCount, isKo)
-      : formatBrowseListResultLabel(resultCount, total, isKo, resultKind);
+      ? formatMapViewCountCompact(resultCount, locale === "ko")
+      : browseResultLabel(resultCount, total, resultKind);
 
   const mapCountLabel =
     viewMode === "map" && variant !== "network"
-      ? formatMapViewCountCompact(resultCount, isKo)
+      ? formatMapViewCountCompact(resultCount, locale === "ko")
       : null;
 
   const resultLabel = loading
-    ? isKo
+    ? locale === "ko"
       ? "검색 중…"
       : "Searching…"
     : mapPageViewModes &&
@@ -520,35 +540,35 @@ export function MediaManualBrowseFilters({
         total != null &&
         total > resultCount
       ? mapCountLabel
-      : formatBrowseListResultLabel(resultCount, total, isKo, resultKind);
+      : browseResultLabel(resultCount, total, resultKind);
 
   const browseResultCountPhrase = loading
-    ? isKo
+    ? locale === "ko"
       ? "검색 중…"
       : "Searching…"
-    : formatBrowseListResultLabel(resultCount, total, isKo, resultKind);
+    : browseResultLabel(resultCount, total, resultKind);
 
   const sheetCtaLabel = loading
-    ? isKo
+    ? locale === "ko"
       ? "검색 중…"
       : "Searching…"
     : filterApplyCountPhrase
-      ? isKo
+      ? locale === "ko"
         ? `${filterApplyCountPhrase} 결과 보기`
         : `Show ${filterApplyCountPhrase}`
-      : isKo
+      : locale === "ko"
         ? `${browseResultCountPhrase} 결과 보기`
         : `Show ${browseResultCountPhrase}`;
 
   const desktopPanelCtaLabel = loading
-    ? isKo
+    ? locale === "ko"
       ? "검색 중…"
       : "Searching…"
     : filterApplyCountPhrase
-      ? isKo
+      ? locale === "ko"
         ? `적용 (${filterApplyCountPhrase})`
         : `Apply (${filterApplyCountPhrase})`
-      : isKo
+      : locale === "ko"
         ? `적용 (${browseResultCountPhrase})`
         : `Apply (${browseResultCountPhrase})`;
 
@@ -745,7 +765,7 @@ export function MediaManualBrowseFilters({
       <div data-screenshot="media-main-category">
         {wrap ? (
           <p className="tkad-home-accent-text mb-2 text-xs font-bold">
-            {isKo
+            {locale === "ko"
               ? variant === "network"
                 ? "네트워크 유형"
                 : "어떤 매체?"
@@ -772,7 +792,7 @@ export function MediaManualBrowseFilters({
                     )}
                   >
                     <Icon className="h-3.5 w-3.5" aria-hidden />
-                    {isKo ? chip.labelKo : chip.labelEn}
+                    {labelKoEn(chip.labelKo, chip.labelEn)}
                   </button>
                 );
               })
@@ -812,7 +832,7 @@ export function MediaManualBrowseFilters({
                       className={cn("shrink-0", wrap ? "h-3.5 w-3.5" : "h-3 w-3")}
                       aria-hidden
                     />
-                    {isKo ? main.label : main.labelEn ?? main.label}
+                    {labelKoEn(main.label, main.labelEn ?? main.label)}
                   </button>
                 );
               })}
@@ -849,7 +869,7 @@ export function MediaManualBrowseFilters({
                     subDisabled && disabledZeroChipClass,
                   )}
                 >
-                  {isKo ? sub.label : sub.labelEn ?? sub.label}
+                  {labelKoEn(sub.label, sub.labelEn ?? sub.label)}
                   {renderCountBadge(subCount)}
                 </button>
               );
@@ -867,16 +887,16 @@ export function MediaManualBrowseFilters({
       <div data-screenshot="media-region-filter">
         {!includeHotspots ? (
           <p className="mb-2 text-xs font-bold text-[color:var(--qp-accent)]">
-            {isKo ? "어디서?" : "Where"}
+            {t("browseWhere")}
           </p>
         ) : null}
         {includeHotspots && showHotspotRegions ? (
           <div className="mb-3">
             <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
-              {isKo ? "인기" : "Popular"}
+              {t("browsePopular")}
             </p>
             <HotspotRegionChips
-              isKo={isKo}
+              locale={locale}
               regionSub={regionSub}
               compact={wrap}
               onSelect={handleHotspotSelect}
@@ -886,7 +906,7 @@ export function MediaManualBrowseFilters({
         ) : null}
         {includeHotspots ? (
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]/80">
-            {isKo ? "전체 지역" : "All regions"}
+            {t("allRegions")}
           </p>
         ) : null}
         <div className={chipRow}>
@@ -912,7 +932,7 @@ export function MediaManualBrowseFilters({
                     : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
                 )}
               >
-                {isKo ? main.label : main.labelEn ?? main.label}
+                {labelKoEn(main.label, main.labelEn ?? main.label)}
               </button>
             );
           })}
@@ -959,7 +979,7 @@ export function MediaManualBrowseFilters({
   const renderUnifiedRegionSection = (wrap: boolean) => (
     <div ref={regionSectionRef}>
       <p className="mb-2 text-xs font-bold text-[color:var(--qp-accent)]">
-        {isKo ? "어디서?" : "Where"}
+        {t("browseWhere")}
       </p>
       {renderRegionAxis(wrap, { includeHotspots: showHotspotRegions })}
     </div>
@@ -981,7 +1001,7 @@ export function MediaManualBrowseFilters({
 
   const renderHotspotRow = (shortcut = false) => (
     <HotspotRegionChips
-      isKo={isKo}
+      locale={locale}
       regionSub={regionSub}
       compact={mapMobileImmersiveMode}
       shortcutToPanel={shortcut}
@@ -994,7 +1014,7 @@ export function MediaManualBrowseFilters({
   const renderHotspotControl = (opts?: { compact?: boolean }) =>
     mapPageViewModes ? (
       <HotspotRegionDropdown
-        isKo={isKo}
+        locale={locale}
         regionSub={regionSub}
         compact={opts?.compact ?? mapToolbarCompact}
         onSelect={handleHotspotSelect}
@@ -1016,7 +1036,7 @@ export function MediaManualBrowseFilters({
       <div className="space-y-3">
         <div>
           <p className="tkad-type-note mb-2 font-medium text-tkad-muted">
-            {isKo ? "가격대" : "Budget"}
+            {t("browseBudget")}
           </p>
           <div className="flex flex-wrap gap-2">
             {MEDIA_MAP_PRICE_PRESETS.map((preset) => {
@@ -1039,7 +1059,7 @@ export function MediaManualBrowseFilters({
                     selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
                   )}
                 >
-                  {isKo ? preset.labelKo : preset.labelEn}
+                  {labelKoEn(preset.labelKo, preset.labelEn)}
                 </button>
               );
             })}
@@ -1047,7 +1067,7 @@ export function MediaManualBrowseFilters({
           <div className="mt-2 grid grid-cols-2 gap-2">
             <label className="space-y-1">
               <span className="tkad-type-note font-medium text-tkad-muted">
-                {isKo ? "최소 가격(원)" : "Min price (KRW)"}
+                {t("browsePriceMinKrw")}
               </span>
               <input
                 type="number"
@@ -1059,7 +1079,7 @@ export function MediaManualBrowseFilters({
             </label>
             <label className="space-y-1">
               <span className="tkad-type-note font-medium text-tkad-muted">
-                {isKo ? "최대 가격(원)" : "Max price (KRW)"}
+                {t("browsePriceMaxKrw")}
               </span>
               <input
                 type="number"
@@ -1074,7 +1094,7 @@ export function MediaManualBrowseFilters({
         {variant === "media" ? (
           <div>
             <p className="tkad-type-note mb-1.5 font-medium text-tkad-muted">
-              {isKo ? "매체 특성" : "Features"}
+              {t("browseFeatures")}
             </p>
             <div className="flex flex-wrap gap-2">
               {FEATURE_CHIPS.map((chip) => {
@@ -1089,7 +1109,7 @@ export function MediaManualBrowseFilters({
                       selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
                     )}
                   >
-                    {isKo ? chip.labelKo : chip.labelEn}
+                    {labelKoEn(chip.labelKo, chip.labelEn)}
                   </button>
                 );
               })}
@@ -1112,7 +1132,7 @@ export function MediaManualBrowseFilters({
         {variant === "media" ? (
           <div>
             <p className="mb-2 text-xs font-bold text-pink-600 dark:text-pink-400">
-              {isKo ? "광고 목적" : "Campaign goal"}
+              {t("browseCampaignGoal")}
             </p>
             <div className={chipRow}>
               {MEDIA_TARGET_CHIPS.map((chip) => (
@@ -1151,7 +1171,7 @@ export function MediaManualBrowseFilters({
               onClick={() => setAdvancedOpen((o) => !o)}
               className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80"
             >
-              <span>{isKo ? "추가 필터" : "More filters"}</span>
+              <span>{t("browseMoreFilters")}</span>
               <ChevronDown
                 className={cn(
                   "h-4 w-4 transition-transform",
@@ -1207,16 +1227,11 @@ export function MediaManualBrowseFilters({
         value={query}
         onValueChange={onQueryChange}
         type={mapPageViewModes ? "text" : "search"}
+        aria-label={t("browseSearchPlaceholder")}
         placeholder={
-          isKo
-            ? variant === "network"
-              ? "네트워크명·지역·유형 검색"
-              : mapPageViewModes
-                ? "매체명·지역·유형"
-                : "매체명·지역·유형 검색"
-            : mapPageViewModes
-              ? "Name, region, type"
-              : "Search name, region, type"
+          variant === "network" && locale === "ko"
+            ? "네트워크명·지역·유형 검색"
+            : t("browseSearchPlaceholder")
         }
         className={cn(
           mapPageViewModes
@@ -1235,7 +1250,7 @@ export function MediaManualBrowseFilters({
             "absolute top-1/2 -translate-y-1/2",
             mapPageViewModes ? "right-2.5" : "right-3",
           )}
-          aria-label={isKo ? "검색어 지우기" : "Clear search"}
+          aria-label={labelKoEn("검색어 지우기", "Clear search")}
         >
           <X className="h-4 w-4 text-gray-400 dark:text-white/40" />
         </button>
@@ -1243,13 +1258,13 @@ export function MediaManualBrowseFilters({
       {mapPageViewModes && mapThreeStepSearchCoachmarkOpen ? (
         <MapOnboardingCoachmark
           open
-          title={isKo ? "1/3 · 매체 검색" : "1/3 · Search media"}
+          title={labelKoEn("1/3 · 매체 검색", "1/3 · Search media")}
           description={
-            isKo
+            locale === "ko"
               ? "매체명·지역·유형으로 전국 검색할 수 있어요."
               : "Search nationwide by name, region, or type."
           }
-          dismissLabel={isKo ? "다음" : "Next"}
+          dismissLabel={labelKoEn("다음", "Next")}
           onDismiss={() => onMapThreeStepSearchCoachmarkDismiss?.()}
           placement="below"
         />
@@ -1263,7 +1278,7 @@ export function MediaManualBrowseFilters({
     <select
       value={sort}
       onChange={(e) => onSortChange(e.target.value)}
-      aria-label={isKo ? "정렬" : "Sort"}
+      aria-label={labelKoEn("정렬", "Sort")}
       className={cn(
         "tkad-type-meta box-border min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-100 px-3 py-0 font-medium text-gray-600 focus:outline-none sm:w-auto sm:shrink-0 sm:flex-none dark:border-white/10 dark:bg-white/8 dark:text-white/70",
         TOOLBAR_CTRL_H,
@@ -1310,8 +1325,8 @@ export function MediaManualBrowseFilters({
             key={mode.id}
             type="button"
             onClick={() => onViewModeChange(mode.id)}
-            title={isKo ? mode.labelKo : mode.labelEn}
-            aria-label={isKo ? mode.labelKo : mode.labelEn}
+            title={labelKoEn(mode.labelKo, mode.labelEn)}
+            aria-label={labelKoEn(mode.labelKo, mode.labelEn)}
             aria-pressed={active}
             className={cn(
               "flex h-full items-center gap-1 py-0 font-medium transition-ui tkad-type-meta",
@@ -1329,7 +1344,7 @@ export function MediaManualBrowseFilters({
                   : "hidden sm:inline"
               }
             >
-              {isKo ? mode.labelKo : mode.labelEn}
+              {labelKoEn(mode.labelKo, mode.labelEn)}
             </span>
           </button>
         );
@@ -1344,7 +1359,7 @@ export function MediaManualBrowseFilters({
       data-screenshot="media-targets-hub-link"
     >
       <Target className="h-3.5 w-3.5 shrink-0" aria-hidden />
-      {isKo ? "캠페인 목적에서 시작" : "Browse by campaign goal"}
+      {t("browseCampaignGoalEntry")}
     </Link>
   ) : null;
 
@@ -1359,10 +1374,10 @@ export function MediaManualBrowseFilters({
           onNavigateToMap();
         }}
         className={toolbarControlClass}
-        aria-label={isKo ? "지도에서 보기" : "Open map"}
+        aria-label={t("browseMapOpenAria")}
       >
         <MapIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        <span>{isKo ? "지도" : "Map"}</span>
+        <span>{t("browseMapButton")}</span>
       </button>
     ) : null;
 
@@ -1375,9 +1390,9 @@ export function MediaManualBrowseFilters({
         type="button"
         onClick={() => setPlanSheetOpen(true)}
         className={summaryChipClass}
-        aria-label={isKo ? `담은 매체 ${cartCount}개 보기` : `View ${cartCount} items in cart`}
+        aria-label={t("browseViewCartAria", { count: cartCount })}
       >
-        {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
+        {t("browseCartCount", { count: cartCount })}
       </button>
     ) : null;
 
@@ -1387,9 +1402,9 @@ export function MediaManualBrowseFilters({
         type="button"
         onClick={onCompareSummaryClick}
         className={summaryChipClass}
-        aria-label={isKo ? `비교함 ${compareCount}개 보기` : `View ${compareCount} items to compare`}
+        aria-label={t("browseViewCompareAria", { count: compareCount })}
       >
-        {isKo ? `비교 ${compareCount}` : `${compareCount} compare`}
+        {t("browseCompareCount", { count: compareCount })}
       </button>
     ) : null;
 
@@ -1411,7 +1426,7 @@ export function MediaManualBrowseFilters({
         }
       }}
       className={toolbarControlClass}
-      aria-label={isKo ? "정렬" : "Sort"}
+      aria-label={labelKoEn("정렬", "Sort")}
     >
       <Filter className="h-4 w-4 rotate-90" aria-hidden />
       <span className="max-w-[5.5rem] truncate">{sortLabel}</span>
@@ -1425,11 +1440,11 @@ export function MediaManualBrowseFilters({
       className={toolbarControlClass}
       aria-haspopup="dialog"
       aria-expanded={sheetOpen}
-      aria-label={isKo ? "필터 열기" : "Open filters"}
+      aria-label={t("openFilters")}
       {...filterTriggerPrefetchProps}
     >
       <SlidersHorizontal className="h-4 w-4" aria-hidden />
-      {isKo ? "필터" : "Filter"}
+      {t("filterButton")}
       {activeFilterCount > 0 ? (
         <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1.5 text-[11px] font-bold leading-none text-white">
           {activeFilterCount}
@@ -1453,7 +1468,7 @@ export function MediaManualBrowseFilters({
       className={TOOLBAR_ICON_BTN}
       aria-haspopup="dialog"
       aria-expanded={sheetOpen}
-      aria-label={isKo ? "필터 열기" : "Open filters"}
+      aria-label={t("openFilters")}
       {...filterTriggerPrefetchProps}
     >
       <SlidersHorizontal className="h-4 w-4" aria-hidden />
@@ -1474,7 +1489,7 @@ export function MediaManualBrowseFilters({
         }
       }}
       className={TOOLBAR_ICON_BTN}
-      aria-label={isKo ? "정렬" : "Sort"}
+      aria-label={labelKoEn("정렬", "Sort")}
     >
       <Filter className="h-4 w-4 rotate-90" aria-hidden />
     </button>
@@ -1491,7 +1506,7 @@ export function MediaManualBrowseFilters({
       {showHotspotRegions ? renderHotspotControl({ compact: true }) : null}
       {mapPageViewModes && onMapAreaSearchModeChange ? (
         <MapAreaSearchModeToggle
-          isKo={isKo}
+          locale={locale}
           mode={mapAreaSearchMode}
           onChange={onMapAreaSearchModeChange}
           compact
@@ -1536,7 +1551,7 @@ export function MediaManualBrowseFilters({
     <>
       <div className="shrink-0 border-b border-gray-100 px-4 py-3 dark:border-white/10">
         <p className="text-sm font-bold text-gray-900 dark:text-white">
-          {isKo ? "필터" : "Filters"}
+          {t("filterPanelTitle")}
         </p>
       </div>
       <div className={unifiedToolbarDesktopFilterPanelScrollClass}>
@@ -1549,7 +1564,7 @@ export function MediaManualBrowseFilters({
           disabled={activeFilterCount === 0}
           className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 disabled:opacity-40 dark:border-white/10 dark:text-white/70"
         >
-          {isKo ? "초기화" : "Reset"}
+          {t("filterReset")}
         </button>
         <button
           type="button"
@@ -1612,14 +1627,14 @@ export function MediaManualBrowseFilters({
                 chips={mediaBrowseActiveChips}
                 onRemove={removeMapBrowseFilterChip}
                 onClearAll={clearAllFilters}
-                isKo={isKo}
+                locale={locale}
               />
             ) : activeFilterCount > 0 &&
               !mobileStickyToolbar &&
               !mobileBottomBar ? (
               <p className="tkad-type-meta text-tkad-muted">
                 <span className="inline-flex items-center rounded-full bg-[color:var(--qp-accent-soft)] px-2.5 py-0.5 font-semibold text-[color:var(--qp-accent)]">
-                  {isKo ? `필터 ${activeFilterCount}` : `${activeFilterCount} filters`}
+                  {t("browseActiveFilterCount", { count: activeFilterCount })}
                 </span>
               </p>
             ) : null}
@@ -1639,11 +1654,11 @@ export function MediaManualBrowseFilters({
                 className={toolbarControlClass}
                 aria-expanded={desktopPanelOpen}
                 aria-haspopup="dialog"
-                aria-label={isKo ? "필터 열기" : "Open filters"}
+                aria-label={t("openFilters")}
                 {...filterTriggerPrefetchProps}
               >
                 <SlidersHorizontal className="h-4 w-4" aria-hidden />
-                {isKo ? "필터" : "Filters"}
+                {t("filterPanelTitle")}
                 <ChevronDown
                   className={cn(
                     "h-3.5 w-3.5 opacity-60 transition-transform",
@@ -1676,7 +1691,7 @@ export function MediaManualBrowseFilters({
               : null}
             {mapPageViewModes && onMapAreaSearchModeChange ? (
               <MapAreaSearchModeToggle
-                isKo={isKo}
+                locale={locale}
                 mode={mapAreaSearchMode}
                 onChange={onMapAreaSearchModeChange}
               />
@@ -1705,11 +1720,11 @@ export function MediaManualBrowseFilters({
               className={toolbarControlClass}
               aria-haspopup="dialog"
               aria-expanded={sheetOpen}
-              aria-label={isKo ? "필터 열기" : "Open filters"}
+              aria-label={t("openFilters")}
               {...filterTriggerPrefetchProps}
             >
               <SlidersHorizontal className="h-4 w-4" aria-hidden />
-              {isKo ? "필터" : "Filters"}
+              {t("filterPanelTitle")}
               {activeFilterCount > 0 ? (
                 <span className="tkad-type-note ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1.5 font-bold leading-none text-white">
                   {activeFilterCount}
@@ -1744,11 +1759,11 @@ export function MediaManualBrowseFilters({
             className={toolbarControlClass}
             aria-expanded={mapCompactFilters ? mapFiltersExpanded : desktopPanelOpen}
             aria-haspopup={mapCompactFilters ? undefined : "dialog"}
-            aria-label={isKo ? "필터 열기" : "Open filters"}
+            aria-label={t("openFilters")}
             {...filterTriggerPrefetchProps}
           >
             <SlidersHorizontal className="h-4 w-4" aria-hidden />
-            {isKo ? "필터" : "Filters"}
+            {t("filterPanelTitle")}
             <ChevronDown
               className={cn(
                 "h-3.5 w-3.5 opacity-60 transition-transform",
@@ -1772,7 +1787,7 @@ export function MediaManualBrowseFilters({
             >
               <div className="shrink-0 border-b border-gray-100 px-4 py-3 dark:border-white/10">
                 <p className="text-sm font-bold text-gray-900 dark:text-white">
-                  {isKo ? "필터" : "Filters"}
+                  {t("filterPanelTitle")}
                   {collapsedFilterCount > 0 ? (
                     <span className="ml-1.5 text-sm font-semibold text-[color:var(--qp-accent)]">
                       {collapsedFilterCount}
@@ -1790,7 +1805,7 @@ export function MediaManualBrowseFilters({
                   disabled={collapsedFilterCount === 0}
                   className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 disabled:opacity-40 dark:border-white/10 dark:text-white/70"
                 >
-                  {isKo ? "초기화" : "Reset"}
+                  {t("filterReset")}
                 </button>
                 <button
                   type="button"
@@ -1814,7 +1829,7 @@ export function MediaManualBrowseFilters({
           chips={mapBrowseFilterChips}
           onRemove={removeMapBrowseFilterChip}
           onClearAll={clearAllFilters}
-          isKo={isKo}
+          locale={locale}
         />
       ) : null}
 
@@ -1833,7 +1848,7 @@ export function MediaManualBrowseFilters({
               disabled={mapCompactFilterCount === 0}
               className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 disabled:opacity-40 dark:border-white/10 dark:text-white/70"
             >
-              {isKo ? "초기화" : "Reset"}
+              {t("filterReset")}
             </button>
             <button
               type="button"
@@ -1853,11 +1868,11 @@ export function MediaManualBrowseFilters({
           type="button"
           onClick={() => setSheetOpen(true)}
           className={toolbarControlClass}
-          aria-label={isKo ? "필터 열기" : "Open filters"}
+          aria-label={t("openFilters")}
           {...filterTriggerPrefetchProps}
         >
           <SlidersHorizontal className="h-4 w-4" aria-hidden />
-          {isKo ? "필터" : "Filters"}
+          {t("filterPanelTitle")}
           {activeFilterCount > 0 ? (
             <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1.5 text-[11px] font-bold leading-none text-white">
               {activeFilterCount}
@@ -1874,7 +1889,7 @@ export function MediaManualBrowseFilters({
         <DiscoveryResultSummary
           resultLabel={resultLabel}
           showResultCount={showResultCountLabel}
-          isKo={isKo}
+          locale={locale}
           selectedCount={selectedCount}
           selectionVariant={selectionVariant}
           onSelectedSummaryClick={onSelectedSummaryClick}
@@ -1895,7 +1910,7 @@ export function MediaManualBrowseFilters({
       <PlanCartSheet
         open={planSheetOpen}
         onOpenChange={setPlanSheetOpen}
-        isKo={isKo}
+        locale={locale}
       />
 
       {/* PR B — vaul 필터/정렬 + (지도 전용) 하단 바 포털 */}
@@ -1904,7 +1919,7 @@ export function MediaManualBrowseFilters({
           <MediaFilterVaulSheet
             open={sheetOpen}
             onOpenChange={setSheetOpen}
-            isKo={isKo}
+            locale={locale}
             activeFilterCount={activeFilterCount}
             onReset={clearAllFilters}
             applyLabel={sheetCtaLabel}
@@ -1914,14 +1929,14 @@ export function MediaManualBrowseFilters({
           <MediaSortVaulSheet
             open={sortSheetOpen}
             onOpenChange={setSortSheetOpen}
-            isKo={isKo}
+            locale={locale}
             sort={sort}
             onSortChange={onSortChange}
           />
           {mobileBottomBar && bottomBarSlot
             ? createPortal(
                 <MediaMobileBottomBar
-                  isKo={isKo}
+                  locale={locale}
                   activeFilterCount={activeFilterCount}
                   sortLabel={sortLabel}
                   viewSegment={mobileViewSegment}
@@ -1941,13 +1956,13 @@ export function MediaManualBrowseFilters({
         >
           <button
             type="button"
-            aria-label={isKo ? "필터 닫기" : "Close filters"}
+            aria-label={t("filterClose")}
             onClick={() => setSheetOpen(false)}
             className="absolute inset-0 bg-black/50"
           />
           <div className="absolute inset-x-0 bottom-0 flex max-h-[88vh] flex-col rounded-t-3xl border-t border-gray-200 bg-white dark:border-white/10 dark:bg-[#0a0a0a]">
             <DiscoveryFilterSheetHeader
-              isKo={isKo}
+              locale={locale}
               activeFilterCount={activeFilterCount}
               onClose={() => setSheetOpen(false)}
             />
@@ -1963,7 +1978,7 @@ export function MediaManualBrowseFilters({
                 disabled={activeFilterCount === 0}
                 className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 disabled:opacity-40 dark:border-white/10 dark:text-white/70"
               >
-                {isKo ? "초기화" : "Reset"}
+                {t("filterReset")}
               </button>
               <button
                 type="button"
@@ -1985,8 +2000,8 @@ export function MediaManualBrowseFilters({
         getPlacement={anchoredPlacementBelowTriggerRight}
         lockBodyScroll
         desktopOnly
-        closeAriaLabel={isKo ? "필터 닫기" : "Close filters"}
-        dialogAriaLabel={isKo ? "필터" : "Filters"}
+        closeAriaLabel={t("filterClose")}
+        dialogAriaLabel={t("filterPanelTitle")}
         panelClassName={unifiedToolbarDesktopFilterPanelClass}
       >
         {desktopPanelOpen ? renderUnifiedToolbarDesktopFilterPanelBody() : null}

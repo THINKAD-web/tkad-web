@@ -993,7 +993,55 @@
       "browseCta": "Browse media",
       "plannerLead": "Start the planner with your saved picks?",
       "plannerCta": "Start planner"
-    }
+    },
+    "browseHeroHeadlineBefore": "Search ",
+    "browseHeroHeadlineGradient": "OOH media",
+    "browseHeroHeadlineAfter": " nationwide",
+    "browseSearchPlaceholder": "Search media, location, keyword",
+    "openFilters": "Open filters",
+    "filterButton": "Filter",
+    "filterReset": "Reset",
+    "filterClose": "Close filters",
+    "clearSearchAria": "Clear search",
+    "browseWhere": "Where",
+    "browsePopular": "Popular",
+    "browseMoreFilters": "More filters",
+    "browseFeatures": "Features",
+    "browseCampaignGoal": "Campaign goal",
+    "browseCampaignGoalEntry": "Browse by campaign goal",
+    "browseBudget": "Budget",
+    "browsePriceMinKrw": "Min price (KRW)",
+    "browsePriceMaxKrw": "Max price (KRW)",
+    "browseListFiltersAria": "List filters and view",
+    "browseSelectPage": "Select page",
+    "browseClearCompare": "Clear compare",
+    "browseTryAiRecommend": "Try AI recommend →",
+    "browseCompareSelected": "✓ Selected",
+    "browseCompareAdd": "+ Compare",
+    "browseResetFiltersChip": "Reset filters ×",
+    "browsePriceRangeTitle": "Price range",
+    "browsePriceMinSlider": "Min (₩1M)",
+    "browsePriceMaxSlider": "Max (₩1M)",
+    "browseCategoriesSheetTitle": "Categories",
+    "browseApply": "Apply",
+    "browseMapButton": "Map",
+    "browseMapOpenAria": "Open map",
+    "browseCartCount": "{count} in cart",
+    "browseCompareCount": "{count} compare",
+    "browseViewCartAria": "View {count} items in cart",
+    "browseViewCompareAria": "View {count} items to compare",
+    "browseActiveFilterCount": "{count} filters",
+    "browseResultShownOfTotal": "Showing {shown} of {total} media",
+    "browseResultShownOfTotalNetwork": "Showing {shown} of {total} networks",
+    "browseResultTotalMedia": "{count} media",
+    "browseResultTotalNetwork": "{count} networks",
+    "browseCoachSearchTitle": "1/3 · Search media",
+    "browseCoachSearchDismiss": "Next",
+    "browseSortPopularToday": "Popular",
+    "browseSelectedPlanView": "{count} selected · view",
+    "browseSelectedView": "{count} selected · view",
+    "browseSelectedPlan": "{count} selected",
+    "browseSelected": "{count} selected"
   },
   "recommend": {
     "form": {
@@ -3593,7 +3641,8 @@
       "step3Title": "Result & save",
       "step3Desc": "Save the confirmed mix and metrics snapshot.",
       "cta": "Start AI Planner",
-      "viewAll": "View all media →"
+      "viewAll": "View all media →",
+      "promptLabel": "Describe it in one line"
     },
     "twoAxis": {
       "eyebrow": "THINKAD",
@@ -3739,7 +3788,14 @@
     "personalizedTitle": "Picks for <accent>{name}</accent>",
     "personalizedMeta": "From recent views, industry & budget",
     "personalizedCtaRecommend": "More AI picks",
-    "personalizedCtaPlanner": "Try AI Planner"
+    "personalizedCtaPlanner": "Try AI Planner",
+    "metadata": {
+      "homeTitle": "Billboard, subway & bus OOH pricing | OOH & digital media, compared",
+      "homeSrOnlyH1": "Billboard, subway & bus OOH pricing — compare OOH and digital media",
+      "mediaListingDescription": "Compare verified billboards, subway, bus, and DOOH media by monthly rate, region, and format — get instant quotes on THINKAD."
+    },
+    "heroBannerAriaLabel": "Home hero",
+    "heroBannerSlideAlt": "Background image {n}"
   },
   "onboarding": {
     "kicker": "ONBOARDING",
@@ -4268,5 +4324,26 @@
         }
       }
     }
+  },
+  "planCart": {
+    "addToPlan": "Add to plan",
+    "add": "Add",
+    "addShort": "Add",
+    "remove": "Remove",
+    "removeShort": "Out",
+    "removeHint": "Tap again to remove",
+    "addToPlanner": "Add to planner",
+    "addToPlannerHint": "Planner: add this media to your campaign planner",
+    "alreadyInPlan": "Already in your plan",
+    "limitTitle": "Plan cart limit",
+    "removedToast": "Removed {name} from your plan",
+    "addedToast": "Added {name} to your plan",
+    "ariaAdd": "Add to plan",
+    "ariaRemove": "Remove from plan (tap again to remove)",
+    "excludedBudget": "Excluded from plan (budget)",
+    "whyRecommended": "Why recommended",
+    "whyShort": "Why",
+    "noImage": "No image",
+    "noImageShort": "No image"
   }
 }

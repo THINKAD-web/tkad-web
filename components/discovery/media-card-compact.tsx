@@ -1,5 +1,8 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
+import { normalizeMediaDetailTextLocale } from "@/lib/media-i18n";
+
 import { forwardRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
@@ -37,7 +40,6 @@ type CompactRowProps = Pick<
   | "item"
   | "href"
   | "metaLine"
-  | "isKo"
   | "inCompare"
   | "inCart"
   | "onToggleCompare"
@@ -46,13 +48,15 @@ type CompactRowProps = Pick<
   | "isInPlan"
   | "onTogglePlan"
   | "rank"
+  | "showPlanButton"
+  | "planAddedFrom"
+  | "plannerCardContext"
 >;
 
 export function DiscoveryMediaCardCompactRow({
   item,
   href,
   metaLine = "",
-  isKo = true,
   inCompare = false,
   inCart = false,
   onToggleCompare,
@@ -62,6 +66,8 @@ export function DiscoveryMediaCardCompactRow({
   onTogglePlan,
   rank,
 }: CompactRowProps) {
+  const locale = useLocale();
+  const tPlan = useTranslations("planCart");
   const rowLink = (
     <>
       <div className="relative h-11 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
@@ -91,7 +97,7 @@ export function DiscoveryMediaCardCompactRow({
             return (
               <OnlineCatalogCardThumbnail
                 item={item}
-                isKo={isKo}
+                locale={locale}
                 size="compact"
                 sizes="56px"
               />
@@ -150,7 +156,7 @@ export function DiscoveryMediaCardCompactRow({
                 ? "bg-rose-500/20 text-rose-700 dark:text-rose-200"
                 : "bg-hermes text-white",
             )}
-            title={isInPlan ? (isKo ? "다시 누르면 빼기" : "Tap again to remove") : undefined}
+            title={isInPlan ? (tPlan("removeHint")) : undefined}
           >
             {isInPlan ? (
               <X className="h-3 w-3" />
@@ -187,7 +193,6 @@ type CompactGridProps = Pick<
   DiscoveryMediaCardCatalogProps,
   | "item"
   | "href"
-  | "isKo"
   | "priceLabel"
   | "inCompare"
   | "inCart"
@@ -211,7 +216,6 @@ type CompactGridProps = Pick<
 export function DiscoveryMediaCardCompactGrid({
   item,
   href,
-  isKo = true,
   priceLabel,
   inCompare = false,
   inCart = false,
@@ -231,13 +235,16 @@ export function DiscoveryMediaCardCompactGrid({
   planAddedFrom = "search",
   plannerCardContext,
 }: CompactGridProps) {
+  const locale = useLocale();
+  const tPlan = useTranslations("planCart");
+  const useKo = normalizeMediaDetailTextLocale(locale) === "ko";
   const model = catalogItemToDisplayModel(item, {
     href,
-    isKo,
+    locale,
     priceLabel,
     ...plannerCardContext,
   });
-  const plannerRecommendLine = formatPlannerRecommendLine(model, isKo);
+  const plannerRecommendLine = formatPlannerRecommendLine(model, useKo);
   const [rationaleOpen, setRationaleOpen] = useState(false);
   const isOnlineCard = isOnlineCatalogMedia({ catalogChannel: item.catalogChannel });
   const extraBullets = recommendRationaleBullets?.filter(Boolean) ?? [];
@@ -262,7 +269,7 @@ export function DiscoveryMediaCardCompactGrid({
         ) : null}
         <OnlineCatalogCardThumbnail
           item={item}
-          isKo={isKo}
+          locale={locale}
           size="tile"
           imageClassName="rounded-t-2xl"
           sizes="(max-width: 768px) 50vw, 25vw"
@@ -277,7 +284,7 @@ export function DiscoveryMediaCardCompactGrid({
         </p>
         <MediaThumbnailTrustOverlay
           item={item}
-          isKo={isKo}
+          locale={locale}
           variant="card"
           layout="flow"
           className="mt-1"
@@ -300,7 +307,7 @@ export function DiscoveryMediaCardCompactGrid({
                   </span>
                 ) : null}
               </div>
-              <MediaPriceExclNote isKo={isKo} className="tkad-type-note mt-0.5" />
+              <MediaPriceExclNote locale={locale} className="tkad-type-note mt-0.5" />
               {model.minBudgetLabel ? (
                 <p className="tkad-type-note mt-0.5 line-clamp-1 tabular-nums text-tkad-muted">
                   {model.minBudgetLabel}
@@ -316,14 +323,14 @@ export function DiscoveryMediaCardCompactGrid({
                 </p>
               ) : model.excludedForBudgetReason ? (
                 <p className="tkad-type-note mt-0.5 line-clamp-1 text-tkad-muted">
-                  {isKo ? "예산 부족으로 플랜에서 제외됨" : "Excluded from plan (budget)"}
+                  {tPlan("excludedBudget")}
                 </p>
               ) : null}
             </div>
           ) : null}
           {plannerMode && onTogglePlan ? (
             <div
-              title={isInPlan ? (isKo ? "다시 누르면 빼기" : "Tap again to remove") : undefined}
+              title={isInPlan ? (tPlan("removeHint")) : undefined}
               className={cn(
                 "tkad-type-meta flex h-9 w-full items-center justify-center gap-1.5 rounded-xl font-semibold",
                 isInPlan
@@ -334,12 +341,12 @@ export function DiscoveryMediaCardCompactGrid({
               {isInPlan ? (
                 <>
                   <X className="h-3.5 w-3.5" />
-                  {isKo ? "빼기" : "Remove"}
+                  {tPlan("remove")}
                 </>
               ) : (
                 <>
                   <Plus className="h-3.5 w-3.5" />
-                  {isKo ? "플랜 담기" : "Add to plan"}
+                  {tPlan("addToPlan")}
                 </>
               )}
             </div>
@@ -376,7 +383,7 @@ export function DiscoveryMediaCardCompactGrid({
           {recommendRationaleProminent ? (
             <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-hermes">
               <Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              {isKo ? "추천 이유" : "Why recommended"}
+              {tPlan("whyRecommended")}
             </p>
           ) : null}
           <p
@@ -420,7 +427,7 @@ export function DiscoveryMediaCardCompactGrid({
                   )}
                   aria-hidden
                 />
-                {isKo ? "추천 근거" : "Why"}
+                {tPlan("whyShort")}
               </button>
               {rationaleOpen ? (
                 <ul className="mt-1 space-y-0.5 text-[10px] leading-snug text-muted-foreground">
@@ -499,7 +506,6 @@ type CatalogTileProps = Pick<
   DiscoveryMediaCardCatalogProps,
   | "item"
   | "href"
-  | "isKo"
   | "priceLabel"
   | "inCompare"
   | "onToggleCompare"
@@ -518,7 +524,6 @@ type CatalogTileProps = Pick<
 export function DiscoveryMediaCardCatalogTile({
   item,
   href,
-  isKo = true,
   priceLabel,
   inCompare = false,
   onToggleCompare,
@@ -532,17 +537,20 @@ export function DiscoveryMediaCardCatalogTile({
   className,
   plannerCardContext,
 }: CatalogTileProps) {
+  const locale = useLocale();
+  const tPlan = useTranslations("planCart");
+  const useKo = normalizeMediaDetailTextLocale(locale) === "ko";
   const model = catalogItemToDisplayModel(item, {
     href,
-    isKo,
+    locale,
     priceLabel,
     ...plannerCardContext,
   });
-  const plannerRecommendLine = formatPlannerRecommendLine(model, isKo);
+  const plannerRecommendLine = formatPlannerRecommendLine(model, useKo);
   const isOnlineCard = isOnlineCatalogMedia({ catalogChannel: item.catalogChannel });
   const locationLine = item.region || item.location || "";
   const planItem = planCartItemFromCatalog(item, planAddedFrom);
-  const thumbnailBadges = buildCatalogThumbnailBadges(item, isKo, { rank });
+  const thumbnailBadges = buildCatalogThumbnailBadges(item, useKo, { rank });
   const rankBadge = thumbnailBadges.find((b) => b.key === "rank");
   const flowBadges = thumbnailBadges.filter((b) => b.key !== "rank");
 
@@ -550,7 +558,7 @@ export function DiscoveryMediaCardCatalogTile({
     <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
       <OnlineCatalogCardThumbnail
         item={item}
-        isKo={isKo}
+        locale={locale}
         size="tile"
         sizes="(max-width: 768px) 50vw, 280px"
       />
@@ -583,7 +591,7 @@ export function DiscoveryMediaCardCatalogTile({
       {model.trustScore != null ? (
         <MediaTrustScoreBadge
           score={model.trustScore}
-          isKo={isKo}
+          locale={locale}
           compact
           className="mt-1 max-w-full"
         />
@@ -609,7 +617,7 @@ export function DiscoveryMediaCardCatalogTile({
             /{model.periodLabel}
           </span>
         ) : null}
-        <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
+        <MediaPriceExclNote locale={locale} className="tkad-type-note" />
       </div>
       {model.metricLine ? (
         <p className="tkad-type-note mt-0.5 line-clamp-1 tabular-nums text-tkad-muted">
@@ -629,13 +637,13 @@ export function DiscoveryMediaCardCatalogTile({
         </p>
       ) : model.excludedForBudgetReason ? (
         <p className="tkad-type-note mt-0.5 line-clamp-1 text-tkad-muted">
-          {isKo ? "예산 부족으로 플랜에서 제외됨" : "Excluded from plan (budget)"}
+          {tPlan("excludedBudget")}
         </p>
       ) : null}
 
       {plannerMode && onTogglePlan ? (
         <div
-          title={isInPlan ? (isKo ? "다시 누르면 빼기" : "Tap again to remove") : undefined}
+          title={isInPlan ? (tPlan("removeHint")) : undefined}
           className={cn(
             "tkad-type-meta mt-2 flex h-8 w-full items-center justify-center gap-1.5 rounded-lg font-semibold",
             isInPlan
@@ -646,12 +654,12 @@ export function DiscoveryMediaCardCatalogTile({
           {isInPlan ? (
             <>
               <X className="h-3.5 w-3.5" />
-              {isKo ? "빼기" : "Remove"}
+              {tPlan("remove")}
             </>
           ) : (
             <>
               <Plus className="h-3.5 w-3.5" />
-              {isKo ? "플랜 담기" : "Add to plan"}
+              {tPlan("addToPlan")}
             </>
           )}
         </div>
@@ -660,7 +668,7 @@ export function DiscoveryMediaCardCatalogTile({
           mediaId={item.id}
           planItem={planItem}
           detailHref={href}
-          isKo={isKo}
+          locale={locale}
           inCompare={inCompare}
           onToggleCompare={onToggleCompare}
           addedFrom={planAddedFrom}
@@ -732,7 +740,6 @@ export const DiscoveryMediaCardMapTile = forwardRef<
 >(function DiscoveryMediaCardMapTile(
   {
     item,
-    isKo = true,
     locale,
     selected = false,
     hovered = false,
@@ -746,7 +753,9 @@ export const DiscoveryMediaCardMapTile = forwardRef<
   },
   ref,
 ) {
-  const model = mapItemToDisplayModel(item, locale, isKo);
+  const tPlan = useTranslations("planCart");
+  const useKo = normalizeMediaDetailTextLocale(locale) === "ko";
+  const model = mapItemToDisplayModel(item, locale, useKo);
   const thumb = catalogThumbnailImageProps(item.image);
   const locationLine =
     [item.district, item.region].filter(Boolean).join(" · ") || item.location;
@@ -800,7 +809,7 @@ export const DiscoveryMediaCardMapTile = forwardRef<
           />
         ) : (
           <div className="tkad-type-note flex h-full w-full items-center justify-center text-tkad-muted">
-            {isKo ? "준비중" : "No image"}
+            {tPlan("noImageShort")}
           </div>
         )}
 
@@ -820,7 +829,7 @@ export const DiscoveryMediaCardMapTile = forwardRef<
         </p>
         <MapTileThumbnailBadges
           item={item}
-          isKo={isKo}
+          locale={locale}
           hideVisibilityScore
           layout="flow"
           className="mt-1"
@@ -834,7 +843,7 @@ export const DiscoveryMediaCardMapTile = forwardRef<
               /{model.periodLabel}
             </span>
           ) : null}
-          <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
+          <MediaPriceExclNote locale={locale} className="tkad-type-note" />
         </div>
         {model.metricLine ? (
           <p className="tkad-type-note mt-0.5 line-clamp-1 tabular-nums text-tkad-muted">
@@ -846,7 +855,7 @@ export const DiscoveryMediaCardMapTile = forwardRef<
           mediaId={item.id}
           planItem={planItem}
           detailHref={model.detailHref}
-          isKo={isKo}
+          locale={locale}
           inCompare={inCompare}
           onToggleCompare={onToggleCompare}
           addedFrom="map"

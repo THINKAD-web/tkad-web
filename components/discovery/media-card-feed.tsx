@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { DiscoveryMediaCardHorizontal } from "@/components/discovery/media-card-horizontal";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import { catalogItemToDisplayModel } from "@/lib/media-card-display";
@@ -12,7 +13,6 @@ type FeedProps = Pick<
   | "highlights"
   | "locationLine"
   | "priceLabel"
-  | "isKo"
   | "inCompare"
   | "inCart"
   | "onToggleCompare"
@@ -26,12 +26,12 @@ type FeedProps = Pick<
 >;
 
 export function DiscoveryMediaCardFeed(props: FeedProps) {
+  const locale = useLocale();
   const {
     item,
     href,
     highlights = [],
     priceLabel = null,
-    isKo = true,
     inCompare = false,
     onToggleCompare,
     plannerMode = false,
@@ -44,7 +44,7 @@ export function DiscoveryMediaCardFeed(props: FeedProps) {
 
   const model = catalogItemToDisplayModel(item, {
     href,
-    isKo,
+    locale,
     priceLabel,
     highlights,
     ...plannerCardContext,
@@ -53,7 +53,6 @@ export function DiscoveryMediaCardFeed(props: FeedProps) {
   return (
     <DiscoveryMediaCardHorizontal
       model={model}
-      isKo={isKo}
       rank={rank}
       plannerMode={plannerMode}
       isInPlan={isInPlan}

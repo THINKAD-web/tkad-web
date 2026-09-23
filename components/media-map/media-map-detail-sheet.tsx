@@ -137,7 +137,7 @@ export function MapDetailQuickActions({
       mediaId={item.id}
       planItem={mapItemPlanCart(item)}
       detailHref={`/media/${item.id}`}
-      isKo={isKo}
+      locale={isKo ? "ko" : "en"}
       inCompare={inCompare}
       onToggleCompare={onToggleCompare}
       addedFrom="map"
@@ -232,7 +232,7 @@ function MapMarkerPreviewBody({
             mediaId={item.id}
             planItem={mapItemPlanCart(item)}
             detailHref={href}
-            isKo={isKo}
+            locale={isKo ? "ko" : "en"}
             inCompare={inCompare}
             onToggleCompare={onToggleCompare}
             addedFrom="map"
@@ -337,7 +337,7 @@ function MediaMapDetailBody({
         mediaId={item.id}
         planItem={mapItemPlanCart(item)}
         detailHref={href}
-        isKo={isKo}
+        locale={isKo ? "ko" : "en"}
         inCompare={inCompare}
         onToggleCompare={onToggleCompare}
         addedFrom="map"
@@ -394,7 +394,6 @@ function MediaMapDetailBody({
           item={catalogItem}
           href={href}
           metaLine={metaLine}
-          isKo={isKo}
           showPlanButton={false}
           {...mediaCardStaticHandlers}
         />

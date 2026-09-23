@@ -994,7 +994,55 @@
       "browseCta": "매체 둘러보기",
       "plannerLead": "찜한 매체로 플래너를 시작할까요?",
       "plannerCta": "플래너 시작"
-    }
+    },
+    "browseHeroHeadlineBefore": "전국 ",
+    "browseHeroHeadlineGradient": "OOH 매체",
+    "browseHeroHeadlineAfter": " 검색",
+    "browseSearchPlaceholder": "매체명, 위치, 키워드로 검색",
+    "openFilters": "필터 열기",
+    "filterButton": "필터",
+    "filterReset": "초기화",
+    "filterClose": "필터 닫기",
+    "clearSearchAria": "검색어 지우기",
+    "browseWhere": "어디서?",
+    "browsePopular": "인기",
+    "browseMoreFilters": "추가 필터",
+    "browseFeatures": "매체 특성",
+    "browseCampaignGoal": "광고 목적",
+    "browseCampaignGoalEntry": "캠페인 목적에서 시작",
+    "browseBudget": "가격대",
+    "browsePriceMinKrw": "최소 가격(원)",
+    "browsePriceMaxKrw": "최대 가격(원)",
+    "browseListFiltersAria": "목록 필터 및 보기",
+    "browseSelectPage": "전체선택",
+    "browseClearCompare": "비교 비우기",
+    "browseTryAiRecommend": "AI 매체 추천 써보기 →",
+    "browseCompareSelected": "✓ 선택됨",
+    "browseCompareAdd": "+ 비교 추가",
+    "browseResetFiltersChip": "필터 초기화 ×",
+    "browsePriceRangeTitle": "가격 범위",
+    "browsePriceMinSlider": "최소 (100만원)",
+    "browsePriceMaxSlider": "최대 (100만원)",
+    "browseCategoriesSheetTitle": "카테고리·캠페인 목적",
+    "browseApply": "적용",
+    "browseMapButton": "지도",
+    "browseMapOpenAria": "지도에서 보기",
+    "browseCartCount": "담김 {count}",
+    "browseCompareCount": "비교 {count}",
+    "browseViewCartAria": "담은 매체 {count}개 보기",
+    "browseViewCompareAria": "비교함 {count}개 보기",
+    "browseActiveFilterCount": "필터 {count}",
+    "browseResultShownOfTotal": "전체 {total}건 중 {shown}건 표시",
+    "browseResultShownOfTotalNetwork": "전체 {total}건 중 {shown}건 표시",
+    "browseResultTotalMedia": "전체 {count}건",
+    "browseResultTotalNetwork": "전체 {count}건",
+    "browseCoachSearchTitle": "1/3 · 매체 검색",
+    "browseCoachSearchDismiss": "다음",
+    "browseSortPopularToday": "오늘의 인기",
+    "browseSelectedPlanView": "선택됨 {count}개 · 보기",
+    "browseSelectedView": "선택 {count} · 보기",
+    "browseSelectedPlan": "선택됨 {count}개",
+    "browseSelected": "선택 {count}"
   },
   "recommend": {
     "form": {
@@ -3639,7 +3687,8 @@
       "step3Title": "결과·저장",
       "step3Desc": "확정 믹스와 지표 요약을 저장합니다.",
       "cta": "AI 플래너 시작",
-      "viewAll": "전체 매체 목록 보기 →"
+      "viewAll": "전체 매체 목록 보기 →",
+      "promptLabel": "한 줄로 말해 보세요"
     },
     "twoAxis": {
       "eyebrow": "THINKAD",
@@ -3785,7 +3834,14 @@
     "personalizedTitle": "{name}님을 위한 <accent>추천</accent>",
     "personalizedMeta": "최근 본 매체·업종·예산 기반",
     "personalizedCtaRecommend": "AI 추천 더 보기",
-    "personalizedCtaPlanner": "AI 플래너 써보기"
+    "personalizedCtaPlanner": "AI 플래너 써보기",
+    "metadata": {
+      "homeTitle": "전광판·지하철·버스 옥외광고 단가 비교 | OOH·디지털 매체 한눈에",
+      "homeSrOnlyH1": "전광판·지하철·버스 옥외광고 단가 비교 — OOH·디지털 매체 한눈에",
+      "mediaListingDescription": "전광판·지하철·버스·DOOH 등 검증 매체를 월 단가·지역·유형별로 비교하고 즉시 견적하세요. THINKAD 싱커드."
+    },
+    "heroBannerAriaLabel": "홈 히어로",
+    "heroBannerSlideAlt": "{n}번째 배경 이미지"
   },
   "onboarding": {
     "kicker": "ONBOARDING",
@@ -4249,5 +4305,26 @@
         }
       }
     }
+  },
+  "planCart": {
+    "addToPlan": "플랜 담기",
+    "add": "담기",
+    "addShort": "담기",
+    "remove": "빼기",
+    "removeShort": "빼기",
+    "removeHint": "다시 누르면 빼기",
+    "addToPlanner": "플래너에 담기",
+    "addToPlannerHint": "플래너: 캠페인 플래너에 매체를 추가합니다",
+    "alreadyInPlan": "이미 담은 매체에 있습니다",
+    "limitTitle": "담은 매체 한도",
+    "removedToast": "{name}을(를) 담은 매체에서 뺐어요",
+    "addedToast": "{name}을(를) 담은 매체에 담았어요",
+    "ariaAdd": "담은 매체에 담기",
+    "ariaRemove": "담은 매체에서 제거 (다시 누르면 빼기)",
+    "excludedBudget": "예산 부족으로 플랜에서 제외됨",
+    "whyRecommended": "추천 이유",
+    "whyShort": "추천 근거",
+    "noImage": "이미지 준비중",
+    "noImageShort": "준비중"
   }
 }

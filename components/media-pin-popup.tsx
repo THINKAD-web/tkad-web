@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { DiscoveryMediaCard } from "@/components/discovery/media-card";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import type { MediaItem } from "@/types/media";
@@ -14,15 +14,15 @@ import { cn } from "@/lib/utils";
 
 export function MediaPinPopup({
   media,
-  isKo,
   isSelected,
   onToggleSelect,
 }: {
   media: MediaItem | null;
-  isKo: boolean;
   isSelected?: boolean;
   onToggleSelect?: (mediaId: string) => void;
 }) {
+  const locale = useLocale();
+  const isKo = locale === "ko" || locale.startsWith("ko");
   if (!media) return null;
 
   const catalogItem = mapMediaItemToHomeCatalog(media);
@@ -52,7 +52,6 @@ export function MediaPinPopup({
           item={catalogItem}
           href={href}
           metaLine={metaLine}
-          isKo={isKo}
           inCompare={Boolean(isSelected)}
           inCart={false}
           onToggleCompare={() => onToggleSelect?.(media.id)}

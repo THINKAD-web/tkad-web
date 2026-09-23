@@ -1199,7 +1199,7 @@ export default function MediaMapPageClient() {
   // 컨트롤 바 — PR1 의 단일 반응형 컴포넌트 재사용(unifiedToolbar). 지도용으로 복제하지 않음.
   const controlBar = (
     <DiscoveryFilterBar
-      isKo={isKo}
+      locale={locale}
       unifiedToolbar
       mobileStickyToolbar
       mapPageViewModes

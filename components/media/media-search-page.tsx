@@ -73,6 +73,7 @@ import {
   MEDIA_BROWSE_CARD_GRID_CLASS,
 } from "@/lib/media-browse-grid";
 import { MediaReelsBrowse } from "@/components/media/media-reels-browse";
+import { MediaPinPopup } from "@/components/media-pin-popup";
 import { MapNavigationLoading } from "@/components/media/map-navigation-loading";
 import { prefetchMapChunks } from "@/lib/lazy-chunk-prefetch";
 import {
@@ -901,7 +902,6 @@ function MediaSearchPageInner({
           item={item}
           href={href}
           metaLine={metaLine}
-          isKo={isKo}
           inCompare={isInCompare(item.id)}
           onToggleCompare={() => toggleCompare(item)}
           plannerMode={plannerMode}
@@ -920,7 +920,6 @@ function MediaSearchPageInner({
             item={item}
             href={href}
             priceLabel={priceLabel}
-            isKo={isKo}
             inCompare={isInCompare(item.id)}
             onToggleCompare={() => toggleCompare(item)}
             plannerMode={plannerMode}
@@ -949,7 +948,6 @@ function MediaSearchPageInner({
           highlights={highlights}
           locationLine={locationLine}
           priceLabel={priceLabel}
-          isKo={isKo}
           inCompare={isInCompare(item.id)}
           onToggleCompare={() => toggleCompare(item)}
           plannerMode={plannerMode}
@@ -990,7 +988,7 @@ function MediaSearchPageInner({
 
   const filtersBar = (
     <DiscoveryFilterBar
-      isKo={isKo}
+      locale={locale}
       browseChannel={browseChannel}
       variant={networkBrowse && !isOnlineBrowse ? "network" : "media"}
       networkType={networkType}
@@ -1135,7 +1133,6 @@ function MediaSearchPageInner({
               {mapPopupOpen && mapSelectedMedia ? (
                 <MediaPinPopup
                   media={mapSelectedMedia}
-                  isKo={isKo}
                   isSelected={isInCompare(mapSelectedMedia.id)}
                   onToggleSelect={(id) => {
                     const row = media.find((m) => m.id === id);
@@ -1152,7 +1149,6 @@ function MediaSearchPageInner({
       ) : viewMode === "reels" ? (
         <MediaReelsBrowse
           items={media}
-          isKo={isKo}
           locale={locale}
           getHref={getMediaHref}
           hasMore={hasMore}

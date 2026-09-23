@@ -175,12 +175,18 @@ export function catalogItemToDisplayModel(
   item: HomeCatalogMediaItem,
   opts: {
     href: string;
-    isKo: boolean;
+    locale?: string;
+    /** @deprecated pass `locale` */
+    isKo?: boolean;
     priceLabel?: string | null;
     highlights?: string[];
   } & PlannerOnlineCardContextEntry,
 ): MediaCardDisplayModel {
-  const locale = opts.isKo ? "ko-KR" : "en-US";
+  const useKo =
+    opts.locale != null
+      ? opts.locale === "ko" || opts.locale.startsWith("ko")
+      : (opts.isKo ?? true);
+  const locale = useKo ? "ko-KR" : "en-US";
   const parentLabel = opts.priceLabel?.trim() || null;
   const ssotLabel = parentLabel ?? formatBrowseCardPriceLabel(item, locale);
   const formattedNumericPrice =
@@ -191,7 +197,7 @@ export function catalogItemToDisplayModel(
   const displayPrice = formattedNumericPrice;
   const periodLabel = formatPricePeriodShortLabel(
     item.pricePeriod,
-    opts.isKo ? "ko" : "en",
+    useKo ? "ko" : "en",
   );
 
   return {
@@ -203,16 +209,16 @@ export function catalogItemToDisplayModel(
     thumbnailUrl: item.thumbnailUrl,
     galleryExtraCount: galleryExtraCount(item),
     priceLabel:
-      displayPrice ?? mediaPriceOnInquiryLabel(opts.isKo ? "ko" : "en"),
+      displayPrice ?? mediaPriceOnInquiryLabel(useKo ? "ko" : "en"),
     showPeriodSuffix: Boolean(
       displayPrice &&
         periodLabel &&
         !priceLabelIncludesPeriodSuffix(displayPrice, periodLabel),
     ),
     periodLabel,
-    metricLine: buildCatalogItemMetricLine(item, opts.isKo, locale),
+    metricLine: buildCatalogItemMetricLine(item, useKo, locale),
     metricLineCompact: buildCatalogItemMetricLineCompact(item, locale),
-    minBudgetLabel: buildMinBudgetLabel(item, opts.isKo, locale),
+    minBudgetLabel: buildMinBudgetLabel(item, useKo, locale),
     highlights: opts.highlights ?? [],
     detailHref: opts.href,
     recommendedBudgetPct: opts.recommendedBudgetPct,

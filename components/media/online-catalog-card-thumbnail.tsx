@@ -12,6 +12,8 @@ type Props = {
     HomeCatalogMediaItem,
     "thumbnailUrl" | "name" | "catalogChannel" | "onlineSpec"
   >;
+  locale?: string;
+  /** @deprecated pass `locale` */
   isKo?: boolean;
   size?: "tile" | "compact";
   imageClassName?: string;
@@ -21,7 +23,8 @@ type Props = {
 
 export function OnlineCatalogCardThumbnail({
   item,
-  isKo = true,
+  locale,
+  isKo,
   size = "tile",
   imageClassName,
   placeholderClassName,

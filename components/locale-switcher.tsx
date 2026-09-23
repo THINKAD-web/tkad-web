@@ -7,7 +7,7 @@ import { routing } from "@/i18n/routing";
 import { useTransition } from "react";
 import { cn } from "@/lib/utils";
 
-const LOCALE_LABEL: Record<string, string> = {
+export const LOCALE_LABEL: Record<string, string> = {
   ko: "한국어",
   en: "English",
   ja: "日本語",

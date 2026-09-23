@@ -21,7 +21,9 @@ import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 
 type Props = {
   media: MediaItem;
-  isKo: boolean;
+  locale?: string;
+  /** @deprecated pass `locale` */
+  isKo?: boolean;
   imagePreparingLabel: string;
   rank?: number;
   className?: string;
@@ -29,12 +31,15 @@ type Props = {
 
 export function MediaCatalogListCard({
   media,
+  locale,
   isKo,
   imagePreparingLabel,
   rank,
   className,
 }: Props) {
   const tMedia = useTranslations("media");
+  const useKo =
+    locale != null ? locale === "ko" || locale.startsWith("ko") : (isKo ?? true);
   const cheapest = getCheapestMediaPriceOption(media);
   const priceWon = cheapest?.priceWon ?? media.price;
   const displayPeriod = cheapest?.period ?? media.pricePeriod;
@@ -44,13 +49,13 @@ export function MediaCatalogListCard({
   const primaryThumb =
     dedupeImageUrls(media.sampleImages ?? [])[0]?.trim() || null;
 
-  const typeLabel = resolveMediaDisplayPill(media, isKo ? "ko" : "en");
+  const typeLabel = resolveMediaDisplayPill(media, useKo ? "ko" : "en");
 
   const isNetwork = media.catalogSource === "network";
   const networkSites = media.networkTotalLocations ?? 0;
   const networkPerUnit = media.networkPricePerUnit ?? null;
 
-  const location = formatMediaLocationShort(media, isKo);
+  const location = formatMediaLocationShort(media, useKo);
   const hasRating =
     media.reviewCount != null &&
     media.reviewCount > 0 &&
@@ -98,14 +103,14 @@ export function MediaCatalogListCard({
             {isNetwork ? (
               <span className="mr-1 inline-flex items-center gap-0.5 rounded bg-hermes/15 px-1 py-0.5 align-middle text-[10px] font-bold text-hermes">
                 <span aria-hidden>🌐</span>
-                {isKo ? "네트워크" : "Network"}
+                {useKo ? "네트워크" : "Network"}
               </span>
             ) : null}
-            {isKo ? media.name : (media.nameEn || media.name)}
+            {useKo ? media.name : (media.nameEn || media.name)}
           </h3>
           <p className="line-clamp-1 text-xs text-gray-500 dark:text-white/50">
             {isNetwork && networkSites > 0
-              ? `${isKo ? "전국" : "Nationwide"} ${networkSites.toLocaleString()}${isKo ? "개소" : " sites"} · ${typeLabel}`
+              ? `${useKo ? "전국" : "Nationwide"} ${networkSites.toLocaleString()}${useKo ? "개소" : " sites"} · ${typeLabel}`
               : `${location} · ${typeLabel}`}
           </p>
           {hasRating ? (
@@ -119,9 +124,9 @@ export function MediaCatalogListCard({
           ) : null}
           {execCount > 0 ? (
             <p className="text-[10px] text-gray-400 dark:text-white/40">
-              {isKo ? `${execCount}회 집행` : `${execCount} flights`}
+              {useKo ? `${execCount}회 집행` : `${execCount} flights`}
               {monthsAgo != null
-                ? isKo
+                ? useKo
                   ? ` · ${monthsAgo <= 0 ? "1개월 이내" : `${monthsAgo}개월 전`}`
                   : ` · ${monthsAgo <= 0 ? "<1 mo" : `${monthsAgo} mo ago`}`
                 : null}
@@ -130,14 +135,14 @@ export function MediaCatalogListCard({
         </div>
 
         <div className="flex items-end justify-between gap-2">
-          <MediaTrustGradeBadges media={media} isKo={isKo} compact />
+          <MediaTrustGradeBadges media={media} isKo={useKo} compact />
           <div className="ml-auto shrink-0 text-right">
             <p className="text-base font-black tabular-nums text-gray-900 dark:text-white">
               {isNetwork && networkPerUnit != null && networkPerUnit > 0 ? (
                 <>
                   {formatMediaPriceWonWithSymbol(networkPerUnit)}
                   <span className="ml-0.5 text-[10px] font-normal text-gray-500 dark:text-white/50">
-                    {isKo ? "/대·월" : "/unit·mo"}
+                    {useKo ? "/대·월" : "/unit·mo"}
                   </span>
                 </>
               ) : (
@@ -151,10 +156,10 @@ export function MediaCatalogListCard({
                 </>
               )}
             </p>
-            <MediaPriceExclNote isKo={isKo} className="mt-0.5 text-right" />
+            <MediaPriceExclNote isKo={useKo} className="mt-0.5 text-right" />
             {hotBadge ? (
               <span className="text-[10px] font-semibold text-hermes">
-                {isKo ? "인기" : "Hot"}
+                {useKo ? "인기" : "Hot"}
               </span>
             ) : null}
           </div>

@@ -20,7 +20,8 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   items: HomeCatalogMediaItem[];
-  isKo: boolean;
+  /** @deprecated derived from `locale` when omitted */
+  isKo?: boolean;
   locale: string;
   getHref: (item: HomeCatalogMediaItem) => string;
   hasMore: boolean;
@@ -212,6 +213,7 @@ export function MediaReelsBrowse({
   onPlannerToggleMedia,
   className,
 }: Props) {
+  const useKo = isKo ?? (locale === "ko" || locale.startsWith("ko"));
   const scrollerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -283,7 +285,7 @@ export function MediaReelsBrowse({
             key={item.id}
             item={item}
             href={getHref(item)}
-            isKo={isKo}
+            isKo={useKo}
             locale={locale}
             inCompare={inCompare(item.id)}
             onToggleCompare={() => onToggleCompare(item)}
@@ -300,7 +302,7 @@ export function MediaReelsBrowse({
         <div ref={sentinelRef} className="h-8 shrink-0 snap-start" aria-hidden />
         {loadingMore ? (
           <p className="tkad-type-meta py-4 text-center text-tkad-muted">
-            {isKo ? "불러오는 중…" : "Loading…"}
+            {useKo ? "불러오는 중…" : "Loading…"}
           </p>
         ) : null}
       </div>
