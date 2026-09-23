@@ -816,6 +816,7 @@ export default function AdminOohQuotesClient() {
                           <AdminOohContractDetailPanel
                             quoteId={row.id}
                             detail={detail}
+                            contractAmountManwon={row.totalAmount}
                             recalcBusy={busyId === row.id}
                             onRecalc={() =>
                               void run(row.id, async () => {
@@ -957,6 +958,30 @@ export default function AdminOohQuotesClient() {
                               </Button>
                             </>
                           ) : null}
+                          {row.status === "booking_confirmed" && !row.contractSigned ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={busyId === row.id}
+                              onClick={() =>
+                                void run(row.id, async () => {
+                                  if (
+                                    !window.confirm(
+                                      "부킹 확정을 되돌릴까요? 계약은 취소되고 홀드가 해제됩니다. 서명 완료 건은 되돌릴 수 없습니다.",
+                                    )
+                                  ) {
+                                    return;
+                                  }
+                                  await act(
+                                    `/api/admin/ooh-quotes/${row.id}/revert-booking`,
+                                    "POST",
+                                  );
+                                })
+                              }
+                            >
+                              부킹 되돌리기
+                            </Button>
+                          ) : null}
                           {canShowBookingConfirm(row) ? (
                             <Button
                               size="sm"
@@ -1054,6 +1079,7 @@ export default function AdminOohQuotesClient() {
                           <AdminOohContractDetailPanel
                             quoteId={row.id}
                             detail={detail}
+                            contractAmountManwon={row.totalAmount}
                             recalcBusy={busyId === row.id}
                             onRecalc={() =>
                               void run(row.id, async () => {

@@ -10,6 +10,7 @@ import {
   Loader2,
   RefreshCw,
   Search,
+  Trash2,
 } from "lucide-react";
 import type { QuoteBreakdown } from "@/lib/quote-calculator";
 import {
@@ -59,6 +60,8 @@ type ContractRow = {
   endDate: string | null;
   quoteStatus: string;
   contractStatus: string;
+  sendMode?: string;
+  uploadedPdfFileName?: string | null;
   contractSigned: boolean;
   signedAt: string | null;
 };
@@ -80,6 +83,14 @@ function formatPeriod(row: ContractRow): string {
     return `${formatDate(row.startDate)} ~ ${formatDate(row.endDate)}`;
   }
   return row.period || "—";
+}
+
+function canCancelUnsignedContract(status: string): boolean {
+  return status === "pending" || status === "attachment_sent";
+}
+
+function deleteNeedsSignedAck(status: string): boolean {
+  return status === "signed" || status === "confirmed";
 }
 
 export default function AdminContractsClient() {
@@ -110,10 +121,8 @@ export default function AdminContractsClient() {
         cache: "no-store",
       });
       const raw = (await res.json()) as {
-        quote?: {
+        quote?: OohQuoteContractDetail & {
           quoteBreakdown?: QuoteBreakdown | null;
-          contract?: OohQuoteContractDetail["contract"];
-          contractDisplay?: OohQuoteContractDetail["contractDisplay"];
         };
       };
       if (!res.ok) throw new Error("load_failed");
@@ -123,6 +132,7 @@ export default function AdminContractsClient() {
         quoteBreakdown: q?.quoteBreakdown ?? null,
         contract: q?.contract ?? null,
         contractDisplay: q?.contractDisplay ?? null,
+        contractMeta: q?.contractMeta ?? null,
       });
     } catch {
       setDetail({ loading: false });
@@ -177,9 +187,17 @@ export default function AdminContractsClient() {
     if (sheetQuoteId) void loadDetail(sheetQuoteId);
   }, [sheetQuoteId, loadDetail]);
 
+  function sendModeLabel(mode: string | undefined) {
+    if (mode === "uploaded_esign") return t("sendMode_upload_esign");
+    if (mode === "uploaded_attachment") return t("sendMode_upload_attachment");
+    if (mode === "auto_generated") return t("sendMode_auto");
+    return null;
+  }
+
   function contractStatusLabel(status: string) {
     const key = `contractStatus_${status}` as
       | "contractStatus_pending"
+      | "contractStatus_attachment_sent"
       | "contractStatus_signed"
       | "contractStatus_confirmed"
       | "contractStatus_cancelled";
@@ -193,6 +211,76 @@ export default function AdminContractsClient() {
   function openRow(quoteId: string) {
     setSheetQuoteId(quoteId);
   }
+
+  const cancelContract = useCallback(
+    async (quoteId: string) => {
+      if (!window.confirm(t("cancelConfirm"))) return;
+      try {
+        const res = await fetch(
+          `/api/admin/ooh-quotes/${quoteId}/cancel-unsigned`,
+          { method: "POST", credentials: "include" },
+        );
+        if (!res.ok) {
+          toast("error", t("cancelFail"));
+          return;
+        }
+        toast("success", t("cancelOk"));
+        if (sheetQuoteId === quoteId) {
+          setSheetQuoteId(null);
+          setDetail(undefined);
+        }
+        await load();
+      } catch {
+        toast("error", t("cancelFail"));
+      }
+    },
+    [load, sheetQuoteId, t, toast],
+  );
+
+  const deleteContract = useCallback(
+    async (row: ContractRow) => {
+      const needsAck = deleteNeedsSignedAck(row.contractStatus);
+      const msg = needsAck ? t("deleteConfirmSigned") : t("deleteConfirm");
+      if (!window.confirm(msg)) return;
+      try {
+        const res = await fetch(`/api/admin/contracts/${row.contractId}`, {
+          method: "DELETE",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: needsAck
+            ? JSON.stringify({ acknowledgeSigned: true })
+            : undefined,
+        });
+        const raw: unknown = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const err =
+            typeof raw === "object" &&
+            raw !== null &&
+            "error" in raw &&
+            typeof (raw as { error?: unknown }).error === "string"
+              ? (raw as { error: string }).error
+              : "delete_fail";
+          if (err === "campaign_linked") {
+            toast("error", t("deleteFailCampaign"));
+          } else if (err === "quote_locked") {
+            toast("error", t("deleteFailLocked"));
+          } else {
+            toast("error", t("deleteFail"));
+          }
+          return;
+        }
+        toast("success", t("deleteOk"));
+        if (sheetQuoteId === row.quoteId) {
+          setSheetQuoteId(null);
+          setDetail(undefined);
+        }
+        await load();
+      } catch {
+        toast("error", t("deleteFail"));
+      }
+    },
+    [load, sheetQuoteId, t, toast],
+  );
 
   const selectedRow = rows.find((r) => r.quoteId === sheetQuoteId);
 
@@ -377,6 +465,12 @@ export default function AdminContractsClient() {
                         <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
                           {contractStatusLabel(row.contractStatus)}
                         </span>
+                        {sendModeLabel(row.sendMode) &&
+                        row.sendMode !== "auto_generated" ? (
+                          <span className="rounded-full border border-[color:var(--qp-accent)]/40 px-2 py-0.5 text-[10px] font-medium text-[color:var(--qp-accent)]">
+                            {sendModeLabel(row.sendMode)}
+                          </span>
+                        ) : null}
                       </div>
                       <p className="mt-1 text-[10px] text-muted-foreground">
                         {t("colSignedAt")}: {formatDate(row.signedAt)}
@@ -417,6 +511,25 @@ export default function AdminContractsClient() {
                       >
                         {t("detailTitle")}
                       </Button>
+                      {canCancelUnsignedContract(row.contractStatus) ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={`border-red-300 text-red-700 hover:bg-red-50 ${adminMobileTouchBtnClass}`}
+                          onClick={() => void cancelContract(row.quoteId)}
+                        >
+                          {t("cancelContract")}
+                        </Button>
+                      ) : null}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={`border-red-300 text-red-700 hover:bg-red-50 ${adminMobileTouchBtnClass}`}
+                        onClick={() => void deleteContract(row)}
+                      >
+                        <Trash2 className="mr-1.5 h-4 w-4" />
+                        {t("deleteContract")}
+                      </Button>
                     </div>
                   </AdminMobileCard>
                 ))}
@@ -456,9 +569,17 @@ export default function AdminContractsClient() {
                         {formatOohQuoteTotalKrw(row.totalAmount)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
-                          {contractStatusLabel(row.contractStatus)}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1">
+                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                            {contractStatusLabel(row.contractStatus)}
+                          </span>
+                          {sendModeLabel(row.sendMode) &&
+                          row.sendMode !== "auto_generated" ? (
+                            <span className="rounded-full border border-[color:var(--qp-accent)]/40 px-2 py-0.5 text-[10px] font-medium text-[color:var(--qp-accent)]">
+                              {sendModeLabel(row.sendMode)}
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
                       <td className="px-4 py-3 tabular-nums text-muted-foreground">
                         {formatDate(row.signedAt)}
@@ -488,6 +609,24 @@ export default function AdminContractsClient() {
                               {t("signedPdf")}
                             </a>
                           ) : null}
+                          {canCancelUnsignedContract(row.contractStatus) ? (
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1 rounded-md border border-red-300 px-2 py-1 text-[10px] font-semibold text-red-700 hover:bg-red-50"
+                              onClick={() => void cancelContract(row.quoteId)}
+                            >
+                              {t("cancelContract")}
+                            </button>
+                          ) : null}
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 rounded-md border border-red-400 bg-red-50 px-2 py-1 text-[10px] font-semibold text-red-800 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-950/60"
+                            title={t("deleteContract")}
+                            onClick={() => void deleteContract(row)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            {t("deleteContract")}
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -554,6 +693,7 @@ export default function AdminContractsClient() {
               <AdminOohContractDetailPanel
                 quoteId={sheetQuoteId}
                 detail={detail}
+                contractAmountManwon={selectedRow?.totalAmount}
                 recalcBusy={recalcBusy}
                 onRecalc={() => {
                   if (!sheetQuoteId) return;

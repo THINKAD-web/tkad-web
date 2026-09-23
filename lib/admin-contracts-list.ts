@@ -1,5 +1,6 @@
 import {
   OoHQuoteStatus,
+  OohContractSendMode,
   OohContractStatus,
   type Prisma,
 } from "@prisma/client";
@@ -37,14 +38,23 @@ export function buildAdminContractsListWhere(
   const contractWhere: Prisma.OohContractWhereInput = {};
 
   if (filter.contractStatus === "pending") {
-    contractWhere.status = OohContractStatus.pending;
+    contractWhere.OR = [
+      { status: OohContractStatus.pending },
+      {
+        status: OohContractStatus.attachment_sent,
+        sendMode: OohContractSendMode.uploaded_attachment,
+      },
+    ];
   } else if (filter.contractStatus === "signed") {
     contractWhere.status = {
       in: [OohContractStatus.signed, OohContractStatus.confirmed],
     };
   }
 
-  if (filter.dateFrom || filter.dateTo) {
+  if (
+    (filter.dateFrom || filter.dateTo) &&
+    filter.contractStatus === "signed"
+  ) {
     contractWhere.signedAt = {};
     if (filter.dateFrom) contractWhere.signedAt.gte = filter.dateFrom;
     if (filter.dateTo) {

@@ -8,6 +8,7 @@ import {
   getPreferredMediaImageUrl,
 } from "@/lib/optimized-image-url";
 import { mediaDisplayLabelHaystack } from "@/lib/media-display-labels";
+import { normalizeSearchText } from "@/lib/media-search-text";
 
 export type MediaCaseStudyPhoto = {
   url: string;
@@ -1199,6 +1200,9 @@ function tokenMatchesHaystack(
 ): boolean {
   if (haystackPlain.includes(token)) return true;
   if (tagsText.includes(token)) return true;
+  const hayNorm = normalizeSearchText(`${haystackPlain} ${tagsText}`);
+  const tokNorm = normalizeSearchText(token);
+  if (tokNorm.length >= 2 && hayNorm.includes(tokNorm)) return true;
   if (/^[ㄱ-ㅎ]+$/.test(token)) {
     if (toChosung(haystackPlain).includes(token)) return true;
     if (haystackChosung.includes(token)) return true;
@@ -1273,6 +1277,9 @@ export function matchesMediaTextQuery(m: MediaItem, lower: string): boolean {
 
   const fullHay = `${haystackPlain} ${tagsText}`;
   if (fullHay.includes(trimmed)) return true;
+  if (normalizeSearchText(fullHay).includes(normalizeSearchText(trimmed))) {
+    return true;
+  }
 
   const words = trimmed.split(/\s+/).filter((w) => w.length > 0);
   if (words.length <= 1) {

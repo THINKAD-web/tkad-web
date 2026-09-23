@@ -4,7 +4,12 @@ import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { canAdminBookingConfirm } from "@/lib/ooh-quote";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
-import { isEmailConfigured, sendEmail } from "@/lib/email/client";
+import { sendContractInviteEmail } from "@/lib/contract-invite-email";
+import {
+  appendContractInviteSendLog,
+  type ContractInviteSendEntry,
+} from "@/lib/contract-invite-log";
+import type { Prisma } from "@prisma/client";
 import { notifySlackBookingConfirm } from "@/lib/quote-slack-notify";
 import {
   createHoldsForQuote,
@@ -13,16 +18,6 @@ import {
 } from "@/lib/ooh-quote-booking-hold";
 
 export const dynamic = "force-dynamic";
-
-function siteBaseUrl(): string {
-  return (
-    process.env.SITE_URL?.trim() ||
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    (process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000")
-  ).replace(/\/$/, "");
-}
 
 export async function PATCH(
   request: NextRequest,
@@ -59,7 +54,7 @@ export async function PATCH(
       });
     });
 
-    await ensureOohContractExists(db, id, updated.status);
+    const contractRow = await ensureOohContractExists(db, id, updated.status);
 
     void notifySlackBookingConfirm({
       quoteId: id,
@@ -71,25 +66,30 @@ export async function PATCH(
     }).catch((e) => console.error("[booking-confirm] slack", e));
 
     const to = row.clientEmail?.trim();
-    if (to && isEmailConfigured()) {
-      const isKo = row.locale !== "en";
-      const loc = row.locale === "en" ? "en" : "ko";
-      const url = `${siteBaseUrl()}/${loc}/quote/${id}/contract`;
-      try {
-        await sendEmail({
+    if (to && contractRow) {
+      const locale = row.locale === "en" ? "en" : "ko";
+      const inviteEmail = await sendContractInviteEmail({
+        to,
+        clientName: row.clientName,
+        locale,
+        quoteId: id,
+        variant: "booking_confirmed",
+      });
+
+      if (inviteEmail.sent) {
+        const entry: ContractInviteSendEntry = {
+          sentAt: new Date().toISOString(),
           to,
-          subject: isKo
-            ? "[싱커드] 부킹 확정 — 전자계약서를 확인해 주세요"
-            : "[THINKAD] Booking confirmed — please review your e-contract",
-          text: isKo
-            ? `안녕하세요 ${row.clientName}님,\n\n부킹이 확정되었습니다. 아래 링크에서 계약서를 확인하고 전자서명을 진행해 주세요.\n\n${url}\n\n감사합니다.`
-            : `Hello ${row.clientName},\n\nYour booking is confirmed. Please open the link to review and sign the contract:\n\n${url}\n\nThank you.`,
-          html: isKo
-            ? `<p>안녕하세요 <strong>${row.clientName}</strong>님,</p><p>부킹이 확정되었습니다. 아래 링크에서 계약서를 확인하고 전자서명을 진행해 주세요.</p><p><a href="${url}">${url}</a></p>`
-            : `<p>Hello <strong>${row.clientName}</strong>,</p><p>Your booking is confirmed. Please review and sign:</p><p><a href="${url}">${url}</a></p>`,
+          kind: "initial",
+        };
+        const inviteLog = appendContractInviteSendLog(
+          contractRow.inviteSendLog,
+          entry,
+        );
+        await db.oohContract.update({
+          where: { id: contractRow.id },
+          data: { inviteSendLog: inviteLog as Prisma.InputJsonValue },
         });
-      } catch (e) {
-        console.error("[booking-confirm] contract invite email", e);
       }
     }
 

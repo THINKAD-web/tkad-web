@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
-import { Loader2, Eraser, FileDown, CheckCircle2 } from "lucide-react";
+import { Loader2, Eraser, FileDown, CheckCircle2, Stamp, X } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
 import type SignatureCanvas from "react-signature-canvas";
 import OohSignaturePad from "@/components/ooh-signature-pad";
+import ContractPdfPreview from "@/components/contract-pdf-preview";
 
 type Session = {
   clientName: string;
@@ -14,6 +15,7 @@ type Session = {
   clientCompany: string | null;
   canSign: boolean;
   signed: boolean;
+  attachmentOnly?: boolean;
 };
 
 export default function ContractSignClient({ quoteId }: { quoteId: string }) {
@@ -26,6 +28,8 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
   const [agree, setAgree] = useState(false);
   const [signerName, setSignerName] = useState("");
   const [signerEmail, setSignerEmail] = useState("");
+  const [stampPreview, setStampPreview] = useState<string | null>(null);
+  const stampInputRef = useRef<HTMLInputElement>(null);
 
   const loadSession = useCallback(async () => {
     setLoading(true);
@@ -57,6 +61,29 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
     sigRef.current?.clear();
   };
 
+  const onStampFile = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast("warning", t("stampInvalidType"));
+      return;
+    }
+    if (file.size > 800_000) {
+      toast("warning", t("stampTooLarge"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === "string" ? reader.result : null;
+      setStampPreview(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const clearStamp = () => {
+    setStampPreview(null);
+    if (stampInputRef.current) stampInputRef.current.value = "";
+  };
+
   const submit = async () => {
     if (!agree) {
       toast("warning", t("needAgree"));
@@ -67,8 +94,10 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
       return;
     }
     const dataUrl = sigRef.current?.toDataURL("image/png");
-    if (!dataUrl || dataUrl.length < 200) {
-      toast("warning", t("needSignature"));
+    const hasSig = Boolean(dataUrl && dataUrl.length >= 200);
+    const hasStamp = Boolean(stampPreview && stampPreview.length >= 200);
+    if (!hasSig && !hasStamp) {
+      toast("warning", t("needSignatureOrStamp"));
       return;
     }
 
@@ -80,7 +109,8 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
         body: JSON.stringify({
           agree: true,
           agreeEsignLaw: true,
-          signaturePngBase64: dataUrl,
+          signaturePngBase64: hasSig ? dataUrl : undefined,
+          stampPngBase64: hasStamp ? stampPreview : undefined,
           signerName: signerName.trim(),
           signerEmail: signerEmail.trim(),
         }),
@@ -173,6 +203,26 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
     );
   }
 
+  if (!session.canSign && session.attachmentOnly) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-6 py-10">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {t("attachmentOnlyTitle")}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("attachmentOnlyBody")}
+          </p>
+        </div>
+        <ContractPdfPreview
+          quoteId={quoteId}
+          title={t("previewTitle")}
+          className="h-[min(720px,75vh)] w-full border-2 border-border bg-white"
+        />
+      </div>
+    );
+  }
+
   if (!session.canSign) {
     return (
       <div className="mx-auto max-w-lg space-y-6 border-2 border-border bg-muted px-6 py-10 text-center">
@@ -191,8 +241,6 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
       </div>
     );
   }
-
-  const previewSrc = `/api/quote/${quoteId}/contract/preview`;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 py-10">
@@ -219,9 +267,9 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
         </div>
         <div className="p-5">
           <div className="overflow-hidden border-2 border-border bg-muted">
-            <iframe
-              title="contract-preview"
-              src={previewSrc}
+            <ContractPdfPreview
+              quoteId={quoteId}
+              title={t("previewTitle")}
               className="h-[min(70vh,720px)] w-full"
             />
           </div>
@@ -274,6 +322,42 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
                 <Eraser className="h-3 w-3" />
                 {t("clearPad")}
               </BtnBlock>
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 tkad-type-label text-accent">
+              [ {t("stampLabel")} ]
+            </p>
+            <p className="mb-3 text-xs text-muted-foreground">{t("stampHint")}</p>
+            <div className="flex flex-wrap items-start gap-3">
+              <label className="inline-flex cursor-pointer items-center gap-2 border-2 border-border bg-card px-4 py-2 tkad-type-label text-sm hover:border-accent">
+                <Stamp className="h-4 w-4" />
+                {t("stampUpload")}
+                <input
+                  ref={stampInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="sr-only"
+                  onChange={(e) => onStampFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
+              {stampPreview ? (
+                <>
+                  <div className="flex h-24 w-24 items-center justify-center border-2 border-border bg-white p-1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={stampPreview}
+                      alt=""
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+                  <BtnBlock variant="secondary" size="sm" onClick={clearStamp}>
+                    <X className="h-3 w-3" />
+                    {t("clearStamp")}
+                  </BtnBlock>
+                </>
+              ) : null}
             </div>
           </div>
 

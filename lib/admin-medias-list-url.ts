@@ -4,6 +4,8 @@ const SERVER_SEARCH_TAKE = 5000;
 export function buildAdminMediasListUrl(opts?: {
   q?: string | null;
   cacheBust?: boolean;
+  /** Standalone·견적 픽커 — 검색 없을 때도 SERVER_SEARCH_TAKE 로드 */
+  pickerCatalog?: boolean;
 }): string {
   const q = opts?.q?.trim() ?? "";
   const params = new URLSearchParams();
@@ -11,7 +13,10 @@ export function buildAdminMediasListUrl(opts?: {
     params.set("q", q);
     params.set("take", String(SERVER_SEARCH_TAKE));
   } else {
-    params.set("take", String(DEFAULT_RECENT_TAKE));
+    params.set(
+      "take",
+      String(opts?.pickerCatalog ? SERVER_SEARCH_TAKE : DEFAULT_RECENT_TAKE),
+    );
   }
   if (opts?.cacheBust) {
     params.set("_", String(Date.now()));

@@ -126,6 +126,11 @@ function isValidTtf(buf: Buffer): boolean {
   );
 }
 
+/** pdf-lib 등 서버 PDF에 넣을 Pretendard TTF (캐시) */
+export async function loadServerKrTtf(): Promise<Buffer | null> {
+  return fetchServerTtf();
+}
+
 async function fetchServerTtf(): Promise<Buffer | null> {
   if (cachedServerTtf) return cachedServerTtf;
   for (const url of SERVER_FONT_URLS) {

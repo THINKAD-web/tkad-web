@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { OohContractStatus } from "@prisma/client";
+import { OohContractSendMode, OohContractStatus } from "@prisma/client";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import {
   adminContractsBaseWhere,
@@ -60,6 +60,8 @@ export async function GET(request: NextRequest) {
             id: true,
             status: true,
             signedAt: true,
+            sendMode: true,
+            uploadedPdfFileName: true,
           },
         },
       },
@@ -67,7 +69,17 @@ export async function GET(request: NextRequest) {
     db.ooHQuote.count({
       where: {
         ...baseWhere,
-        oohContract: { is: { status: OohContractStatus.pending } },
+        oohContract: {
+          is: {
+            OR: [
+              { status: OohContractStatus.pending },
+              {
+                status: OohContractStatus.attachment_sent,
+                sendMode: OohContractSendMode.uploaded_attachment,
+              },
+            ],
+          },
+        },
       },
     }),
     db.ooHQuote.count({
@@ -121,6 +133,8 @@ export async function GET(request: NextRequest) {
         endDate: row.endDate?.toISOString() ?? null,
         quoteStatus: row.status,
         contractStatus: contract.status,
+        sendMode: contract.sendMode,
+        uploadedPdfFileName: contract.uploadedPdfFileName,
         contractSigned: serialized.contractSigned,
         signedAt: contract.signedAt?.toISOString() ?? null,
         updatedAt: row.updatedAt.toISOString(),

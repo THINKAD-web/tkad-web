@@ -5,6 +5,9 @@ import { buildAdminMediasListUrl } from "./admin-medias-list-url.ts";
 test("buildAdminMediasListUrl — no query loads recent 500", () => {
   const url = buildAdminMediasListUrl();
   assert.equal(url, "/api/admin/medias?take=500");
+
+  const pickerUrl = buildAdminMediasListUrl({ pickerCatalog: true });
+  assert.equal(pickerUrl, "/api/admin/medias?take=5000");
 });
 
 test("buildAdminMediasListUrl — query uses server search take", () => {

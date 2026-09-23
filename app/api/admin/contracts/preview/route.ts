@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assertAdmin } from "@/lib/admin-guard";
+import { getPrisma } from "@/lib/prisma";
 import { buildOohContractPdf } from "@/lib/ooh-contract-pdf";
+import { resolveContractMediaForQuote } from "@/lib/ooh-contract-context";
+import { parseStandaloneIsoDates } from "@/lib/ooh-contract-pdf-vars";
 import {
   newStandaloneContractDraftId,
   StandaloneContractPreviewBody,
@@ -37,9 +40,35 @@ export async function POST(request: NextRequest) {
       ? (raw as { draftId: string }).draftId.trim()
       : newStandaloneContractDraftId();
 
-  const vars = standaloneContractToPdfVars(parsed.data, draftId);
-  const { pdfBase64 } = await buildOohContractPdf(vars);
-  const buf = Buffer.from(pdfBase64, "base64");
+  let buf: Buffer;
+  try {
+    let resolvedLines;
+    if (parsed.data.mediaIds.length > 0) {
+      const db = getPrisma();
+      const dates =
+        parsed.data.startDate && parsed.data.endDate
+          ? parseStandaloneIsoDates(parsed.data.startDate, parsed.data.endDate)
+          : { start: null, end: null };
+      const pack = await resolveContractMediaForQuote(
+        db,
+        parsed.data.mediaIds,
+        null,
+        parsed.data.locale !== "en",
+        dates,
+      );
+      resolvedLines = pack.lineItems;
+    }
+    const vars = standaloneContractToPdfVars(
+      parsed.data,
+      draftId,
+      resolvedLines,
+    );
+    const { pdfBase64 } = await buildOohContractPdf(vars);
+    buf = Buffer.from(pdfBase64, "base64");
+  } catch (e) {
+    console.error("[admin contract preview]", e);
+    return NextResponse.json({ error: "pdf_generate_failed" }, { status: 503 });
+  }
 
   const disposition = parsed.data.download ? "attachment" : "inline";
   const filename = `thinkad-contract-${draftId.slice(-8).toLowerCase()}.pdf`;

@@ -1,4 +1,8 @@
-import { OoHQuoteStatus, OohContractStatus } from "@prisma/client";
+import { OoHQuoteStatus } from "@prisma/client";
+import {
+  canCustomerSignContract,
+  isContractCustomerStepComplete,
+} from "@/lib/contract-send-mode";
 import { prisma } from "@/lib/prisma";
 import { fetchPublicMediaCatalogList } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
@@ -55,12 +59,11 @@ export async function GET(
       });
 
     const contract = quote.oohContract;
-    const contractSigned =
-      contract?.status === OohContractStatus.signed ||
-      contract?.status === OohContractStatus.confirmed;
-    const canSignContract =
-      quote.status === OoHQuoteStatus.booking_confirmed &&
-      (!contract || contract.status === OohContractStatus.pending);
+    const contractSigned = isContractCustomerStepComplete(contract);
+    const canSignContract = canCustomerSignContract({
+      quoteStatus: quote.status,
+      contract: contract ?? null,
+    });
 
     return apiOk({
       id: quote.id,

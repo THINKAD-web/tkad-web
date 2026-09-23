@@ -1,30 +1,17 @@
 import { NextRequest } from "next/server";
-import { OoHQuoteStatus, OohContractStatus } from "@prisma/client";
+import { OoHQuoteStatus } from "@prisma/client";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
+import { canAdminSendInvoiceForContract } from "@/lib/contract-send-mode";
 import { canAdminSendInvoice } from "@/lib/ooh-quote";
-import { buildSimpleContractPdfBase64 } from "@/lib/server-ooh-quote-pdf";
+import { buildBillingDocumentPdfBase64 } from "@/lib/server-ooh-quote-pdf";
+import { buildContractMoney, supplyWonFromManwonField } from "@/lib/contract-money";
+import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
+import { parseOohContractMeta } from "@/lib/ooh-contract-meta";
+import { getFormalQuoteIssuer } from "@/lib/formal-quote-issuer";
 import { sendEmailWithPdfAttachment } from "@/lib/email/client";
 
 export const dynamic = "force-dynamic";
-
-function bankLines(isKo: boolean): string[] {
-  const name = process.env.QUOTE_BANK_NAME?.trim();
-  const account = process.env.QUOTE_BANK_ACCOUNT?.trim();
-  const holder = process.env.QUOTE_BANK_HOLDER?.trim();
-  if (isKo) {
-    return [
-      name ? `입금 계좌: ${name}` : "입금 계좌: (관리자 설정 QUOTE_BANK_*)",
-      account ? `계좌번호: ${account}` : "",
-      holder ? `예금주: ${holder}` : "",
-    ].filter(Boolean);
-  }
-  return [
-    name ? `Bank: ${name}` : "Bank: (configure QUOTE_BANK_*)",
-    account ? `Account: ${account}` : "",
-    holder ? `Holder: ${holder}` : "",
-  ].filter(Boolean);
-}
 
 export async function POST(
   request: NextRequest,
@@ -43,12 +30,9 @@ export async function POST(
   if (!canAdminSendInvoice(row.status)) {
     return json({ error: "Invalid status for this action" }, 409);
   }
-  if (
-    !row.oohContract ||
-    row.oohContract.status !== OohContractStatus.signed
-  ) {
+  if (!row.oohContract || !canAdminSendInvoiceForContract(row.oohContract)) {
     return json(
-      { error: "전자계약 서명 완료 후 청구서를 발송할 수 있습니다." },
+      { error: "전자계약 서명(또는 첨부 발송) 완료 후 청구서를 발송할 수 있습니다." },
       409,
     );
   }
@@ -63,46 +47,88 @@ export async function POST(
   due.setDate(due.getDate() + 7);
   const dueStr = due.toISOString().slice(0, 10);
 
-  const contractLines = [
-    isKo ? "OOH 광고 계약서 (요약)" : "OOH advertising contract (summary)",
-    "",
-    isKo ? `의뢰인: ${row.clientName}` : `Client: ${row.clientName}`,
-    row.clientCompany
-      ? isKo
-        ? `회사: ${row.clientCompany}`
-        : `Company: ${row.clientCompany}`
-      : "",
-    isKo ? `광고 기간: ${row.period}` : `Period: ${row.period}`,
-    isKo
-      ? `총 집행 금액(참고, 만원): ₩${row.totalAmount.toLocaleString("ko-KR")}`
-      : `Total (10K KRW units): ₩${row.totalAmount.toLocaleString("en-US")}`,
-    "",
-    isKo
-      ? "본 문서는 전자요약이며, 정식 계약은 별도 서면을 따릅니다."
-      : "This is a summary; formal terms follow a separate agreement.",
-  ].filter(Boolean) as string[];
-
-  const invoiceLines = [
-    isKo ? "청구서" : "Invoice",
-    "",
-    isKo ? `청구일: ${new Date().toISOString().slice(0, 10)}` : `Date: ${new Date().toISOString().slice(0, 10)}`,
-    isKo ? `납기: ${dueStr}` : `Due: ${dueStr}`,
-    "",
-    isKo ? `공급가액(만원): ₩${row.totalAmount.toLocaleString("ko-KR")}` : `Amount (10K KRW): ₩${row.totalAmount.toLocaleString("en-US")}`,
-    "",
-    ...bankLines(isKo),
-  ];
+  const meta = parseOohContractMeta(row.adminNote);
+  const breakdown = row.quoteBreakdown as {
+    lines?: {
+      mediaId?: string;
+      mediaName: string;
+      location?: string;
+      quantityLabel?: string;
+      lineSupplyWon: number;
+    }[];
+  } | null;
+  const mediaSource = (breakdown?.lines ?? []).filter(
+    (line) => line.mediaId && !isQuoteAddonLineId(line.mediaId),
+  );
+  const money = buildContractMoney({
+    mediaLines: mediaSource.map((line) => ({
+      name: line.mediaName,
+      location: line.location ?? "",
+      spec: line.quantityLabel ?? "",
+      supplyWon: line.lineSupplyWon,
+    })),
+    contractMediaSupplyWon: supplyWonFromManwonField(row.totalAmount),
+    extraProductionWon: meta.extraProductionWon,
+    extraInstallWon: meta.extraInstallWon,
+    extraOtherWon: meta.extraOtherWon,
+    productionCostText: meta.productionCost,
+  });
+  const mediaLines =
+    money.mediaLines.length > 0
+      ? money.mediaLines.map((line) => ({
+          name: line.name,
+          spec: [line.location, line.spec].filter(Boolean).join(" · "),
+          amountWon: line.supplyWon,
+        }))
+      : [
+          {
+            name: isKo ? "매체비" : "Media fee",
+            amountWon: money.contractMediaSupplyWon,
+          },
+        ];
+  const extraLines = [
+    ...(money.adjustmentWon !== 0
+      ? [
+          {
+            name: isKo ? "협의 조정" : "Adjustment",
+            amountWon: money.adjustmentWon,
+          },
+        ]
+      : []),
+    { name: isKo ? "제작비" : "Production", amountWon: money.extraProductionWon },
+    { name: isKo ? "설치비" : "Installation", amountWon: money.extraInstallWon },
+    { name: isKo ? "기타" : "Other", amountWon: money.extraOtherWon },
+  ].filter((l) => l.amountWon !== 0);
+  const issuer = getFormalQuoteIssuer();
+  const bankName = process.env.QUOTE_BANK_NAME?.trim() || issuer.bank;
+  const bankAccount = process.env.QUOTE_BANK_ACCOUNT?.trim() || issuer.account;
+  const bankHolder = process.env.QUOTE_BANK_HOLDER?.trim() || issuer.holder;
 
   try {
-    const contractPdf = await buildSimpleContractPdfBase64({
+    const shared = {
       isKo,
-      title: isKo ? "싱커드 계약 요약" : "THINKAD contract summary",
-      lines: contractLines,
+      clientName: row.clientName,
+      company: row.clientCompany,
+      period: row.period,
+      lines: mediaLines,
+      extraLines,
+      supplyWon: money.supplyWon,
+      vatWon: money.vatWon,
+      totalWon: money.totalWon,
+      bankName,
+      bankAccount,
+      bankHolder,
+      contactEmail: meta.accountManagerEmail || issuer.email,
+      contactPhone: meta.accountManagerPhone || issuer.tel,
+    };
+    const contractPdf = await buildBillingDocumentPdfBase64({
+      ...shared,
+      kind: "summary",
     });
-    const invoicePdf = await buildSimpleContractPdfBase64({
-      isKo,
-      title: isKo ? "싱커드 청구서" : "THINKAD invoice",
-      lines: invoiceLines,
+    const invoicePdf = await buildBillingDocumentPdfBase64({
+      ...shared,
+      kind: "invoice",
+      dueDate: dueStr,
     });
 
     await sendEmailWithPdfAttachment({

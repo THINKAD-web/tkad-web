@@ -1,9 +1,6 @@
 import { createHash } from "node:crypto";
 import type { SignatureAuditLog } from "@prisma/client";
-import {
-  buildOohContractPdf,
-  type OohContractPdfVars,
-} from "@/lib/ooh-contract-pdf";
+import type { OohContractPdfVars } from "@/lib/ooh-contract-pdf";
 
 export function sha256Hex(data: Buffer | string): string {
   const buf = typeof data === "string" ? Buffer.from(data, "utf8") : data;
@@ -14,6 +11,7 @@ export function sha256Hex(data: Buffer | string): string {
 export async function hashUnsignedContractDocument(
   vars: OohContractPdfVars,
 ): Promise<string> {
+  const { buildOohContractPdf } = await import("@/lib/ooh-contract-pdf");
   const { pdfBase64 } = await buildOohContractPdf(vars);
   return sha256Hex(Buffer.from(pdfBase64, "base64"));
 }
@@ -24,6 +22,23 @@ export function hashSignatureImagePngBase64(signaturePngBase64: string): string 
     ? signaturePngBase64.split(",")[1]!
     : signaturePngBase64;
   return sha256Hex(Buffer.from(raw, "base64"));
+}
+
+/** 서명·도장 이미지 감사 해시 (둘 다 있으면 결합) */
+export function hashContractSignImages(input: {
+  signaturePngBase64?: string | null;
+  stampPngBase64?: string | null;
+}): string {
+  const sig = input.signaturePngBase64?.trim();
+  const stamp = input.stampPngBase64?.trim();
+  if (sig && stamp) {
+    return sha256Hex(
+      `${hashSignatureImagePngBase64(sig)}:${hashSignatureImagePngBase64(stamp)}`,
+    );
+  }
+  if (stamp) return hashSignatureImagePngBase64(stamp);
+  if (sig) return hashSignatureImagePngBase64(sig);
+  throw new Error("no_sign_image");
 }
 
 export function formatSignedAtKst(iso: string | Date): string {

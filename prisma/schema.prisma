@@ -157,9 +157,16 @@ enum OoHQuoteStatus {
 /// 전자계약 (`/quote/[id]/contract`) — 관리자 Quote와 무관
 enum OohContractStatus {
   pending
+  attachment_sent
   signed
   confirmed
   cancelled
+}
+
+enum OohContractSendMode {
+  auto_generated
+  uploaded_esign
+  uploaded_attachment
 }
 
 enum ReliabilityGrade {
@@ -1429,10 +1436,19 @@ model OohContract {
   signerIp            String?   @map("signer_ip")
   signerAgent         String?   @map("signer_agent") @db.Text
   signatureImage      String?   @map("signature_image") @db.Text
+  /// 갑(광고주) 업로드 도장 — 서명 패드와 별도 보관 (PDF 재생성용)
+  clientStampImage    String?   @map("client_stamp_image") @db.Text
   agreementAcceptedAt DateTime? @map("agreement_accepted_at")
 
   documentSha256 String? @map("document_sha256")
   specialTerms   String? @map("special_terms") @db.Text
+  /// 서명 URL 이메일 발송 이력 [{ sentAt, to, kind: initial|resend|attachment_* }]
+  inviteSendLog  Json?   @map("invite_send_log")
+
+  sendMode              OohContractSendMode @default(auto_generated) @map("send_mode")
+  uploadedPdfUrl        String?             @map("uploaded_pdf_url")
+  uploadedPdfSha256     String?             @map("uploaded_pdf_sha256") @db.VarChar(64)
+  uploadedPdfFileName   String?             @map("uploaded_pdf_file_name") @db.VarChar(255)
 
   status OohContractStatus @default(pending)
 

@@ -1,19 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { OoHQuoteStatus, OohContractStatus } from "@prisma/client";
+import {
+  OoHQuoteStatus,
+  OohContractSendMode,
+  OohContractStatus,
+} from "@prisma/client";
+import {
+  isAttachmentOnlyContract,
+  mapUploadPdfFetchErrorToHttpStatus,
+  normalizeContractSendMode,
+} from "@/lib/contract-send-mode";
+import { fetchUploadedContractPdfVerified } from "@/lib/ooh-contract-upload-pdf";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import {
   loadOoHQuoteForContract,
   ooHQuoteToContractPdfVars,
-  resolveMediaNamesForQuote,
+  resolveContractMediaForQuote,
 } from "@/lib/ooh-contract-context";
-import { buildSignedOohContractPdf } from "@/lib/ooh-contract-pdf";
 import { sendContractSignedEvidenceEmails } from "@/lib/contract-sign-notify";
 import {
   formatSignedAtKst,
-  hashSignatureImagePngBase64,
+  hashContractSignImages,
   hashUnsignedContractDocument,
+  sha256Hex,
 } from "@/lib/signature-audit";
 import { getCurrentUser } from "@/lib/user-session";
 import { postInternalAlert } from "@/lib/internal-webhook";
@@ -74,11 +84,17 @@ export async function POST(
   }
 
   const signatureRaw = String(body.signaturePngBase64 ?? "").trim();
-  if (!signatureRaw || signatureRaw.length < 80) {
-    return json({ error: "Signature required" }, { status: 400 });
+  const stampRaw = String(body.stampPngBase64 ?? "").trim();
+  const hasSignature = signatureRaw.length >= 80;
+  const hasStamp = stampRaw.length >= 80;
+  if (!hasSignature && !hasStamp) {
+    return json(
+      { error: "Signature or company stamp image required" },
+      { status: 400 },
+    );
   }
-  if (signatureRaw.length > MAX_SIG) {
-    return json({ error: "Signature too large" }, { status: 400 });
+  if (signatureRaw.length > MAX_SIG || stampRaw.length > MAX_SIG) {
+    return json({ error: "Signature image too large" }, { status: 400 });
   }
 
   const signerName = String(body.signerName ?? "").trim();
@@ -106,8 +122,15 @@ export async function POST(
   await ensureOohContractExists(db, id, row.status);
   row = (await loadOoHQuoteForContract(db, id))!;
   const contract = row.oohContract;
-  if (!contract)
-    return json({ error: "Contract record missing" }, { status: 500 });
+  if (!contract) {
+    return json({ error: "Contract record missing" }, { status: 404 });
+  }
+  if (isAttachmentOnlyContract(contract)) {
+    return json(
+      { error: "This contract was sent as an attachment; signing is not required" },
+      { status: 403 },
+    );
+  }
   if (contract.status !== OohContractStatus.pending) {
     return json({ error: "Already signed or closed" }, { status: 409 });
   }
@@ -116,40 +139,133 @@ export async function POST(
   const signedAtIso = signedAt.toISOString();
   const signedAtKst = formatSignedAtKst(signedAt);
   const isKo = row.locale !== "en";
-  const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
-  const vars = ooHQuoteToContractPdfVars(row, mediaNames, contract.id);
+  const sendMode = normalizeContractSendMode(contract.sendMode);
 
-  const sigB64 = signatureRaw.includes(",")
-    ? signatureRaw.split(",")[1]!
-    : signatureRaw;
-  try {
-    const buf = Buffer.from(sigB64, "base64");
-    if (buf.length < 40) {
-      return json({ error: "Invalid signature image" }, { status: 400 });
+  function validatePngField(raw: string, label: string): string | null {
+    if (!raw) return null;
+    const b64 = raw.includes(",") ? raw.split(",")[1]! : raw;
+    try {
+      const buf = Buffer.from(b64, "base64");
+      if (buf.length < 40) {
+        throw new Error("too_small");
+      }
+    } catch {
+      throw new Error(label);
     }
-  } catch {
-    return json({ error: "Invalid signature encoding" }, { status: 400 });
+    return b64;
   }
 
-  const documentHash = await hashUnsignedContractDocument(vars);
-  const signatureImageHash = hashSignatureImagePngBase64(sigB64);
+  let sigB64: string | null = null;
+  let stampB64: string | null = null;
+  try {
+    if (hasSignature) sigB64 = validatePngField(signatureRaw, "signature");
+    if (hasStamp) stampB64 = validatePngField(stampRaw, "stamp");
+  } catch (e) {
+    const label = e instanceof Error ? e.message : "image";
+    return json(
+      {
+        error:
+          label === "stamp"
+            ? "Invalid stamp image"
+            : "Invalid signature image",
+      },
+      { status: 400 },
+    );
+  }
+
+  const signatureImageHash = hashContractSignImages({
+    signaturePngBase64: hasSignature ? signatureRaw : null,
+    stampPngBase64: hasStamp ? stampRaw : null,
+  });
+  const clientStampDataUrl = stampRaw
+    ? stampRaw.startsWith("data:")
+      ? stampRaw
+      : `data:image/png;base64,${stampB64}`
+    : null;
   const sessionUser = await getCurrentUser();
 
-  const { pdfBase64, sha256 } = await buildSignedOohContractPdf(
-    vars,
-    sigB64,
-    {
-      documentNumber: contract.id,
-      signerName,
-      signerEmail,
-      signedAtIso,
-      signedAtKst,
-      signerIp: ip,
-      signerAgent: ua,
-      documentContentSha256: documentHash,
-      signatureImageSha256: signatureImageHash,
-    },
-  );
+  let documentHash: string;
+  let pdfBase64: string;
+  let sha256: string;
+
+  try {
+    if (sendMode === OohContractSendMode.uploaded_esign) {
+      if (!contract.uploadedPdfUrl) {
+        return json({ error: "Upload contract PDF missing" }, { status: 503 });
+      }
+      const sourcePdf = await fetchUploadedContractPdfVerified(
+        contract.uploadedPdfUrl,
+        contract.uploadedPdfSha256,
+      );
+      documentHash =
+        contract.uploadedPdfSha256?.trim() ||
+        contract.documentSha256?.trim() ||
+        sha256Hex(sourcePdf);
+      const { buildSignedUploadContractPdf } = await import(
+        "@/lib/upload-contract-sign-pdf"
+      );
+      const signed = await buildSignedUploadContractPdf(
+        sourcePdf,
+        {
+          signaturePngBase64: hasSignature ? signatureRaw : null,
+          stampPngBase64: hasStamp ? stampRaw : null,
+        },
+        {
+          signerName,
+          signerEmail,
+          signedAtKst,
+          documentContentSha256: documentHash,
+          signatureImageSha256: signatureImageHash,
+        },
+      );
+      pdfBase64 = signed.pdfBase64;
+      sha256 = signed.sha256;
+    } else {
+      const mediaPack = await resolveContractMediaForQuote(
+        db,
+        row.mediaIds,
+        row.quoteBreakdown as import("@/lib/quote-calculator").QuoteBreakdown | null,
+        isKo,
+        { start: row.startDate, end: row.endDate },
+      );
+      const vars = ooHQuoteToContractPdfVars(
+        row,
+        mediaPack.names,
+        contract.id,
+        undefined,
+        mediaPack.lineItems,
+      );
+      documentHash = await hashUnsignedContractDocument(vars);
+      const { buildSignedOohContractPdf } = await import("@/lib/ooh-contract-pdf");
+      const built = await buildSignedOohContractPdf(
+        vars,
+        {
+          signaturePngBase64: hasSignature ? signatureRaw : null,
+          clientStampDataUrl,
+        },
+        {
+          documentNumber: contract.id,
+          signerName,
+          signerEmail,
+          signedAtIso,
+          signedAtKst,
+          signerIp: ip,
+          signerAgent: ua,
+          documentContentSha256: documentHash,
+          signatureImageSha256: signatureImageHash,
+        },
+      );
+      pdfBase64 = built.pdfBase64;
+      sha256 = built.sha256;
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "sign_pdf_failed";
+    console.error("[contract sign] pdf build", { quoteId: id, err: e });
+    return json(
+      { error: "Could not prepare contract PDF for signing" },
+      { status: mapUploadPdfFetchErrorToHttpStatus(msg) },
+    );
+  }
 
   const pdfBuffer = Buffer.from(pdfBase64, "base64");
   let contractPdfUrl = "inline:signed";
@@ -189,7 +305,11 @@ export async function POST(
       signerEmail,
       signerIp: ip,
       signerAgent: ua,
-      signatureImage: signatureRaw.slice(0, 500_000),
+      signatureImage: (hasSignature ? signatureRaw : stampRaw).slice(
+        0,
+        500_000,
+      ),
+      clientStampImage: hasStamp ? stampRaw.slice(0, 500_000) : null,
       agreementAcceptedAt: signedAt,
       signedPdfBase64,
       documentSha256: sha256,

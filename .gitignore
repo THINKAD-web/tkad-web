@@ -76,6 +76,7 @@ scripts/print-admin-*.ts
 !.github/pr-screenshots/map-ux-phase-2/*.png
 !.github/pr-screenshots/map-coverage-poc/
 !.github/pr-screenshots/map-coverage-poc/*.png
+!.github/pr-screenshots/contract-sign-font-page2.png
 !docs/screenshots/
 !docs/screenshots/pr4-baseline/
 !docs/screenshots/pr4-baseline/*.png
@@ -87,6 +88,10 @@ scripts/print-admin-*.ts
 !reports/design-tone-audit-20260826/screenshots/option-a-media/*.png
 !reports/trust-credibility-urgent/
 !reports/trust-credibility-urgent/*.png
+!reports/contract-quality-2026-09-22/*.png
+!reports/contract-golden-2026-09-22/*.png
+!reports/contract-table-2026-09-23/
+!reports/contract-table-2026-09-23/*.png
 scripts/fix-*.ts
 scripts/.backfill-media-translations-calibration.json
 

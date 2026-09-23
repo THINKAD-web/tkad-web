@@ -1,0 +1,8 @@
+{
+  "source": "script calling buildOohContractPdf and buildBillingDocumentPdfBase64 (not a logged-in admin browser preview)",
+  "g1TotalWon": 112200000,
+  "g1AmountKorean": "일억일천이백이십만원정",
+  "g1Display": "￦ 112,200,000(VAT포함)",
+  "invoiceTotalWon": 112200000,
+  "summaryTotalWon": 112200000
+}
