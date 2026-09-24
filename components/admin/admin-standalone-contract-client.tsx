@@ -38,7 +38,10 @@ import { useAdminMediaPickerList } from "@/hooks/use-admin-media-picker-list";
 import { parseWonFromLooseAdminInput } from "@/lib/contract-money";
 import { catalogPriceFieldToWon } from "@/lib/pricing";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
-import { wonToManwon } from "@/lib/ooh-quote-amount";
+import {
+  normalizeOohQuoteTotalAmountInput,
+  wonToManwon,
+} from "@/lib/ooh-quote-amount";
 import {
   newStandaloneContractDraftId,
   type StandaloneContractDraft,
@@ -267,7 +270,9 @@ export default function AdminStandaloneContractClient() {
   }, []);
 
   const persistDraft = useCallback(() => {
-    const manwon = Math.max(1, parseInt(totalAmountManwon, 10) || 0);
+    const manwon = normalizeOohQuoteTotalAmountInput(
+      Math.max(1, parseInt(totalAmountManwon, 10) || 0),
+    );
     const draft: StandaloneContractDraft = {
       version: STANDALONE_CONTRACT_DRAFT_VERSION,
       draftId,
@@ -322,7 +327,9 @@ export default function AdminStandaloneContractClient() {
   ]);
 
   const buildPayload = useCallback(() => {
-    const manwon = Math.max(1, parseInt(totalAmountManwon, 10) || 0);
+    const manwon = normalizeOohQuoteTotalAmountInput(
+      Math.max(1, parseInt(totalAmountManwon, 10) || 0),
+    );
     return {
       draftId,
       clientCompany: clientCompany.trim(),

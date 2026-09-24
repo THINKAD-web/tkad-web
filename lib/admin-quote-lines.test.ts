@@ -146,6 +146,31 @@ test("buildAdminQuoteLineItems sets usesMediaPartialRate for 15-day campaign", (
   assert.equal(items[0]?.usesMediaPartialRate, true);
 });
 
+test("custom 제작비 ignores calendar month quantity multiplier", () => {
+  const items = buildAdminQuoteLineItems({
+    lines: [
+      createCustomQuoteLine({
+        name: "제작비",
+        quantity: 6,
+        unitPriceWon: 1_000_000,
+      }),
+    ],
+    medias: [],
+    isKo: true,
+    campaignPeriodLabel: "2026-01-01 ~ 2026-06-30",
+    billing: {
+      mode: "calendar_months",
+      calendarMonths: 6,
+      presetDays: 180,
+      days: 180,
+      startDate: "2026-01-01",
+      endDate: "2026-06-30",
+    },
+  });
+  assert.equal(items[0]?.amount, 1_000_000);
+  assert.equal(items[0]?.quantity, 6);
+});
+
 test("buildAdminQuoteLineItems custom line unchanged (manual amount)", () => {
   const items = buildAdminQuoteLineItems({
     lines: [

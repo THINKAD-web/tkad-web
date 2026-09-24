@@ -53,14 +53,45 @@ export function coerceOohQuoteTotalAmountManwon(
   return { manwon: stored, corrected: false };
 }
 
+/**
+ * OoHQuote.totalAmount(만원 필드) → 표시용 원(KRW).
+ * 계약 PDF의 {@link supplyWonFromManwonField} 와 동일한 오저장 보정.
+ */
+export function displayWonFromOohQuoteTotalAmount(
+  totalAmountStored: number,
+  referenceTotalWon?: number | null,
+): number {
+  const coerced = coerceOohQuoteTotalAmountManwon(
+    totalAmountStored,
+    referenceTotalWon,
+  );
+  const manwon = coerced.corrected
+    ? coerced.manwon
+    : normalizeOohQuoteTotalAmountInput(totalAmountStored);
+  return oohQuoteManwonToWon(manwon);
+}
+
+/** 어드민 입력(만원 필드) — 원 단위 실수로 들어온 값을 만원으로 정규화 */
+export function normalizeOohQuoteTotalAmountInput(raw: number): number {
+  if (!Number.isFinite(raw) || raw <= 0) return 1;
+  const n = Math.round(raw);
+  if (n > OOH_QUOTE_BUDGET_WON_INPUT_THRESHOLD) {
+    return Math.max(1, wonToManwon(n));
+  }
+  return n;
+}
+
 /** 고객-facing ₩ 표시 (원 단위) */
 export function formatOohQuoteTotalKrw(
   totalAmountManwon: number,
   locale: string = "ko-KR",
+  referenceTotalWon?: number | null,
 ): string {
-  return `₩${new Intl.NumberFormat(locale).format(
-    oohQuoteManwonToWon(totalAmountManwon),
-  )}`;
+  const won = displayWonFromOohQuoteTotalAmount(
+    totalAmountManwon,
+    referenceTotalWon,
+  );
+  return `₩${new Intl.NumberFormat(locale).format(won)}`;
 }
 
 /** 어드민·내부용 만원 라벨 (예: 4,080만) */

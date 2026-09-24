@@ -35,6 +35,26 @@ test("resolveContractExtraWons uses productionCost text", () => {
   assert.equal(extras.extraProductionWon, 20_000_000);
 });
 
+test("suppressAdjustmentRow hides standalone catalog vs agreed total gap", () => {
+  const withAdj = buildContractMoney({
+    mediaLines: [
+      { name: "A", location: "", spec: "", supplyWon: 50_000_000 },
+    ],
+    contractMediaSupplyWon: 16_500_000,
+  });
+  assert.equal(withAdj.adjustmentWon, -33_500_000);
+
+  const suppressed = buildContractMoney({
+    mediaLines: [
+      { name: "A", location: "", spec: "", supplyWon: 50_000_000 },
+    ],
+    contractMediaSupplyWon: 16_500_000,
+    suppressAdjustmentRow: true,
+  });
+  assert.equal(suppressed.adjustmentWon, 0);
+  assert.equal(suppressed.supplyWon, 16_500_000);
+});
+
 test("G1 negotiated media plus production", () => {
   const money = buildContractMoney({
     mediaLines: [

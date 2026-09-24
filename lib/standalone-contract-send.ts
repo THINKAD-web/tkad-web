@@ -22,6 +22,7 @@ import {
 import type { StandaloneContractPreviewInput } from "@/lib/standalone-contract";
 import { catalogSupplyWonForPeriod } from "@/lib/ooh-contract-context";
 import { inclusiveCampaignDays } from "@/lib/admin-quote-calc";
+import { normalizeOohQuoteTotalAmountInput } from "@/lib/ooh-quote-amount";
 
 export const STANDALONE_OOH_SOURCE_NOTE = "[[ooh-contract-source:standalone]]";
 
@@ -86,7 +87,7 @@ export function buildStandaloneOoHQuoteCreateData(
     clientPhone: input.clientPhone?.trim() || null,
     clientCompany: input.clientCompany?.trim() || null,
     mediaIds: input.mediaIds,
-    totalAmount: input.totalAmountManwon,
+    totalAmount: normalizeOohQuoteTotalAmountInput(input.totalAmountManwon),
     period: input.period.trim(),
     startDate: input.startDate ? parseIsoDate(input.startDate) : null,
     endDate: input.endDate ? parseIsoDate(input.endDate) : null,

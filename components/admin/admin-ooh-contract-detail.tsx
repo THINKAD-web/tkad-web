@@ -21,6 +21,7 @@ import {
   supplyWonFromManwonField,
 } from "@/lib/contract-money";
 import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
+import { AdminContractPdfPreview } from "@/components/admin/admin-contract-pdf-preview";
 
 function formatKoNumber(value: number | null | undefined, fallback = "—"): string {
   if (value == null || !Number.isFinite(value)) return fallback;
@@ -310,7 +311,7 @@ export function AdminOohContractDetailPanel({
     return <p className="text-xs text-muted-foreground">{t("loading")}</p>;
   }
 
-  const previewUrl = `/api/quote/${quoteId}/contract/preview`;
+  const adminPreviewUrl = `/api/admin/ooh-quotes/${quoteId}/contract-preview`;
 
   return (
     <div className="space-y-4 text-xs">
@@ -755,7 +756,7 @@ export function AdminOohContractDetailPanel({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-semibold text-foreground">{t("contractPreviewTitle")}</p>
                 <a
-                  href={previewUrl}
+                  href={adminPreviewUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-[11px] font-semibold text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
@@ -764,11 +765,10 @@ export function AdminOohContractDetailPanel({
                   {t("contractPreviewNewTab")}
                 </a>
               </div>
-              <iframe
-                key={previewKey}
+              <AdminContractPdfPreview
+                quoteId={quoteId}
+                previewKey={previewKey}
                 title={t("contractPreviewTitle")}
-                src={previewUrl}
-                className="h-[min(520px,70vh)] w-full rounded-xl border border-gray-200 bg-white dark:border-white/10"
               />
             </div>
           ) : (

@@ -91,6 +91,13 @@ export function createCatalogQuoteLine(
   };
 }
 
+/** 제작·설치 등 1회성 비용 — 개월 청구 모드에서도 수량(개월)으로 곱하지 않음 */
+export function isOneTimeAdminCustomQuoteLineName(name: string): boolean {
+  const t = name.trim();
+  if (!t) return false;
+  return /제작|디자인|production|design|설치|install|시공/i.test(t);
+}
+
 export function createCustomQuoteLine(
   partial?: Partial<Pick<AdminQuoteCustomLine, "name" | "quantity" | "unitPriceWon">>,
 ): AdminQuoteCustomLine {
@@ -388,7 +395,12 @@ export function buildAdminQuoteLineItems(opts: {
     if (line.kind === "custom") {
       const qty = Math.max(1, line.quantity);
       const unit = Math.max(0, Math.round(line.unitPriceWon));
-      const amount = Math.round(unit * qty);
+      const billQty =
+        billing.mode === "calendar_months" &&
+        isOneTimeAdminCustomQuoteLineName(line.name)
+          ? 1
+          : qty;
+      const amount = Math.round(unit * billQty);
       if (amount <= 0 && !line.name.trim()) continue;
       out.push({
         lineId: line.lineId,
