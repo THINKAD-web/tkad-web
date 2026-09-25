@@ -1213,10 +1213,12 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 | # | 항목 | 상태 |
 |---|------|------|
 | 1 | GA4 DebugView (`user_filter`/`open_tray`/`go_to_planner`) | 미완 — 🖱️ |
-| 2 | 시크릿 URL + history | 미완 — 🖱️ (반경 URL은 PR-13 QA에 포함) |
+| 2 | 시크릿 URL + history | 반경 URL **🖱️ 부분** — #688 배포 후 `centerLat`/`radiusM`/`placeLabel` URL·`map_search` `poi` 확인; history·시크릿 전체는 미완 |
 | 3 | hover / 0건 / CompareBar / PlanCartSheet | 미완 — 🖱️ |
 | 4 | 2건 → `from=plan` E2E | 미완 — 🖱️ |
 | 5 | 모바일 390/360 | 미완 — 🖱️ |
 | 6 | `lcpElement` field DB | 미완 — 🔌 (운영 DB) |
+
+**PR-13 Production 스모크 (2026-09-25, #688 배포 ~4분 후):** 🖱️ `/api/media/map/places` 200 · UI「주소·역·랜드마크」노출 · 강남역 후보 선택 → URL `centerLat`/`radiusM=1000`/`placeLabel` · `map_search` `search_type: poi`. pan 시 자동 영역 재검색 없음(코드) — pan 후 결과 건수 동일은 운영 재확인 권장.
 
 **Phase 0 로드맵:** 배치 1~4(PR-10~13) 기능 구현선은 PR-13 머지 시 **1주기 완료**. 이후 우선순위(모바일 바텀시트·현장 확인·데이터 레이어 등)는 GA4·field vitals 기반으로 재논의.
