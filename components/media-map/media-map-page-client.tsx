@@ -42,6 +42,7 @@ import {
 } from "@/lib/media-map/url-state";
 import { resolveBrowseRegionMapView } from "@/lib/media-map/region-view";
 import {
+  clearMapBrowseFilters,
   initMapBrowseFiltersFromUrl,
   isMapTextSearchActive,
   mapBrowseFiltersToMapApiParams,
@@ -106,6 +107,7 @@ import {
   trackMapMarkerClick,
   trackMapSearch,
   trackMapView,
+  type MapFilterApplyTrigger,
 } from "@/lib/map-ga-events";
 
 function itemShowsMapPin(item: MapMapItem): boolean {
@@ -309,6 +311,9 @@ export default function MediaMapPageClient() {
   const fetchGenerationRef = useRef(0);
   const lastTrackedFilterFpRef = useRef<string | null>(null);
   const lastTrackedSearchQRef = useRef("");
+  const lastBoundsMoveGaAtRef = useRef(0);
+  const lastBoundsMoveGaResultRef = useRef<number | null>(null);
+  const MAP_BOUNDS_GA_THROTTLE_MS = 45_000;
   /** URL 기본 필터만으로는 `map_filter_apply` 미발화 — 지표 오염 방지 */
   const filterApplyGaEnabledRef = useRef(
     !isDefaultMapBrowseFilters(
@@ -590,7 +595,11 @@ export default function MediaMapPageClient() {
   }, [applyUrlStateFromLocation]);
 
   const fetchItems = useCallback(
-    async (b: MapBounds | null, f: MapBrowseFilters): Promise<boolean> => {
+    async (
+      b: MapBounds | null,
+      f: MapBrowseFilters,
+      gaTrigger: MapFilterApplyTrigger | "silent" = "silent",
+    ): Promise<boolean> => {
       mapFetchAbortRef.current?.abort();
       const controller = new AbortController();
       mapFetchAbortRef.current = controller;
@@ -695,18 +704,37 @@ export default function MediaMapPageClient() {
               ? data.data.matchTotal
               : next.length;
           const filterFp = mapBrowseFiltersFingerprint(f);
-          if (
-            filterApplyGaEnabledRef.current &&
-            filterFp !== lastTrackedFilterFpRef.current
-          ) {
-            lastTrackedFilterFpRef.current = filterFp;
-            const viaUrlRestore = urlRestoreSessionRef.current;
-            if (viaUrlRestore) urlRestoreSessionRef.current = false;
-            trackMapFilterApply({
-              filter_summary: filterFp,
-              result_count: resultCount,
-              via_url_restore: viaUrlRestore || undefined,
-            });
+          if (filterApplyGaEnabledRef.current && gaTrigger !== "silent") {
+            if (gaTrigger === "user_filter") {
+              if (filterFp !== lastTrackedFilterFpRef.current) {
+                lastTrackedFilterFpRef.current = filterFp;
+                const viaUrlRestore = urlRestoreSessionRef.current;
+                if (viaUrlRestore) urlRestoreSessionRef.current = false;
+                trackMapFilterApply({
+                  filter_summary: filterFp,
+                  result_count: resultCount,
+                  trigger: "user_filter",
+                  via_url_restore: viaUrlRestore || undefined,
+                });
+              }
+            } else if (gaTrigger === "bounds_move") {
+              const now = Date.now();
+              const resultChanged =
+                lastBoundsMoveGaResultRef.current !== resultCount;
+              if (
+                now - lastBoundsMoveGaAtRef.current >=
+                  MAP_BOUNDS_GA_THROTTLE_MS ||
+                resultChanged
+              ) {
+                lastBoundsMoveGaAtRef.current = now;
+                lastBoundsMoveGaResultRef.current = resultCount;
+                trackMapFilterApply({
+                  filter_summary: filterFp,
+                  result_count: resultCount,
+                  trigger: "bounds_move",
+                });
+              }
+            }
           }
           const qTrim = f.q.trim();
           if (!qTrim) {
@@ -753,7 +781,7 @@ export default function MediaMapPageClient() {
   const runSearch = useCallback(
     async (b: MapBounds) => {
       const f = browseFiltersRef.current;
-      const ok = await fetchItems(b, f);
+      const ok = await fetchItems(b, f, "bounds_move");
       if (!ok) return;
       setSearchedBounds(b);
       searchedBoundsRef.current = b;
@@ -768,7 +796,7 @@ export default function MediaMapPageClient() {
     const b = searchedBoundsRef.current ?? boundsRef.current;
     if (!b) return;
     const timer = window.setTimeout(() => {
-      void fetchItems(b, browseFiltersRef.current);
+      void fetchItems(b, browseFiltersRef.current, "bounds_move");
     }, MAP_AUTO_SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
   }, [view?.zoom, fetchItems]);
@@ -779,7 +807,7 @@ export default function MediaMapPageClient() {
     const f = browseFiltersRef.current;
     void (async () => {
       const seedBounds = KOREA_MAP_OVERVIEW_BOUNDS;
-      const ok = await fetchItems(seedBounds, f);
+      const ok = await fetchItems(seedBounds, f, "silent");
       initialFetchDoneRef.current = true;
       if (!ok) return;
       setSearchedBounds(seedBounds);
@@ -807,7 +835,7 @@ export default function MediaMapPageClient() {
     const b = searchedBoundsRef.current ?? boundsRef.current;
     const f = browseFilters;
     if (!b && !isMapTextSearchActive(f)) return;
-    void fetchItems(b ?? KOREA_MAP_OVERVIEW_BOUNDS, f);
+    void fetchItems(b ?? KOREA_MAP_OVERVIEW_BOUNDS, f, "user_filter");
   }, [
     browseFilters.q,
     browseFilters.mainCategory,
@@ -829,7 +857,7 @@ export default function MediaMapPageClient() {
       browseFilters.regionSub,
     );
     if (mapView) return;
-    void fetchItems(b, browseFilters);
+    void fetchItems(b, browseFilters, "user_filter");
   }, [browseFilters.regionMain, browseFilters.regionSub, fetchItems, browseFilters]);
 
   useEffect(() => {
@@ -1121,6 +1149,11 @@ export default function MediaMapPageClient() {
   const patchBrowseFilters = useCallback((patch: Partial<MapBrowseFilters>) => {
     filterApplyGaEnabledRef.current = true;
     setBrowseFilters((f) => ({ ...f, ...patch }));
+  }, []);
+
+  const handleClearBrowseFilters = useCallback(() => {
+    filterApplyGaEnabledRef.current = true;
+    setBrowseFilters((f) => clearMapBrowseFilters(f));
   }, []);
 
   const handleHotspotRegionSelect = useCallback(
@@ -1442,6 +1475,7 @@ export default function MediaMapPageClient() {
       onSelect={handleSelect}
       onToggleCompare={toggleCompare}
       isInCompare={isInCompare}
+      onClearFilters={handleClearBrowseFilters}
     />
   );
 
