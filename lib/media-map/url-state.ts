@@ -32,7 +32,11 @@ export type MediaMapFilter = {
   features?: string;
 };
 
-export type MediaMapUrlState = MediaMapView & MediaMapFilter;
+/** 선택된 매체 id (마커/미리보기). 공유 링크용 — install 핀 id는 URL에 넣지 않음 */
+export type MediaMapUrlState = MediaMapView &
+  MediaMapFilter & {
+    media?: string;
+  };
 
 const VIEW_NUM_FIELDS = ["lat", "lng", "zoom"] as const;
 const PRICE_NUM_FIELDS = ["minPrice", "maxPrice"] as const;
@@ -106,6 +110,10 @@ export function parseMediaMapUrlState(
     if (raw == null || raw === "") continue;
     out[key] = raw.slice(0, 80);
   }
+  const mediaRaw = searchParams.get("media");
+  if (mediaRaw?.trim()) {
+    out.media = mediaRaw.trim().slice(0, 120);
+  }
   // legacy `type` → category (digital alias → dooh)
   if (!out.category) {
     const legacyType = searchParams.get("type");
@@ -145,22 +153,42 @@ export function buildMediaMapSearchString(state: MediaMapUrlState): string {
     const v = state[key];
     if (v && v.length > 0) sp.set(key, v);
   }
+  if (state.media?.trim()) {
+    sp.set("media", state.media.trim().slice(0, 120));
+  }
   return sp.toString();
+}
+
+export type UrlHistoryMode = "replace" | "push";
+
+/**
+ * history API 로 URL search 만 갱신.
+ * `push` — 필터·선택 등 사용자 의도가 바뀐 경우(뒤로가기 복원용).
+ * `replace` — 지도 pan/zoom 등 고빈도 갱신.
+ */
+export function writeUrlSearch(next: string, mode: UrlHistoryMode): void {
+  if (typeof window === "undefined") return;
+  const path = window.location.pathname;
+  const url = next ? `${path}?${next}` : path;
+  const cur = window.location.search.replace(/^\?/, "");
+  try {
+    if (mode === "push") {
+      if (cur === next) return;
+      window.history.pushState(window.history.state, "", url);
+    } else {
+      if (cur === next) return;
+      window.history.replaceState(window.history.state, "", url);
+    }
+  } catch {
+    /* noop */
+  }
 }
 
 /**
  * history.replaceState 로 URL 만 갱신 (스크롤/리렌더 X).
  * 같은 search string 이면 no-op.
  */
+/** @deprecated prefer `writeUrlSearch(next, "replace")` */
 export function replaceUrlSearch(next: string): void {
-  if (typeof window === "undefined") return;
-  const cur = window.location.search.replace(/^\?/, "");
-  if (cur === next) return;
-  const path = window.location.pathname;
-  const url = next ? `${path}?${next}` : path;
-  try {
-    window.history.replaceState(window.history.state, "", url);
-  } catch {
-    /* noop */
-  }
+  writeUrlSearch(next, "replace");
 }
