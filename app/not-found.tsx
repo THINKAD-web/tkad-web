@@ -1,6 +1,7 @@
 "use client";
 
 import { NeonErrorPage } from "@/components/public-chrome/neon-error-page";
+import { DESIGN_EMPTY_ASSETS } from "@/lib/media-category-icons";
 
 export default function RootNotFound() {
   return (
@@ -8,6 +9,7 @@ export default function RootNotFound() {
       <body className="m-0 bg-gray-50 dark:bg-[#05050a] antialiased">
         <NeonErrorPage
           standalone
+          illustrationSrc={DESIGN_EMPTY_ASSETS.notFound}
           code="404"
           eyebrow="[ NOT FOUND ]"
           title="페이지를 찾을 수 없습니다"

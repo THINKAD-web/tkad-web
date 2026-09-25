@@ -87,6 +87,8 @@ import {
   readPlannerOnlineCardContext,
   type PlannerOnlineCardContextByPlatform,
 } from "@/lib/planner/online-catalog-card-context";
+import { MediaCategoryIconImage } from "@/components/media/media-category-icon-image";
+import { DesignEmptyIllustration } from "@/components/design/design-empty-illustration";
 
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,
@@ -1233,6 +1235,7 @@ function MediaSearchPageInner({
           )
         ) : media.length === 0 ? (
           <DiscoveryEmptyState
+            icon={<DesignEmptyIllustration variant="noResults" />}
             title={isKo ? "조건에 맞는 매체가 없어요" : "No media match your filters"}
             description={isKo ? "필터를 조정해보세요" : "Try adjusting your filters"}
             action={
@@ -1305,11 +1308,18 @@ function MediaSearchPageInner({
         <div className="tkad-media-app-shell tkad-media-list-shell media-accent-option-a relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]" data-media-accent="option-a">
           <div className="min-w-0 px-4 pt-3">{filtersBar}</div>
           {isOnlineBrowse ? (
-            <p className="tkad-type-meta min-w-0 px-4 pt-2 text-tkad-muted">
-              {isKo
-                ? "THINKAD는 옥외광고(OOH)를 중심으로 하며, 온라인 광고도 함께 지원합니다."
-                : "THINKAD is built around out-of-home (OOH) advertising, and also supports online ad campaigns."}
-            </p>
+            <div className="flex min-w-0 items-start gap-3 px-4 pt-2">
+              <MediaCategoryIconImage
+                iconKey="onlineAd"
+                size={40}
+                className="mt-0.5 h-10 w-10 shrink-0"
+              />
+              <p className="tkad-type-meta text-tkad-muted">
+                {isKo
+                  ? "THINKAD는 옥외광고(OOH)를 중심으로 하며, 온라인 광고도 함께 지원합니다."
+                  : "THINKAD is built around out-of-home (OOH) advertising, and also supports online ad campaigns."}
+              </p>
+            </div>
           ) : null}
           <div className="min-w-0 px-4 pt-3 pb-[calc(4.25rem+1.5rem+env(safe-area-inset-bottom,0px))] lg:pb-6">
             {bodyContent}

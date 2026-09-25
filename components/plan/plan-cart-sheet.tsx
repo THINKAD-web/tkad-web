@@ -9,6 +9,7 @@ import { useVaulStickyFix } from "@/hooks/use-vaul-sticky-fix";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { shouldUseUnoptimizedImage } from "@/lib/optimized-image-url";
 import { cn } from "@/lib/utils";
+import { DesignEmptyIllustration } from "@/components/design/design-empty-illustration";
 
 type Props = {
   open: boolean;
@@ -67,6 +68,7 @@ export function PlanCartSheet({
 
           {items.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
+              <DesignEmptyIllustration variant="planner" className="mb-4" />
               <p className="text-sm font-semibold text-foreground">
                 {isKo ? "아직 담은 매체가 없어요" : "No media in your plan yet"}
               </p>

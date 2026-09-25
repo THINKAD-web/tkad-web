@@ -59,6 +59,7 @@ import {
 } from "@/components/media-map/map-toolbar-control-styles";
 import { MapToolbarSortDropdown } from "@/components/media-map/map-toolbar-sort-dropdown";
 import { MapOnboardingCoachmark } from "@/components/media-map/map-onboarding-coachmark";
+import { DESIGN_ONBOARDING_ASSETS } from "@/lib/design-marketing-assets";
 import { MapAreaSearchModeToggle } from "@/components/media-map/map-area-search-mode-toggle";
 import {
   MediaFilterVaulSheet,
@@ -1258,15 +1259,17 @@ export function MediaManualBrowseFilters({
       {mapPageViewModes && mapThreeStepSearchCoachmarkOpen ? (
         <MapOnboardingCoachmark
           open
-          title={labelKoEn("1/3 · 매체 검색", "1/3 · Search media")}
+          illustrationSrc={DESIGN_ONBOARDING_ASSETS.mapSteps}
+          title={labelKoEn("1/3 · 검색 · 필터 · 분석", "1/3 · Search · filter · insights")}
           description={
             locale === "ko"
-              ? "매체명·지역·유형으로 전국 검색할 수 있어요."
-              : "Search nationwide by name, region, or type."
+              ? "검색으로 매체를 찾고, 필터로 좁힌 뒤 지도·목록에서 비교해 보세요."
+              : "Search media, narrow with filters, then compare on the map and list."
           }
           dismissLabel={labelKoEn("다음", "Next")}
           onDismiss={() => onMapThreeStepSearchCoachmarkDismiss?.()}
           placement="below"
+          className="w-[min(22rem,calc(100vw-2rem))]"
         />
       ) : null}
     </div>

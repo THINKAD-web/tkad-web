@@ -1,18 +1,14 @@
 import type { LucideIcon } from "lucide-react";
+import type { MediaCategoryIconKey } from "@/lib/media-category-icons";
 import {
   Building2,
-  Bus,
-  BusFront,
   Globe2,
   GraduationCap,
   Landmark,
   MapPin,
   Mic2,
-  Monitor,
   ShoppingBag,
-  Smartphone,
   Store,
-  TrainFront,
 } from "lucide-react";
 
 export const MEDIA_CHIP_ACTIVE =
@@ -35,17 +31,18 @@ type FilterChip = {
   label: string;
   value: string;
   icon?: LucideIcon;
+  categoryIcon?: MediaCategoryIconKey;
 };
 
 export const MEDIA_TYPE_CHIPS: readonly FilterChip[] = [
   { label: "전체", value: "" },
-  { label: "지하철", value: "subway", icon: TrainFront },
-  { label: "버스", value: "bus", icon: Bus },
-  { label: "전광판", value: "billboard", icon: Monitor },
-  { label: "DOOH", value: "dooh", icon: Smartphone },
+  { label: "지하철", value: "subway", categoryIcon: "subway" },
+  { label: "버스", value: "bus", categoryIcon: "busWrap" },
+  { label: "전광판", value: "billboard", categoryIcon: "billboard" },
+  { label: "DOOH", value: "dooh", categoryIcon: "dooh" },
   { label: "대학가", value: "campus", icon: GraduationCap },
   { label: "쇼핑몰", value: "retail", icon: Store },
-  { label: "쉘터", value: "bus_shelter", icon: BusFront },
+  { label: "쉘터", value: "bus_shelter", categoryIcon: "busShelter" },
   { label: "로컬", value: "local", icon: MapPin },
 ];
 

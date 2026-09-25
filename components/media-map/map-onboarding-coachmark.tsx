@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,8 @@ type MapOnboardingCoachmarkProps = {
   onDismiss: () => void;
   className?: string;
   placement?: "below" | "above";
+  /** 통짜 온보딩 일러스트 (검색·필터·분석) — 1/3 코치마크 등 */
+  illustrationSrc?: string;
 };
 
 /** 지도 위 소형 1회성 코치마크 — 검색 버튼 등 타깃 근처에 배치 */
@@ -22,6 +25,7 @@ export function MapOnboardingCoachmark({
   onDismiss,
   className,
   placement = "below",
+  illustrationSrc,
 }: MapOnboardingCoachmarkProps) {
   if (!open) return null;
 
@@ -60,6 +64,16 @@ export function MapOnboardingCoachmark({
         >
           <X className="h-3.5 w-3.5" aria-hidden />
         </button>
+        {illustrationSrc ? (
+          <Image
+            src={illustrationSrc}
+            alt=""
+            width={280}
+            height={120}
+            className="mb-3 w-full rounded-lg object-contain"
+            aria-hidden
+          />
+        ) : null}
         <p className="tkad-type-meta pr-6 font-semibold text-foreground">{title}</p>
         <p className="tkad-type-note mt-1 text-tkad-muted">{description}</p>
         <button
