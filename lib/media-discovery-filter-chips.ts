@@ -34,6 +34,17 @@ type FilterChip = {
   categoryIcon?: MediaCategoryIconKey;
 };
 
+/**
+ * 매체 유형(지하철/버스/전광판/DOOH/쉘터 등) 축 필터 칩 — SSOT.
+ *
+ * 현재 미사용: 지도/브라우즈 메인 화면의 유형 칩은 `MEDIA_TARGET_CHIPS`(캠페인
+ * 목적 축 — 브랜드/팬덤/팝업 등)를 쓰며, 메인 칩의 Lucide 아이콘 유지는 의도된
+ * 것이라 이 배열의 `categoryIcon`을 지금 끼워 넣지 않는다 (2026-09-25 디자인
+ * 자산 배포 점검 결론). 두 축은 서로 다른 필터라 1:1 대응되지 않는다.
+ * 추후 매체 유형 칩 UI를 별도로 노출할 때 `categoryIcon`이 이미
+ * `lib/media-category-icons.ts`의 SSOT(`MediaCategoryIconKey`)를 참조하도록
+ * 되어 있으니 그대로 `MediaFilterChipLabel`에 연결하면 된다.
+ */
 export const MEDIA_TYPE_CHIPS: readonly FilterChip[] = [
   { label: "전체", value: "" },
   { label: "지하철", value: "subway", categoryIcon: "subway" },
