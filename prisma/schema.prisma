@@ -3319,6 +3319,11 @@ model WebVital {
   path           String   @default("/")
   locale         String?
   navigationType String?  @map("navigation_type")
+  /// LCP only — `web-vitals/attribution` (`element` is tag/id/class snippet)
+  lcpElement     String?  @map("lcp_element")
+  lcpUrl         String?  @map("lcp_url")
+  lcpTtfbMs      Float?   @map("lcp_ttfb_ms")
+  lcpResourceLoadDelayMs Float? @map("lcp_resource_load_delay_ms")
   createdAt      DateTime @default(now()) @map("created_at")
 
   @@index([name, createdAt(sort: Desc)])
