@@ -6,6 +6,7 @@ import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { isOnlineCatalogMedia } from "@/lib/pricing-unavailable";
 import { cn } from "@/lib/utils";
+import { MediaCatalogThumbnailFallback } from "@/components/media/media-catalog-thumbnail-fallback";
 
 type Props = {
   item: Pick<
@@ -52,13 +53,11 @@ export function OnlineCatalogCardThumbnail({
   }
 
   return (
-    <div
-      className={cn(
-        "tkad-type-note flex h-full w-full items-center justify-center text-tkad-muted",
-        placeholderClassName,
-      )}
-    >
-      {isKo ? "준비중" : "No image"}
-    </div>
+    <MediaCatalogThumbnailFallback
+      catalogChannel="online"
+      type={item.catalogChannel === "online" ? "online" : undefined}
+      size={size === "compact" ? 40 : 56}
+      className={placeholderClassName}
+    />
   );
 }

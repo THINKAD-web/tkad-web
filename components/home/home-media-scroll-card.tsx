@@ -14,6 +14,7 @@ import {
 import { regionLabel } from "@/lib/media-keyword-landing";
 import { resolveCpmDisplay } from "@/lib/metrics/format";
 import { cn } from "@/lib/utils";
+import { MediaCatalogThumbnailFallback } from "@/components/media/media-catalog-thumbnail-fallback";
 
 type Props = {
   item: HomeCatalogMediaItem;
@@ -102,9 +103,11 @@ export function HomeMediaScrollCard({
             unoptimized={thumb.unoptimized}
           />
         ) : (
-          <div className="tkad-type-note flex h-full items-center justify-center text-tkad-muted">
-            {isKo ? "준비중" : "No image"}
-          </div>
+          <MediaCatalogThumbnailFallback
+            type={item.type}
+            catalogChannel={item.catalogChannel}
+            size={64}
+          />
         )}
       </div>
 

@@ -27,6 +27,7 @@ import {
 import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { OnlineCatalogCardThumbnail } from "@/components/media/online-catalog-card-thumbnail";
+import { MediaCatalogThumbnailFallback } from "@/components/media/media-catalog-thumbnail-fallback";
 import { OnlineCardRecommendTags } from "@/components/media/online-card-recommend-tags";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
@@ -123,9 +124,11 @@ export function DiscoveryMediaCardCompactRow({
             );
           }
           return (
-            <div className="tkad-type-note flex h-full w-full items-center justify-center text-tkad-muted">
-              —
-            </div>
+            <MediaCatalogThumbnailFallback
+              type={item.type}
+              catalogChannel={item.catalogChannel}
+              size={32}
+            />
           );
         })()}
       </div>

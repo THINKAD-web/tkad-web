@@ -2,6 +2,7 @@ import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { NeonErrorPage } from "@/components/public-chrome/neon-error-page";
+import { DESIGN_EMPTY_ASSETS } from "@/lib/media-category-icons";
 
 type Props = {
   params?: Promise<{ locale?: string }>;
@@ -19,6 +20,7 @@ export default async function NotFound({ params }: Props) {
 
   return (
     <NeonErrorPage
+      illustrationSrc={DESIGN_EMPTY_ASSETS.notFound}
       code="404"
       eyebrow={t("notFound.eyebrow")}
       title={t("notFound.title")}

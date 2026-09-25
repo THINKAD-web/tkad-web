@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Suspense, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -21,6 +22,7 @@ import {
   authSubtitleClass,
   authTitleClass,
 } from "@/lib/auth/auth-ui-classes";
+import { DESIGN_HERO_ASSETS } from "@/lib/media-category-icons";
 
 function LoginForm() {
   const t = useTranslations("auth");
@@ -76,7 +78,18 @@ function LoginForm() {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10">
-        <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-10 lg:flex-row lg:items-center lg:gap-12">
+          <div className="relative hidden w-full max-w-sm shrink-0 lg:block">
+            <Image
+              src={DESIGN_HERO_ASSETS.loginWelcome}
+              alt=""
+              width={480}
+              height={520}
+              className="w-full object-contain"
+              priority
+            />
+          </div>
+          <div className="flex w-full max-w-md flex-col items-center justify-center">
           <div className={authCardClass}>
             <div>
               <div className="mb-6 text-center">
@@ -168,6 +181,7 @@ function LoginForm() {
               {t("signup")}
             </Link>
           </p>
+          </div>
         </div>
       </div>
     </HomeLandingDayNight>

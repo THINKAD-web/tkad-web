@@ -1,7 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { AlertTriangle, Home, RotateCcw } from "lucide-react";
+import { DESIGN_EMPTY_ASSETS } from "@/lib/media-category-icons";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { BtnBlock } from "@/components/brutalist";
 import { cn } from "@/lib/utils";
@@ -21,6 +23,8 @@ export type NeonErrorPageProps = {
   className?: string;
   /** `app/not-found`, `global-error` — i18n·테마 프로바이더 밖 */
   standalone?: boolean;
+  /** e.g. dark-background 404 art (`empty-404.png`) */
+  illustrationSrc?: string;
 };
 
 const actionBtnClass =
@@ -121,10 +125,17 @@ function NeonErrorShell({
   title,
   description,
   footerNote,
+  illustrationSrc,
   children,
 }: Pick<
   NeonErrorPageProps,
-  "className" | "code" | "eyebrow" | "title" | "description" | "footerNote"
+  | "className"
+  | "code"
+  | "eyebrow"
+  | "title"
+  | "description"
+  | "footerNote"
+  | "illustrationSrc"
 > & { children: ReactNode }) {
   return (
     <div
@@ -141,13 +152,27 @@ function NeonErrorShell({
       <div className="relative z-10 mx-auto w-full max-w-lg">
         <div className="tkad-glass-surface relative overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 p-8 text-center shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-10">
           <div className="relative">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-400/30 bg-rose-500/10 shadow-sm">
-              <AlertTriangle
-                className="h-8 w-8 text-rose-300"
-                strokeWidth={1.75}
-                aria-hidden
-              />
-            </div>
+            {illustrationSrc ? (
+              <div className="mx-auto mb-6 flex justify-center">
+                <Image
+                  src={illustrationSrc}
+                  alt=""
+                  width={280}
+                  height={200}
+                  className="object-contain"
+                  priority
+                  aria-hidden
+                />
+              </div>
+            ) : (
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-400/30 bg-rose-500/10 shadow-sm">
+                <AlertTriangle
+                  className="h-8 w-8 text-rose-300"
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+              </div>
+            )}
 
             <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-hermes">
               {eyebrow}
@@ -195,6 +220,7 @@ export function NeonErrorPage({
   footerNote,
   className,
   standalone = false,
+  illustrationSrc,
 }: NeonErrorPageProps) {
   const body = (
     <NeonErrorShell
@@ -204,6 +230,7 @@ export function NeonErrorPage({
       title={title}
       description={description}
       footerNote={footerNote}
+      illustrationSrc={illustrationSrc}
     >
       <NeonErrorActions
         standalone={standalone}

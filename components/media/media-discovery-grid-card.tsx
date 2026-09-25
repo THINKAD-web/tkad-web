@@ -7,6 +7,7 @@ import { MediaCompareSelectButton } from "@/components/media/media-compare-selec
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import type { PlanCartItem } from "@/lib/plan-cart";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
+import { MediaCatalogThumbnailFallback } from "@/components/media/media-catalog-thumbnail-fallback";
 
 type Props = {
   href: string;
@@ -14,6 +15,9 @@ type Props = {
   metaLine: string;
   priceLabel: string | null;
   imageUrl: string | null;
+  mediaType?: string | null;
+  mediaSubCategory?: string | null;
+  catalogChannel?: string | null;
   isKo: boolean;
   planItem: Omit<PlanCartItem, "addedAt">;
   inCompare: boolean;
@@ -30,6 +34,9 @@ export function MediaDiscoveryGridCard({
   metaLine,
   priceLabel,
   imageUrl,
+  mediaType,
+  mediaSubCategory,
+  catalogChannel,
   isKo,
   planItem,
   inCompare,
@@ -54,9 +61,12 @@ export function MediaDiscoveryGridCard({
             priority={imagePriority}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">
-            {isKo ? "준비중" : "No image"}
-          </div>
+          <MediaCatalogThumbnailFallback
+            type={mediaType}
+            mediaSubCategory={mediaSubCategory}
+            catalogChannel={catalogChannel}
+            size={56}
+          />
         )}
       </div>
       <div className="p-3">

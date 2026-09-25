@@ -103,6 +103,9 @@ export function MediaKeywordLandingCatalog({ items, locale }: Props) {
               metaLine={metaLine}
               priceLabel={renderPriceLabel(m, locale)}
               imageUrl={mapMediaItemToHomeCatalog(m).thumbnailUrl ?? null}
+              mediaType={m.type}
+              mediaSubCategory={m.mediaSubCategory}
+              catalogChannel={m.catalogChannel}
               isKo={isKo}
               planItem={planCartItemFromMediaItem(m, "search")}
               inCompare={isInCompare(m.id)}

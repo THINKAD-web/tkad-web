@@ -4,6 +4,7 @@ import { memo, type MutableRefObject } from "react";
 import { useSyncExternalStore } from "react";
 import { DiscoveryMediaCard } from "@/components/discovery/media-card";
 import { DiscoveryEmptyState } from "@/components/discovery/filter-bar";
+import { DesignEmptyIllustration } from "@/components/design/design-empty-illustration";
 import { resolveMediaIdFromMapPinId } from "@/lib/media-detail-map-markers";
 import {
   getMapHoveredMediaId,
@@ -111,6 +112,7 @@ export const MediaMapItemList = memo(function MediaMapItemList({
       !isMobile ? (
         <li className="col-span-2 list-none">
           <DiscoveryEmptyState
+            icon={<DesignEmptyIllustration variant="noResults" />}
             title={isKo ? "검색 결과가 없습니다" : "No results"}
             description={
               isKo

@@ -17,6 +17,11 @@ import {
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import type { HomeReportItem } from "@/lib/report-queries";
 import type { HomeCaseItem } from "@/lib/case-queries";
+import { MediaCategoryIconImage } from "@/components/media/media-category-icon-image";
+import {
+  resolveMediaCategoryIconFromBrowseSub,
+  type MediaCategoryIconKey,
+} from "@/lib/media-category-icons";
 
 type Props = {
   mediaCountLabel: string;
@@ -105,6 +110,12 @@ export async function HomePlannerLanding({
     "flex min-h-0 flex-col rounded-lg border border-gray-200 bg-white p-2.5 shadow-sm ring-1 ring-black/5 sm:p-4",
     "transition-colors hover:border-hermes/30 dark:border-white/10 dark:bg-white/[0.04] dark:ring-white/10 dark:hover:border-hermes/40",
   );
+
+  const coverageIcon = (
+    subId: string,
+    fallback: MediaCategoryIconKey = "dooh",
+  ): MediaCategoryIconKey =>
+    resolveMediaCategoryIconFromBrowseSub(subId) ?? fallback;
 
   return (
     <div className="tkad-planner-landing">
@@ -199,6 +210,11 @@ export async function HomePlannerLanding({
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {oohTiles.map((tile) => (
                   <Link key={tile.subId} href={tile.href} className={tileClass}>
+                    <MediaCategoryIconImage
+                      iconKey={coverageIcon(tile.subId)}
+                      size={44}
+                      className="mb-2 h-11 w-11"
+                    />
                     <p className="text-xs font-bold leading-snug text-gray-900 dark:text-white sm:text-base">
                       {isKo ? tile.labelKo : tile.labelEn}
                     </p>
@@ -223,6 +239,11 @@ export async function HomePlannerLanding({
                     href={tile.href}
                     className={tileClass}
                   >
+                    <MediaCategoryIconImage
+                      iconKey="onlineAd"
+                      size={44}
+                      className="mb-2 h-11 w-11"
+                    />
                     <p className="text-xs font-bold leading-snug text-gray-900 dark:text-white sm:text-base">
                       {isKo ? tile.labelKo : tile.labelEn}
                     </p>
