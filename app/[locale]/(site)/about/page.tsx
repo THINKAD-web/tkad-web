@@ -7,6 +7,8 @@ import { ogAltForRoute } from "@/lib/og-route-copy";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageHero } from "@/components/layout/page-hero";
 import { AboutPageSections } from "@/components/about/about-page-sections";
+import { MarketingHeroVisual } from "@/components/design/marketing-hero-visual";
+import { DESIGN_MARKETING_HERO_ASSETS } from "@/lib/design-marketing-assets";
 import { getPublicMediaCountLabel } from "@/lib/trust-metrics";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -51,6 +53,10 @@ export default async function AboutPage({ params }: Props) {
           title={t("heroSlogan")}
           highlight=""
           description={t("identityBody")}
+        />
+        <MarketingHeroVisual
+          src={DESIGN_MARKETING_HERO_ASSETS.brandStory}
+          className="pb-6 pt-2"
         />
         <AboutPageSections verifiedLabel={verifiedLabel} />
       </div>
