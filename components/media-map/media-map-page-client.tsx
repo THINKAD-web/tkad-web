@@ -54,6 +54,10 @@ import {
   mapBoundsIntersect,
 } from "@/lib/media-map/map-item-bounds";
 import {
+  mapItemMatchesUrlMediaRef,
+  mapItemToUrlMediaRef,
+} from "@/lib/media-map/url-media-ref";
+import {
   MEDIA_MAP_LIST_SHEET_TRANSITION_MS,
   MediaMapListSheet,
   type MediaMapSheetSnap,
@@ -491,9 +495,15 @@ export default function MediaMapPageClient() {
     setInvalidateNonce((n) => n + 1);
   }, [isMobile, sheetSnap, peekChromeHeight]);
 
-  const selectedMediaIdForUrl = selectedId
-    ? resolveMediaIdFromMapPinId(selectedId)
-    : undefined;
+  const selectedMediaRefForUrl = useMemo(() => {
+    if (!selectedId) return undefined;
+    const mediaId = resolveMediaIdFromMapPinId(selectedId);
+    const item =
+      selectedItem?.id === mediaId
+        ? selectedItem
+        : items.find((i) => i.id === mediaId);
+    return item ? mapItemToUrlMediaRef(item) : mediaId;
+  }, [selectedId, selectedItem, items]);
 
   // URL 상태 동기화 — 필터·선택은 pushState, pan/zoom은 replaceState
   const urlSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -506,11 +516,11 @@ export default function MediaMapPageClient() {
         lng: view?.lng,
         zoom: view?.zoom,
         ...mapBrowseFiltersToUrlState(browseFilters),
-        media: selectedMediaIdForUrl,
+        media: selectedMediaRefForUrl,
       });
       const filtersOrMediaChanged =
         filterFp !== lastUrlPushFilterFpRef.current ||
-        selectedMediaIdForUrl !== lastUrlPushMediaRef.current;
+        selectedMediaRefForUrl !== lastUrlPushMediaRef.current;
       const mode =
         !initialUrlSyncDoneRef.current || !filtersOrMediaChanged
           ? "replace"
@@ -518,7 +528,7 @@ export default function MediaMapPageClient() {
       writeUrlSearch(next, mode);
       initialUrlSyncDoneRef.current = true;
       lastUrlPushFilterFpRef.current = filterFp;
-      lastUrlPushMediaRef.current = selectedMediaIdForUrl;
+      lastUrlPushMediaRef.current = selectedMediaRefForUrl;
     }, 300);
     return () => {
       if (urlSyncTimerRef.current) clearTimeout(urlSyncTimerRef.current);
@@ -537,7 +547,7 @@ export default function MediaMapPageClient() {
     browseFilters.priceMax,
     browseFilters.features,
     browseFilters.sort,
-    selectedMediaIdForUrl,
+    selectedMediaRefForUrl,
   ]);
 
   const applyUrlStateFromLocation = useCallback(() => {
@@ -1055,7 +1065,7 @@ export default function MediaMapPageClient() {
   useEffect(() => {
     const mediaId = pendingMediaFromUrlRef.current;
     if (!mediaId || selectedId) return;
-    const item = items.find((i) => i.id === mediaId);
+    const item = items.find((i) => mapItemMatchesUrlMediaRef(i, mediaId));
     if (!item) return;
     pendingMediaFromUrlRef.current = null;
     const pinId =

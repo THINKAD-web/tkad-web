@@ -20,6 +20,7 @@ export function serializeMapApiItemFromMediaItem(
 
   return {
     id: m.id,
+    slug: m.slug?.trim() || undefined,
     name: m.name,
     location: m.location,
     region: m.region,

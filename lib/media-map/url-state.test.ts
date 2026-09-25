@@ -15,7 +15,7 @@ const roundTrip = parseMediaMapUrlState(
       q: "강남",
       regionMain: "seoul",
       priceMin: "100",
-      media: "cmabc123",
+      media: "gangnam-billboard-a",
     }),
   ),
 );
@@ -25,7 +25,7 @@ assert.equal(roundTrip.zoom, 9);
 assert.equal(roundTrip.q, "강남");
 assert.equal(roundTrip.regionMain, "seoul");
 assert.equal(roundTrip.priceMin, "100");
-assert.equal(roundTrip.media, "cmabc123");
+assert.equal(roundTrip.media, "gangnam-billboard-a");
 
 assert.deepEqual(
   parseMediaMapUrlState(new URLSearchParams("lat=999&lng=50&zoom=99")),

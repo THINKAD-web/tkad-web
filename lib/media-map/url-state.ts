@@ -32,7 +32,10 @@ export type MediaMapFilter = {
   features?: string;
 };
 
-/** 선택된 매체 id (마커/미리보기). 공유 링크용 — install 핀 id는 URL에 넣지 않음 */
+/**
+ * 선택된 매체 공개 식별자 (`slug` 우선, 없으면 `id`).
+ * install 핀 id(`*-install-N`)는 URL에 넣지 않음.
+ */
 export type MediaMapUrlState = MediaMapView &
   MediaMapFilter & {
     media?: string;
