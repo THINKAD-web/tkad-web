@@ -37,4 +37,18 @@ assert.equal(
   "dooh",
 );
 
+const radius = parseMediaMapUrlState(
+  new URLSearchParams(
+    buildMediaMapSearchString({
+      centerLat: 37.5,
+      centerLng: 127.0,
+      radiusM: 1000,
+      placeLabel: "강남역",
+    }),
+  ),
+);
+assert.equal(radius.centerLat, 37.5);
+assert.equal(radius.radiusM, 1000);
+assert.equal(radius.placeLabel, "강남역");
+
 console.log("url-state.test.ts: ok");

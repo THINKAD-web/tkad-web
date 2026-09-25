@@ -36,12 +36,24 @@ export type MediaMapFilter = {
  * 선택된 매체 공개 식별자 (`slug` 우선, 없으면 `id`).
  * install 핀 id(`*-install-N`)는 URL에 넣지 않음.
  */
+export type MediaMapRadiusState = {
+  /** 반경 검색 중심 (WGS84) */
+  centerLat?: number;
+  centerLng?: number;
+  /** 반경(m) — 500 / 1000 / 3000 등 */
+  radiusM?: number;
+  /** UI 라벨 (선택한 장소명) */
+  placeLabel?: string;
+};
+
 export type MediaMapUrlState = MediaMapView &
-  MediaMapFilter & {
+  MediaMapFilter &
+  MediaMapRadiusState & {
     media?: string;
   };
 
-const VIEW_NUM_FIELDS = ["lat", "lng", "zoom"] as const;
+const VIEW_NUM_FIELDS = ["lat", "lng", "zoom", "centerLat", "centerLng"] as const;
+const RADIUS_NUM_FIELDS = ["radiusM"] as const;
 const PRICE_NUM_FIELDS = ["minPrice", "maxPrice"] as const;
 const STRING_FIELDS = [
   "category",
@@ -108,6 +120,35 @@ export function parseMediaMapUrlState(
   if (out.zoom != null && (out.zoom < 1 || out.zoom > 14)) {
     out.zoom = Math.max(1, Math.min(14, Math.round(out.zoom)));
   }
+  for (const key of RADIUS_NUM_FIELDS) {
+    const n = parsePositiveInt(searchParams.get(key));
+    if (n != null && n > 0) out[key] = Math.min(20_000, n);
+  }
+  if (
+    out.centerLat != null &&
+    (out.centerLat < 33 || out.centerLat > 39.5 || Number.isNaN(out.centerLat))
+  ) {
+    delete out.centerLat;
+  }
+  if (
+    out.centerLng != null &&
+    (out.centerLng < 124 || out.centerLng > 132.5 || Number.isNaN(out.centerLng))
+  ) {
+    delete out.centerLng;
+  }
+  if (
+    (out.centerLat == null || out.centerLng == null || out.radiusM == null) &&
+    (out.centerLat != null || out.centerLng != null || out.radiusM != null)
+  ) {
+    delete out.centerLat;
+    delete out.centerLng;
+    delete out.radiusM;
+    delete out.placeLabel;
+  }
+  const placeLabel = searchParams.get("placeLabel");
+  if (placeLabel?.trim()) {
+    out.placeLabel = placeLabel.trim().slice(0, 80);
+  }
   for (const key of STRING_FIELDS) {
     const raw = searchParams.get(key);
     if (raw == null || raw === "") continue;
@@ -145,6 +186,19 @@ export function buildMediaMapSearchString(state: MediaMapUrlState): string {
   }
   if (state.zoom != null && Number.isFinite(state.zoom)) {
     sp.set("zoom", String(Math.round(state.zoom)));
+  }
+  if (
+    state.centerLat != null &&
+    state.centerLng != null &&
+    state.radiusM != null &&
+    state.radiusM > 0
+  ) {
+    sp.set("centerLat", state.centerLat.toFixed(5));
+    sp.set("centerLng", state.centerLng.toFixed(5));
+    sp.set("radiusM", String(Math.round(state.radiusM)));
+    if (state.placeLabel?.trim()) {
+      sp.set("placeLabel", state.placeLabel.trim().slice(0, 80));
+    }
   }
   if (state.minPrice != null && Number.isFinite(state.minPrice) && state.minPrice >= 0) {
     sp.set("minPrice", String(Math.round(state.minPrice)));

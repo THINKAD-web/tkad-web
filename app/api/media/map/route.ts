@@ -12,6 +12,11 @@ import {
   type MapCatalogFilterParams,
 } from "@/lib/public-media-map-filter";
 import { applyMapPinResponseLimit } from "@/lib/media-map/map-pin-response-limit";
+import {
+  boundsForRadiusCircle,
+  mediaItemWithinRadiusM,
+  parseMapRadiusM,
+} from "@/lib/media-map/map-radius-filter";
 import type { MediaItem } from "@/lib/media-data";
 import type { PublicMediaSort } from "@/lib/public-media-query";
 import { apiOk, apiServerError } from "@/lib/api-response";
@@ -101,6 +106,18 @@ export async function GET(req: Request) {
 
     const nationalScope = sp.get("nationalScope") === "1";
 
+    const centerLat = parseFloatOrNull(sp.get("centerLat"));
+    const centerLng = parseFloatOrNull(sp.get("centerLng"));
+    const radiusM = parseMapRadiusM(sp.get("radiusM"));
+    const radiusActive =
+      centerLat != null &&
+      centerLng != null &&
+      radiusM != null &&
+      centerLat >= 33 &&
+      centerLat <= 39.5 &&
+      centerLng >= 124 &&
+      centerLng <= 132.5;
+
     const filterParams: MapCatalogFilterParams = {
       category: sp.get("category")?.trim() || sp.get("type")?.trim() || null,
       target: sp.get("target")?.trim() || null,
@@ -133,14 +150,28 @@ export async function GET(req: Request) {
 
     const filterMatched = filterMediaByDiscoveryChips(all, chipFilterOpts);
 
-    const bounds =
+    let bounds =
       swLat != null && neLat != null && swLng != null && neLng != null
         ? { swLat, neLat, swLng, neLng }
         : null;
 
-    const filtered = filterMatched.filter((m) =>
-      itemIncludedInMapList(m, bounds, nationalScope),
-    );
+    if (radiusActive) {
+      bounds = boundsForRadiusCircle(
+        { lat: centerLat!, lng: centerLng! },
+        radiusM!,
+      );
+    }
+
+    let filtered = filterMatched.filter((m) => {
+      if (radiusActive) {
+        return mediaItemWithinRadiusM(
+          m,
+          { lat: centerLat!, lng: centerLng! },
+          radiusM!,
+        );
+      }
+      return itemIncludedInMapList(m, bounds, nationalScope);
+    });
 
     const sorted = sortMapCatalogItems(filtered, filterParams.sort);
 
@@ -181,7 +212,7 @@ export async function GET(req: Request) {
     return apiOk({
       items,
       total: items.length,
-      matchTotal: filterMatched.length,
+      matchTotal: filtered.length,
       mapPlottableTotal,
       mapPinsReturned,
       mapPinsTruncated,

@@ -888,3 +888,335 @@ Preview: [main](https://tkad-web-git-main-mannote-6701s-projects.vercel.app/ko/m
 ---
 
 *Phase 0 시점에는 코드를 변경하지 않았다. 배치 2·3 머지 후 §28·§30·§4 는 위 기록과 PR 본문을 기준으로 갱신한다.*
+
+---
+
+## 전체 검수 (배치 1~4 · Production)
+
+- **검수일:** 2026-09-25 (KST)
+- **대상 URL:** `https://tkad.co.kr/ko/media/map` (샘플: `en`/`ja`/`zh` 일부)
+- **코드 기준선:** `main` — PR #685 (URL 상태), #686 (목록 동기화·`trigger`), #687 (숏리스트 트레이) 머지 반영 가정
+- **방법:** Production `curl`·API 대조, Cursor 브라우저 자동화(`dataLayer`·타일 URL·일부 클릭 플로우), `scripts/lighthouse-map-runs.mjs` 3회·median 완료. **코드 수정 없음.**
+- **GA4 Admin / DebugView:** Google 재인증 없이 Admin Explore·DebugView 스크린샷은 **미확인** — 운영자 확인 항목으로 남김.
+- **P0:** 없음 (즉시 수정 필요 이슈 미발견).
+
+### 검증 수준 (신뢰도 표기)
+
+| 표기 | 의미 |
+|------|------|
+| **🖱️ 브라우저** | Production에서 실제 렌더·클릭(또는 CDP로 `dataLayer`/DOM·타일 URL 확인) |
+| **🌐 HTTP** | `curl`·응답 헤더·HTML/RSC 문자열 |
+| **🔌 API** | Production JSON API 응답 대조 |
+| **📄 코드** | `main` 소스·git 이력만 확인, Production 클릭 없음 |
+
+**이번에 “통과”로 말한 항목의 실측 범위**
+
+| 주제 | 검증 수준 | 비고 |
+|------|-----------|------|
+| GA `map_view`·검색·담기·`map_marker_click` | 🖱️ | `dataLayer` 캡처 |
+| 숏리스트 트레이 1건 담기·트레이 UI | 🖱️ |「담기」클릭, 트레이·토스트 확인; **플래너 링크 클릭·도착은 미수행** |
+| 가격 SSOT 3~5건 | 🖱️ + 🔌 | 지도 a11y 스냅샷 + API·상세 `curl` |
+| `media=` 딥링크·URL 동기화 | 🖱️ | URL·미리보기 카드 |
+| 영역/이동형 목록 분리 | 🖱️ | 스냅샷 문구 |
+| VWorld / CARTO 타일 | 🖱️ | `img.leaflet-tile` src |
+| perf mark `tkad-map-basemap-tiles` | 🖱️ | `performance.getEntriesByName` |
+| SSR h1·448건·footer 없음·ISR etag | 🌐 | |
+| Lighthouse median | 🌐 (lab) | **실사용자 CWV와 별개** — §D-4 |
+| `from=plan` 복수 매체 플래너 hydrate | 📄 | handoff 코드 + #687 직전 fix 커밋; **2건 담기 E2E 미수행** |
+
+### 플래너 라우팅 (PR-12 · 지시서 vs Production)
+
+**결론: 버그 아님 — #687 머지 직전 의도적 설계 변경.** 지시서·PR-12 초기 QA 메모의「2건 이상 → `/my/plan`」은 **첫 커밋(`ed0ffc8f`) 구현**과 일치했으나, **같은 PR에서 `234ad1f6`으로 교체**됐다.
+
+| CTA | Production (`media-map-plan-shortlist-tray.tsx`) | 역할 |
+|-----|---------------------------------------------------|------|
+| 트레이 **「플래너」** 1건 | `/planner?addMedia={id}` | 단일 매체 브리프 handoff |
+| 트레이 **「플래너」** 2건+ | `/planner?from=plan&mediaIds=…` (`buildMyPlanPlannerHref`) | **로컬 `tkad_plan_cart` 전체**를 브리프에 hydrate (`brief-flow-client` → `planCartToBriefHandoff`) — `/my/plan` 페이지를 거치지 않음 |
+| 트레이 **「전체 보기·수정」** → 시트 | `PlanCartSheet` 하단 **「내 플랜에서 보기」→ `/my/plan`** | 순서·삭제·예산 등 **카트 관리 전용 화면** (`my-plan-page-client.tsx`) |
+
+**왜 `/my/plan`을 트레이 플래너 CTA에서 뺐나:** 초기 구현은 2건+일 때 `/my/plan`으로만 보냈는데, 그 경로는 **플래너 위저드 진입이 아니라** “내 플랜” 관리 UI이다. 복수 매체를 **곧바로 플래너 믹스에 넣으려면** `/my/plan`과 동일하게 쓰는 `from=plan` handoff가 맞다(내 플랜 페이지의 플래너 CTA도 `buildMyPlanPlannerHref` 사용).
+
+**사용자 영향:** 복수 담기 후 **트레이「플래너」만** 누르면 `/my/plan` 리스트 UI는 **안 보인다**. 리스트 관리가 필요하면 **「전체 보기·수정」→「내 플랜에서 보기」**를 쓰면 된다 — PR-12에서 `/my/plan`이 **빠진 것이 아니라 CTA 역할 분리**다.
+
+**감사 판정:** 기능 결함(P0/P1) 아님. **문서 정합성** — 지시서 E-9·PR 진행 보고의「2건+ → `/my/plan`」은 **구 스펙**; 감사서·QA 체크리스트는 위 표로 갱신.
+
+### A. 계측 (배치 1)
+
+```
+[A-1] map_view (세션 1회 dedupe)
+현황: 동일 탭에서 `dataLayer`에 `map_view` 1회 확인 (`source: map`, `zoom: 8`). `sessionStorage.tkad_map_ga_view_v1 === "1"` 설정됨. StrictMode 재마운트 시 중복은 코드(`mapViewSentInPageLifetime`)로 차단.
+문제: 없음 (DebugView 실측은 미수행).
+심각도: --
+```
+
+```
+[A-2] map_filter_apply — trigger user_filter | bounds_move
+현황: 검색어「명동」입력 후 `map_filter_apply` 발화, `trigger: "bounds_move"`, `result_count: 94`. `filter_summary`에 `q: "명동"` 포함. **이번 세션에서 `user_filter` 단독 발화는 미재현** (필터 패널에서 카테고리만 변경하는 시나리오는 수동 QA 권장).
+문제: 검색 직후 GA `trigger`가 `bounds_move`로만 보일 수 있어, Explore에서 user_filter/bounds_move 비율 해석 시 주의 필요.
+심각도: P2
+```
+
+```
+[A-3] map_search / map_marker_click / map_preview_cta / add_to_plan_cart
+현황: `map_search` (명동, `search_type: "address"` — `동` 접미 휴리스틱), `map_marker_click` (`media_id`, `is_cluster: false`), 미리보기「담기」→ `map_preview_cta` (`cta_kind: "add"`) + `add_to_plan_cart` (`added_from: "map"`, `source: "map"`, `action: "add"`). `open_tray` / `go_to_planner`는 **이번 스모크에서 미클릭** (코드·타입에는 PR-12 값 존재).
+문제: `open_tray`·`go_to_planner` Production dataLayer 미검증.
+심각도: P2
+```
+
+```
+[A-4] analytics_config_loaded / analytics_config_failed
+현황: `GET /api/analytics/config` → 200, `ga4`·`gtm` ID 정상. 이벤트는 세션당 1회(`tkad_analytics_config_ga_v1:*`) — GTM 로드 후 `dataLayer`에서 잡히지 않을 수 있음. 실패율 집계는 GA4에서 재확인 필요.
+문제: 이번 자동화 세션에서 `analytics_config_*` dataLayer 캡처 없음 (의도된 dedupe·GTM 소비 가능).
+심각도: P2
+```
+
+```
+[A-5] GA4 맞춤 측정기준 14종 + theme 사용자 속성
+현황: 클라이언트 `gtag('set','user_properties',{ theme })` (`components/public-analytics-loader.tsx`) 유지. Admin 등록 14종·Explore 값 채움 여부는 **미확인**.
+문제: 배치 2~4 파라미터 드리프트는 코드 grep 상 map 이벤트 키(`source`, `trigger`, `cta_kind`, `added_from`) 일치 — Admin 실측은 운영 TODO.
+심각도: P2
+```
+
+### B. 가격·CPM SSOT (배치 1 PR-3)
+
+```
+[B-1] 지도 카드 vs 목록 카드 가격/CPM (3~5건)
+현황: Production UI·RSC 기준 — 명동 미디어폴 지도 목록·미리보기 **₩1,000만/월 · CPM ₩1,539**; 신세계 스퀘어 **₩2,200만/일**; 평택 영진빌딩 **₩300만/월**(등록 상품가·`resolveMediaDisplayPrice` SSOT). 상세 페이지 명동 **₩1,000만** 일치. `/api/public/media-catalog`의 raw `price` 필드는 DB 월가(예: 1.1억)라 **UI SSOT와 다름** — 목록 browse는 `mapMediaItemToHomeCatalog` 경로 사용.
+문제: 외부 integrator가 `/api/public/media-catalog`만 보면 표시가와 어긋날 수 있음 (지도·browse UI는 일치).
+심각도: P2
+```
+
+```
+[B-2] media= 딥링크와 동일 가격
+현황: `?media=cmquwmka0000604l2qyl38ys7` 진입 시 URL·미리보기·목록 카드 동일 매체·동일 ₩1,000만/월 표시. slug 예: `media=sinsegyebaekhwajeom-bonjeom-sinsegye-seukweeo-jeongwangpan-gwanggo` (API zoom≥13 항목에 `slug` 포함; 저줌 응답은 id 폴백).
+문제: 없음.
+심각도: --
+```
+
+### C. SSR 셸 · SEO (배치 2)
+
+```
+[C-1] curl SSR 셸 (h1, 지역, 매체 수)
+현황: `curl -sL https://tkad.co.kr/ko/media/map` — HTML ~327KB, `<h1>지도에서 찾기</h1>`,「대표 핫스팟 12개 · 집계 매체 448건」문구, 핫스팟·`/media/region/{main}` 링크(예: seoul, busan 등) 포함.
+문제: 없음.
+심각도: --
+```
+
+```
+[C-2] tkad-site-footer 미포함
+현황: 저장 HTML·`curl` 본문에 `tkad-site-footer` 문자열 **0건** (배치 2 PR-6 유지).
+문제: 없음.
+심각도: --
+```
+
+```
+[C-3] revalidate=300 · 쿼리 조합과 ISR
+현황: 응답 헤더 `x-nextjs-stale-time: 300`, `x-nextjs-prerender: 1`. bare URL vs `?media=…&lat=…&zoom=…` **동일 `etag`**·`age` 공유(예: age≈123s) — 동적 쿼리가 HTML 셸 ISR 키를 매 요청 분기시키지 않음.
+문제: 없음.
+심각도: --
+```
+
+### D. 타일 로딩 (배치 3)
+
+```
+[D-1] 라이트 — VWorld
+현황: `img.leaflet-tile` src `https://api.vworld.kr/req/wmts/.../Base/...png`. 스냅샷 attribution「VWorld」.
+문제: 없음.
+심각도: --
+```
+
+```
+[D-2] 다크 — CARTO (OSM 폴백 없음)
+현황: `localStorage` 수동 dark + reload 후 타일 `basemaps.cartocdn.com/dark_all/...` — `vworld`·`openstreetmap` **false**.
+문제: 없음.
+심각도: --
+```
+
+```
+[D-3] tkad-map-basemap-tiles perf mark
+현황: `performance.getEntriesByName('tkad-map-basemap-tiles').length === 1`, `tkad-map-init`·`tkad-map-usable` 동반.
+문제: 없음.
+심각도: --
+```
+
+```
+[D-4] Lighthouse Production 3회 + field LCP
+현황: **Lab (참고용만)** — 3회 LCP **29.1s / 19.1s / 16.4s**, median **19.1s** (VWorld 타일 LCP·배치 3과 동일 패턴: throttling + 외부 타일 지연). **Field SSOT:** §E(2026-09-23) `/ko/media/map` LCP n=160, p50 **~2.05s**, CWV Good **~81%** — **실사용자 경험은 lab 19~29s로 판단하면 안 됨**. 이번 검수 목적은 타일 호스트·LCP 요소 유형 확인이며 median 파일 `/tmp/lh-prod-batch-audit-2026-09-25-median.json`.
+문제: 없음 (신규 회귀 아님).
+심각도: --
+```
+
+```
+[D-5] PR #676 LCP attribution → /api/vitals
+현황: 코드 머지됨(`feat/web-vitals-lcp-attribution`, #676). 로컬 Prisma로 `web_vitals.lcpElement` 집계는 **DB 클라이언트 초기화 실패로 미실행**. §E(2026-09-23)는「컬럼 없음」이었으므로 **머지 후 field에 `img.leaflet-tile` 계열이 쌓이는지 운영 DB·대시보드 확인 필요**.
+문제: 검수 시점 field attribution 실측 없음.
+심각도: P2
+```
+
+### E. 기능 (배치 4)
+
+```
+[E-1] URL 복사 → 시크릿 재현
+현황: 자동화에서 `lat`/`lng`/`zoom`·`media=` 동기화 확인. **시크릿 창 전체 필터+뷰 복제는 미수행**.
+문제: 수동 1회 권장.
+심각도: P2
+```
+
+```
+[E-2] 뒤로/앞으로가기 복원
+현황: **미수행** (popstate·`via_url_restore` 코드는 #685에 존재).
+문제: 미검증.
+심각도: P2
+```
+
+```
+[E-3] media=slug / id 폴백
+현황: id 딥링크 동작 확인. slug는 gangnam zoom13 API 항목에서 확인; 저줌 payload에 slug 없을 때 id URL 사용.
+문제: 없음.
+심각도: --
+```
+
+```
+[E-4] 「이 지도 영역」 vs 「이동형·전국」 분리
+현황: 전국 줌에서 스냅샷「이 지도 영역」·「이동형 47건은…」·「핀 80 · 목록 1,050건(이동형 47건 별도)」표시.
+문제: 없음.
+심각도: --
+```
+
+```
+[E-5] 목록 hover ↔ 마커 하이라이트
+현황: **미수행** (#686 코드 존재).
+문제: 미검증.
+심각도: P2
+```
+
+```
+[E-6] 결과 0건 빈 상태 + 필터 초기화
+현황: **미수행**.
+문제: 미검증.
+심각도: P2
+```
+
+```
+[E-7] bounds_move 45초 throttle
+현황: 코드 `MAP_BOUNDS_GA_THROTTLE_MS = 45_000` (`media-map-page-client.tsx`). **45초 내 다중 pan으로 GA 중복 억제는 미실측**.
+문제: 미검증.
+심각도: P2
+```
+
+```
+[E-8] 담기 1건 → 트레이 → 플래너
+검증: 🖱️ (담기·트레이) + 📄 (href)
+현황: 명동 1건「담기」→ 트레이·토스트 확인. 트레이「플래너」는 1건 시 `/planner?addMedia=` (DOM 링크 미클릭).
+문제: 플래너 **도착·믹스 반영** 미실측.
+심각도: P2
+```
+
+```
+[E-9] 담기 2건+ → 플래너 vs /my/plan
+검증: 📄 (git `234ad1f6` + handoff 코드); 2건 담기 E2E **미수행**
+현황: **설계 변경 확인** — 트레이「플래너」2건+는 `/planner?from=plan&mediaIds=…` (버그·누락 아님). `/my/plan`은 `PlanCartSheet`「내 플랜에서 보기」전용. 상세: 위 「플래너 라우팅」절.
+문제: 없음 (문서·지시서만 구스펙).
+심각도: --
+```
+
+```
+[E-10] 견적 → /quote?media=
+현황: 트레이「견적」링크 노출; **클릭·도착 미확인**.
+문제: 미검증.
+심각도: P2
+```
+
+```
+[E-11] CompareBar vs 숏리스트 트레이 공존
+현황: 비교함 비어 있을 때만 트레이 확인; **비교 카트 채운 상태 레이아웃 미검증**.
+문제: 미검증.
+심각도: P2
+```
+
+```
+[E-12] 트레이 → PlanCartSheet 동기화
+현황: **미수행** (펼치기·「전체 보기·수정」).
+문제: 미검증.
+심각도: P2
+```
+
+```
+[E-13] 반경 검색 (PR-13)
+현황: **PR-13 미착수** — `components/media-map`에 반경 검색 UI 없음 (`field-survey-panel`「반경 500m」답사 문구만).
+문제: 없음 (스킵).
+심각도: --
+```
+
+### F. 회귀 일반
+
+```
+[F-1] 한글 IME 조합 입력
+현황: **미수행** (자동화 `fill`은 composition 이벤트 없음).
+문제: 미검증.
+심각도: P2
+```
+
+```
+[F-2] 모바일 390/360 레이아웃
+현황: **미수행** (트레이·바텀시트·미리보기 CTA 겹침).
+문제: 미검증.
+심각도: P2
+```
+
+```
+[F-3] 클러스터 → 줌 → 핀 → 미리보기 → 담기 E2E
+현황: 부분 — 핀 선택·미리보기·담기·트레이까지 확인; **클러스터 클릭·줌인 체인 미수행**.
+문제: 부분 스모크만.
+심각도: P2
+```
+
+```
+[F-4] locale ko/en/ja/zh 하드코딩 한국어
+현황: `/en/media/map` — h1「Map search」, 핫스팟·탭 영문. 배치 4 신규 문자열 전수 비교는 **미수행**; en 샘플에서 한국어 누수 없음.
+문제: ja/zh 미샘플.
+심각도: P2
+```
+
+### 요약
+
+| 심각도 | 건수 | 내용 |
+|--------|------|------|
+| **P0** | 0 | — |
+| **P1** | 0 | — |
+| **P2** | 다수 | GA Admin·`user_filter`/`open_tray`/`go_to_planner`·플래너/견적 **도착 E2E**·history·모바일·IME·CompareBar 공존·vitals `lcpElement` field 집계 등 **미완 클릭 QA** |
+
+**다음 액션 (운영·다음 QA 세션):** GA4 DebugView; 2건 담기 → `from=plan` 플래너 믹스 확인; 시크릿 URL·뒤로가기; CompareBar+트레이; `web_vitals.lcpElement` (map, #676 이후 7일). Lab LH는 §D-4 참고용만 유지.
+
+---
+
+## 배치 4 완결 (PR-13 · 2026-09-25)
+
+### PR-13 반경 검색 — 구현 요약 (`feat/map-pr13-radius-search`)
+
+| 항목 | 내용 |
+|------|------|
+| 지오코딩 | **Kakao 로컬 REST** — 기존 `KAKAO_REST_API_KEY` / `lib/kakao-address-geocode.ts`·`lib/kakao-nearby-pois.ts`와 동일 키. 신규 `lib/kakao-local-place-search.ts` + `GET /api/media/map/places?query=` |
+| UI | 지도 상단 **「주소·역·랜드마크 (반경 검색)」** 입력·후보 목록·반경 프리셋 **500m / 1km / 3km** (`MapPlaceRadiusSearch`) |
+| 필터 | `GET /api/media/map` — `centerLat`·`centerLng`·`radiusM` 시 **반경 우선**(bounds는 원 fit용), `matchTotal` 반경 결과 수 |
+| URL | `centerLat`·`centerLng`·`radiusM`·`placeLabel` — `lib/media-map/url-state.ts` |
+| 지도 | `MapRadiusCircleLayer` + 반경 활성 시 **「이 지역 검색」**·자동 bounds 재검색 비활성 |
+| pan 동작 | **반경 모드는 X로만 해제.** 손으로 지도를 움직여도 반경·결과 집합 유지(원은 화면 밖으로 갈 수 있음). API bounds는 원 envelope 고정 — pan으로 결과가 바뀌지 않음 |
+| GA | 장소 적용 시 `map_search` — `search_type`: Kakao hit `address` \| `poi` (매체명 `q` 검색은 기존 `resolveMapSearchType` 유지) |
+
+**운영 확인 (카카오 콘솔):** 로컬 API 일일 쿼터·상업 이용 조건은 VWorld/CARTO와 같이 **운영자가 Developers 콘솔에서 직접 확인** 필요. 키 미설정 시 `/api/media/map/places` → `configured: false`, 빈 목록.
+
+**검증:** `lib/media-map/url-state.test.ts`·`map-radius-filter.test.ts` 통과. Production 스모크(주소·역·랜드마크·URL 공유·IME)는 **머지 후 🖱️ QA** — 아래 잔여 P2와 함께 처리.
+
+### 잔여 P2 QA (PR-13 머지 후)
+
+| # | 항목 | 상태 |
+|---|------|------|
+| 1 | GA4 DebugView (`user_filter`/`open_tray`/`go_to_planner`) | 미완 — 🖱️ |
+| 2 | 시크릿 URL + history | 미완 — 🖱️ (반경 URL은 PR-13 QA에 포함) |
+| 3 | hover / 0건 / CompareBar / PlanCartSheet | 미완 — 🖱️ |
+| 4 | 2건 → `from=plan` E2E | 미완 — 🖱️ |
+| 5 | 모바일 390/360 | 미완 — 🖱️ |
+| 6 | `lcpElement` field DB | 미완 — 🔌 (운영 DB) |
+
+**Phase 0 로드맵:** 배치 1~4(PR-10~13) 기능 구현선은 PR-13 머지 시 **1주기 완료**. 이후 우선순위(모바일 바텀시트·현장 확인·데이터 레이어 등)는 GA4·field vitals 기반으로 재논의.

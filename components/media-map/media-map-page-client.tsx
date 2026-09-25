@@ -101,6 +101,15 @@ import { resolveMapCoverageOverlayState } from "@/lib/media-map/map-service-regi
 import { MediaMapCoverageOverlayHint } from "@/components/media-map/media-map-coverage-overlay-hint";
 import { MediaMapPlanShortlistTray } from "@/components/media-map/media-map-plan-shortlist-tray";
 import {
+  MapPlaceRadiusSearch,
+  type MapPlaceRadiusValue,
+} from "@/components/media-map/map-place-radius-search";
+import {
+  mapPlaceRadiusFromUrl,
+  mapPlaceRadiusToUrlState,
+} from "@/lib/media-map/map-place-radius-state";
+import { boundsForRadiusCircle } from "@/lib/media-map/map-radius-filter";
+import {
   isDefaultMapBrowseFilters,
   mapBrowseFiltersFingerprint,
   resolveMapSearchType,
@@ -209,6 +218,9 @@ export default function MediaMapPageClient() {
   const [browseFilters, setBrowseFilters] = useState<MapBrowseFilters>(() =>
     initMapBrowseFiltersFromUrl(initialUrl.current),
   );
+  const [placeRadius, setPlaceRadius] = useState<MapPlaceRadiusValue | null>(() =>
+    mapPlaceRadiusFromUrl(initialUrl.current),
+  );
   const pendingMediaFromUrlRef = useRef(
     initialUrl.current?.media?.trim() || null,
   );
@@ -307,6 +319,7 @@ export default function MediaMapPageClient() {
   const searchedBoundsRef = useRef<MapBounds | null>(null);
   const lastFocusedSelectionRef = useRef<string | null>(null);
   const browseFiltersRef = useRef(browseFilters);
+  const placeRadiusRef = useRef(placeRadius);
   const lastTextSearchQRef = useRef("");
   const mapFetchAbortRef = useRef<AbortController | null>(null);
   const fetchGenerationRef = useRef(0);
@@ -351,6 +364,9 @@ export default function MediaMapPageClient() {
   useEffect(() => {
     browseFiltersRef.current = browseFilters;
   }, [browseFilters]);
+  useEffect(() => {
+    placeRadiusRef.current = placeRadius;
+  }, [placeRadius]);
 
   useEffect(() => {
     viewportDirtyRef.current = viewportDirty;
@@ -522,6 +538,7 @@ export default function MediaMapPageClient() {
         lng: view?.lng,
         zoom: view?.zoom,
         ...mapBrowseFiltersToUrlState(browseFilters),
+        ...mapPlaceRadiusToUrlState(placeRadius),
         media: selectedMediaRefForUrl,
       });
       const filtersOrMediaChanged =
@@ -554,6 +571,10 @@ export default function MediaMapPageClient() {
     browseFilters.features,
     browseFilters.sort,
     selectedMediaRefForUrl,
+    placeRadius?.centerLat,
+    placeRadius?.centerLng,
+    placeRadius?.radiusM,
+    placeRadius?.placeLabel,
   ]);
 
   const applyUrlStateFromLocation = useCallback(() => {
@@ -566,6 +587,7 @@ export default function MediaMapPageClient() {
       initMapBrowseFiltersFromUrl(parsed),
     );
     setBrowseFilters(initMapBrowseFiltersFromUrl(parsed));
+    setPlaceRadius(mapPlaceRadiusFromUrl(parsed));
     lastUrlPushFilterFpRef.current = mapBrowseFiltersFingerprint(
       initMapBrowseFiltersFromUrl(parsed),
     );
@@ -617,15 +639,37 @@ export default function MediaMapPageClient() {
       try {
         const { params, nationalScope, queryRegion } =
           mapBrowseFiltersToMapApiParams(f);
+        const pr = placeRadiusRef.current;
+        if (pr) {
+          params.set("nationalScope", "1");
+          params.set("centerLat", String(pr.centerLat));
+          params.set("centerLng", String(pr.centerLng));
+          params.set("radiusM", String(pr.radiusM));
+        }
         const zoomLevel = Math.round(
           viewRef.current?.zoom ?? programmaticView?.zoom ?? 8,
         );
         params.set("zoom", String(zoomLevel));
-        if (b) {
-          params.set("swLat", String(b.swLat));
-          params.set("swLng", String(b.swLng));
-          params.set("neLat", String(b.neLat));
-          params.set("neLng", String(b.neLng));
+        const boundsForApi =
+          pr != null
+            ? (() => {
+                const circle = boundsForRadiusCircle(
+                  { lat: pr.centerLat, lng: pr.centerLng },
+                  pr.radiusM,
+                );
+                return {
+                  swLat: circle.swLat,
+                  swLng: circle.swLng,
+                  neLat: circle.neLat,
+                  neLng: circle.neLng,
+                };
+              })()
+            : b;
+        if (boundsForApi) {
+          params.set("swLat", String(boundsForApi.swLat));
+          params.set("swLng", String(boundsForApi.swLng));
+          params.set("neLat", String(boundsForApi.neLat));
+          params.set("neLng", String(boundsForApi.neLng));
         }
 
         const res = await fetch(`/api/media/map?${params.toString()}`, {
@@ -806,15 +850,36 @@ export default function MediaMapPageClient() {
   useEffect(() => {
     if (initialFetchDoneRef.current) return;
     const f = browseFiltersRef.current;
+    const pr = placeRadiusRef.current;
     void (async () => {
-      const seedBounds = KOREA_MAP_OVERVIEW_BOUNDS;
+      let seedBounds: MapBounds = KOREA_MAP_OVERVIEW_BOUNDS;
+      if (pr) {
+        const circle = boundsForRadiusCircle(
+          { lat: pr.centerLat, lng: pr.centerLng },
+          pr.radiusM,
+        );
+        seedBounds = {
+          swLat: circle.swLat,
+          swLng: circle.swLng,
+          neLat: circle.neLat,
+          neLng: circle.neLng,
+        };
+        emitProgrammaticView({
+          lat: pr.centerLat,
+          lng: pr.centerLng,
+          zoom: 12,
+          fitBounds: seedBounds,
+          fitBoundsMaxZoom: 16,
+          resetUserViewport: true,
+        });
+      }
       const ok = await fetchItems(seedBounds, f, "silent");
       initialFetchDoneRef.current = true;
       if (!ok) return;
       setSearchedBounds(seedBounds);
       searchedBoundsRef.current = seedBounds;
     })();
-  }, [fetchItems]);
+  }, [fetchItems, emitProgrammaticView]);
 
   const handleBoundsChange = useCallback(
     (b: MapBounds) => {
@@ -835,7 +900,7 @@ export default function MediaMapPageClient() {
   useEffect(() => {
     const b = searchedBoundsRef.current ?? boundsRef.current;
     const f = browseFilters;
-    if (!b && !isMapTextSearchActive(f)) return;
+    if (!b && !isMapTextSearchActive(f) && !placeRadiusRef.current) return;
     void fetchItems(b ?? KOREA_MAP_OVERVIEW_BOUNDS, f, "user_filter");
   }, [
     browseFilters.q,
@@ -949,6 +1014,7 @@ export default function MediaMapPageClient() {
   useEffect(() => {
     clearAutoSearchDebounce();
 
+    if (placeRadiusRef.current) return;
     if (areaSearchMode !== "auto") return;
     if (!viewportDirty || !bounds || !searchedBounds) return;
     if (!mapBoundsChangeExceedsThreshold(searchedBounds, bounds)) return;
@@ -1050,6 +1116,7 @@ export default function MediaMapPageClient() {
   const showSearchAreaButton =
     areaSearchMode === "manual" &&
     !isMapTextSearchActive(browseFilters) &&
+    !placeRadius &&
     viewportDirty &&
     boundsNeedAreaSearch;
 
@@ -1155,7 +1222,47 @@ export default function MediaMapPageClient() {
   const handleClearBrowseFilters = useCallback(() => {
     filterApplyGaEnabledRef.current = true;
     setBrowseFilters((f) => clearMapBrowseFilters(f));
+    setPlaceRadius(null);
   }, []);
+
+  const applyPlaceRadiusSearch = useCallback(
+    (next: MapPlaceRadiusValue | null, trackSearch?: { searchType: "address" | "poi"; label: string }) => {
+      filterApplyGaEnabledRef.current = true;
+      setPlaceRadius(next);
+      if (!next) return;
+      const circleBounds = boundsForRadiusCircle(
+        { lat: next.centerLat, lng: next.centerLng },
+        next.radiusM,
+      );
+      const searchBounds: MapBounds = {
+        swLat: circleBounds.swLat,
+        swLng: circleBounds.swLng,
+        neLat: circleBounds.neLat,
+        neLng: circleBounds.neLng,
+      };
+      emitProgrammaticView({
+        lat: next.centerLat,
+        lng: next.centerLng,
+        zoom: 12,
+        fitBounds: searchBounds,
+        fitBoundsMaxZoom: 16,
+        resetUserViewport: true,
+      });
+      setSearchedBounds(searchBounds);
+      searchedBoundsRef.current = searchBounds;
+      setViewportDirty(false);
+      if (trackSearch) {
+        trackMapSearch({
+          search_type: trackSearch.searchType,
+          query_length: trackSearch.label.length,
+          has_results: true,
+          result_count: 0,
+        });
+      }
+      void fetchItems(searchBounds, browseFiltersRef.current, "user_filter");
+    },
+    [emitProgrammaticView, fetchItems],
+  );
 
   const handleHotspotRegionSelect = useCallback(
     (regionMain: string, regionSub: string) => {
@@ -1447,7 +1554,7 @@ export default function MediaMapPageClient() {
     mobileListTotal ?? items.filter((i) => i.type === "mobile").length;
 
   const showMapEmptyOverlay =
-    (searchedBounds || isMapTextSearchActive(browseFilters)) &&
+    (searchedBounds || isMapTextSearchActive(browseFilters) || placeRadius) &&
     items.length === 0 &&
     !loading;
 
@@ -1567,6 +1674,31 @@ export default function MediaMapPageClient() {
         )}
       >
         {controlBar}
+        <div className="mt-2">
+          <MapPlaceRadiusSearch
+            isKo={isKo}
+            value={placeRadius}
+            onChange={(next) => {
+              setPlaceRadius(next);
+              if (!next) {
+                const b = searchedBoundsRef.current ?? boundsRef.current;
+                if (b) void fetchItems(b, browseFiltersRef.current, "user_filter");
+              }
+            }}
+            onPlaceApplied={(hit, radiusM) => {
+              applyPlaceRadiusSearch(
+                {
+                  centerLat: hit.latitude,
+                  centerLng: hit.longitude,
+                  radiusM,
+                  placeLabel: hit.placeName,
+                  searchType: hit.kind,
+                },
+                { searchType: hit.kind, label: hit.placeName },
+              );
+            }}
+          />
+        </div>
       </div>
 
       {/* 본문(flex-1, min-h-0): 데스크톱 = 리스트 + 지도 / 모바일 = 지도 풀 + 바텀시트 */}
@@ -1609,6 +1741,15 @@ export default function MediaMapPageClient() {
               coverageGeoJson={coverageOverlay?.geoJson ?? null}
               fitCoverageBounds={coverageOverlay != null}
               fitBoundsMaxZoom={12}
+              radiusCircle={
+                placeRadius
+                  ? {
+                      lat: placeRadius.centerLat,
+                      lng: placeRadius.centerLng,
+                      radiusM: placeRadius.radiusM,
+                    }
+                  : null
+              }
             />
           </div>
 
