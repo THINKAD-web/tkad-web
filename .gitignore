@@ -68,7 +68,12 @@ scripts/verify-*.ts
 scripts/screenshot-*
 scripts/simulate-*.ts
 scripts/print-admin-*.ts
+# Local/debug PNGs (scripts/screenshot-*, ad-hoc captures). Whitelist paths below.
 *.png
+# Versioned product art under public/assets (category, empty, hero, onboarding, og, …)
+!public/assets/
+!public/assets/**
+!public/assets/**/*.png
 !.github/pr-screenshots/
 !.github/pr-screenshots/map-ux-phase-1/
 !.github/pr-screenshots/map-ux-phase-1/*.png
