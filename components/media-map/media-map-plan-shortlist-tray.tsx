@@ -15,6 +15,7 @@ import {
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { planCartMonthlyTotalWon } from "@/lib/plan-cart-pricing";
 import { buildSelectionQuoteHref } from "@/lib/media-selection-bar";
+import { buildMyPlanPlannerHref } from "@/lib/plan-cart-planner-bridge";
 import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
 import { trackMapPreviewCta } from "@/lib/map-ga-events";
 import { cn } from "@/lib/utils";
@@ -48,10 +49,11 @@ export function MediaMapPlanShortlistTray({ isKo }: Props) {
     [],
     cart.items.map((i) => i.mediaId),
   );
+  const mediaIds = cart.items.map((i) => i.mediaId);
   const plannerHref =
-    cart.items.length === 1
-      ? `/planner?addMedia=${encodeURIComponent(cart.items[0]!.mediaId)}`
-      : "/my/plan";
+    mediaIds.length === 1
+      ? `/planner?addMedia=${encodeURIComponent(mediaIds[0]!)}`
+      : buildMyPlanPlannerHref(mediaIds);
 
   if (count <= 0) return null;
 
