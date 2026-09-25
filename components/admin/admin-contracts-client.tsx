@@ -22,6 +22,7 @@ import {
   adminQuoteSectionHint,
   adminQuoteSectionTitle,
   adminQuoteSelectClass,
+  adminQuoteTableRowClass,
 } from "@/components/admin/admin-quote-page-shell";
 import {
   AdminMobileCard,
@@ -42,6 +43,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useToast } from "@/components/toast-provider";
+import { cn } from "@/lib/utils";
 import { mapOohQuoteRecalcApiError } from "@/lib/ooh-quote-recalc-error";
 import {
   formatOohQuoteManwonShort,
@@ -462,7 +464,7 @@ export default function AdminContractsClient() {
                         <span className="text-sm font-bold tabular-nums text-foreground">
                           {formatOohQuoteTotalKrw(row.totalAmount)}
                         </span>
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-foreground dark:text-hero-fg">
                           {contractStatusLabel(row.contractStatus)}
                         </span>
                         {sendModeLabel(row.sendMode) &&
@@ -484,7 +486,7 @@ export default function AdminContractsClient() {
                       onClick={(e) => e.stopPropagation()}
                     >
                       <a
-                        href={`/api/quote/${row.quoteId}/contract/preview`}
+                        href={`/api/admin/ooh-quotes/${row.quoteId}/contract-preview`}
                         target="_blank"
                         rel="noreferrer"
                         className={`inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-card px-3 font-semibold hover:bg-muted ${adminMobileTouchBtnClass}`}
@@ -552,7 +554,10 @@ export default function AdminContractsClient() {
                   {rows.map((row) => (
                     <tr
                       key={row.quoteId}
-                      className="cursor-pointer border-b border-border/40 transition-colors hover:bg-[color:var(--qp-accent-soft)] dark:hover:bg-[color:var(--qp-accent)]/5"
+                      className={cn(
+                        adminQuoteTableRowClass,
+                        "cursor-pointer transition-colors hover:bg-[color:var(--qp-accent-soft)] dark:hover:bg-[color:var(--qp-accent)]/5",
+                      )}
                       onClick={() => openRow(row.quoteId)}
                     >
                       <td className="px-4 py-3 font-mono text-xs font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
@@ -565,12 +570,12 @@ export default function AdminContractsClient() {
                       <td className="px-4 py-3 text-muted-foreground">
                         {row.clientCompany ?? "—"}
                       </td>
-                      <td className="px-4 py-3 tabular-nums font-medium">
+                      <td className="px-4 py-3 tabular-nums font-medium text-foreground dark:text-hero-fg">
                         {formatOohQuoteTotalKrw(row.totalAmount)}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap items-center gap-1">
-                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-foreground dark:text-hero-fg">
                             {contractStatusLabel(row.contractStatus)}
                           </span>
                           {sendModeLabel(row.sendMode) &&
@@ -588,10 +593,10 @@ export default function AdminContractsClient() {
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex flex-wrap gap-1">
                           <a
-                            href={`/api/quote/${row.quoteId}/contract/preview`}
+                            href={`/api/admin/ooh-quotes/${row.quoteId}/contract-preview`}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[10px] font-semibold hover:bg-muted"
+                            className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[10px] font-semibold text-foreground hover:bg-muted dark:border-hero-fg/20 dark:bg-zinc-900 dark:text-hero-fg"
                             title={t("previewPdf")}
                           >
                             <FileText className="h-3 w-3" />

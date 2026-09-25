@@ -202,6 +202,8 @@ export function buildContractMoney(input: {
   extraInstallWon?: number;
   extraOtherWon?: number;
   productionCostText?: string;
+  /** 카탈로그 추정 라인과 합의 매체비가 다를 때 협의 조정 행 생략 (standalone 작성) */
+  suppressAdjustmentRow?: boolean;
 }): ContractMoneyBreakdown {
   const mediaLines = (input.mediaLines ?? []).map((line) => ({
     name: line.name,
@@ -219,9 +221,10 @@ export function buildContractMoney(input: {
         mediaSubtotalWon,
     ),
   );
-  const adjustmentWon = hasLines
-    ? contractMediaSupplyWon - mediaSubtotalWon
-    : 0;
+  const adjustmentWon =
+    hasLines && !input.suppressAdjustmentRow
+      ? contractMediaSupplyWon - mediaSubtotalWon
+      : 0;
   const extraProductionWon = Math.max(0, Math.round(input.extraProductionWon ?? 0));
   const extraInstallWon = Math.max(0, Math.round(input.extraInstallWon ?? 0));
   const extraOtherWon = Math.max(0, Math.round(input.extraOtherWon ?? 0));

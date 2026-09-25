@@ -14,6 +14,11 @@ import {
 } from "@/lib/ooh-quote-amount";
 import { manwonToWon } from "@/lib/admin-quote-to-ooh";
 
+test("won stored in totalAmount field displays without 10000x blow-up", () => {
+  assert.equal(formatOohQuoteTotalKrw(16_500_000), "₩16,500,000");
+  assert.notEqual(formatOohQuoteTotalKrw(16_500_000), "₩165,000,000,000");
+});
+
 test("4080만 → ₩40,800,000 (preview must not show ₩4,080)", () => {
   assert.equal(oohQuoteManwonToWon(4080), 40_800_000);
   assert.equal(formatOohQuoteTotalKrw(4080), "₩40,800,000");

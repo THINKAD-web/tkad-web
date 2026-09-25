@@ -177,6 +177,8 @@ export function standaloneContractToPdfVars(
     contractMediaSupplyWon: mediaSupply,
     ...extras,
     productionCostText: input.productionCost,
+    /** 카탈로그×기간 추정 라인 ≠ 어드민 입력 합의 매체비 — 협의 조정 행은 견적 연동 시만 */
+    suppressAdjustmentRow: Boolean(resolvedLines?.length),
   });
   const vars = buildKoOohContractPdfVars({
     contractId: draftId,
