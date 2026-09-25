@@ -8,6 +8,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
 import { useTheme } from "next-themes";
 import { useMap, GeoJSON, CircleMarker, ZoomControl } from "react-leaflet";
+import { MapRadiusCircleLayer } from "@/components/public-map/map-radius-circle-layer";
 import { LeafletMapHost } from "@/components/public-map/leaflet-map-host";
 import { cn } from "@/lib/utils";
 import {
@@ -78,6 +79,8 @@ type Props = {
   subwayOverlayEnabled?: boolean;
   /** zoom·cap 기반 bulk 핀 라벨 상태 (선택 핀 제외) */
   onPinLabelStateChange?: (state: MapPinLabelOverlayState) => void;
+  /** 반경 검색 원 오버레이 */
+  radiusCircle?: { lat: number; lng: number; radiusM: number } | null;
 };
 
 /** 외부 nonce 변경 시 invalidateSize() — 컨테이너 크기 변화가 없는 레이아웃/스냅 전환에도 타일 보정 */
@@ -373,6 +376,7 @@ export default function DarkMapView({
   preferLightTiles = false,
   subwayOverlayEnabled = false,
   onPinLabelStateChange,
+  radiusCircle = null,
 }: Props) {
   const { resolvedTheme } = useTheme();
   const [tilesLoading, setTilesLoading] = useState(true);
@@ -427,6 +431,12 @@ export default function DarkMapView({
         <DarkMapTileLayer themeAware={themeAwareTiles} preferLight={preferLightTiles} />
         {subwayOverlayEnabled ? (
           <LazySeoulMetroOverlayLayer lightTiles={lightTiles} />
+        ) : null}
+        {radiusCircle ? (
+          <MapRadiusCircleLayer
+            center={{ lat: radiusCircle.lat, lng: radiusCircle.lng }}
+            radiusM={radiusCircle.radiusM}
+          />
         ) : null}
         <ZoomControl position="bottomright" />
         <MapResizeFix />
