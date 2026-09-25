@@ -17,8 +17,6 @@ import { CasesCatalogSection } from "@/components/cases/cases-catalog-section";
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
 import { resolveCasesCatalogView } from "@/lib/cases-catalog-layout";
 import { emptyCaseFilters } from "@/lib/success-case-hub";
-import { MarketingHeroVisual } from "@/components/design/marketing-hero-visual";
-import { DESIGN_MARKETING_HERO_ASSETS } from "@/lib/design-marketing-assets";
 
 type Props = {
   locale: string;
@@ -52,10 +50,6 @@ export async function CasesPageContent({ locale, cases }: Props) {
           highlight="성공 사례"
           description="실제 집행된 OOH 캠페인의 전략과 성과를 확인하세요"
           showBeta
-        />
-        <MarketingHeroVisual
-          src={DESIGN_MARKETING_HERO_ASSETS.casesShowcase}
-          className="pb-4 pt-2"
         />
         <SubTabsBar group="content" currentPath="/cases" />
         <PageContainer className="border-b border-white/10 pb-6">

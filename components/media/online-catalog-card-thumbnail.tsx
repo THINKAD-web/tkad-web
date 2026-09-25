@@ -11,7 +11,7 @@ import { MediaCatalogThumbnailFallback } from "@/components/media/media-catalog-
 type Props = {
   item: Pick<
     HomeCatalogMediaItem,
-    "thumbnailUrl" | "name" | "catalogChannel" | "onlineSpec"
+    "thumbnailUrl" | "name" | "catalogChannel" | "onlineSpec" | "type"
   >;
   locale?: string;
   /** @deprecated pass `locale` */
@@ -54,8 +54,8 @@ export function OnlineCatalogCardThumbnail({
 
   return (
     <MediaCatalogThumbnailFallback
-      catalogChannel="online"
-      type={item.catalogChannel === "online" ? "online" : undefined}
+      catalogChannel={item.catalogChannel}
+      type={item.type}
       size={size === "compact" ? 40 : 56}
       className={placeholderClassName}
     />

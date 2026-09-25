@@ -1269,6 +1269,7 @@ export function MediaManualBrowseFilters({
           dismissLabel={labelKoEn("다음", "Next")}
           onDismiss={() => onMapThreeStepSearchCoachmarkDismiss?.()}
           placement="below"
+          align="start"
           className="w-[min(22rem,calc(100vw-2rem))]"
         />
       ) : null}

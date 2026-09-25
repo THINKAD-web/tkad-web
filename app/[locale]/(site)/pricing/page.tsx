@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
-import Image from "next/image";
 import { CreditCard } from "lucide-react";
-import { MarketingHeroVisual } from "@/components/design/marketing-hero-visual";
-import {
-  DESIGN_MARKETING_HERO_ASSETS,
-  DESIGN_OG_ASSETS,
-} from "@/lib/design-marketing-assets";
 import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { buildShareMetadata, pageAlternates, siteKeywords } from "@/lib/seo";
@@ -73,11 +67,6 @@ export default async function PricingPage({ params, searchParams }: Props) {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
-        <MarketingHeroVisual
-          src={DESIGN_MARKETING_HERO_ASSETS.pricingTransparent}
-          priority
-          className="pb-2 pt-6 sm:pt-10"
-        />
         <MediaKeywordLandingHero
           tone="qp"
           eyebrow={`// ${isKo ? "PRICING" : "PRICING"}`}
@@ -101,17 +90,6 @@ export default async function PricingPage({ params, searchParams }: Props) {
 
         <section className="relative overflow-hidden border-t border-gray-100 bg-white pb-20 pt-8 text-gray-900 dark:border-white/5 dark:bg-[#0a0a0a] dark:text-white">
           <PageContainer className="relative tkad-qp-pricing-surface">
-            <div className="mb-8 overflow-hidden rounded-2xl border border-gray-200/80 dark:border-white/10">
-              <Image
-                src={DESIGN_OG_ASSETS.pricing}
-                alt=""
-                width={1200}
-                height={630}
-                className="w-full object-cover"
-                sizes="(max-width: 1024px) 100vw, 1024px"
-                priority
-              />
-            </div>
             {sp.success === "1" ? (
               <p className="mb-6 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-center text-sm font-semibold text-emerald-800 dark:text-emerald-200">
                 {isKo ? "PRO 구독이 활성화되었습니다!" : "PRO subscription activated!"}

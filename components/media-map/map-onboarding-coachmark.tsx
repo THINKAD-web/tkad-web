@@ -14,6 +14,8 @@ type MapOnboardingCoachmarkProps = {
   placement?: "below" | "above";
   /** 통짜 온보딩 일러스트 (검색·필터·분석) — 1/3 코치마크 등 */
   illustrationSrc?: string;
+  /** `start`: 타깃 왼쪽 끝에 맞춤 — 좁은 타깃 아래 넓은 코치마크가 좌측으로 넘치지 않게 */
+  align?: "center" | "start";
 };
 
 /** 지도 위 소형 1회성 코치마크 — 검색 버튼 등 타깃 근처에 배치 */
@@ -26,14 +28,18 @@ export function MapOnboardingCoachmark({
   className,
   placement = "below",
   illustrationSrc,
+  align = "center",
 }: MapOnboardingCoachmarkProps) {
+  const arrowX = align === "start" ? "left-6" : "left-1/2 -translate-x-1/2";
+
   if (!open) return null;
 
   return (
     <div
       role="status"
       className={cn(
-        "pointer-events-auto absolute left-1/2 z-[12] w-[min(18rem,calc(100vw-2rem))] -translate-x-1/2",
+        "pointer-events-auto absolute z-[12] w-[min(18rem,calc(100vw-2rem))]",
+        align === "start" ? "left-0" : "left-1/2 -translate-x-1/2",
         placement === "below" ? "top-full mt-2" : "bottom-full mb-2",
         className,
       )}
@@ -48,12 +54,18 @@ export function MapOnboardingCoachmark({
         {placement === "below" ? (
           <span
             aria-hidden
-            className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-[color:var(--qp-accent)]/40 bg-card dark:border-[color:var(--qp-accent)]/35 dark:bg-[#12121c]/95"
+            className={cn(
+              "absolute -top-1.5 h-3 w-3 rotate-45 border-l border-t border-[color:var(--qp-accent)]/40 bg-card dark:border-[color:var(--qp-accent)]/35 dark:bg-[#12121c]/95",
+              arrowX,
+            )}
           />
         ) : (
           <span
             aria-hidden
-            className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-r border-b border-[color:var(--qp-accent)]/40 bg-card dark:border-[color:var(--qp-accent)]/35 dark:bg-[#12121c]/95"
+            className={cn(
+              "absolute -bottom-1.5 h-3 w-3 rotate-45 border-r border-b border-[color:var(--qp-accent)]/40 bg-card dark:border-[color:var(--qp-accent)]/35 dark:bg-[#12121c]/95",
+              arrowX,
+            )}
           />
         )}
         <button
