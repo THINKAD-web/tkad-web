@@ -85,15 +85,19 @@ export function trackMapView(params: {
   });
 }
 
+export type MapFilterApplyTrigger = "user_filter" | "bounds_move";
+
 export function trackMapFilterApply(params: {
   filter_summary: string;
   result_count: number;
+  trigger: MapFilterApplyTrigger;
   via_url_restore?: boolean;
 }): void {
   trackEvent("map_filter_apply", {
     source: MAP_GA_SOURCE,
     filter_summary: params.filter_summary.slice(0, 200),
     result_count: params.result_count,
+    trigger: params.trigger,
     via_url_restore: params.via_url_restore === true ? true : undefined,
   });
 }

@@ -8,10 +8,12 @@ import {
   affectedPinIdsForActiveStateChange,
   mapPinMatchesActiveId,
   pinsMatchingActiveId,
+  resolveMediaIdFromMapPinId,
   type MapPinActiveSets,
 } from "@/lib/media-detail-map-markers";
 import {
   getMapHoveredMediaId,
+  setMapHoveredMediaId,
   subscribeMapHoveredMediaId,
 } from "@/lib/media-map/map-hover-bridge";
 import {
@@ -355,6 +357,11 @@ export function DarkMapMarkersLayer({
         title: mk.name,
       });
       marker.on("click", () => onSelectRef.current(mk.id));
+      const mediaId = resolveMediaIdFromMapPinId(mk.id);
+      marker.on("mouseover", () => setMapHoveredMediaId(mediaId));
+      marker.on("mouseout", () => {
+        if (getMapHoveredMediaId() === mediaId) setMapHoveredMediaId(null);
+      });
       markerRefs.current.set(mk.id, marker);
       markersToAdd.push(marker);
     }
