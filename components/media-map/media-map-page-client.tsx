@@ -1669,7 +1669,9 @@ export default function MediaMapPageClient() {
       {/* 상단(flex-none): 단일 반응형 컨트롤 바 (항상 고정) */}
       <div
         className={cn(
-          "flex-none border-b border-gray-200/80 bg-gray-50/95 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95",
+          // relative z-20: backdrop-blur 가 쌓임 맥락을 만들어 툴바 안 팝오버(1/3 코치마크 등)가
+          // 뒤따르는 목록·지도 영역 아래에 깔리던 문제 방지
+          "relative z-20 flex-none border-b border-gray-200/80 bg-gray-50/95 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95",
           isMobile ? "px-3 py-1" : "px-3 pt-1.5 pb-1.5 md:px-4",
         )}
       >
