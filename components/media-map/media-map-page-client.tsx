@@ -99,6 +99,7 @@ import {
 } from "@/lib/media-map/map-display-mode";
 import { resolveMapCoverageOverlayState } from "@/lib/media-map/map-service-region-coverage-overlay";
 import { MediaMapCoverageOverlayHint } from "@/components/media-map/media-map-coverage-overlay-hint";
+import { MediaMapPlanShortlistTray } from "@/components/media-map/media-map-plan-shortlist-tray";
 import {
   isDefaultMapBrowseFilters,
   mapBrowseFiltersFingerprint,
@@ -1915,14 +1916,22 @@ export default function MediaMapPageClient() {
         ) : null}
       </div>
 
-      <CompareBar
-        variant="light"
-        items={compareItems}
-        locale={typeof document !== "undefined" ? document.documentElement.lang || "ko" : "ko"}
-        onClear={() => {
-          setCompareCartEntries([]);
-        }}
-      />
+      {compareEntries.length > 0 ? (
+        <CompareBar
+          variant="light"
+          items={compareItems}
+          locale={
+            typeof document !== "undefined"
+              ? document.documentElement.lang || "ko"
+              : "ko"
+          }
+          onClear={() => {
+            setCompareCartEntries([]);
+          }}
+        />
+      ) : (
+        <MediaMapPlanShortlistTray isKo={isKo} />
+      )}
     </div>
   );
 }

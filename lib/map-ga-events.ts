@@ -8,7 +8,12 @@ import {
 
 export const MAP_GA_SOURCE = "map" as const;
 
-export type MapPreviewCtaKind = "detail" | "contact" | "add";
+export type MapPreviewCtaKind =
+  | "detail"
+  | "contact"
+  | "add"
+  | "open_tray"
+  | "go_to_planner";
 
 export type MapSearchType = "media_name" | "address" | "poi" | "mixed";
 
