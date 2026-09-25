@@ -3,6 +3,8 @@ export type MapDisplayMode = "pin" | "service_region" | "location_unknown";
 
 export type MapMapItem = {
   id: string;
+  /** 공개 URL segment — `media=` 쿼리는 slug 우선 */
+  slug?: string;
   name: string;
   location: string;
   region: string;

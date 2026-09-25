@@ -88,11 +88,13 @@ export function trackMapView(params: {
 export function trackMapFilterApply(params: {
   filter_summary: string;
   result_count: number;
+  via_url_restore?: boolean;
 }): void {
   trackEvent("map_filter_apply", {
     source: MAP_GA_SOURCE,
     filter_summary: params.filter_summary.slice(0, 200),
     result_count: params.result_count,
+    via_url_restore: params.via_url_restore === true ? true : undefined,
   });
 }
 

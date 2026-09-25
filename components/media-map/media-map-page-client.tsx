@@ -38,7 +38,7 @@ import type { MapMapItem } from "@/components/media-map/media-map-types";
 import {
   buildMediaMapSearchString,
   parseMediaMapUrlState,
-  replaceUrlSearch,
+  writeUrlSearch,
 } from "@/lib/media-map/url-state";
 import { resolveBrowseRegionMapView } from "@/lib/media-map/region-view";
 import {
@@ -53,6 +53,10 @@ import {
   boundsFromMapCoordItems,
   mapBoundsIntersect,
 } from "@/lib/media-map/map-item-bounds";
+import {
+  mapItemMatchesUrlMediaRef,
+  mapItemToUrlMediaRef,
+} from "@/lib/media-map/url-media-ref";
 import {
   MEDIA_MAP_LIST_SHEET_TRANSITION_MS,
   MediaMapListSheet,
@@ -202,6 +206,9 @@ export default function MediaMapPageClient() {
   const [browseFilters, setBrowseFilters] = useState<MapBrowseFilters>(() =>
     initMapBrowseFiltersFromUrl(initialUrl.current),
   );
+  const pendingMediaFromUrlRef = useRef(
+    initialUrl.current?.media?.trim() || null,
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>([]);
@@ -314,6 +321,16 @@ export default function MediaMapPageClient() {
   const viewportDirtyRef = useRef(false);
   const boundsRef = useRef<MapBounds | null>(null);
   const viewRef = useRef(view);
+  const urlRestoreSessionRef = useRef(false);
+  const initialUrlSyncDoneRef = useRef(false);
+  const lastUrlPushFilterFpRef = useRef(
+    mapBrowseFiltersFingerprint(
+      initMapBrowseFiltersFromUrl(initialUrl.current),
+    ),
+  );
+  const lastUrlPushMediaRef = useRef<string | undefined>(
+    initialUrl.current?.media,
+  );
 
   useEffect(() => {
     viewRef.current = view;
@@ -478,18 +495,40 @@ export default function MediaMapPageClient() {
     setInvalidateNonce((n) => n + 1);
   }, [isMobile, sheetSnap, peekChromeHeight]);
 
-  // URL 상태 동기화 — view + filter 변경 시 history.replaceState
+  const selectedMediaRefForUrl = useMemo(() => {
+    if (!selectedId) return undefined;
+    const mediaId = resolveMediaIdFromMapPinId(selectedId);
+    const item =
+      selectedItem?.id === mediaId
+        ? selectedItem
+        : items.find((i) => i.id === mediaId);
+    return item ? mapItemToUrlMediaRef(item) : mediaId;
+  }, [selectedId, selectedItem, items]);
+
+  // URL 상태 동기화 — 필터·선택은 pushState, pan/zoom은 replaceState
   const urlSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (urlSyncTimerRef.current) clearTimeout(urlSyncTimerRef.current);
     urlSyncTimerRef.current = setTimeout(() => {
+      const filterFp = mapBrowseFiltersFingerprint(browseFilters);
       const next = buildMediaMapSearchString({
         lat: view?.lat,
         lng: view?.lng,
         zoom: view?.zoom,
         ...mapBrowseFiltersToUrlState(browseFilters),
+        media: selectedMediaRefForUrl,
       });
-      replaceUrlSearch(next);
+      const filtersOrMediaChanged =
+        filterFp !== lastUrlPushFilterFpRef.current ||
+        selectedMediaRefForUrl !== lastUrlPushMediaRef.current;
+      const mode =
+        !initialUrlSyncDoneRef.current || !filtersOrMediaChanged
+          ? "replace"
+          : "push";
+      writeUrlSearch(next, mode);
+      initialUrlSyncDoneRef.current = true;
+      lastUrlPushFilterFpRef.current = filterFp;
+      lastUrlPushMediaRef.current = selectedMediaRefForUrl;
     }, 300);
     return () => {
       if (urlSyncTimerRef.current) clearTimeout(urlSyncTimerRef.current);
@@ -508,7 +547,47 @@ export default function MediaMapPageClient() {
     browseFilters.priceMax,
     browseFilters.features,
     browseFilters.sort,
+    selectedMediaRefForUrl,
   ]);
+
+  const applyUrlStateFromLocation = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const parsed = parseMediaMapUrlState(
+      new URLSearchParams(window.location.search),
+    );
+    urlRestoreSessionRef.current = true;
+    filterApplyGaEnabledRef.current = !isDefaultMapBrowseFilters(
+      initMapBrowseFiltersFromUrl(parsed),
+    );
+    setBrowseFilters(initMapBrowseFiltersFromUrl(parsed));
+    lastUrlPushFilterFpRef.current = mapBrowseFiltersFingerprint(
+      initMapBrowseFiltersFromUrl(parsed),
+    );
+    lastUrlPushMediaRef.current = parsed.media;
+    pendingMediaFromUrlRef.current = parsed.media?.trim() || null;
+    if (parsed.lat != null && parsed.lng != null && parsed.zoom != null) {
+      setView({ lat: parsed.lat, lng: parsed.lng, zoom: parsed.zoom });
+      emitProgrammaticView({
+        lat: parsed.lat,
+        lng: parsed.lng,
+        zoom: parsed.zoom,
+        resetUserViewport: true,
+      });
+    }
+    if (!parsed.media?.trim()) {
+      setSelectedId(null);
+      setSelectedItem(null);
+      lastFocusedSelectionRef.current = null;
+    }
+  }, [emitProgrammaticView]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      applyUrlStateFromLocation();
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [applyUrlStateFromLocation]);
 
   const fetchItems = useCallback(
     async (b: MapBounds | null, f: MapBrowseFilters): Promise<boolean> => {
@@ -621,9 +700,12 @@ export default function MediaMapPageClient() {
             filterFp !== lastTrackedFilterFpRef.current
           ) {
             lastTrackedFilterFpRef.current = filterFp;
+            const viaUrlRestore = urlRestoreSessionRef.current;
+            if (viaUrlRestore) urlRestoreSessionRef.current = false;
             trackMapFilterApply({
               filter_summary: filterFp,
               result_count: resultCount,
+              via_url_restore: viaUrlRestore || undefined,
             });
           }
           const qTrim = f.q.trim();
@@ -979,6 +1061,19 @@ export default function MediaMapPageClient() {
     lastFocusedSelectionRef.current = null;
     setMapHoveredMediaId(null);
   }, []);
+
+  useEffect(() => {
+    const mediaId = pendingMediaFromUrlRef.current;
+    if (!mediaId || selectedId) return;
+    const item = items.find((i) => mapItemMatchesUrlMediaRef(i, mediaId));
+    if (!item) return;
+    pendingMediaFromUrlRef.current = null;
+    const pinId =
+      markersRef.current.find(
+        (m) => resolveMediaIdFromMapPinId(m.id) === mediaId,
+      )?.id ?? mediaId;
+    handleSelect(pinId);
+  }, [items, selectedId, handleSelect]);
 
   const selected = selectedItem;
 
